@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Confirm your shop | Envoi product mockup</title><style>
+:root{--ink:#14293d;--muted:#52657a;--blue:#145deb;--pale:#f1f6fc;--cyan:#ceedf3;--line:#c9d7e6;--paper:#fff;--amber:#90500c;--warn:#fff4da;--green:#206a51}
+*{box-sizing:border-box}body{margin:0;background:var(--pale);color:var(--ink);font:16px/1.55 "Segoe UI",Arial,sans-serif}h1,h2,h3,.brand{font-family:"Trebuchet MS","Segoe UI",sans-serif;line-height:1.15}h1{font-size:clamp(2rem,4.5vw,3.4rem);letter-spacing:-.045em;margin:14px 0 20px;max-width:800px}h2{font-size:1.5rem;letter-spacing:-.025em;margin:0 0 14px}h3{font-size:1.05rem;margin:0 0 8px}p{margin:0 0 16px}a{color:var(--blue);text-underline-offset:4px}header{background:var(--paper);border-bottom:1px solid var(--line)}.top{max-width:1180px;margin:auto;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{font-weight:bold;font-size:1.6rem;letter-spacing:-.06em;text-decoration:none;color:var(--ink);display:flex;align-items:center;gap:10px}.mark{background:var(--blue);color:#fff;display:grid;place-items:center;width:34px;height:34px;border-radius:8px;letter-spacing:0}.badge,.eyebrow{font:12px/1.4 Consolas,monospace;letter-spacing:.07em;text-transform:uppercase}.badge{background:var(--cyan);padding:7px 10px;border-radius:4px}.notice{background:var(--warn);padding:10px 28px;text-align:center;color:#704009;font-size:13px}.nav{max-width:1180px;margin:auto;display:flex;gap:8px;padding:14px 28px;flex-wrap:wrap}.nav a{font-size:14px;color:var(--muted);padding:6px 12px;border-radius:6px;text-decoration:none}.nav a[aria-current=page]{background:var(--cyan);color:var(--ink);font-weight:600}main{max-width:1180px;margin:auto;padding:32px 28px 60px}.eyebrow{color:var(--blue);font-weight:600}.lead{font-size:18px;max-width:720px;color:var(--muted)}.layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,1fr);gap:26px;align-items:start;margin-top:30px}.stack{display:grid;gap:20px}.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:26px;min-width:0}.slip{border-top:5px solid var(--blue);position:relative}.card.tint{background:var(--cyan)}.card.warning{background:var(--warn);border-color:#e3c17f}.row{display:flex;align-items:start;justify-content:space-between;gap:20px;padding:12px 0;border-bottom:1px solid var(--line)}.row:last-child{border:0}.muted,small{color:var(--muted)}small{font-size:13px;display:block}.total{font-size:30px;font-weight:700;letter-spacing:-.03em}.money{font-variant-numeric:tabular-nums;white-space:nowrap}label{display:block;font-weight:600;margin:16px 0 6px}input,textarea,select{font:inherit;color:var(--ink);padding:12px;background:var(--paper);border:1px solid #8da3bb;border-radius:7px;width:100%}textarea{resize:vertical;min-height:100px}input[type=radio],input[type=checkbox]{width:auto;accent-color:var(--blue);margin:0 10px 0 0}button,.button{font:600 15px "Segoe UI",Arial,sans-serif;border:1px solid var(--blue);border-radius:7px;background:var(--blue);color:#fff;padding:13px 18px;display:inline-block;text-decoration:none;cursor:pointer;text-align:center}.secondary{color:var(--ink);background:var(--paper);border-color:#8da3bb}.button.full{display:block;width:100%}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}button:disabled{background:#e3eaf1;border-color:#c9d7e6;color:#536578;cursor:not-allowed}.upload{border:2px dashed #7c9db9;background:var(--pale);border-radius:8px;padding:30px 22px}.chip{font-size:12px;display:inline-block;border:1px solid var(--line);padding:4px 9px;border-radius:100px;background:var(--pale)}.chip.ok{color:var(--green);background:#e6f4ed;border-color:#a8cfbf}.chip.warn{color:var(--amber);background:var(--warn);border-color:#e3c17f}.steps{padding-left:22px;color:var(--muted)}.steps li{padding-bottom:12px}details{background:var(--pale);padding:15px;border-radius:7px;margin-top:16px}summary{font-weight:600;cursor:pointer}details p{margin:14px 0 0}.rule{height:1px;background:var(--line);margin:20px 0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.tile{display:block;color:var(--ink);text-decoration:none;transition:transform .15s}.tile:hover{transform:translateY(-3px);border-color:var(--blue)}.tile .eyebrow{display:block;margin-bottom:12px}.mono{font:13px/1.6 Consolas,monospace;overflow-wrap:anywhere}.status{border-left:4px solid var(--blue);padding-left:16px;margin:20px 0}.plainlist{padding-left:22px}.plainlist li{margin-bottom:10px}.rail{display:block;border:2px solid var(--blue);border-radius:8px;padding:16px;margin:14px 0;font-weight:400}.rail.unavailable{border:1px solid var(--line);background:var(--pale)}footer{max-width:1180px;margin:auto;padding:20px 28px 32px;font-size:13px;color:var(--muted)}:focus-visible{outline:3px solid #d67911;outline-offset:4px}.skip{position:absolute;left:14px;top:-80px;background:#fff;padding:10px;z-index:4}.skip:focus{top:8px}.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:740px){.top{padding:16px 18px;gap:10px}.top .badge{font-size:10px}.nav{padding:10px 12px;gap:2px}.nav a{padding:6px 8px;font-size:12px}main{padding:26px 18px 40px}.layout,.grid,.two{grid-template-columns:1fr}.card{padding:21px}.lead{font-size:16px}.notice{padding:10px 18px}.layout{gap:18px}.row{gap:12px}.total{font-size:27px}footer{padding:18px}.actions .button{flex:1}}
+@media(prefers-reduced-motion:reduce){.tile{transition:none}}
+</style></head><body>
+<a class="skip" href="#main">Skip to content</a>
+<header>
+  <div class="top"><a class="brand" href="index.html"><span class="mark" aria-hidden="true">↗</span>envoi</a><span class="badge">Product review / Gate 1</span></div>
+  <div class="notice">HTML mockup · fictional shop and prices · no image uploaded or extracted, no shop published, no payment executed</div>
+  <nav class="nav" aria-label="Mockup screens"><a href="index.html">Overview</a><a href="merchant-onboarding.html" aria-current="page">Merchant setup</a><a href="buyer.html">Buyer</a><a href="review.html">Review</a><a href="receipt.html">Receipt</a><a href="merchant-orders.html">Merchant orders</a></nav>
+</header>
+<main id="main">
+  <span class="eyebrow">Merchant / draft setup</span>
+  <h1>Two photos.<br>Your review before publication.</h1>
+  <p class="lead">SGQR helps fill shop identifiers. A separate menu image drafts items and SGD prices. You correct and confirm the details, then connect a destination you control.</p>
+  <div class="layout">
+    <div class="stack">
+      <section class="card" aria-labelledby="shop-heading">
+        <h2 id="shop-heading">1. SGQR image and shop details</h2>
+        <div class="upload">
+          <label for="photo" style="margin-top:0">SGQR sticker image</label><input id="photo" type="file" accept="image/*" aria-describedby="qr-note">
+          <small id="qr-note">Local selector only. Nothing is uploaded or decoded here.</small>
+        </div>
+        <p style="margin-top:16px"><strong>SGQR contains no menu and does not prove ownership.</strong> Review only supported identifiers actually present. Unreadable or unsupported? Enter/correct details below.</p>
+        <label for="shop">Display name</label><input id="shop" value="Kopi Corner" autocomplete="organization"><small>Fictional demo shop.</small>
+        <label for="uen">Business identifier, if present</label><input id="uen" placeholder="Confirmed identifier; leave absent values blank"><small>A UEN may be absent. Valid format does not prove ownership.</small>
+        <label for="outlet">Outlet location</label><input id="outlet" placeholder="Confirm the outlet address"><small>Different outlets can share a business identifier.</small>
+        <label><input id="shop-confirm" type="checkbox" disabled>I reviewed the shop/outlet details.</label><small>Supply a shop name and outlet before confirming. This declaration cannot verify merchant authorization.</small>
+      </section>
+      <section class="card" aria-labelledby="menu-heading">
+        <h2 id="menu-heading">2. Separate menu image</h2>
+        <div class="upload">
+          <label for="menu-photo" style="margin-top:0">Menu image</label><input id="menu-photo" type="file" accept="image/*" aria-describedby="menu-photo-note">
+          <small id="menu-photo-note">No image is uploaded or analyzed. All draft values below are fixtures.</small>
+        </div>
+        <details><summary>Before a real image import</summary><p>The proposed workflow shares your menu image with Zapier and its AI provider for drafting. Use a temporary image link; remove source access after completion, failure, cancellation or expiry. Provider retention can differ. Access and removal are still untested.</p></details>
+        <label for="import-state">Preview an import state (fixtures only)</label>
+        <select id="import-state"><option value="ready">Readable draft</option><option value="unreadable">One unreadable price</option><option value="processing">Import in progress</option><option value="failed">Import failed / inaccessible image</option><option value="malformed">Unusable extraction output</option><option value="manual">Manual entry</option></select>
+        <small>Changing this preview resets fixture fields. Real import failures must preserve your edits.</small>
+        <p id="import-note" class="status" role="status">Fixture draft only. Review names/prices and supply availability before confirming.</p>
+        <div class="upload" style="padding:18px" aria-label="Fixture source preview"><h3>Fixture source preview</h3><p id="source-preview">Kaya toast S$4.00 · Kopi S$2.00</p><small>Text illustration of a menu, not an extracted image. A real review would show your source image beside the draft.</small></div>
+        <form id="menu-draft" novalidate>
+          <div id="menu-rows">
+            <fieldset style="margin:18px 0;padding:16px;border:1px solid var(--line);border-radius:8px"><legend>Draft item 1</legend>
+              <label for="name-1">Item name and portion</label><input id="name-1" class="item-name" value="Kaya toast" maxlength="120">
+              <div class="two"><div><label for="price-1">SGD price</label><input id="price-1" class="item-price" value="4.00" inputmode="decimal" placeholder="Unreadable? Leave blank"></div><div><label for="available-1">Availability (your choice)</label><select id="available-1" class="item-availability"><option value="">Choose availability</option><option value="available">Available</option><option value="unavailable">Unavailable</option></select></div></div>
+              <button type="button" class="secondary remove-item" style="margin-top:12px">Remove item</button>
+            </fieldset>
+            <fieldset style="margin:18px 0;padding:16px;border:1px solid var(--line);border-radius:8px"><legend>Draft item 2</legend>
+              <label for="name-2">Item name and portion</label><input id="name-2" class="item-name" value="Kopi" maxlength="120">
+              <div class="two"><div><label for="price-2">SGD price</label><input id="price-2" class="item-price" value="2.00" inputmode="decimal" placeholder="Unreadable? Leave blank"></div><div><label for="available-2">Availability (your choice)</label><select id="available-2" class="item-availability"><option value="">Choose availability</option><option value="available">Available</option><option value="unavailable">Unavailable</option></select></div></div>
+              <button type="button" class="secondary remove-item" style="margin-top:12px">Remove item</button>
+            </fieldset>
+          </div>
+          <small>SGD prices only in this proposal. Never guess an unreadable value or replace it with zero. Supply missing portions/details; availability is not inferred from a photo.</small>
+          <div class="actions"><button id="manual-entry" type="button" class="secondary">Enter menu manually</button><button id="add-item" type="button" class="secondary">Add an item</button></div>
+          <label><input id="menu-confirm" type="checkbox" disabled>I corrected and explicitly confirm this complete menu.</label>
+          <p id="confirmation-note" role="status">Supply availability for every item before confirming. No menu is published here.</p>
+        </form>
+      </section>
+    </div>
+    <aside class="stack">
+      <section class="card slip"><span class="eyebrow">3. Authorization and destinations</span><h2 style="margin-top:14px">Publish only after the checks.</h2>
+        <div class="row"><div><strong>Merchant authorization</strong><small>Confirm authority to represent this outlet.</small></div><span class="chip warn">Unverified</span></div>
+        <div class="row"><div><strong>PayPal sandbox</strong><small>Merchant account authorization required.</small></div><span class="chip warn">Not connected</span></div>
+        <div class="row"><div><strong>PYUSD wallet</strong><small>Optional, after independent proof. Receipt is PYUSD.</small></div><span class="chip">Not enabled</span></div>
+        <p style="margin-top:16px">At least one accepted destination must be connected. PayPal comes first; publishing does not require PYUSD.</p>
+        <ul class="plainlist"><li id="shop-check">Shop/outlet review still needed.</li><li id="menu-check">Menu confirmation still needed.</li><li>Merchant authorization and destination checks remain unverified.</li></ul>
+        <button id="publish" disabled style="width:100%">Publication blocked</button><small style="margin-top:10px">Drafts are invisible to buyers. This mockup cannot authorize, connect or publish.</small>
+        <details><summary>Prepared demo merchants</summary><p>The future sandbox demo uses pre-provisioned, allowlisted test recipients and discloses that shortcut. A pasted merchant ID or SGQR image is insufficient.</p></details>
+      </section>
+      <section class="card tint"><h2>You control the final menu.</h2><p>AI by Zapier is proposed drafting assistance. Nothing extracted goes live automatically. Edits require confirmation again; payment changes need fresh buyer approval.</p><a class="button secondary" href="buyer.html">Preview a published fixture</a></section>
+    </aside>
+  </div>
+</main>
+<script>
+const draft=document.getElementById('menu-draft');
+const scenario=document.getElementById('import-state');
+const confirmMenu=document.getElementById('menu-confirm');
+const rowContainer=document.getElementById('menu-rows');
+const note=document.getElementById('confirmation-note');
+const rows=()=>[...rowContainer.querySelectorAll('fieldset')];
+const firstRowTemplate=rows()[0].cloneNode(true);
+let nextItem=3;
+function refresh(invalidate=false){
+  if(invalidate) confirmMenu.checked=false;
+  const shopReady=document.getElementById('shop').value.trim() && document.getElementById('outlet').value.trim();
+  document.getElementById('shop-confirm').disabled=!shopReady;
+  if(!shopReady) document.getElementById('shop-confirm').checked=false;
+  const complete=scenario.value!=='processing' && rows().length>0 && rows().every(row=>{
+    const price=row.querySelector('.item-price').value.trim();
+    return row.querySelector('.item-name').value.trim() && /^\d+(\.\d{1,2})?$/.test(price) && Number(price)>0 && row.querySelector('.item-availability').value;
+  });
+  confirmMenu.disabled=!complete;
+  if(!complete) confirmMenu.checked=false;
+  note.textContent=confirmMenu.checked?'Menu confirmed locally for this preview. Edits require confirmation again; nothing is published.':complete?'Review every entry, then explicitly confirm. This remains an unpublished fixture.':'Complete item names, positive SGD prices and availability before confirming. Nothing is published.';
+  document.getElementById('menu-check').textContent=confirmMenu.checked?'Menu reviewed in this local preview only.':'Menu confirmation still needed.';
+  document.getElementById('shop-check').textContent=document.getElementById('shop-confirm').checked?'Shop details reviewed in this preview; authorization is separate.':'Shop/outlet review still needed.';
+}
+function preview(){
+  rowContainer.replaceChildren();
+  for(let i=1;i<=2;i++){
+    const row=firstRowTemplate.cloneNode(true);
+    row.querySelector('legend').textContent='Draft item '+i;
+    row.querySelectorAll('input,select').forEach(field=>{const oldId=field.id;field.id=oldId.replace(/\d+$/,String(i));row.querySelector('label[for="'+oldId+'"]').htmlFor=field.id;});
+    rowContainer.append(row);
+  }
+  nextItem=3;
+  const mode=scenario.value;
+  const hasDraft=mode==='ready'||mode==='unreadable';
+  rows().forEach((row,i)=>{
+    row.querySelector('.item-name').value=hasDraft?['Kaya toast','Kopi'][i]:'';
+    row.querySelector('.item-price').value=hasDraft?(mode==='unreadable'&&i===1?'':['4.00','2.00'][i]):'';
+    row.querySelector('.item-availability').value='';
+  });
+  const messages={ready:'Fixture draft only. Review names/prices and supply availability before confirming.',unreadable:'Kopi price is unreadable. It stays blank; supply it from your menu or exclude the item before publication.',processing:'Import in progress example. No entries can be confirmed yet. Manual entry remains available.',failed:'Import failed: image could not be accessed. No prices were filled. Re-upload in the built app or enter manually.',malformed:'Extraction output was unusable. No entries were accepted. Enter manually or try a new image in the built app.',manual:'Manual entry: supply item names, SGD prices, portions and availability, then review and confirm.'};
+  document.getElementById('import-note').textContent=messages[mode];
+  document.getElementById('source-preview').textContent=mode==='ready'?'Kaya toast S$4.00 · Kopi S$2.00':mode==='unreadable'?'Kaya toast S$4.00 · Kopi [unreadable price]':'No readable source preview for this example.';
+  refresh(true);
+}
+scenario.addEventListener('change',preview);
+draft.addEventListener('submit',event=>event.preventDefault());
+draft.addEventListener('input',event=>refresh(event.target!==confirmMenu));
+draft.addEventListener('change',event=>refresh(event.target!==confirmMenu));
+document.getElementById('manual-entry').addEventListener('click',()=>{scenario.value='manual';preview();});
+document.getElementById('add-item').addEventListener('click',()=>{
+  const row=firstRowTemplate.cloneNode(true);const number=nextItem++;
+  row.querySelector('legend').textContent='Draft item '+number;
+  row.querySelectorAll('input,select').forEach(field=>{const oldId=field.id;field.id=oldId.replace(/\d+$/,String(number));field.value='';row.querySelector('label[for="'+oldId+'"]').htmlFor=field.id;});
+  rowContainer.append(row);refresh(true);
+});
+rowContainer.addEventListener('click',event=>{if(event.target.matches('.remove-item')){event.target.closest('fieldset').remove();refresh(true);}});
+['shop','uen','outlet'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{document.getElementById('shop-confirm').checked=false;refresh();}));
+document.getElementById('shop-confirm').addEventListener('change',()=>refresh());
+['photo','menu-photo'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{
+  if(id==='photo') document.getElementById('shop-confirm').checked=false;
+  else {scenario.value='manual';preview();}
+  refresh(id==='menu-photo');
+}));
+refresh();
+</script>
+<footer>Gate 1 proposal · 6 October 2026 · Local fixture interactions only. No extraction or integration has been tested.</footer>
+</body></html>

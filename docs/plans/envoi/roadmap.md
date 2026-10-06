@@ -1,0 +1,69 @@
+# Envoi: gate roadmap and candidate slices
+
+2026-10-06. Discussion draft only. Gate 1 is awaiting approval. This document previews work; it neither merges the gates nor authorizes implementation. After Gates 1-3 are approved, rewrite the agreed candidates into `04-slices.md` and request Gate 4 approval.
+
+## Four decisions, four approvals
+
+| Gate | Decision in plain language | Deliverable | Evidence needed to approve |
+| --- | --- | --- | --- |
+| 1: Product | What can a visitor and a merchant actually do? | `01-product.md` and one plain HTML mockup per screen. | Agreed audience, journeys, scope, cuts, success measurement, test-environment labels, and external approval. |
+| 2: Architecture | How will the parts connect, and where can payment authority exist? | `02-architecture.md`: existing-code fit, routes, data/query outlines, end-to-end flow, third parties and environment variable names. | Recipient ownership, provider approval, non-custodial signing, fee provenance, authenticated writes, payment recovery, Render web/worker hosting and Zapier draft-only menu import with temporary image access/removal. Research uncertainty stays explicit until runtime proof. |
+| 3: Program design | What exact contracts prevent wrong payments and ambiguous state? | `03-program-design.md`: file map, types/signatures without bodies, call stacks, named tests, least confident choices. | Quotes bind buyer, outlet, recipient, items, amount/currency, rail and expiry; approvals cannot be reused. Payment recovery and menu validation, confirmation invalidation, duplicate/late results, timeout and cleanup contracts are specified. |
+| 4: Vertical slices | In what order will each small user capability become runnable? | `04-slices.md` and the slice checklist in `00-status.md`. | Each slice has dependencies, a visible result, acceptance evidence and a failure response. Sponsor access, PayPal, SGQR, Zapier menu import and PYUSD unknowns need early proof. |
+
+At each gate: save the document, summarize the choices, ask "Approve Gate N, or what should change?", and wait. If a later finding invalidates an earlier decision, reopen that gate. No application implementation begins before Gate 4 approval.
+
+## Early feasibility decisions
+
+Source research can happen during planning. Executable proof belongs to the approved slices. The original "day-1 spike" is replaced by early visible proofs with the correct buyer approval boundary.
+
+| Proof | Passing evidence | If it fails |
+| --- | --- | --- |
+| PayPal purchase | Actual sandbox order, buyer approval, capture reference, amount/currency, and intended seller/payee agree. | Diagnose credentials, eligibility and toolkit coverage. A direct Orders adapter is valid if the toolkit lacks fields, but changes to claimed integration reopen the affected gates. Failure of unattended buyer authorization is expected, not a product kill. No pivot to an absent fallback plan. |
+| SGQR-assisted onboarding | Consented authentic photo set with decoded/confirmed values, unsupported and unreadable cases, and no invented identity. Original clean-sample target is 8/10; log every result. | Keep manual confirmation/entry. A low score invalidates "automatic extraction" or "60-second" claims, not necessarily the entire product. If no authentic samples exist, call the result fixture-only. |
+| Zapier menu-image draft | Account-supported image model reads a consented, temporarily accessible menu image and returns validated item names/SGD prices. Merchant corrects, supplies availability and confirms; removal of image access is observed. | Leave unreadable prices blank. Probe malformed output, inaccessible image, timeout/quota, cancellation, replay and cleanup. Manual entry keeps onboarding usable, but does not count as proof of Zapier integration; revise the proposal explicitly if the workflow cannot be delivered. |
+| Sponsor access | APIMatic PayPal context and account-supported generation, Render services/budget, and a published Zapier workflow remain available through judging. | Public sponsor pages do not establish entitlements or prizes. Resolve access before depending on a sponsor feature; generated clients/documentation remain conditional. |
+| PYUSD transfer | Official devnet mint verified; payer wallet signs; intended receiver, atomic amount, token program and finalized transaction agree. | Disable the rail and reopen product scope if needed. PayPal still supports the required prototype; do not relabel another token or hide a failed transfer. |
+
+## Candidate hackathon slices
+
+These are capability boundaries, not a promise of duration or final numbering. The first real payment must already enforce recipient/amount binding and basic idempotency; later recovery work does not excuse unsafe early slices.
+
+| # | Runnable capability | What the user can see / acceptance evidence | Depends on |
+| --- | --- | --- | --- |
+| 1 | **Tracer bullet:** open a seeded shop, review a fixture basket, and reach an explicitly unpaid stub receipt through the Render-hosted app. | UI -> Node -> stored order -> UI works. No payment executed; hosting/configuration exercised, including worker connectivity where needed. | Approved Gate 4; Render/Supabase access. |
+| 2 | **Single PayPal sandbox happy path:** create -> buyer checkout approval -> capture for one allowlisted seller, using APIMatic PayPal context during integration. | Actual capture and verified payee/amount/currency; cancel remains unpaid; repeat approval cannot create a second purchase. Bound purchase and basic uncertain-result reconciliation already apply. | 1; isolated sandbox credentials and plugin access. |
+| 3 | Import a sticker into a merchant draft and confirm or correct its details. | Decode-first import, visible uncertainty, manual fallback, authentic sample report; personal proxies are not published as business identifiers. | 1; consented samples for an authentic accuracy claim. |
+| 4 | Upload a separate menu image and receive an AI by Zapier draft; correct it or use manual entry. | Exact readable SGD prices, blanks for unreadable values, merchant-supplied availability, explicit confirmation and no publication. Inaccessible image, malformed output, quota/timeout, duplicate/late result and cleanup probes pass. | 1; published Zapier workflow/model access; consented samples and temporary-access proof. |
+| 5 | An authorized demo merchant publishes its confirmed outlet/menu and connected accepted test destination. | Both image paths plus fallback; draft invisible until authorization, complete menu confirmation and connection checks pass. Edits invalidate confirmation. PYUSD connection is optional. | 2, 3, 4. |
+| 6 | A buyer's text request finds a registered outlet and available items. | Registered, merchant-confirmed prices; ambiguity, missing location/item asks for clarification. Model cannot invent prices or destinations. | 5. |
+| 7 | Review eligible rails with sourced costs and a bound, expiring purchase. | Payer/merchant fee split; unknown FX stays unknown; changed items, amount, recipient, currency or rail require fresh approval. | 2, 6. |
+| 8 | Complete a separate PYUSD devnet purchase after independent feasibility proof. | Exact mint/token program/amount/receiver, wallet approval and finalized signature. No buyer key custody; one rail per order. | 7; official test tokens, compatible wallet and conversion basis. |
+| 9 | Merchant sees confirmed payment and acknowledges the order. | Buyer/merchant agree on payment evidence; pending is not paid; acknowledgment remains separate. | 2, 5; include 8 when available. |
+| 10 | Expand PayPal recovery for lost responses/callbacks. | Duplicate/out-of-order events, reload and timeout converge on one capture. No blind recharge or cross-rail retry. | 2, 9. |
+| 11 | Recover wallet submission/confirmation timeout. | Reconcile signature and attempt; distinguish expiry, failure and uncertainty before any replacement transfer. | 8, 9. |
+| 12 | Compatible external MCP client discovers the shop and opens the same approval journey. | Public menu/capabilities, authenticated human approval, no secrets or unrestricted transfer tools. | 6, 7, 10; 11 if PYUSD is shown. |
+| 13 | Developer uses an APIMatic-generated registry client/documentation where access supports it. | Client calls the running API; contract check passes; describe only demonstrated features. Raw documentation is a fallback, not proof of generated-client integration. | 12; actual generation/portal tier and terms confirmed. |
+| 14 | Optional merchant offer within explicit rules. | Editable caps/time window; resulting price changes require renewed approval. Dialogue cannot authorize amounts. | Core payment/recovery slices pass. |
+| 15 | Reproducible judged release with access and recorded evidence. | Import/failure evidence, actual payment references, proposed 4-of-5/3-minute usability test, mobile/keyboard checks, setup/reset, OSS license and short functioning video. Access lasts through judging. | All included slices; 13 is account-conditional and 14 optional. |
+
+For each approved slice, execute its relevant failure probes as well as its happy path, attach actual evidence, check the status file only after verification, and ask "Continue to slice N+1, or re-steer?" Do not complete all data layers before a user can run a journey.
+
+## Production continuation: a separate launch decision
+
+Production is not a sandbox configuration flip. Candidate continuation after the hackathon:
+
+| Candidate | User-visible result | Release prerequisite |
+| --- | --- | --- |
+| P1: Live seller enrollment | A real merchant grants provider permissions and is discoverable only after verified enrollment. | PayPal partner eligibility, approved live integration, verified business/outlet ownership, support and dispute responsibilities agreed. |
+| P2: Controlled live PayPal purchase | A small authorized pilot produces a real merchant receipt and reconciles accurately. | Qualified regulatory/provider review, recipient tests, monitoring, kill switch, refunds/support process and operational recovery drill. |
+| P3: Mainnet wallet purchase | An eligible payer approves an exact PYUSD transfer directly to an enrolled merchant wallet. | Separate legal/provider assessment, verified mainnet mint and destination ownership, audited signing/transaction path, merchant acceptance of PYUSD and conversion policy. This can remain disabled indefinitely. |
+| P4: Operated pilot | A merchant can handle cancellations/refund requests and the team can detect/recover incidents. | Access controls, retention policy, backup/restore proof, verified provider events, reconciliation alerts, rate limits and documented incident ownership. |
+
+Reopen Product/Architecture/Program Design for changed live capabilities before approving production slices. Operational controls needed for P2 must already be present before P2 starts; P4 expands their pilot use, not postpones them.
+
+## Scheduling without invented effort estimates
+
+Planning windows, not duration estimates: 6-11 Oct gates and early evidence setup; 12-25 Oct core journeys and payment proofs; 26 Oct-1 Nov recovery/MCP/SDK work; 2-8 Nov rehearsal and submission assets; 9-12 Nov correction buffer. Target submission before 12 Nov evening SGT; official cutoff is 13 Nov 04:00 SGT. Gate approval delays and runtime failures can change these windows.
+
+Cut voice, negotiation, AG Grid and catalogue breadth first. Do not cut payment evidence, approval checks, recipient verification, menu confirmation, image cleanup or uncertainty handling. Menu import through Zapier is proposed scope; manual fallback alone cannot support an integration claim. If Zapier or PYUSD fails, explicitly reopen affected product scope instead of silently dropping it. None of these candidates authorizes implementation.
