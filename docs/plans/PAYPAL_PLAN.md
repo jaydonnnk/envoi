@@ -1,3 +1,7 @@
+> **SUPERSEDED — do not build from this file.** Original brief dated 2026-10-06, preserved for traceability; only this banner has been added since.
+> Its fee, onboarding-speed, branding and licensing claims are corrected in `envoi/research.md`; the authoritative product scope is `envoi/01-product.md`.
+> Banner added 2026-10-07. The body below is byte-identical to the version whose SHA256 is recorded in `envoi/00-status.md`, and the pre-banner bytes remain in git at the Initial commit.
+
 # ENVOI — PayPal AI Hackathon Plan
 
 > **Envoi**: the messenger you send to pay. An AI agent finds the merchant, compares the rails, and pays on your behalf — with your one-tap approval.

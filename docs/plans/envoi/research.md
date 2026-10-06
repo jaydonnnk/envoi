@@ -1,6 +1,6 @@
 # Envoi: evidence and corrections
 
-Consolidated 2026-10-06. Sponsor access and menu-import documentation were rechecked against the primary sources below. Other corrections are carried forward from the earlier source review on the same date. This is documentation research, not runtime proof. No sandbox capture, wallet transfer, QR/menu photo trial, Zapier integration or user test has been run.
+Consolidated 2026-10-06. Sponsor access and menu-import documentation were rechecked against the primary sources below. Other corrections are carried forward from the earlier source review on the same date. A prior-art review of shipped SGQR payment products was added 2026-10-07 and prompted the reopened Gate 1 buyer-side scan entry point. This is documentation research, not runtime proof. No sandbox capture, wallet transfer, QR/menu photo trial, Zapier integration or user test has been run.
 
 ## Material corrections to PAYPAL_PLAN.md
 
@@ -26,9 +26,9 @@ Use organizer test-access instructions without exposing privileged API secrets o
 
 ## Claims not established in this pass
 
-SGQR combines payment schemes; it does not provide Envoi with an item catalogue or a standard menu lookup. The consolidated proposal requires a separate menu image, AI by Zapier drafting and merchant confirmation, with manual fallback. That scope supersedes manual-only menus and optional Zapier. Gate 1 remains unapproved. [MAS SGQR overview](https://www.mas.gov.sg/development/e-payments/sgqr), [EMVCo payment QR overview](https://www.emvco.com/knowledge-hub/the-what-why-and-how-of-emv-qr-codes/).
+SGQR combines payment schemes; it does not provide Envoi with an item catalogue or a standard menu lookup. The consolidated proposal requires a separate menu image, AI by Zapier drafting and merchant confirmation, with manual fallback. That scope supersedes manual-only menus and optional Zapier. Gate 1 product scope was approved by the user on 2026-10-07; integration proof remains outstanding. [MAS SGQR overview](https://www.mas.gov.sg/development/e-payments/sgqr), [EMVCo payment QR overview](https://www.emvco.com/knowledge-hub/the-what-why-and-how-of-emv-qr-codes/).
 
-- Tourist demand, visitor counts, local crypto demand, willingness to pay, and merchant acceptance of stablecoin settlement.
+- Tourist demand, visitor counts, local crypto demand, willingness to pay, and merchant acceptance of stablecoin settlement. Prior art in the section below establishes that a product ships to the crypto-holding segment; that is not evidence of the segment's size, and not evidence of merchant willingness.
 - The brief's current Singapore consumer PYUSD availability, exact supported market count, or full network list. The proposed wallet rail must not depend on those claims.
 - "~60 seconds" for complete live merchant onboarding or "nearest" without actual location and outlet coordinates.
 - The toolkit accepting all multiparty recipient and authorization parameters needed by Envoi.
@@ -37,7 +37,29 @@ SGQR combines payment schemes; it does not provide Envoi with an item catalogue 
 - Trademark/name clearance. Use fictional shop branding in demonstration materials until permission is established.
 - The archived Kaki Bill fallback. Its contents are not present in this workspace; no automatic pivot is authorized or sufficiently specified.
 
-The original brief remains unchanged for traceability. Subsequent gate decisions supersede disputed assumptions explicitly, rather than preserving the brief's "verified" labels as evidence.
+The original brief remains unchanged apart from a dated supersession banner added at its top on 2026-10-07; its body is preserved for traceability. Subsequent gate decisions supersede disputed assumptions explicitly, rather than preserving the brief's "verified" labels as evidence.
+
+## Findings from shipped SGQR-based payment products
+
+Reviewed 2026-10-07 from a public repository of a Singapore product that is live on a public blockchain network. Findings are paraphrased; they are observations of a shipped design, not endorsements, and they are not primary specification sources. Where a fact has a primary source, that source is cited instead.
+
+**What the QR code is actually for.** In the shipped design the payer scans the sticker, the business identifier is extracted from it, and that identifier is the lookup key into a merchant registry holding the real payout destination. The QR resolves *which merchant*; it never routes the payment. This is the same split Envoi now adopts in `01-product.md` rule 11, and it independently confirms that the sticker is identity rather than a rail.
+
+**A sticker cannot carry a token destination.** The payout address is derived from the merchant's own authenticated onboarding, not read from the QR. SGQR is an EMVCo merchant-presented-mode payload carrying payment-scheme identifiers and PayNow proxies; there is no wallet address in it and no standard field for one. [EMVCo payment QR overview](https://www.emvco.com/knowledge-hub/the-what-why-and-how-of-emv-qr-codes/), [MAS SGQR overview](https://www.mas.gov.sg/development/e-payments/sgqr). Consequence: the QR routes neither the PayPal rail nor a PYUSD rail. Adding a wallet rail does not change the sticker's role.
+
+**No shipped product auto-publishes a merchant from a photo.** Onboarding requires a business-ownership document (registry extract or letterhead) plus a human review step before the listing goes live, with a target turnaround measured in business days. This corroborates the correction already recorded above: possession of a photograph or a syntactically valid identifier proves nothing about ownership. Envoi's authorized-demo-merchant gate is therefore the norm for this category, not excessive caution.
+
+**Manual identifier entry is the standard fallback.** The shipped flow allows the merchant to type the business identifier when scanning fails. Envoi's manual-entry fallback matches.
+
+**Multiple outlets can share one identifier, and this is handled explicitly.** The shipped design supports one owner claiming many identifiers and treats outlet identity as distinct from the legal entity. This supports the new requirement in the `01-product.md` merchant journey that each outlet record what distinguishes it, so a buyer scan resolves one location rather than a chain.
+
+**How a credible cost comparison is produced.** The shipped design fetches a live price-oracle quote, applies staleness detection, and displays a pre-approval receipt stating what the payer pays, what the merchant receives, and which route was used. This is the model for Envoi's cost display and it confirms rule 5: a comparison needs a live quoted basis with a timestamp, or it must show unknown. A hardcoded difference between two rails is not a comparison.
+
+**The stablecoin-to-SGD off-ramp is still unsolved non-custodially.** In the shipped product the SGD cash-out leg is a manual, custodial, gated demonstration, with a non-custodial alternative that pays into an exchange balance rather than a bank and is gated off by default. This is strong external evidence for `01-product.md` rule 4 and for the separate merchant-economics test at line 19: a merchant receiving a USD-denominated token has a real, unsolved problem converting it, and low network fees do not address it.
+
+**Positioning of the category.** The shipped product states plainly that PayNow is free for Singapore merchants and that the overwhelming majority of payers use it, and it deliberately targets the crypto-holding minority plus merchants willing to serve them rather than competing for the mainstream. This matches Envoi's audience decision to serve visitors PayNow cannot reach. The specific "99% of payers" figure is a third-party market claim that this pass did **not** independently verify; do not restate it as fact or place it in public submission materials without a primary source.
+
+**The unoccupied gap.** Every shipped design reviewed is scan-to-pay operated by a human holding a wallet. None exposes an agent surface — no machine-readable discovery of merchant capability, no delegated purchase, no approval journey opened by a third-party agent. Envoi's differentiator is agent-initiated purchase on the PayPal rail with the human approving externally. That gap is real as of this review, and it is the claim the demonstration should lead with rather than the sticker scan.
 
 ## Proposed sponsor integrations and access
 
@@ -72,8 +94,9 @@ Zapier supports error handlers and replay, with plan-dependent limits. Error han
 
 - Account access: APIMatic plugin and any own-API generation tier, Render services/credits and budget, Zapier published-workflow plan and chosen vision model. Prize eligibility remains separate and unverified.
 - Menu workflow: consented readable/blurred/partial/non-SGD samples; exact readable prices; blanks for unreadable values; malformed/empty results; inaccessible/expired image; timeout/quota failure; manual fallback; confirmation invalidation; duplicate/late result handling; actual image cleanup. No accuracy result is earned yet.
+- Buyer-side scan: decode accuracy on authentic stickers scanned in place, camera-permission denial, an unenrolled sticker resolving to no purchase, and a shared identifier covering several enrolled outlets resolving to one. None has been demonstrated.
 - Payments: distinct authorized sandbox seller, buyer approval, capture/payee/amount/currency match and uncertain-result reconciliation. PYUSD requires its own mint/extension/wallet/finality and conversion proof before enablement.
 - Usability and merchant economics: the proposed 4-of-5/3-minute target and merchant willingness are untested.
 - Live launch: provider eligibility, qualified Singapore legal review, merchant ownership/enrollment, retention, support, monitoring, reconciliation and recovery. No-custody is a design boundary, not a licensing conclusion.
 
-This consolidation does not approve Gate 1, Gate 2 or implementation. The original brief remains unchanged; the consolidated product supersedes its conflicting scope claims.
+Research and mockup checks do not establish runtime evidence. The user separately approved Gate 1 product scope on 2026-10-07; Gates 2-4 remain pending and no application implementation is authorized. The original brief's body remains unchanged below its dated supersession banner; the approved product supersedes its conflicting scope claims.
