@@ -31,7 +31,7 @@ Also **[verified]**: GitHub Free includes *"2,000"* Actions minutes monthly, *"G
 
 ## Provisioned state discovered during this gate
 
-Planning documents said nothing was provisioned. That is now false, and this gate records the actual state instead of the assumption. While Gate 3 preparation ran, a concurrent session provisioned Neon at the user's direction and left its files untracked in this shared worktree. **No secret value was read into this document, and none may be committed.** `git status` confirms `.env.local` and `.neon` are matched by `.gitignore` (`.env`, `.env.*`, `.neon`, `node_modules/`) and are not staged or listed as untracked.
+Planning documents said nothing was provisioned. That is now false, and this gate records the actual state instead of the assumption. While Gate 3 preparation ran, a concurrent session provisioned Neon at the user's direction and left its files untracked in this shared worktree; the user later instructed that they be committed, and they are now tracked in commit `f8caf7d`. **No secret value was read into this document, and none may be committed.** `git status` confirms `.env.local` and `.neon` are matched by `.gitignore` (`.env`, `.env.*`, `.neon`, `node_modules/`) and are in no commit.
 
 | Fact | Value | Consequence |
 | --- | --- | --- |
@@ -98,10 +98,10 @@ Four files already exist from the concurrent provisioning session: `.gitignore`,
 
 | Path | Why it lives there |
 | --- | --- |
-| `package.json` | **Exists**, currently holding only `@neon/config` and `@neon/env`. Grows the app scripts: `dev`, `build`, `start`, `lint`, `typecheck`, `test`, `db:generate`, `db:migrate`, `runner:build`, `runner:start`. |
-| `package-lock.json` | **Exists** from provisioning. Extends as the app pins are installed; the resolved versions then become the authoritative record against the pins above. |
-| `.gitignore` | **Exists** and already covers `.env`, `.env.*`, `.neon` and `node_modules/`. Verified by `git status` not listing `.env.local` or `.neon`. Must also cover build output and test artifacts before any commit. |
-| `neon.ts` | **Exists**, now `auth: false` after the user-authorized flip on 2026-10-07. Verified not to control the branch-level Auth service, which remains enabled in its own `neon_auth` schema. Left untracked; belongs to the concurrent provisioning session. |
+| `package.json` | **Exists and tracked.** Currently holds only `@neon/config` and `@neon/env`. Grows the app scripts: `dev`, `build`, `start`, `lint`, `typecheck`, `test`, `db:generate`, `db:migrate`, `runner:build`, `runner:start`. |
+| `package-lock.json` | **Exists and tracked** from provisioning. Extends as the app pins are installed; the resolved versions then become the authoritative record against the pins above. |
+| `.gitignore` | **Exists and tracked.** Covers `.env`, `.env.*`, `.neon` and `node_modules/`; verified by `git status` not listing `.env.local` or `.neon`. **Gap: it does not yet cover build output such as `.next/`, `dist/` or test artifacts, and it must before application work begins.** |
+| `neon.ts` | **Exists and tracked** at `auth: false`, committed in `f8caf7d`. Verified not to control the branch-level Auth service, which remains enabled in its own `neon_auth` schema. |
 | `neondb` schema state | **Verified 2026-10-07 by read-only inspection:** `public` contains zero tables; all nine Neon Auth tables sit in `neon_auth`. Better Auth must be pinned to `public`. |
 | `tsconfig.json` | Next.js web config, `strict`, no `any` at boundaries. |
 | `tsconfig.runner.json` | Separate NodeNext build of the maintenance entrypoint only, so CI can prove what maintenance can reach. |
