@@ -1,0 +1,216 @@
+# Architecture: Envoi
+
+Gate 2 architecture proposal, 2026-10-07 (Asia/Singapore). **APPROVED by the user 2026-10-07.** Product authority: [approved Gate 1](01-product.md). Approval accepts this proposal, not runtime/account proof. The preceding review's findings remain unresolved; approval does not establish that they were fixed. This document contains no application implementation, Gate 3 contracts or approved slices.
+
+## Read this first
+
+Envoi keeps the shop catalogue and purchase record. PayPal or the buyer's wallet handles payment approval. Recovery state survives in PostgreSQL; a finite maintenance job checks unfinished work even when the app is asleep.
+
+- **[verified] User constraint:** free hosting services only; the user cannot create another free Supabase database. This replaces the earlier Supabase/Render-worker draft without changing approved product behavior.
+- **[hypothesis]** One Next.js/TypeScript app on Render Free, Neon Free PostgreSQL, Better Auth inside the app and a finite Node maintenance runner scheduled with GitHub Actions. No Supabase, paid Render worker or separate API service.
+- **[hypothesis]** PayPal sandbox Orders v2 through a direct server adapter, with a distinct, authorized sandbox seller. No default payment to Envoi's own account.
+- **[hypothesis]** Text and SGQR lookup reach the same published catalogue. AI suggests items; stored prices and connected destinations determine the purchase.
+- **[hypothesis]** Zapier receives only the separate menu image through revocable Envoi access. Its result remains an unpublished draft until merchant correction and confirmation.
+- **[unknown]** Seller permissions, sponsor entitlements, image fetching/removal, authentic scan performance and transactions are unproven. PYUSD remains disabled until its separate proof and configuration decisions pass.
+
+All proposed limits below are **[hypothesis] design choices**, not measured performance or provider guarantees. All routes/tables are proposed, not existing code.
+
+## Fit
+
+**[verified]** Inspection on 2026-10-07 found planning Markdown, six standalone HTML mockups and a historical JPG. `frontend/`, `backend/`, `tests/` and `tasks/` are empty; there are no application manifests, services, migrations or tests to extend. Evidence: repository file inventory and [status](00-status.md). Preserve the approved mockups and superseded original brief.
+
+| Approach | Benefit | Cost / decision |
+| --- | --- | --- |
+| **Render Free app + Neon Free database + scheduled maintenance** | UI, HTTP API and MCP share rules; persistent records survive a sleeping app. | **Recommended free-hosting draft.** Cold starts, quotas, scheduled-job access and delayed recovery need proof. |
+| Render Free app + Render Free Postgres | One hosting vendor for app and database. | Database expires after 30 days; insufficient for submission through judging. Render has no free background-worker service. |
+| Render app/worker + Supabase | Managed database/auth/storage plus continuous recovery. | Supabase quota unavailable to the user; the Render worker violates free-only hosting. Superseded. |
+| Next.js plus a separate Fastify API and worker | Independent API transport and scaling. | Another deployment/authentication boundary before one purchase works. Reconsider only if a measured transport constraint demands it. |
+| Next.js plus a Python backend | Viable with an established Python team. | Adds a language boundary for browser wallets and shared contracts; no existing Python implementation or team constraint is established. |
+
+**[hypothesis] Selected topology:** Next.js App Router in the Node runtime, TypeScript domain modules, Zod validation, Drizzle migrations/queries and Vercel AI SDK for suggestions. Render Free hosts the app; Neon Free holds domain data, Better Auth sessions and tightly bounded temporary menu-image bytes. Better Auth is a library in our app, not another hosted service. A finite Node runner from the same codebase performs maintenance through GitHub Actions. It uses durable purchase/import records with due times and recoverable leases; no Redis, `pg-boss` or always-running queue poller initially. Pin compatible releases at Gate 3; no installation or provisioning at this gate.
+
+**[vendor claim]** Next.js supports Node deployment. Render Free sleeps after 15 minutes idle, may take about a minute to wake, offers 750 shared instance hours/month and has an ephemeral filesystem. Its free database expires after 30 days and background workers have no free instance type. These are documented limits, not observed Envoi performance. No persistent images, sessions or jobs on Render's filesystem. [Next.js deployment](https://nextjs.org/docs/app/getting-started/deploying), [Render Free](https://render.com/docs/free).
+
+**[vendor claim]** Neon documents 1 GB Postgres storage/project, 100 CU-hours/project/month, 5 GB public transfer/project/month and mandatory scale-to-zero after five minutes idle. Compute/transfer exhaustion suspends compute; storage exhaustion can also block updates/deletes. This is a quota-limited Free plan, not a claimed trial or verified account. The current plan describes no Render-style 30-day database expiry. Use a small compute, bounded connections and no idle database polling. Select the closest available database region after access verification; Singapore co-location is unverified. [Neon plans](https://neon.com/docs/introduction/plans), [October 2026 update](https://neon.com/blog/neon-free-plan-1-gb-per-project).
+
+**[hypothesis] Free maintenance:** run a bounded Node job hourly, away from the start of the hour, with a proposed two-minute execution timeout and overlap prevention. It connects directly to the database rather than pinging Render to keep the app awake. Private-repository runs require verified remaining included minutes and a zero-spend stop setting; public standard runners are free, but making this repository public is not authorized. No image/payment artifacts or caches are uploaded by maintenance. A manual operator run is a recovery fallback, not an unattended scheduler proof. **[vendor claim]** GitHub schedules can be delayed/dropped, require the default branch and can be disabled after 60 days of inactivity in a public repository. Therefore hourly recovery/cleanup is best effort, not a deadline guarantee. [Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions), [included usage](https://docs.github.com/en/billing/reference/product-usage-included), [schedule limits](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule).
+
+**[unknown] Free access and performance:** verify account quotas, no paid fallback/overage, worker execution and cold-start buyer journeys before a judged release. Include cold-start time in the approved three-minute usability measurement. Do not silently pre-warm the service to claim an ordinary first visit passes. Free hosting does not establish free OpenAI/Zapier access; those entitlements remain separate blockers.
+
+| Boundary | Owns | Must not own |
+| --- | --- | --- |
+| Browser | Camera/local QR decode, local menu preview, user choices, provider/wallet handoff. | Trusted prices, destination verification, credentials or a paid-state decision. |
+| Catalogue / enrollment | Outlet identity, memberships, approved identifier mappings, menu versions, destination connections. | Auto-enrollment from a scan or AI-based proof of ownership. |
+| Purchase domain | Immutable review, actor binding, amount calculation, execution lock, payment status and separate acknowledgment. | Arbitrary amounts/payees supplied by an agent, browser or Zap. |
+| AI suggestion adapter | Interpret text and propose registered outlet/item IDs or a clarification. | Capture, signing, publication, SQL execution or authoritative price calculation. |
+| PayPal adapter | Exact sandbox create/read/capture and verification under enrolled seller permissions. | Changing an approved purchase or substituting Envoi's account. |
+| Import adapter | Scoped Zap dispatch/result, validation and temporary-image lifecycle. | Payment credentials, destination changes or publication. |
+| Maintenance runner | Bounded provider reads, reconciliation of existing attempts, expired imports, source-row removal and operator-visible failures. | Initial capture, replacement payment, automatic menu re-analysis or keeping the Render app/database continuously awake. |
+
+## Endpoints
+
+Proposed application API prefix: `/api/v1`. Body fields, response/error types and OpenAPI details belong to Gate 3. All private reads and writes verify the caller and object ownership server-side. Browser mutations use same-origin/CSRF protection; agent tokens have separate scopes.
+
+| Verb + route | Purpose / authority |
+| --- | --- |
+| `GET/POST /api/auth/[...all]` (outside `/api/v1`) | Better Auth session routes; secure cookie sessions, anonymous buyers and pre-provisioned merchant sign-in. Library-managed routes do not grant outlet membership. |
+| `GET /outlets`, `GET /outlets/{id}/menu` | Public, paginated reads of enrolled, published fixture outlets and their confirmed menu/capabilities. No credentials, personal proxies or raw payout configuration. |
+| `POST /outlets/resolve-sgqr` | Validate a bounded QR payload and return zero, one or several published outlet matches. Never create an enrollment or payment. |
+| `POST /buyer/suggestions` | Buyer session: bounded text/area request; registered suggestions or clarification. Never a transfer tool. |
+| `POST /purchases` | Buyer session: selected outlet/item IDs and quantities become a server-priced, expiring review. Client prices/payees are not accepted. |
+| `GET /purchases/{id}` | Owning buyer session or the authorized merchant: relevant purchase, payment evidence and separate acknowledgment. |
+| `POST /purchases/{id}/paypal/start` | Owning buyer explicitly continues from the current review; persist an attempt and create one exact sandbox order. |
+| `POST /purchases/{id}/paypal/complete` | Owning buyer requests completion after external approval; server re-reads and checks the bound PayPal order before capture. |
+| `POST /purchases/{id}/cancel`, `POST /purchases/{id}/reconcile` | Close an unexecuted purchase, or request a bounded status check. A cancellation racing with dispatched capture remains pending/uncertain until checked. |
+| `POST /merchant/outlets`, `PATCH /merchant/outlets/{id}` | Permanent merchant login plus allowlisted membership: create/edit an unpublished outlet draft. Changes invalidate relevant confirmation. |
+| `PUT /merchant/outlets/{id}/destinations/paypal` | Select an operator-prepared sandbox seller connection assigned to this merchant; verify provider permissions/capability. Arbitrary pasted merchant IDs cannot connect. |
+| `POST /merchant/outlets/{id}/menu-imports` | Authenticated merchant, explicit sharing consent, one validated image; create a durable import attempt. |
+| `GET /merchant/menu-imports/{id}`, `POST /merchant/menu-imports/{id}/cancel` | Owning merchant: result/status or cancellation and immediate source-access closure. |
+| `PUT /merchant/outlets/{id}/menu-draft` | Owning merchant: manual entry/corrections with revision conflict checks. |
+| `POST /merchant/outlets/{id}/confirm`, `POST /merchant/outlets/{id}/publish` | Confirm exact current revisions; publish only with enrollment, confirmed complete menu and an active accepted test destination. |
+| `GET /merchant/outlets/{id}/orders`, `POST /merchant/orders/{id}/acknowledge` | Membership-scoped list; acknowledge only a verified payment, independently of payment status. |
+| `POST /purchase-requests`, `POST /purchase-requests/redeem` | Scoped external-agent token creates a suggestion/human handoff; buyer session redeems a short-lived token into a new review. Neither authorizes payment. |
+| `GET /imports/{id}/image?token=...` | Envoi-generated, import-only image capability; return private database image bytes while active. No public object URL or redirect. |
+| `POST /integrations/zapier/menu-results` | Per-import bearer capability in an HTTP header: bounded draft output only for its active import. |
+| `POST /integrations/paypal/webhook` | Verify the event against the configured sandbox app, deduplicate and persist a due provider read. Event content alone cannot mark paid. |
+| `GET /health` | Minimal web readiness; private/operator view checks maintenance heartbeat, overdue work and capacity without exposing secrets. |
+
+UI routes: `/buy`, `/review/{purchaseId}`, `/receipt/{purchaseId}`, `/merchant/setup`, `/merchant/orders`, `/approve/{handoffToken}`, and PayPal return/cancel pages. Return/cancel pages show/check persisted state; a GET or URL parameter cannot execute capture. Approval pages contain no third-party analytics and use a no-referrer policy.
+
+Separate `/mcp` endpoint: Streamable HTTP `POST`; stateless JSON responses, `GET` and `DELETE` return method-not-allowed unless a later approved transport needs them. Validate Origin/Host, transport version and bounded input. A scoped supported-client token permits `search_outlets`, `get_menu` and `create_purchase_request`; no capture, arbitrary transfer, menu-write or unrestricted receipt tools. Public registry reads remain available through HTTP. **[vendor claim]** MCP specifies Origin validation and transport security requirements; actual Next.js/SDK/client interoperability is **[unknown]**. [MCP transport specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports).
+
+Wallet preparation/submission routes are reserved for the disabled extension, not enabled endpoints. Gate 3 describes their contracts only after the mint, wallet and conversion choices are settled.
+
+## Data
+
+**[hypothesis]** One PostgreSQL database is authoritative. Store SGD in integer cents, token quantities in integer atomic units and conversion ratios with decimal-safe arithmetic. No floating-point payment calculations. Use transactional version checks and unique constraints; a queue message is a trigger to inspect state, not authority to repeat an external effect.
+
+| Proposed records | Stored outline | Queries / constraints |
+| --- | --- | --- |
+| `merchant_memberships`, `enrollments` | Auth user, outlet role, operator approval, demo label and evidence references. | Authorize every merchant action by user + outlet; only operators can approve enrollment. No credentials or ownership documents in the public view. |
+| `outlets`, `outlet_identifiers` | Legal-entity reference if present, distinct outlet ID/address, optional confirmed coordinates, supported scheme/identifier mapping, publication and version. | Search published name/area/menu; identifier lookup can return several outlets. A business ID is not globally unique per outlet. No inferred distance without usable coordinates. |
+| `payment_destinations` | Outlet, rail, environment, verified seller/wallet ID, secret-reference name, ownership/permission status and version. | Resolve an accepted active destination server-side; changes invalidate affected reviews. Secret values live in managed service configuration, never these rows. |
+| `menu_revisions`, `menu_items` | Draft revision, item IDs/name/portion, nullable SGD cents, merchant-supplied availability and confirmed revision. | Only published confirmed revisions are buyer-readable. Corrections invalidate confirmation; missing prices cannot become zero. Publishing switches a pointer atomically. |
+| `menu_imports`, `menu_import_sources` | Actor/outlet, draft base version, consent version/time, token hashes, deadlines, result fingerprint, cleanup state; a private `bytea` source row. | Import and source insert atomically; one open import per outlet, proposed maximum ten sources/50 MiB live bytes across the demo. Lock admission checks. Sweep expired/closed source rows. Source URL/token is not an audit field. |
+| `purchases` | Owning buyer, entry point (`text`, `scan` or agent handoff), immutable basket snapshot, menu/destination versions, rail/amount/currency, cost provenance, review expiry and acknowledgment. | Buyer/merchant-scoped reads; lock before execution. New review replaces a safely closed unpaid review; never alter a dispatched payment's snapshot. |
+| `payment_attempts`, `provider_events` | Purchase, operation identity, distinct create/capture request IDs, external order/capture or transaction reference, lifecycle and verification time. | One active attempt per purchase; unique provider references/event IDs. Preserve lost-response state and prevent cross-rail fallback. |
+| `purchase_requests` | Agent token identity, suggested IDs, token hash, expiry and redeemed buyer/purchase binding. | One redemption; no payment authority or private receipt access for the creating agent. |
+| Better Auth tables | Library-owned users, accounts and durable sessions; anonymous-user marker. | Auth migrations are distinct from domain membership. Guest users cannot acquire merchant rights by linking/registering an account. |
+| `audit_events`, `maintenance_runs` and due fields on imports/attempts | Actor/object IDs, transition/reason, evidence pointer; next-check time, lease/expiry, retry count and last successful maintenance time. | Business transition and due work persist in one transaction. Recover expired leases; no duplicate external effect from concurrent runs. Exclude raw prompts/images, QR payloads, bearer tokens and privileged provider responses. |
+
+Authentication: Better Auth inside Next.js with its PostgreSQL/Drizzle adapter and anonymous plugin; permanent email/password accounts for allowlisted demo merchants, anonymous sessions for buyers. Use secure, HttpOnly cookies, a stable server secret and database sessions that survive Render sleep/redeploy. Disable public merchant signup; pre-provision authorized test accounts out of band with no committed/default passwords. Email verification/recovery needs a separate mail decision and is not claimed here. Require a non-anonymous user plus an operator-approved membership on every merchant action. Clearing the buyer session can lose receipt access; disclose prepared test sessions and do not expose receipts by a guessable ID. **[vendor claim]** Better Auth documents these library integrations; their combined configuration remains untested. [Introduction](https://better-auth.com/docs/introduction), [anonymous plugin](https://better-auth.com/docs/plugins/anonymous), [email/password](https://better-auth.com/docs/authentication/email-password), [Drizzle adapter](https://better-auth.com/docs/adapters/drizzle), [Next.js integration](https://better-auth.com/docs/integrations/next).
+
+Browser domain reads/writes go through Envoi routes; no browser database credentials or direct Data API. Separate least-privileged web, maintenance and migration roles. Membership/object checks remain mandatory, including on the image proxy. Use TLS-verified connections; a small pooled connection for web requests and direct connections for migrations or session-dependent maintenance. Do not rely on session-level state through transaction pooling. **[vendor claim]** Neon documents pooled/direct connection differences; adapter and lease compatibility must be proved. [Connection pooling](https://neon.com/docs/connect/connection-pooling).
+
+Editing a published menu creates an unpublished revision; buyers continue to see the last confirmed revision until replacement publication. Replaced prices/availability or destination changes invalidate affected unexecuted reviews. Already captured payments retain their original evidence; a menu edit cannot erase a payment.
+
+## Flow
+
+### Merchant enrollment and menu
+
+1. Permanent merchant login -> allowlisted membership -> unpublished outlet. Operator records demo authority and assigned test destination; format checks and possession of SGQR are insufficient.
+2. Browser decodes the SGQR image locally -> server validates supported payload fields/checksum -> merchant reviews/corrects outlet information -> operator-approved identifier mapping. Do not upload the QR image to Zapier. Discard raw QR payload after parsing and never log it. Unsupported/personal proxies do not become published business identifiers.
+3. Merchant separately selects a menu image and consents -> bounded validation/metadata removal -> atomically insert the private source bytes and import row, with a five-minute access deadline and cleanup due state.
+4. The web request dispatches the configured Zapier Catch Hook after that transaction -> AI by Zapier image analysis -> Webhooks action -> authenticated Envoi result route. Persist dispatch identity before sending; ambiguous dispatch is not automatically repeated. A crash before dispatch expires visibly and needs a fresh merchant attempt. Trigger HTTP success means accepted dispatch only, not successful analysis. No response-following background promise on a sleeping web service.
+5. Envoi validates the bounded result for the original import and draft revision -> merchant sees an unpublished suggestion. Merchant edits are preserved; a changed draft requires explicit incorporation of useful suggestions, never automatic overwrite.
+6. Merchant supplies missing prices/portions/availability and confirms the exact complete revision -> publish transaction rechecks enrollment, outlet confirmation, menu confirmation and active destination. Zapier cannot publish.
+
+**[vendor claim]** AI by Zapier documents publicly accessible image inputs and structured/list outputs. Webhooks by Zapier supports inbound triggers and outbound requests/headers. **[unknown]** This account's vision model, output shape and Envoi image-link compatibility. [AI by Zapier](https://help.zapier.com/hc/en-us/articles/8496342944013-Use-AI-by-Zapier-to-analyze-and-return-data), [trigger workflow](https://help.zapier.com/hc/en-us/articles/8496288690317-Trigger-Zap-workflows-from-webhooks), [send result](https://help.zapier.com/hc/en-us/articles/8496326446989-Send-webhooks-in-Zap-workflows).
+
+### Temporary-image boundary
+
+Select **bounded private PostgreSQL image rows plus an Envoi image proxy**. This avoids another storage service or a paid/shared disk for the small demo. **[vendor claim]** PostgreSQL `bytea` stores binary data. The proxy is our proposed access control, not a demonstrated provider feature. Neon also advertises object storage; it is not selected because this bounded flow can use the database already required. Revisit storage only if measured size/latency demands it. [PostgreSQL binary data](https://www.postgresql.org/docs/current/datatype-binary.html).
+
+| Proposed policy | Choice / failure behavior |
+| --- | --- |
+| Upload | One JPEG/PNG, at most 5 MiB both before and after normalization, 20 megapixels and 6,000 pixels per side. Decode actual content and strip metadata. Proposed global admission cap: ten live sources/50 MiB; one open import per outlet. Reject excess before dispatch. These are Envoi limits, not verified model limits or a bound on total database/history size. |
+| Processing/access | Hard deadline 5 minutes after import acceptance, including queue delay. Image capability expires at that deadline; no extension by retries, reads or provider replay. |
+| Proxy | Unpredictable hashed token scoped to one import; check state/deadline on every fetch, fail closed on database errors. Return bytes without redirect, framework image optimizer or CDN caching; `Cache-Control: private, no-store`, no ETag and no-referrer. Redact capability URLs from app/access/error logs. |
+| Closure | Completion/failure/cancel closes access and deletes the source row in the same successful transaction. Expiry denies fetches/results by checking the deadline even if no job has run. In-flight/copied bytes cannot be recalled. Observe a subsequent fetch denial; headers alone are insufficient proof. |
+| Removal after inactivity/crash | Sweep expired/closed source rows during the hourly maintenance job and relevant authenticated status requests. An idle expired image may remain in the private database until maintenance runs; scheduling can be delayed/dropped, so there is no five-minute deletion guarantee or hard maximum physical retention. Proposed overdue threshold: 90 minutes; stale maintenance or overdue sources block new imports and require operator cleanup. Database outage means no access and retained bytes, not a false removal claim. |
+| Storage/history | Logical DELETE does not establish physical erasure: database versions, restore history and upstream copies may retain bytes. Neon advertises a six-hour restore window. Consent must explain this separately from the five-minute fetch window. Monitor total provider storage/history with headroom; source-byte caps alone cannot prevent quota exhaustion from blocking cleanup. |
+| Draft result | At most 100 rows, names/portions at most 120 characters each, callback at most 128 KiB. Explicit SGD or ambiguous/blank price; positive decimal-safe known prices. Unknown currency/price stays incomplete. Duplicate variants require merchant resolution. Availability remains merchant supplied. |
+| Retry | No automatic re-analysis. Merchant starts a fresh consented attempt/access window; old/duplicate/late results cannot overwrite a confirmed menu. Maintenance retries cleanup and provider reads only. |
+| Review preview | Keep the selected source image locally in the merchant's current browser tab for side-by-side review. Closing/reloading may require selecting it again; do not retain a server copy after import completion to support preview. |
+
+Real merchant images remain blocked until fetch/denial/logical-removal probes, crash/idle maintenance and account-specific retention/consent checks pass. Begin with explicitly consented test images. The earlier five-minute source-deletion target is superseded by this free-hosting policy; it was not an approved product promise. Envoi removal does not establish physical deletion from database history, Zapier, model-provider history or copies. Disclose these limits before upload; if required retention cannot be met, amend the architecture rather than claim it is solved. Do not create persistent AI knowledge sources. Details remain in [research](research.md#menu-import-constraints-source-facts-versus-proposed-controls).
+
+### Buyer lookup and exact review
+
+1. Text -> AI proposes registered candidates/clarification; server looks up published items. Missing area/location blocks a nearest claim. Use name/area and ordinary SQL search initially; no vector database or external map service.
+2. Alternatively camera/paste -> shared validated SGQR parser -> supported identifier lookup in the published registry. Zero matches means not enrolled/no purchase; several means ask which outlet. A scan supplies no recipient or payment authority. Camera denial/unreadable/unsupported content offers paste, then text search. Authentic supported identifiers and parser coverage remain **[unknown]**; generic EMV format is not a complete SGQR scheme specification. [EMVCo overview](https://www.emvco.com/knowledge-hub/the-what-why-and-how-of-emv-qr-codes/).
+3. Buyer confirms outlet/items -> server computes SGD price from the confirmed menu -> stores immutable review and a 5-minute expiry, bound to buyer, item quantities, outlet, menu/destination versions, exact amount/currency and one rail.
+4. Render stored review, not AI prose, as the payment summary. Costs carry fee payer/source/time/basis; unknown funding/FX/merchant fees stay unknown and cannot support a cheapest ranking.
+
+Buyer AI calls use Vercel AI SDK with one configured OpenAI provider model; exact model follows account access and a small task evaluation at Gate 3. Initial request budget: 30 seconds and at most three read-only tool calls; failure offers manual selection. Merchant text/model output is untrusted data. No model tool receives PayPal capture or wallet-signing authority. **[vendor claim]** AI SDK supports structured output/tools and the selected provider family; this is not evidence of suggestion accuracy. [AI SDK](https://ai-sdk.dev/docs/introduction).
+
+### PayPal payment and recovery
+
+**[hypothesis] Choose the direct Orders v2 adapter as the runtime path now.** APIMatic PayPal context assists development; optional generated clients must satisfy the same adapter contract. Do not depend on Agent Toolkit field coverage for seller/payee checks. This preserves meaningful PayPal + AI without claiming toolkit execution.
+
+Sandbox setup: Envoi's sandbox platform/API caller, a **distinct allowlisted sandbox seller** with confirmed permissions, and a separate sandbox buyer. Prepare enrollment out of band and disclose it; the merchant UI selects only its assigned connection. No arbitrary merchant-ID connection, custody, platform fee or fallback payee. **[vendor claim]** PayPal documents sandbox platform testing before live partner approval and seller-authentication headers for multiparty checkout. Account access remains **[unknown]**. [Platform access](https://developer.paypal.com/platforms/get-started/), [multiparty integration](https://developer.paypal.com/platforms/checkout/standard/integrate).
+
+1. Buyer continues from current review -> transaction validates owner/version/expiry/destination and persists one execution attempt, operation keys and next reconciliation time. Repeated clicks return the same attempt.
+2. Server -> `POST /v2/checkout/orders`: `CAPTURE` intent, one purchase unit, explicit seller/payee, exact SGD items/total, purchase correlation and no shipping. Use configured sandbox OAuth, seller assertion/partner headers where required and a persisted create `PayPal-Request-Id`. No amounts or destinations from the client.
+3. Buyer follows the returned PayPal approval link. The human approves at PayPal; Envoi review, agent claims or URL query values cannot substitute.
+4. Owning session returns -> completion POST -> server `GET /v2/checkout/orders/{id}`. Verify the locally bound order, approved status, seller/payee, amount/currency and basket/correlation. Recheck execution eligibility and review versions/expiry. A changed/expired purchase closes capture eligibility and requests fresh review; do not PATCH a buyer-approved order to new terms.
+5. Persist capture-dispatched state before `POST /v2/checkout/orders/{id}/capture`, with a distinct stable capture request ID. Capture exactly this order; no second toolkit `pay_order` call.
+6. Server read verifies a completed capture, order/capture association, intended seller, exact gross amount/currency and stored basket/correlation. Only then record paid and actual capture ID. If evidence is incomplete or mismatched, quarantine as uncertain and alert the operator.
+7. Webhooks pass configured-app signature verification, inbox deduplication and a server read of the same known order. Unknown orders are quarantined; replay/out-of-order callbacks cannot downgrade confirmed state or manufacture a purchase.
+8. A lost response/restart leaves persisted reconciliation state. Receipt/status checks can request a bounded provider read; the hourly runner checks outstanding known orders without a buyer page. Missing external identity stays uncertain for operator investigation. Only an authorized same-attempt request may retry an existing create/capture operation within its documented idempotency window, with identical payload/key and known eligibility. The maintenance runner never creates/captures orders. No replacement payment while an external effect is possible; repeated scheduled work is not an exactly-once payment guarantee.
+
+**[vendor claim]** Orders specifies create/read/capture, payee fields and per-operation idempotency windows; PayPal documents same-key recovery and webhook verification. **[unknown]** A complete Envoi sandbox execution under those permissions. [Orders API specification](https://raw.githubusercontent.com/paypal/paypal-rest-api-specifications/main/openapi/checkout_orders_v2.json), [idempotency](https://developer.paypal.com/api/rest/reference/idempotency/), [webhook verification](https://developer.paypal.com/api/rest/webhooks/rest/).
+
+Payment lifecycle outline: awaiting approval -> executing -> pending/uncertain -> confirmed, or a verified failed/canceled outcome. Expiry is not proof that an already dispatched payment failed. Cancellation can close an attempt only when no capture has been dispatched, or after provider reconciliation establishes its outcome. No new attempt or rail switch while an external effect is possible; terminal release rules and races belong in Gate 3. Reconciliation does not perform an initial capture solely because it discovers an approved order after the buyer abandoned the journey.
+
+Merchant view polls its authorized orders; buyer receipt polls stored verification status. Merchant acknowledgment is its own field, enabled only after verified payment. Neither polling nor acknowledgment moves money. A future refund/dispute must preserve the original capture evidence with a separate status, not rewrite it as never paid.
+
+### Disabled PYUSD extension
+
+Architectural boundary only: browser wallet signs an exact, bounded devnet transaction directly to the connected merchant wallet; Envoi never stores buyer keys or signs a transfer. A merchant signs a purpose/outlet/cluster-bound challenge to demonstrate wallet control. Server validates the prepared transaction, then verifies finalized on-chain execution, correct token identity/program, atomic amount and recipient. Extra transfer/authority instructions must be rejected.
+
+Before enabling: independently establish official mint/decimals/Token Extensions, compatible wallet transaction display/signing, destination ownership, RPC/finality recovery, blockhash expiry and a merchant-accepted SGD-to-token quote source with timestamp/rounding/expiry. Pin these decisions in a Gate 2 amendment before dependent Gate 3/4 wallet work; never substitute a token merely named PYUSD. **[vendor claim]** PayPal documents devnet test-token acquisition, not this account's faucet success or a complete transaction. [Official test-token guide](https://developer.paypal.com/community/blog/testnet-pyusd/).
+
+Unknown signatures/submissions lock the purchase. Do not ask the wallet to sign a replacement while the first transfer can still land. A wallet signature is not a finalized receipt, and PYUSD arrival is not SGD settlement. PayPal remains usable while this rail is disabled, as approved at Gate 1.
+
+### Another agent
+
+Scoped supported client -> published registry/menu -> `create_purchase_request` -> unclaimed human URL, expiring after 10 minutes. Buyer opens it, establishes their own session and explicitly redeems it once -> server recalculates a fresh review -> same PayPal/wallet approval journey. Creating agent gets no payment authority, private receipt token or privileged readback. Expired/used handoffs require a new request; prevent link leakage with no-referrer/no analytics and log redaction.
+
+## External
+
+Names below are **proposed configuration names only**, never values. No credentials were read or provisioned. Database/auth/provider secrets remain server-side.
+
+| Integration | Role / proposed environment names | Access boundary |
+| --- | --- | --- |
+| Render Free | Web only; `APP_BASE_URL`, `ENVOI_ENVIRONMENT`, `PAYMENTS_ENABLED`, `MENU_IMPORTS_ENABLED`, `LOG_LEVEL`. | Sandbox-only; reject live/mainnet configuration. No paid worker/disk or assumed credits. Verify a free plan and prevent billable overages; suspend rather than upgrade. |
+| Neon Free | PostgreSQL/domain/auth/source rows; `DATABASE_URL`, `MAINTENANCE_DATABASE_URL`, `MIGRATION_DATABASE_URL`. | TLS connections and least-privileged roles; migration privileges unavailable to runtime. No database credentials/Data API in the browser. Verify remaining storage/compute/transfer and no paid fallback. |
+| Better Auth | Login/guest sessions inside app; `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`. | Stable secret, trusted app origin and secure cookies; database sessions. Allowlisted merchant test accounts only; no mail/reset service assumed. |
+| GitHub Actions | Finite scheduled Node maintenance; `MAINTENANCE_DATABASE_URL`, sandbox provider secrets needed for read/verification only. | Repository secrets and redacted logs, no migration credentials/image artifacts. Prove included quota and zero-spend stop controls. The separate Git request permits planning commits only; no visibility change, workflow creation or deployment is authorized. |
+| PayPal | Orders/capture/read + webhook; `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_PARTNER_ATTRIBUTION_ID`, `PAYPAL_WEBHOOK_ID`. | Allowlisted sandbox host is code/environment-controlled; no arbitrary base URL input, platform fees or default recipient. Per-outlet seller IDs are verified data, not secrets granting permission. |
+| Zapier | Menu draft workflow; `ZAPIER_MENU_HOOK_URL`. | Hook URL is secret service configuration. Per-import image/result tokens are generated capabilities, stored hashed and redacted; no payment/auth-storage secrets in Zap steps. |
+| OpenAI through AI SDK | Text suggestions; `OPENAI_API_KEY`, `AI_MODEL`. | Key remains server-side; minimal request/menu data, budgeted read tools. Model/access evaluation outstanding. |
+| Supported MCP clients | Hash-stored scoped demo tokens configured out of band. | Registry/proposal tools only. No token value in repository/testing instructions; no production OAuth promise. |
+| APIMatic | PayPal Context Plugin; own-API clients/docs if actual tier supports them. | Development tooling, not payment authority. No runtime dependency or credential assumed. Entitlements and prize qualification unverified. [Sponsor offer](https://paypalaihackathon.devpost.com/details/apimatic). |
+| Solana / quote service | Disabled extension; eventual `SOLANA_RPC_URL`, `SOLANA_CLUSTER`, `PYUSD_MINT`, `PYUSD_ENABLED`, quote-service configuration after selection. | Disabled by default. No buyer-key environment variable. Provider selection is an amendment prerequisite, not permission to install/connect. |
+
+Operator monitoring: redacted logs, maintenance heartbeat, overdue payment/source reports and visible manual-review records. Persist business changes and due timestamps atomically; finite jobs claim bounded work with recoverable leases and unique operation constraints. Gate 3 specifies races, retry limits and role permissions; slices must prove them. No daemon inside Render, indefinite DB polling, Redis, Sentry or outbound notification service initially. A named demo operator inspects failures and account usage. Recovery/cleanup delays stay visible; uncertain payments remain blocked. Live support/backup targets require separate decisions; paid production services are outside the user's current free-hosting constraint.
+
+## Falsifiers and approval limits
+
+| Open risk | Required later evidence / stop condition |
+| --- | --- |
+| Distinct seller cannot receive an exact sandbox capture | Actual buyer-approved capture plus provider read matching seller/amount/currency/basket. Stop payment work if permissions/payee coverage fail; revise Gate 2 rather than pay Envoi and call it merchant settlement. |
+| Image proxy cannot be fetched or remains fetchable after closure | Provider fetch followed by denial on completion/failure/cancel/expiry, including a sleeping app/restart; observed source-row removal and disclosure of database/upstream history. No physical-erasure or five-minute cleanup claim. Stop real-image imports if any boundary fails; manual entry does not prove Zapier integration. |
+| Scan identifies the wrong outlet | Authentic approved mappings, unsupported payload rejection and shared-identifier clarification. No uniqueness or automatic accuracy claim from fixtures. Text/manual fallbacks remain visible. |
+| Runtime recovery cannot identify an uncertain charge | Inject lost responses/restarts/duplicate events; converge on the same provider capture or keep blocked/uncertain. No new-charge retry to make the demo finish. |
+| Free recovery or hosting cannot last through judging | Verify Render/Neon/GitHub quotas and zero-spend controls, a finite scheduled run, idle/crash recovery and delayed-job behavior. No reliance on credits, paid fallback or Render's 30-day database. Stop deployment if free capacity is unavailable; amend Gate 2 before changing the topology. [Official rules](https://paypalaihackathon.devpost.com/rules). |
+| Cold start breaks the approved buyer journey | Test a genuinely idle first visit and include wake-up time in the three-minute measurement. A warmed rehearsal cannot establish that result; amend hosting if required. |
+| AI/Zapier access expires | Verify supported model/published workflow and task access through judging. Free hosting does not establish sponsor access or free inference. No silent substitution of manual entry for the Zapier integration. |
+| Wallet mint/quote/signing cannot be verified | Keep PYUSD disabled; amend architecture before enabling it. No mainnet/live launch is covered. |
+
+Gate 2 approval accepts the proposed boundaries and selected core stack with these explicit proof requirements. It does not establish runtime/account success, resolve the preceding review's findings, approve Gate 3/4, authorize application code, install packages, enroll real merchants, obtain paid services, deploy or send organizer messages. The separate user request authorizes only recording approval, committing architecture planning and its existing mirrors/handoff, fast-forwarding into `main`, pushing `main` and verifying the remote commit, then stopping. No repository visibility change is authorized. A discovery that changes approved product behavior must reopen Gate 1; a correction changing an approved architecture decision reopens Gate 2 before dependent work.
+
+The review findings are recorded as unresolved in [status](00-status.md#unresolved-review-findings); this approval update does not change the architecture decisions or claim fixes. In particular, image-proxy caller requirements, credential-enforced maintenance authority, checkout/receipt identity and capacity/cleanup contracts still need independent cross-checking.
+
+Gate 3, only after separate authorization, specifies file map, signatures, version pins, state/race contracts and named failure tests. Gate 4 separately selects visible slices and their evidence. This approved proposal and its mirrors preserve enough context to resume in a fresh chat.
