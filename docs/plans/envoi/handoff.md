@@ -34,7 +34,7 @@ Proposed target remains 4 of 5 first-time buyers completing an eligible test-env
 
 ## Next authorized action
 
-Gate 3 preparation is complete and approved. The user approved Gate 3 on 2026-10-07 and authorized committing the Gate 3 planning documents and pushing `main`; that Git work is the last authorized action and is complete at the commit recorded in `00-status.md`.
+Gate 3 preparation is complete and approved. The user approved Gate 3 on 2026-10-07 and authorized committing the Gate 3 planning documents and pushing `main`. That Git work is complete: commit `ac13444` on branch `codex/gate-3-program-design`, fast-forwarded into `main` from `69ad8a5`, pushed to `origin`, and verified with `git ls-remote` returning the identical SHA `ac13444656396abb4215f7fb5c900060c7d6087d`. The branch is retained.
 
 **The next action is nothing, until the user asks for Gate 4.** Do not create `04-slices.md`, do not write application code, and do not treat Gate 3 approval as implementation approval. **Not authorized:** installing an application package, provisioning an account, applying the R11 follow-up (`neon.ts` to `auth: false` plus redeploy), creating a workflow, deploying, changing repository visibility, or writing application code.
 
