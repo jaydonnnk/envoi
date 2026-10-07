@@ -2,3 +2,11 @@
 .env.*
 .neon
 node_modules/
+.next/
+dist/
+.maintenance-build/
+coverage/
+playwright-report/
+test-results/
+.vitest/
+*.tsbuildinfo

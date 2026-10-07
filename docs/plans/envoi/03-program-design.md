@@ -100,7 +100,7 @@ Four files already exist from the concurrent provisioning session: `.gitignore`,
 | --- | --- |
 | `package.json` | **Exists and tracked.** Currently holds only `@neon/config` and `@neon/env`. Grows the app scripts: `dev`, `build`, `start`, `lint`, `typecheck`, `test`, `db:generate`, `db:migrate`, `runner:build`, `runner:start`. |
 | `package-lock.json` | **Exists and tracked** from provisioning. Extends as the app pins are installed; the resolved versions then become the authoritative record against the pins above. |
-| `.gitignore` | **Exists and tracked.** Covers `.env`, `.env.*`, `.neon` and `node_modules/`; verified by `git status` not listing `.env.local` or `.neon`. **Gap: it does not yet cover build output such as `.next/`, `dist/` or test artifacts, and it must before application work begins.** |
+| `.gitignore` | **Exists and tracked.** Covers `.env`, `.env.*`, `.neon`, `node_modules/`, plus build output and test artifacts: `.next/`, `dist/`, `.maintenance-build/`, `coverage/`, `playwright-report/`, `test-results/`, `.vitest/`, `*.tsbuildinfo`. The earlier gap is closed. |
 | `neon.ts` | **Exists and tracked** at `auth: false`, committed in `f8caf7d`. Verified not to control the branch-level Auth service, which remains enabled in its own `neon_auth` schema. |
 | `neondb` schema state | **Verified 2026-10-07 by read-only inspection:** `public` contains zero tables; all nine Neon Auth tables sit in `neon_auth`. Better Auth must be pinned to `public`. |
 | `tsconfig.json` | Next.js web config, `strict`, no `any` at boundaries. |
