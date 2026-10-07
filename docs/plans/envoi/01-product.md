@@ -1,6 +1,6 @@
 # Product: Envoi
 
-Gate 1 consolidated proposal, 2026-10-06; **reopened 2026-10-07** to add a buyer-side scan entry point after a prior-art review of Quay, recorded in `research.md`. **APPROVED by the user 2026-10-07** for product scope and journeys only, including both buyer entry points. Hackathon first, then a separately approved production launch. Gate 2 architecture proposal is **APPROVED 2026-10-07** in `02-architecture.md`; Gates 3-4 remain pending and Gate 3 is not authorized. Architecture approval establishes no runtime/account proof or review fixes. This status update does not change the approved product decisions.
+Gate 1 consolidated proposal, 2026-10-06; **reopened 2026-10-07** to add a buyer-side scan entry point after a prior-art review of Quay, recorded in `research.md`. **APPROVED by the user 2026-10-07** for product scope and journeys only, including both buyer entry points. Hackathon first, then a separately approved production launch. Gate 2 architecture proposal is **APPROVED 2026-10-07** in `02-architecture.md`. Gate 3 program design is **APPROVED 2026-10-07** in `03-program-design.md`; Gate 4 remains pending. These approvals establish no runtime/account proof; the eight Gate 2 review findings are closed as dispositioned by Gate 3, with their named residual risks still open. This status update does not change the approved product decisions.
 
 ## Problem
 
@@ -133,4 +133,4 @@ No mockup uploads an image, extracts data, publishes a shop or performs a paymen
 - External approval, single-method payment, honest cost uncertainty, and order acknowledgment are explicit.
 - Seeded merchants and test transactions cannot be mistaken for live adoption or live money.
 
-**Gate 1 approved 2026-10-07. Gate 2 architecture proposal approved 2026-10-07.** Program contracts and the final slice plan require separate authorization and approval. Current source corrections are in `research.md`; `stack-recommendation.md` mirrors the approved architecture proposal. These approvals do not establish runtime/account or usability evidence, or resolve the preceding architecture review's findings.
+**Gate 1 approved 2026-10-07. Gate 2 architecture proposal approved 2026-10-07. Gate 3 program design approved 2026-10-07.** The final slice plan requires separate authorization and approval. Current source corrections are in `research.md`; `stack-recommendation.md` mirrors the approved architecture proposal and the Gate 3 pins. These approvals do not establish runtime/account or usability evidence. The eight Gate 2 review findings are closed as dispositioned by Gate 3; the residual risks that disposition names remain open.

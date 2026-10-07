@@ -1,8 +1,8 @@
-# Envoi: approved Gate 2 handoff and stop boundary
+# Envoi: Gates 1-3 approved, Gate 4 boundary
 
-Updated 2026-10-07. Gate 1 was **reopened on 2026-10-07** to add a buyer-side scan entry point, then **explicitly APPROVED by the user on 2026-10-07** for product scope and journeys. Gate 2 architecture proposal is **APPROVED by the user 2026-10-07** in `02-architecture.md`; Gates 3-4 are pending and Gate 3 is not authorized. Approval establishes no runtime/account proof and does not establish that the preceding review's findings were fixed. No app, sponsor integration or payment integration exists. The user requires **free hosting services only**. The architecture branch is `codex/gate-2-architecture`; the current request authorizes its planning commit, fast-forward integration into `main`, push of `main` and remote verification, then STOP. Retain the architecture branch.
+Updated 2026-10-07. Gate 1 was **reopened on 2026-10-07** to add a buyer-side scan entry point, then **explicitly APPROVED by the user on 2026-10-07** for product scope and journeys. Gate 2 architecture proposal is **APPROVED by the user 2026-10-07** in `02-architecture.md`; its commit, fast-forward into `main`, push and `git ls-remote` verification are complete at `69ad8a5`. Gate 3 program design is **APPROVED by the user 2026-10-07** in `03-program-design.md`, with the planning commit and push to `main` separately authorized in the same instruction. **Gate 4 is pending and unauthorized.** No app, sponsor integration or payment integration exists, but a Neon Free database **has** been provisioned by a concurrent session; its two conflicts with the planning documents were both resolved by user decision on 2026-10-07. The user requires **free hosting services only**.
 
-Workspace: `C:\Users\jayd0\OneDrive - Temasek Polytechnic\Documents 1\Envoi`.
+Workspace: `C:\Users\jayd0\OneDrive\Desktop\envoi`. An earlier revision of this file recorded `C:\Users\jayd0\OneDrive - Temasek Polytechnic\Documents 1\Envoi`; that path is stale and is corrected here. No decision depended on it.
 Skill: `C:\Users\jayd0\.agents\skills\software-factory\SKILL.md`.
 
 Read applicable AGENTS.md and all documents under `docs/plans/envoi/` before resuming. Keep replies concise and visualizations/mockups as `.html`. Preserve the body of `docs/plans/PAYPAL_PLAN.md` unchanged; it carries a supersession banner added 2026-10-07, and both the pre-banner and post-banner SHA256 values are recorded in `00-status.md`.
@@ -11,11 +11,12 @@ Read applicable AGENTS.md and all documents under `docs/plans/envoi/` before res
 
 - `01-product.md`: approved Gate 1 product scope with buyer/merchant journeys, rules, sponsor roles, both buyer entry points (text and scan) and an untested usability target.
 - `mockups/index.html`: entry to five product screens. `merchant-onboarding.html` shows both uploads, editable drafts, manual/failure states and confirmation/publication blockers. `buyer.html` shows the text entry point and the scan entry point including an unenrolled-sticker result.
-- `research.md`: primary-source sponsor/menu limitations, corrections to the original brief, prior-art findings from shipped SGQR payment products, and unresolved proof requirements.
-- `02-architecture.md`: approved Gate 2 proposal with alternatives, component ownership, routes, data/query outlines, core flows, external configuration names and unresolved proofs. Architecture authority for planning; approval does not resolve the preceding review findings.
-- `stack-recommendation.md`: supporting mirror of the approved Gate 2 proposal; `02-architecture.md` remains authoritative.
+- `research.md`: primary-source sponsor/menu limitations, corrections to the original brief, prior-art findings from shipped SGQR payment products, the 2026-10-07 Gate 3 source cross-check, and unresolved proof requirements.
+- `02-architecture.md`: approved Gate 2 proposal with alternatives, component ownership, routes, data/query outlines, core flows, external configuration names and unresolved proofs. Architecture authority; approval did not resolve the preceding review findings.
+- `03-program-design.md`: **unapproved Gate 3 draft.** File map, types and signatures without bodies, ten named clocks, purchase/attempt/import state machines, the authorization matrix, call stacks, race contracts, capacity budgets, named failure tests with mutation proofs, registry-read version pins, the disposition of all eight review findings and ten least-confident decisions.
+- `stack-recommendation.md`: supporting mirror of the approved Gate 2 proposal plus the Gate 3 version pins; `02-architecture.md` and `03-program-design.md` remain authoritative in their own gates.
 - `roadmap.md`: discussion candidates including the separate Zapier menu-import slice. Not Gate 4 approval.
-- `00-status.md`: current approvals, evidence boundary and fresh mockup checks. The older JPG preview is historical; current HTML is authoritative for review.
+- `00-status.md`: current approvals, the Gate 3 cross-check results, the findings disposition table, evidence boundary and fresh checks. The older JPG preview is historical; current HTML is authoritative for review.
 
 ## Product scope to preserve
 
@@ -33,20 +34,46 @@ Proposed target remains 4 of 5 first-time buyers completing an eligible test-env
 
 ## Next authorized action
 
-The user authorized recording Gate 2 approval, committing only architecture planning and its existing mirrors/approval/handoff updates, `git merge --ff-only` into `main`, pushing `main` to `origin` and verifying the remote commit with `git ls-remote`. STOP after that verification. If fast-forward integration is impossible, report the blocker without rewriting history. Preserve the original brief and unrelated changes. Git publication means commits only; no visibility change, provisioning, installation or deployment is authorized. No Gate 3/4 or application implementation is authorized.
+Gate 3 preparation is complete and approved. The user approved Gate 3 on 2026-10-07 and authorized committing the Gate 3 planning documents and pushing `main`; that Git work is the last authorized action and is complete at the commit recorded in `00-status.md`.
+
+**The next action is nothing, until the user asks for Gate 4.** Do not create `04-slices.md`, do not write application code, and do not treat Gate 3 approval as implementation approval. **Not authorized:** installing an application package, provisioning an account, applying the R11 follow-up (`neon.ts` to `auth: false` plus redeploy), creating a workflow, deploying, changing repository visibility, or writing application code.
+
+**Two provisioned-state questions were resolved by the user on 2026-10-07.**
+
+- **R11, decided: in-app Better Auth wins.** `neon.ts` set `auth: true` (Neon Managed Better Auth) while approved Gate 2 says Better Auth is a library in our app, not a hosted service. The user chose in-app auth, so **Gate 2 is not reopened**. The open follow-up is operational: `neon.ts` must change `auth: true` to `auth: false` and be redeployed through the Neon CLI so the file and platform agree. That is a **provisioning action and is not authorized**; until it is done the mismatch is a known tracked state. Do not let it be lost, and do not build against managed auth by accident.
+- **R12, decided: accept `aws-us-east-2`, conditional on measurement.** The project is not in Singapore, so trans-Pacific round trips land inside the approved three-minute buyer metric on top of the Render cold start. The acceptance holds only while a named Slice 1 test measures a real Singapore cold first visit; if the metric fails because of region latency, relocation is revisited rather than explained away. Relocation is a provisioning action and is not authorized.
+
+Do not edit, stage, move or delete the concurrent session's files: `neon.ts`, `.neon`, `.env.local`, `package.json`, `package-lock.json`, `node_modules/`, `.gitignore`. `.gitignore` already covers `.env*` and `.neon`, and `git status` confirms neither is staged. No secret value was copied into any planning document.
+
+The preceding Gate 2 Git authorization is complete and must not be repeated: `main` was fast-forwarded to `69ad8a5`, pushed and verified with `git ls-remote`.
 
 Approved proposal: Next.js on Render Free, Neon Free PostgreSQL, Better Auth in the app and finite hourly GitHub Actions maintenance over durable purchase/import state. No Supabase, paid Render worker/disk or continuous queue poller. Actions quota/zero-spend controls, free account access and cold-start performance need proof; no repository visibility change is authorized. Include cold-start time in the three-minute metric. Free hosting does not establish AI/Zapier entitlements.
 
 PayPal retains the distinct authorized sandbox seller, external buyer approval, exact immutable purchase and provider verification. APIMatic context is development tooling; text/scan share published catalogue rules. Separate menu images use capped private database bytes behind the revocable Envoi proxy. The proposed fetch/result deadline is five minutes; normal closure deletes the row transactionally, while idle/crash cleanup is best effort hourly. There is no five-minute source-deletion guarantee or hard physical-retention limit; database restore history and upstream copies need consent. Stale maintenance/overdue sources block imports. These controls are untested; preview stays local.
 
-PYUSD remains disabled; mint, wallet, conversion and recovery choices require proof and a Gate 2 amendment before dependent wallet contracts/slices. Provider access, sponsor entitlements, image fetch/removal and actual payment/scan evidence remain unknown. A failure changing the selected architecture reopens Gate 2; changed product behavior reopens Gate 1. Review the exact failure boundaries in `02-architecture.md` rather than treating this summary as a contract.
+**Gate 3 correction to the paragraph above:** the transactional delete on normal closure is retained as the design, but it is no longer treated as a capacity control. **[verified]** Neon Free fails inserts, updates and deletes once the storage limit is reached, and its 6-hour history window keeps written bytes counted after a logical delete. Access denial is therefore a read-only computation from `accepted_at`, and capacity is bounded at admission. See `03-program-design.md` and the Gate 3 cross-check section of `research.md`.
+
+PYUSD remains disabled; mint, wallet, conversion and recovery choices require proof and a Gate 2 amendment before dependent wallet contracts/slices. Provider access, sponsor entitlements, image fetch/removal and actual payment/scan evidence remain unknown. A failure changing the selected architecture reopens Gate 2; changed product behavior reopens Gate 1. Review the exact failure boundaries in `02-architecture.md` and the contracts in `03-program-design.md` rather than treating this summary as a contract.
 
 A fresh session can continue from these files; no material decision exists only in chat.
 
-## Gate 3 handoff: inactive until separate user authorization
+## Gate 3 preparation: executed and approved 2026-10-07
 
-Independently cross-check the approved architecture and the preceding review findings before drafting `03-program-design.md`. Do not assume the previous agent's conclusions are correct. Resolve or explicitly disposition every item in [the unresolved review record](00-status.md#unresolved-review-findings): free-capacity budgets/polling/complete Actions overhead/shared quotas/zero-spend controls; cleanup when storage exhaustion blocks DELETE; logical checkout identity across duplicates/replacement reviews; image capability versus merchant-session/membership; anonymous deletion/linking, durable receipt ownership and payment retention; code-level versus credential-enforced maintenance PayPal authority; unsupported prior-art/SGQR claims and inconsistent timing definitions. All remain unresolved at this handoff.
+The saved instructions for this gate were followed. The architecture and the preceding review findings were cross-checked against primary sources without assuming the previous agent's conclusions were correct, and that cross-check corrected three Gate 2 assumptions: Neon blocks cleanup writes at the storage limit, Better Auth deletes the anonymous user on link by default, and PayPal documents no fixed idempotency window while warning against concurrent same-key requests. All eight items in [the review record](00-status.md#unresolved-review-findings) are dispositioned in `03-program-design.md`, with three named residual risks (storage-exhaustion recovery, code-level maintenance authority, best-effort scheduling) recorded rather than smoothed over.
 
-Specify the file map, types/signatures without implementation bodies, call stacks, state transitions, authorization, retry/expiry/version races and meaningful failure tests. Include crash boundaries around every external call, genuine webhook verification, menu confirmation/publication and delayed maintenance. Actual account access and integration proofs belong to later authorized slices. PYUSD remains disabled. Any correction changing an approved architecture decision must reopen Gate 2 for approval before dependent work.
+The draft specifies the file map, types and signatures without bodies, call stacks, three state machines, the authorization matrix, race contracts, capacity budgets, named failure tests each paired with the mutation that proves it, and ten registry-read version pins. Crash boundaries exist around every external call, webhook verification is signature-based with dedupe, and menu confirmation and publication recheck their preconditions inside a transaction. Account access and integration proofs stay in later authorized slices. PYUSD remains disabled.
 
-Only after separate authorization and completion of Gate 3 preparation, finish with exactly: `Approve Gate 3, or what should change?` Do not advance to Gate 4 or implementation. This saved instruction is not authorization to start Gate 3 now.
+## Gate 4 handoff: inactive until an explicit user request
+
+Do not start Gate 4 on the strength of this file. It needs an explicit user request, even though Gate 3 is approved.
+
+Select the visible slices and their acceptance evidence into `04-slices.md`, one runnable capability per slice, with Slice 1 as the tracer bullet. Carry these Gate 3 obligations into the slice plan rather than restating them as prose:
+
+- Slice 1 must include the version-pin boot check and must fail loudly if `better-auth`, `drizzle-orm` or `drizzle-kit` do not work against the pinned Next and TypeScript majors.
+- Slice 1 must include the R12 region latency measurement, and auth work must not begin until the R11 follow-up is applied under a provisioning authorization. A session bug is a receipt-ownership bug.
+- The Actions maintenance workflow must not be created until the cadence decision is recorded and either the remaining private quota is confirmed or the repository is public.
+- Real merchant images stay blocked until the fetch, denial and removal probes pass, and the storage-exhaustion path has a tested operator runbook or an explicit acceptance of residual risk R2.
+- The PayPal sandbox happy path must already enforce recipient and amount binding plus the lease-serialized capture; recovery work later is not an excuse for an unsafe early slice.
+- Every guard claimed in the test plan needs its own mutation proof. A fault caught by two tests proves neither covers its own branch.
+
+Finish with exactly: `Approve Gate 4, or what should change?` Do not begin implementation. This saved instruction is not authorization to start Gate 4 now.
