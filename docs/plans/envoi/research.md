@@ -1,8 +1,14 @@
 # Envoi: evidence and corrections
 
-Consolidated 2026-10-06. Sponsor access and menu-import documentation were rechecked against the primary sources below. Other corrections are carried forward from the earlier source review on the same date. A prior-art review of shipped SGQR payment products was added 2026-10-07 and prompted the reopened Gate 1 buyer-side scan entry point. This is documentation research, not runtime proof. No sandbox capture, wallet transfer, QR/menu photo trial, Zapier integration or user test has been run.
+Consolidated 2026-10-06; Gate 2 source supplement added 2026-10-10.
+This is documentation research plus the explicitly attributed read-only devnet observations, not an integration proof.
+No sandbox capture, wallet transfer, QR/menu photo trial or user test has been run.
 
-**[verified] Approval record, 2026-10-07:** Gate 2 architecture proposal is **APPROVED 2026-10-07** in `02-architecture.md`. **Gate 3 program design is APPROVED 2026-10-07** in `03-program-design.md`, with the planning commit and push to `main` separately authorized in the same instruction. Gate 4 remains pending. These approvals established no runtime/account proof and did not establish that the preceding review's findings were fixed; the independent cross-check Gate 3 required is recorded in [the Gate 3 cross-check section](#gate-3-cross-check-2026-10-07) below, which corrected three Gate 2 assumptions and dispositioned all eight findings in [status](00-status.md#unresolved-review-findings). Gate 3 approval closes those findings as dispositioned and leaves their named residual risks open. No integration proof is claimed by planning work.
+**[verified] Current approval record, 2026-10-10:** Gate 1 was re-approved; Gates 2 and 3 are reopened only for direct vision import and PYUSD.
+`02-architecture.md` is the revised Gate 2 proposal awaiting re-approval; Gate 3 and the unapproved Gate 4 draft remain unchanged.
+OpenAI and its dependency pin stay; no provider switch is proposed.
+The 2026-10-07 approvals, cross-check and eight finding dispositions remain historical authority for unaffected decisions, not approval of this amendment.
+See [Gate 3 cross-check](#gate-3-cross-check-2026-10-07) and [status](00-status.md#unresolved-review-findings).
 
 ## Material corrections to PAYPAL_PLAN.md
 
@@ -28,7 +34,7 @@ Use organizer test-access instructions without exposing privileged API secrets o
 
 ## Claims not established in this pass
 
-SGQR combines payment schemes; it does not provide Envoi with an item catalogue or a standard menu lookup. The consolidated proposal requires a separate menu image, AI by Zapier drafting and merchant confirmation, with manual fallback. That scope supersedes manual-only menus and optional Zapier. Gate 1 product scope was approved by the user on 2026-10-07; integration proof remains outstanding. [MAS SGQR overview](https://www.mas.gov.sg/development/e-payments/sgqr), [EMVCo payment QR overview](https://www.emvco.com/knowledge-hub/the-what-why-and-how-of-emv-qr-codes/).
+SGQR combines payment schemes; it does not provide Envoi with an item catalogue or a standard menu lookup. The consolidated proposal requires a separate menu image, AI drafting and merchant confirmation, with manual fallback. That scope supersedes manual-only menus. AI by Zapier was the drafting route until the user removed Zapier on 2026-10-10; the revised Gate 1 sends the photo to an AI model while the merchant waits. Gate 1 product scope was approved by the user on 2026-10-07; integration proof remains outstanding. [MAS SGQR overview](https://www.mas.gov.sg/development/e-payments/sgqr), [EMVCo payment QR overview](https://www.emvco.com/knowledge-hub/the-what-why-and-how-of-emv-qr-codes/).
 
 - Tourist demand, visitor counts, local crypto demand, willingness to pay, and merchant acceptance of stablecoin settlement. Prior art in the section below establishes that a product ships to the crypto-holding segment; that is not evidence of the segment's size, and not evidence of merchant willingness.
 - The brief's current Singapore consumer PYUSD availability, exact supported market count, or full network list. The proposed wallet rail must not depend on those claims.
@@ -65,7 +71,9 @@ Reviewed 2026-10-07 from a public repository of a Singapore product that is live
 
 ## Proposed sponsor integrations and access
 
-**Recommend APIMatic + Render + Zapier.** No accounts, entitlements, credits or integrations were verified inside Envoi. Reading public documentation establishes advertised capability, not working access.
+**Historical 2026-10-06 recommendation, superseded for Zapier on 2026-10-10.**
+Current roles are APIMatic account-conditional development tooling, Render hosting and direct OpenAI vision, not a Zapier workflow.
+Public documentation does not establish account access or prize eligibility.
 
 | Tool | Primary documentation checked | Consequence / unresolved access |
 | --- | --- | --- |
@@ -82,7 +90,10 @@ Current AI-by-Zapier pricing docs require paid access to publish; Free permits u
 
 **Proposed Envoi controls, not demonstrated provider guarantees:**
 
-These are historical Gate 1 candidates carried forward for traceability, not selected storage services. The free-hosting revision in `02-architecture.md` selects capped private PostgreSQL image rows behind an Envoi proxy. It supersedes both signed-URL and Supabase Storage candidates. A five-minute fetch/result window is distinct from best-effort hourly crash/idle cleanup; physical erasure/database history and upstream retention remain unproven. See the free-hosting refresh below for current choices.
+These are historical candidates, not current storage or transport choices.
+The 2026-10-10 Gate 2 amendment supersedes signed URLs, stored image bytes, the image proxy and all image maintenance with request-memory-only direct vision.
+Draft validation/merchant confirmation rules below still apply; Zapier access, callbacks, retention and cleanup rules do not.
+See [the current supplement](#gate-2-source-supplement-2026-10-10).
 
 1. Keep SGQR decoding separate from menu analysis. Only the merchant's separate, consented menu image enters the menu workflow. Do not send buyer data, private keys, payment credentials or unnecessary QR personal identifiers.
 2. Use private temporary storage and a short-lived direct image URL that Zapier/the selected provider can fetch without a browser login. Anyone holding that URL can fetch it during its lifetime. Supabase documents signed URLs for private assets, but they survive Auth key revocation until expiry; URL revocation requires support. Temporary-link compatibility with AI by Zapier and effective early source removal still need proof. Never make an entire bucket public. [Storage serving](https://supabase.com/docs/guides/storage/serving/downloads).
@@ -96,14 +107,17 @@ Zapier supports error handlers and replay, with plan-dependent limits. Error han
 
 ## Proof still required after the gates
 
-- Account access: Render Free, Neon Free and included GitHub Actions execution/zero-spend controls; APIMatic plugin/own-API tier and Zapier published-workflow/model access through judging. No paid hosting fallback or assumed credits. Free hosting does not establish free AI/Zapier access. Prize eligibility remains separate and unverified.
-- Menu workflow: consented readable/blurred/partial/non-SGD samples; exact readable prices; blanks for unreadable values; malformed/empty results; inaccessible/expired image; timeout/quota failure; manual fallback; confirmation invalidation; duplicate/late result handling; actual image cleanup. No accuracy result is earned yet.
+- **[unknown]** Account access: hosting/Actions quota and zero-spend controls, APIMatic tier, usable OpenAI credits, separate model access through judging and no data-sharing opt-in. No Zapier access is needed and no paid hosting fallback is authorized.
+- **[unknown]** Menu workflow: consented readable/blurred/Chinese/rotated/small-text/partial/non-SGD samples; exact readable prices and blanks for unreadable values; malformed/empty/late results, abort/disconnect, lost response, RAM/latency/spend caps and injected no-disk/no-log/no-database-image probes. Manual fallback and merchant confirmation are not accuracy proof.
 - Buyer-side scan: decode accuracy on authentic stickers scanned in place, camera-permission denial, an unenrolled sticker resolving to no purchase, and a shared identifier covering several enrolled outlets resolving to one. None has been demonstrated.
 - Payments: distinct authorized sandbox seller, buyer approval, capture/payee/amount/currency match and uncertain-result reconciliation. PYUSD requires its own mint/extension/wallet/finality and conversion proof before enablement.
 - Usability and merchant economics: the proposed 4-of-5/3-minute target and merchant willingness are untested.
 - Live launch: provider eligibility, qualified Singapore legal review, merchant ownership/enrollment, retention, support, monitoring, reconciliation and recovery. No-custody is a design boundary, not a licensing conclusion.
 
-Research and mockup checks do not establish runtime evidence. The user approved Gate 1 product scope, the Gate 2 architecture proposal and the Gate 3 program design on 2026-10-07; Gate 4 remains pending and no application implementation is authorized. The original brief's body remains unchanged below its dated supersession banner; the approved product supersedes its conflicting scope claims. The Gate 3 instruction authorized committing planning documents and pushing `main` only, with no visibility change, implementation, provisioning or deployment.
+Research and mockup checks do not establish runtime evidence.
+Gate 1 is re-approved; this Gate 2 amendment awaits approval, Gate 3 revision waits and Gate 4 remains an unapproved draft.
+No implementation, spend, installation, provisioning, workflow, commit, push or deployment is authorized by this work.
+The original brief and protected gate/mockup files remain unchanged in this revision.
 
 ## Initial Gate 2 source refresh, 2026-10-07 (hosting choices superseded below)
 
@@ -142,3 +156,189 @@ Primary sources were re-read independently while preparing `03-program-design.md
 - **[verified] GitHub Actions zero-spend is structural on a Free account.** GitHub Free includes `2,000` minutes monthly, `GitHub Actions usage is free for self-hosted runners and for public repositories that use standard GitHub-hosted runners`, and `If your account does not have a valid payment method on file, usage is blocked once you use up your quota`. Consequence: the zero-spend control is the absence of a payment method plus a $0 spending limit, not an assumption. An hourly schedule in a private repository consumes roughly 720 of 2,000 minutes (36%), and becomes free once the repository is public, which the official rules require for submission anyway. [Actions billing](https://docs.github.com/en/billing/managing-billing-for-your-products/managing-billing-for-github-actions/about-billing-for-github-actions)
 - **[unknown] PayPal Orders v2 scope granularity.** The publicly reachable Orders v2 reference lists the operations without exposing scope strings, so whether a read-only scope exists could not be verified from a primary source in this pass. Maintenance's restriction to provider reads therefore remains **code-level and build-graph-enforced**, not credential-enforced. Verify at provisioning whether a second REST app can be limited to reads; if it can, add it as defence in depth and record the change.
 - **[hypothesis] Registry-read version pins.** Current versions were read with `npm view <pkg> version` for Next 16.4.0, React 19.3.0, TypeScript 7.0.2, Drizzle ORM 0.45.3, Drizzle Kit 0.31.11, postgres.js 3.4.9, Better Auth 1.7.7, Zod 4.6.5, AI SDK 7.0.130, `@ai-sdk/openai` 4.0.86, MCP SDK 1.32.1, `barcode-detector` 3.2.2, Sharp 0.35.5, Vitest 5.0.3, Playwright 1.63.0, Tailwind 4.3.3 and ESLint 10.12.0. Mutual compatibility across these majors is untested; the Slice 1 boot check is the falsifier. No installation occurred.
+
+## Sponsor rules re-check, 2026-10-10
+
+The official overview and rules pages were fetched and read on 2026-10-10.
+[Overview](https://paypalaihackathon.devpost.com/), [rules](https://paypalaihackathon.devpost.com/rules).
+
+- **[verified]** Sponsor tools are optional. The overview says using one of the partner tools "is not required", and that any AI tool works as long as PayPal integration is central.
+- **[verified]** The project must meaningfully integrate at least one PayPal technology and meaningfully incorporate AI.
+- **[verified]** Sponsor prizes exist for AG Grid, APIMatic, Bryntum, Channel3 and Render. There is **no Zapier prize**. Best Use of APIMatic is $1,000 USD plus six months of an APIMatic Business subscription, with three winners. Best Use of Render is Render credits for first to third place.
+- **[verified]** A project can win at most one Grand Prize and one Sponsor Prize, or one Honorable Mention and one Sponsor Prize.
+- **[verified]** Grand prizes include "Best Use of PayPal + AI" and "Best Use of Agentic Commerce". The second matches Envoi's agent handoff over MCP (S13).
+- **User decision, same day:** Zapier is removed because it is paid. The "Recommend APIMatic + Render + Zapier" recommendation in [Proposed sponsor integrations and access](#proposed-sponsor-integrations-and-access) is superseded for Zapier. The user later chose a direct vision call through the existing OpenAI provider as the replacement, so the Zapier rows and Zapier-specific menu-import notes in this file are historical; the output-validation rules for a draft still apply.
+
+## AI provider and PYUSD re-check, 2026-10-10
+
+Read on 2026-10-10 to support the four questions in [`handoff.md`](handoff.md#questions-to-ask-the-user-before-revising), before the reopened gates are revised.
+Sources were documentation pages plus one read-only `getAccountInfo` call to the public Solana devnet RPC.
+No account, faucet, wallet, API key or transaction was used, and nothing was installed.
+The Devpost overview and rules pages now return HTTP 403 to direct fetches and a bot-verification page in the browser, so the prize facts in [Sponsor rules re-check](#sponsor-rules-re-check-2026-10-10) were not re-read in this pass.
+
+### AI provider cost and free-tier data terms
+
+- **[verified]** OpenAI bills API usage per token: "Prices per 1M tokens" and "Tokens are billed at the chosen model's input and output rates".
+The pricing page names no free tier and no free credits for model usage.
+Standard short-context prices per 1M input/output tokens include `gpt-5-nano` $0.05/$0.40, `gpt-4.1-nano` $0.10/$0.40 and `gpt-4o-mini` $0.15/$0.60.
+[Pricing](https://developers.openai.com/api/docs/pricing).
+- **[verified]** OpenAI states that API data "is not used to train or improve OpenAI models" unless the customer opts in, keeps abuse-monitoring logs "for up to 30 days", and may retain an image flagged by its CSAM classifier for manual review even under zero-retention settings.
+[Your data](https://developers.openai.com/api/docs/guides/your-data).
+- **[verified]** The Gemini API has a free tier on its current Flash and Flash-Lite models (pricing page last updated 2026-10-09 UTC).
+The free tier is marked "Used to improve our products: Yes" and the paid tier "No".
+The page gives no per-modality breakdown for the free tier, so free-tier image input is **[unknown]**, and free-tier rate limits were not read.
+[Pricing](https://ai.google.dev/gemini-api/docs/pricing).
+- **[verified]** The Gemini API terms for Unpaid Services (last updated 2026-04-28) say Google uses submitted content and responses "to provide, improve, and develop" its products, that "human reviewers may read, annotate, and process your API input and output", and "Do not submit sensitive, confidential, or personal information to the Unpaid Services."
+Users must be 18 or older, and API clients made available to users in the EEA, Switzerland or the UK must use Paid Services.
+[Terms](https://ai.google.dev/gemini-api/terms).
+- **[vendor claim]** Groq states "By default, Groq does not retain customer data for inference requests", while inference logs may be kept "for up to 30 days" for reliability or abuse investigation with an opt-out in Data Controls.
+The page does not say whether inputs train models.
+Its only listed vision model is `qwen/qwen3.8-27b`, with up to three images per request and JSON mode with images.
+The rate-limit page shows Developer-plan limits only, so free-plan access to that model is **[unknown]**.
+[Your data](https://console.groq.com/docs/your-data), [vision](https://console.groq.com/docs/vision), [rate limits](https://console.groq.com/docs/rate-limits).
+- **[verified]** GitHub Models was "fully retired" on 30 July 2026 and is not an option.
+[GitHub Models](https://docs.github.com/en/github-models/use-github-models/prototyping-with-ai-models).
+- **[vendor claim]** AI SDK user messages accept image parts as base64, `ArrayBuffer`, `Uint8Array`, `Buffer` or a URL, and "Not all language models support all message and content types".
+Structured output with an image for a given provider and model is **[unknown]** until tried.
+[Prompts](https://ai-sdk.dev/docs/foundations/prompts).
+
+### PYUSD blockers against primary sources
+
+| Blocker | Finding | Label |
+| --- | --- | --- |
+| Official devnet token | Paxos lists the Solana Devnet PYUSD token as `CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM` and says "Testnet tokens have no value!"; it lists no Solana supply-control address. A devnet read of that account at slot 509781623 returned owner `TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb` (Token-2022), `decimals: 6`, token metadata name "PayPal USD" and symbol "PYUSD" with a metadata URI under `token-metadata.paxos.com/.../sandbox/solana/`, and the extensions `mintCloseAuthority`, `permanentDelegate`, `transferFeeConfig` (0 basis points, maximum fee 0), `confidentialTransferMint` (auto-approve off), `confidentialTransferFeeConfig`, `transferHook` (no program), `metadataPointer` and `tokenMetadata`. PayPal's own test-token guide shows the address as the placeholder "[insert token address here]", so Paxos is the citable source. The mainnet mint `2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo` is a different token and must never be configured for devnet. [Paxos testnet](https://docs.paxos.com/guides/stablecoin/pyusd/testnet) | **[verified]** |
+| Transfer instruction | Solana's transfer-fee page says to "Transfer tokens with TransferCheckedWithFee and verify the expected fee", and that with `TransferChecked` "The configured fee is still withheld on the destination token account." The fee authority can change the fee with `SetTransferFee`, which "takes effect starting two epochs later." Verification must therefore read the fee configuration for the transfer's epoch rather than assume zero. [Transfer fees](https://solana.com/docs/tokens/extensions/transfer-fees) | **[verified]** source; the verification rule is **[hypothesis]** |
+| Test tokens | PayPal's guide (15 May 2025) names the Google Cloud Web3 Faucet, Solana Devnet, "up to 100 testnet PYUSD per Google account per day", and says it "requires no sign-up". Paxos recommends its own Testnet Faucet for PYUSD and says "Faucet availability and limits change over time." Both faucet pages render client-side and could not be read here. Fees and token-account rent need devnet SOL from `faucet.solana.com`. [Guide](https://developer.paypal.com/community/blog/testnet-pyusd/), [Paxos funding](https://docs.paxos.com/guides/developer/fund-sandbox-with-test-crypto) | **[vendor claim]** route; access **[unknown]** until the user tries it with their own Google account |
+| Buyer wallet | Phantom supports Solana Devnet after the user turns on Settings, Developer Settings, Testnet Mode, and then "will display testnet balances and allow transactions". Its Token Extensions page lists metadata, metadata pointer, permanent delegate ("Phantom will display a warning"), transfer fees (shown "on the confirmation screen of every send") and transfer hooks; confidential transfer is not listed, and the devnet mint has it initialized. The page does not say how a dapp requests devnet. How a phone browser at the shop counter reaches the wallet (in-app browser or deep link) was not established. [Testnet mode](https://docs.phantom.com/developer-powertools/testnet-mode), [Token Extensions](https://docs.phantom.com/developer-powertools/solana-token-extensions-token22) | **[vendor claim]** for the listed features; devnet PYUSD display and the phone path are **[unknown]** |
+| Merchant wallet ownership | Phantom says message signatures "do not involve network fees and are a convenient way for apps to verify ownership of an address", uses Ed25519 signatures, and "validates recognized Sign-In with Solana (SIWS) messages before displaying an approval prompt", requiring `domain` to match the requesting page's host. Binding purpose, outlet and cluster into the signed message is Envoi's design. [Signing a message](https://docs.phantom.com/solana/signing-a-message), [SIWS](https://docs.phantom.com/recipes/auth/sign-in-with-solana) | **[vendor claim]**; the binding is **[hypothesis]**, untested |
+| SGD-to-PYUSD quote | ECB reference rates include SGD and USD (latest shown 9 October 2026) and are free, but are "published for information purposes only" and "Using the rates for transaction purposes is strongly discouraged." Frankfurter serves such rates with no key and "no quotas", and says the rates "fall under each provider's terms". A data.gov.sg daily USD/SGD series was reported to end in October 2015 and MAS rates to come from Thomson Reuters with permission; both are from a search summary and were not re-read. Pyth's FX feed list was unreachable from this environment. [ECB](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html), [Frankfurter](https://frankfurter.dev/) | **[unknown]**: no free market-rate source was found whose terms clearly allow a transaction basis |
+| Merchant-set rate alternative | The merchant states the PYUSD-per-SGD rate it accepts, with the date set, at enrollment; Envoi converts each review with it, rounds the atomic amount up, shows the basis and age, and requires the rate to be re-confirmed after a fixed age. No external FX source or terms are involved, and Gate 1 rule 4 already requires the basis and age to be labeled. | **[hypothesis]**, not yet a decision |
+| RPC | `https://api.devnet.solana.com` is "rate-limited": 100 requests per 10 seconds per IP, 40 per 10 seconds per IP for one RPC method, 40 concurrent connections and 100 MB per 30 seconds, and "The public RPC endpoints are not intended for production applications." Whether Render Free's outbound IP is shared with other tenants that consume the same per-IP limit is unknown. [Clusters](https://solana.com/docs/references/clusters) | **[verified]** limits; shared-IP effect **[unknown]** |
+| Finality and expiry | A blockhash is usable "for about 60 to 90 seconds"; 151 recent blockhashes are valid; a client polls `getBlockHeight` at `confirmed` until it exceeds the `lastValidBlockHeight` from `getLatestBlockhash`, after which "their previous transaction will NOT ever be processed". `finalized` avoids the dropped-fork risk at the cost of about 13 seconds of validity. This supports a rule that no replacement transfer is requested before the first one's last valid block height has passed. [Confirmation and expiration](https://solana.com/developers/guides/advanced/confirmation) | **[verified]** source; Envoi's rule is **[hypothesis]** |
+| Schedule | Adding the rail needs a Gate 2 amendment, Gate 3 wallet contracts and two slices (wallet purchase with the merchant wallet challenge, and wallet recovery) inside a plan that already has a 25 October checkpoint and a cut order. | **[hypothesis]** tight |
+
+## Gate 2 source supplement, 2026-10-10
+
+This records the twelve findings supplied in the continuation handoff and the narrow re-checks used by the Gate 2 amendment.
+Documentation quoted below was re-read in this run unless explicitly attributed to the previous session.
+No OpenAI API call, wallet, faucet, account provisioning, installation or transaction was used.
+The slot/epoch/mint authorities and genesis hash below are **prior-session read-only observations supplied by the user**, not fresh RPC output from this run.
+Devpost was not fetched or bypassed; the earlier official-rule date record remains the deadline evidence.
+
+### Direct vision and retention
+
+1. **[verified] OpenAI's published data policy:** API data "is not used to train or improve OpenAI models" unless "you explicitly opt in".
+   Abuse logs may contain customer content and are normally retained "for up to 30 days", with longer retention for legal requirements or harm prevention.
+   Responses has "a 30 day Application State retention period by default", or with `store=true`, and in those cases stores response data for at least 30 days.
+   "If the classifier detects potential CSAM content, the image will be retained for manual review", even with Zero Data Retention or Modified Abuse Monitoring.
+   **[unknown]** This account's opt-in/ZDR status and the exact foreground `store: false` retention effect outside the specifically described controls/background behavior.
+   The published policy is evidence of terms, not independent verification of OpenAI's actual deletion behavior.
+   [Your data](https://developers.openai.com/api/docs/guides/your-data).
+2. **[vendor claim] AI SDK provider:** `openai(modelId)` uses Responses by default; `store` "Defaults to `true`" and `strictJsonSchema` defaults true.
+   Optional schema properties are unsupported; use required nullable values for unreadable prices/portions.
+   **[hypothesis]** Explicit `store: false`, one foreground call, no persistent file/conversation state and independent local validation are the selected menu-call controls.
+   This does not change the OpenAI provider or `@ai-sdk/openai` pin.
+   [OpenAI provider](https://ai-sdk.dev/providers/ai-sdk-providers/openai).
+3. **[vendor claim] AI SDK error surface:** `APICallError` can carry `url`, `requestBodyValues`, `responseHeaders`, `responseBody`, `data` and nested `cause`.
+   **[hypothesis]** Whole-error logging could serialize the base64 menu photo; use an allowlisted non-content error record instead, dropping those fields and arbitrary messages.
+   Gate 3 must name an actual serialized-log test with an injected image/base64 needle and its own redaction mutation.
+   [API-call error](https://ai-sdk.dev/docs/reference/ai-sdk-errors/ai-api-call-error).
+4. **[vendor claim] OpenAI vision:** accepts PNG, JPEG, WEBP and non-animated GIF, base64 data URLs, up to 512 MB payload and 1,500 images per request.
+   `detail` supports low/high/original/auto; auto is the default and resizing is model-specific.
+   For example, `gpt-5.5` high detail caps the maximum dimension at 2,048 pixels and allows up to 2,500 patches; neither figure is a universal model limit.
+   It warns about non-Latin text such as Japanese/Korean, small text and rotated text.
+   **[hypothesis]** Chinese-text Singapore menus and downscaled price text belong in pre-registered falsifier samples; JPEG/PNG-only Envoi admission is a narrower design choice, not all provider-supported formats.
+   [Images and vision](https://developers.openai.com/api/docs/guides/images-vision).
+5. **[verified] Published shutdown schedule:** `gpt-4.1-nano` and `o4-mini` shut down 23 Oct 2026.
+   The `gpt-5`, `gpt-5-mini` and `gpt-5-nano` 2025-08-07 snapshots shut down 11 Dec 2026, before judging ends on 16 Dec.
+   The earlier nano-price examples are historical prices, not viable through-judging model selections; alias availability is not inferred from price labels.
+   **[hypothesis]** Separate text and proposed `AI_MENU_MODEL` evaluations must select account-available models with the needed schema/image support and no published shutdown before judging ends, then monitor later notices.
+   No model name is chosen or evaluation spend authorized by planning.
+   [Deprecations](https://developers.openai.com/api/docs/deprecations).
+6. **[vendor claim] Render:** compute-plan table lists Free web as 0.1 CPU and 512 MB.
+   Its Heroku comparison says "Render allows responses to take up to 100 minutes for HTTP requests".
+   The outbound-IP page says ranges are shared across all services in a region, without a Free-specific qualification.
+   **[unknown]** Mobile/intermediary timeout, worst-case decoder memory, vision latency and whether competing services consume the same public RPC per-IP allowance as this instance.
+   The Free page alone is not evidence for RAM, body size or the quoted timeout.
+   [Compute](https://render.com/docs/compute-plans), [HTTP timeout](https://render.com/docs/render-vs-heroku-comparison), [outbound IPs](https://render.com/docs/outbound-ip-addresses).
+7. **[vendor claim] Next.js:** Server Actions default to 1 MB raw HTTP request bodies including multipart overhead.
+   **Fresh direct re-check:** proxy automatically clones/buffers the request body in memory, with a default 10 MB buffered-body limit; oversize buffering logs a warning, not an application admission rejection.
+   This corrects the handoff's search-summary-only status for the proxy finding.
+   **[hypothesis]** Use the already-selected Node route-handler surface with its own counted body limit and exclude this upload from proxy body cloning; do not raise Server Action limits or rely on 10 MB as validation.
+   Current docs do not prove behavior of the pinned release until the boot/upload tests run.
+   [Server Actions](https://nextjs.org/docs/app/api-reference/config/next-config-js/serverActions), [proxy buffering](https://nextjs.org/docs/app/api-reference/config/next-config-js/proxyClientMaxBodySize).
+
+### Phantom, chain identity and recovery
+
+8. **[vendor claim] Phantom:** `signAndSendTransaction` is its recommended path; sign-only methods are not supported in its Wallet Standard implementation and exist only on the legacy `window.solana` object.
+   The wallet signs and broadcasts, then returns a signature.
+   **[hypothesis]** Envoi therefore constructs/persists unsigned bytes before release and validates the finalized landed transaction, not an unavailable signed pre-broadcast result.
+   Unexpected instructions can be rejected as payment evidence after broadcast but that rejection cannot prevent or undo a transfer.
+   **[unknown]** Whether Phantom modifies the dapp message/blockhash/instructions.
+   [Sending a transaction](https://docs.phantom.com/solana/sending-a-transaction).
+9. **[vendor claim] Phantom testnet mode:** Settings -> Developer Settings -> Testnet Mode lists Devnet/Testnet; it does not specify how a dapp requests a network.
+   **[verified] Standard source:** `SOLANA_DEVNET_CHAIN` is `solana:devnet`; `SolanaSignAndSendTransactionInput.chain` is required and output `signature` is raw `Uint8Array` bytes.
+   **[unknown]** Phantom honoring this chain input and displaying the specific devnet PYUSD mint.
+   [Testnet mode](https://docs.phantom.com/developer-powertools/testnet-mode), [chains source](https://raw.githubusercontent.com/anza-xyz/wallet-standard/master/packages/core/chains/src/index.ts), [sign-and-send source](https://raw.githubusercontent.com/anza-xyz/wallet-standard/master/packages/core/features/src/signAndSendTransaction.ts).
+10. **[vendor claim] Phantom Browse:** `https://phantom.com/ul/browse/<url>?ref=<ref>` opens a page in its in-app browser and documents no cluster parameter.
+    **Fresh direct re-check:** the separate encrypted Connect method documents `cluster=mainnet-beta|testnet|devnet`, default mainnet-beta; HTTPS redirects open the mobile browser.
+    It is a different integration, not evidence that Wallet Standard honors devnet or shares cookies.
+    **[hypothesis]** Treat wallet-browser cookies as separate and never transfer purchase ownership; a candidate is single-use suggestions redeemed into a newly priced review in that session.
+    **[unknown]** Actual phone path/cookie behavior; this candidate is not a delivered or selected transport.
+    [Browse](https://docs.phantom.com/phantom-deeplinks/other-methods/browse), [Connect](https://docs.phantom.com/phantom-deeplinks/provider-methods/connect).
+11. **[verified, prior-session observation] Read-only devnet:** calls to `https://api.devnet.solana.com` reported slot 509797350, epoch 1180 and genesis hash `EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG`.
+    The genesis value comes from `getGenesisHash`, not the clusters documentation page.
+    `getAccountInfo` for `CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM` returned Token-2022 owner, 6 decimals, name "PayPal USD", symbol "PYUSD" and metadata under `token-metadata.paxos.com/.../sandbox/solana/`.
+    Mint authority: `FtU1WxEj7uasRq7WxFQ3FyPE8rz174hV3JHV7Z1rccjb`.
+    Freeze authority and permanent delegate: `DFWDTsWsyGgFLbVARTS92wHDKK2hwTUNk71uPM3mf16S`.
+    Both older/newer transfer fees were 0 basis points and maximum 0, with epoch 644.
+    Transfer-hook program was null, with authority `G8ENSYKVGPbRTbcN1BxXuRMYeCq13271UjCUrrpZTJ4X`, also reported as fee/close/metadata/confidential-transfer authority.
+    These are public addresses, not wallet keys, and a historical read is not a future immutable-configuration guarantee.
+    **[hypothesis]** Frozen accounts fail transfer; permanent-delegate control permits later movement out of the recipient, so receipt wording must describe finalized transfer, not tokens being "kept".
+    Hook activation is a new-preparation stop condition.
+    **[vendor claim]** Phantom shows a warning for permanent-delegate mints; its effect on buyer time remains unmeasured.
+    [RPC read endpoint](https://api.devnet.solana.com), [getGenesisHash](https://solana.com/docs/rpc/http/getgenesishash), [Token Extensions](https://docs.phantom.com/developer-powertools/solana-token-extensions-token22).
+12. **[verified] Paxos published devnet address** remains `CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM`; "Testnet tokens have no value!".
+    **[verified] Published public devnet limits:** 100 requests/10 s/IP; 40/10 s/IP per method; 40 concurrent connections/IP; 40 connections/10 s/IP; 100 MB/30 s.
+    Devnet is rate-limited and public endpoints are not intended for production; devnet can reset.
+    Those limits are advertised policy, not verified free account capacity or guaranteed retained history.
+    [Paxos testnet](https://docs.paxos.com/guides/stablecoin/pyusd/testnet), [clusters](https://solana.com/docs/references/clusters).
+
+### Additional amendment cross-checks and consequences
+
+- **[vendor claim] Transfer fees:** `TransferChecked` still withholds configured fees; `SetTransferFee` takes effect two epochs later.
+  **[hypothesis]** Read older/newer fee schedules and their effective epochs before preparation; refuse non-zero fees in the validity horizon, then verify exact per-transaction destination balance delta and zero fee at finality.
+  Do not compare to a later live balance, which can include unrelated payments or permanent-delegate movement.
+  [Transfer fees](https://solana.com/docs/tokens/extensions/transfer-fees).
+- **[vendor claim] Solana confirmation:** recent blockhashes normally last about 60-90 seconds; finalized blockhashes reduce available signing time but avoid dropped-fork blockhash risk.
+  The guide recommends wallets refresh stale blockhashes before signing.
+  **[hypothesis]** Exact-message/blockhash preservation must be proven for Phantom before saved-height expiry permits replacement; it is not established by the dapp preparing bytes.
+  Use finalized height past lastValidBlockHeight plus complete finalized history scanning as a conservative release condition; missing evidence stays uncertain.
+  [Confirmation and expiration](https://solana.com/developers/guides/advanced/confirmation).
+- **[vendor claim] RPC history:** `getSignaturesForAddress` returns newest-first signatures for references in accountKeys, supports finalized commitment and `before`/`until` pagination, with a maximum 1,000 entries/page.
+  **[hypothesis]** Persist cursors/window coverage and retrieve full candidate transactions; null/pruned/incomplete history cannot prove absence.
+  A unique mandatory memo reference, expected fee payer and exact prepared message are the proposed attribution controls, not equal amount alone.
+  [Signature history](https://solana.com/docs/rpc/http/getsignaturesforaddress).
+- **[vendor claim] Phantom message signing** uses Ed25519 and recognizes SIWS messages, checking the requesting host for the domain.
+  **[hypothesis]** Envoi's exact saved, single-use 5-minute enrollment challenge additionally binds purpose/outlet/cluster/wallet and nonce; key control does not prove merchant authority.
+  [Message signing](https://docs.phantom.com/solana/signing-a-message).
+- **[vendor claim] Mint authority consequences, re-read after two fetch timeouts:** a permanent delegate can transfer/burn from any account for that mint and the token account owner cannot revoke it; frozen accounts cannot receive, transfer or burn until thawed.
+  **[hypothesis]** Require unfrozen verified accounts before preparation and describe the finalized transfer only, never guaranteed retained ownership.
+  [Permanent delegate](https://solana.com/docs/tokens/extensions/permanent-delegate), [freeze account](https://solana.com/docs/tokens/basics/freeze-account).
+
+### Gate 2 proposal mirror and boundary
+
+**[hypothesis] Revised proposal:** request-memory-only JPEG/PNG import, bytes-free attempt, 90-second total/60-second model budget, one global in-flight request, 10/outlet and 50/global daily attempts, recorded spend ceiling, strict bounded draft, merchant edits/confirmation preserved and no import maintenance dependency.
+Drop source rows, image/result routes and capability principals, `ZAPIER_MENU_HOOK_URL`, `T_IMAGE_ACCESS`, `T_SOURCE_SWEEP`, `expire_imports` and `sweep_sources` in the later Gate 3 revision, not by editing it now.
+Separate `AI_MENU_MODEL` is proposed alongside unchanged `AI_MODEL`/provider/pin.
+
+**[hypothesis] PYUSD proposal:** devnet identity/mint/program/decimals as code constants, only RPC/enable env knobs, pre-existing verified merchant ATA, Ed25519/SIWS control proof, dated 30-day merchant rate, integer ceil rounding, persisted locked attempt before wallet sign-and-send, finalized exact-message verification and complete post-expiry recovery.
+Phone fresh-review handoff remains a candidate; no cookie sharing, transfer of ownership or broadcast by Envoi.
+PayPal must remain independent.
+
+**[unknown] Carry forward:** model through judging; OpenAI sharing setting and `store: false` effect; Chinese-text draft accuracy; Render latency/decoder RAM; Phantom token display, chain honoring and message mutation; phone/session path; user faucet access; RPC shared-IP/history behavior.
+R2 narrows to general storage exhaustion; R6 expands to RAM/CPU; image-churn R7 is superseded by mis-sized spend/admission R7a.
+Other approved decisions and risks stand.
+The architecture is revised but not re-approved; Gate 3 and Gate 4 edits wait, and no runtime, spend or external-action authority follows from this research.
+
+Documentary proof is recorded in [status](00-status.md#gate-2-amendment-documentary-verification-2026-10-10), not integration evidence.
