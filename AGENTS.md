@@ -129,11 +129,15 @@ does not replace the gate documents.
   current tip of `main`. Confirm it with `git branch --show-current`. Do not begin
   slice work on `main` or continue on the previous slice's branch unless explicitly
   instructed otherwise.
-- Use `codex/slice-<N>-<slug>` by default, with a short descriptive slug. Keep the
-  name stable and record it in the slice's section of `00-status.md`.
+- Use `<project>/slice-<N>-<slug>` by default, where `<project>` is the feature
+  slug of the gate folder (for example `envoi/slice-1-tracer`), with a short
+  descriptive slug. When a branch covers only part of a slice, name the slug
+  after the fixture or feature that part is about (for example
+  `envoi/slice-2-paypal-webhook`). Keep the name stable and record it in the
+  slice's section of `00-status.md`.
 - Authorization to implement a slice includes creating its required branch. It
   does not include pushing it. Do not create a branch for an unauthorized slice.
-- Gate revisions and substantial reviews use descriptive `codex/` branches under
+- Gate revisions and substantial reviews use descriptive `<project>/` branches under
   the same authorization rules. Small documentation maintenance does not require
   a new branch. Follow an explicit user request to work directly on `main`.
 - Commit coherent concerns with messages stating what changed and why. Avoid
