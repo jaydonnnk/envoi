@@ -211,6 +211,26 @@ Use these rules for explicitly unattended work or work likely to span compaction
 - Run servers and watchers in controllable background sessions with captured logs.
   Record how to stop them; clean up when they are no longer needed.
 
+## Context transfer
+
+Use these rules to decide when to hand a session to a fresh chat. The
+`transfer-context` skill produces the handoff and the independent review prompt.
+
+- Transfer at roughly 50-70% of the context window. Quality drops well before the
+  hard limit: early instructions are forgotten and failed approaches get repeated.
+  Transfer before auto-compaction runs, because compaction is a lossy summary the
+  user does not control. At 50%, you should start planning on how to finish up the task at hand and prepare for a handoff
+- Prefer a clean boundary, whichever comes first: a finished slice, an approved
+  gate or a merged branch. Handing off between steps loses almost nothing; handing
+  off mid-edit loses a lot.
+- Transfer when the task changes to a new feature or a different area of the code.
+  Old context there is mostly noise.
+- Transfer when degradation shows: re-reading files already read, contradicting
+  earlier decisions, or retrying something that already failed.
+- Transfer before a review. An independent reviewer works better in a fresh session.
+- Do not transfer a small, tightly coupled change that is nearly done, or a debug
+  loop in progress where the failed attempts are the useful context.
+
 ## Technology and proof boundaries
 
 - Advertised capability is not working account access. Quotas, billing, regions,
