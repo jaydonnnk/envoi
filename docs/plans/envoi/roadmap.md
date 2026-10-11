@@ -1,9 +1,9 @@
 # Envoi: gate roadmap and candidate slices
 
 Discussion candidates, updated 2026-10-11; not Gate 4 approval or a replacement build order.
-Gate 1 is re-approved; Gate 2's direct-vision/PYUSD amendment was re-approved on 2026-10-11; the Gate 3 revision of affected contracts is next, and the unapproved Gate 4 draft waits for Gate 3 re-approval.
+Gate 1 is re-approved; Gate 2's direct-vision/PYUSD amendment was re-approved on 2026-10-11; the Gate 3 revision of affected contracts was drafted on 2026-10-11, revised after the user's review the same day, and awaits the user's decision, and the unapproved Gate 4 draft waits for Gate 3 re-approval.
 All unaffected 2026-10-07 decisions and eight review dispositions stand.
-Required later Gate 4 changes: merge S11/S12, drop Zapier access, move S13 immediately after S4, add PYUSD after S13 and first in the cut order.
+Required later Gate 4 changes: merge S11/S12, drop Zapier access, move S13 immediately after S4, add PYUSD after S13 and first in the cut order, and apply the Gate 3 test delta recorded in `03-program-design.md` (199 previous names mapped to 90 named tests and 225 cases; 8 names removed, 13 cases added).
 The candidate numbers below are not S-numbers.
 
 The unchanged core is Render Free, Neon Free, in-app Better Auth, quota-gated finite GitHub Actions maintenance and direct sandbox Orders v2 with a distinct seller and lease-serialized recovery.
@@ -19,7 +19,7 @@ No account, spend, installation, provisioning, workflow, deployment, visibility 
 | --- | --- | --- | --- |
 | 1: Product | What can a visitor and a merchant actually do? | `01-product.md` and one plain HTML mockup per screen. | Agreed audience, journeys, scope, cuts, success measurement, test-environment labels, and external approval. |
 | 2: Architecture | How will the parts connect, and where can payment authority exist? | `02-architecture.md`: routes, data, flows, boundaries, third parties and environment names. | Unchanged PayPal/hosting authority; request-memory vision/retention consent; merchant-rate devnet wallet construction/broadcast/finality/recovery with explicit proof blockers. |
-| 3: Program design | What exact contracts prevent wrong payments and ambiguous state? | `03-program-design.md`: file map, types/signatures without bodies, call stacks, named tests, least confident choices. | Quotes bind buyer, outlet, recipient, items, amount/currency, rail and expiry; approvals cannot be reused. Payment recovery and menu validation, confirmation invalidation, duplicate/late results, timeout and cleanup contracts are specified. |
+| 3: Program design | What exact contracts prevent wrong payments and ambiguous state? | `03-program-design.md`: file map, types/signatures without bodies, call stacks, named tests, least confident choices. | Quotes bind buyer, outlet, recipient, items, amount/currency, rail and expiry; approvals cannot be reused. Payment recovery and menu validation, confirmation invalidation, duplicate/late results, timeout, import admission/spend and image-leak contracts are specified; PYUSD preparation, verification by meaning and complete-history recovery each have named guards. |
 | 4: Vertical slices | In what order will each small user capability become runnable? | `04-slices.md` and the slice checklist in `00-status.md`. | Visible results, dependencies, named tests/mutations and proof of access, PayPal, SGQR, direct vision and wallet unknowns; revise only after Gate 3 re-approval. |
 
 At each gate: save the document, summarize the choices, ask "Approve Gate N, or what should change?", and wait. If a later finding invalidates an earlier decision, reopen that gate. No application implementation begins before Gate 4 approval.

@@ -1,9 +1,9 @@
-# Envoi: Gate 2 re-approved, Gate 3 revision next
+# Envoi: Gate 3 revision drafted, awaiting approval
 
 Updated 2026-10-11.
 Gate 1 was re-approved on 2026-10-10; do not redo it.
 `02-architecture.md` was revised for direct vision import and PYUSD only, revised again after a 2026-10-11 review, and re-approved by the user on 2026-10-11 ("gate 2 approved").
-The Gate 3 revision of affected contracts is next, as described in the [Gate 3 handover](#gate-3-handover-2026-10-11); `03-program-design.md` and the unapproved `04-slices.md` are not revised yet.
+The Gate 3 revision of affected contracts was drafted on 2026-10-11 on branch `envoi/gate-3-vision-pyusd`, following the [Gate 3 handover](#gate-3-handover-2026-10-11), revised the same day after the user's review (fixes A-K), and awaits the user's decision; the unapproved `04-slices.md` is not revised yet.
 All unaffected 2026-10-07 approvals stand, including Render Free/Neon Free/in-app Better Auth/GitHub Actions, PayPal recovery, identity-only scan, MCP, R11 and R12.
 No app or payment integration exists; the already-provisioned Neon database is recorded in status.
 On 2026-10-11 the user authorized committing this work, publishing its branch and merging it into `main`; Git publication is not gate approval.
@@ -19,7 +19,9 @@ Read applicable AGENTS.md and all documents under `docs/plans/envoi/` before res
 - `mockups/index.html`: entry to five product screens. `merchant-onboarding.html` shows both uploads, editable drafts, manual/failure states and confirmation/publication blockers. `buyer.html` shows the text entry point and the scan entry point including an unenrolled-sticker result.
 - `research.md`: primary-source sponsor/menu limitations, corrections to the original brief, prior-art findings from shipped SGQR payment products, the 2026-10-07 Gate 3 source cross-check, and unresolved proof requirements.
 - `02-architecture.md`: Gate 2 amendment re-approved 2026-10-11; complete direct-vision and PYUSD boundaries, with unaffected approved decisions preserved.
-- `03-program-design.md`: 2026-10-07 approved contracts, reopened only for affected import/PYUSD work and not revised yet; that revision is the next step. Old source/capability/maintenance contracts are superseded pending that revision; provider pin and unaffected contracts stand.
+- `03-program-design.md`: 2026-10-07 approved contracts plus the 2026-10-11 revision of the import and PYUSD contracts, revised after the user's review the same day, which awaits approval.
+  The source row, capabilities, image clocks and image tasks are removed; provider pin and unaffected contracts stand.
+  Its [test delta](03-program-design.md#test-delta-for-the-gate-4-revision) lists what Gate 4 must reassign.
 - `stack-recommendation.md`: mirror of the revised architecture and unaffected Gate 3 pins; not approval authority.
 - `04-slices.md`: **unapproved Gate 4 draft.** Fifteen slices in build order, the assignment of all 54 Gate 3 tests plus 20 named additions, Gate 3 deltas D1-D7, access checks, per-slice authorizations, schedule and cut order, and least confident decisions.
 - `roadmap.md`: updated discussion candidates and proof conditions; not a revised Gate 4 order or approval.
@@ -43,7 +45,9 @@ Proposed target remains 4 of 5 first-time buyers completing an eligible test-env
 
 ## Next authorized action
 
-**Next action: revise the affected Gate 3 contracts as listed in the [Gate 3 handover](#gate-3-handover-2026-10-11), mirror them, run fail-capable checks and ask exactly `Approve Gate 3, or what should change?`, then wait.**
+**Next action: the user decides on the Gate 3 revision; the question asked is exactly `Approve Gate 3, or what should change?`.**
+The revision, the user's review fixes A-K, its mirrors and fail-capable checks are done and recorded in `00-status.md`; on approval, record it, then revise Gate 4 with the test delta.
+On a change request, revise `03-program-design.md` and its mirrors and ask again.
 The four reopening questions were already answered and Gates 1 and 2 are re-approved; do not ask them again or revise either gate.
 Gate 4 is revised only after Gate 3 re-approval.
 No application code, install, account provisioning, wallet/faucet, spending, workflow, deployment or visibility change is authorized; the 2026-10-11 commit/push authorization covered these planning documents only.
@@ -126,7 +130,9 @@ PayPal must stay usable if PYUSD fails, and a failed proof keeps the rail disabl
 2. Questions 1-4 are answered and Gate 1 is re-approved; preserve both.
 3. The Gate 2 amendment and mirrors are re-approved (2026-10-11); do not revise them.
 4. Gate 2 approval is recorded; Gate 3 edits may begin on a new branch, as the Gate 3 handover says.
-5. Revise `03-program-design.md`: import types and call stack, authorization matrix, named clocks, maintenance tasks, test plan with mutations, version pins, residual risks and wallet contracts if chosen. Ask `Approve Gate 3, or what should change?`.
+5. Revise `03-program-design.md`: import types and call stack, authorization matrix, named clocks, maintenance tasks, test plan with mutations, version pins, residual risks and wallet contracts if chosen.
+   Ask `Approve Gate 3, or what should change?`.
+   **Done 2026-10-11, revised after the user's review the same day; awaiting the user's decision.**
 6. After Gate 3 re-approval, revise `04-slices.md`: merge S11/S12, remove Zapier access, reassign tests, add PYUSD after S13/first cut and move S13 immediately after S4. Ask `Approve Gate 4, or what should change?`.
 7. Mirror every change in `00-status.md`, this file, `roadmap.md`, `stack-recommendation.md` and `research.md`, and run documentary checks proven able to fail.
 
@@ -203,6 +209,24 @@ The user asked for a copy-paste prompt so another agent can run the Gate 3 revis
 - Edit only `03-program-design.md` and its mirrors: `00-status.md`, this file, `roadmap.md`, `stack-recommendation.md` and `research.md`. Do not edit `AGENTS.md`, `01-product.md`, the mockups, `02-architecture.md` or `04-slices.md`.
 - Contracts only: no application code, install, account provisioning, OpenAI call, wallet, faucet, RPC transaction, spending, workflow, deployment, visibility change, commit or push without explicit authorization.
 - Do not infer the open user items: the OpenAI data-sharing setting (steps given 2026-10-11, answer not yet recorded), the daily spend ceiling, the text and vision models, and faucet access.
+
+### Gate 3 revision status, 2026-10-11
+
+- **Drafted, not approved.**
+  `03-program-design.md` carries the revision on branch `envoi/gate-3-vision-pyusd`, created from `main` at `9b4796b`; nothing is committed or pushed.
+- **Scope kept.**
+  The revision changed only `03-program-design.md`, `00-status.md`, this file, `roadmap.md`, `stack-recommendation.md` and `research.md`; Gate 1, the mockups, Gate 2 and Gate 4 are untouched, and the revision did not edit AGENTS.md.
+  AGENTS.md carries a separate uncommitted "Context transfer" section, saved after the revision's last edit; including it in any commit is the user's decision.
+- **No Gate 2 decision was found wrong or incomplete, and none of the review fixes changes one.**
+  The Gate 2 rules made exact and those restored after the review are listed in the revision summary at the top of `03-program-design.md`.
+- **Revised after the user's review, 2026-10-11.**
+  The user's verdicts on six least confident calls are recorded in `00-status.md` as review decisions.
+  Fixes A-K are applied: the basket lock holds only while money can still move, derived on read, with PayPal abandonment once `T_REVIEW` passes and an audited operator exit for a PYUSD mismatch; the import commit rechecks membership; verification checks mint and decimals explicitly; Lighthouse leaves the runtime identity check; the clock is `T_MENU_MODEL`; no RPC runs inside a transaction; a reservation counts zero only before model dispatch; later signature hints are verified within a cap; the state machines agree; and a stale provisioning sentence is corrected.
+  Two additions go slightly beyond the review list and are flagged for the user: `created` and `create_unknown` PayPal attempts also lock inside `T_REVIEW`, and both execution starts recheck the lock.
+- **Tests:** batched into 90 named tests, 69 standalone and 21 groups, and 225 cases, from 192 named tests; 8 names are removed and 13 cases added, each with its own mutation.
+  The [test delta](03-program-design.md#test-delta-for-the-gate-4-revision) maps every one of the 199 previous names, and Gate 4 must apply it.
+- **Checked:** fail-capable documentary checks passed, and each of 43 planted faults failed on its own rule; see [the verification](00-status.md#gate-3-review-revision-documentary-verification-2026-10-11).
+- **Still open, not inferred:** the OpenAI data-sharing setting (no answer recorded), the daily spend ceiling, the text and vision models, and faucet access.
 
 ### Gate 3 checks
 

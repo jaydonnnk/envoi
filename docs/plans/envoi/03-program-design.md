@@ -1,8 +1,55 @@
 # Program Design: Envoi
 
-**Reopened 2026-10-10.** The user removed Zapier because it is paid and reopened Gates 1, 2 and 3; Zapier-dependent content in this document is pending revision and everything else stays approved. See [`00-status.md`](00-status.md#reopening-2026-10-10-zapier-removed) and [`handoff.md`](handoff.md#reopening-2026-10-10-zapier-removed-pyusd-reconsidered).
+**Reopened 2026-10-10; revised 2026-10-11, revised again after the user's review the same day, and awaiting the user's decision on Gate 3.**
+The user removed Zapier because it is paid and reopened Gates 1, 2 and 3.
+Gate 1 was re-approved on 2026-10-10 and Gate 2 on 2026-10-11.
+This revision replaces only the contracts that depend on the re-approved Gate 2 amendment: the direct OpenAI vision import and the independently gated PYUSD devnet rail.
+Every other contract below stays as approved on 2026-10-07.
+See [Revision 2026-10-11](#revision-2026-10-11-direct-vision-and-pyusd), [`00-status.md`](00-status.md#reopening-2026-10-10-zapier-removed) and [`handoff.md`](handoff.md#gate-3-handover-2026-10-11).
 
 Gate 3 program design, 2026-10-07 (Asia/Singapore). **APPROVED by the user 2026-10-07** ("gate 3 is approved"), together with a separate authorization to commit these planning documents and push `main`. Authorities: [approved Gate 1 product](01-product.md) and [approved Gate 2 architecture](02-architecture.md). Approval accepts the contracts below and the disposition of the eight Gate 2 review findings; it establishes no runtime, account, integration or usability evidence, and it does not authorize implementation or Gate 4. A separate, narrowly scoped authorization on the same day covered the R11 flag flip, its redeploy and a read-only schema inspection, all now complete. This document contains contracts only: file map, types and signatures without bodies, call stacks, state transitions, race rules, capacity budgets and named failure tests. No application implementation, no installed application packages and no approved slices exist.
+
+## Revision 2026-10-11: direct vision and PYUSD
+
+Authority: the [re-approved Gate 2 amendment](02-architecture.md), including its five review changes, and the [Gate 3 handover](handoff.md#gate-3-handover-2026-10-11).
+This revision is a proposal: the user has not yet approved it, and the 2026-10-07 approval does not cover it.
+
+- **Removed:** the image source row and its `bytea` storage, both capability principals, the image proxy and Zapier result routes, Zapier dispatch and its hook URL name, `T_IMAGE_ACCESS`, `T_SOURCE_SWEEP`, the `expire_imports` and `sweep_sources` tasks, import status and cancel routes, and the import dependency on the maintenance heartbeat and capacity reading.
+- **Added for the import:** a counted Node upload route, in-memory photo checks, serialized admission with daily caps and a spend reservation, the tool-free vision call with explicit `store: false`, model-output bounds, allowlisted error records, expiry derived on read and draft reload after a lost response.
+- **Added for PYUSD:** pinned devnet constants and an identity check, the wallet challenge, the merchant rate, preparation with a `confirmed` blockhash, verification of the transfer's meaning, complete-history recovery, the shared RPC limiter, the Phantom Browse phone link and PayPal isolation.
+- **Updated to match:** errors, clocks, state machines, the authorization matrix, call stacks, races, capacity budgets, maintenance tasks, residual risks, least confident decisions and the test plan, plus a [test delta](#test-delta-for-the-gate-4-revision) that Gate 4 must apply.
+- **Revised after the user's 2026-10-11 review (fixes A to K):**
+  - A: the basket lock now holds exactly while money can still move, derived on read; a PayPal attempt that never dispatched a capture reads `abandoned` once `T_REVIEW` passes, because capture dispatch requires the review deadline; a PYUSD `mismatch` gets one exit, an audited operator resolution that closes it unpaid.
+  - B: `commitImport` rechecks the actor's membership, as Gate 2 flow step 5 says.
+  - C: verification checks the transfer's mint account and decimals byte explicitly, as Gate 2 step 5 says.
+  - D: Lighthouse leaves the runtime identity check, which is genesis, mint owner and decimals only, as Gate 2's enable condition says; the one-off devnet recheck stays in research.
+  - E: the model clock is `T_MENU_MODEL`, Gate 2's name.
+  - F: no PYUSD RPC read runs inside a database transaction, including preparation's block-height read.
+  - G: a spend reservation counts zero only when its attempt closed before the model call was dispatched, proven by a dispatch mark committed before the call.
+  - H: a later signature hint is verified when every earlier one was `not_ours` or `failed_landing`, up to three hints per attempt and within the read debounce.
+  - I: the purchase and PYUSD attempt machines agree: a PYUSD purchase is paid only from `pending_payment`.
+  - J: a stale sentence about the provisioning files and R11 is corrected.
+  - K: tests are batched into table-driven groups, 90 named tests and 225 cases, with an exact mapping from every previous name.
+  - The user also reviewed six least confident calls; the verdicts are noted under [Least confident choices](#least-confident-choices-in-the-2026-10-11-revision) and recorded in [`00-status.md`](00-status.md#approval-history).
+- **Unchanged:** the OpenAI provider and the `@ai-sdk/openai` pin, PayPal recovery, scan, MCP, hosting, auth, R11 containment and the R12 region acceptance.
+- **Correction made in passing:** row 6 of the findings table named the maintenance boundary risk "R6", while that risk is R3 in every other place; the row now says R3.
+  No decision changed.
+
+**No Gate 2 decision was found wrong or incomplete, and none of the review fixes changes one.**
+Gate 2 rules this revision makes exact rather than changes:
+
+1. Lighthouse "assertion" instructions exclude its two memory instructions, discriminators 0 and 1, which create or close an account.
+2. "Recorded" spend bounds are reviewed code constants, so no environment name is added.
+3. "Reserve worst-case input/output spend" keeps every reservation whose model call was dispatched, and counts zero only for an attempt that provably closed before dispatch.
+4. "`PYUSD_ENABLED` gates the adapter" stops new PYUSD actions only, so recovery of prepared attempts continues while the flag is off.
+5. "No new attempt or rail switch while an external effect is possible" becomes a basket lock that ignores the rail, holds exactly while money can still move, is derived on read, is checked at review creation and at both execution starts, and is per buyer session.
+6. "Reconciliation does not capture an order the buyer abandoned" becomes a compare-and-set: capture is dispatched only while the review is inside `T_REVIEW`, so an approved order whose buyer never returns closes unpaid once `T_REVIEW` passes.
+7. "Mismatched evidence remains uncertain and operator-visible, never paid" gets one exit: an out-of-band, audited operator resolution that closes the attempt unpaid, never paid, built by Gate 4 under delta D1.
+
+Gate 2 rules the earlier draft had narrowed, restored after the review: the import commit rechecks membership (Gate 2 flow step 5), verification checks the pinned mint and decimals explicitly (step 5 of the PYUSD flow), the enable identity is genesis, mint owner and decimals only, and the model clock uses Gate 2's name `T_MENU_MODEL`.
+
+Evidence gathered for this revision is recorded in [`research.md`](research.md#gate-3-revision-reads-2026-10-11): dated registry reads, the pinned AI SDK type definitions, the Lighthouse instruction source at a pinned commit and two read-only devnet reads.
+No package was installed, no OpenAI call was made and no wallet, faucet or transaction was used.
 
 ## What this gate resolves
 
@@ -22,14 +69,14 @@ Also **[verified]**: GitHub Free includes *"2,000"* Actions minutes monthly, *"G
 
 | # | Finding | Evidence found | Resolution or disposition |
 | --- | --- | --- | --- |
-| 1 | Free-capacity budgets, bounded polling, complete Actions job overhead, shared quotas, zero-spend controls | **[verified]** 2,000 private minutes/month; public standard runners free; usage blocked with no payment method. **[vendor claim]** Neon 1 GB storage, 100 CU-hours/project, 5 GB transfer, 5-minute scale-to-zero. **[vendor claim]** Render Free 750 shared instance hours, sleep after 15 minutes. | **Resolved** in [Capacity budgets](#capacity-budgets) below: a monthly figure for every shared quota, an admission-based storage budget, a bounded polling contract, and an Actions cadence that starts at every 6 hours and moves to hourly only after quota is confirmed or the repository is public. Zero-spend is enforced by having no payment method on file plus a $0 spending limit. Residual **[unknown]**: actual CU-to-wall-clock conversion at the chosen Neon compute size; must be measured in Slice 1. |
-| 2 | Cleanup/recovery when database storage exhaustion blocks `DELETE` | **[verified]** inserts, updates and deletes all fail at the storage limit; 6-hour history retains written bytes after logical deletion. | **Resolved, with a disclosed residual risk.** Two contracts: (a) image-proxy denial is computed from `accepted_at` on a **read** path, so closing access never needs a write; (b) admission is bounded by bytes admitted per rolling 6-hour history window, not by live bytes alone, so exhaustion should be unreachable. If it is reached anyway, no in-application recovery exists: the operator runbook is console-side (shorten the history window to truncate it, then delete). Whether truncation is immediate is **[unknown]** and untested; this is named as residual risk R2 in [Least confident decisions](#least-confident-decisions). |
+| 1 | Free-capacity budgets, bounded polling, complete Actions job overhead, shared quotas, zero-spend controls | **[verified]** 2,000 private minutes/month; public standard runners free; usage blocked with no payment method. **[vendor claim]** Neon 1 GB storage, 100 CU-hours/project, 5 GB transfer, 5-minute scale-to-zero. **[vendor claim]** Render Free 750 shared instance hours, sleep after 15 minutes. | **Resolved** in [Capacity budgets](#capacity-budgets) below: a monthly figure for every shared quota, an admission-based storage budget, a bounded polling contract, and an Actions cadence that starts at every 6 hours and moves to hourly only after quota is confirmed or the repository is public. Zero-spend is enforced by having no payment method on file plus a $0 spending limit. Residual **[unknown]**: actual CU-to-wall-clock conversion at the chosen Neon compute size; must be measured in Slice 1. **Revised 2026-10-11:** the storage budget no longer carries image bytes or history churn, and OpenAI spend, decoder memory and devnet RPC budgets are added. |
+| 2 | Cleanup/recovery when database storage exhaustion blocks `DELETE` | **[verified]** inserts, updates and deletes all fail at the storage limit; 6-hour history retains written bytes after logical deletion. | **Resolved, revised 2026-10-11.** No image bytes are stored, so no image access must close and no source delete exists; each import writes one small bytes-free row. The read-only principle survives: an abandoned import reads as expired from its deadline, with no write and no task. If generic storage exhaustion is reached anyway, no in-application recovery exists: the operator runbook is console-side (shorten the history window to truncate it, then delete). Whether truncation is immediate is **[unknown]** and untested; this is residual risk R2, narrowed, in [Least confident decisions](#least-confident-decisions). *Superseded 2026-10-07 contract: read-path image denial and rolling-window image-byte admission.* |
 | 3 | Logical checkout identity across duplicate requests and replacement reviews | Design gap, no external dependency. | **Resolved** by `CheckoutKey`: a deterministic hash over buyer session, outlet, menu revision, destination, rail, currency and canonical lines, with a unique partial index on one open review per key, `supersedes_purchase_id` for replacements, and an explicit rule that a replacement is legal only from a terminal unpaid state. See [Checkout identity](#checkout-identity) and [Races](#races). |
-| 4 | Image capability access versus merchant-session/membership requirements | Design gap, no external dependency. | **Resolved** by declaring two disjoint principal kinds. The capability principal is deliberately session-free because the provider fetches without a browser; its compensating controls are a 256-bit unpredictable token stored hashed, single-import scope, a read-only deadline check, `no-store`, log redaction and a rate limit. Merchant routes keep membership checks and never accept a capability token. See [Authorization](#authorization). |
+| 4 | Image capability access versus merchant-session/membership requirements | Design gap, no external dependency. | **Resolved by removal, 2026-10-11.** The direct vision call needs no provider fetch, so both capability principals, their routes and their tokens are gone. Every import read or write requires a merchant session and outlet membership. See [Authorization](#authorization). *Superseded 2026-10-07 contract: two disjoint principal kinds with a session-free image capability.* |
 | 5 | Anonymous deletion/linking, durable receipt ownership, payment-record retention | **[verified]** Better Auth deletes the anonymous user on link by default. | **Resolved**: `disableDeleteAnonymousUser: true`, plus an `onLinkAccount` hook that refuses to create any membership. Purchases keep `buyer_user_id` as the owner of record; linking changes nothing about ownership. Retention: purchases, attempts, provider events and audit rows are retained for the whole demo (small, no bytes, no QR payloads, no prompts, no bearer values). Expired Better Auth session rows are purged by maintenance. Receipt loss on cookie clearing is disclosed in the UI, not silently repaired. |
-| 6 | Maintenance's code-level versus credential-enforced PayPal authority | **[unknown]**: PayPal's public reference pages reachable in this pass list Orders v2 operations without exposing scope strings, so whether a read-only Orders scope exists could not be verified from a primary source. | **Partly resolved, honestly dispositioned.** The boundary is enforced by construction: maintenance receives a `PayPalReadClient` type that has no `create`/`capture` member, imports only `orders-read.ts`, and a CI test asserts the built maintenance bundle cannot reach the capture module or endpoint path. That is a real, fail-capable guard, but it is **code-level**, not credential-enforced. If provisioning reveals a read-only Orders scope, a second REST app credential is added as defence in depth; until then the residual risk is disclosed as R6 and must appear in submission materials, not be omitted. |
+| 6 | Maintenance's code-level versus credential-enforced PayPal authority | **[unknown]**: PayPal's public reference pages reachable in this pass list Orders v2 operations without exposing scope strings, so whether a read-only Orders scope exists could not be verified from a primary source. | **Partly resolved, honestly dispositioned.** The boundary is enforced by construction: maintenance receives a `PayPalReadClient` type that has no `create`/`capture` member, imports only `orders-read.ts`, and a CI test asserts the built maintenance bundle cannot reach the capture module or endpoint path. That is a real, fail-capable guard, but it is **code-level**, not credential-enforced. If provisioning reveals a read-only Orders scope, a second REST app credential is added as defence in depth; until then the residual risk is disclosed as R3 and must appear in submission materials, not be omitted. |
 | 7 | Unsupported prior-art and SGQR claims | Bounded search: one public repository reviewed on 2026-10-07; no primary SGQR scheme specification; the "99% of payers" figure is a third-party market claim. | **Resolved by relabeling.** `research.md` is amended in this gate so the agent-surface gap reads as a **[hypothesis]** from a named bounded search rather than an established fact, and the SGQR parser contract returns unrecognized tags explicitly instead of dropping or guessing them. No uniqueness or decode-accuracy claim survives into submission material without a primary source. |
-| 8 | Inconsistent timing definitions | Design gap, no external dependency. | **Resolved** by [Named clocks](#named-clocks): one name per clock, its start event, duration, enforcer and expiry consequence. Every other document must use these names. Expiry of any clock is never evidence that a dispatched payment failed, and no clock guarantees physical erasure. |
+| 8 | Inconsistent timing definitions | Design gap, no external dependency. | **Resolved** by [Named clocks](#named-clocks): one name per clock, its start event, duration, enforcer and expiry consequence. Every other document must use these names. Expiry of any clock is never evidence that a dispatched payment failed, and no clock guarantees physical erasure. **Revised 2026-10-11:** the image clocks are removed; request, model, upload, wallet-challenge, rate-age and RPC clocks are added, plus one block-height bound that is not a clock. |
 
 ## Provisioned state discovered during this gate
 
@@ -88,13 +135,34 @@ Versions below were read from the npm registry on 2026-10-07 with `npm view <pkg
 | `eslint` | `10.12.0` | Lint |
 | `tsx` | `4.23.15` | Local maintenance runs only; CI uses the compiled build |
 
+**Added 2026-10-11 for PYUSD.**
+These were read from the npm registry on 2026-10-11 at 11:12 UTC with plain HTTPS reads of each package's registry document, because npm is not installed on this Mac.
+No package was installed and no lockfile changed.
+The 2026-10-07 pins above are unchanged; `ai` and `@ai-sdk/openai` keep their pins although newer patch releases now exist.
+
+| Package | Proposed pin | Published | Role |
+| --- | --- | --- | --- |
+| `@solana/kit` | `8.4.0` | 2026-09-28 | Read-only RPC client over a custom bounded transport, message compilation, codecs, addresses and Ed25519 signature verification. Peer `typescript >=5.4.0`; engines `node >=20.18.0`. |
+| `@solana-program/token-2022` | `0.19.0` | 2026-09-21 | `TransferChecked` builder, mint and token-account decoders, associated-account derivation and instruction identification. Peers `@solana/kit ^8.3.0` and `@solana/sysvars ^8.0.0`; the `@solana/zk-sdk` peer is optional and is not added. |
+| `@solana-program/memo` | `0.15.0` | 2026-09-21 | Memo instruction builder, with its program address overridden to the pinned memo program below. |
+| `@wallet-standard/app` | `1.1.1` | 2026-06-03 | Browser wallet discovery. Engines `node >=22`. |
+| `@solana/wallet-standard-features` | `1.5.0` | 2026-09-10 | Types for `solana:signAndSendTransaction` and `solana:signMessage`. Engines `node >=22`. |
+
+Deliberately not added: `@solana/wallet-standard-chains`, because the chain is one reviewed constant; `@solana-program/compute-budget`, because verification needs only its program address; and `lighthouse-sdk`, whose latest release, `2.1.0` from 2025-05-12, peers `@solana/kit ^2.1.0` and cannot share Kit 8.
+Lighthouse instructions are therefore identified by reviewed discriminator constants taken from its source at a pinned commit.
+
 **Boot gate (Slice 1 falsifier):** if `better-auth@1.7.7`, `drizzle-orm@0.45.3` or `drizzle-kit@0.31.11` do not work against `next@16.4.0` / `typescript@7.0.2`, downgrade to the newest mutually supported majors and record the resolved set here. Do not patch around an incompatible auth library; a session bug is a receipt-ownership bug.
+The same boot check applies to the PYUSD pins when the first PYUSD slice installs them: they must typecheck under `typescript@7.0.2`, resolve the `@solana/sysvars` peer through `@solana/kit@8.4.0` without a second copy, and build in the browser and Node bundles.
 
 `pg_advisory_lock`, prepared statements, `LISTEN/NOTIFY` and temporary tables are unsafe through transaction pooling, so leases use row-level `UPDATE ... WHERE ... RETURNING` and migrations plus any session-state work use `MIGRATION_DATABASE_URL`/`MAINTENANCE_DATABASE_URL` (direct). **[vendor claim]** Neon documents pooled versus direct differences; **[unknown]** for this account.
 
 ## Files
 
-Four files already exist from the concurrent provisioning session: `.gitignore`, `neon.ts`, `package.json` and `package-lock.json`, plus `node_modules/` and the ignored `.env.local` and `.neon`. Everything else below is proposed and does not exist. `docs/plans/PAYPAL_PLAN.md` and the six mockups are preserved untouched. The provisioning files belong to that session and are **not** staged, moved or edited by this gate; `neon.ts` in particular carries the unresolved R11 discrepancy and must not be silently flipped.
+Four files already exist from the concurrent provisioning session: `.gitignore`, `neon.ts`, `package.json` and `package-lock.json`, plus `node_modules/` and the ignored `.env.local` and `.neon`.
+Everything else below is proposed and does not exist.
+`docs/plans/PAYPAL_PLAN.md` and the six mockups are preserved untouched.
+**Corrected 2026-10-11 (wording only):** the four provisioning files are tracked since commit `f8caf7d`, and R11 is resolved: `neon.ts` is at `auth: false` after the separately authorized follow-up, and the read-only inspection disproved the collision hazard.
+This gate does not stage, move or edit them; the R11 containment rules below still bind.
 
 ### Repository root
 
@@ -108,12 +176,12 @@ Four files already exist from the concurrent provisioning session: `.gitignore`,
 | `tsconfig.json` | Next.js web config, `strict`, no `any` at boundaries. |
 | `tsconfig.runner.json` | Separate NodeNext build of the maintenance entrypoint only, so CI can prove what maintenance can reach. |
 | `drizzle.config.ts` | Migration generation against `MIGRATION_DATABASE_URL`. |
-| `next.config.ts` | Node runtime, image optimizer disabled for the capability route, security headers, no-referrer on approval pages. |
+| `next.config.ts` | Node runtime, framework image optimizer unused, security headers, no-referrer on approval pages. **Revised 2026-10-11:** no `src/proxy.ts` or `middleware.ts` exists; if one is ever added, its matcher must exclude the menu-import route so no proxy clones the upload body. |
 | `render.yaml` | Proposed Render Free web service. Not applied; provisioning is not authorized. |
 | `vitest.config.ts`, `playwright.config.ts` | Test runners. |
 | `.github/workflows/ci.yml` | Typecheck, lint, unit and integration tests on push. |
 | `.github/workflows/maintenance.yml` | Proposed hourly runner. **Creation is not authorized by this gate.** |
-| `.env.example` | Names only, never values. Must equal the union of names in `src/env.ts`. Must not duplicate the real `.env.local`, which stays ignored. |
+| `.env.example` | Names only, never values. Must equal the union of names in `src/env.ts`. Must not duplicate the real `.env.local`, which stays ignored. **Revised 2026-10-11:** includes `AI_MENU_MODEL`, `MENU_IMPORTS_ENABLED`, `SOLANA_RPC_URL` and `PYUSD_ENABLED`; the Zapier hook name is removed. |
 
 ### Configuration, libraries and guards
 
@@ -125,12 +193,14 @@ Four files already exist from the concurrent provisioning session: `.gitignore`,
 | `src/lib/auth.ts` | Better Auth instance: Drizzle adapter, anonymous plugin with `disableDeleteAnonymousUser: true`, `onLinkAccount` refusing membership creation, public signup disabled. |
 | `src/lib/auth-context.ts` | Every principal guard. No route performs its own session logic. |
 | `src/lib/errors.ts` | `AppError` union and the only mapping to HTTP status. |
-| `src/lib/http/respond.ts` | JSON envelope, cache headers, `no-store` for capability responses. |
-| `src/lib/ids.ts` | Identifiers and 256-bit capability tokens, plus hashing for storage. |
+| `src/lib/http/respond.ts` | JSON envelope, cache headers, `no-store` for private responses. |
+| `src/lib/http/bounded-body.ts` | **Added 2026-10-11.** Counted, time-bounded request-body reader; the only way a route reads an upload body. |
+| `src/lib/http/origin.ts` | **Added 2026-10-11.** Same-origin check for browser mutations against `APP_BASE_URL`, never the `Host` header. |
+| `src/lib/ids.ts` | Identifiers, 256-bit agent handoff tokens and 128-bit PYUSD memo references, plus hashing for storage. |
 | `src/lib/money.ts` | Integer minor-unit SGD arithmetic. No float path exists. |
 | `src/lib/time.ts` | The named clocks and an injectable `now` for deterministic tests. |
-| `src/lib/log.ts` | Redacting logger: QR payloads, bearer values, capability URLs, prompts and privileged provider bodies never reach a sink. |
-| `src/lib/ratelimit.ts` | Database-backed limiter for public and capability routes. |
+| `src/lib/log.ts` | Redacting logger: QR payloads, bearer values, prompts, image bytes, base64 and data URLs, and privileged provider bodies never reach a sink. **Revised 2026-10-11:** errors are logged only as allowlisted `SafeErrorRecord`s, never as error objects. |
+| `src/lib/ratelimit.ts` | Database-backed limiter for public routes, wallet challenges and the shared Solana RPC budget. |
 
 ### Domain modules (no HTTP, no provider SDK)
 
@@ -139,8 +209,15 @@ Four files already exist from the concurrent provisioning session: `.gitignore`,
 | `src/domain/outlets/types.ts`, `search.ts`, `publish.ts` | Published-outlet reads and the publication precondition transaction. |
 | `src/domain/sgqr/decode.ts`, `validate.ts` | EMVCo TLV decode into recognized/unrecognized tags, then allowlisted identifier resolution to zero, one or many outlets. |
 | `src/domain/menu/types.ts`, `draft.ts`, `confirm.ts` | Revision/item completeness, non-clobbering suggestion merge, confirmation and invalidation. |
-| `src/domain/imports/types.ts`, `admission.ts`, `lifecycle.ts`, `validate-result.ts` | Capacity admission, accept/dispatch/close/expire with transactional source deletion, and Zapier result bounds. |
-| `src/domain/purchases/checkout-key.ts`, `price.ts`, `review.ts`, `state.ts`, `reconcile.ts` | Logical checkout identity, server pricing, review creation/replacement, the transition table and provider-read decisions. |
+| `src/domain/imports/types.ts`, `consent.ts`, `admission.ts`, `upload.ts`, `lifecycle.ts`, `validate-result.ts` | **Revised 2026-10-11.** Limits and outcomes, the versioned consent, serialized admission with daily caps and a spend reservation, in-memory photo-part parsing, commit, close and derive-on-read, and model-output bounds. No image bytes outlive the request. |
+| `src/domain/purchases/checkout-key.ts`, `price.ts`, `review.ts`, `state.ts`, `reconcile.ts` | Logical checkout identity and, since 2026-10-11, the rail-independent basket lock derived on read; server pricing, review creation/replacement, the transition table, the derived purchase view and provider-read decisions. |
+| `src/domain/pyusd/constants.ts` | **Added 2026-10-11.** Reviewed devnet constants and the proof switch. No environment variable can override them. |
+| `src/domain/pyusd/identity.ts`, `mint.ts` | **Added 2026-10-11.** Genesis, mint owner-program and decimals identity check, exactly Gate 2's enable condition; fee-horizon and extension eligibility. |
+| `src/domain/pyusd/rate.ts` | **Added 2026-10-11.** Exact rate parsing, upward integer conversion and age on read. |
+| `src/domain/pyusd/challenge.ts` | **Added 2026-10-11.** SIWS-format challenge bytes, single-use Ed25519 verification and destination recording. |
+| `src/domain/pyusd/attempts.ts`, `state.ts` | **Added 2026-10-11.** Preparation, the lock, the PYUSD attempt transition table and signature binding. |
+| `src/domain/pyusd/verify.ts` | **Added 2026-10-11.** Pure verification of a finalized landed transaction by meaning. No RPC. |
+| `src/domain/pyusd/recovery.ts` | **Added 2026-10-11.** Expiry, scan coverage and release decisions. No RPC. |
 | `src/domain/payments/attempts.ts`, `state.ts` | One active attempt per purchase, operation keys, dispatch legality, attempt lifecycle. |
 | `src/domain/suggestions/types.ts`, `suggest.ts` | AI tool schemas and bounded suggestion results. |
 | `src/domain/handoffs/types.ts`, `redeem.ts` | Agent purchase-request tokens and single redemption. |
@@ -156,8 +233,13 @@ Four files already exist from the concurrent provisioning session: `.gitignore`,
 | `src/integrations/paypal/orders-read.ts` | Read-only client type consumed by maintenance. |
 | `src/integrations/paypal/verify.ts` | Webhook signature verification and event dedupe. |
 | `src/integrations/paypal/map.ts` | Provider payload to domain evidence, with explicit mismatch reasons. |
-| `src/integrations/zapier/dispatch.ts` | Catch-hook dispatch with identity persisted before send. |
 | `src/integrations/ai/openai.ts` | AI SDK provider, model, tool budget and structured-output schema. |
+| `src/integrations/ai/menu-vision.ts` | **Added 2026-10-11.** The one tool-free vision call: `AI_MENU_MODEL`, explicit `store: false`, strict schema, no retries, bounded output and an abort signal. Uses the same provider and pin as `openai.ts`. |
+| `src/integrations/image/normalize.ts` | **Added 2026-10-11.** The only module that imports `sharp`: header dimension check, decode, orientation, metadata strip and JPEG re-encode, in memory. |
+| `src/integrations/solana/rpc.ts`, `limiter.ts` | **Added 2026-10-11.** Read-only devnet client over a bounded transport, and the shared database RPC limiter. No send, airdrop or signing method exists. |
+| `src/integrations/solana/build.ts`, `decode.ts` | **Added 2026-10-11.** Unsigned transfer construction from pinned constants; landed-transaction and account decoding into domain shapes. |
+
+The Zapier dispatch module is removed by the 2026-10-11 revision.
 
 ### HTTP surface
 
@@ -172,19 +254,31 @@ Four files already exist from the concurrent provisioning session: `.gitignore`,
 | `src/app/api/v1/purchases/[id]/cancel/route.ts`, `reconcile/route.ts` | Close an unexecuted review; request a bounded provider read. |
 | `src/app/api/v1/merchant/outlets/route.ts`, `merchant/outlets/[id]/route.ts` | Create and edit an unpublished outlet. |
 | `src/app/api/v1/merchant/outlets/[id]/destinations/paypal/route.ts` | Select an operator-prepared connection. |
-| `src/app/api/v1/merchant/outlets/[id]/menu-imports/route.ts`, `merchant/menu-imports/[id]/route.ts`, `merchant/menu-imports/[id]/cancel/route.ts` | Import create, status and cancel. |
-| `src/app/api/v1/merchant/outlets/[id]/menu-draft/route.ts`, `confirm/route.ts`, `publish/route.ts` | Manual correction with revision conflict checks, confirmation, publication. |
+| `src/app/api/v1/merchant/outlets/[id]/menu-imports/route.ts` | **Revised 2026-10-11.** Synchronous Node route handler: membership, origin, consent, admission, counted upload, vision draft and merge in one request. No import status or cancel route exists. |
+| `src/app/api/v1/merchant/outlets/[id]/menu-draft/route.ts`, `confirm/route.ts`, `publish/route.ts` | Manual correction with revision conflict checks, confirmation, publication. Since 2026-10-11, `GET menu-draft` also returns the latest import outcome, derived on read. |
+| `src/app/api/v1/merchant/outlets/[id]/destinations/pyusd/challenge/route.ts`, `destinations/pyusd/route.ts` | **Added 2026-10-11.** Issue a wallet challenge; verify the signed proof and the merchant token account. |
+| `src/app/api/v1/merchant/outlets/[id]/pyusd-rate/route.ts` | **Added 2026-10-11.** Append or re-confirm the shop's rate. |
+| `src/app/api/v1/purchases/[id]/pyusd/prepare/route.ts`, `pyusd/submitted/route.ts` | **Added 2026-10-11.** Persist, lock and then release unsigned bytes; record a signature hint. The shared `reconcile` route serves both rails. |
 | `src/app/api/v1/merchant/outlets/[id]/orders/route.ts`, `merchant/orders/[id]/acknowledge/route.ts` | Membership-scoped orders and separate acknowledgment. |
 | `src/app/api/v1/purchase-requests/route.ts`, `purchase-requests/redeem/route.ts` | Agent request and single redemption. |
-| `src/app/api/v1/imports/[id]/image/route.ts` | Capability image proxy. Read-only deadline decision, `no-store`. |
-| `src/app/api/v1/integrations/zapier/menu-results/route.ts` | Per-import bearer result callback. |
 | `src/app/api/v1/integrations/paypal/webhook/route.ts` | Verified, deduplicated event inbox. |
-| `src/app/api/v1/health/route.ts`, `health/operator/route.ts` | Public readiness; operator view of heartbeat, overdue work and capacity. Refines Gate 2's single `GET /health`. |
+| `src/app/api/v1/health/route.ts`, `health/operator/route.ts` | Public readiness; operator view of heartbeat, overdue work and capacity. Refines Gate 2's single `GET /health`. Since 2026-10-11 the operator view also shows import outcomes, latency, spend reservations and decoder memory, RPC throttling, and held or mismatched PYUSD attempts with their scan coverage. |
 | `src/app/mcp/route.ts` | Streamable HTTP MCP, `POST` only, three scoped tools. |
 | `src/app/buy/page.tsx`, `review/[purchaseId]/page.tsx`, `receipt/[purchaseId]/page.tsx` | Buyer screens. |
 | `src/app/merchant/setup/page.tsx`, `merchant/orders/page.tsx` | Merchant screens. |
 | `src/app/approve/[handoffToken]/page.tsx` | Agent handoff landing. |
 | `src/app/paypal/return/page.tsx`, `paypal/cancel/page.tsx` | Landing pages that read persisted state only; no capture from a `GET`. |
+
+The image proxy and the Zapier result routes are removed by the 2026-10-11 revision.
+
+### Browser wallet modules (added 2026-10-11)
+
+| Path | Why it lives there |
+| --- | --- |
+| `src/lib/wallet/standard.ts` | Browser-only wallet discovery: keeps only wallets whose chains include `solana:devnet` and that offer the needed feature. |
+| `src/lib/wallet/phantom-browse.ts` | Builds the Phantom Browse link from public outlet and item ids only. |
+| `src/app/review/[purchaseId]/pyusd-pay.tsx` | Client component: prepare, hand the exact bytes to the wallet, post the signature hint; on a phone with no wallet, the Phantom link instead of a pay button. |
+| `src/app/merchant/setup/pyusd-wallet.tsx` | Client component: request a challenge, have the wallet sign the exact bytes, submit the proof; set the rate. |
 
 ### Maintenance and tests
 
@@ -192,7 +286,7 @@ Four files already exist from the concurrent provisioning session: `.gitignore`,
 | --- | --- |
 | `src/maintenance/run.ts` | Entrypoint: heartbeat, claim leases, run tasks in fixed order, write a report, exit non-zero on operator-visible failure. |
 | `tests/unit/**`, `tests/integration/**`, `tests/e2e/**` | Named tests from the test plan. |
-| `tests/fixtures/**` | Visibly labeled demo fixtures; every fixture response and screenshot carries its label. |
+| `tests/fixtures/**` | Visibly labeled demo fixtures; every fixture response and screenshot carries its label. Since 2026-10-11 this includes synthetic OpenAI responses, synthetic landed devnet transactions and generated test photos; none is presented as a real import or payment. |
 
 ## Types and signatures
 
@@ -202,11 +296,12 @@ Declarations only. No bodies.
 
 ```ts
 export type ErrorCode =
-  | "validation_failed" | "unauthorized" | "forbidden_membership" | "not_found"
+  | "validation_failed" | "unauthorized" | "forbidden_membership" | "forbidden_origin" | "not_found"
   | "review_expired" | "review_invalidated" | "checkout_conflict" | "revision_conflict"
   | "execution_locked" | "capture_already_dispatched" | "payment_uncertain"
-  | "import_closed" | "import_expired" | "import_base_revision_changed"
-  | "admission_rejected" | "capacity_pressure" | "maintenance_stale"
+  | "consent_required" | "import_rejected" | "import_expired" | "import_base_revision_changed"
+  | "admission_rejected"
+  | "pyusd_unavailable" | "rate_expired" | "wallet_proof_rejected" | "wallet_attempt_locked"
   | "provider_unreachable" | "provider_mismatch" | "rate_limited";
 
 export type AppError = {
@@ -230,21 +325,37 @@ export function formatSgd(value: SgdCents): string;
 
 `sgdFromDecimalString` returns `null` for an unreadable or ambiguous price. It never returns `0` for unknown.
 
+**Revised 2026-10-11:** `import_closed`, `capacity_pressure` and `maintenance_stale` are removed, because no import can be canceled and no import depends on maintenance or a capacity reading.
+`forbidden_origin`, `consent_required`, `import_rejected` and the four PYUSD codes are added.
+`admission_rejected` carries an `ImportRejection` in `details`.
+`import_rejected` carries the specific `BoundedRead`, `PhotoPart` or `NormalizedPhoto` reason in `details.reason`, and `pyusd_unavailable` names its cause there too: `rail_disabled`, `payments_disabled`, a `PyusdIdentity` reason or a `MintEligibility` reason.
+Each named test asserts that specific reason, not only the code.
+
 ### Clocks
 
 ```ts
 export type ClockName =
-  | "T_REVIEW" | "T_IMAGE_ACCESS" | "T_SOURCE_SWEEP" | "T_HANDOFF"
+  | "T_REVIEW" | "T_HANDOFF"
   | "T_LEASE" | "T_MAINT_RUN" | "T_MAINT_INTERVAL" | "T_MAINT_OVERDUE"
-  | "T_AI_BUDGET" | "T_PROVIDER_READ_DEBOUNCE";
+  | "T_AI_BUDGET" | "T_PROVIDER_READ_DEBOUNCE"
+  | "T_MENU_REQUEST" | "T_MENU_UPLOAD_READ" | "T_MENU_MODEL"
+  | "T_WALLET_CHALLENGE" | "T_RATE_AGE"
+  | "T_RPC_WINDOW" | "T_RPC_CALL" | "T_RPC_SLOT_LEASE";
 
 export function deadlineOf(clock: ClockName, startedAt: Date): Date;
 export function isExpired(clock: ClockName, startedAt: Date, now: Date): boolean;
 export function remainingMs(clock: ClockName, startedAt: Date, now: Date): number;
 export type Now = () => Date;
+
+export const MENU_COMMIT_RESERVE_MS: 5_000;
+export function menuModelBudgetMs(admittedAt: Date, now: Date): number; // min(T_MENU_MODEL, remaining T_MENU_REQUEST - reserve), never below 0
+export function utcDayStart(now: Date): Date;                           // admission-day boundary; never the Singapore day
 ```
 
 `T_DB_IDLE` and `T_RENDER_IDLE` are provider-controlled and deliberately **not** in `ClockName`: no application code may depend on or reset them.
+**Revised 2026-10-11:** `T_IMAGE_ACCESS` and `T_SOURCE_SWEEP` are removed.
+The PYUSD blockhash bound is a block height, not a time, so it is deliberately not a `ClockName` either.
+The model clock carries Gate 2's name, `T_MENU_MODEL`; an earlier draft of this revision called it `T_MENU_MODEL_MAX`, which broke the one-name-per-clock rule.
 
 ### SGQR
 
@@ -300,47 +411,197 @@ export function mergeImportSuggestions(
   currentRevisionId: string,
 ): DraftMerge;
 
-export type AdmissionRejection =
-  | "too_large" | "unsupported_type" | "pixel_limit" | "decode_failed"
-  | "open_import_exists" | "live_source_cap" | "churn_cap"
-  | "maintenance_stale" | "storage_pressure";
-
-export type ImageAdmission =
-  | { ok: true; importId: string; sourceId: string }
-  | { ok: false; reason: AdmissionRejection };
-
-export function admitMenuImage(db: Db, input: {
-  outletId: string;
-  actorUserId: string;
-  consentVersion: string;
-  bytes: Uint8Array;
-  declaredContentType: string;
-  baseRevisionId: string;
-  now: Date;
-}): Promise<ImageAdmission>;
-
 export type DraftItemSuggestion = {
-  name: string;
+  name: string;                      // "" when unreadable; completeness then blocks confirmation
   portion: string | null;
   priceSgdCents: SgdCents | null;
-  priceBasis: "explicit" | "ambiguous" | "blank";
+  priceBasis: "explicit" | "ambiguous" | "blank" | "other_currency" | "duplicate_variant";
 };
-
-export type ZapierResultValidation =
-  | { ok: true; items: DraftItemSuggestion[]; fingerprint: string }
-  | { ok: false; reason: "malformed" | "empty" | "oversize" | "too_many_rows" | "currency_unsupported" | "duplicate_variant" };
-
-export function validateZapierResult(raw: unknown): ZapierResultValidation;
-
-export type ImportClosure = "completed" | "failed" | "canceled" | "expired";
-export function closeImport(db: Db, importId: string, closure: ImportClosure): Promise<{
-  closed: boolean;
-  sourceDeleted: boolean;
-  sourceDeleteBlockedReason?: "storage_exhausted" | "already_deleted";
-}>;
 ```
 
-`closeImport` returns `sourceDeleted: false` with a reason instead of throwing when the delete is blocked. Access is already closed by the read-path deadline before this runs.
+The types above are unchanged from 2026-10-07 except `priceBasis`, which gains two values.
+**Revised 2026-10-11:** the image admission, source row, Zapier validation and source-deleting close are removed and replaced by the request-memory import below.
+
+```ts
+// src/domain/imports/consent.ts
+export const MENU_CONSENT_VERSION: string;   // changes whenever the short text or its details change
+export const MENU_CONSENT_TEXT: { short: readonly string[]; details: readonly string[] }; // Gate 2 wording, one version for both
+
+// src/domain/imports/types.ts
+export const MENU_IMPORT_LIMITS: {
+  readonly maxBodyBytes: 2_621_440;    // 2.5 MiB whole multipart body, counted while streaming
+  readonly maxPhotoBytes: 2_097_152;   // 2 MiB JPEG part
+  readonly maxEdgePixels: 2_048;
+  readonly maxRows: 100;
+  readonly maxTextChars: 120;          // per name or portion
+  readonly maxResultBytes: 131_072;    // 128 KiB serialized validated result
+};
+
+export type AdmissionLimits = { outletInFlight: number; globalInFlight: number; outletDaily: number; globalDaily: number };
+export const DEFAULT_ADMISSION_LIMITS: AdmissionLimits; // 1, 1, 10, 50; tests inject other values to isolate one guard
+
+export type MenuModelBounds = {
+  model: string;                           // must equal AI_MENU_MODEL
+  inputUsdMicrosPerMillionTokens: number;
+  outputUsdMicrosPerMillionTokens: number;
+  maxInputTokens: number;                  // reviewed worst case for one shrunk photo plus the prompt
+  maxOutputTokens: number;                 // also sent as the call's maxOutputTokens
+};
+
+export const MENU_SPEND_POLICY: {
+  readonly dailyCeilingUsdMicros: number | null;    // null until the user records a ceiling; null fails closed
+  readonly modelBounds: readonly MenuModelBounds[]; // empty until a vision model is evaluated; no match fails closed
+};
+
+export function reserveUsdMicros(bounds: MenuModelBounds): number; // integer ceiling of worst-case input plus output cost
+
+export type ImportRejection =
+  | "imports_disabled" | "consent_required"
+  | "in_flight_outlet" | "in_flight_global" | "daily_cap_outlet" | "daily_cap_global"
+  | "spend_ceiling_unset" | "model_bounds_missing" | "model_bounds_exceeded" | "spend_ceiling_reached";
+
+export type ImportAdmission =
+  | { ok: true; importId: string; admittedAt: Date; deadlineAt: Date; reservedUsdMicros: number }
+  | { ok: false; reason: ImportRejection };
+
+export function admitMenuImport(db: Db, input: {
+  outletId: string;
+  actorUserId: string;
+  consentVersion: string;      // the route has already checked it equals MENU_CONSENT_VERSION
+  baseRevisionId: string;
+  model: string;               // AI_MENU_MODEL
+  limits: AdmissionLimits;
+  policy: typeof MENU_SPEND_POLICY;
+  now: Date;
+}): Promise<ImportAdmission>;
+```
+
+`admitMenuImport` runs in one transaction that first locks the singleton `menu_import_admission` row, so every check sees one consistent view.
+In order, it requires: reviewed bounds for `AI_MENU_MODEL` and a recorded ceiling; no attempt of the current model configuration whose actual spend exceeded its reservation; no live attempt for the outlet and none globally, where live means open and before its deadline; fewer admitted attempts in the current UTC day than each daily cap, counting every outcome; and the day's reservations plus the new one within the ceiling.
+It then inserts the open row with `deadline_at = now + T_MENU_REQUEST` and the reservation.
+**Revised 2026-10-11 after review:** a reservation is held unless its attempt provably never dispatched the model call.
+The day's total counts the reservation of every row that records a model dispatch or is still live, and counts zero for a row that is closed or past its deadline with no dispatch mark.
+Because `markModelDispatched` commits before the call and writes only while the attempt is open and before its deadline, a row without the mark never reached OpenAI, so `rejected_upload` and `rejected_photo` attempts free their reservation and record zero actual spend.
+A reservation whose call was dispatched is never released, even after an abort, because an aborted call may still be billed.
+The daily attempt caps still count every admitted attempt, whatever its outcome.
+The route checks `MENU_IMPORTS_ENABLED` and the consent version before calling it, and reads no body byte until it succeeds.
+
+```ts
+export type ImportOutcome =
+  | "in_flight" | "completed" | "conflict_base_revision" | "conflict_confirmed" | "membership_revoked"
+  | "rejected_upload" | "rejected_photo" | "model_failed" | "model_timeout" | "output_invalid"
+  | "aborted" | "expired";
+
+export type MenuImportRow = {
+  id: string; outletId: string; actorUserId: string; baseRevisionId: string;
+  consentVersion: string; modelConfigVersion: string;   // hash of model, bounds entry, prompt and schema versions
+  admittedAt: Date; deadlineAt: Date; modelDispatchedAt: Date | null; closedAt: Date | null;   // dispatch mark added 2026-10-11 after review
+  closedOutcome: Exclude<ImportOutcome, "in_flight" | "expired"> | null;
+  reservedUsdMicros: number; actualUsdMicros: number | null;
+  inputTokens: number | null; outputTokens: number | null;
+  rowsDrafted: number | null; rowsBlankPrice: number | null;
+  resultFingerprint: string | null;                     // SHA-256 of the validated result, never of the image
+  latencyMs: number | null; peakRssBytes: number | null;
+};
+
+export function deriveImportOutcome(row: MenuImportRow, now: Date): ImportOutcome; // pure; open and past deadlineAt reads "expired"
+
+// src/lib/http/bounded-body.ts
+export type BoundedRead =
+  | { ok: true; bytes: Uint8Array }
+  | { ok: false; reason: "too_large" | "timeout" | "aborted" };
+export function readCountedBody(body: ReadableStream<Uint8Array> | null, maxBytes: number, timeoutMs: number, signal: AbortSignal): Promise<BoundedRead>;
+
+// src/domain/imports/upload.ts
+export type PhotoPart =
+  | { ok: true; jpeg: Uint8Array }
+  | { ok: false; reason: "not_multipart" | "part_count" | "missing_photo" | "part_too_large" };
+export function parseSinglePhotoPart(bytes: Uint8Array, contentType: string | null): Promise<PhotoPart>;
+
+// src/integrations/image/normalize.ts
+export type NormalizedPhoto =
+  | { ok: true; jpeg: Uint8Array; width: number; height: number }
+  | { ok: false; reason: "not_jpeg" | "too_many_pixels" | "decode_failed" };
+export function normalizeMenuJpeg(jpeg: Uint8Array): Promise<NormalizedPhoto>;
+```
+
+`readCountedBody` pulls chunks and stops at `maxBytes` or the time bound; it never trusts `Content-Length`.
+`parseSinglePhotoPart` parses the counted bytes in memory and accepts exactly one part named `photo`, of at most 2 MiB; the part's declared type is ignored, because only decoded content decides.
+`normalizeMenuJpeg` reads the dimensions from the JPEG header before decoding any pixel, refuses anything that is not JPEG or is wider or taller than 2,048 pixels, then decodes once, applies orientation, drops all metadata and re-encodes JPEG without enlarging.
+None of the three writes a file.
+Consent version and base revision travel in the `Envoi-Consent-Version` and `Envoi-Base-Revision` request headers, so the route can check them before reading the body.
+
+```ts
+// src/integrations/ai/menu-vision.ts
+export const MENU_VISION_PROMPT_VERSION: string;
+
+export const MenuVisionOutput: z.ZodType<{
+  items: Array<{
+    name: string | null;
+    portion: string | null;
+    priceText: string | null;                      // the printed number only, or null when unreadable
+    currency: "sgd_or_unmarked" | "other" | null;
+  }>;
+}>;
+
+export type VisionCall =
+  | { kind: "ok"; raw: unknown; inputTokens: number | null; outputTokens: number | null }
+  | { kind: "timeout" }
+  | { kind: "aborted" }
+  | { kind: "provider_error"; error: SafeErrorRecord };
+
+export function draftMenuFromPhoto(input: {
+  jpeg: Uint8Array;
+  model: string;               // AI_MENU_MODEL, never AI_MODEL
+  bounds: MenuModelBounds;
+  budgetMs: number;            // menuModelBudgetMs(admittedAt, now)
+  signal: AbortSignal;         // the request's signal, so a disconnect aborts the call
+}): Promise<VisionCall>;
+```
+
+`draftMenuFromPhoto` makes exactly one `generateText` call with `output: Output.object({ schema: MenuVisionOutput })`, because `generateObject` is deprecated in the pinned `ai@7.0.130`.
+Its provider options are exactly `{ store: false, strictJsonSchema: true }`; the image part sets `imageDetail: "high"`; `maxRetries` is 0; `maxOutputTokens` comes from the reviewed bounds; and the abort signal combines the request signal with `budgetMs`.
+There are no tools, no files API upload, no conversation state and no second attempt.
+**[vendor claim]** These option names come from the pinned packages' type definitions, read on 2026-10-11; their behavior on the selected account and model is **[unknown]**.
+
+```ts
+// src/domain/imports/validate-result.ts
+export type VisionDraftValidation =
+  | { ok: true; items: DraftItemSuggestion[]; fingerprint: string; blankPriceCount: number }
+  | { ok: false; reason: "malformed" | "empty" | "too_many_rows" | "text_too_long" | "oversize" };
+
+export function validateVisionDraft(raw: unknown): VisionDraftValidation;
+
+// src/domain/imports/lifecycle.ts
+export type ImportUsage = { inputTokens: number | null; outputTokens: number | null; latencyMs: number; peakRssBytes: number | null };
+
+export type ImportCommit =
+  | { committed: true; merge: Extract<DraftMerge, { applied: true }> }
+  | { committed: false; outcome: "expired" | "membership_revoked" | "conflict_base_revision" | "conflict_confirmed" };
+
+export function markModelDispatched(db: Db, importId: string, now: Date): Promise<{ marked: boolean }>; // short committed write before the call; only while open and before deadline_at; false => no call
+export function commitImport(db: Db, importId: string, draft: Extract<VisionDraftValidation, { ok: true }>, usage: ImportUsage, now: Date): Promise<ImportCommit>;
+export function closeImportFailed(db: Db, importId: string, outcome: "rejected_upload" | "rejected_photo" | "model_failed" | "model_timeout" | "output_invalid" | "aborted", usage: ImportUsage | null, now: Date): Promise<{ closed: boolean }>;
+export function recordImportUsage(db: Db, importId: string, usage: ImportUsage): Promise<void>; // never changes an outcome
+
+// src/lib/log.ts
+export type SafeErrorRecord = {
+  name: string;                // error class name from an allowlist, otherwise "Error"
+  status: number | null;       // HTTP status when the error carries one
+  retryable: boolean | null;
+  provider: "openai" | "paypal" | "solana_rpc" | "internal";
+};
+export function toSafeErrorRecord(err: unknown, provider: SafeErrorRecord["provider"]): SafeErrorRecord;
+```
+
+`validateVisionDraft` rejects the whole result only for malformed or empty output or a broken bound, and drops rows whose fields are all null.
+Item problems stay per item: a price that is unreadable, zero, negative, over two decimals or not plain digits stays blank as `ambiguous` or `blank`; a price marked in another currency stays blank as `other_currency`; and two rows with the same name and portion both keep blank prices as `duplicate_variant`, so the merchant resolves them.
+**Changed from the 2026-10-07 Zapier contract,** which rejected the whole result for a duplicate variant or a non-SGD price.
+`commitImport` locks the attempt and the draft revision, writes only while the attempt is open and `now < deadline_at`, requires the actor to still hold the outlet's membership and the base revision to be current and unconfirmed, then merges, closes the attempt and audits in one transaction.
+The membership recheck, restored on 2026-10-11 after review, is the one Gate 2 flow step 5 names: "attempt/deadline/membership/base revision".
+A late, unauthorized or conflicting commit merges nothing; a revoked membership closes the attempt `membership_revoked` and answers `forbidden_membership`.
+`closeImportFailed` is best effort: if it cannot write, the attempt still reads as expired after its deadline.
+`toSafeErrorRecord` never reads `message`, `cause`, `url`, `requestBodyValues`, `responseHeaders`, `responseBody` or `data`, which is where the AI SDK can carry the base64 photo, and the logger accepts only this record for errors.
 
 ### Checkout identity
 
@@ -356,13 +617,50 @@ export type CheckoutKeyInput = {
   rail: RailId;
   currency: "SGD";
   lines: readonly PurchaseLine[];
+  pyusdRateVersionId: string | null;   // added 2026-10-11: required for "pyusd", null for "paypal"
 };
 
 export type CheckoutKey = string & { readonly __brand: "CheckoutKey" };
 export function computeCheckoutKey(input: CheckoutKeyInput): CheckoutKey;
+
+// added 2026-10-11; trigger revised after review the same day
+export type BasketLockKey = string & { readonly __brand: "BasketLockKey" };
+export function computeBasketLockKey(input: { buyerUserId: string; outletId: string; lines: readonly PurchaseLine[] }): BasketLockKey;
+
+export type BasketLockReason =
+  | "paypal_capture_in_flight"   // a PayPal attempt in capture_dispatched or capture_unknown
+  | "paypal_review_window"       // a PayPal attempt in created, create_unknown, order_created or externally_approved while its review is inside T_REVIEW
+  | "pyusd_attempt_open"         // a PYUSD attempt in any state other than confirmed or closed_unpaid
+  | "purchase_uncertain";        // a purchase in uncertain
+
+export type PurchaseLockView = {
+  purchaseState: PurchaseState;
+  reviewExpiresAt: Date;
+  paypalAttempt: AttemptState | null;
+  pyusdAttempt: PyusdAttemptState | null;
+};
+
+export function moneyCanStillMove(view: PurchaseLockView, now: Date): BasketLockReason | null; // pure; derived on read
+export function findBasketLock(db: Db, input: {
+  key: BasketLockKey;
+  exceptPurchaseId: string | null;     // the purchase being started is not its own lock
+  lockRows: boolean;                   // true inside an execution start: FOR UPDATE on every same-key purchase of the buyer, in id order
+  now: Date;
+}): Promise<{ purchaseId: string; reason: BasketLockReason } | null>;
 ```
 
 `computeCheckoutKey` sorts lines by `menuItemId`, rejects a quantity outside `1..20`, and hashes the canonical JSON with SHA-256. Two requests that differ in any priced or routed input produce different keys, which is the point: a changed menu revision is a different checkout, never a mutated one.
+Since 2026-10-11 the PYUSD rate version is one of those priced inputs.
+
+`computeBasketLockKey` deliberately leaves out the rail, destination, menu revision and rate.
+**Revised 2026-10-11 after review:** the lock holds exactly while money can still move for a purchase with the same key, and `moneyCanStillMove` derives that on every read, with no stored lock and no maintenance dependency.
+Money can still move while a PayPal attempt is in `capture_dispatched` or `capture_unknown`; while a PayPal attempt is in `created`, `create_unknown`, `order_created` or `externally_approved` and its review is still inside `T_REVIEW`; while a PYUSD attempt is in any state other than `confirmed` or `closed_unpaid`; and while the purchase is `uncertain`.
+A PayPal attempt that never dispatched a capture stops locking when `T_REVIEW` passes, because capture is dispatched only by a compare-and-set that requires the review deadline to be in the future, so after that moment no capture can ever be sent for it.
+The earlier draft locked on any `pending_payment` purchase, which a PayPal buyer enters at order creation, before money can move, and so locked a basket forever after an abandoned approval.
+`createReview` refuses `execution_locked` while `findBasketLock` finds a lock, on either rail.
+Both execution starts, `paypal/start` and the second `pyusd/prepare` transaction, call it again with `lockRows: true`, so two reviews of one basket that were opened before either started cannot both start payment.
+This makes Gate 2's "no new attempt or rail switch while an external effect is possible" enforceable now that a second rail exists.
+The lock is per buyer session, so it cannot stop the Phantom-browser path, which starts a new anonymous session, from paying a basket already paid in another browser.
 
 ### Purchases, attempts and provider decisions
 
@@ -380,6 +678,11 @@ export type PurchaseTransition = { from: PurchaseState; to: PurchaseState; reaso
 export function canTransitionPurchase(t: PurchaseTransition): boolean;
 export function canTransitionAttempt(from: AttemptState, to: AttemptState): boolean;
 
+// added 2026-10-11 after review: PayPal abandonment is derived on read
+export type PurchaseView = { state: PurchaseState; paypalAttempt: AttemptState | null; pyusdAttempt: PyusdAttemptState | null; lock: BasketLockReason | null };
+export function derivePurchaseView(purchase: PurchaseRow, attempt: PaymentAttemptRow | PyusdAttempt | null, now: Date): PurchaseView; // pure
+export function applyDerivedTransitions(db: Db, purchaseId: string, now: Date): Promise<void>; // next touch: stores what the view reads, by compare-and-set
+
 export type PricedLine = { menuItemId: string; name: string; quantity: number; unitSgdCents: SgdCents; lineSgdCents: SgdCents };
 
 export type CostProvenance = {
@@ -388,8 +691,10 @@ export type CostProvenance = {
   fx: { known: false };
 };
 
+export type PyusdQuote = { rateVersionId: string; atomicPerSgd: bigint; rateConfirmedAt: Date; atomicAmount: bigint; basis: "merchant_rate" }; // added 2026-10-11
+
 export type PriceQuote =
-  | { ok: true; lines: PricedLine[]; totalSgdCents: SgdCents; currency: "SGD"; menuRevisionId: string; destinationId: string; provenance: CostProvenance; pricedAt: Date }
+  | { ok: true; lines: PricedLine[]; totalSgdCents: SgdCents; currency: "SGD"; menuRevisionId: string; destinationId: string; provenance: CostProvenance; pricedAt: Date; pyusd: PyusdQuote | null }
   | { ok: false; error: AppError };
 
 export function priceBasket(db: Db, input: {
@@ -442,6 +747,19 @@ export function decideCreateRecovery(attempt: PaymentAttemptRow, now: Date): "re
 
 `decideCreateRecovery` encodes the argument that makes a lost create safe: capture requires an order id Envoi never received, and the buyer never received an approval link, so no external effect is possible. It returns `safe_to_recreate` only when the attempt has never held an order id.
 
+**Added 2026-10-11 after review.**
+`derivePurchaseView` reads a PayPal attempt in `created`, `create_unknown`, `order_created` or `externally_approved` whose review has passed `T_REVIEW` as `abandoned`, and its `pending_payment` purchase as `unpaid_closed`.
+That is safe because no capture was dispatched and none can be any more, so the approval at PayPal can never move money; Gate 2 already forbids capturing an order the buyer abandoned.
+`applyDerivedTransitions` stores those two transitions at the next touch: any route that loads the purchase, the basket-lock lookup, and maintenance's best-effort `close_expired_reviews`.
+No buyer-visible state and no lock decision waits for that write, so neither the six-hourly cadence nor the unauthorized maintenance workflow can strand a basket.
+`capture_dispatched` and `capture_unknown` never read as abandoned.
+
+**Added 2026-10-11.**
+For `rail: "pyusd"`, `priceBasket` requires `PYUSD_ENABLED`, a PYUSD destination with verified key control, and a shop rate not past `T_RATE_AGE`; it fills `PyusdQuote` with `pyusdAtomicFor`.
+`CostProvenance.fx` stays `{ known: false }`, because the shop's own rate is not a market quote.
+`assertPaymentEligible` additionally rechecks, for PYUSD, that the review's rate version is still the shop's current version and is not past `T_RATE_AGE`, that `PAYMENTS_ENABLED` is true, and that no other attempt exists for the purchase.
+`PYUSD_ENABLED` is checked only by `requirePyusdEnabled`, so each flag has exactly one deciding check per call site.
+
 ### PayPal clients
 
 ```ts
@@ -468,6 +786,236 @@ export function verifyPayPalWebhookEvent(cfg: PayPalConfig, req: Request): Promi
 ```
 
 `PayPalReadClient` is a distinct exported type, not a runtime flag. Maintenance code cannot call `captureOrder` without changing an import that a CI test detects.
+
+### PYUSD (added 2026-10-11)
+
+```ts
+// src/domain/pyusd/constants.ts; reviewed code constants, never environment values
+export const PYUSD_DEVNET: {
+  readonly chain: "solana:devnet";
+  readonly genesisHash: "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG";
+  readonly mint: "CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM";
+  readonly tokenProgram: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";   // Token-2022
+  readonly decimals: 6;
+  readonly memoProgram: "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr";    // non-upgradeable memo program
+  readonly computeBudgetProgram: "ComputeBudget111111111111111111111111111111";
+  readonly lighthouseProgram: "L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95";
+  readonly lighthouseAssertionDiscriminators: readonly number[];          // 2..17 at Lighthouse commit 4c57947; 0 and 1 are memory instructions
+  readonly reviewedMintExtensions: readonly string[];                     // exactly the eight observed on 2026-10-10
+  readonly innerToken2022Allowed: readonly ("GetAccountDataSize" | "AmountToUiAmount" | "UiAmountToAmount")[];
+};
+
+export const PYUSD_PROOFS: {
+  readonly automaticUnpaidRelease: false;   // set true only by a reviewed change after the wallet blockhash-preservation and history-coverage proofs are recorded in 00-status.md
+};
+
+// src/integrations/solana/rpc.ts; read-only by construction
+export type RpcResult<T> =
+  | { kind: "ok"; value: T }
+  | { kind: "rate_limited" } | { kind: "unavailable" } | { kind: "too_large" } | { kind: "local_budget_exhausted" };
+
+export type SolanaReadClient = {
+  getGenesisHash(): Promise<RpcResult<string>>;
+  getAccounts(addresses: readonly Address[], commitment: "confirmed" | "finalized"): Promise<RpcResult<(EncodedAccount | null)[]>>;
+  getLatestBlockhashConfirmed(): Promise<RpcResult<{ blockhash: string; lastValidBlockHeight: bigint; slot: bigint }>>;
+  getBlockHeight(commitment: "confirmed" | "finalized"): Promise<RpcResult<bigint>>;
+  getEpochInfo(): Promise<RpcResult<{ epoch: bigint; absoluteSlot: bigint }>>;
+  getEpochSchedule(): Promise<RpcResult<EpochSchedule>>;
+  getTransactionFinalized(signature: string): Promise<RpcResult<LandedTransaction | null>>;
+  getSignaturesFinalized(address: Address, before: string | null, limit: 1000): Promise<RpcResult<SignatureEntry[]>>;
+};
+export function createSolanaReadClient(cfg: { rpcUrl: string }, limiter: RpcLimiter): SolanaReadClient;
+
+// src/integrations/solana/limiter.ts
+export const RPC_BUDGET: {
+  readonly windowMs: 10_000; readonly globalPerWindow: 20; readonly perMethodPerWindow: 10;
+  readonly maxConcurrent: 2; readonly callTimeoutMs: 10_000; readonly slotLeaseMs: 15_000;
+  readonly maxResponseBytes: 1_048_576; readonly backoffBaseMs: 1_000; readonly backoffMaxMs: 30_000;
+};
+export type RpcLimiter = {
+  acquire(method: string): Promise<{ ok: true; release(): Promise<void> } | { ok: false; retryAfterMs: number }>;
+  reportRateLimited(): Promise<void>;   // sets a shared backoff with full jitter
+};
+export function createDatabaseRpcLimiter(db: Db, now: Now): RpcLimiter;
+
+// src/domain/pyusd/identity.ts, mint.ts
+export type PyusdIdentity =
+  | { ok: true; epoch: bigint }
+  | { ok: false; reason: "rpc_unconfigured" | "rpc_unavailable" | "genesis_mismatch" | "mint_program_mismatch" | "mint_decimals_mismatch" };
+export function checkPyusdIdentity(rpc: SolanaReadClient | null): Promise<PyusdIdentity>; // genesis, mint owner program and decimals only; the enable flag is checked separately, so recovery still runs while new actions are off
+export function requirePyusdEnabled(env: Env): AppError | null;                       // PYUSD_ENABLED; guards PYUSD pricing, challenge, proof, rate and preparation only
+
+export type FeeSchedule = { epoch: bigint; basisPoints: number; maximumFee: bigint };
+export type FeeEvidence = { preparedEpoch: bigint; older: FeeSchedule; newer: FeeSchedule };
+export type MintEligibility =
+  | { ok: true; fee: FeeEvidence }
+  | { ok: false; reason: "fee_rate_nonzero" | "max_fee_nonzero" | "fee_next_epoch_nonzero" | "transfer_hook_active" | "unreviewed_extension" | "mint_unreadable" };
+export function assessMintForTransfer(mint: DecodedMint, currentEpoch: bigint): MintEligibility;
+export function feeAtEpoch(fee: Pick<FeeEvidence, "older" | "newer">, epoch: bigint): FeeSchedule;
+
+export type TokenAccountCheck =
+  | { ok: true; address: Address; amount: bigint }
+  | { ok: false; reason: "missing" | "not_token_2022_account" | "frozen" };
+export function checkPyusdTokenAccount(rpc: SolanaReadClient, owner: Address): Promise<TokenAccountCheck>; // derives the associated account; never takes an address from input
+
+// src/domain/pyusd/rate.ts
+export const PYUSD_RATE_BOUNDS: { readonly minAtomicPerSgd: 1n; readonly maxAtomicPerSgd: 10_000_000n }; // 0.000001 to 10 PYUSD per S$1
+export type PyusdRate = { versionId: string; outletId: string; atomicPerSgd: bigint; confirmedAt: Date };
+export function parsePyusdPerSgd(text: string): { ok: true; atomicPerSgd: bigint } | { ok: false; reason: "not_plain_six_place_decimal" | "out_of_bounds" }; // one strict pattern, then bounds; never Number()
+export function isRateExpired(rate: PyusdRate, now: Date): boolean;           // now >= confirmedAt + T_RATE_AGE
+export function pyusdAtomicFor(sgdCents: SgdCents, atomicPerSgd: bigint): bigint; // ceil(cents * rate / 100) in BigInt only
+export function formatPyusdPerSgd(atomicPerSgd: bigint): string;              // exact six-decimal string, no float
+
+// src/domain/pyusd/challenge.ts
+export type WalletChallenge = {
+  id: string; outletId: string; memberUserId: string; wallet: Address;
+  message: Uint8Array;               // exact UTF-8 bytes the wallet signs; saved verbatim
+  nonceHash: string; issuedAt: Date; expiresAt: Date; consumedAt: Date | null;
+};
+export function buildChallengeMessage(input: { domain: string; uri: string; wallet: Address; outletId: string; nonce: string; issuedAt: Date; expiresAt: Date }): Uint8Array;
+export function issueWalletChallenge(db: Db, principal: MerchantPrincipal, outletId: string, wallet: Address, now: Date): Promise<{ challengeId: string; message: Uint8Array; expiresAt: Date } | { error: AppError }>;
+
+export type WalletProof =
+  | { ok: true; destinationId: string }
+  | { ok: false; reason: "challenge_unknown" | "challenge_expired" | "challenge_used" | "challenge_other_outlet" | "signature_invalid" | "token_account_missing" | "token_account_not_token_2022" | "token_account_frozen" | "rail_unavailable" };
+export function verifyWalletProof(db: Db, rpc: SolanaReadClient, principal: MerchantPrincipal, outletId: string, input: { challengeId: string; signature: Uint8Array }, now: Date): Promise<WalletProof>;
+```
+
+The challenge follows the SIWS message fields: domain and URI from `APP_BASE_URL`, the wallet address, a statement naming the destination-enrollment purpose and the outlet, `Version: 1`, `Chain ID: devnet`, a 128-bit nonce, `Issued At`, `Expiration Time` at `T_WALLET_CHALLENGE`, and resources repeating the purpose and outlet.
+The browser has the wallet sign these exact bytes with `solana:signMessage`; `solana:signIn` is not used, because the wallet would build its own text.
+The proof request carries no wallet address and no token account: the key comes from the saved challenge, and the receiving account is derived.
+A verified proof records key control only.
+The destination counts as active for publication and payment only while `PYUSD_ENABLED` is true and the outlet's operator-approved enrollment exists.
+
+```ts
+// src/domain/pyusd/attempts.ts, state.ts
+export type PyusdAttemptState =
+  | "prepared"            // saved and locked; unsigned bytes may have left
+  | "confirmed"           // a finalized transfer passed verification and is bound
+  | "mismatch"            // a successful finalized transaction carrying this reference failed verification; only an audited operator resolution ends it
+  | "expired_scanning"    // finalized height passed lastValidBlockHeight; history scan in progress
+  | "held_no_match"       // complete scan found nothing, but automatic unpaid release is not enabled
+  | "closed_unpaid";      // complete scan found nothing and release is enabled; terminal unpaid
+
+export type ScanCoverage = {
+  startedAtFinalizedHeight: bigint;
+  newestSignature: string | null;         // top boundary, fixed when the scan starts after expiry
+  beforeCursor: string | null;            // resume point; advances only after every candidate on its page is decided
+  reachedBeforePreparation: boolean;      // a fully processed page held a signature older than preparationSlot
+  pagesRead: number;
+  candidatesChecked: number;
+  lastGap: "rate_limited" | "null_transaction" | "rpc_unavailable" | "too_large" | "page_cap" | "identity_changed" | null;
+};
+
+export const PYUSD_HINT_CAP: 3;   // signature hints stored per attempt; later ones are audited only (added 2026-10-11 after review)
+export type SignatureHint = {
+  signature: string; receivedAt: Date;
+  decision: "unread" | "not_found" | "not_ours" | "failed_landing" | "confirmed" | "uncertain";
+};
+
+export type PyusdAttempt = {
+  id: string; purchaseId: string; state: PyusdAttemptState;
+  buyerWallet: Address; sourceTokenAccount: Address; destinationTokenAccount: Address;
+  atomicAmount: bigint; rateVersionId: string;
+  reference: string;                      // 128-bit random, base58; the only memo content
+  unsignedWireBase64: string;             // the exact bytes released, returned again while valid
+  messageFingerprint: string;             // SHA-256 of the compiled message; evidence, not a matching rule
+  blockhash: string; lastValidBlockHeight: bigint; preparationSlot: bigint;
+  fee: FeeEvidence;
+  hints: readonly SignatureHint[];        // at most PYUSD_HINT_CAP, appended by compare-and-set on the count
+  finalizedSignature: string | null;
+  scan: ScanCoverage | null;
+  nextCheckAt: Date; leaseExpiresAt: Date | null;
+};
+
+export type Preparation =
+  | { kind: "prepared" | "existing"; attemptId: string; transactionBase64: string; chain: "solana:devnet" }
+  | { kind: "locked"; attemptId: string; state: PyusdAttemptState }
+  | { kind: "refused"; error: AppError };
+
+export function preparePyusdPayment(db: Db, rpc: SolanaReadClient, principal: BuyerPrincipal, purchaseId: string, buyerWallet: Address, now: Date): Promise<Preparation>;
+export function canTransitionPyusdAttempt(from: PyusdAttemptState, to: PyusdAttemptState): boolean;
+
+// src/integrations/solana/build.ts
+export function buildUnsignedTransfer(input: {
+  buyerWallet: Address; source: Address; destination: Address;
+  atomicAmount: bigint; reference: string;
+  blockhash: { blockhash: string; lastValidBlockHeight: bigint };
+}): { wireBase64: string; messageFingerprint: string };
+```
+
+`buildUnsignedTransfer` compiles a version 0 message with no address lookup tables and the buyer as fee payer.
+Its instructions are, in order, one memo carrying only the reference under the pinned memo program and one Token-2022 `TransferChecked` from the buyer's associated account to the merchant's, with the buyer as authority, the exact amount and 6 decimals.
+It adds no compute-budget, account-creation, authority, delegate or durable-nonce instruction, and leaves the signature slot empty.
+The memo comes first so a merchant account that requires incoming memos still accepts the transfer.
+`preparePyusdPayment` returns `existing` with the saved bytes only for the same wallet while the confirmed block height is at most `lastValidBlockHeight` minus 10; otherwise it returns `locked`, and never a refreshed blockhash or a second transaction.
+**Revised 2026-10-11 after review:** no PYUSD RPC read runs inside a database transaction.
+The height for an existing attempt is read through the limiter after a plain read of the attempt, with no row lock held, because the saved bytes never change and returning them again cannot create a second transfer.
+New preparations read every chain fact first and only then open the one short transaction that locks, rechecks and inserts.
+
+```ts
+// src/domain/pyusd/verify.ts; pure, no RPC
+export type TokenBalance = { accountIndex: number; mint: string; owner: string | null; programId: string | null; amount: bigint };
+export type CompiledInstruction = { programIndex: number; accountIndexes: readonly number[]; data: Uint8Array };
+
+export type LandedTransaction = {
+  signature: string; slot: bigint; version: "legacy" | 0 | "unsupported";
+  numRequiredSignatures: number;
+  accountKeys: readonly Address[] | null;            // static keys, then loaded writable and readonly; null when unresolvable
+  recentBlockhash: string;
+  outer: readonly CompiledInstruction[];
+  inner: readonly CompiledInstruction[] | null;      // null when metadata omits inner instructions
+  meta: { err: unknown | null; preTokenBalances: TokenBalance[] | null; postTokenBalances: TokenBalance[] | null } | null;
+};
+
+export type VerificationFailure =
+  | "metadata_incomplete" | "account_keys_unresolved"
+  | "blockhash_mismatch" | "extra_signer" | "fee_payer_mismatch"
+  | "transfer_count" | "mint_mismatch" | "decimals_mismatch" | "source_mismatch" | "destination_mismatch" | "amount_mismatch"
+  | "memo_count" | "fee_nonzero_at_execution" | "balance_delta_mismatch"
+  | "outer_instruction_not_allowlisted" | "lighthouse_not_assertion"
+  | "inner_program_not_allowlisted" | "inner_instruction_not_allowlisted";
+
+export type VerificationResult =
+  | { decision: "confirmed"; evidence: PyusdEvidence }
+  | { decision: "not_ours" }            // no pinned-memo instruction whose data equals this attempt's reference
+  | { decision: "failed_landing" }      // ours, executed with an error: no transfer happened under this signature
+  | { decision: "uncertain"; reason: VerificationFailure };
+
+export type PyusdEvidence = { signature: string; slot: bigint; atomicAmount: bigint; destinationTokenAccount: Address; verifiedAt: Date };
+
+export function verifyPyusdTransfer(tx: LandedTransaction, attempt: PyusdAttempt, feeAtExecution: FeeSchedule, now: Date): VerificationResult;
+```
+
+`verifyPyusdTransfer` first decides whether the transaction is ours (a pinned-memo instruction whose data equals the reference), then requires complete metadata and resolvable keys, then treats an execution error as `failed_landing`.
+Only after that does it apply every meaning rule from Gate 2: the saved blockhash; one required signature, held by the buyer as fee payer; exactly one Token-2022 `TransferChecked` whose mint account equals the pinned mint, whose decimals byte equals 6, and which moves the exact amount from the saved source to the saved destination; exactly one memo; zero fee in the execution epoch; a destination balance delta in the metadata equal to the amount; every other outer instruction a ComputeBudget instruction or a Lighthouse instruction whose first data byte is an assertion discriminator; and inner instructions only from the Token-2022, memo, ComputeBudget and Lighthouse programs, with Token-2022 inner kinds limited to the three read-only ones and Lighthouse inner kinds to assertions.
+**Restored 2026-10-11 after review:** the mint and decimals checks are explicit, as Gate 2 step 5 requires ("with the pinned program/mint/decimals").
+Token-2022 would also fail a `TransferChecked` whose mint or decimals disagree with the accounts, but verification does not rely on that.
+
+```ts
+// src/domain/pyusd/recovery.ts; pure, no RPC
+export type SignatureEntry = { signature: string; slot: bigint; failed: boolean };
+
+export type RecoveryStep =
+  | { action: "verify_hints_then_wait" }
+  | { action: "start_scan" }
+  | { action: "continue_scan"; before: string | null }
+  | { action: "close_unpaid" }
+  | { action: "hold"; reason: "automatic_release_not_enabled" }
+  | { action: "operator"; reason: "mismatch" };
+
+export function decideRecoveryStep(attempt: PyusdAttempt, finalizedBlockHeight: bigint, proofs: typeof PYUSD_PROOFS): RecoveryStep;
+export function applyScanPage(coverage: ScanCoverage, page: readonly SignatureEntry[], preparationSlot: bigint): { candidates: string[]; pageReachesBeforePreparation: boolean; lastSignature: string | null };
+export function isScanComplete(coverage: ScanCoverage): boolean; // reachedBeforePreparation, which only a fully decided page can set
+```
+
+A scan starts only after the finalized block height exceeds `lastValidBlockHeight`, so its fixed top boundary covers every slot in which the transaction could have landed.
+Candidates are all successful signatures at or after `preparationSlot`; a failed transaction moves no tokens, so it can be skipped.
+The RPC's memo summary is deliberately not used as a filter: a transfer that landed with an unexpected extra memo could be summarized without the reference and skipped, and closing that attempt unpaid would invite a second payment.
+A page counts toward coverage only when every candidate on it is decided; any gap leaves the cursor where it was.
+A devnet reset or a changed mint, detected as a genesis, mint-owner or decimals mismatch, stops every scan with `identity_changed`; an unreachable RPC records `rpc_unavailable` instead.
+Lighthouse is not part of this check: a transaction using a missing program fails and is never paid, so its absence cannot make a payment look valid, and Gate 2's enable condition is genesis, mint owner and decimals only.
+The one-off read-only Lighthouse recheck that Gate 2 assigned to Gate 3 is recorded in [`research.md`](research.md#gate-3-revision-reads-2026-10-11).
 
 ### Suggestions and handoffs
 
@@ -502,8 +1050,9 @@ Redemption creates a fresh server-priced review. It never carries an amount from
 
 ```ts
 export type TaskName =
-  | "heartbeat" | "record_capacity" | "expire_imports" | "sweep_sources"
-  | "reconcile_attempts" | "close_expired_reviews" | "purge_expired_sessions";
+  | "heartbeat" | "record_capacity"
+  | "reconcile_attempts" | "reconcile_pyusd_attempts"
+  | "close_expired_reviews" | "purge_expired_sessions";
 
 export type ClaimedWork = { id: string; kind: TaskName; dueAt: Date };
 
@@ -519,12 +1068,15 @@ export type MaintenanceTask = {
   run(db: Db, work: ClaimedWork, deps: MaintenanceDeps): Promise<TaskOutcome>;
 };
 
-export type MaintenanceDeps = { paypal: PayPalReadClient; now: Now; log: RedactingLogger };
+export type MaintenanceDeps = { paypal: PayPalReadClient; solana: SolanaReadClient | null; now: Now; log: RedactingLogger };
 export const MAINTENANCE_TASKS: readonly MaintenanceTask[];
 export async function runMaintenance(deps: MaintenanceDeps): Promise<MaintenanceReport>;
 ```
 
 `MaintenanceDeps` has no write client. That is the whole enforcement argument for finding 6, and `MAINTENANCE_TASKS` is exhaustive: adding a task requires editing this file, which the review diff makes visible.
+**Revised 2026-10-11:** `expire_imports` and `sweep_sources` are removed, because no image or import task exists.
+`reconcile_pyusd_attempts` is added; it receives `SolanaReadClient`, which has no send, airdrop or signing method, and is `null` when `SOLANA_RPC_URL` is unset.
+`reconcile_attempts` stays PayPal-only, and its module imports nothing from Solana.
 
 ## Named clocks
 
@@ -532,18 +1084,32 @@ One name per clock. Every other document must use these names.
 
 | Clock | Starts at | Duration | Enforced by | On expiry |
 | --- | --- | --- | --- | --- |
-| `T_REVIEW` | review creation | 5 minutes | read, `paypal/start`, `paypal/complete` | purchase becomes `review_expired`. Not proof a dispatched payment failed. |
-| `T_IMAGE_ACCESS` | import acceptance | 5 minutes | image proxy and result route, **read-only check** | fetch and result denied even if no job ran and even if writes are blocked |
-| `T_SOURCE_SWEEP` | import deadline | 0 to 60 minutes late | maintenance `sweep_sources` | overdue sources block new imports at `T_MAINT_OVERDUE` |
-| `T_MAINT_OVERDUE` | last successful heartbeat | 90 minutes | import admission gate | new imports refused; operator alert |
+| `T_REVIEW` | review creation | 5 minutes | read, `paypal/start`, `paypal/complete`, and since 2026-10-11 `pyusd/prepare`, the capture-dispatch compare-and-set and the basket lock, all derived on read | purchase becomes `review_expired`. Not proof a dispatched payment failed. Since 2026-10-11 a PayPal attempt that never dispatched a capture reads `abandoned` and its purchase `unpaid_closed`, and stops locking its basket. Once a PYUSD attempt is prepared, `T_REVIEW` no longer applies to it. |
+| `T_MAINT_OVERDUE` | last successful heartbeat | 90 minutes | operator health view (revised 2026-10-11) | operator alert only; no import or payment admission depends on it |
+| `T_MENU_REQUEST` | import admission | 90 seconds | `commitImport` writes only while `now < deadline_at`; readers use `deriveImportOutcome` | late result merged nowhere; the attempt reads as expired with no write and no task |
+| `T_MENU_UPLOAD_READ` | import admission | 30 seconds, never past `T_MENU_REQUEST` | `readCountedBody` | upload aborted; attempt closes `rejected_upload` |
+| `T_MENU_MODEL` | model call start | at most 60 seconds, and never more than the remaining `T_MENU_REQUEST` minus the 5-second commit reserve | abort signal on the one vision call | `model_timeout`; abort is not proof OpenAI stopped processing or billing |
+| `T_WALLET_CHALLENGE` | challenge issue | 5 minutes | proof transaction | challenge unusable; request a new one |
+| `T_RATE_AGE` | rate confirmation | 30 days | PYUSD pricing and preparation, computed on read | PYUSD unavailable at that shop; open PYUSD reviews cannot prepare; prepared attempts unaffected |
+| `T_RPC_WINDOW` | limiter window start | 10 seconds | shared database RPC limiter | budget refills |
+| `T_RPC_CALL` | RPC request start | 10 seconds | bounded RPC transport | call counts as unavailable; never evidence of absence |
+| `T_RPC_SLOT_LEASE` | concurrency slot claim | 15 seconds | limiter slot rows | a slot left by a crash becomes reclaimable |
 | `T_MAINT_INTERVAL` | schedule | hourly at minute 17, every 6 hours before quota confirmation | GitHub Actions | best effort; schedules can be delayed or dropped |
 | `T_MAINT_RUN` | job start | 2 minutes | Actions `timeout-minutes` | job killed; leases expire and are reclaimable |
 | `T_LEASE` | work claim | 5 minutes | due-work queries | another runner may claim; no duplicate external effect because maintenance performs none |
 | `T_HANDOFF` | agent request creation | 10 minutes | redeem route | token unusable; a new request is required |
 | `T_AI_BUDGET` | suggestion request start | 30 seconds | AI adapter | `budget_exceeded`; manual selection offered |
-| `T_PROVIDER_READ_DEBOUNCE` | last provider read | 30 seconds | status and reconcile routes | stored state returned without a new provider call |
+| `T_PROVIDER_READ_DEBOUNCE` | last provider read | 30 seconds | status and reconcile routes, and since 2026-10-11 `pyusd/submitted`, per attempt, for hint and reconcile reads | stored state returned without a new provider call |
 
 Two rules apply to every clock. Expiry is never evidence about an external effect that may already have happened. No clock promises physical erasure.
+
+**Removed 2026-10-11:** `T_IMAGE_ACCESS` and `T_SOURCE_SWEEP`, with the image proxy and source sweep they timed.
+The daily import caps and spend ceiling use the UTC calendar day from `utcDayStart`, which is a calendar boundary rather than a clock.
+
+**Block-height bound, not a clock.**
+A prepared PYUSD attempt is bounded by its saved `lastValidBlockHeight`.
+The bound has passed only when the **finalized** block height exceeds it; a confirmed height, wall time or a wallet error proves nothing.
+Only then may the history scan start.
 
 ## State transitions
 
@@ -553,16 +1119,22 @@ Two rules apply to every clock. Expiry is never evidence about an external effec
 review_open -> review_expired          (T_REVIEW, no attempt ever dispatched)
 review_open -> review_invalidated      (published revision or destination changed)
 review_open -> superseded              (a new review for the same CheckoutKey replaced it)
-review_open -> pending_payment         (paypal/start created an attempt)
-pending_payment -> paid                (decideCaptureOutcome = confirmed)
-pending_payment -> uncertain           (capture_dispatched with unknown or mismatched outcome)
-pending_payment -> unpaid_closed       (cancel with no dispatched capture, or verified failed/canceled)
-uncertain -> paid                      (a later provider read confirms the same capture)
-uncertain -> unpaid_closed             (a later provider read establishes a verified non-payment)
+review_open -> pending_payment         (paypal/start created an attempt, or pyusd/prepare saved a PYUSD attempt)
+pending_payment -> paid                (decideCaptureOutcome = confirmed, or verifyPyusdTransfer = confirmed)
+pending_payment -> uncertain           (capture_dispatched with unknown or mismatched outcome, or a PYUSD attempt in mismatch or held_no_match)
+pending_payment -> unpaid_closed       (cancel with no dispatched capture and no PYUSD attempt; verified failed/canceled; a PayPal attempt abandoned
+                                        because T_REVIEW passed with no capture dispatched, derived on read and stored at the next touch;
+                                        or a PYUSD attempt closed_unpaid)
+uncertain -> paid                      (a later provider read confirms the same PayPal capture)
+uncertain -> unpaid_closed             (a later provider read establishes a verified PayPal non-payment; a held PYUSD attempt closes unpaid
+                                        once release is enabled; or an audited operator resolution closes a PYUSD mismatch)
 paid -> paid                           (terminal; a refund/dispute adds separate status, never rewrites this)
 ```
 
-Illegal and rejected by `canTransitionPurchase`: any transition out of `paid` to an unpaid state; any transition into `paid` that is not sourced from `decideCaptureOutcome = confirmed`; `review_expired -> pending_payment`; `superseded -> anything`.
+Illegal and rejected by `canTransitionPurchase`: any transition out of `paid` to an unpaid state; any transition into `paid` that is not sourced from `decideCaptureOutcome = confirmed` or, since 2026-10-11, `verifyPyusdTransfer = confirmed`; `review_expired -> pending_payment`; `superseded -> anything`.
+A PYUSD purchase can be canceled only before preparation; afterwards cancel answers `payment_uncertain` and the buyer sees "checking payment".
+**Revised 2026-10-11 after review:** a PYUSD purchase reaches `paid` only from `pending_payment`.
+The earlier draft also allowed `uncertain -> paid` through "a later scan", but no PYUSD state leads from `mismatch` or `held_no_match` to `confirmed`, and Gate 2 says mismatched evidence is never paid, so the clause is removed and the two machines agree.
 
 ### Payment attempt
 
@@ -572,8 +1144,10 @@ created -> create_unknown              (create dispatched, response lost)
 create_unknown -> order_created        (same-key replay returned the prior result)
 create_unknown -> abandoned            (replay confirms nothing landed; safe_to_recreate)
 order_created -> externally_approved   (provider read shows buyer approval)
-order_created -> abandoned             (T_REVIEW expiry with no approval; no external effect)
-externally_approved -> capture_dispatched  (lease held, capture request id persisted first)
+created | create_unknown | order_created | externally_approved -> abandoned
+                                       (T_REVIEW passed with no capture dispatched; no external effect; derived on read, stored at the next touch)
+externally_approved -> capture_dispatched  (lease held, capture request id persisted first, by a compare-and-set that requires the review
+                                            deadline to be in the future)
 capture_dispatched -> capture_confirmed
 capture_dispatched -> capture_unknown
 capture_unknown -> capture_confirmed   (same-key replay or provider read)
@@ -582,35 +1156,61 @@ externally_approved -> capture_failed
 ```
 
 `capture_unknown` never transitions to `abandoned` and never permits a new capture request id. That is the single most important illegal transition in the system.
+**Revised 2026-10-11 after review:** the earlier draft gave `externally_approved` no exit, so a buyer who approved at PayPal and closed the tab left a purchase that locked its basket forever.
+Abandonment from any state before `capture_dispatched` is safe only because dispatch requires the review deadline in the same compare-and-set: once `T_REVIEW` has passed, no capture can ever be sent, and `capture_dispatched` and `capture_unknown` never read as abandoned.
 
-### Menu import
+### PYUSD attempt (added 2026-10-11)
 
 ```
-accepted -> dispatched -> completed
-accepted | dispatched -> failed
-accepted | dispatched -> canceled
-accepted | dispatched -> expired        (T_IMAGE_ACCESS)
-completed | failed | canceled | expired -> source_deleted
-completed | failed | canceled | expired -> source_delete_blocked   (storage exhausted; operator runbook)
+prepared -> confirmed                  (a hint or a scanned signature passes verifyPyusdTransfer and binds)
+prepared -> mismatch                   (a successful finalized transaction carrying this reference fails verification)
+prepared -> expired_scanning           (finalized block height > lastValidBlockHeight)
+expired_scanning -> confirmed          (the scan finds a verified transfer)
+expired_scanning -> mismatch           (the scan finds a successful transaction with this reference that fails verification)
+expired_scanning -> held_no_match      (complete scan, no match, automatic unpaid release not enabled)
+expired_scanning -> closed_unpaid      (complete scan, no match, automatic unpaid release enabled)
+held_no_match -> closed_unpaid         (automatic unpaid release enabled later; the recorded coverage is already complete)
+mismatch -> closed_unpaid              (an out-of-band, audited operator resolution with recorded evidence; added 2026-10-11 after review)
 ```
 
-A late result for `expired`, `canceled` or a changed base revision is rejected with `import_expired`, `import_closed` or `import_base_revision_changed`. There is no automatic re-analysis path.
+`prepared`, `expired_scanning`, `held_no_match` and `mismatch` keep the purchase and its basket locked; only `confirmed` and `closed_unpaid` end the lock.
+`mismatch` has no automatic exit: it is operator-visible, and the system never moves it on its own.
+Its one exit is an out-of-band, audited operator resolution that records the operator, the reason and the evidence, such as an out-of-band refund reference or proof that no tokens reached the merchant, and closes the attempt unpaid; the receipt then shows that operator resolution rather than claiming no transfer happened.
+There is no `mismatch -> confirmed`, because Gate 2 says mismatched evidence is never paid; accepting such a transfer would need a Gate 2 amendment.
+The resolution is not built in this gate: Gate 4 places it with the operator CLI of delta D1.
+No transition re-prepares, refreshes the blockhash or submits anything, and a wallet error or a missing hint changes no state.
+
+### Menu import (revised 2026-10-11)
+
+```
+open -> completed                      (commit inside T_MENU_REQUEST merged the validated draft)
+open -> conflict_base_revision         (commit found a newer draft revision; nothing merged)
+open -> conflict_confirmed             (commit found a confirmed draft; nothing merged)
+open -> membership_revoked             (commit found the actor no longer holds the outlet membership; nothing merged; added 2026-10-11 after review)
+open -> rejected_upload | rejected_photo | model_failed | model_timeout | output_invalid | aborted   (best-effort close; nothing merged)
+open, read after deadline_at -> expired   (derived on read by deriveImportOutcome; no write and no task)
+```
+
+A late result is rejected with `import_expired`, and a changed base revision with `import_base_revision_changed`.
+There is no cancel, status-poll or automatic re-analysis path; a fresh merchant action under the current consent starts another attempt, and admission counts it.
+*Removed 2026-10-11:* the `accepted`, `dispatched`, `canceled`, `source_deleted` and `source_delete_blocked` states of the image-row machine.
 
 ## Authorization
 
 | Principal | Obtained by | May | May never |
 | --- | --- | --- | --- |
-| `anonymous` (buyer) | Better Auth anonymous sign-in, HttpOnly cookie | read published outlets/menus, create and own reviews, start and complete their own payment, read their own receipt | any merchant route; read another buyer's purchase; supply a price, payee or rail |
-| `merchant` | permanent pre-provisioned account **plus** an operator-approved `merchant_memberships` row for that outlet | edit their outlet, upload images, correct and confirm a menu, publish when preconditions hold, view and acknowledge their orders | act on an outlet without a membership row; approve their own enrollment; connect an arbitrary pasted merchant id |
-| `operator` | allowlisted flag on a permanent account | approve enrollments, prepare destination connections, read the operator health view | capture or create a payment on a buyer's behalf |
-| `capability:import-image` | 256-bit token in the query string, stored hashed | `GET` the bytes of exactly one import while `T_IMAGE_ACCESS` is open | enumerate imports; extend the deadline; reach any other route; be treated as a session |
-| `capability:import-result` | 256-bit bearer header, stored hashed | `POST` one bounded draft result for exactly one active import | publish, confirm, overwrite merchant edits, reach payment routes |
+| `anonymous` (buyer) | Better Auth anonymous sign-in, HttpOnly cookie | read published outlets/menus, create and own reviews, start and complete their own payment, read their own receipt; since 2026-10-11, prepare PYUSD for their own review and post a signature hint for their own attempt | any merchant route; read another buyer's purchase; supply a price, payee or rail; supply an amount, RPC URL, token account or rate; prepare from another session's review |
+| `merchant` | permanent pre-provisioned account **plus** an operator-approved `merchant_memberships` row for that outlet | edit their outlet, upload a menu photo for a synchronous draft, reload the draft and the latest import outcome, correct and confirm a menu, publish when preconditions hold, view and acknowledge their orders; since 2026-10-11, request a wallet challenge, prove a wallet they control, and set or re-confirm the PYUSD rate | act on an outlet without a membership row; approve their own enrollment; connect an arbitrary pasted merchant id; make a PYUSD wallet active without the outlet's operator-approved enrollment |
+| `operator` | allowlisted flag on a permanent account | approve enrollments, prepare destination connections, read the operator health view, including held and mismatched PYUSD attempts; since 2026-10-11, resolve a PYUSD mismatch as unpaid, out of band and audited, through the operator act Gate 4 places in delta D1 | capture or create a payment on a buyer's behalf; sign or submit a transaction; mark a mismatched PYUSD attempt paid |
 | `agent-token` | out-of-band scoped demo token, stored hashed | `search_outlets`, `get_menu`, `create_purchase_request` over MCP | capture, transfer, menu writes, receipt reads, private registry data |
-| `maintenance` | Actions secret `MAINTENANCE_DATABASE_URL` plus read-only provider config | claim due work, read provider orders, delete overdue source rows, write heartbeat and audit | create or capture an order, re-analyze an image, replace a payment, migrate, keep the app awake |
+| `maintenance` | Actions secret `MAINTENANCE_DATABASE_URL` plus read-only provider config and, when PYUSD is configured, `SOLANA_RPC_URL` | claim due work, read provider orders, read devnet chain state, advance PYUSD scan coverage and attempt states, write heartbeat and audit | create or capture an order, sign, submit or rebroadcast a transaction, request an airdrop, re-analyze an image, replace a payment, migrate, keep the app awake |
 
 Two rules make this table enforceable rather than descriptive. Every route begins with exactly one `require*` guard from `src/lib/auth-context.ts`, and a route that needs two principals does not exist. Guest-to-merchant escalation is blocked at two layers: `onLinkAccount` creates no membership, and `requireOutletMembership` reads the membership row rather than any property of the user record.
 
-The capability principal is intentionally session-free, and that is the answer to finding 4: the provider fetches the image without a browser, so a session requirement would make the integration impossible. The compensating controls are the token's entropy, single-import scope, hashed storage, read-only deadline enforcement, `Cache-Control: private, no-store`, no ETag, no redirect, no-referrer, log redaction of the whole URL and a per-import fetch rate limit.
+**Revised 2026-10-11: there are no capability principals.**
+The image proxy and the result callback are gone, so every import read and write is merchant-session and membership scoped, and browser mutations also pass `assertSameOrigin`.
+Two inputs look like credentials and are deliberately not principals: a wallet signature over a challenge is evidence of key control, never a session or a role; and a submitted transaction signature is a hint the server verifies, never a command.
+*Removed:* `capability:import-image` and `capability:import-result`, with their compensating controls.
 
 ## Call stacks
 
@@ -623,13 +1223,17 @@ POST /api/v1/buyer/suggestions
 
 POST /api/v1/purchases
   requireBuyerSession -> priceBasket (reads the confirmed revision, never client prices)
+    -> computeBasketLockKey -> findBasketLock (since 2026-10-11; derived on read): execution_locked while
+       money can still move for a same-basket purchase of this buyer, on either rail
     -> computeCheckoutKey -> createReview
       -> INSERT purchases ON CONFLICT (buyer, checkout_key) WHERE review_open -> existing_open_review
       -> audit_events in the same transaction
 
 POST /api/v1/purchases/{id}/paypal/start
-  requireBuyerSession -> SELECT ... FOR UPDATE purchases
+  requireBuyerSession -> SELECT ... FOR UPDATE purchases (since 2026-10-11: every purchase of this buyer with
+    the same basket lock key, this one included, in id order)
     -> assertPaymentEligible (owner, T_REVIEW, revision still published, destination still active)
+    -> findBasketLock over the others (since 2026-10-11) => execution_locked, no attempt
     -> attempts.claimSlot (unique partial index: one non-terminal attempt per purchase)
     -> persist create_request_id
     -> paypal/orders.createOrder (host allowlist, payee from the destination row, amounts from the snapshot)
@@ -641,36 +1245,64 @@ POST /api/v1/purchases/{id}/paypal/complete
     -> paypal/orders.readOrder -> verify order id, status, payee, amount, currency, correlation
     -> mismatch => payment_uncertain, operator alert, stop
     -> acquire attempt lease -> persist capture_request_id -> capture_dispatched
+       (since 2026-10-11 one compare-and-set: WHERE state = externally_approved AND the review deadline > now;
+        no row => no capture is sent, and the purchase reads review_expired or abandoned)
     -> paypal/orders.captureOrder -> decideCaptureOutcome
       confirmed => purchase paid + CaptureEvidence
       uncertain => capture_unknown + purchase uncertain
 GET /receipt/{purchaseId}  polls stored state only, at most every T_PROVIDER_READ_DEBOUNCE
+GET /api/v1/purchases/{id} and the receipt (since 2026-10-11): derivePurchaseView, so an attempt before
+  capture_dispatched whose review passed T_REVIEW reads abandoned and its purchase unpaid_closed;
+  applyDerivedTransitions stores both at this touch, best effort, with no maintenance dependency
 POST /api/v1/integrations/paypal/webhook
   verifyPayPalWebhookEvent -> INSERT provider_events ON CONFLICT (event_id) DO NOTHING
     -> if new and the order is known: enqueue a due read. Event content alone never marks paid.
 ```
 
-### Menu image import
+### Menu photo import (revised 2026-10-11)
 
 ```
-POST /api/v1/merchant/outlets/{id}/menu-imports
-  requireOutletMembership -> consent recorded -> sharp decode + normalize + strip metadata
-    -> imports.admission (live cap, churn cap, open-import rule, maintenance heartbeat, storage pressure)
-    -> BEGIN: INSERT menu_imports + menu_import_sources(bytea) + audit_events -> COMMIT
-    -> zapier/dispatch (identity persisted before send) -> dispatched
-      crash between COMMIT and dispatch => expires visibly; a fresh merchant attempt is required
+browser: decode the selected photo, apply orientation, shrink without enlarging to <= 2,048 px per side,
+  re-encode one JPEG <= 2 MiB; the original stays in this tab only; no localStorage or IndexedDB copy
+  a photo that cannot be decoded or fitted stops here and offers another photo or manual entry
 
-GET /api/v1/imports/{id}/image?token=...
-  requireImportImageCapability (hash lookup) -> read accepted_at and state
-    -> isExpired("T_IMAGE_ACCESS") on a READ => 410
-    -> stream bytes, no-store, no optimizer, no redirect, URL redacted from logs
+POST /api/v1/merchant/outlets/{id}/menu-imports      (Node route handler; no proxy matcher covers it)
+  headers Envoi-Consent-Version, Envoi-Base-Revision; body multipart with one part "photo"
+  requireOutletMembership -> assertSameOrigin -> MENU_IMPORTS_ENABLED
+    -> consent version == MENU_CONSENT_VERSION, else 409 consent_required and no row
+    -> admitMenuImport: BEGIN, lock menu_import_admission row
+         bounds and ceiling recorded, no over-reservation, outlet and global live attempts,
+         outlet and global UTC-day counts, the day's held reservations (dispatched or still live) + new <= ceiling
+         INSERT menu_imports(open, deadline_at = now + T_MENU_REQUEST, reserved) + audit, COMMIT
+       refused => 409 or 429 with the ImportRejection; not one body byte has been read
+    -> readCountedBody(<= 2.5 MiB, <= T_MENU_UPLOAD_READ, request.signal)     request memory only
+    -> parseSinglePhotoPart (one "photo" part, <= 2 MiB; declared type ignored)
+    -> normalizeMenuJpeg (header dimensions <= 2,048 before decode; JPEG only; orient; strip metadata; re-encode)
+       a reject here closes rejected_upload or rejected_photo with no dispatch mark, so its reservation counts zero
+    -> markModelDispatched (since 2026-10-11: short committed write while open and before deadline_at;
+         not marked => no call, close aborted; from here the reservation is never released)
+    -> draftMenuFromPhoto (AI_MENU_MODEL; store false; strict schema; no tools; maxRetries 0;
+         maxOutputTokens from reviewed bounds; abort = request.signal or menuModelBudgetMs)
+    -> validateVisionDraft (row, text and size bounds; per-item blank prices; duplicates flagged)
+    -> commitImport: BEGIN, lock attempt and draft revision
+         attempt open and now < deadline_at, actor still holds the outlet membership (restored 2026-10-11),
+         base revision current and unconfirmed
+         mergeImportSuggestions (merchant edits preserved) -> close completed with counts, usage,
+         fingerprint, latency and peak RSS -> audit, COMMIT
+       late => nothing merged, reads expired; membership revoked => close membership_revoked, 403 forbidden_membership;
+       conflict => close with the conflict outcome, nothing merged
+    -> 200 with the outcome and draft summary; no image bytes in any response
+  any failure => closeImportFailed(outcome) best effort; log only toSafeErrorRecord(err, "openai")
+  buffers fall out of scope with the request; nothing is written to disk, the database or a log
 
-POST /api/v1/integrations/zapier/menu-results
-  requireZapierResultCapability -> isExpired -> validateZapierResult
-    -> mergeImportSuggestions (base revision must match; merchant edits preserved)
-    -> closeImport("completed") -> DELETE source row in the same transaction
-       delete blocked => source_delete_blocked + operator alert, access already denied
+GET /api/v1/merchant/outlets/{id}/menu-draft
+  requireOutletMembership -> draft + deriveImportOutcome(latest attempt, now)       read only
+  a lost response is recovered here: completed stays visible; a live attempt blocks a retry until its deadline
+```
 
+*Removed 2026-10-11:* the image-capability `GET`, the Zapier result `POST`, Zapier dispatch and the source-row delete.
+
+```
 PUT /api/v1/merchant/outlets/{id}/menu-draft
   requireOutletMembership -> revision conflict check -> upsert items -> confirmation invalidated
 
@@ -692,16 +1324,130 @@ POST /api/v1/outlets/resolve-sgqr
   raw payload is discarded after parsing and never logged
 ```
 
+### PYUSD merchant wallet and rate (added 2026-10-11)
+
+```
+POST /api/v1/merchant/outlets/{id}/destinations/pyusd/challenge     body { walletAddress }
+  requireOutletMembership -> assertSameOrigin -> requirePyusdEnabled -> ratelimit (10 per outlet per hour)
+    -> buildChallengeMessage (domain and URI from APP_BASE_URL, never the Host header; devnet; purpose and outlet; nonce; expiry)
+    -> INSERT wallet_challenges (exact bytes, nonce hash UNIQUE, expires_at) -> { challengeId, message }
+browser: wallet.features["solana:signMessage"].signMessage({ account, message }) -> signature bytes
+PUT /api/v1/merchant/outlets/{id}/destinations/pyusd                body { challengeId, signature }
+  requireOutletMembership -> assertSameOrigin -> requirePyusdEnabled
+    -> load challenge: same outlet, not expired, not consumed
+    -> Ed25519 verify(saved bytes, signature, challenge wallet)
+    -> checkPyusdIdentity -> checkPyusdTokenAccount(challenge wallet): derived address exists, is Token-2022, is not frozen
+    -> BEGIN: UPDATE wallet_challenges SET consumed_at WHERE id AND consumed_at IS NULL AND expires_at > now RETURNING
+       upsert payment_destinations (rail pyusd, wallet, token account, key control verified, version + 1) -> audit -> COMMIT
+  creates no membership and no enrollment; open PYUSD reviews pinned to the old destination version fail at preparation
+
+PUT /api/v1/merchant/outlets/{id}/pyusd-rate                        body { pyusdPerSgd: "0.742115" }   (illustrative value)
+  requireOutletMembership -> assertSameOrigin -> requirePyusdEnabled
+    -> parsePyusdPerSgd (exact decimal, at most 6 places, within PYUSD_RATE_BOUNDS)
+    -> INSERT pyusd_rates (new version, confirmed_at = now) -> audit
+  re-confirming an unchanged value also creates a version; open PYUSD reviews on the old version fail at preparation
+```
+
+### PYUSD purchase (added 2026-10-11)
+
+```
+POST /api/v1/purchases                                              rail "pyusd"
+  requireBuyerSession -> computeBasketLockKey -> findBasketLock (derived on read): execution_locked while money can
+    still move for a same-basket purchase of this buyer, on either rail (revised 2026-10-11 after review)
+    -> priceBasket (confirmed revision; verified PYUSD destination; PYUSD_ENABLED; rate not past T_RATE_AGE)
+       -> pyusdAtomicFor (ceil, BigInt) -> computeCheckoutKey (includes the rate version) -> createReview
+
+POST /api/v1/purchases/{id}/pyusd/prepare                           body { walletAddress }
+  (revised 2026-10-11 after review: no RPC call runs inside a database transaction)
+  requireBuyerSession -> assertSameOrigin -> requirePyusdEnabled
+    -> plain read of the purchase and its attempt, no row lock:
+         an attempt in prepared, same wallet => getBlockHeight(confirmed) through the limiter, outside any transaction:
+           height <= lastValidBlockHeight - 10 ? the saved bytes ("existing") : locked
+         any other attempt => locked
+    -> assertPaymentEligible (owner, T_REVIEW, published revision, destination version, rate version and age,
+         PAYMENTS_ENABLED) as a read-only pre-check
+    -> read-only RPC through the shared limiter, outside any transaction:
+         checkPyusdIdentity (genesis, mint owner program and decimals)
+         mint at finalized -> assessMintForTransfer (bps and maximum fee zero for this and the next epoch; hook null; reviewed extensions)
+         checkPyusdTokenAccount(merchant) again: exists, Token-2022, not frozen, since the account can change after the proof
+         checkPyusdTokenAccount(buyer): Token-2022, not frozen, amount >= atomicAmount (a missing account has amount 0)
+         getLatestBlockhashConfirmed -> blockhash, lastValidBlockHeight, slot
+         buildUnsignedTransfer (memo with the new reference, then TransferChecked; version 0; no compute budget)
+    -> BEGIN: SELECT ... FOR UPDATE every purchase of this buyer with the same basket lock key, this one included, in id order
+         recheck no attempt, unchanged eligibility, and findBasketLock over the others => execution_locked
+         INSERT payment_attempts (rail pyusd, prepared, all evidence, reference UNIQUE); purchase -> pending_payment; audit
+       COMMIT
+    -> only now respond { attemptId, transactionBase64, chain: "solana:devnet" }
+  a lost response leaves a locked attempt; a repeat call returns the same bytes while they are valid
+
+browser (pyusd-pay.tsx)
+  wallets = getWallets() with chains including solana:devnet and the solana:signAndSendTransaction feature
+  none on a phone => an "Open in Phantom" link from buildPhantomBrowseLink; never a pay button
+  none on a desktop => no pay button; explain that a devnet wallet is needed
+  -> signAndSendTransaction({ account, chain: "solana:devnet", transaction: exact bytes })
+  -> signature bytes -> base58 -> POST pyusd/submitted
+  a wallet error or rejection after preparation is shown as "checking payment", never as canceled
+
+POST /api/v1/purchases/{id}/pyusd/submitted                         body { attemptId, signature }
+  requireBuyerSession -> assertSameOrigin -> owner
+    -> append the hint by compare-and-set on the hint count while the attempt is not terminal and holds fewer than
+       PYUSD_HINT_CAP; a repeated hint changes nothing; past the cap the hint is audited only (revised 2026-10-11 after review)
+    -> the readable hint is the oldest one still unread or not_found, and only while every older hint is decided
+       not_ours or failed_landing; a hint behind an undecided one waits
+    -> debounced by T_PROVIDER_READ_DEBOUNCE per attempt, outside any transaction: getTransactionFinalized(readable hint)
+         null => hint not_found; read again after the debounce
+         verifyPyusdTransfer: confirmed => bind finalizedSignature (UNIQUE), attempt confirmed, purchase paid, evidence, audit
+                              not_ours => hint decided not_ours in audit; the next hint becomes readable
+                              failed_landing => hint decided failed_landing; the next hint becomes readable
+                              uncertain => attempt mismatch, purchase uncertain, operator-visible
+         every state change is a compare-and-set in one short transaction after the read
+GET /receipt/{purchaseId}  polls stored state within the approved polling bounds; while an attempt is prepared, each
+  poll may call the debounced reconcile route, so at most one provider read happens per T_PROVIDER_READ_DEBOUNCE
+```
+
+The phone link is `https://phantom.com/ul/browse/<encoded APP_BASE_URL/buy?outlet=<id>&items=<itemId:qty,...>>?ref=<encoded APP_BASE_URL>`.
+It carries no purchase id, session, price, payee or personal data; inside Phantom's browser the buyer gets a new anonymous session, and `/buy` only pre-fills a basket that the buyer reviews through the ordinary `POST /purchases`.
+The original browser's review is never prepared and simply expires.
+
+### PYUSD recovery (added 2026-10-11)
+
+```
+POST /api/v1/purchases/{id}/reconcile (rail pyusd), and maintenance reconcile_pyusd_attempts
+  claim the attempt lease (T_LEASE) -> checkPyusdIdentity (genesis, mint owner program and decimals):
+    a mismatch records lastGap identity_changed and stops; an unreachable RPC records rpc_unavailable and stops
+  -> decideRecoveryStep(attempt, finalized block height):
+     prepared, height <= lastValidBlockHeight  => verify the readable hint, if any; otherwise wait
+     prepared, height > lastValidBlockHeight   => verify the readable hint first; then expired_scanning with the top boundary fixed now
+     expired_scanning => getSignaturesFinalized(merchant token account, before = cursor, 1000)
+         at most 3 pages and 20 candidate fetches per claim
+         applyScanPage -> candidates: successful signatures at or after preparationSlot
+         each candidate -> getTransactionFinalized -> verifyPyusdTransfer
+            confirmed       => bind, attempt confirmed, purchase paid
+            uncertain       => attempt mismatch, purchase uncertain, operator alert; release is impossible
+            not_ours or failed_landing => continue
+         429, null transaction, unavailable, oversized, page cap or identity change => record lastGap, keep the cursor, stop
+         a page advances the cursor only after all its candidates are decided
+         reachedBeforePreparation => complete:
+            PYUSD_PROOFS.automaticUnpaidRelease ? closed_unpaid, purchase unpaid_closed, basket unlocked
+                                                : held_no_match, purchase uncertain, operator alert
+  -> persist coverage and state with compare-and-set; release the lease
+PYUSD_ENABLED false stops only new PYUSD actions; this recovery path still runs for prepared attempts.
+```
+
 ### Maintenance run
 
 ```
 .github/workflows/maintenance.yml -> node .maintenance-build/src/maintenance/run.js
   connect MAINTENANCE_DATABASE_URL (direct) -> heartbeat
   -> record_capacity (pg_database_size plus Neon-reported usage where reachable)
-  -> expire_imports -> sweep_sources -> reconcile_attempts (PayPalReadClient only)
+  -> reconcile_attempts (PayPalReadClient only; imports no Solana module)
+  -> reconcile_pyusd_attempts (SolanaReadClient only, when SOLANA_RPC_URL is set; shared database RPC limiter;
+       at most 2 attempts per run, each within the per-claim page and fetch caps)
   -> close_expired_reviews -> purge_expired_sessions
   -> write maintenance_runs report -> exit non-zero if any outcome is operator-visible
 ```
+
+**Revised 2026-10-11:** `expire_imports` and `sweep_sources` are removed; imports never depend on this run.
 
 ## Races
 
@@ -717,8 +1463,27 @@ POST /api/v1/outlets/resolve-sgqr
 | Destination disconnected mid-review | Same mechanism via the pinned `destination_id`. An already captured payment keeps its original evidence. |
 | Duplicate or out-of-order webhook | Unique `provider_events(event_id)`; a duplicate inserts nothing and changes nothing. An unknown order is quarantined. No callback can downgrade `paid`. |
 | Two maintenance runs overlap | Leases claimed with `UPDATE ... WHERE lease_expires_at < now() RETURNING`. Because maintenance performs no external write, an overlap costs work, not money. |
-| Late Zapier result | Rejected by `T_IMAGE_ACCESS` and by the base-revision check. A confirmed menu is never overwritten by a callback. |
-| Storage exhaustion during close | `closeImport` reports `source_delete_blocked` instead of failing the request. Access denial already happened on the read path, which needs no write. |
+| Two imports at once (added 2026-10-11) | `admitMenuImport` locks the singleton admission row, so both in-flight checks and both daily counts see one view. The loser gets `in_flight_outlet` or `in_flight_global` and no row. |
+| Lost import response, merchant retries | The merchant reloads `GET menu-draft` first. A completed import is visible; a still-live attempt refuses a new admission until its deadline; after the deadline it reads expired and admission proceeds. A disconnect is not proof nothing committed. |
+| Import commit races a merchant edit or confirmation | `commitImport` locks the draft revision row and requires the base revision to be current and unconfirmed. Otherwise it closes with a conflict outcome and merges nothing. |
+| Model result after the deadline | `commitImport` writes only while `now < deadline_at`; a late result merges nothing and the attempt reads expired. Usage is still recorded. |
+| Two tabs prepare PYUSD for one purchase | `SELECT ... FOR UPDATE` on the purchase plus the one-active-attempt partial index, whose terminal set now includes `confirmed` and `closed_unpaid`. The second call gets the same bytes, for the same wallet while valid, or `locked`. |
+| Preparation response lost | The attempt commits before any byte leaves. A repeat call returns the same bytes while valid and never a new blockhash. |
+| Buyer rejects in the wallet, then retries | Same bytes while valid. After that, recovery only: no new review for the basket on either rail until the attempt ends. |
+| Rate, destination or menu changes during an open PYUSD review | Preparation rechecks every pinned version inside its locked transaction and fails `review_invalidated`. Prepared attempts keep their saved amount and destination. |
+| Eligibility changes between the two preparation transactions | The second transaction rechecks eligibility and that no attempt exists before it inserts. |
+| Hint route and maintenance verify the same signature | `finalizedSignature` is unique and state changes are compare-and-set; the loser re-reads. |
+| Web reconcile and maintenance scan the same attempt | The attempt lease allows one claimer; coverage is written with compare-and-set, so a stale claimer cannot move the cursor back or forward. |
+| Two merchant tabs submit one wallet challenge | `UPDATE ... WHERE consumed_at IS NULL RETURNING`; one wins and the other gets `challenge_used`. |
+| A payment that can still move money and a new review on the other rail | The basket lock key ignores the rail, so `createReview` refuses with `execution_locked` while `moneyCanStillMove` holds for a same-basket purchase. Revised after review: the lock no longer follows `pending_payment`. |
+| Two reviews of one basket, opened before either started, then both started (added after review) | Each execution start locks every same-basket purchase of the buyer in id order before it rechecks the lock and inserts, so the second start waits, sees the first attempt and refuses `execution_locked`. |
+| Buyer approves at PayPal and closes the tab (added after review) | Once `T_REVIEW` passes with no capture dispatched, the attempt reads `abandoned` and the purchase `unpaid_closed` on read, and the basket unlocks; the next touch stores both. Maintenance's `close_expired_reviews` is cleanup only. |
+| `T_REVIEW` passes while `paypal/complete` is between its eligibility check and dispatch (added after review) | Dispatch is a compare-and-set that requires `externally_approved` and an unexpired review deadline, and abandonment is a compare-and-set from a pre-capture state; exactly one wins, and a lost dispatch sends no capture. |
+| Membership revoked while an import is in flight (added after review) | `commitImport` rechecks the membership inside its transaction; a revocation committed first makes it close `membership_revoked` and merge nothing. |
+| Devnet resets during recovery | The identity check fails, coverage records `identity_changed`, and nothing is released. |
+| Web and runner compete for the RPC budget | One database limiter serves both; a refused acquisition means "not now" and is never absence evidence. |
+
+*Removed 2026-10-11:* the late Zapier result and storage-exhaustion-during-close rows, whose mechanisms no longer exist.
 
 ## Capacity budgets
 
@@ -726,22 +1491,44 @@ All figures are **[hypothesis]** arithmetic over **[verified]** or **[vendor cla
 
 | Quota | Documented limit | Envoi budget | Guard |
 | --- | --- | --- | --- |
-| GitHub Actions minutes (private repo) | **[verified]** 2,000/month; public standard runners free; usage blocked with no payment method on file | every 6 hours = about 180 runs = about 180 minutes = 9%. Move to hourly (about 720 minutes = 36%) only after remaining quota is confirmed or the repository is public, which the official rules require for submission anyway | no payment method on file, plus a $0 spending limit; the workflow is disabled until the cadence decision is recorded |
-| Neon storage | **[verified]** 1 GB/project; history window 6 hours; inserts, updates and deletes fail at the limit | domain data 50 MB, live image bytes 100 MB, history churn 100 MB, audit and events 20 MB, reserved headroom 630 MB | admission refuses at 20 live sources **or** 100 MiB admitted in the rolling 6-hour window **or** measured usage above 70% |
+| GitHub Actions minutes (private repo) | **[verified]** 2,000/month; public standard runners free; usage blocked with no payment method on file | every 6 hours = about 180 runs = about 180 minutes = 9%. Move to hourly (about 720 minutes = 36%) only after remaining quota is confirmed or the repository is public, which the official rules require for submission anyway | no payment method on file, plus a $0 spending limit; the workflow is disabled until the cadence decision is recorded. Since 2026-10-11, PYUSD reconciliation adds at most about 54 RPC calls a run, at least 27 seconds at the shared budget, inside `T_MAINT_RUN` |
+| Neon storage (revised 2026-10-11) | **[verified]** 1 GB/project; history window 6 hours; inserts, updates and deletes fail at the limit | domain data 50 MB, audit and events 20 MB, import metadata under 2 MB/month (at most 50 bytes-free rows a day), PYUSD challenges, rates, attempts and coverage under 5 MB; at the full RPC budget, limiter row writes could hold on the order of 20 MB in the 6-hour history window by arithmetic, and real use is far lower; about 900 MB headroom | no image bytes exist; `record_capacity` reports usage and alerts the operator at 70%; no import or payment admission depends on that reading (R2) |
 | Neon compute | **[vendor claim]** 100 CU-hours/project/month; mandatory scale-to-zero after 5 minutes | 720 maintenance wakes at about 10 s each is about 2 wall-clock hours; buyer sessions budgeted at 200 sessions x 3 minutes is about 10 wall-clock hours | no polling loop anywhere; browser polling only while an attempt is non-terminal, at most every 2 s for at most 60 s per page view. **[unknown]** exact CU conversion; measure in Slice 1 |
-| Neon transfer | **[vendor claim]** 5 GB/project/month | images are fetched at most once per import at 5 MiB or less; JSON polling dominates | negligible against quota; monitored by `record_capacity` |
+| Neon transfer | **[vendor claim]** 5 GB/project/month | revised 2026-10-11: no image bytes cross the database; JSON polling dominates | negligible against quota; monitored by `record_capacity` |
 | Render Free instance hours | **[vendor claim]** 750 shared/month; sleep after 15 minutes idle | 744 hours in a month, so exactly one always-listening free service | one web service only; a second free service would halve availability below the month |
 | Cold start | **[vendor claim]** about a minute to wake | counted inside the approved three-minute buyer metric | a genuinely idle first visit is measured; no silent pre-warming |
+| OpenAI API spend (added 2026-10-11) | **[verified]** per-token billing; the pricing page names no free tier | the daily ceiling is **[unknown]** until the user records it; at most 50 reserved attempts a day | admission fails closed while the ceiling or the model's reviewed bounds are missing; a reservation whose model call was dispatched is never released, and only an attempt closed before dispatch counts zero; usage above a reservation stops imports |
+| Render Free memory and CPU for imports (added 2026-10-11) | **[vendor claim]** 512 MB and 0.1 CPU | one import at a time; per import at most a 2.5 MiB body, a 2 MiB part, a re-encoded JPEG of about 2 MiB, a base64 copy of about 2.7 MiB and one decoded frame of about 17 MB as RGBA by arithmetic; `sharp` overhead **[unknown]** | one global in-flight import; dimensions read from the header before decoding; peak RSS sampled per import and shown to the operator (R6) |
+| Public devnet RPC (added 2026-10-11) | **[verified]** published 100 requests/10 s/IP, 40/10 s/IP per method, 40 concurrent | 20 calls/10 s, 10/10 s per method and 2 concurrent across web and runner; per maintenance claim at most 3 pages and 20 transaction reads; about 4 reads per preparation | shared database limiter with jittered backoff; Render's shared outbound IP may consume the same allowance **[unknown]** |
 
-`pg_database_size(current_database())` does not include Neon's history/instant-restore storage, so `record_capacity` records both that value and, where reachable, the provider-reported usage. If provider usage cannot be read programmatically, the operator reads the console weekly and the admission threshold stays at 70% of 1 GB. This limitation is stated rather than smoothed over.
+`pg_database_size(current_database())` does not include Neon's history/instant-restore storage, so `record_capacity` records both that value and, where reachable, the provider-reported usage.
+If provider usage cannot be read programmatically, the operator reads the console weekly.
+**Revised 2026-10-11:** the 70% figure is now an operator alert, not an import admission threshold, because imports store no bytes and must not depend on a maintenance reading.
+This limitation is stated rather than smoothed over.
 
 ## Test plan
 
 Every test must be able to fail. Each guard gets its own mutation proof, because a fault caught by two tests proves nothing about either one.
 
-### Pricing and checkout identity
+**Batching, revised 2026-10-11 after review.**
+The user asked for fewer named tests and less test compute without weakening one guard, one mutation.
 
-| Test | Asserts | Mutation that proves it |
+- Guards that share a fixture, a module and a future slice run as one table-driven test, called a group.
+  Each row of a group is one guard: it is reported as its own case, asserts its specific failure reason and lists its own mutation, and removing that one guard fails exactly its own row.
+- A group never spans two slices or the PayPal, PYUSD and import boundary.
+  Every section names its slice unit; the PYUSD groups assume the roadmap's two PYUSD slices, a purchase slice and then a recovery slice, so Gate 4 can assign each group whole.
+  If Gate 4 splits a unit differently, it regroups by case, which the delta mapping makes mechanical.
+- A guard that is observable only through another guard stays a standalone test, so that a mutation of the other guard fails no row but its own.
+  Where a slice finds that one mutation fails two rows, it narrows the fixture or moves one row out as a standalone test and records that, and never weakens either row.
+- Pure-logic groups run with no database.
+  Database groups share one PostgreSQL setup per test file and run each case inside a transaction that is rolled back, with the route's own transactions as savepoints; the schema and constraints are real, and nothing mocks the database.
+  A guard whose proof needs two committed connections, such as a concurrency race, stays a standalone test that commits uniquely keyed rows and deletes them afterwards.
+- Counts: 90 named tests, which are 69 standalone tests and 21 groups, and 225 cases.
+  A case is one table row; a standalone test is one row, and only the approved `publication requires all four preconditions` lists four mutations in its row.
+
+### Pricing and checkout identity (unchanged from 2026-10-07; the Gate 4 draft assignment stands)
+
+| Test | Asserts | Mutation |
 | --- | --- | --- |
 | `prices come only from the confirmed revision` | a client-supplied price field is ignored and the server total is used | make `priceBasket` read a body field; test fails |
 | `unknown price never becomes zero` | an item with `priceSgdCents: null` blocks review creation with `validation_failed` | default null to 0; test fails |
@@ -749,7 +1536,7 @@ Every test must be able to fail. Each guard gets its own mutation proof, because
 | `a changed menu revision is a new checkout` | a different `menuRevisionId` produces a different `CheckoutKey` | remove the revision from the hash input; test fails |
 | `replacement only from a terminal unpaid state` | replacing a `pending_payment` purchase is rejected with `execution_locked` | allow replacement from any state; test fails |
 
-### Payment safety
+### Payment safety (unchanged from 2026-10-07; the Gate 4 draft assignment stands)
 
 | Test | Asserts | Mutation |
 | --- | --- | --- |
@@ -767,29 +1554,158 @@ Every test must be able to fail. Each guard gets its own mutation proof, because
 | `expired review cannot start a payment` | `T_REVIEW` expiry yields `review_expired` | skip the clock check; test fails |
 | `maintenance cannot capture` | the compiled maintenance bundle contains no reference to the capture module or endpoint path | add `orders.ts` to the runner build; test fails |
 
-### Menu import and image boundary
+### Basket lock and PayPal abandonment (added 2026-10-11, revised after review; shared purchase and PayPal code, placed by Gate 4)
+
+These touch code that PayPal and PYUSD share, so none is grouped.
+The lock tests most likely land with the first PYUSD slice and the abandonment tests with the PayPal slices; Gate 4 decides.
 
 | Test | Asserts | Mutation |
 | --- | --- | --- |
-| `expiry denies a fetch with no write` | with the write path disabled, a fetch after `T_IMAGE_ACCESS` still returns 410 | make denial depend on a state column write; test fails |
-| `closed import denies a fetch` | completion, failure and cancel each deny the next fetch | remove the state check; test fails |
-| `guessed token is denied` | a wrong or truncated token yields 404 with no timing oracle and no byte leak | compare in plain string form; test fails |
-| `blocked delete is reported not thrown` | `closeImport` returns `source_delete_blocked` under a simulated storage error | let the error propagate; test fails |
-| `admission refuses churn` | the 21st 5 MiB admission inside the rolling window is refused with `churn_cap` | count live bytes only; test fails |
-| `stale heartbeat blocks imports` | a heartbeat older than `T_MAINT_OVERDUE` refuses admission | remove the check; test fails |
-| `malformed result is an error not a repair` | invalid JSON yields `import` failure and leaves the draft unchanged | coerce to an empty list; test fails |
-| `late result is rejected` | a result after expiry yields `import_expired` and no draft change | accept it; test fails |
-| `base revision change is rejected` | a result for a superseded revision yields `import_base_revision_changed` | drop the comparison; test fails |
+| `an unresolved payment blocks the same basket on the other rail` | while a PayPal purchase is `uncertain`, a PYUSD review for the same outlet and lines is refused with `execution_locked`, and the reverse | key the lock by rail; test fails |
+| `an abandoned PayPal order does not lock its basket` | a PayPal attempt left in `order_created` past `T_REVIEW` reads `abandoned`, its purchase reads `unpaid_closed`, and a new review of the same basket is created on either rail, with no maintenance run | lock on any `pending_payment` purchase; test fails |
+| `an approved PayPal order that never returns closes unpaid` | an attempt in `externally_approved` whose buyer never returns reads `abandoned` once `T_REVIEW` passes, its purchase reads `unpaid_closed` with no capture request sent, and the next touch stores both transitions | give `externally_approved` no exit; test fails |
+| `capture is never dispatched once the review has expired` | with an injected clock that crosses the review deadline between the completion route's eligibility check and its dispatch write, the compare-and-set writes nothing and no capture request is sent | drop the deadline predicate from the dispatch compare-and-set; test fails |
+| `two open reviews of one basket cannot both start payment` | with a PayPal review and a PYUSD review of the same basket both open, and both execution transactions held after their first lock by an injected barrier, exactly one attempt is saved and the other start answers `execution_locked` | check the basket lock only at review creation, or check it without first locking the buyer's same-basket purchases; either mutation fails the test |
+
+### Menu import: route refusals and upload bounds (import slice)
+
+**Group `import route refusals read no body`**, 4 cases.
+The menu-import route handler against PostgreSQL, rolled back per case; the request body is a stream that counts its pulls.
+
+| Case | Asserts | Mutation |
+| --- | --- | --- |
+| `import route rejects a foreign Origin` | a foreign `Origin` yields 403 `forbidden_origin` before admission, with no attempt row and zero body pulls | skip `assertSameOrigin`; this case fails |
+| `imports refuse while disabled` | with `MENU_IMPORTS_ENABLED` false the route answers `admission_rejected` with `imports_disabled`, writes no row and pulls no body | ignore the flag; this case fails |
+| `stale consent version is refused before admission` | an old `Envoi-Consent-Version` yields 409 `consent_required`, no row and zero body pulls | skip the version comparison; this case fails |
+| `refused admission reads no image bytes` | with a live import already open for the outlet, admission refuses with `in_flight_outlet` and the body has been pulled zero times | read the body after the consent check but before admission; this case fails |
+
+**Group `import upload and photo rejects`**, 8 cases.
+The menu-import route handler against PostgreSQL, rolled back per case; the OpenAI fake fails the case if it is ever called.
+
+| Case | Asserts | Mutation |
+| --- | --- | --- |
+| `import body is counted, not trusted from Content-Length` | a chunked body over 2.5 MiB with a false or missing `Content-Length` stops being read within one chunk of the limit and yields `import_rejected` with `too_large`; the attempt closes `rejected_upload` | read with `request.arrayBuffer()` and check the size afterwards; the pulled-byte count exceeds the bound and this case fails |
+| `slow upload stops at its read bound` | a body still arriving at `T_MENU_UPLOAD_READ` on an injected clock is abandoned with `timeout` and `rejected_upload` | remove the read timer; this case fails |
+| `non-multipart body is refused` | a raw JPEG body yields `not_multipart` and `rejected_upload` | accept a raw body; this case fails |
+| `second photo part is refused` | a body with a second part yields `part_count` and `rejected_upload` | accept extra parts; this case fails |
+| `body without a photo part is refused` | a body whose only part has another name yields `missing_photo` and `rejected_upload` | accept a part of any name; this case fails |
+| `JPEG over 2 MiB is refused inside a legal body` | a 2.3 MiB JPEG within 2,048 pixels per side, in a body under 2.5 MiB, yields `part_too_large` and `rejected_upload` | drop the part-size check, leaving only the body limit; this case fails |
+| `non-JPEG content is refused even when labeled JPEG` | PNG bytes declared `image/jpeg` yield `not_jpeg` and `rejected_photo` | skip the decoded-format check; this case fails |
+| `JPEG over 2,048 pixels per side is refused before decode` | a 2,049 x 100 JPEG yields `too_many_pixels` and `rejected_photo`, and the pixel-decode spy is never called | drop the header dimension check; this case fails |
+
+**Group `import route static checks`**, 3 cases.
+A static check over the route sources and the repository root; no database.
+
+| Case | Asserts | Mutation |
+| --- | --- | --- |
+| `no proxy matcher covers the import route` | a build check fails if `src/proxy.ts` or `middleware.ts` exists with a matcher that includes the menu-import path | add a catch-all proxy file; this case fails |
+| `menu-import handler begins with its membership guard` | `requireOutletMembership` is the first statement of the menu-import handler | remove the guard from that handler; this case fails |
+| `menu-draft handler begins with its membership guard` | `requireOutletMembership` is the first statement of the menu-draft handler | remove the guard from that handler; this case fails |
+
+Standalone tests:
+
+| Test | Asserts | Mutation |
+| --- | --- | --- |
+| `re-encoded photo carries no metadata` | a photo with EXIF GPS, XMP and a comment reaches the model fake with none of them and correctly oriented | send the uploaded bytes unchanged; test fails |
+| `import writes nothing to disk` | with an empty dedicated temporary directory and file-write spies, a successful and a failing import create no file anywhere | spool the upload to a temporary file; test fails |
+
+### Menu import: admission and spend (import slice)
+
+**Group `menu import admission`**, 12 cases.
+`admitMenuImport` against PostgreSQL, rolled back per case; limits and the spend policy are injected so each case isolates one guard, for example by raising the global in-flight limit to 2 for the outlet case.
+
+| Case | Asserts | Mutation |
+| --- | --- | --- |
+| `second live import for an outlet is refused` | with the global limit raised for isolation, a second admission for one outlet before the first deadline yields `in_flight_outlet` | drop the outlet in-flight predicate; this case fails |
+| `second live import anywhere is refused` | a live import for outlet A makes an admission for outlet B yield `in_flight_global` | drop the global in-flight predicate; this case fails |
+| `eleventh import for an outlet in a UTC day is refused` | with the global daily cap raised for isolation and ten completed attempts at midday UTC, the eleventh admission for the outlet yields `daily_cap_outlet` | drop the outlet daily count; this case fails |
+| `fifty-first import in a UTC day is refused` | across outlets, the fifty-first admission yields `daily_cap_global` | drop the global daily count; this case fails |
+| `failed and aborted attempts count toward daily caps` | ten failed or aborted attempts for one outlet exhaust its daily cap | count only completed attempts; this case fails |
+| `daily caps reset at UTC midnight` | an admission at 07:59 SGT counts in the earlier UTC day and one at 08:00 SGT starts a new day | compute the day in Asia/Singapore; this case fails |
+| `an expired open import does not block the next admission` | an open row past its deadline, never closed, does not count as live | count stored open rows as live; this case fails |
+| `imports fail closed until a spend ceiling is recorded` | with `dailyCeilingUsdMicros: null` every admission yields `spend_ceiling_unset` | treat a null ceiling as unlimited; this case fails |
+| `unreviewed menu model is refused` | an `AI_MENU_MODEL` with no reviewed bounds entry yields `model_bounds_missing` | fall back to default bounds; this case fails |
+| `reservation beyond the daily ceiling is refused` | when the day's held reservations of live attempts plus a new one exceed the ceiling, admission yields `spend_ceiling_reached` | compare only recorded actual spend; this case fails |
+| `usage above its reservation stops further imports` | once an attempt records actual spend above its reservation, the next admission yields `model_bounds_exceeded` | ignore recorded usage at admission; this case fails |
+| `an attempt closed before the model call releases its reservation` | an attempt closed `rejected_photo` with no dispatch mark counts zero, so an admission that fits only without it is admitted | count every reservation whatever its dispatch mark; this case fails |
+
+Standalone tests:
+
+| Test | Asserts | Mutation |
+| --- | --- | --- |
+| `concurrent admissions admit one` | two simultaneous admissions produce exactly one open row | remove the singleton row lock; test fails |
+| `aborted attempt keeps its spend reservation` | after an aborted call whose dispatch was recorded, the day's held reservations still include that attempt, so an admission that fits only without it yields `spend_ceiling_reached` | release a reservation whenever its attempt closes, ignoring the dispatch mark; test fails |
+| `model dispatch is recorded before the call` | when the OpenAI fake receives the request, a second connection already sees the attempt's committed `model_dispatched_at` | write the dispatch mark after the call returns, or inside a transaction still open during the call; test fails |
+
+### Menu import: vision call and leak boundary (import slice)
+
+OpenAI HTTP is faked at the provider's fetch boundary, and every fake response is a labeled fixture.
+
+**Group `menu vision request`**, 8 cases.
+The menu-import route handler against PostgreSQL, rolled back per case, with the fake fetch capturing the one request.
+
+| Case | Asserts | Mutation |
+| --- | --- | --- |
+| `menu vision request sets store false` | the request body captured at the fake fetch boundary contains `"store": false` | omit the provider option; this case fails |
+| `menu vision request carries no tools` | the captured request body has no `tools` field | register a read tool on the call; this case fails |
+| `menu vision call is never retried` | a fake 500 response produces exactly one HTTP request and `model_failed` | leave `maxRetries` at the SDK default; this case fails |
+| `menu vision schema is strict with required nullable fields` | the captured schema is strict, lists every property as required and allows null for each unknown value | make `priceText` optional; this case fails |
+| `menu vision output is capped at the reviewed token bound` | the captured output-token limit equals the reviewed bounds entry | omit `maxOutputTokens`; this case fails |
+| `menu vision uses AI_MENU_MODEL, not AI_MODEL` | with the two names set to different values, the captured request names the `AI_MENU_MODEL` value | read `AI_MODEL`; this case fails |
+| `model budget keeps the commit reserve` | after a 40-second upload on an injected clock, the model abort fires at 45 seconds, and never later than 60 seconds | use a fixed 60-second budget; this case fails |
+| `client disconnect aborts the model call` | aborting the request signal aborts the in-flight fake call and closes the attempt `aborted` | stop passing the request signal; this case fails |
+
+Standalone tests:
+
+| Test | Asserts | Mutation |
+| --- | --- | --- |
+| `image bytes never reach logs, responses or audit` | the scanner's self-test first detects a planted needle as raw base64, as a data URL and as a JSON-escaped string in the actual serialized log format; then a fake `APICallError` carrying the needle in its body values, response body, message and cause runs through the route, and the serialized logs, the HTTP response and the audit rows contain no needle | log the whole error object; test fails |
+| `import tables have no image column` | schema introspection finds no `bytea` column and no image, hash, URL or data column in `menu_imports` or `audit_events` | add an `image_sha256` column; test fails |
+| `an abandoned import reads as expired with no write` | in a read-only transaction, `GET menu-draft` reports an open row past its deadline as `expired` | trust the stored state; test fails |
+| `draft reload reports the latest import outcome` | after a commit whose response was dropped, `GET menu-draft` returns `completed` with the merged rows | return the draft without the import outcome; test fails |
+
+### Menu import: draft validation, merge and commit (import slice)
+
+Five of these cases keep names approved on 2026-10-07; the planned merge of S11 and S12 already requires Gate 4 to reassign them.
+
+**Group `vision draft validation`**, 8 cases.
+`validateVisionDraft` on fixture model outputs; pure, no database.
+A failed validation cannot reach `commitImport`, whose input type accepts only a successful one.
+
+| Case | Asserts | Mutation |
+| --- | --- | --- |
+| `malformed result is an error not a repair` | schema-violating model output yields `malformed`, never a repaired or empty item list | coerce schema-violating output to an empty item list; this case fails |
+| `blank price stays blank` | unreadable price text such as "market price" keeps `priceSgdCents: null` | default a null price to 0; this case fails |
+| `more than 100 draft rows is refused` | 101 rows yield `output_invalid` with `too_many_rows` | drop the row cap; this case fails |
+| `draft text over 120 characters is refused` | a 121-character name yields `text_too_long` | drop the text cap; this case fails |
+| `draft result over 128 KiB is refused` | a result whose validated serialization exceeds 128 KiB yields `oversize` | drop the size cap; this case fails |
+| `non-SGD price stays blank` | a price marked in another currency yields `priceSgdCents: null` and `other_currency` | accept the printed number; this case fails |
+| `zero or malformed price text stays blank` | "0", "-1", "3.505" and "1e3" each yield `priceBasis: "ambiguous"` | parse with `parseFloat`; this case fails |
+| `duplicate variants are flagged for the merchant` | two rows with the same name and portion both keep null prices marked `duplicate_variant` | keep the first row's price; this case fails |
+
+**Group `import commit merges nothing unless every recheck passes`**, 4 cases.
+`commitImport` against PostgreSQL, rolled back per case.
+
+| Case | Asserts | Mutation |
+| --- | --- | --- |
+| `late result is rejected` | a model result committing after `T_MENU_REQUEST` yields `import_expired`, outcome `expired` and no draft change | accept it; this case fails |
+| `base revision change is rejected` | a result for a superseded revision yields `import_base_revision_changed`, outcome `conflict_base_revision` and no draft change | drop the comparison; this case fails |
+| `confirmed menu is never overwritten` | a model result committing after confirmation yields `conflict_confirmed` and changes nothing | allow the write; this case fails |
+| `membership removed during an import merges nothing` | with the actor's membership revoked after admission, the commit yields `forbidden_membership`, outcome `membership_revoked` and no draft change | drop the membership recheck from `commitImport`; this case fails |
+
+Standalone tests:
+
+| Test | Asserts | Mutation |
+| --- | --- | --- |
 | `merchant edits survive a merge` | a merchant-corrected name and price are unchanged after a merge | overwrite from suggestions; test fails |
-| `confirmed menu is never overwritten` | a result arriving after confirmation changes nothing | allow the write; test fails |
-| `blank price stays blank` | an ambiguous price yields `priceBasis: "ambiguous"` and `priceSgdCents: null` | default to 0; test fails |
-| `raw QR payload is not logged` | an injected self-test proves the redaction scanner detects a planted payload in the actual serialized log output, including escaped and forward-slash path variants | remove redaction; test fails |
-| `capability URL is not logged` | the same scanner detects a planted token in access and error logs | remove redaction; test fails |
 
-### Scan, suggestions and authorization
+### Scan, suggestions and authorization (unchanged from 2026-10-07; the Gate 4 draft assignment stands)
+
+`raw QR payload is not logged` moved here from the removed image section; its name, assertion and mutation are unchanged.
 
 | Test | Asserts | Mutation |
 | --- | --- | --- |
+| `raw QR payload is not logged` | an injected self-test proves the redaction scanner detects a planted payload in the actual serialized log output, including escaped and forward-slash path variants | remove redaction; test fails |
 | `unrecognized tags are surfaced not guessed` | an unknown tag appears in `unrecognized` and no field is invented | drop unknown tags; test fails |
 | `unenrolled sticker yields no purchase` | `no_match` and no enrollment row is created | auto-create an outlet; test fails |
 | `shared identifier asks which outlet` | `ambiguous` with distinguishers, no proximity inference | pick the first match; test fails |
@@ -806,7 +1722,7 @@ Every test must be able to fail. Each guard gets its own mutation proof, because
 | `handoff redeems once` | the second redemption yields `already_redeemed` | remove the constraint; test fails |
 | `handoff carries no amount` | redemption re-prices server-side and ignores any agent-supplied total | accept the agent total; test fails |
 
-### Publication and free-capacity behaviour
+### Publication and free-capacity behaviour (unchanged from 2026-10-07; the Gate 4 draft assignment stands)
 
 | Test | Asserts | Mutation |
 | --- | --- | --- |
@@ -820,25 +1736,643 @@ Every test must be able to fail. Each guard gets its own mutation proof, because
 
 If the region measurement shows trans-Pacific round trips consuming a material share of the three-minute budget, relocation to a Singapore region must be revisited as a provisioning decision rather than absorbed silently.
 
+### PYUSD identity, configuration and isolation (PYUSD purchase slice)
+
+**Group `PYUSD identity check`**, 3 cases.
+`checkPyusdIdentity` over a fake RPC client; no database.
+
+| Case | Asserts | Mutation |
+| --- | --- | --- |
+| `wrong genesis hash disables PYUSD` | an RPC reporting the mainnet genesis hash yields `genesis_mismatch` | skip the genesis comparison; this case fails |
+| `mint under another token program disables PYUSD` | a mint account owned by the original token program yields `mint_program_mismatch` | skip the mint owner-program check; this case fails |
+| `mint with other decimals disables PYUSD` | a mint reporting 9 decimals yields `mint_decimals_mismatch` | skip the decimals check; this case fails |
+
+**Group `PYUSD static boundary checks`**, 7 cases.
+Static analysis of the built server and runner bundles, the import graph and the route sources; no database.
+
+| Case | Asserts | Mutation |
+| --- | --- | --- |
+| `PayPal code imports no Solana module` | the import graph from PayPal routes, `src/integrations/paypal/**` and `reconcile_attempts` reaches no `@solana/*`, `@solana-program/*` or `src/integrations/solana/**` module | import a Solana helper into a PayPal module; this case fails |
+| `server never sends a transaction` | the built server and runner bundles contain no `sendTransaction`, `sendRawTransaction` or `requestAirdrop` method name, and `SolanaReadClient` has no such member | add a `sendTransaction` call to the RPC client; this case fails |
+| `wallet challenge handler begins with its membership guard` | `requireOutletMembership` is the first statement of the challenge handler | remove the guard from that handler; this case fails |
+| `wallet proof handler begins with its membership guard` | `requireOutletMembership` is the first statement of the proof handler | remove the guard from that handler; this case fails |
+| `rate handler begins with its membership guard` | `requireOutletMembership` is the first statement of the rate handler | remove the guard from that handler; this case fails |
+| `preparation handler begins with its buyer guard` | `requireBuyerSession` is the first statement of the preparation handler | remove the guard from that handler; this case fails |
+| `signature hint handler begins with its buyer guard` | `requireBuyerSession` is the first statement of the hint handler | remove the guard from that handler; this case fails |
+
+Standalone tests:
+
+| Test | Asserts | Mutation |
+| --- | --- | --- |
+| `only two settings configure the PYUSD rail` | the environment schema accepts `SOLANA_RPC_URL` and `PYUSD_ENABLED` for this rail and rejects a `PYUSD_MINT` or `SOLANA_CLUSTER` value at boot | add an optional mint override; test fails |
+| `PYUSD failure leaves PayPal working` | with the RPC unreachable, and separately with a genesis mismatch, the app boots and the labeled PayPal fixture journey still starts and completes | initialize PYUSD at boot and throw on failure; test fails |
+| `a PYUSD-only shop cannot publish while PYUSD is disabled` | an outlet whose only verified destination is PYUSD cannot publish while `PYUSD_ENABLED` is false | count a disabled rail's destination as active; test fails |
+
+### PYUSD merchant wallet and rate (PYUSD purchase slice)
+
+**Group `merchant PYUSD routes`**, 17 cases.
+The challenge, proof and rate route handlers against PostgreSQL, rolled back per case, over a fake RPC transport; every row except its own runs with the rail enabled, a same-origin request and a matching devnet identity.
+
+| Case | Asserts | Mutation |
+| --- | --- | --- |
+| `wallet challenge refuses while the rail is disabled` | with `PYUSD_ENABLED` false the challenge route answers `pyusd_unavailable` with `rail_disabled` and writes no challenge | remove `requirePyusdEnabled` from the challenge route; this case fails |
+| `wallet proof refuses while the rail is disabled` | with `PYUSD_ENABLED` false the proof route answers `pyusd_unavailable` with `rail_disabled` and records no destination | remove `requirePyusdEnabled` from the proof route; this case fails |
+| `rate change refuses while the rail is disabled` | with `PYUSD_ENABLED` false the rate route answers `pyusd_unavailable` with `rail_disabled` and writes no rate version | remove `requirePyusdEnabled` from the rate route; this case fails |
+| `wallet challenge rejects a foreign Origin` | a foreign `Origin` yields 403 `forbidden_origin` and no challenge | remove `assertSameOrigin` from the challenge route; this case fails |
+| `wallet proof rejects a foreign Origin` | a foreign `Origin` yields 403 `forbidden_origin` and no destination | remove `assertSameOrigin` from the proof route; this case fails |
+| `rate change rejects a foreign Origin` | a foreign `Origin` yields 403 `forbidden_origin` and no rate version | remove `assertSameOrigin` from the rate route; this case fails |
+| `wallet proof refuses on an identity mismatch` | an RPC reporting the mainnet genesis makes the proof answer `pyusd_unavailable` with `genesis_mismatch` and record no destination | skip the identity check in the proof route; this case fails |
+| `wallet challenge names Envoi's configured domain and devnet` | with a forged `Host` header, the challenge still names the `APP_BASE_URL` host and `Chain ID: devnet` | build the domain from the `Host` header; this case fails |
+| `wallet challenges are rate limited per outlet` | the eleventh challenge for one outlet within an hour yields `rate_limited` | remove the challenge limiter; this case fails |
+| `invalid wallet signature is refused` | a signature that does not verify under the challenge's wallet yields `signature_invalid` | skip Ed25519 verification; this case fails |
+| `wallet challenge expires after five minutes` | a valid signature submitted at `T_WALLET_CHALLENGE` yields `challenge_expired` | skip the expiry check; this case fails |
+| `wallet challenge for another outlet is refused` | a challenge issued for outlet A and submitted on outlet B's route by a member of both yields `challenge_other_outlet` | ignore the challenge's outlet; this case fails |
+| `merchant token account is derived, never supplied` | a token-account address added to the proof body is ignored, and the derived associated account is the one checked and stored | accept a token account from the body; this case fails |
+| `missing merchant token account is refused` | a wallet with no PYUSD associated account yields `token_account_missing` | skip the existence check; this case fails |
+| `merchant token account under another program is refused` | a system-owned account at the derived address yields `token_account_not_token_2022` | skip the program-owner check on the token account; this case fails |
+| `frozen merchant token account is refused` | a frozen derived account yields `token_account_frozen` | skip the frozen-state check; this case fails |
+| `wallet proof creates no membership or enrollment` | after a valid proof, no membership or enrollment row is created or changed | approve the enrollment on proof; this case fails |
+
+**Group `rate parsing, bounds and conversion`**, 4 cases.
+`src/domain/pyusd/rate.ts` on literal inputs; pure, no database.
+The bounds fixture is chosen so that its exact product is divisible by 100, so rounding cannot decide it.
+
+| Case | Asserts | Mutation |
+| --- | --- | --- |
+| `PYUSD amount rounds up to the next atomic unit` | 350 cents at an illustrative 742,115 atomic units per S$1 gives 2,597,403, not 2,597,402 | use floor division; this case fails |
+| `rate arithmetic is exact at its bounds` | the largest allowed basket total at the maximum rate equals the exact BigInt result | multiply as JavaScript numbers; this case fails |
+| `rate text must be a plain decimal with at most six places` | "-1", "1e3", " 0.7" and "0.7421151" are each refused | parse with `Number()` and round; this case fails |
+| `rate outside its bounds is refused` | "0", "0.000000" and "10.000001" are each refused | drop the bounds check; this case fails |
+
+Standalone tests:
+
+| Test | Asserts | Mutation |
+| --- | --- | --- |
+| `wallet proof verifies the saved challenge bytes` | a signature over an altered message, submitted with that altered text, is refused | verify against message text taken from the request; test fails |
+| `wallet challenge is single-use` | two concurrent proofs for one challenge record one destination, and the other yields `challenge_used` | drop the `consumed_at IS NULL` predicate; test fails |
+| `a changed PYUSD rate is a new checkout` | inputs that differ only in `pyusdRateVersionId` produce different `CheckoutKey`s | leave the rate version out of the hash; test fails |
+| `rate change never alters a prepared attempt` | after a new rate version, a prepared attempt keeps its amount and still verifies | re-price open attempts on a rate change; test fails |
+
+### PYUSD pricing and preparation (PYUSD purchase slice)
+
+Solana RPC is faked at the bounded transport, and every fake response is a labeled fixture.
+
+**Group `PYUSD pricing`**, 2 cases.
+`priceBasket` with rail `pyusd` against PostgreSQL, rolled back per case.
+
+| Case | Asserts | Mutation |
+| --- | --- | --- |
+| `PYUSD pricing refuses while the rail is disabled` | with `PYUSD_ENABLED` false, PYUSD pricing answers `pyusd_unavailable` with `rail_disabled` and creates no review | remove `requirePyusdEnabled` from PYUSD pricing; this case fails |
+| `rate older than 30 days makes PYUSD unavailable` | a rate confirmed exactly `T_RATE_AGE` ago yields `rate_expired` at pricing, and one a millisecond younger prices | skip the age check at pricing; this case fails |
+
+**Group `mint eligibility for a transfer`**, 5 cases.
+`assessMintForTransfer` on decoded mint fixtures; pure, no database.
+
+| Case | Asserts | Mutation |
+| --- | --- | --- |
+| `non-zero transfer fee rate refuses preparation` | a current schedule with basis points above zero yields `fee_rate_nonzero` | skip the basis-point check; this case fails |
+| `non-zero maximum fee refuses preparation` | a current schedule with zero basis points and a non-zero maximum fee yields `max_fee_nonzero` | skip the maximum-fee check; this case fails |
+| `non-zero fee in the next epoch refuses preparation` | a zero current schedule with a non-zero newer schedule effective next epoch yields `fee_next_epoch_nonzero` | check only the current epoch; this case fails |
+| `active transfer hook refuses preparation` | a transfer-hook extension with a non-null program yields `transfer_hook_active` | ignore the hook program; this case fails |
+| `unreviewed mint extension refuses preparation` | a mint carrying an extension outside the eight reviewed ones, such as pausable, yields `unreviewed_extension` | ignore unknown extensions; this case fails |
+
+**Group `PYUSD preparation`**, 16 cases.
+The preparation route handler against PostgreSQL, rolled back per case with its transaction as a savepoint, over a fake RPC transport.
+
+| Case | Asserts | Mutation |
+| --- | --- | --- |
+| `preparation refuses while the rail is disabled` | with `PYUSD_ENABLED` false, preparation of a review priced while the flag was on answers `pyusd_unavailable` with `rail_disabled` and saves no attempt | remove `requirePyusdEnabled` from preparation; this case fails |
+| `preparation rejects a foreign Origin` | a foreign `Origin` yields 403 `forbidden_origin` and no attempt | remove `assertSameOrigin` from preparation; this case fails |
+| `preparation requires the owning buyer` | another anonymous session gets 404 and no attempt | drop the owner predicate on preparation; this case fails |
+| `payments kill switch refuses PYUSD preparation` | with `PAYMENTS_ENABLED` false, preparation answers `pyusd_unavailable` with `payments_disabled` and saves no attempt | skip the kill-switch check in PYUSD eligibility; this case fails |
+| `stale review cannot prepare PYUSD` | a review past `T_REVIEW` yields `review_expired` at preparation | skip the `T_REVIEW` check in PYUSD eligibility; this case fails |
+| `preparation refuses on an identity mismatch` | an RPC reporting the mainnet genesis makes preparation answer `pyusd_unavailable` with `genesis_mismatch` and save no attempt | skip the identity check in preparation; this case fails |
+| `preparation refuses an ineligible mint` | a mint with a non-zero current fee rate makes preparation answer `pyusd_unavailable` with `fee_rate_nonzero` and save no attempt | skip `assessMintForTransfer` in preparation; this case fails |
+| `rate change invalidates an unexecuted PYUSD review at preparation` | a review pinned to an older rate version fails preparation with `review_invalidated` | skip the rate-version recheck; this case fails |
+| `rate expiry between review and preparation refuses preparation` | a review priced one minute before the rate reaches `T_RATE_AGE` fails preparation after it does | check the age only at pricing; this case fails |
+| `buyer without enough PYUSD cannot prepare` | a buyer whose associated account is missing, or holds one atomic unit less than the amount, is refused with no attempt | skip the buyer balance check; this case fails |
+| `frozen buyer token account cannot prepare` | a frozen buyer account is refused with no attempt | skip the buyer frozen check; this case fails |
+| `merchant token account is rechecked at preparation` | a merchant account frozen after its proof refuses preparation with no attempt | skip the merchant account check in preparation; this case fails |
+| `no unsigned bytes leave before the attempt is saved` | when the attempt insert fails, the response carries no transaction | build and return the bytes before the commit; this case fails |
+| `repeated preparation returns the same bytes` | a second call for the same wallet while valid returns byte-identical `transactionBase64` | rebuild with a fresh blockhash; this case fails |
+| `expired bytes are never released again` | a repeat call once the confirmed height passes `lastValidBlockHeight` minus 10 returns `locked` and no bytes | return the saved bytes regardless of height; this case fails |
+| `a second wallet cannot prepare a locked purchase` | a call naming another wallet returns `locked` and no bytes | build new bytes for the new wallet; this case fails |
+
+**Group `PYUSD attempt constraints`**, 2 cases.
+Direct inserts against the real schema in PostgreSQL, rolled back per case.
+
+| Case | Asserts | Mutation |
+| --- | --- | --- |
+| `memo reference is unique per attempt` | inserting a second attempt with an existing reference violates a unique constraint | drop the reference unique index; this case fails |
+| `a finalized signature binds to one attempt` | binding one signature to a second attempt violates a unique constraint | drop the signature unique index; this case fails |
+
+Standalone tests:
+
+| Test | Asserts | Mutation |
+| --- | --- | --- |
+| `prepared transaction is exactly a memo and one TransferChecked` | the decoded message is version 0 with no lookup tables, the buyer as fee payer, a memo equal to the reference, then one Token-2022 `TransferChecked` for the exact amount and 6 decimals, and nothing else | add a compute-unit price instruction; test fails. Swapping to `Transfer` or dropping the memo each fail the same test |
+| `cancel after PYUSD preparation reports checking` | cancel on a purchase with a prepared attempt yields `payment_uncertain` and the purchase stays `pending_payment` | allow `unpaid_closed`; test fails |
+
+### PYUSD wallet handoff, hints and receipt (PYUSD purchase slice)
+
+**Group `browser wallet handoff`**, 3 cases.
+The browser wallet modules with a fake Wallet Standard registry; no database and no network.
+
+| Case | Asserts | Mutation |
+| --- | --- | --- |
+| `wallet is asked for solana:devnet` | the fake Wallet Standard wallet receives `chain: "solana:devnet"` and the exact prepared bytes | omit the chain; this case fails |
+| `wallet without devnet sign-and-send is not offered` | a wallet lacking `solana:devnet` or the sign-and-send feature is not listed | skip the capability filter; this case fails |
+| `Phantom link carries only public outlet and item ids` | the decoded link targets `APP_BASE_URL/buy` with exactly the outlet id and item-quantity pairs, and no purchase id, session, price or payee | add the purchase id to the link; this case fails |
+
+**Group `signature hints and reconcile before expiry`**, 8 cases.
+The hint and reconcile route handlers against PostgreSQL, rolled back per case, over a fake RPC transport whose block height stays below the attempt's bound.
+
+| Case | Asserts | Mutation |
+| --- | --- | --- |
+| `signature hint rejects a foreign Origin` | a foreign `Origin` yields 403 `forbidden_origin` and no hint is saved | remove `assertSameOrigin` from the hint route; this case fails |
+| `signature hint requires the owning buyer` | another anonymous session gets 404 and no hint is saved | drop the owner predicate on the hint route; this case fails |
+| `submitted signature is only a hint` | posting a signature changes no purchase state until a finalized read verifies it | mark the purchase paid on the hint; this case fails |
+| `user-triggered PYUSD reads are debounced` | two reconcile calls within `T_PROVIDER_READ_DEBOUNCE` cause one RPC read | skip the debounce; this case fails |
+| `a failed landing leaves the attempt prepared` | a hint naming a failed transaction that carries our reference is decided `failed_landing` and changes no attempt or purchase state | treat a failed landing as a mismatch; this case fails |
+| `a later hint is verified when the first is not ours` | after a first hint decided `not_ours`, a second hint naming the real transfer is read once the debounce allows and confirms the attempt | audit every hint after the first without reading it; this case fails |
+| `hints beyond the per-attempt cap are not read` | with three hints decided `not_ours`, a fourth is audited only and causes no RPC read | drop the hint cap; this case fails |
+| `disabled rail still reconciles prepared attempts` | with `PYUSD_ENABLED` false, a prepared attempt's hint is still read and verified, and the attempt can become `confirmed` | gate hint verification and reconcile on the flag; this case fails |
+
+Standalone tests:
+
+| Test | Asserts | Mutation |
+| --- | --- | --- |
+| `phone without a wallet gets the Phantom link, not a pay button` | at 390px with a mobile user agent and no wallet, the review shows the link and no pay button | show the pay button whenever PYUSD is selected; test fails |
+| `PYUSD receipt says transferred and finalized on devnet` | a confirmed receipt says "Transferred and finalized on Solana devnet" with the signature, recipient and amount, and never "kept", "settled" or an SGD settlement | change the copy to "received"; test fails |
+| `a PYUSD mismatch can close only unpaid` | `canTransitionPyusdAttempt` allows `mismatch -> closed_unpaid`, the operator exit, and refuses `mismatch -> confirmed` | allow `mismatch -> confirmed`; test fails |
+
+### PYUSD verification by meaning (PYUSD purchase slice)
+
+**Group `PYUSD verification by meaning`**, 22 cases.
+`verifyPyusdTransfer` on synthetic landed transactions, each changing one thing in one Phantom-shaped valid fixture; pure, no database.
+The mint and decimals fixtures are marked successful although Token-2022 would refuse them on chain, so each isolates its own rule.
+
+| Case | Asserts | Mutation |
+| --- | --- | --- |
+| `ComputeBudget and Lighthouse assertions are accepted` | the valid fixture, with a compute-unit price and a Lighthouse token-account assertion added, is `confirmed` | reject every instruction beyond the two prepared ones; this case fails |
+| `failed transaction is never paid` | the fixture with an execution error is `failed_landing` | ignore `meta.err`; this case fails |
+| `other blockhash leaves the transfer uncertain` | a different recent blockhash yields `blockhash_mismatch` | skip the blockhash comparison; this case fails |
+| `second signer leaves the transfer uncertain` | two required signatures yield `extra_signer` | skip the signer count; this case fails |
+| `another fee payer leaves the transfer uncertain` | a first account key other than the buyer yields `fee_payer_mismatch` | skip the fee-payer comparison; this case fails |
+| `zero or two TransferChecked leave the transfer uncertain` | none, or two, yield `transfer_count` | use the first transfer found; this case fails |
+| `transfer of another mint is not paid` | a `TransferChecked` whose mint account is not the pinned mint yields `mint_mismatch` | skip the mint comparison; this case fails |
+| `transfer with other decimals is not paid` | a `TransferChecked` whose decimals byte is 9 yields `decimals_mismatch` | skip the decimals comparison; this case fails |
+| `transfer from another source is not paid` | a different source account yields `source_mismatch` | skip the source comparison; this case fails |
+| `transfer to another destination is not paid` | a different destination yields `destination_mismatch` | skip the destination comparison; this case fails |
+| `amount off by one atomic unit is not paid` | one unit more and one unit less each yield `amount_mismatch` | accept any amount at least the expected one; this case fails |
+| `duplicate memo leaves the transfer uncertain` | a second pinned memo beside ours yields `memo_count` | accept any memo count; this case fails |
+| `memo without the reference is not ours` | a memo with other text yields `not_ours` and never `confirmed` | skip the memo content comparison; this case fails |
+| `fee at the execution epoch must be zero` | an isolating fixture with an exact balance delta but a non-zero schedule for the execution epoch yields `fee_nonzero_at_execution` | skip the execution-epoch fee check; this case fails |
+| `destination delta must equal the amount` | an isolating fixture with a zero fee schedule but metadata balances one unit short yields `balance_delta_mismatch` | skip the balance-delta check; this case fails |
+| `incomplete metadata leaves the transfer uncertain` | missing token balances or inner instructions yield `metadata_incomplete` | treat missing metadata as empty; this case fails |
+| `an added non-allowlisted instruction leaves the transfer uncertain` | an extra System transfer yields `outer_instruction_not_allowlisted` | allow any outer program; this case fails |
+| `outer Lighthouse memory instruction is not allowlisted` | an outer Lighthouse instruction with discriminator 0 yields `lighthouse_not_assertion` | allow every outer Lighthouse instruction; this case fails |
+| `inner Lighthouse memory instruction is not allowlisted` | an inner Lighthouse instruction with discriminator 0 yields `lighthouse_not_assertion` | allow every inner Lighthouse instruction; this case fails |
+| `inner instruction from another program leaves the transfer uncertain` | an inner System instruction yields `inner_program_not_allowlisted` | skip the inner program check; this case fails |
+| `inner instruction that moves tokens or changes authority leaves it uncertain` | inner Token-2022 `Transfer` and `SetAuthority` each yield `inner_instruction_not_allowlisted` | allow any inner Token-2022 instruction; this case fails |
+| `unresolvable account keys leave the transfer uncertain` | an unsupported version or missing loaded addresses yield `account_keys_unresolved` | resolve static keys only; this case fails |
+
+### PYUSD RPC transport and budget (PYUSD purchase slice)
+
+**Group `bounded RPC transport`**, 4 cases.
+`createSolanaReadClient` over a fake transport; no database.
+
+| Case | Asserts | Mutation |
+| --- | --- | --- |
+| `preparation uses a confirmed blockhash` | the blockhash read is sent at `confirmed` commitment | request a finalized blockhash; this case fails |
+| `verification reads at finalized commitment` | every transaction and signature read is sent at `finalized` commitment | read at `confirmed`; this case fails |
+| `oversized RPC response is refused` | a response over 1 MiB is cut off and returns `too_large` | read the response unbounded; this case fails |
+| `RPC call stops at its timeout` | a fake RPC that never answers is abandoned at `T_RPC_CALL` and returns `unavailable` | remove the call timeout; this case fails |
+
+**Group `shared RPC limiter`**, 5 cases.
+`createDatabaseRpcLimiter` against PostgreSQL, rolled back per case; two limiter instances share the case's connection and stand in for the web app and the runner.
+
+| Case | Asserts | Mutation |
+| --- | --- | --- |
+| `RPC calls stop at 20 per 10 seconds across web and runner` | two limiter clients on one database together get 20 acquisitions in a window | count per process; this case fails |
+| `one RPC method stops at 10 per 10 seconds` | the eleventh acquisition for one method in a window is refused while another method still succeeds | drop the per-method count; this case fails |
+| `at most two RPC requests run at once` | a third concurrent acquisition is refused until a slot frees | drop the slot rows; this case fails |
+| `RPC 429 backs off every caller` | after a reported 429, both limiter instances are refused for the jittered backoff | retry immediately; this case fails |
+| `abandoned RPC slot is reclaimed after its lease` | a slot whose holder crashed becomes available after `T_RPC_SLOT_LEASE` | never expire slot leases; this case fails |
+
+### PYUSD recovery (PYUSD recovery slice)
+
+**Group `PYUSD recovery over a fake chain`**, 11 cases.
+The shared reconcile path against PostgreSQL, rolled back per case, over a fake RPC transport with injected confirmed and finalized heights.
+
+| Case | Asserts | Mutation |
+| --- | --- | --- |
+| `release waits for finalized height past the saved bound` | with confirmed height above `lastValidBlockHeight` and finalized height equal to it, the attempt stays `prepared` | compare the confirmed height, or use `>=`; this case fails |
+| `scan starts only after expiry is final` | with the confirmed and finalized heights both at or below the bound, no signature page is requested | start scanning on the first reconcile; this case fails |
+| `scan that never reaches before preparation is incomplete` | pages that end with every signature at or after `preparationSlot` leave the attempt `expired_scanning` | treat the end of pages as complete; this case fails |
+| `scan stops at the page cap without releasing` | stopping at the 3-page cap records `page_cap` and leaves the attempt locked | treat the page cap as the end of history; this case fails |
+| `scan stops at the fetch cap without releasing` | stopping at the 20-fetch cap records `page_cap` and leaves the attempt locked | treat the fetch cap as the end of history; this case fails |
+| `scan resumes from its saved cursor` | the next claim requests the page before the persisted cursor | restart from the newest signature; this case fails |
+| `429 or null transaction keeps the attempt locked` | a rate-limited page, a null candidate transaction or a candidate read that timed out as `unavailable` leaves the cursor and state unchanged | skip the undecided candidate and advance; this case fails |
+| `a successful transaction with our reference that fails verification blocks release` | such a candidate moves the attempt to `mismatch` and the purchase to `uncertain` | treat it as not ours and continue; this case fails |
+| `automatic unpaid release stays off until its proofs are recorded` | a complete empty scan ends in `held_no_match` while `PYUSD_PROOFS.automaticUnpaidRelease` is false | default the switch to true; this case fails |
+| `a complete empty scan closes the attempt once release is enabled` | with the switch true, a complete empty scan ends in `closed_unpaid`, the purchase `unpaid_closed` and the basket unlocked | never release; this case fails |
+| `devnet reset stops verification and scanning` | a genesis mismatch during recovery records `identity_changed` and changes no state | skip the identity check in recovery; this case fails |
+
+Standalone tests:
+
+| Test | Asserts | Mutation |
+| --- | --- | --- |
+| `web and runner cannot scan one attempt at once` | a web reconcile and a runner claim on one expired attempt advance its coverage once | skip the lease claim in the web reconcile path; test fails |
+
 Integration tests run against a real PostgreSQL instance with the real schema and real constraints, because the guarantees above are index and transaction guarantees. A mocked database would prove none of them. Provider HTTP is faked at the `PayPalWriteClient` boundary, and every faked response is labeled as a fixture in test output and evidence.
+Since 2026-10-11, OpenAI HTTP is faked at the provider's fetch boundary and Solana RPC at the bounded transport, under the same labeling rule; landed-transaction fixtures are synthetic unless a slice records real devnet evidence for them.
+
+## Test delta for the Gate 4 revision
+
+**Rewritten 2026-10-11 after review, replacing the earlier draft's list.**
+The unapproved Gate 4 draft assigns each of the 54 Gate 3 test names approved on 2026-10-07 exactly once.
+The earlier draft of this revision kept 47 of them, removed 7 and added 145 names, for 192 named tests.
+This version batches them: 90 named tests, which are 69 standalone tests and 21 groups, and 225 cases.
+`04-slices.md` is not edited by this gate, so its assignment check will fail until Gate 4 applies this delta.
+
+- **Previous names:** 199, which are the 54 approved on 2026-10-07 and the 145 drafted additions.
+- **Removed (8):** the 7 image-boundary names the earlier draft removed, all assigned to S11 in the Gate 4 draft, and `Lighthouse program must be an executable devnet program`, removed with Lighthouse from the runtime identity check.
+- **Kept as standalone tests with the same name (63):** 42 approved and 21 drafted names.
+- **Grouped (128):** 5 approved and 123 drafted names now run as rows of a group.
+  119 keep their name as the case name, 1 is renamed, and 8 names that covered several call sites or cases split into 29 rows.
+- **Added (13 cases):** 7 rows in groups and 6 standalone tests, each tied to the review fix that needs it.
+- **Totals:** 90 named tests and 225 cases, against 192 named tests in the earlier draft.
+  By slice unit: the 2026-10-07 core keeps 41 named tests and 41 cases; the basket lock and PayPal abandonment have 5 and 5; the import slice has 17 and 57; the PYUSD purchase slice has 25 and 110; and the PYUSD recovery slice has 2 and 12.
+
+Every previous name maps below to where it now runs; a group case is written as the group, an arrow and the case.
+Every case in the test plan appears exactly once in the "Now" column of these two tables.
+
+| Previous name | From | Now |
+| --- | --- | --- |
+| `prices come only from the confirmed revision` | 2026-10-07 | standalone `prices come only from the confirmed revision` |
+| `unknown price never becomes zero` | 2026-10-07 | standalone `unknown price never becomes zero` |
+| `same basket twice returns the same review` | 2026-10-07 | standalone `same basket twice returns the same review` |
+| `a changed menu revision is a new checkout` | 2026-10-07 | standalone `a changed menu revision is a new checkout` |
+| `replacement only from a terminal unpaid state` | 2026-10-07 | standalone `replacement only from a terminal unpaid state` |
+| `capture requires an owned lease` | 2026-10-07 | standalone `capture requires an owned lease` |
+| `lost create response replays the same key` | 2026-10-07 | standalone `lost create response replays the same key` |
+| `create_unknown without an order id is recreatable` | 2026-10-07 | standalone `create_unknown without an order id is recreatable` |
+| `capture_unknown never becomes abandoned` | 2026-10-07 | standalone `capture_unknown never becomes abandoned` |
+| `amount mismatch quarantines` | 2026-10-07 | standalone `amount mismatch quarantines` |
+| `payee mismatch quarantines` | 2026-10-07 | standalone `payee mismatch quarantines` |
+| `duplicate webhook changes nothing` | 2026-10-07 | standalone `duplicate webhook changes nothing` |
+| `unverified webhook signature is rejected` | 2026-10-07 | standalone `unverified webhook signature is rejected` |
+| `webhook content alone cannot mark paid` | 2026-10-07 | standalone `webhook content alone cannot mark paid` |
+| `GET return page cannot capture` | 2026-10-07 | standalone `GET return page cannot capture` |
+| `cancel after dispatch reports uncertain` | 2026-10-07 | standalone `cancel after dispatch reports uncertain` |
+| `expired review cannot start a payment` | 2026-10-07 | standalone `expired review cannot start a payment` |
+| `maintenance cannot capture` | 2026-10-07 | standalone `maintenance cannot capture` |
+| `expiry denies a fetch with no write` | 2026-10-07 | removed |
+| `closed import denies a fetch` | 2026-10-07 | removed |
+| `guessed token is denied` | 2026-10-07 | removed |
+| `blocked delete is reported not thrown` | 2026-10-07 | removed |
+| `admission refuses churn` | 2026-10-07 | removed |
+| `stale heartbeat blocks imports` | 2026-10-07 | removed |
+| `malformed result is an error not a repair` | 2026-10-07 | `vision draft validation` -> `malformed result is an error not a repair` |
+| `late result is rejected` | 2026-10-07 | `import commit merges nothing unless every recheck passes` -> `late result is rejected` |
+| `base revision change is rejected` | 2026-10-07 | `import commit merges nothing unless every recheck passes` -> `base revision change is rejected` |
+| `merchant edits survive a merge` | 2026-10-07 | standalone `merchant edits survive a merge` |
+| `confirmed menu is never overwritten` | 2026-10-07 | `import commit merges nothing unless every recheck passes` -> `confirmed menu is never overwritten` |
+| `blank price stays blank` | 2026-10-07 | `vision draft validation` -> `blank price stays blank` |
+| `raw QR payload is not logged` | 2026-10-07 | standalone `raw QR payload is not logged` |
+| `capability URL is not logged` | 2026-10-07 | removed |
+| `unrecognized tags are surfaced not guessed` | 2026-10-07 | standalone `unrecognized tags are surfaced not guessed` |
+| `unenrolled sticker yields no purchase` | 2026-10-07 | standalone `unenrolled sticker yields no purchase` |
+| `shared identifier asks which outlet` | 2026-10-07 | standalone `shared identifier asks which outlet` |
+| `scan grants no destination and no rail` | 2026-10-07 | standalone `scan grants no destination and no rail` |
+| `model cannot invent a price` | 2026-10-07 | standalone `model cannot invent a price` |
+| `model tool budget is enforced` | 2026-10-07 | standalone `model tool budget is enforced` |
+| `anonymous buyer cannot reach a merchant route` | 2026-10-07 | standalone `anonymous buyer cannot reach a merchant route` |
+| `linking an anonymous account creates no membership` | 2026-10-07 | standalone `linking an anonymous account creates no membership` |
+| `linking preserves purchase ownership` | 2026-10-07 | standalone `linking preserves purchase ownership` |
+| `auth configuration matches the approved gate` | 2026-10-07 | standalone `auth configuration matches the approved gate` |
+| `no secret reaches the committed tree` | 2026-10-07 | standalone `no secret reaches the committed tree` |
+| `membership is per outlet` | 2026-10-07 | standalone `membership is per outlet` |
+| `agent token cannot read a receipt` | 2026-10-07 | standalone `agent token cannot read a receipt` |
+| `handoff redeems once` | 2026-10-07 | standalone `handoff redeems once` |
+| `handoff carries no amount` | 2026-10-07 | standalone `handoff carries no amount` |
+| `publication requires all four preconditions` | 2026-10-07 | standalone `publication requires all four preconditions` |
+| `incomplete menu blocks confirmation` | 2026-10-07 | standalone `incomplete menu blocks confirmation` |
+| `editing a published menu creates an unpublished revision` | 2026-10-07 | standalone `editing a published menu creates an unpublished revision` |
+| `maintenance run is finite` | 2026-10-07 | standalone `maintenance run is finite` |
+| `overlapping runs claim disjoint work` | 2026-10-07 | standalone `overlapping runs claim disjoint work` |
+| `polling stops at a terminal state` | 2026-10-07 | standalone `polling stops at a terminal state` |
+| `region latency is measured, not assumed` | 2026-10-07 | standalone `region latency is measured, not assumed` |
+| `import body is counted, not trusted from Content-Length` | draft | `import upload and photo rejects` -> `import body is counted, not trusted from Content-Length` |
+| `slow upload stops at its read bound` | draft | `import upload and photo rejects` -> `slow upload stops at its read bound` |
+| `only one photo part is accepted` | draft | `import upload and photo rejects` -> `non-multipart body is refused`; `import upload and photo rejects` -> `second photo part is refused`; `import upload and photo rejects` -> `body without a photo part is refused` |
+| `non-JPEG content is refused even when labeled JPEG` | draft | `import upload and photo rejects` -> `non-JPEG content is refused even when labeled JPEG` |
+| `JPEG over 2 MiB is refused inside a legal body` | draft | `import upload and photo rejects` -> `JPEG over 2 MiB is refused inside a legal body` |
+| `JPEG over 2,048 pixels per side is refused before decode` | draft | `import upload and photo rejects` -> `JPEG over 2,048 pixels per side is refused before decode` |
+| `re-encoded photo carries no metadata` | draft | standalone `re-encoded photo carries no metadata` |
+| `import route rejects a foreign Origin` | draft | `import route refusals read no body` -> `import route rejects a foreign Origin` |
+| `no proxy matcher covers the import route` | draft | `import route static checks` -> `no proxy matcher covers the import route` |
+| `import writes nothing to disk` | draft | standalone `import writes nothing to disk` |
+| `imports refuse while disabled` | draft | `import route refusals read no body` -> `imports refuse while disabled` |
+| `stale consent version is refused before admission` | draft | `import route refusals read no body` -> `stale consent version is refused before admission` |
+| `second live import for an outlet is refused` | draft | `menu import admission` -> `second live import for an outlet is refused` |
+| `second live import anywhere is refused` | draft | `menu import admission` -> `second live import anywhere is refused` |
+| `eleventh import for an outlet in a UTC day is refused` | draft | `menu import admission` -> `eleventh import for an outlet in a UTC day is refused` |
+| `fifty-first import in a UTC day is refused` | draft | `menu import admission` -> `fifty-first import in a UTC day is refused` |
+| `failed and aborted attempts count toward daily caps` | draft | `menu import admission` -> `failed and aborted attempts count toward daily caps` |
+| `daily caps reset at UTC midnight` | draft | `menu import admission` -> `daily caps reset at UTC midnight` |
+| `concurrent admissions admit one` | draft | standalone `concurrent admissions admit one` |
+| `refused admission reads no image bytes` | draft | `import route refusals read no body` -> `refused admission reads no image bytes` |
+| `imports fail closed until a spend ceiling is recorded` | draft | `menu import admission` -> `imports fail closed until a spend ceiling is recorded` |
+| `unreviewed menu model is refused` | draft | `menu import admission` -> `unreviewed menu model is refused` |
+| `reservation beyond the daily ceiling is refused` | draft | `menu import admission` -> `reservation beyond the daily ceiling is refused` |
+| `aborted attempt keeps its spend reservation` | draft | standalone `aborted attempt keeps its spend reservation` |
+| `usage above its reservation stops further imports` | draft | `menu import admission` -> `usage above its reservation stops further imports` |
+| `an expired open import does not block the next admission` | draft | `menu import admission` -> `an expired open import does not block the next admission` |
+| `menu vision request sets store false` | draft | `menu vision request` -> `menu vision request sets store false` |
+| `menu vision request carries no tools` | draft | `menu vision request` -> `menu vision request carries no tools` |
+| `menu vision call is never retried` | draft | `menu vision request` -> `menu vision call is never retried` |
+| `menu vision schema is strict with required nullable fields` | draft | `menu vision request` -> `menu vision schema is strict with required nullable fields` |
+| `menu vision output is capped at the reviewed token bound` | draft | `menu vision request` -> `menu vision output is capped at the reviewed token bound` |
+| `menu vision uses AI_MENU_MODEL, not AI_MODEL` | draft | `menu vision request` -> `menu vision uses AI_MENU_MODEL, not AI_MODEL` |
+| `model budget keeps the commit reserve` | draft | `menu vision request` -> `model budget keeps the commit reserve` |
+| `client disconnect aborts the model call` | draft | `menu vision request` -> `client disconnect aborts the model call` |
+| `image bytes never reach logs, responses or audit` | draft | standalone `image bytes never reach logs, responses or audit` |
+| `import tables have no image column` | draft | standalone `import tables have no image column` |
+| `an abandoned import reads as expired with no write` | draft | standalone `an abandoned import reads as expired with no write` |
+| `draft reload reports the latest import outcome` | draft | standalone `draft reload reports the latest import outcome` |
+| `more than 100 draft rows is refused` | draft | `vision draft validation` -> `more than 100 draft rows is refused` |
+| `draft text over 120 characters is refused` | draft | `vision draft validation` -> `draft text over 120 characters is refused` |
+| `draft result over 128 KiB is refused` | draft | `vision draft validation` -> `draft result over 128 KiB is refused` |
+| `non-SGD price stays blank` | draft | `vision draft validation` -> `non-SGD price stays blank` |
+| `zero or malformed price text stays blank` | draft | `vision draft validation` -> `zero or malformed price text stays blank` |
+| `duplicate variants are flagged for the merchant` | draft | `vision draft validation` -> `duplicate variants are flagged for the merchant` |
+| `wrong genesis hash disables PYUSD` | draft | `PYUSD identity check` -> `wrong genesis hash disables PYUSD`; `merchant PYUSD routes` -> `wallet proof refuses on an identity mismatch`; `PYUSD preparation` -> `preparation refuses on an identity mismatch` |
+| `mint under another token program disables PYUSD` | draft | `PYUSD identity check` -> `mint under another token program disables PYUSD` |
+| `mint with other decimals disables PYUSD` | draft | `PYUSD identity check` -> `mint with other decimals disables PYUSD` |
+| `Lighthouse program must be an executable devnet program` | draft | removed |
+| `only two settings configure the PYUSD rail` | draft | standalone `only two settings configure the PYUSD rail` |
+| `PYUSD failure leaves PayPal working` | draft | standalone `PYUSD failure leaves PayPal working` |
+| `PayPal code imports no Solana module` | draft | `PYUSD static boundary checks` -> `PayPal code imports no Solana module` |
+| `server never sends a transaction` | draft | `PYUSD static boundary checks` -> `server never sends a transaction` |
+| `disabled rail refuses new PYUSD actions` | draft | `merchant PYUSD routes` -> `wallet challenge refuses while the rail is disabled`; `merchant PYUSD routes` -> `wallet proof refuses while the rail is disabled`; `merchant PYUSD routes` -> `rate change refuses while the rail is disabled`; `PYUSD pricing` -> `PYUSD pricing refuses while the rail is disabled`; `PYUSD preparation` -> `preparation refuses while the rail is disabled` |
+| `disabled rail still reconciles prepared attempts` | draft | `signature hints and reconcile before expiry` -> `disabled rail still reconciles prepared attempts` |
+| `payments kill switch refuses PYUSD preparation` | draft | `PYUSD preparation` -> `payments kill switch refuses PYUSD preparation` |
+| `a PYUSD-only shop cannot publish while PYUSD is disabled` | draft | standalone `a PYUSD-only shop cannot publish while PYUSD is disabled` |
+| `every new route begins with its guard` | draft | `import route static checks` -> `menu-import handler begins with its membership guard`; `import route static checks` -> `menu-draft handler begins with its membership guard`; `PYUSD static boundary checks` -> `wallet challenge handler begins with its membership guard`; `PYUSD static boundary checks` -> `wallet proof handler begins with its membership guard`; `PYUSD static boundary checks` -> `rate handler begins with its membership guard`; `PYUSD static boundary checks` -> `preparation handler begins with its buyer guard`; `PYUSD static boundary checks` -> `signature hint handler begins with its buyer guard` |
+| `wallet challenge names Envoi's configured domain and devnet` | draft | `merchant PYUSD routes` -> `wallet challenge names Envoi's configured domain and devnet` |
+| `wallet proof verifies the saved challenge bytes` | draft | standalone `wallet proof verifies the saved challenge bytes` |
+| `invalid wallet signature is refused` | draft | `merchant PYUSD routes` -> `invalid wallet signature is refused` |
+| `wallet challenge expires after five minutes` | draft | `merchant PYUSD routes` -> `wallet challenge expires after five minutes` |
+| `wallet challenge is single-use` | draft | standalone `wallet challenge is single-use` |
+| `wallet challenge for another outlet is refused` | draft | `merchant PYUSD routes` -> `wallet challenge for another outlet is refused` |
+| `wallet proof creates no membership or enrollment` | draft | `merchant PYUSD routes` -> `wallet proof creates no membership or enrollment` |
+| `wallet challenges are rate limited per outlet` | draft | `merchant PYUSD routes` -> `wallet challenges are rate limited per outlet` |
+| `merchant token account is derived, never supplied` | draft | `merchant PYUSD routes` -> `merchant token account is derived, never supplied` |
+| `missing merchant token account is refused` | draft | `merchant PYUSD routes` -> `missing merchant token account is refused` |
+| `merchant token account under another program is refused` | draft | `merchant PYUSD routes` -> `merchant token account under another program is refused` |
+| `frozen merchant token account is refused` | draft | `merchant PYUSD routes` -> `frozen merchant token account is refused` |
+| `PYUSD amount rounds up to the next atomic unit` | draft | `rate parsing, bounds and conversion` -> `PYUSD amount rounds up to the next atomic unit` |
+| `rate arithmetic is exact at its bounds` | draft | `rate parsing, bounds and conversion` -> `rate arithmetic is exact at its bounds` |
+| `rate text must be a plain decimal with at most six places` | draft | `rate parsing, bounds and conversion` -> `rate text must be a plain decimal with at most six places` |
+| `rate outside its bounds is refused` | draft | `rate parsing, bounds and conversion` -> `rate outside its bounds is refused` |
+| `rate older than 30 days makes PYUSD unavailable` | draft | `PYUSD pricing` -> `rate older than 30 days makes PYUSD unavailable` |
+| `a changed PYUSD rate is a new checkout` | draft | standalone `a changed PYUSD rate is a new checkout` |
+| `rate change invalidates an unexecuted PYUSD review at preparation` | draft | `PYUSD preparation` -> `rate change invalidates an unexecuted PYUSD review at preparation` |
+| `rate expiry between review and preparation refuses preparation` | draft | `PYUSD preparation` -> `rate expiry between review and preparation refuses preparation` |
+| `rate change never alters a prepared attempt` | draft | standalone `rate change never alters a prepared attempt` |
+| `no unsigned bytes leave before the attempt is saved` | draft | `PYUSD preparation` -> `no unsigned bytes leave before the attempt is saved` |
+| `repeated preparation returns the same bytes` | draft | `PYUSD preparation` -> `repeated preparation returns the same bytes` |
+| `expired bytes are never released again` | draft | `PYUSD preparation` -> `expired bytes are never released again` |
+| `a second wallet cannot prepare a locked purchase` | draft | `PYUSD preparation` -> `a second wallet cannot prepare a locked purchase` |
+| `preparation uses a confirmed blockhash` | draft | `bounded RPC transport` -> `preparation uses a confirmed blockhash` |
+| `prepared transaction is exactly a memo and one TransferChecked` | draft | standalone `prepared transaction is exactly a memo and one TransferChecked` |
+| `memo reference is unique per attempt` | draft | `PYUSD attempt constraints` -> `memo reference is unique per attempt` |
+| `non-zero transfer fee rate refuses preparation` | draft | `mint eligibility for a transfer` -> `non-zero transfer fee rate refuses preparation` |
+| `non-zero maximum fee refuses preparation` | draft | `mint eligibility for a transfer` -> `non-zero maximum fee refuses preparation` |
+| `non-zero fee in the next epoch refuses preparation` | draft | `mint eligibility for a transfer` -> `non-zero fee in the next epoch refuses preparation` |
+| `active transfer hook refuses preparation` | draft | `mint eligibility for a transfer` -> `active transfer hook refuses preparation` |
+| `unreviewed mint extension refuses preparation` | draft | `mint eligibility for a transfer` -> `unreviewed mint extension refuses preparation` |
+| `buyer without enough PYUSD cannot prepare` | draft | `PYUSD preparation` -> `buyer without enough PYUSD cannot prepare` |
+| `frozen buyer token account cannot prepare` | draft | `PYUSD preparation` -> `frozen buyer token account cannot prepare` |
+| `merchant token account is rechecked at preparation` | draft | `PYUSD preparation` -> `merchant token account is rechecked at preparation` |
+| `PYUSD routes reject a foreign Origin` | draft | `merchant PYUSD routes` -> `wallet challenge rejects a foreign Origin`; `merchant PYUSD routes` -> `wallet proof rejects a foreign Origin`; `merchant PYUSD routes` -> `rate change rejects a foreign Origin`; `PYUSD preparation` -> `preparation rejects a foreign Origin`; `signature hints and reconcile before expiry` -> `signature hint rejects a foreign Origin` |
+| `stale review cannot prepare PYUSD` | draft | `PYUSD preparation` -> `stale review cannot prepare PYUSD` |
+| `PYUSD routes require the owning buyer` | draft | `PYUSD preparation` -> `preparation requires the owning buyer`; `signature hints and reconcile before expiry` -> `signature hint requires the owning buyer` |
+| `cancel after PYUSD preparation reports checking` | draft | standalone `cancel after PYUSD preparation reports checking` |
+| `an unresolved payment blocks the same basket on the other rail` | draft | standalone `an unresolved payment blocks the same basket on the other rail` |
+| `wallet is asked for solana:devnet` | draft | `browser wallet handoff` -> `wallet is asked for solana:devnet` |
+| `wallet without devnet sign-and-send is not offered` | draft | `browser wallet handoff` -> `wallet without devnet sign-and-send is not offered` |
+| `phone without a wallet gets the Phantom link, not a pay button` | draft | standalone `phone without a wallet gets the Phantom link, not a pay button` |
+| `Phantom link carries only public outlet and item ids` | draft | `browser wallet handoff` -> `Phantom link carries only public outlet and item ids` |
+| `submitted signature is only a hint` | draft | `signature hints and reconcile before expiry` -> `submitted signature is only a hint` |
+| `PYUSD receipt says transferred and finalized on devnet` | draft | standalone `PYUSD receipt says transferred and finalized on devnet` |
+| `ComputeBudget and Lighthouse assertions are accepted` | draft | `PYUSD verification by meaning` -> `ComputeBudget and Lighthouse assertions are accepted` |
+| `failed transaction is never paid` | draft | `PYUSD verification by meaning` -> `failed transaction is never paid` |
+| `other blockhash leaves the transfer uncertain` | draft | `PYUSD verification by meaning` -> `other blockhash leaves the transfer uncertain` |
+| `second signer leaves the transfer uncertain` | draft | `PYUSD verification by meaning` -> `second signer leaves the transfer uncertain` |
+| `another fee payer leaves the transfer uncertain` | draft | `PYUSD verification by meaning` -> `another fee payer leaves the transfer uncertain` |
+| `zero or two TransferChecked leave the transfer uncertain` | draft | `PYUSD verification by meaning` -> `zero or two TransferChecked leave the transfer uncertain` |
+| `transfer from another source is not paid` | draft | `PYUSD verification by meaning` -> `transfer from another source is not paid` |
+| `transfer to another destination is not paid` | draft | `PYUSD verification by meaning` -> `transfer to another destination is not paid` |
+| `amount off by one atomic unit is not paid` | draft | `PYUSD verification by meaning` -> `amount off by one atomic unit is not paid` |
+| `duplicate memo leaves the transfer uncertain` | draft | `PYUSD verification by meaning` -> `duplicate memo leaves the transfer uncertain` |
+| `memo without the reference is not ours` | draft | `PYUSD verification by meaning` -> `memo without the reference is not ours` |
+| `fee at the execution epoch must be zero` | draft | `PYUSD verification by meaning` -> `fee at the execution epoch must be zero` |
+| `destination delta must equal the amount` | draft | `PYUSD verification by meaning` -> `destination delta must equal the amount` |
+| `incomplete metadata leaves the transfer uncertain` | draft | `PYUSD verification by meaning` -> `incomplete metadata leaves the transfer uncertain` |
+| `an added non-allowlisted instruction leaves the transfer uncertain` | draft | `PYUSD verification by meaning` -> `an added non-allowlisted instruction leaves the transfer uncertain` |
+| `Lighthouse memory instructions are not allowlisted` | draft | `PYUSD verification by meaning` -> `outer Lighthouse memory instruction is not allowlisted`; `PYUSD verification by meaning` -> `inner Lighthouse memory instruction is not allowlisted` |
+| `inner instruction from another program leaves the transfer uncertain` | draft | `PYUSD verification by meaning` -> `inner instruction from another program leaves the transfer uncertain` |
+| `inner instruction that moves tokens or changes authority leaves it uncertain` | draft | `PYUSD verification by meaning` -> `inner instruction that moves tokens or changes authority leaves it uncertain` |
+| `verification reads at finalized commitment` | draft | `bounded RPC transport` -> `verification reads at finalized commitment` |
+| `unresolvable account keys leave the transfer uncertain` | draft | `PYUSD verification by meaning` -> `unresolvable account keys leave the transfer uncertain` |
+| `a finalized signature binds to one attempt` | draft | `PYUSD attempt constraints` -> `a finalized signature binds to one attempt` |
+| `release waits for finalized height past the saved bound` | draft | `PYUSD recovery over a fake chain` -> `release waits for finalized height past the saved bound` |
+| `scan starts only after expiry is final` | draft | `PYUSD recovery over a fake chain` -> `scan starts only after expiry is final` |
+| `scan that never reaches before preparation is incomplete` | draft | `PYUSD recovery over a fake chain` -> `scan that never reaches before preparation is incomplete` |
+| `capped scan never releases` | draft | `PYUSD recovery over a fake chain` -> `scan stops at the page cap without releasing`; `PYUSD recovery over a fake chain` -> `scan stops at the fetch cap without releasing` |
+| `scan resumes from its saved cursor` | draft | `PYUSD recovery over a fake chain` -> `scan resumes from its saved cursor` |
+| `429 or null transaction keeps the attempt locked` | draft | `PYUSD recovery over a fake chain` -> `429 or null transaction keeps the attempt locked` |
+| `a successful transaction with our reference that fails verification blocks release` | draft | `PYUSD recovery over a fake chain` -> `a successful transaction with our reference that fails verification blocks release` |
+| `a failed landing leaves the attempt prepared` | draft | `signature hints and reconcile before expiry` -> `a failed landing leaves the attempt prepared` |
+| `automatic unpaid release stays off until its proofs are recorded` | draft | `PYUSD recovery over a fake chain` -> `automatic unpaid release stays off until its proofs are recorded` |
+| `a complete empty scan closes the attempt once release is enabled` | draft | `PYUSD recovery over a fake chain` -> `a complete empty scan closes the attempt once release is enabled` |
+| `devnet reset stops verification and scanning` | draft | `PYUSD recovery over a fake chain` -> `devnet reset stops verification and scanning` |
+| `RPC calls stop at 20 per 10 seconds across web and runner` | draft | `shared RPC limiter` -> `RPC calls stop at 20 per 10 seconds across web and runner` |
+| `one RPC method stops at 10 per 10 seconds` | draft | `shared RPC limiter` -> `one RPC method stops at 10 per 10 seconds` |
+| `at most two RPC requests run at once` | draft | `shared RPC limiter` -> `at most two RPC requests run at once` |
+| `RPC 429 backs off and changes no state` | draft | `shared RPC limiter` -> `RPC 429 backs off every caller` |
+| `oversized RPC response is refused` | draft | `bounded RPC transport` -> `oversized RPC response is refused` |
+| `user-triggered PYUSD reads are debounced` | draft | `signature hints and reconcile before expiry` -> `user-triggered PYUSD reads are debounced` |
+| `RPC call stops at its timeout` | draft | `bounded RPC transport` -> `RPC call stops at its timeout` |
+| `abandoned RPC slot is reclaimed after its lease` | draft | `shared RPC limiter` -> `abandoned RPC slot is reclaimed after its lease` |
+| `web and runner cannot scan one attempt at once` | draft | standalone `web and runner cannot scan one attempt at once` |
+
+Added cases:
+
+| Fix | Now |
+| --- | --- |
+| A | standalone `an abandoned PayPal order does not lock its basket` |
+| A | standalone `an approved PayPal order that never returns closes unpaid` |
+| A | standalone `capture is never dispatched once the review has expired` |
+| A | standalone `two open reviews of one basket cannot both start payment` |
+| G | `menu import admission` -> `an attempt closed before the model call releases its reservation` |
+| G | standalone `model dispatch is recorded before the call` |
+| B | `import commit merges nothing unless every recheck passes` -> `membership removed during an import merges nothing` |
+| K | `PYUSD preparation` -> `preparation refuses an ineligible mint` |
+| H | `signature hints and reconcile before expiry` -> `a later hint is verified when the first is not ours` |
+| H | `signature hints and reconcile before expiry` -> `hints beyond the per-attempt cap are not read` |
+| A, I | standalone `a PYUSD mismatch can close only unpaid` |
+| C | `PYUSD verification by meaning` -> `transfer of another mint is not paid` |
+| C | `PYUSD verification by meaning` -> `transfer with other decimals is not paid` |
+
+Same-name cases whose assertion or mutation wording changed (30), each now naming its specific reason or fixture: `import route rejects a foreign Origin`, `imports refuse while disabled`, `stale consent version is refused before admission`, `refused admission reads no image bytes`, `import body is counted, not trusted from Content-Length`, `slow upload stops at its read bound`, `JPEG over 2 MiB is refused inside a legal body`, `non-JPEG content is refused even when labeled JPEG`, `JPEG over 2,048 pixels per side is refused before decode`, `eleventh import for an outlet in a UTC day is refused`, `reservation beyond the daily ceiling is refused`, `aborted attempt keeps its spend reservation`, `malformed result is an error not a repair`, `blank price stays blank`, `zero or malformed price text stays blank`, `late result is rejected`, `base revision change is rejected`, `confirmed menu is never overwritten`, `wrong genesis hash disables PYUSD`, `mint under another token program disables PYUSD`, `mint with other decimals disables PYUSD`, `payments kill switch refuses PYUSD preparation`, `stale review cannot prepare PYUSD`, `a failed landing leaves the attempt prepared`, `disabled rail still reconciles prepared attempts`, `preparation uses a confirmed blockhash`, `verification reads at finalized commitment`, `RPC call stops at its timeout`, `scan starts only after expiry is final`, `429 or null transaction keeps the attempt locked`.
+Three of them hand part of their old assertion to another check rather than drop it: `blank price stays blank` leaves the `ambiguous` basis to `zero or malformed price text stays blank`; `malformed result is an error not a repair` leaves the unchanged draft to `commitImport`, whose input type accepts only a successful validation; and `RPC call stops at its timeout` leaves the unchanged attempt state to `429 or null transaction keeps the attempt locked`, which now also covers a timed-out read.
+
+Fix K marks `preparation refuses an ineligible mint`: the five mint-eligibility cases now test the pure function, so one route case keeps the preparation call site covered.
+
+**Placement hint for Gate 4, not a decision here:** each section above names its slice unit.
+The import cases belong with the merged menu-import slice, the PYUSD purchase cases with the first PYUSD slice and the PYUSD recovery cases with the second.
+`a PYUSD-only shop cannot publish while PYUSD is disabled` touches S7 code, and the five basket-lock and PayPal abandonment tests touch S2 and S3 code; they may need to land with the first PYUSD slice or with those PayPal slices.
+
+## Gate 4 deltas D1-D7 reviewed
+
+`04-slices.md` lists seven gaps it found in the 2026-10-07 Gate 3.
+This revision resolves only what it touches and lists the rest unchanged.
+
+| # | Status after this revision |
+| --- | --- |
+| D1 operator CLI | Not resolved here, but one operator act is now named. Held and mismatched PYUSD attempts are operator-visible in the health view. **Revised 2026-10-11 after review:** the PYUSD state machine names the only exit from `mismatch`, an out-of-band, audited operator resolution that records the operator, reason and evidence and moves `mismatch -> closed_unpaid`, never `confirmed`. Gate 4 places it as an operator CLI subcommand with its own contract and tests; this gate does not build it. |
+| D2 Node version | Not touched. The new pins require Node 20.18 or later, and the Wallet Standard packages declare Node 22 or later, which the proposed Node 24 LTS satisfies. |
+| D3 test database | Not touched. The new integration tests need the same disposable PostgreSQL, plus the labeled OpenAI and RPC fakes described in the test plan. |
+| D4 CI minutes | Not touched. |
+| D5 races and authorization without named tests | **Partly resolved:** every race and authorization rule added in this revision has a named test or case; the PayPal abandonment and two-start races added after review are tested by `capture is never dispatched once the review has expired` and `two open reviews of one basket cannot both start payment`. A membership revocation committed in the same instant as an import commit is covered only by the sequential case `membership removed during an import merges nothing`. The 2026-10-07 gaps D5 lists for PayPal stay with Gate 4. |
+| D6 OpenAPI | Not touched; the import route change does not affect the public read routes. |
+| D7 database roles | Not resolved here. The web role will also need `menu_imports`, `menu_import_admission`, `wallet_challenges`, `pyusd_rates` and the RPC limiter rows; the maintenance role needs PYUSD attempt columns and the limiter rows. Grants stay in migrations, as D7 proposes. |
 
 ## Least confident decisions
 
 1. **R1 TypeScript 7.0.2 with Next 16.4.0, Drizzle 0.45.3 and Better Auth 1.7.7.** All are current majors read from the registry today; their mutual compatibility is untested here. The Slice 1 boot check is the falsifier, and the fallback is to downgrade to the newest mutually supported set rather than to patch around it.
-2. **R2 Storage exhaustion has no in-application recovery.** Access denial is read-only and therefore survives, but reclaiming bytes when `DELETE` itself fails is a console action whose immediacy is **[unknown]**. If the 70% admission threshold proves insufficient in practice, the honest move is to reduce the image cap or drop image import to manual entry, not to claim cleanup works.
+2. **R2 Storage exhaustion has no in-application recovery.**
+   Reclaiming bytes when `DELETE` itself fails is a console action whose immediacy is **[unknown]**.
+   **Narrowed 2026-10-11:** no image bytes or image churn exist any more, so the risk is generic exhaustion, which still blocks purchase, payment evidence, auth and audit writes.
+   The 70% reading is an operator alert, not an admission control; an abandoned import still reads as expired without any write.
 3. **R3 Maintenance's PayPal boundary is code-level.** Finding 6 could not be verified as credential-enforceable. The build-graph test is a genuine guard against accidental reachability, and it is not a security boundary against a deliberately modified runner.
-4. **R4 Hourly maintenance is not a deadline.** GitHub schedules can be delayed or dropped, so `T_SOURCE_SWEEP` and `reconcile_attempts` are best effort. Anything described to a judge as "within an hour" must instead be described as "checked at least hourly when the schedule runs".
-5. **R5 The exact AI model is unselected.** Gate 2 deferred model choice to a Gate 3 task evaluation, and that evaluation needs an API key and spend that are not authorized. The contracts are model-agnostic; the evaluation moves to a named slice with pre-registered criteria, and `AI_MODEL` stays an environment name.
-6. **R6 `sharp` is a native dependency on a free ephemeral host.** Build time and binary availability on Render Free are unverified. If it fails, image normalization must move to a pure-JS decoder with a lower cap, which weakens the metadata-stripping claim and must be disclosed.
-7. **R7 Churn-based admission may be too conservative or too lax.** The 100 MiB per rolling 6-hour window figure is arithmetic, not measurement. It could block a legitimate demo retry sequence, or under-protect if history accounting behaves differently than documented.
+4. **R4 Hourly maintenance is not a deadline.**
+   GitHub schedules can be delayed or dropped, so `reconcile_attempts` and, since 2026-10-11, `reconcile_pyusd_attempts` are best effort.
+   Since the 2026-10-11 review, no buyer path waits for `close_expired_reviews`: PayPal abandonment and the basket lock are derived on read.
+   Anything described to a judge as "within an hour" must instead be described as "checked at least hourly when the schedule runs".
+5. **R5 The exact AI model is unselected.**
+   Gate 2 deferred model choice to a Gate 3 task evaluation, and that evaluation needs an API key and spend that are not authorized.
+   The contracts are model-agnostic; the evaluation moves to a named slice with pre-registered criteria, and `AI_MODEL` stays an environment name.
+   **Extended 2026-10-11:** `AI_MENU_MODEL` needs its own pre-registered vision evaluation with image and strict-schema support and no published shutdown before 16 Dec 2026.
+   Chinese, rotated and small-price text accuracy and vision latency are falsifiers, and the user has not chosen either model, the daily spend ceiling or the bounds, so imports stay closed until those are recorded.
+6. **R6 `sharp` is a native dependency on a free ephemeral host.**
+   Build time and binary availability on Render Free are unverified.
+   If it fails, image normalization must move to a pure-JS decoder with a lower cap, which weakens the metadata-stripping claim and must be disclosed.
+   **Expanded 2026-10-11:** decoder memory and CPU on 512 MB and 0.1 CPU join it.
+   The browser shrink bounds server input at 2,048 pixels per side but is not a measurement, and browser decoding of large or HEIC phone photos is unmeasured too.
+7. **R7 Churn-based admission may be too conservative or too lax.**
+   The 100 MiB per rolling 6-hour window figure is arithmetic, not measurement.
+   It could block a legitimate demo retry sequence, or under-protect if history accounting behaves differently than documented.
+   **Superseded 2026-10-11 by R7a,** because no image bytes are admitted any more.
+   - **R7a Admission and spend may be mis-sized.**
+     One import at a time, 10 per outlet and 50 globally a UTC day, and a reserved worst-case spend are arithmetic.
+     One global slot makes a second merchant wait up to 90 seconds; the daily caps could block a rehearsal; and a wrong token bound would make reservations meaningless, which is why usage above a reservation stops imports.
+     Since the 2026-10-11 review an attempt closed before its model call frees its reservation; that release depends on the dispatch mark being committed before the call, which has its own test.
+     None of these figures is a measured cost or a safe memory bound.
 8. **R8 Browser polling on a sleeping app.** A 2-second poll for 60 seconds keeps Render awake and Neon out of scale-to-zero during an active payment, which is intended, but the interaction with the 750-hour monthly budget across several concurrent judges is unmeasured.
 9. **R9 One package with two entrypoints.** Sharing `src/domain` between the web app and the compiled runner is what makes the maintenance boundary type-checkable, but it also means a Next.js dependency change can break the runner build. The separate `tsconfig.runner.json` is the mitigation and may not be sufficient.
 10. **R10 `purchase_requests` as an agent surface is unexercised.** No supported MCP client has been run against Next.js 16 in this planning pass, so transport interoperability is **[unknown]** and could force a Gate 2 amendment if a different transport is required.
 11. **R11 Managed auth was provisioned and contradicted approved Gate 2. Decided by the user on 2026-10-07: in-app Better Auth. Hazard disproven by inspection; not a blocker.** `neon.ts` is now `auth: false`, though `neon deploy` reported no changes and that field demonstrably does not control the branch-level service. A read-only schema inspection resolved the question that mattered: **all nine Neon Auth tables live in a dedicated `neon_auth` schema and `public` is empty**, so there is no table-name collision with the in-app Better Auth tables this design places in `public`. Managed auth remains enabled but inert and isolated; nothing was disabled. **Two containment rules are mandatory:** never build against `neon_auth`, and pin Better Auth's Drizzle adapter explicitly to `public` so no unqualified `user`, `session`, `account` or `verification` name can resolve into the other schema through a search path. Cost of the idle service on the Free plan is **[unknown]**.
 12. **R12 The database is in `aws-us-east-2`. Accepted by the user on 2026-10-07, conditional on measurement.** The residual risk is that trans-Pacific round trips stack inside an approved three-minute metric that already absorbs a Render cold start. It is unmeasured, and relocation is more expensive once real data exists. The acceptance therefore holds only while the Slice 1 latency measurement passes; if the metric fails because of region latency, relocation must be revisited rather than explained away.
+13. **R13 Wallet behaviour is unproven (added 2026-10-11).**
+    Whether Phantom honours `solana:devnet`, displays this devnet mint and keeps the prepared blockhash, transfer and memo is **[unknown]**.
+    If it refreshes the blockhash, the expiry release is unsafe: stop the rail and reopen Gate 2.
+    If it adds Lighthouse memory instructions or anything else outside the allowlist, those payments stay uncertain, and widening the allowlist is a Gate 2 amendment, not a code change.
+    The user's 2026-10-11 review kept the memory-instruction exclusion as written; whether Phantom adds them is tested at PYUSD enablement under this risk, not now.
+14. **R14 The phone path is unproven (added 2026-10-11).**
+    Whether the Browse link keeps its query on target phones and whether the wallet browser keeps its session through approval are **[unknown]**.
+    Phone PYUSD stays unavailable until proven, and no session or purchase ever moves between browsers.
+15. **R15 Test funds are unproven (added 2026-10-11).**
+    Devnet SOL for fees and test PYUSD depend on faucets the user has not yet tried.
+    Without them no PYUSD proof can run, and the rail stays disabled.
+16. **R16 The mint's authorities can change its behaviour (added 2026-10-11).**
+    Freeze, permanent-delegate, transfer-hook and fee authorities exist on the devnet mint.
+    Preparation refuses on a non-zero fee horizon, an active hook or an unreviewed extension, but the permanent delegate can move tokens after a verified transfer, so receipts say "transferred and finalized", never "kept".
+17. **R17 Public RPC limits and history completeness are not ours to control (added 2026-10-11).**
+    Render's shared outbound IP may consume the same per-IP allowance, and devnet can prune history or reset.
+    Incomplete history keeps payments locked rather than released, and automatic unpaid release stays off until its proofs are recorded, so a buyer who cancels in the wallet can stay locked until an operator acts.
+    The lock covers only that buyer session's same basket on either rail; a different basket or a new session is unaffected.
+    A `mismatch` ends only through the audited operator resolution of delta D1, and only as unpaid.
+18. **R18 Verification happens after broadcast (added 2026-10-11).**
+    Envoi never sees the signed transaction before the wallet sends it, so verification can withhold confirmation but cannot prevent or undo a wrong transfer.
+
+### Least confident choices in the 2026-10-11 revision
+
+These are the calls in this revision most worth challenging now, while changing them costs a sentence.
+The user reviewed six of them on 2026-10-11, items 4, 5, 6, 7, 10 and 13; their verdicts are noted on each item and recorded in [`00-status.md`](00-status.md#approval-history) as review decisions, not Gate 3 approval.
+
+1. **Spend ceiling and model bounds as reviewed code constants.**
+   This adds no environment name and makes every change a reviewed diff, but recording the user's decision needs a commit.
+   The alternative, an operator-set database row, needs the Gate 4 operator CLI first.
+2. **Consent version and base revision in headers, with a one-part multipart body.**
+   This lets admission run before any body byte is read, as Gate 2 requires.
+   A raw `image/jpeg` body would be simpler but departs from Gate 2's "multipart request" wording.
+3. **One serialized admission row.**
+   It makes the caps race-free with one lock.
+   Its cost is that a second merchant anywhere waits for the first import, which follows from Gate 2's one global in-flight import.
+4. **Per-item blanks instead of whole-result rejection.**
+   A non-SGD price or a duplicate variant now blanks only that item, where the 2026-10-07 Zapier contract rejected the whole result.
+   This follows Gate 2's "duplicate variants need resolution" but is a contract change worth confirming.
+   **User review 2026-10-11: agreed, kept.**
+5. **`PYUSD_ENABLED=false` still reconciles prepared attempts.**
+   Gate 2 says the flag "gates the adapter"; reading it as "stops new PYUSD actions" keeps a payment that may have landed from going unverified.
+   The stricter reading would leave such purchases locked until the flag returns.
+   **User review 2026-10-11: agreed, kept.**
+6. **The non-upgradeable memo program.**
+   The pinned memo client builds for its newer upgradeable program by default; this design overrides it to `MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr`, whose code cannot change, and allowlists only that one.
+   Both were confirmed executable on devnet on 2026-10-11.
+   **User review 2026-10-11: agreed, kept.**
+7. **Lighthouse assertions by discriminator from a pinned commit.**
+   No compatible Lighthouse client exists for Kit 8, so discriminators 2 to 17 are reviewed constants.
+   A Lighthouse upgrade that renumbers instructions would make payments uncertain rather than wrongly confirmed.
+   **User review 2026-10-11: kept as written, with memory instructions 0 and 1 excluded; whether Phantom adds them is tested at PYUSD enablement under R13, not now.**
+8. **A database-backed RPC limiter.**
+   It enforces one budget across Render and the runner exactly, at the cost of database writes per RPC call.
+   A static split between the two processes would avoid those writes but could exceed the budget during a redeploy overlap.
+9. **Scan completeness means reaching a signature older than the preparation slot, with no memo filter.**
+   This is conservative and simple, but a merchant account with heavy traffic since preparation costs more pages and transaction reads, spread across claims by the caps.
+10. **A rail-independent basket lock that holds only while money can still move.**
+    **User review 2026-10-11: keep the idea, fix its trigger; revised accordingly.**
+    It enforces Gate 2's "no new attempt or rail switch while an external effect is possible" for both rails, and also changes PayPal: an uncertain PayPal payment now blocks a PYUSD review for the same basket.
+    The earlier draft locked on `pending_payment`, which a PayPal buyer enters at order creation, and gave `externally_approved` no exit, so a buyer who approved at PayPal and closed the tab could never review those items again.
+    The lock is now derived on read from attempt states and `T_REVIEW`, with no maintenance dependency, and a PayPal attempt that never dispatched a capture reads `abandoned` once `T_REVIEW` passes.
+    Two choices go slightly beyond the review's list and are worth confirming: `created` and `create_unknown` also lock inside `T_REVIEW`, because an order created by an in-flight request can still be approved and captured in that window; and both execution starts recheck the lock with the buyer's same-basket purchases locked, because two reviews opened before either started would otherwise both pay.
+    The lock is per buyer session, so it cannot stop the Phantom-browser path, a new anonymous session, from paying a basket already paid in another browser.
+    A buyer who wants a different basket is unaffected.
+11. **Exact-bytes wallet challenge with `solana:signMessage`.**
+    Server verification is exact, but Phantom's handling of a SIWS-format message through `signMessage` rather than `signIn` is **[unknown]**.
+12. **Version 0 transaction, memo first.**
+    Phantom's handling of version 0 versus legacy transactions on devnet is **[unknown]**; the choice is cheap to flip before the PYUSD slice.
+13. **Batched tests: 90 named tests and 225 cases, down from 192 named tests.**
+    **User review 2026-10-11: reduce named tests and compute by batching, without weakening one guard, one mutation; revised accordingly.**
+    Every guard still has its own row and mutation, and the review's fixes add 13 cases.
+    The risk is that a slice discovers two rows of one group failing on the same mutation; the batching rules then move one row out rather than accept the overlap, which can raise the named count again.
+    The PYUSD groups also assume the roadmap's two PYUSD slices; another split means regrouping by case.
+    PYUSD is first in the cut order, so its 27 named tests and 122 cases go with it if it is cut.
 
 ## What this gate does not authorize
 
 Approving Gate 3 accepts these contracts. It does not authorize implementation, package installation, account provisioning, workflow creation, deployment, a repository visibility change, real merchant images, real merchant enrollment, any payment outside a sandbox, or Gate 4 slice selection. The R11 flag flip, its redeploy and a read-only schema inspection were separately authorized and executed on 2026-10-07; that authorization did not extend to `neon neon-auth disable`, which remains unauthorized. Gate 3 approval does not establish that any vendor claim above behaves as documented for this account, and it does not reopen Gate 1 or Gate 2: no approved product behaviour or architecture decision is changed here. Two recorded claims are relabeled in `research.md` under finding 7, which is an evidence correction, not a decision change.
 
 A discovery during implementation that changes an approved architecture decision reopens Gate 2 for approval before dependent work continues. A change to product behaviour reopens Gate 1.
+
+**Added 2026-10-11.**
+Approving this revision would accept the import and PYUSD contracts as a proposal only.
+It would not authorize real merchant photos, any OpenAI call or evaluation spend, choosing `AI_MODEL` or `AI_MENU_MODEL`, recording a spend ceiling, wallet or faucet use, devnet transactions, enabling PYUSD, setting `PYUSD_PROOFS.automaticUnpaidRelease`, building or using the operator resolution of a PYUSD mismatch, or editing `04-slices.md`.
+The user's OpenAI data-sharing setting, daily spend ceiling, models and faucet access remain open and are not inferred from any approval.
+The revision itself used only read-only registry, GitHub and devnet reads; it installed, provisioned, spent and committed nothing.
+The revision after the user's review used no external read at all.

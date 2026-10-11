@@ -5,7 +5,8 @@ This is documentation research plus the explicitly attributed read-only devnet o
 No sandbox capture, wallet transfer, QR/menu photo trial or user test has been run.
 
 **[verified] Current approval record, 2026-10-11:** Gate 1 was re-approved on 2026-10-10 and Gate 2 on 2026-10-11; Gate 3 stays reopened only for direct vision import and PYUSD.
-`02-architecture.md` is the re-approved Gate 2 amendment; the Gate 3 revision is next and the unapproved Gate 4 draft waits for it.
+`02-architecture.md` is the re-approved Gate 2 amendment; the Gate 3 revision was drafted on 2026-10-11 and awaits the user's decision, and the unapproved Gate 4 draft waits for it.
+Its source reads are in [Gate 3 revision reads](#gate-3-revision-reads-2026-10-11).
 OpenAI and its dependency pin stay; no provider switch is proposed.
 The 2026-10-07 approvals, cross-check and eight finding dispositions remain historical authority for unaffected decisions, not approval of this amendment.
 See [Gate 3 cross-check](#gate-3-cross-check-2026-10-07) and [status](00-status.md#unresolved-review-findings).
@@ -115,7 +116,7 @@ Zapier supports error handlers and replay, with plan-dependent limits. Error han
 - Live launch: provider eligibility, qualified Singapore legal review, merchant ownership/enrollment, retention, support, monitoring, reconciliation and recovery. No-custody is a design boundary, not a licensing conclusion.
 
 Research and mockup checks do not establish runtime evidence.
-Gate 1 is re-approved; this Gate 2 amendment awaits approval, Gate 3 revision waits and Gate 4 remains an unapproved draft.
+Gate 1 is re-approved, the Gate 2 amendment was re-approved on 2026-10-11, the Gate 3 revision drafted on 2026-10-11 awaits the user's decision and Gate 4 remains an unapproved draft.
 No implementation, spend, installation, provisioning, workflow, commit, push or deployment is authorized by this work.
 The original brief and protected gate/mockup files remain unchanged in this revision.
 
@@ -341,7 +342,7 @@ Where a point supersedes an earlier hypothesis above, it says so; the earlier te
     **[hypothesis]** Envoi's prepared transaction carries no compute-budget instructions; wallet-added ones are allowlisted.
     [Priority fees](https://docs.phantom.com/developer-powertools/solana-priority-fees).
 15. **[vendor claim] Lighthouse program ID:** the Lighthouse repository README lists `L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95` for both devnet and mainnet beta.
-    **[unknown]** Whether Phantom's devnet assertions use that deployment; Gate 3 rechecks the program account before pinning it in code.
+    **[unknown]** Whether Phantom's devnet assertions use that deployment; Gate 3 rechecks the program account before pinning it in code; done read-only on 2026-10-11, see [Gate 3 revision reads](#gate-3-revision-reads-2026-10-11).
     [Lighthouse repository](https://github.com/Jac0xb/lighthouse).
 16. **[vendor claim] Blockhash commitment:** Solana's confirmation guide says `confirmed` should almost always be used for RPC requests, that a `finalized` blockhash cuts transaction expiration by about 13 seconds (more under unstable conditions), and that a blockhash from an abandoned block is never recent on the finalized chain.
     **[hypothesis]** Prepare with a `confirmed` blockhash for more buyer approval time; release still requires finalized block height past the saved `lastValidBlockHeight` plus a complete scan.
@@ -372,6 +373,42 @@ PayPal must remain independent.
 **[unknown] Carry forward:** model through judging; OpenAI sharing setting and `store: false` effect; Chinese-text draft accuracy; Render latency/decoder RAM and browser shrink on target phones; Phantom token display, chain honoring and blockhash/transfer preservation; phone Browse-link path; user faucet access; RPC shared-IP/history behavior.
 R2 narrows to general storage exhaustion; R6 expands to RAM/CPU; image-churn R7 is superseded by mis-sized spend/admission R7a.
 Other approved decisions and risks stand.
-The architecture was re-approved on 2026-10-11; Gate 3 revises affected contracts next and Gate 4 waits for Gate 3, and no runtime, spend or external-action authority follows from this research.
+The architecture was re-approved on 2026-10-11; the Gate 3 revision of affected contracts was drafted the same day and awaits the user's decision, Gate 4 waits for Gate 3, and no runtime, spend or external-action authority follows from this research.
 
 Documentary proof is recorded in [status](00-status.md#gate-2-amendment-documentary-verification-2026-10-10), not integration evidence.
+
+## Gate 3 revision reads, 2026-10-11
+
+Read on 2026-10-11 (11:11-11:14 UTC) to pin the Gate 3 revision's new packages and constants.
+Every read was an HTTPS GET of a public registry document, package tarball or source file, plus two read-only devnet RPC calls; raw responses stayed in session scratch storage.
+No package was installed, no OpenAI call was made, and no wallet, faucet, airdrop or transaction was used.
+
+1. **[verified] Registry pins.**
+   The npm registry documents list `@solana/kit` 8.4.0 (published 2026-09-28; peer `typescript >=5.4.0`; engines `node >=20.18.0`), `@solana-program/token-2022` 0.19.0 (2026-09-21; peers `@solana/kit ^8.3.0`, `@solana/sysvars ^8.0.0`, and `@solana/zk-sdk ^0.5.1` marked optional), `@solana-program/memo` 0.15.0 (2026-09-21), `@wallet-standard/app` 1.1.1 (2026-06-03; engines `node >=22`) and `@solana/wallet-standard-features` 1.5.0 (2026-09-10; engines `node >=22`) as latest.
+   `lighthouse-sdk` 2.1.0 (2025-05-12) peers `@solana/kit ^2.1.0`, so it cannot share Kit 8.
+   The pinned `ai` 7.0.130 and `@ai-sdk/openai` 4.0.86 were both published 2026-10-07; newer patches (7.0.137 and 4.0.91) exist and are not adopted, because the pins are out of scope.
+   [npm registry](https://registry.npmjs.org/).
+2. **[verified] Program addresses in the pinned clients.**
+   `@solana-program/memo` 0.15.0 builds new memos for `Memo4c2pN8afCj432Lb7RMVKi9PbQnnW7ewFFaV3oAH` and keeps `MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr` and `Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo` as legacy addresses for reading.
+   Its builder accepts a program-address override.
+   `@solana-program/compute-budget` 0.19.0 names `ComputeBudget111111111111111111111111111111`, and `@solana-program/token-2022` 0.19.0 names `TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb` and the associated-token program `ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL`.
+   Its instruction enum includes `TransferChecked`, `GetAccountDataSize`, `AmountToUiAmount` and `UiAmountToAmount`, and extension instructions such as `Pause` that the reviewed devnet mint does not carry.
+3. **[verified] Lighthouse instruction set.**
+   At commit `4c579479c98635e419b1b167f08be02a71604a71` (2025-04-27), `programs/lighthouse/src/instruction.rs` orders `MemoryWrite` and `MemoryClose` first, then sixteen assertion instructions from `AssertAccountData` to `AssertBubblegumTreeConfigAccount`.
+   The generated Rust client confirms discriminators 0 for `MemoryWrite`, 4 for `AssertAccountDelta` and 9 for `AssertTokenAccount`, consistent with that order.
+   `MemoryWrite` takes a writable payer and a memory account it creates, so it moves lamports and is not an assertion.
+   The README still lists `L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95` for devnet and mainnet beta.
+   **[unknown]** Which Lighthouse instructions Phantom adds on devnet.
+   [Lighthouse instruction source](https://github.com/Jac0xb/lighthouse/blob/4c579479c98635e419b1b167f08be02a71604a71/programs/lighthouse/src/instruction.rs).
+4. **[verified] Read-only devnet check, the one Gate 2 assigned to Gate 3.**
+   `getGenesisHash` on `https://api.devnet.solana.com` returned `EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG`, matching the pinned devnet genesis.
+   `getMultipleAccounts` at `finalized`, context slot 509883437, with zero-length data slices, returned all three accounts as executable: the Lighthouse address and the newer memo address owned by `BPFLoaderUpgradeab1e11111111111111111111111`, and `MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr` owned by the non-upgradeable `BPFLoader2111111111111111111111111111111111`.
+   This proves the programs exist on devnet today; it says nothing about future upgrades or a devnet reset.
+5. **[vendor claim] Pinned AI SDK options.**
+   The type definitions in `ai` 7.0.130 document `maxRetries` ("Set to 0 to disable retries", default 2), `abortSignal` and `maxOutputTokens`, and mark `generateObject` deprecated in favour of `generateText` with an `output` setting.
+   `@ai-sdk/openai` 4.0.86 exposes the provider options `store` and `strictJsonSchema`, and reads an image part's `providerOptions.openai.imageDetail` into the request's image `detail`.
+   It also exposes `promptCacheRetention`; the menu call never sets it, and its default effect on retention is **[unknown]**.
+   These are the package authors' definitions, not observed behaviour on the selected account.
+6. **[hypothesis] Consequences for Gate 3.**
+   Pin the non-upgradeable memo program and allowlist only it; identify Lighthouse assertions by discriminators 2 to 17 as reviewed constants; call the vision model through `generateText` with an `output` setting; add no Lighthouse SDK, chains package or compute-budget client.
+   None of this changes a Gate 2 decision.
