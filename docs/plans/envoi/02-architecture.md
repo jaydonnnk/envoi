@@ -7,7 +7,7 @@ The 2026-10-11 review changed five points: the browser shrinks the menu photo be
 Preparation now releases the unsigned bytes exactly once and never stores them, because a wallet may add different instructions each time it signs ([step 4](#preparation-wallet-broadcast-and-verification)).
 The post-expiry history scan now runs for every released attempt, including a confirmed one, so a second transfer carrying the same reference is recorded and shown instead of going unnoticed ([recovery](#lost-response-recovery-and-rpc)).
 Everything else approved on 2026-10-07 stands, including hosting, in-app auth, PayPal recovery, identity-only scan and MCP handoff.
-Gate 1 was re-approved on 2026-10-10; Gate 3 may now revise affected contracts, and Gate 4 waits for Gate 3 re-approval.
+Gate 1 was re-approved on 2026-10-10; Gate 3 may now revise affected contracts, and Gate 4 waits for Gate 3 re-approval, which the user gave on 2026-10-11.
 See [`00-status.md`](00-status.md#reopening-2026-10-10-zapier-removed) and [`handoff.md`](handoff.md#gate-2-handover-2026-10-10).
 
 Product authority: [approved Gate 1](01-product.md).

@@ -1,7 +1,7 @@
 # Envoi: gate roadmap and candidate slices
 
 Discussion candidates, updated 2026-10-11; not Gate 4 approval or a replacement build order.
-Gate 1 is re-approved; Gate 2's direct-vision/PYUSD amendment was re-approved on 2026-10-11, and re-approved again the same day for two PYUSD double-payment fixes; the Gate 3 revision of affected contracts was drafted on 2026-10-11, revised after the user's review and for those fixes the same day, and awaits the user's decision, and the unapproved Gate 4 draft waits for Gate 3 re-approval.
+Gate 1 is re-approved; Gate 2's direct-vision/PYUSD amendment was re-approved on 2026-10-11, and re-approved again the same day for two PYUSD double-payment fixes; the Gate 3 revision of affected contracts was drafted on 2026-10-11, revised after the user's review and for those fixes the same day, and re-approved on 2026-10-11; the unapproved Gate 4 draft is revised next.
 All unaffected 2026-10-07 decisions and eight review dispositions stand.
 Required later Gate 4 changes: merge S11/S12, drop Zapier access, move S13 immediately after S4, add PYUSD after S13 and first in the cut order, and apply the Gate 3 test delta recorded in `03-program-design.md` (199 previous names mapped to 92 named tests and 231 cases; 10 names removed, 21 cases added).
 The candidate numbers below are not S-numbers.

@@ -1,10 +1,10 @@
-# Envoi: Gate 3 revision drafted, awaiting approval
+# Envoi: Gate 3 re-approved, Gate 4 revision next
 
 Updated 2026-10-11.
 Gate 1 was re-approved on 2026-10-10; do not redo it.
 `02-architecture.md` was revised for direct vision import and PYUSD only, revised again after a 2026-10-11 review, and re-approved by the user on 2026-10-11 ("gate 2 approved").
 It was reopened again the same day for two PYUSD double-payment fixes and re-approved for them, the user having approved the fixes in advance.
-The Gate 3 revision of affected contracts was drafted on 2026-10-11 on branch `envoi/gate-3-vision-pyusd`, following the [Gate 3 handover](#gate-3-handover-2026-10-11), revised the same day after the user's review (fixes A-K) and for fixes L and M, and awaits the user's decision; the unapproved `04-slices.md` is not revised yet.
+The Gate 3 revision of affected contracts was drafted on 2026-10-11 on branch `envoi/gate-3-vision-pyusd`, following the [Gate 3 handover](#gate-3-handover-2026-10-11), revised the same day after the user's review (fixes A-K) and for fixes L and M, and re-approved by the user on 2026-10-11 ("Yes approve commit the branch and push and merge to main"); the unapproved `04-slices.md` is not revised yet.
 All unaffected 2026-10-07 approvals stand, including Render Free/Neon Free/in-app Better Auth/GitHub Actions, PayPal recovery, identity-only scan, MCP, R11 and R12.
 No app or payment integration exists; the already-provisioned Neon database is recorded in status.
 On 2026-10-11 the user authorized committing this work, publishing its branch and merging it into `main`; Git publication is not gate approval.
@@ -20,7 +20,7 @@ Read applicable AGENTS.md and all documents under `docs/plans/envoi/` before res
 - `mockups/index.html`: entry to five product screens. `merchant-onboarding.html` shows both uploads, editable drafts, manual/failure states and confirmation/publication blockers. `buyer.html` shows the text entry point and the scan entry point including an unenrolled-sticker result.
 - `research.md`: primary-source sponsor/menu limitations, corrections to the original brief, prior-art findings from shipped SGQR payment products, the 2026-10-07 Gate 3 source cross-check, and unresolved proof requirements.
 - `02-architecture.md`: Gate 2 amendment re-approved 2026-10-11, and re-approved again the same day for two PYUSD double-payment fixes; complete direct-vision and PYUSD boundaries, with unaffected approved decisions preserved.
-- `03-program-design.md`: 2026-10-07 approved contracts plus the 2026-10-11 revision of the import and PYUSD contracts, revised after the user's review the same day, which awaits approval.
+- `03-program-design.md`: 2026-10-07 approved contracts plus the 2026-10-11 revision of the import and PYUSD contracts, revised after the user's review and for fixes L and M the same day, re-approved on 2026-10-11.
   The source row, capabilities, image clocks and image tasks are removed; provider pin and unaffected contracts stand.
   Its [test delta](03-program-design.md#test-delta-for-the-gate-4-revision) lists what Gate 4 must reassign.
 - `stack-recommendation.md`: mirror of the revised architecture and unaffected Gate 3 pins; not approval authority.
@@ -46,11 +46,9 @@ Proposed target remains 4 of 5 first-time buyers completing an eligible test-env
 
 ## Next authorized action
 
-**Next action: the user decides on the Gate 3 revision; the question asked is exactly `Approve Gate 3, or what should change?`.**
-The revision, the user's review fixes A-K, its mirrors and fail-capable checks are done and recorded in `00-status.md`; on approval, record it, then revise Gate 4 with the test delta.
-On a change request, revise `03-program-design.md` and its mirrors and ask again.
+**Next action: on the user's request, revise Gate 4 (`04-slices.md`) with the Gate 3 [test delta](03-program-design.md#test-delta-for-the-gate-4-revision) and ask `Approve Gate 4, or what should change?`.**
+Gate 3 was re-approved on 2026-10-11 with fixes A-M; its record, mirrors and fail-capable checks are in `00-status.md`.
 The four reopening questions were already answered and Gates 1 and 2 are re-approved; do not ask them again or revise either gate.
-Gate 4 is revised only after Gate 3 re-approval.
 No application code, install, account provisioning, wallet/faucet, spending, workflow, deployment or visibility change is authorized; the 2026-10-11 commit/push authorization covered these planning documents only.
 The R11 flag/redeploy/inspection are complete, not work to repeat.
 
@@ -133,7 +131,7 @@ PayPal must stay usable if PYUSD fails, and a failed proof keeps the rail disabl
 4. Gate 2 approval is recorded; Gate 3 edits may begin on a new branch, as the Gate 3 handover says.
 5. Revise `03-program-design.md`: import types and call stack, authorization matrix, named clocks, maintenance tasks, test plan with mutations, version pins, residual risks and wallet contracts if chosen.
    Ask `Approve Gate 3, or what should change?`.
-   **Done 2026-10-11, revised after the user's review the same day; awaiting the user's decision.**
+   **Done 2026-10-11, revised after the user's review and for fixes L and M the same day; re-approved 2026-10-11.**
 6. After Gate 3 re-approval, revise `04-slices.md`: merge S11/S12, remove Zapier access, reassign tests, add PYUSD after S13/first cut and move S13 immediately after S4. Ask `Approve Gate 4, or what should change?`.
 7. Mirror every change in `00-status.md`, this file, `roadmap.md`, `stack-recommendation.md` and `research.md`, and run documentary checks proven able to fail.
 
@@ -213,9 +211,9 @@ The user asked for a copy-paste prompt so another agent can run the Gate 3 revis
 
 ### Gate 3 revision status, 2026-10-11
 
-- **Drafted, not approved.**
+- **Re-approved 2026-10-11.**
   `03-program-design.md` carries the revision on branch `envoi/gate-3-vision-pyusd`, created from `main` at `9b4796b`.
-  On 2026-10-11 the user authorized publishing this work, merging it into `main` and pushing; Git publication is not Gate 3 approval.
+  On 2026-10-11 the user authorized publishing this work, merging it into `main` and pushing; Git publication is not gate approval; the user then re-approved Gate 3 ("Yes approve commit the branch and push and merge to main") and authorized committing, pushing and merging.
 - **Scope kept.**
   The revision changed only `03-program-design.md`, `00-status.md`, this file, `roadmap.md`, `stack-recommendation.md` and `research.md`, plus `02-architecture.md` for the Gate 2 reopening below; Gate 1, the mockups and Gate 4 are untouched, and the revision did not edit AGENTS.md.
   AGENTS.md carries a separate uncommitted "Context transfer" section, saved after the revision's last edit; including it in any commit is the user's decision.

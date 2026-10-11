@@ -1,6 +1,7 @@
 # Program Design: Envoi
 
-**Reopened 2026-10-10; revised 2026-10-11, revised again after the user's review the same day, revised a third time the same day for fixes L and M after Gate 2 was reopened, and awaiting the user's decision on Gate 3.**
+**Reopened 2026-10-10; revised 2026-10-11, revised again after the user's review the same day, revised a third time the same day for fixes L and M after Gate 2 was reopened, and RE-APPROVED by the user on 2026-10-11** ("Yes approve commit the branch and push and merge to main").
+Approval accepts these contracts as a proposal; it establishes no runtime, account, model, wallet or usability evidence and authorizes no implementation or Gate 4 approval.
 The user removed Zapier because it is paid and reopened Gates 1, 2 and 3.
 Gate 1 was re-approved on 2026-10-10 and Gate 2 on 2026-10-11.
 Gate 2 was reopened again on 2026-10-11 for two PYUSD double-payment fixes and re-approved the same day, the user having approved the fixes in advance.
@@ -13,7 +14,7 @@ Gate 3 program design, 2026-10-07 (Asia/Singapore). **APPROVED by the user 2026-
 ## Revision 2026-10-11: direct vision and PYUSD
 
 Authority: the [re-approved Gate 2 amendment](02-architecture.md), including its five review changes, and the [Gate 3 handover](handoff.md#gate-3-handover-2026-10-11).
-This revision is a proposal: the user has not yet approved it, and the 2026-10-07 approval does not cover it.
+This revision is a proposal, re-approved by the user on 2026-10-11; the 2026-10-07 approval did not cover it.
 
 - **Removed:** the image source row and its `bytea` storage, both capability principals, the image proxy and Zapier result routes, Zapier dispatch and its hook URL name, `T_IMAGE_ACCESS`, `T_SOURCE_SWEEP`, the `expire_imports` and `sweep_sources` tasks, import status and cancel routes, and the import dependency on the maintenance heartbeat and capacity reading.
 - **Added for the import:** a counted Node upload route, in-memory photo checks, serialized admission with daily caps and a spend reservation, the tool-free vision call with explicit `store: false`, model-output bounds, allowlisted error records, expiry derived on read and draft reload after a lost response.

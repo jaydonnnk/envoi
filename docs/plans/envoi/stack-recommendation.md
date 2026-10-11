@@ -2,7 +2,7 @@
 
 Supporting mirror, updated 2026-10-11.
 Gate 1 is re-approved; Gate 2's direct-vision/PYUSD amendment in `02-architecture.md` was re-approved on 2026-10-11, and re-approved again the same day for two PYUSD double-payment fixes.
-`03-program-design.md` was revised on 2026-10-11 for the import and PYUSD contracts, revised again after the user's review and for those fixes the same day, and awaits the user's decision on Gate 3; unapproved `04-slices.md` is unchanged and its affected import/wallet content is superseded pending Gate 4.
+`03-program-design.md` was revised on 2026-10-11 for the import and PYUSD contracts, revised again after the user's review and for those fixes the same day, and re-approved on 2026-10-11; unapproved `04-slices.md` is unchanged and its affected import/wallet content is superseded pending Gate 4.
 Unaffected 2026-10-07 decisions, eight review dispositions and version pins stand, including OpenAI and `@ai-sdk/openai`.
 The Gate 3 revision adds five proposed PYUSD pins read from the registry on 2026-10-11: `@solana/kit` 8.4.0, `@solana-program/token-2022` 0.19.0, `@solana-program/memo` 0.15.0, `@wallet-standard/app` 1.1.1 and `@solana/wallet-standard-features` 1.5.0.
 No approval establishes runtime/account proof or authorizes installation or implementation; the user separately authorized committing and pushing these planning documents on 2026-10-11.
@@ -73,7 +73,7 @@ Timeout says Envoi stopped waiting, did not store the photo or apply late result
 R2 narrows to general Neon exhaustion that still blocks payment-state writes; R6 expands to RAM/CPU; image-churn R7 is superseded by admission/spend-sizing R7a.
 Wallet display/chain and blockhash/transfer preservation, the phone Browse-link path, user faucet access and public RPC shared-IP/history completeness remain unknown.
 Full consent, limits, wallet rules and evidence: [architecture](02-architecture.md), [source supplement](research.md#gate-2-source-supplement-2026-10-10).
-The Gate 3 revision of 2026-10-11 carries these contracts, with a named test or table-driven case and its own mutation for each new guard, and awaits the user's decision; this mirror is not implementation authority.
+The Gate 3 revision of 2026-10-11 carries these contracts, with a named test or table-driven case and its own mutation for each new guard, and was re-approved on 2026-10-11; this mirror is not implementation authority.
 After the user's review it also verifies the transfer's mint and decimals explicitly, keeps Lighthouse out of the runtime identity check, reads no RPC inside a database transaction and releases a menu spend reservation only when the model call was never dispatched; no pin changed.
 APIMatic/prize access remains account-conditional and unproven.
 

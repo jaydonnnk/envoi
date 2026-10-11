@@ -5,7 +5,7 @@ This is documentation research plus the explicitly attributed read-only devnet o
 No sandbox capture, wallet transfer, QR/menu photo trial or user test has been run.
 
 **[verified] Current approval record, 2026-10-11:** Gate 1 was re-approved on 2026-10-10 and Gate 2 on 2026-10-11, and again the same day for two PYUSD double-payment fixes that rest on the Phantom augmentation evidence already recorded here; Gate 3 stays reopened only for direct vision import and PYUSD.
-`02-architecture.md` is the re-approved Gate 2 amendment; the Gate 3 revision was drafted on 2026-10-11, revised twice the same day, and awaits the user's decision, and the unapproved Gate 4 draft waits for it.
+`02-architecture.md` is the re-approved Gate 2 amendment; the Gate 3 revision was drafted on 2026-10-11, revised twice the same day and re-approved on 2026-10-11, and the unapproved Gate 4 draft is revised next.
 Its source reads are in [Gate 3 revision reads](#gate-3-revision-reads-2026-10-11).
 OpenAI and its dependency pin stay; no provider switch is proposed.
 The 2026-10-07 approvals, cross-check and eight finding dispositions remain historical authority for unaffected decisions, not approval of this amendment.
@@ -116,7 +116,7 @@ Zapier supports error handlers and replay, with plan-dependent limits. Error han
 - Live launch: provider eligibility, qualified Singapore legal review, merchant ownership/enrollment, retention, support, monitoring, reconciliation and recovery. No-custody is a design boundary, not a licensing conclusion.
 
 Research and mockup checks do not establish runtime evidence.
-Gate 1 is re-approved, the Gate 2 amendment was re-approved on 2026-10-11, the Gate 3 revision drafted on 2026-10-11 awaits the user's decision and Gate 4 remains an unapproved draft.
+Gate 1 is re-approved, the Gate 2 amendment was re-approved on 2026-10-11, the Gate 3 revision drafted on 2026-10-11 was re-approved the same day and Gate 4 remains an unapproved draft.
 No implementation, spend, installation, provisioning, workflow, commit, push or deployment is authorized by this work.
 The original brief and protected gate/mockup files remain unchanged in this revision.
 
@@ -373,7 +373,7 @@ PayPal must remain independent.
 **[unknown] Carry forward:** model through judging; OpenAI sharing setting and `store: false` effect; Chinese-text draft accuracy; Render latency/decoder RAM and browser shrink on target phones; Phantom token display, chain honoring and blockhash/transfer preservation; phone Browse-link path; user faucet access; RPC shared-IP/history behavior.
 R2 narrows to general storage exhaustion; R6 expands to RAM/CPU; image-churn R7 is superseded by mis-sized spend/admission R7a.
 Other approved decisions and risks stand.
-The architecture was re-approved on 2026-10-11; the Gate 3 revision of affected contracts was drafted the same day and awaits the user's decision, Gate 4 waits for Gate 3, and no runtime, spend or external-action authority follows from this research.
+The architecture was re-approved on 2026-10-11; the Gate 3 revision of affected contracts was drafted and re-approved the same day, Gate 4 is revised next, and no runtime, spend or external-action authority follows from this research.
 
 Documentary proof is recorded in [status](00-status.md#gate-2-amendment-documentary-verification-2026-10-10), not integration evidence.
 
