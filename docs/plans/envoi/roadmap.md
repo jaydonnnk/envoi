@@ -1,17 +1,17 @@
 # Envoi: gate roadmap and candidate slices
 
-Discussion candidates, updated 2026-10-10; not Gate 4 approval or a replacement build order.
+Discussion candidates, updated 2026-10-11; not Gate 4 approval or a replacement build order.
 Gate 1 is re-approved; Gate 2's direct-vision/PYUSD amendment is revised awaiting re-approval; Gate 3 and the unapproved Gate 4 draft stay unchanged until their preceding gates pass.
 All unaffected 2026-10-07 decisions and eight review dispositions stand.
 Required later Gate 4 changes: merge S11/S12, drop Zapier access, move S13 immediately after S4, add PYUSD after S13 and first in the cut order.
 The candidate numbers below are not S-numbers.
 
 The unchanged core is Render Free, Neon Free, in-app Better Auth, quota-gated finite GitHub Actions maintenance and direct sandbox Orders v2 with a distinct seller and lease-serialized recovery.
-**[hypothesis] Amendment:** direct OpenAI menu vision, request memory only, bytes-free attempt metadata, 90-second total/60-second model budget, no image routes/capabilities/tasks or maintenance dependency.
+**[hypothesis] Amendment:** direct OpenAI menu vision on a browser-shrunk photo, request memory only, bytes-free attempt metadata, 90-second total/60-second model budget, no image routes/capabilities/tasks or maintenance dependency.
 Proposed `AI_MENU_MODEL` separates vision evaluation without changing provider/pin.
-PYUSD devnet constants, merchant rate, Wallet Standard broadcast and finalized/complete-history recovery are proposed, not enabled or proven.
-Phone separate-session fresh-review handoff remains a candidate.
-No account, spend, installation, provisioning, workflow, deployment, visibility change, commit, push or implementation is authorized here.
+PYUSD devnet constants, merchant rate, `confirmed`-blockhash preparation, Wallet Standard broadcast, finalized verification of the transfer's meaning and complete-history recovery are proposed, not enabled or proven.
+Phone path: a Phantom Browse link carrying only public outlet/item IDs into a fresh wallet-browser session and review, still unproven.
+No account, spend, installation, provisioning, workflow, deployment, visibility change or implementation is authorized here; the 2026-10-11 commit and push of planning documents was separately authorized.
 
 ## Four decisions, four approvals
 
@@ -34,7 +34,7 @@ Source research can happen during planning. Executable proof belongs to the appr
 | SGQR decode, both entry points | Consented authentic photo set with decoded/confirmed values, unsupported and unreadable cases, and no invented identity. Buyer side additionally: scanning a sticker in place resolves one enrolled outlet, an unenrolled sticker resolves to no purchase, and a shared identifier covering several outlets asks which one. Original clean-sample target is 8/10; log every result. | Keep manual confirmation/entry, and keep the text entry point, which depends on neither decode accuracy nor camera permission. A low score invalidates "automatic extraction" or "60-second" claims, not necessarily the entire product. If no authentic samples exist, call the result fixture-only. |
 | Direct AI menu-image draft | Consented OpenAI vision returns a strictly bounded unpublished draft; exact readable prices and blank unreadable values survive merchant correction/confirmation. Actual no-disk/no-log/no-database-image probes pass. | Challenge Chinese/rotated/small text, malformed/late output, lost responses, timeout, RAM, credit caps and edit races. Manual fallback is not an AI-import result; no zero-retention claim from `store: false`. |
 | Free hosting and model access | Hosting/Actions quota and zero-spend controls, idle cold starts/delayed maintenance and OpenAI models available through 16 Dec. APIMatic remains separate/account-conditional. | No paid hosting fallback or assumed credits/access; account sharing/spend needs the user's confirmation. Topology/provider changes reopen Gate 2, not a silent workaround. |
-| PYUSD transfer/recovery | Correct devnet constants/ATA/key-control proof and merchant rate; wallet honors chain and preserves exact prepared message/blockhash; server verifies finalized transfer/zero fee/transaction balance delta. Lost signature needs complete post-expiry history. | No replacement while effect is possible or history incomplete. RPC, wallet mutation, phone/session or faucet failure keeps PYUSD unavailable and PayPal usable; no pre-broadcast enforcement claim. |
+| PYUSD transfer/recovery | Correct devnet constants/ATA/key-control proof and merchant rate; wallet honors chain and preserves the prepared blockhash, transfer and memo, adding only allowlisted ComputeBudget/Lighthouse instructions; server verifies finalized transfer/zero fee/transaction balance delta. Lost signature needs complete post-expiry history. | No replacement while effect is possible or history incomplete. RPC, wallet mutation, phone/session or faucet failure keeps PYUSD unavailable and PayPal usable; no pre-broadcast enforcement claim. |
 
 ## Candidate hackathon slices
 
@@ -49,10 +49,10 @@ These are capability boundaries, not a promise of duration or final numbering. T
 | 5 | An authorized demo merchant publishes its confirmed outlet/menu and connected accepted test destination. | Both image paths plus fallback; draft invisible until authorization, complete menu confirmation and connection checks pass. Edits invalidate confirmation. PYUSD connection is optional. | 2, 3, 4. |
 | 6 | A buyer identifies a registered outlet and available items, by text request **or by scanning/pasting its SGQR sticker**. | Registered, merchant-confirmed prices; ambiguity, missing location/item asks for clarification. The scan path additionally proves an unenrolled sticker yields no purchase, a shared identifier covering several outlets asks which one, and camera denial falls back to paste then text. Model cannot invent prices or destinations. | 5. |
 | 7 | Review eligible rails with sourced costs and a bound, expiring purchase. | Payer/merchant fee split; unknown FX stays unknown; changed items, amount, recipient, currency or rail require fresh approval. | 2, 6. |
-| 8 | Complete a separate PYUSD devnet purchase after PayPal and MCP proof. | Pinned devnet mint/program/decimals, pre-existing merchant ATA and key-control proof, 30-day merchant rate/ceil amount, exact finalized wallet transaction. | 7, 12; user funding, wallet/phone proofs and approved Gate 2/3 contracts. |
+| 8 | Complete a separate PYUSD devnet purchase after PayPal and MCP proof. | Pinned devnet mint/program/decimals, pre-existing merchant ATA and key-control proof, 30-day merchant rate/ceil amount, finalized wallet transfer verified by meaning with allowlisted wallet-added instructions. | 7, 12; user funding, wallet/phone proofs and approved Gate 2/3 contracts. |
 | 9 | Merchant sees confirmed payment and acknowledges the order. | Buyer/merchant agree on payment evidence; pending is not paid; acknowledgment remains separate. | 2, 5; include 8 when available. |
 | 10 | Expand PayPal recovery for lost responses/callbacks. | Duplicate/out-of-order events, reload and timeout converge on one capture. No blind recharge or cross-rail retry. | 2, 9. |
-| 11 | Recover a lost wallet signature or confirmation response. | Persisted locked attempt, exact attributable finalized evidence or complete post-expiry absence; RPC gaps remain uncertain. Maintenance submits nothing. | 8, 9. |
+| 11 | Recover a lost wallet signature or confirmation response. | Persisted locked attempt, attributable finalized evidence that passes the transfer verification rule, or complete post-expiry absence; RPC gaps remain uncertain. Maintenance submits nothing. | 8, 9. |
 | 12 | Compatible external MCP client discovers the shop and opens the unchanged human approval journey. | Published capabilities, single-use suggestions redeemed to a new server-priced review, no receipt readback or payment authority. In Gate 4, S13 moves just after S4. | 6, 7, 10; advertise PYUSD unavailable until its own proofs pass. |
 | 13 | Developer uses an APIMatic-generated registry client/documentation where access supports it. | Client calls the running API; contract check passes; describe only demonstrated features. Raw documentation is a fallback, not proof of generated-client integration. | 12; actual generation/portal tier and terms confirmed. |
 | 14 | Optional merchant offer within explicit rules. | Editable caps/time window; resulting price changes require renewed approval. Dialogue cannot authorize amounts. | Core payment/recovery slices pass. |
@@ -81,7 +81,7 @@ User-decided capability cut order: PYUSD first, scan next, account-conditional A
 Optional voice/negotiation/AG Grid/catalogue breadth do not become core work ahead of those decisions.
 Never cut payment evidence, approval/recipient checks, menu confirmation, no-image-retention controls or uncertainty handling.
 Manual fallback alone cannot support an AI-drafting claim; cutting affected product scope must be recorded/re-approved rather than hidden.
-**[unknown]** Carry model availability/sharing/retention, Chinese-text accuracy, decoder RAM/latency, wallet chain/mutation/display, phone sessions, faucet and shared-IP/history limits.
+**[unknown]** Carry model availability/sharing/retention, Chinese-text accuracy, decoder RAM/latency, wallet chain/blockhash preservation/display, the phone Browse-link path, faucet and shared-IP/history limits.
 R2 narrows to generic storage exhaustion; R6 expands to RAM/CPU; R7 image churn is superseded by admission/spend-sizing R7a.
 Full choices and sources: [architecture](02-architecture.md), [supplement](research.md#gate-2-source-supplement-2026-10-10).
 None of these candidates authorizes implementation.

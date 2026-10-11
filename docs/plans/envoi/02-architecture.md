@@ -1,7 +1,8 @@
 # Architecture: Envoi
 
-**Reopened and revised 2026-10-10; awaiting Gate 2 re-approval.**
+**Reopened and revised 2026-10-10, revised again after review on 2026-10-11; awaiting Gate 2 re-approval.**
 This amendment replaces Zapier with a direct OpenAI vision request and includes the independently gated PYUSD devnet rail.
+The 2026-10-11 review changed five points: the browser shrinks the menu photo before upload, PYUSD verification checks the transfer's meaning and allowlists the instructions Phantom documents adding, preparation uses a `confirmed` blockhash, the phone path is a plain Phantom Browse link, and the consent text is short with details on request.
 Everything else approved on 2026-10-07 stands, including hosting, in-app auth, PayPal recovery, identity-only scan and MCP handoff.
 Gate 1 was re-approved on 2026-10-10; Gates 3 and 4 cannot be revised until their preceding gates are re-approved.
 See [`00-status.md`](00-status.md#reopening-2026-10-10-zapier-removed) and [`handoff.md`](handoff.md#gate-2-handover-2026-10-10).
@@ -23,8 +24,8 @@ Envoi keeps the shop catalogue and purchase record. PayPal or the buyer's wallet
 - **[hypothesis]** One Next.js/TypeScript app on Render Free, Neon Free PostgreSQL, Better Auth inside the app and a finite Node maintenance runner scheduled with GitHub Actions. No Supabase, paid Render worker or separate API service.
 - **[hypothesis]** PayPal sandbox Orders v2 through a direct server adapter, with a distinct, authorized sandbox seller. No default payment to Envoi's own account.
 - **[hypothesis]** Text and SGQR lookup reach the same published catalogue. AI suggests items; stored prices and connected destinations determine the purchase.
-- **[hypothesis]** A consented menu image goes directly to OpenAI inside the upload request, with `store: false`, no Envoi image storage or image URL, and a merchant-confirmed draft only.
-- **[hypothesis]** PYUSD uses the pinned devnet mint, a verified merchant wallet and its dated rate, Phantom Wallet Standard signing/broadcast, and finalized server verification.
+- **[hypothesis]** A consented menu image is shrunk in the browser, then goes directly to OpenAI inside the upload request, with `store: false`, no Envoi image storage or image URL, and a merchant-confirmed draft only.
+- **[hypothesis]** PYUSD uses the pinned devnet mint, a verified merchant wallet and its dated rate, Phantom Wallet Standard signing/broadcast, and finalized server verification of the transfer's meaning rather than its exact bytes.
 - **[unknown]** Seller permissions, model accuracy/latency, OpenAI account data-sharing, wallet behavior, phone access, faucet access and RPC reliability are unproven.
   PYUSD stays visibly disabled until its independent proofs pass; PayPal does not depend on it.
 
@@ -77,12 +78,12 @@ Credits do not authorize evaluation spend or establish availability through judg
 
 | Boundary | Owns | Must not own |
 | --- | --- | --- |
-| Browser | Camera/local QR decode, local menu preview, user choices, provider/wallet handoff. | Trusted prices, destination verification, credentials or a paid-state decision. |
+| Browser | Camera/local QR decode, local menu preview and pre-upload photo shrink, user choices, provider/wallet handoff. | Trusted prices, destination verification, credentials or a paid-state decision. |
 | Catalogue / enrollment | Outlet identity, memberships, approved identifier mappings, menu versions, destination connections. | Auto-enrollment from a scan or AI-based proof of ownership. |
 | Purchase domain | Immutable review, actor binding, amount calculation, execution lock, payment status and separate acknowledgment. | Arbitrary amounts/payees supplied by an agent, browser or model. |
 | AI suggestion adapter | Interpret text and propose registered outlet/item IDs or a clarification. | Capture, signing, publication, SQL execution or authoritative price calculation. |
 | PayPal adapter | Exact sandbox create/read/capture and verification under enrolled seller permissions. | Changing an approved purchase or substituting Envoi's account. |
-| Import adapter | Request-memory decode/normalization, one budgeted vision call, validated draft merge and bytes-free attempt metadata. | Stored image bytes/URLs, image-bearing logs, payment credentials, destination changes or publication. |
+| Import adapter | Request-memory re-validation/normalization of the browser-shrunk JPEG, one budgeted vision call, validated draft merge and bytes-free attempt metadata. | Stored image bytes/URLs, image-bearing logs, payment credentials, destination changes or publication. |
 | PYUSD adapter | Devnet reads, unsigned transaction construction, finalized semantic verification and expiry recovery. | Buyer/server signing keys, broadcast, custody or a mainnet fallback. |
 | Maintenance runner | Bounded provider reads, reconciliation of existing PayPal/PYUSD attempts and existing review/session maintenance with operator-visible failures. | Initial capture, transaction submission, replacement payment, image tasks or keeping the app/database continuously awake. |
 
@@ -161,7 +162,7 @@ Editing a published menu creates an unpublished revision; buyers continue to see
 2. Browser decodes SGQR locally -> server validates supported fields/checksum -> merchant reviews/corrects -> operator-approved mapping.
    Do not send the QR image to the model; discard raw payload and never log it.
    Unsupported/personal proxies do not become published business identifiers.
-3. Merchant selects a separate menu image and accepts the versioned OpenAI disclosure -> membership/origin/admission checks -> bytes-free attempt and spend reservation -> bounded in-memory read, `sharp` decode, metadata stripping and downscale.
+3. Merchant selects a separate menu image and accepts the versioned OpenAI disclosure -> the browser decodes, orients and shrinks a JPEG copy, keeping the original only in this tab -> membership/origin/admission checks -> bytes-free attempt and spend reservation -> bounded in-memory read, `sharp` re-validation, metadata stripping and re-encode.
 4. Within this request, make one foreground vision call with explicit `store: false`, strict structured output, an AbortSignal and no tools or automatic retries.
    There is no stored image, image URL, callback or work scheduled after the response.
 5. Validate the result -> transaction rechecks attempt/deadline/membership/base revision -> preserve merchant edits, invalidate menu confirmation, merge into an unpublished draft and close the attempt atomically.
@@ -181,9 +182,9 @@ It never becomes a background image job.
 
 | Proposed policy | Choice / failure behavior |
 | --- | --- |
-| Upload | One actual JPEG/PNG, at most 5 MiB, 20 megapixels and 6,000 pixels/side; bounded whole multipart request at 6 MiB. Validate decoded content, reject animation/malformed content, auto-orient then strip metadata. No URL input, disk spool, file upload API, database bytes, CDN or framework optimizer. |
+| Upload | The browser decodes the selected photo, applies its orientation, shrinks it without enlarging to at most 2,048 pixels/side and re-encodes one JPEG of at most 2 MiB. A photo the browser cannot decode or fit under that limit stops before upload and offers another photo or manual entry. The server accepts only one actual JPEG within the same 2 MiB and 2,048-pixel limits, bounds the whole multipart request at 2.5 MiB, validates decoded content and rejects malformed content. No URL input, disk spool, file upload API, database bytes, CDN or framework optimizer. |
 | Transport | Node route handler, not a Server Action. Exclude this route from proxy/middleware body cloning; origin/auth checks live in the handler. Count streamed bytes even without a truthful Content-Length, and bound upload reading to 30 seconds. |
-| Normalization | Downscale without enlarging toward the evaluated model's high-detail effective limit, initially at most 2,048 pixels/side and 2 MiB encoded. This can lose small text; the sample evaluation must challenge that choice. One decoder at a time; decoded memory is not bounded by encoded size alone. |
+| Normalization | The 2,048-pixel/2 MiB target follows the evaluated model's high-detail effective limit; shrinking can lose small text, and the sample evaluation must challenge that choice. Raising the limit after evaluation is a recorded Gate 2 change because it moves R6. The server decodes the bounded JPEG once, auto-orients, strips metadata and re-encodes without enlarging, with one decoder at a time. The pixel limit bounds a decoded frame at about 4.2 megapixels, roughly 17 MB as RGBA by arithmetic; actual `sharp` memory remains unmeasured. |
 | Time | `T_MENU_REQUEST`: 90 seconds from admission to completion, including upload/decode/model/commit. `T_MENU_MODEL`: at most 60 seconds and no longer than remaining request time minus a 5-second commit reserve. Abort on budget/client disconnect where observable; reject any late result. Abort is not proof OpenAI stopped processing or billing. |
 | Admission/spend | One in-flight import/outlet and one globally, checked before image buffering; 10 admitted attempts/outlet and 50 globally per UTC day. Failed/aborted attempts count. Reserve worst-case input/output spend against an operator-approved daily credit ceiling; fail closed until ceiling and model price/token bounds are recorded. These caps do not establish a dollar cost or safe RAM use. |
 | Crash/lost response | Derive abandoned/expired outcome on read at the request deadline; no expiry task or heartbeat dependency. Reload `GET menu-draft` before retry: a committed result stays visible, a still-live attempt blocks another. Atomic close/merge and attempt identity prevent a late response from overwriting edits. A disconnect is not proof that nothing committed. |
@@ -194,7 +195,7 @@ It never becomes a background image job.
 **[vendor claim]** Render Free has 0.1 CPU/512 MB and documents HTTP responses up to 100 minutes, not a 90-second mobile/intermediary guarantee.
 Next Server Actions default to 1 MB; proxy body cloning defaults to a 10 MB buffer, not an upload rejection policy.
 AI SDK API errors can contain the image-bearing request body.
-**[unknown]** Vision latency, `sharp` memory at 20 MP on 512 MB and account-specific request retention.
+**[unknown]** Vision latency, `sharp` memory for a 2,048-pixel JPEG on 512 MB, browser decode/shrink of large or HEIC phone photos and account-specific request retention.
 Sources and qualifications: [Gate 2 source supplement](research.md#gate-2-source-supplement-2026-10-10).
 
 Timeout copy proposed for the future implemented UI:
@@ -205,14 +206,18 @@ Timeout copy proposed for the future implemented UI:
 
 For a lost connection, use different copy: "The connection was lost. Reload the draft to check whether it finished before trying again."
 
-Versioned consent copy, proposed for approval here, not a mockup edit:
+Versioned consent copy, proposed for approval here, not a mockup edit.
+The short text is always shown; the details sit behind a "Details" control and belong to the same consent version.
 > Your menu photo is sent to OpenAI to draft item names and SGD prices while you wait.
-> Envoi holds it only in memory for this request and does not store it; this browser tab keeps its selected copy for side-by-side review.
-> OpenAI says it does not use API data for training unless the account owner opts in.
-> Its abuse-monitoring logs may contain request content and are normally kept for up to 30 days, with longer retention for legal or harm-prevention reasons.
-> The Responses API has a default application-state retention period of 30 days; Envoi requests `store: false`, but the exact retention effect for this account is not established.
-> OpenAI also retains an image flagged as possible child sexual abuse material for manual review, even under Zero Data Retention.
+> Envoi does not store it; only this browser tab keeps a copy, for side-by-side review.
+> OpenAI may keep it for up to 30 days for abuse monitoring, or longer where the law or harm prevention requires, and does not train on it unless the account owner opts in.
 > Upload only a menu, with no people or personal information.
+
+Details:
+> Envoi sends the photo with OpenAI's `store: false` setting, which asks OpenAI not to keep the request for later use; OpenAI does not publish exactly what it changes for this kind of request.
+> That setting is separate from the abuse-monitoring copy, which OpenAI removes only for approved Zero Data Retention accounts.
+> OpenAI keeps an image its systems flag as possible child sexual abuse material for manual review, even when other retention is off.
+> These are OpenAI's published terms; Envoi has not verified OpenAI's actual deletion.
 
 Before real merchant photos, the user must confirm their OpenAI organization/project has not opted in to data sharing and accept this disclosure.
 Prove on the actual upload/error surfaces that no image is written to disk, database, logs or artifact storage, including an injected base64 needle that the leak scanner detects.
@@ -293,19 +298,23 @@ This amendment selects the boundaries below, not wallet execution, funding or en
    Use Token-2022 `TransferChecked` only when every fee that can apply in the current/next epoch is zero, including maximum fee zero, and the blockhash validity cannot cross a scheduled non-zero fee activation.
    A new non-null transfer hook or unsupported/changed extension disables new preparations pending review, rather than adding unknown instructions.
    **[vendor claim]** `SetTransferFee` activates two epochs later; this supports the bounded fee check, not a promise that a devnet reset or arbitrary epoch timing cannot change behavior.
-3. Fetch a fresh finalized blockhash and persist the attempt before releasing unsigned bytes: exact message/fingerprint, lastValidBlockHeight, preparation slot, source/destination, buyer fee payer, amount, rate version and a unique opaque memo reference.
+3. Fetch a fresh blockhash at `confirmed` commitment and persist the attempt before releasing unsigned bytes: prepared message/fingerprint, blockhash, lastValidBlockHeight, preparation slot, source/destination, buyer fee payer, amount, rate version and a unique opaque memo reference.
+   **[vendor claim]** Solana's guide recommends `confirmed` for RPC requests and says a `finalized` blockhash cuts about 13 seconds from the signing window; a blockhash from a dropped fork never becomes recent on the finalized chain, so such a transaction can only expire unexecuted.
+   **[hypothesis]** Release still compares finalized block height with the saved `lastValidBlockHeight`, so this choice gives the buyer more approval time without loosening release.
    The memo is mandatory for lost-signature attribution, not an optional identifier inferred from equal amounts.
-   Transaction has only bounded optional compute-budget instructions, one `TransferChecked` and that memo; no account creation, authority/delegate changes, arbitrary programs, extra transfers or durable nonce.
+   Envoi's prepared transaction contains exactly one `TransferChecked` and that memo, with no compute-budget instructions, leaving priority fees to the wallet as Phantom recommends; no account creation, authority/delegate changes, arbitrary programs, extra transfers or durable nonce.
 4. Lock the logical checkout and purchase from this release point, even if the response is lost or the wallet later reports rejection.
    Repeated preparation returns the same saved bytes while valid, never a refreshed blockhash or a second transaction; expiry moves to reconciliation, not re-preparation.
    Browser passes those exact bytes/account to Wallet Standard `solana:signAndSendTransaction` with chain `solana:devnet`.
-   Phantom obtains human approval, signs and broadcasts; Envoi has no signed-transaction-before-broadcast validation opportunity and never submits/rebroadcasts.
+   Phantom obtains human approval, may add its own compute-budget and Lighthouse assertion instructions, signs and broadcasts; Envoi has no signed-transaction-before-broadcast validation opportunity and never submits/rebroadcasts.
    Raw signature bytes returned by the wallet are encoded and posted as a hint, not a paid-state command.
 5. Server fetches the transaction at `finalized` on the verified devnet RPC.
    Re-read cluster/mint/extensions and retain fee schedules with their epochs; establish the fee applicable to the execution epoch from preparation evidence and transaction metadata, not a guessed current fee.
-   Require successful execution, exact prepared message/blockhash and buyer signer/fee payer, pinned program/mint/decimals, source owner, destination ATA, exact atomic amount, memo reference and zero withheld transfer fee.
+   Verify the payment's meaning, not the exact bytes: require successful execution, the saved blockhash, the buyer as the only signer and fee payer, exactly one `TransferChecked` with the pinned program/mint/decimals, source owner, destination ATA and exact atomic amount, exactly one memo carrying the reference, and zero withheld transfer fee.
+   Every other outer instruction must be a ComputeBudget instruction or a Lighthouse assertion from the pinned program `L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95`.
+   Inner instructions, if any, may come only from the pinned Token-2022, Memo, ComputeBudget and Lighthouse programs, and none may move tokens or lamports, create or close accounts, or change an authority or delegate.
    Use transaction metadata's destination pre/post token balance delta, not a later live-account balance; it must equal the exact amount.
-   Require complete metadata and reject all unexpected outer/inner payment or authority instructions.
+   Require complete metadata; anything outside these rules leaves the attempt uncertain.
    Bind a finalized signature to at most one attempt; missing/mismatched evidence remains uncertain and operator-visible, never paid.
 6. Confirmed receipt says "Transferred and finalized on Solana devnet" with actual signature, recipient and amount.
    It never says tokens are "kept", permanently owned, live money or SGD settlement.
@@ -313,12 +322,17 @@ This amendment selects the boundaries below, not wallet execution, funding or en
 
 **[vendor claim]** Phantom recommends signing and sending; sign-only methods are not supported through its Wallet Standard implementation.
 The Standard's chain input is required and its output is signature bytes.
-**[unknown]** Whether Phantom honors `solana:devnet`, displays this devnet mint, or changes the transaction, especially its blockhash/instructions.
+**[vendor claim]** Phantom also documents that a submitted transaction may be augmented with Lighthouse assertion instructions, so the landed transaction differs from the submitted one.
+It adds priority-fee instructions to a transaction that has no signatures and no compute-budget instructions.
+Lighthouse's own repository gives its program ID for devnet and mainnet as `L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95`; Gate 3 rechecks that account on devnet.
+An exact-bytes match would therefore mark ordinary Phantom payments uncertain, so step 5 verifies meaning and allowlists only those two instruction kinds.
+**[unknown]** Whether Phantom honors `solana:devnet`, displays this devnet mint, applies these additions on devnet and in the extension, or changes the blockhash or Envoi's own instructions.
 Solana's confirmation guide actually recommends wallets replace stale blockhashes before signing.
-Therefore **proof of exact prepared-message/blockhash preservation is an enablement condition**, not an assumption.
-If Phantom refreshes it, expiry-based release below is unsafe; stop this rail and reopen the architecture rather than loosening matching.
+Therefore **proof that Phantom keeps the prepared blockhash, transfer and memo is an enablement condition**, not an assumption.
+If Phantom refreshes the blockhash, expiry-based release below is unsafe; stop this rail and reopen the architecture rather than loosening matching.
+If it adds an instruction outside the allowlist, those payments stay uncertain; widening the allowlist is a recorded Gate 2 amendment, not a code change.
 Post-broadcast validation can withhold Envoi confirmation but cannot undo a wallet's wrong transfer.
-[Phantom signing](https://docs.phantom.com/solana/sending-a-transaction), [Standard feature](https://raw.githubusercontent.com/anza-xyz/wallet-standard/master/packages/core/features/src/signAndSendTransaction.ts), [confirmation](https://solana.com/developers/guides/advanced/confirmation).
+[Phantom signing](https://docs.phantom.com/solana/sending-a-transaction), [Phantom Lighthouse](https://docs.phantom.com/developer-powertools/lighthouse), [Phantom priority fees](https://docs.phantom.com/developer-powertools/solana-priority-fees), [Lighthouse program](https://github.com/Jac0xb/lighthouse), [Standard feature](https://raw.githubusercontent.com/anza-xyz/wallet-standard/master/packages/core/features/src/signAndSendTransaction.ts), [confirmation](https://solana.com/developers/guides/advanced/confirmation).
 
 #### Lost-response recovery and RPC
 
@@ -327,7 +341,7 @@ No replacement transaction, new blockhash, new review or rail switch is requeste
 Even a wallet error/rejection after release is not sufficient server evidence of non-broadcast.
 Maintenance and the existing bounded reconcile route perform read-only RPC calls; neither submits a transaction.
 
-After finalized block height exceeds the saved `lastValidBlockHeight`, paginate merchant ATA signatures at finalized over the full preparation-to-expiry window, then retrieve candidate transactions and apply the same exact verification.
+After finalized block height exceeds the saved `lastValidBlockHeight`, paginate merchant ATA signatures at finalized over the full preparation-to-expiry window, then retrieve candidate transactions and apply the same step 5 verification.
 A matching transfer confirms the original attempt; only a complete, healthy scan proving no matching successful execution can expire it unpaid and permit a fresh review.
 Persist scan cursors/coverage across finite runs; 429, lag, null transaction, unavailable history, reset, page cap or incomplete window leaves it uncertain.
 An empty response alone is not an absence proof.
@@ -350,14 +364,17 @@ Recheck extensions/accounts before each new attempt; retain original finalized t
 **[vendor claim]** Phantom Browse opens an Envoi URL in its wallet browser and has no cluster parameter.
 The separate Connect deeplink documents `cluster=devnet` but defaults to mainnet-beta; it is not the selected Wallet Standard transport.
 **[hypothesis]** Treat the wallet browser as a separate cookie/session container, never as the owner of a purchase created in Safari/Chrome.
-Cookie behavior and the complete phone-at-counter path remain **[unknown]**.
 
-Candidate only, not an implemented or proven phone choice: reuse the approved single-use handoff semantics to carry outlet/item suggestions into a new wallet-browser session, then price and review again there.
-Never copy session cookies, transfer purchase ownership or expose the old receipt; do not create a second review if an old attempt has been released.
-Any buyer-issued handoff route/contract extension must be settled before phone implementation; the approved external-agent MCP handoff stays unchanged.
-No encrypted deeplink session/key layer or native app is silently added.
+**[hypothesis] Selected phone path:** on a phone browser with no injected wallet, a PYUSD review shows an "Open in Phantom" link instead of a pay button.
+The link uses the documented Browse URL, `https://phantom.com/ul/browse/<url>?ref=<ref>`, and the encoded Envoi URL carries only the public outlet ID and the selected public item IDs and quantities.
+Inside Phantom's browser the buyer gets a new anonymous session; the server re-reads the published menu, prices a fresh review and the buyer confirms it there before any PYUSD preparation.
+The link is a suggestion, not a review, token or authority: it carries no session, purchase ID, price, payee or personal data, needs no new route and may be reused, because each use only creates a fresh unexecuted review.
+The original browser's PYUSD review is never prepared and simply expires, so no released attempt exists outside the wallet browser.
+Never copy session cookies, transfer purchase ownership or expose the old receipt.
+The approved external-agent MCP handoff stays unchanged, and no encrypted deeplink session/key layer or native app is added.
+**[unknown]** Whether Browse preserves the URL's query on target phones, whether the wallet browser keeps its session through approval, and the complete phone-at-counter path.
 
-Enablement needs the user's account/faucet proof, merchant ATA/key-control proof, wallet display/chain/message-preservation proof, phone path and separate-session decision, exact finalized transfer and lost-response recovery under the actual RPC.
+Enablement needs the user's account/faucet proof, merchant ATA/key-control proof, wallet display/chain and blockhash/transfer/memo preservation proof, the phone Browse-link proof, exact finalized transfer and lost-response recovery under the actual RPC.
 Failure keeps PYUSD visibly unavailable and PayPal working; a cut follows the approved first-cut rule and is recorded, never disguised as success.
 
 ### Another agent
@@ -390,7 +407,7 @@ Live support/backup targets and paid production services need separate decisions
 
 Residual-risk changes, limited to this amendment:
 - **R2 narrows, does not close:** no image churn/cleanup risk remains, but generic Neon storage exhaustion still blocks purchase, payment evidence, auth and audit writes; there is no proven in-app recovery.
-- **R6 grows:** `sharp` build/binary compatibility plus native decode memory/CPU on 512 MB/0.1 CPU, particularly 20 MP photos, remain unmeasured.
+- **R6 grows, less than first proposed:** `sharp` build/binary compatibility plus decode memory/CPU on 512 MB/0.1 CPU remain unmeasured; the browser shrink bounds server input at 2,048 pixels/side but is not a measurement, and browser decode of large phone photos joins the risk.
 - **R7 image-churn budget closes as superseded:** no source/history byte admission remains; replacement **R7a** is mis-sized daily/in-flight/spend admission, not a demonstrated credit or RAM bound.
 - **R5 extends:** separate text/vision evaluation, Chinese-text/small-price accuracy, request latency and model availability through judging remain open.
 - **PYUSD residuals:** wallet mutation/chain behavior, phone-session continuity, faucet access, mutable mint authorities, RPC shared limits/history completeness and post-broadcast inability to prevent a wrong transfer remain open.
@@ -402,21 +419,21 @@ All other approved residual-risk dispositions, R11 containment and R12 acceptanc
 | --- | --- |
 | Distinct seller cannot receive an exact sandbox capture | Actual buyer-approved capture plus provider read matching seller/amount/currency/basket. Stop payment work if permissions/payee coverage fail; revise Gate 2 rather than pay Envoi and call it merchant settlement. |
 | Image retained by Envoi or leaked through SDK errors | Actual request/error/disk/database/log/artifact probes with an injected image/base64 needle; metadata stripping, disconnect, abort, restart and late-result rejection. Stop real-image imports on any leak; `store: false` does not prove upstream erasure. |
-| Vision latency, memory or accuracy fails | Measure on Render Free with cap-sized and consented Chinese/rotated/small-text/blur/non-SGD samples and concurrent payment traffic; report every result against pre-registered thresholds. Lower caps or revise architecture if needed; manual fallback is not a successful AI import. |
+| Vision latency, memory or accuracy fails | Measure on Render Free with cap-sized and consented Chinese/rotated/small-text/blur/non-SGD samples, shrunk by real phone browsers, and concurrent payment traffic; report every result against pre-registered thresholds. Lower caps or revise architecture if needed; manual fallback is not a successful AI import. |
 | Scan identifies the wrong outlet | Authentic approved mappings, unsupported payload rejection and shared-identifier clarification. No uniqueness or automatic accuracy claim from fixtures. Text/manual fallbacks remain visible. |
 | Runtime recovery cannot identify an uncertain charge | Inject lost responses/restarts/duplicate events; converge on the same provider capture or keep blocked/uncertain. No new-charge retry to make the demo finish. |
 | Free recovery or hosting cannot last through judging | Verify Render/Neon/GitHub quotas and zero-spend controls, a finite scheduled run, idle/crash recovery and delayed-job behavior. No reliance on credits, paid fallback or Render's 30-day database. Stop deployment if free capacity is unavailable; amend Gate 2 before changing the topology. [Official rules](https://paypalaihackathon.devpost.com/rules). |
 | Cold start breaks the approved buyer journey | Test a genuinely idle first visit and include wake-up time in the three-minute measurement. A warmed rehearsal cannot establish that result; amend hosting if required. |
 | OpenAI model/access or consent fails | User confirms no data-sharing opt-in and an authorized spend ceiling; select available models with schema/image support as needed and no shutdown before judging ends. Do not use deprecated nano prices as a through-judging model choice. No free-inference or zero-retention assumption. |
-| Wallet ignores devnet, changes message/blockhash or cannot display PYUSD | Keep PYUSD disabled until actual wallet proofs pass; exact landed-message mismatch stays uncertain. No sign-only fallback, mainnet switch or claim of pre-broadcast enforcement. Reopen Gate 2 if the chosen wallet invalidates expiry safety. |
-| Phone cannot safely reach wallet from its own session | Prove phone connection and settle the candidate fresh-review handoff, with no purchase ownership transfer or duplicate released checkout. Keep phone PYUSD unavailable until resolved. |
+| Wallet ignores devnet, changes the blockhash or Envoi's transfer/memo, adds non-allowlisted instructions or cannot display PYUSD | Keep PYUSD disabled until actual wallet proofs pass; a landed transaction outside the step 5 rule stays uncertain. No sign-only fallback, mainnet switch or claim of pre-broadcast enforcement. Reopen Gate 2 if the chosen wallet invalidates expiry safety. |
+| Phone cannot safely reach wallet from its own session | Prove on target phones that the Browse link opens the Envoi URL with its outlet/item IDs, that the wallet browser keeps its own session through approval, and that the fresh review and PYUSD journey complete there. Keep phone PYUSD unavailable until proven; never transfer purchase ownership or reuse a released checkout. |
 | RPC cannot establish finalized outcome or complete absence | Lost wallet response, 429, null/pruned history, page limits, reset and delayed maintenance must preserve the lock. A complete attributable finalized record or complete post-expiry scan is required; time passing alone cannot permit another payment. |
 | Mint fees/hooks/accounts or merchant rate become ineligible | Test current/next epoch schedules, extension changes, frozen/wrong ATA, expired/replaced rate and exact rounding. Disable new PYUSD attempts on mismatch; preserve released-attempt evidence and PayPal usability. |
 
-Gate 2 re-approval accepts only this direct-vision and PYUSD amendment with its proof conditions, proposed `AI_MENU_MODEL` name and pinned code-constant configuration.
-The user's data-sharing setting, dollar ceiling, actual models and phone path are not inferred from approval.
-It establishes no runtime/account success and does not approve Gate 3/4, application code, wallet/faucet use, spending, installation, provisioning, workflows, deployment, visibility change, commit or push.
-The earlier Git authorizations are historical and do not apply to this uncommitted revision.
+Gate 2 re-approval accepts only this direct-vision and PYUSD amendment with its proof conditions, proposed `AI_MENU_MODEL` name and pinned code-constant configuration, including the 2026-10-11 review changes.
+The user's data-sharing setting, dollar ceiling, actual models and phone proofs are not inferred from approval.
+It establishes no runtime/account success and does not approve Gate 3/4, application code, wallet/faucet use, spending, installation, provisioning, workflows, deployment or visibility change.
+On 2026-10-11 the user separately authorized committing and pushing this proposal to `main`; that publishes planning documents only and is not Gate 2 approval.
 Changed product behavior reopens Gate 1; an architecture change reopens Gate 2 before dependent work.
 
 The eight earlier findings stay dispositioned with named residual risks in [status](00-status.md#unresolved-review-findings), not reopened wholesale.

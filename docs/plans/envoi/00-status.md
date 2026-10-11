@@ -1,9 +1,9 @@
 # Status: Envoi
 
-Updated: 2026-10-10 (Asia/Singapore).
+Updated: 2026-10-11 (Asia/Singapore).
 
 - Gate 1 - Product: **RE-APPROVED 2026-10-10** by the user ("I approve gate one") after being reopened and revised the same day to remove Zapier, which the user rejected as paid, and to record the PYUSD decisions; see the [reopening record](#reopening-2026-10-10-zapier-removed). Previously **APPROVED 2026-10-07** by the user after reopening it to add a buyer-side scan entry point. Approval covers product scope and buyer/merchant journeys, including text and scan/paste entry points.
-- Gate 2 - Architecture: **REOPENED 2026-10-10, in progress; revised proposal awaiting re-approval** in `02-architecture.md`, only for direct vision import and PYUSD. OpenAI/provider pin and all unaffected 2026-10-07 decisions stand. No runtime/account proof or new Git authority is established.
+- Gate 2 - Architecture: **REOPENED 2026-10-10, in progress; revised proposal, revised again after a 2026-10-11 review, awaiting re-approval** in `02-architecture.md`, only for direct vision import and PYUSD. OpenAI/provider pin and all unaffected 2026-10-07 decisions stand. No runtime/account proof is established; the 2026-10-11 commit/push authorization publishes planning documents and is not approval.
 - Gate 3 - Program Design: **REOPENED 2026-10-10, in progress; revision waits for Gate 2 re-approval** only for affected import and PYUSD contracts/tests. `03-program-design.md` is unchanged in this Gate 2 revision; its 2026-10-07 approval and eight finding dispositions still govern unaffected decisions. The OpenAI provider pin does not change, and the completed R11 action/R12 region decision are not reopened.
 - Gate 4 - Slice plan: **in progress, unapproved draft.** [`04-slices.md`](04-slices.md) stays unchanged until Gates 2 and 3 are re-approved. No slice is authorized or started. Required later changes: merge S11/S12, remove Zapier checks, move S13 immediately after S4, add PYUSD after S13 and first in the cut order; scan and account-conditional S14 follow it.
 
@@ -15,7 +15,7 @@ Updated: 2026-10-10 (Asia/Singapore).
 - **AI-provider question resolved:** OpenAI stays because the user has credits. No provider or `@ai-sdk/openai` pin change; account balance/access/sharing and authorized evaluation spend remain unknown.
 - **Cut order corrected by the later PYUSD decision:** PYUSD first, scan next, account-conditional S14 after scan. The unchanged Gate 4 draft still carries its older order and must not be treated as current authority.
 - **PYUSD included:** merchant-set rate, 30-day re-confirmation and upward atomic rounding are re-approved Gate 1 decisions. This Gate 2 amendment pins devnet identity, wallet boundaries, destination/rate data and recovery; tests/slices wait for the later gates.
-- **Handoff.** The user asked for a copy-paste prompt so another agent can continue. All of this work is uncommitted on `envoi/gate-4-slice-plan` in the macOS checkout and exists nowhere else.
+- **Handoff.** The user asked for a copy-paste prompt so another agent can continue. This work was uncommitted on `envoi/gate-4-slice-plan` in the macOS checkout until the user authorized committing it and pushing it to `main` on 2026-10-11.
 - **[verified]** The sponsor-rule facts behind these decisions are in [`research.md`](research.md#sponsor-rules-re-check-2026-10-10).
 - **Questions 1-4 answered 2026-10-10.** The AI-provider and PYUSD evidence presented with them is in [`research.md`](research.md#ai-provider-and-pyusd-re-check-2026-10-10). The answers:
   1. **AI provider: OpenAI stays.** The user said "We can use openai i have quite a bit of credits". The approved Gate 2 provider and the Gate 3 `@ai-sdk/openai` pin do not change.
@@ -84,16 +84,17 @@ The claim in these documents that nothing was provisioned is now **stale**. A co
 
 - **[verified]** Source findings and newly re-read documentation are in [`research.md`](research.md#gate-2-source-supplement-2026-10-10). Zapier workflow/trial access is no longer a dependency; actual hosting, OpenAI credits/model access, APIMatic tiers and prize eligibility remain **[unknown]**.
 - Free hosting only stands: Render Free web, existing Neon Free project and in-app Better Auth plus finite quota-gated maintenance. Remaining Neon storage/compute/transfer and actual hosting/Actions access through judging remain unknown; Render is not provisioned. R11's flag change, redeploy and read-only inspection are complete: `neon.ts` is `auth: false`, the managed service remains enabled but unused/isolated, and the in-app adapter must pin `public` and never query `neon_auth`. R12 accepts `aws-us-east-2` subject to the Slice 1 measurement; neither decision is reopened.
-- **[hypothesis]** The revised import uses request memory only, 90-second total/60-second model budgets, explicit `store: false`, a bytes-free attempt and no import maintenance dependency. No image URL, source row or capability remains in the Gate 2 proposal; stale Gate 3/4 source contracts are explicitly superseded pending their revisions.
-- **[unknown]** OpenAI data-sharing setting/foreground retention, Chinese-text accuracy, selected vision model through 16 Dec, Render latency and `sharp` RAM on 512 MB. Real photos remain gated on consent/account confirmation and actual no-disk/no-log/no-database-image probes.
-- **[verified, prior-session observation]** Read-only devnet mint/genesis/extension findings are attributed in research, not repeated in this run. **[unknown]** Phantom mint display, devnet chain honoring, message/blockhash mutation, phone/session path, user faucet access and shared-IP/history completeness. No wallet, faucet or payment was used.
+- **[hypothesis]** The revised import shrinks the photo in the browser to one JPEG of at most 2,048 pixels/side and 2 MiB, then uses request memory only, 90-second total/60-second model budgets, explicit `store: false`, a bytes-free attempt and no import maintenance dependency. No image URL, source row or capability remains in the Gate 2 proposal; stale Gate 3/4 source contracts are explicitly superseded pending their revisions.
+- **[unknown]** OpenAI data-sharing setting/foreground retention, Chinese-text accuracy, selected vision model through 16 Dec, Render latency, `sharp` RAM on 512 MB and browser shrink of large phone photos. Real photos remain gated on consent/account confirmation and actual no-disk/no-log/no-database-image probes.
+- **[verified, prior-session observation]** Read-only devnet mint/genesis/extension findings are attributed in research, not repeated in this run. **[vendor claim]** Phantom documents that it may add Lighthouse assertion and priority-fee instructions, so verification allowlists them. **[unknown]** Phantom mint display, devnet chain honoring, blockhash/transfer preservation, the phone Browse-link path, user faucet access and shared-IP/history completeness. No wallet, faucet or payment was used.
 - No authentic menu extraction, payment, merchant ownership trial, buyer-side scan or user test has been demonstrated.
 - Prior-art review of shipped SGQR payment products, 2026-10-07 (`research.md`), supports three decisions: the sticker is an identity key and not a payment route on either rail; shipped products require ownership documents plus human review rather than auto-publishing from a photo; and the stablecoin-to-SGD off-ramp remains unsolved non-custodially, which reinforces the separate merchant-economics test. A "99% of payers use PayNow" figure appearing in prior art is an unverified third-party market claim and must not enter public submission materials without a primary source.
 - Live deployment separately requires provider eligibility, legal assessment, merchant enrollment and operational checks. No-custody alone does not establish a legal exemption.
 
 ## Notes for a fresh session
 
-- **Current request, Gate 2-only revision, 2026-10-10:** the user authorized architecture and five mirrors on the existing dirty branch, with backup first and no AGENTS.md/product/mockup/Gate 3/Gate 4 edits. Those edits are saved; next is Gate 2 re-approval, not renewed Gate 1 work or later-gate drafting. No commit/push or external action is authorized; earlier current-request paragraphs below are historical run context.
+- **Current request, 2026-10-11:** the user asked whether Gate 2 was good, accepted the five recommended review changes, asked for OpenAI data-control steps and authorized committing and pushing to `main` once the revision checked out. The changes are in `02-architecture.md` and its five mirrors; AGENTS.md, product, mockups, Gate 3 and Gate 4 were not edited. Next is Gate 2 re-approval; no external action beyond that push is authorized. Earlier current-request paragraphs below are historical run context.
+- **Gate 2-only revision, 2026-10-10 (historical):** the user authorized architecture and five mirrors on the existing dirty branch, with backup first and no AGENTS.md/product/mockup/Gate 3/Gate 4 edits.
 - **Current request, 2026-10-10:** the user said "U can start the gate 4 planning for envoi". That authorized Gate 4 preparation and drafting `04-slices.md` on branch `envoi/gate-4-slice-plan`, created from `main` at `dc1e23c`, following the Gate 3 precedent. It did **not** authorize Gate 4 approval, a commit, a push, starting any slice, package or tool installation, provisioning, workflow creation, deployment or a repository visibility change.
 - **[verified] Workspace moved, 2026-10-10.** The repository is now checked out on macOS (arm64) at `/Users/jayd0/Desktop/envoi`; the Windows path below is historical. Only `git` is installed: Node.js, npm, PostgreSQL, Docker, Homebrew, the GitHub CLI and the Neon CLI are absent. The ignored `.env.local`, `.neon` and `node_modules/` did not travel with the clone, so no database credential exists on this machine. The checkout uses LF line endings and the brief hashes directly to the recorded `6058798E...F3B220A1`. The GitHub repository is private: the unauthenticated GitHub API returns 404 while authenticated `git ls-remote` succeeds.
 - The software-factory skill on this machine is `/Users/jayd0/.claude/skills/software-factory/SKILL.md`; the `C:/Users/jayd0/.agents/...` paths in `AGENTS.md` are the Windows locations.
@@ -128,13 +129,13 @@ Fresh consolidation checks, 2026-10-06. **2026-10-07 re-check after the scan ame
 ## Stop point
 
 **Historical Git record, 2026-10-07:** the Gate 3 planning authorization completed at `ac13444`, fast-forwarded/pushed to `main` and verified remotely.
-It supplies no commit/push authority for this uncommitted revision on `envoi/gate-4-slice-plan`.
+It supplied no authority for later revisions. **2026-10-11:** the user authorized committing the uncommitted work and the review revision on `envoi/gate-4-slice-plan`, fast-forwarding `main` and pushing it; that authorization does not carry over to later changes.
 
 **STOP here: the Gate 2 amendment is revised and awaiting approval.**
 Gate 1 is already re-approved; ask exactly `Approve Gate 2, or what should change?` and wait.
 Only after that approval revise affected Gate 3 contracts, then obtain Gate 3 re-approval before revising Gate 4.
 No slice starts without its explicit authorization and Gate 4 approval.
-Do not install, provision, use a wallet/faucet, spend, create workflows, deploy, change visibility, stage, commit or push.
+Do not install, provision, use a wallet/faucet, spend, create workflows, deploy or change visibility; further commits or pushes need their own authorization.
 The tracked provisioning files remain untouched; ignored credentials/config/generated artifacts must never be staged.
 
 **The one authorized exception:** the user authorized the R11 follow-up on 2026-10-07, scoped to changing `neon.ts` from `auth: true` to `auth: false`, redeploying that configuration, and then a read-only schema inspection. **All three are complete.** The file is `auth: false` with a short explaining comment. `neon deploy --update-existing --no-env-pull` reported `No changes`, saying the branch already matched the policy, and `Utilized services: Postgres`. The inspection (`default_transaction_read_only=on`, verified in-session) found every Neon Auth table in its own `neon_auth` schema with `public` empty, which **disproves the collision hazard**. Managed auth stays enabled but inert; nothing was disabled. `neon neon-auth disable` was **not** run and is not authorized. `neon.ts` was later committed unchanged, at `auth: false`, in commit `f8caf7d`, so the working tree and the committed record now agree.
@@ -143,14 +144,14 @@ The tracked provisioning files remain untouched; ignored credentials/config/gene
 
 The core below remains approved from 2026-10-07; the two amendment bullets are **proposed, awaiting re-approval**, not new approval records.
 
-- Free hosting only: Render Free app, Neon Free PostgreSQL, in-app Better Auth and finite GitHub Actions maintenance. Durable payment state is in the database; scheduling remains best effort with the Gate 3 quota-gated cadence. No paid worker, Supabase or Redis; MCP/HTTP share rules. Existing Git authorizations do not apply to this revision.
+- Free hosting only: Render Free app, Neon Free PostgreSQL, in-app Better Auth and finite GitHub Actions maintenance. Durable payment state is in the database; scheduling remains best effort with the Gate 3 quota-gated cadence. No paid worker, Supabase or Redis; MCP/HTTP share rules. The 2026-10-11 commit/push authorization covers publication only.
 - Better Auth anonymous buyer sessions; non-anonymous merchant login plus operator-approved membership. Sessions survive app sleep/redeploy. No public merchant signup or email/reset service assumed; private records are never public registry data.
 - Direct Orders v2 runtime adapter: distinct authorized sandbox seller/payee, human PayPal approval, immutable server-priced purchase, persisted create/capture operation keys and reconciliation before replacement payment.
-- **Import amendment proposal:** synchronous route-handler vision, request memory only, versioned OpenAI consent and explicit `store: false`; bytes-free attempt, 90-second request/60-second model budgets, one global in-flight, 10/outlet and 50/global daily attempts plus recorded spend ceiling. Keep strict 100-row/120-character/128-KiB draft bounds, edits/base revisions and manual fallback. Drop old image routes/rows/principals/clocks/tasks and status/cancel routes; reload the authenticated draft for lost-response recovery. Proposed `AI_MENU_MODEL` adds separate vision evaluation without provider/pin change.
+- **Import amendment proposal:** synchronous route-handler vision on a browser-shrunk JPEG of at most 2,048 pixels/side and 2 MiB, request memory only, short versioned OpenAI consent with details on request and explicit `store: false`; bytes-free attempt, 90-second request/60-second model budgets, one global in-flight, 10/outlet and 50/global daily attempts plus recorded spend ceiling. Keep strict 100-row/120-character/128-KiB draft bounds, edits/base revisions and manual fallback. Drop old image routes/rows/principals/clocks/tasks and status/cancel routes; reload the authenticated draft for lost-response recovery. Proposed `AI_MENU_MODEL` adds separate vision evaluation without provider/pin change.
 - Render sleep/cold starts and Neon/GitHub quotas may break availability; include an idle first visit in the three-minute metric. OpenAI credits are user-reported, not account-verified; no paid hosting fallback or assumed sponsor credits.
 - Scan is identity lookup only; shared identifiers require outlet clarification. AI suggests registered items and cannot publish, capture or sign.
-- **PYUSD amendment proposal:** reviewed devnet genesis/mint/Token-2022/decimals constants, only RPC/enable configuration, verified pre-existing merchant ATA and SIWS/Ed25519 challenge, dated integer merchant rate and ceil rounding. Persist/lock an exact transaction with mandatory reference before Wallet Standard sign-and-send; verify finalized message, transfer, zero fee and per-transaction balance delta. Release an unknown attempt only after saved-height expiry plus complete attributable history, with proven wallet blockhash preservation; incomplete history stays uncertain. Phone fresh-review handoff is a candidate, not resolved authority. PayPal remains isolated and PYUSD remains disabled until proofs pass.
-- APIMatic context remains development tooling; own-API generation remains account-conditional. R11 containment and R12 conditional region acceptance stand; no application, wallet/faucet, spend, install, provisioning, workflow, deployment, visibility, commit or push is authorized.
+- **PYUSD amendment proposal:** reviewed devnet genesis/mint/Token-2022/decimals constants, only RPC/enable configuration, verified pre-existing merchant ATA and SIWS/Ed25519 challenge, dated integer merchant rate and ceil rounding. Persist/lock a prepared transaction with a `confirmed` blockhash and mandatory reference before Wallet Standard sign-and-send; verify the finalized transfer's meaning (saved blockhash, sole buyer signer, one exact transfer, memo, zero fee, per-transaction balance delta), allowlisting only ComputeBudget and pinned Lighthouse assertion instructions. Release an unknown attempt only after saved-height expiry plus complete attributable history, with proven wallet blockhash preservation; incomplete history stays uncertain. Phone path: a Phantom Browse link carrying public outlet/item IDs into a fresh wallet-browser review, unproven. PayPal remains isolated and PYUSD remains disabled until proofs pass.
+- APIMatic context remains development tooling; own-API generation remains account-conditional. R11 containment and R12 conditional region acceptance stand; no application, wallet/faucet, spend, install, provisioning, workflow, deployment or visibility change is authorized by the proposal, and the 2026-10-11 commit/push was separately authorized.
 
 ### Gate 2 preparation checklist, 2026-10-07 (historical)
 
@@ -168,6 +169,13 @@ The core below remains approved from 2026-10-07; the two amendment bullets are *
 - [x] Record supplied source findings with links/provenance and re-read newly relied-on documentation; no wallet, faucet or fresh RPC transaction.
 - [x] Fresh fail-capable documentary checks, protected-byte comparison and final diff inspection, recorded below.
 - [ ] Explicit user re-approval of Gate 2: `Approve Gate 2, or what should change?`.
+
+### Gate 2 review revision checklist, 2026-10-11
+
+- [x] Review the amendment against Gate 1, the mirrors and primary sources; recommend five changes.
+- [x] User accepted all five; revise only `02-architecture.md` and its five mirrors.
+- [x] Fresh documentary checks and diff inspection, recorded below.
+- [ ] Explicit user re-approval of Gate 2, still the open item above.
 
 ### Gate 3 preparation checklist
 
@@ -229,6 +237,7 @@ All unaffected risk dispositions stand; Gate 3 revises affected contracts only a
 - 2026-10-10: user answered the four reopening questions: OpenAI stays as the AI provider ("We can use openai i have quite a bit of credits"), a direct vision call replaces Zapier, PYUSD is included and cut first, and S13 moves to right after S4. Gate 1 was revised and put to the user for re-approval. No gate was re-approved, and nothing was committed, pushed, installed or provisioned.
 - 2026-10-10: user explicitly re-approved Gate 1 ("Yep. I approve gate one.") and asked for a handover prompt so another agent can start Gate 2. Product scope only; no architecture, implementation, commit, push, installation or provisioning is authorized by it.
 - 2026-10-10: user authorized this Gate 2-only revision on `envoi/gate-4-slice-plan`, with backup first and no AGENTS.md edit. `02-architecture.md` and its five mirrors are revised for direct OpenAI vision and PYUSD; source findings are recorded. This is preparation, not Gate 2 re-approval; Gate 3/4 and protected product/mockup files remain untouched. No commit, push, runtime, account, spending or external-service action is authorized.
+- 2026-10-11: user asked whether Gate 2 was good, then accepted the five recommended review changes ("make the changes to 1-5"), asked for the OpenAI data-control steps and authorized "once its good, commit and push to main". The changes are browser-side photo shrink, verification by transfer meaning with allowlisted wallet-added instructions, a `confirmed` blockhash, the Phantom Browse phone path and short consent with details. This is not Gate 2 re-approval and authorizes no install, provisioning, spending, wallet/faucet, workflow, deployment or visibility change.
 
 ### Initial Gate 2 documentary verification, 2026-10-07 (historical, before free-hosting revision)
 
@@ -318,3 +327,15 @@ Checks ran with a one-off Python script in the session scratchpad, not a reposit
   Two documentation URLs returned 404 and were corrected; two later Solana documentation requests timed out, then succeeded on retry.
   No Devpost bypass, API inference, new RPC transaction, wallet, faucet, install, provisioning, workflow, deployment, staging, commit or push occurred.
   These checks do not prove runtime latency/RAM/retention, merchant authority, payment safety, wallet behavior, account access or usability.
+
+### Gate 2 review revision documentary verification, 2026-10-11
+
+- **[verified] Documentary checker:** reran the earlier checker from a scratch copy as `python3 -I <scratch>/doccheck.py docs/plans/envoi /Users/jayd0/Desktop/envoi`.
+  It passed 54 local links (42 anchored), all 54 Gate 3 tests assigned exactly once, the Gate 2 question and pending-state guard, no em dashes in the added lines and the secret self-test (11 of 11 needles, 8 public-address controls).
+- **[verified] Fail-capability:** on scratch copies compared with the preceding commit's documents, a pristine copy passed and each planted fault failed on its own run: an em dash, a broken anchor, a false Gate 2 re-approval, an OpenAI key shape and a removed approval question.
+- **[verified] Scope:** this revision changed only `02-architecture.md`, `00-status.md`, `handoff.md`, `research.md`, `roadmap.md` and `stack-recommendation.md`.
+  AGENTS.md, Gate 1, the mockups, Gate 3 and Gate 4 are byte-identical to the preceding commit, and `git diff --check` passed.
+- **[verified] Sources:** Phantom's Lighthouse and priority-fee pages, the Lighthouse repository README, Solana's confirmation guide and OpenAI's data page were read in this run and are recorded as research items 13-17.
+  No OpenAI API call, wallet, faucet, RPC request, install, provisioning or deployment occurred.
+- **Git:** the earlier uncommitted work and this revision were committed as separate concerns under the user's 2026-10-11 authorization; a record cannot contain its own commit SHA, so Git history and the remote are the evidence.
+- **What this does not establish:** no runtime, account, model, wallet, browser-shrink, phone or usability evidence.

@@ -1,12 +1,12 @@
 # Envoi: revised Gate 2 awaiting approval, Gates 3 and 4 waiting
 
-Updated 2026-10-10.
-Gate 1 was re-approved that day; do not redo it.
-`02-architecture.md` is now revised for direct vision import and PYUSD only and awaits Gate 2 re-approval.
+Updated 2026-10-11.
+Gate 1 was re-approved on 2026-10-10; do not redo it.
+`02-architecture.md` is revised for direct vision import and PYUSD only, revised again after a 2026-10-11 review, and awaits Gate 2 re-approval.
 Gate 3 revision waits for that approval; `03-program-design.md` and the unapproved `04-slices.md` remain unchanged in this Gate 2 work.
 All unaffected 2026-10-07 approvals stand, including Render Free/Neon Free/in-app Better Auth/GitHub Actions, PayPal recovery, identity-only scan, MCP, R11 and R12.
 No app or payment integration exists; the already-provisioned Neon database is recorded in status.
-Historical Git authorizations are complete and do not authorize publishing this uncommitted checkout.
+On 2026-10-11 the user authorized committing this work and pushing it to `main`; that is not Gate 2 approval.
 
 Workspace: `/Users/jayd0/Desktop/envoi` on macOS (arm64) since 2026-10-10; Gates 1-3 ran at `C:\Users\jayd0\OneDrive\Desktop\envoi` on Windows. An earlier revision of this file recorded `C:\Users\jayd0\OneDrive - Temasek Polytechnic\Documents 1\Envoi`; that path is stale and is corrected here. No decision depended on it.
 Skill: `/Users/jayd0/.claude/skills/software-factory/SKILL.md` on macOS; `C:\Users\jayd0\.agents\skills\software-factory\SKILL.md` on Windows.
@@ -46,7 +46,7 @@ Proposed target remains 4 of 5 first-time buyers completing an eligible test-env
 **Next action: review the revised Gate 2 amendment and ask exactly `Approve Gate 2, or what should change?`, then wait.**
 The four reopening questions were already answered; do not ask them again or revise Gate 1.
 Only after Gate 2 approval may affected Gate 3 contracts be revised and put to the user; Gate 4 follows its re-approval.
-No application code, install, account provisioning, wallet/faucet, spending, workflow, deployment, visibility change, commit or push is authorized.
+No application code, install, account provisioning, wallet/faucet, spending, workflow, deployment or visibility change is authorized; the 2026-10-11 commit/push authorization covered these planning documents only.
 The R11 flag/redeploy/inspection are complete, not work to repeat.
 
 **Two provisioned-state questions were resolved by the user on 2026-10-07.**
@@ -102,10 +102,10 @@ It was left out of the slice plan because approved Gate 2 forbids dependent wall
 | --- | --- | --- |
 | Official devnet token | Paxos names the pinned mint; prior-session read-only RPC confirms Token-2022/6 decimals/genesis and authorities. Recheck at enable/preparation, not by token name. | **[verified]** documentation/historical read; future configuration mutable |
 | Test tokens | Whether PayPal's documented devnet test-token route actually funds this account's test wallet. | **[vendor claim]** route documented; access **[unknown]** |
-| Buyer wallet | Phantom Wallet Standard sign-and-send; prove devnet chain honoring, mint display and exact message/blockhash preservation before expiry release. Phone path stays unresolved. | **[vendor claim]** interface; behavior **[unknown]** |
+| Buyer wallet | Phantom Wallet Standard sign-and-send; prove devnet chain honoring, mint display and preservation of the prepared blockhash, transfer and memo before expiry release. Phantom-added ComputeBudget/Lighthouse instructions are allowlisted. Phone path: a Phantom Browse link into a fresh wallet-browser review, unproven. | **[vendor claim]** interface; behavior **[unknown]** |
 | Merchant wallet ownership | A signed challenge bound to purpose, outlet and cluster proving the merchant controls the receiving wallet. | Sketched in Gate 2; untested |
 | SGD to PYUSD rate | Shop's integer atomic-units-per-S$1 rate, dated and re-confirmed every 30 days, rounded upward; no external FX provider. | **[verified]** Gate 1 decision; arithmetic unbuilt |
-| RPC and recovery | Public devnet RPC, exact finalized verification and complete post-expiry signature-window scan. Throttle/null/history gaps remain uncertain; server never submits. | **[verified]** published limits; actual shared-IP/history behavior **[unknown]** |
+| RPC and recovery | Public devnet RPC, finalized verification of the transfer's meaning and complete post-expiry signature-window scan. Throttle/null/history gaps remain uncertain; server never submits. | **[verified]** published limits; actual shared-IP/history behavior **[unknown]** |
 | Schedule | Roadmap candidates 8 and 11 add a wallet purchase slice and a wallet recovery slice before the 13 Nov 04:00 SGT cutoff. | **[hypothesis]** tight |
 
 The user wants PYUSD, and Gate 2 now proposes its architecture with independent proof conditions.
@@ -130,26 +130,27 @@ PayPal must stay usable if PYUSD fails, and a failed proof keeps the rail disabl
 6. After Gate 3 re-approval, revise `04-slices.md`: merge S11/S12, remove Zapier access, reassign tests, add PYUSD after S13/first cut and move S13 immediately after S4. Ask `Approve Gate 4, or what should change?`.
 7. Mirror every change in `00-status.md`, this file, `roadmap.md`, `stack-recommendation.md` and `research.md`, and run documentary checks proven able to fail.
 
-Work stays uncommitted on `envoi/gate-4-slice-plan` in `/Users/jayd0/Desktop/envoi` until the user authorizes a commit; it exists in no other checkout.
+On 2026-10-11 the user authorized committing this work on `envoi/gate-4-slice-plan` in `/Users/jayd0/Desktop/envoi`, fast-forwarding `main` and pushing it.
 
 ## Gate 2 handover, 2026-10-10
 
 Gate 1 was re-approved on 2026-10-10.
 The Gate 2 revision is now saved in `02-architecture.md` and its five mirrors; ask exactly `Approve Gate 2, or what should change?`, then wait.
 It changes only direct vision import and PYUSD; unaffected decisions stand.
-All work remains uncommitted in this checkout and no Gate 2 re-approval has been recorded.
-The protected AGENTS.md/product/mockups/Gate 3/Gate 4 bytes must match the pre-edit backup.
+A 2026-10-11 review changed five points, listed in the architecture header and folded into the bullets below.
+That revision edited only `02-architecture.md` and its five mirrors; AGENTS.md, product, mockups, Gate 3 and Gate 4 were not edited.
+On 2026-10-11 the user authorized committing this work and pushing it to `main`; no Gate 2 re-approval has been recorded.
 
 ### Menu import without Zapier
 
 - The merchant's menu photo goes to the approved OpenAI provider through the AI SDK inside the upload request, and the draft returns in the same response. OpenAI stays because the user has credits; the provider and the `@ai-sdk/openai` pin do not change.
 - Proposed bytes-free `menu_imports` row records actor/outlet/base revision/consent/model/outcome/counts/spend/latency, with expiry on read. No source row, image URL, capability principal or image task. Drop import status/cancel routes and recover a lost response by authenticated draft reload.
 - Keep upload validation, metadata stripping, draft-result bounds, blank-not-zero prices, merchant-edit preservation, confirmation invalidation and manual fallback.
-- Proposed budgets: 90-second total from admission, 60-second model maximum with commit reserve; 30-second bounded upload read; one global in-flight; 10/outlet and 50/global attempts per UTC day, plus user-authorized daily spend ceiling. JPEG/PNG 5 MiB/20 MP/6,000-side input, 6 MiB whole body, normalized 2 MiB/2,048-side high-detail candidate. All are hypotheses, not measured RAM/latency or dollar spend.
+- Proposed budgets: 90-second total from admission, 60-second model maximum with commit reserve; 30-second bounded upload read; one global in-flight; 10/outlet and 50/global attempts per UTC day, plus user-authorized daily spend ceiling. The browser shrinks the photo to one JPEG of at most 2,048 pixels/side and 2 MiB; the server accepts only that, with a 2.5 MiB whole body, and re-encodes it. All are hypotheses, not measured RAM/latency or dollar spend.
 - Node route handler, no proxy body clone/disk spool/image persistence. Explicit `store: false`; allowlisted error metadata drops image-bearing SDK request/response fields. Actual serialized leak scanner needs an injected base64 self-test and no-disk probes.
-- Architecture records distinct timeout/lost-connection copy and full consent naming training opt-in, usual 30-day abuse logs/legal exceptions, default Responses application state, unclear `store: false` effect and CSAM manual-review retention. User must confirm no data-sharing opt-in before real photos.
+- Architecture records distinct timeout/lost-connection copy and short consent: OpenAI receives the photo, Envoi does not store it, OpenAI may keep it up to 30 days for abuse monitoring with legal/harm exceptions, and no training without opt-in. Details cover the unpublished exact `store: false` effect, abuse-log removal only under Zero Data Retention and CSAM manual review. User must confirm no data-sharing opt-in before real photos.
 - Proposed `AI_MENU_MODEL` is separate from unchanged `AI_MODEL`; model/image/schema access and availability through 16 Dec require pre-registered evaluations. Chinese/rotated/small-text accuracy is a falsifier.
-- R2 narrows to generic database exhaustion, R6 expands to native decode RAM/CPU, image-churn R7 is superseded by admission/spend-sizing R7a. Other risks stand.
+- R2 narrows to generic database exhaustion, R6 expands to decode RAM/CPU (reduced by the browser shrink), image-churn R7 is superseded by admission/spend-sizing R7a. Other risks stand.
 
 ### PYUSD amendment
 
@@ -157,13 +158,13 @@ The proposed choices below use the [current source supplement](research.md#gate-
 
 - Proposed constants: devnet genesis `EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG`, mint `CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM`, Token-2022 program and 6 decimals. Only RPC/enable env names remain; mismatch refuses PYUSD initialization, not PayPal boot. Prior-session reads are attributed in the new source supplement.
 - `TransferChecked` only with zero current/next-horizon fee schedules, correct unfrozen source/destination and no newly active hook. Merchant ATA must exist and be verified before activation; buyer creates no accounts.
-- Phantom Wallet Standard `solana:signAndSendTransaction`, chain `solana:devnet`, wallet signs/broadcasts then returns signature bytes. Mint display, chain honoring, message/blockhash mutation and phone path remain unknown. There is no signed pre-broadcast validation opportunity.
+- Phantom Wallet Standard `solana:signAndSendTransaction`, chain `solana:devnet`, wallet signs/broadcasts then returns signature bytes. Phantom documents that it may add Lighthouse assertion and priority-fee instructions; mint display, chain honoring, blockhash/transfer preservation and the phone Browse-link path remain unknown. There is no signed pre-broadcast validation opportunity.
 - Merchant wallet ownership: exact saved 5-minute SIWS-format domain/purpose/outlet/cluster/wallet/nonce challenge, Ed25519 verification and atomic single-use consumption. It proves key control, not operator enrollment.
 - Merchant-set rate (approved in Gate 1): PYUSD per S$1 with the date set, 30-day re-confirmation, atomic amount rounded up, shown as the shop's rate. No external FX source.
 - Public devnet RPC with its documented limits; the Render shared-outbound-IP effect is **[unknown]**.
-- Persist/lock before unsigned transaction release, with exact message/blockhash, fee payer, lastValidBlockHeight and mandatory opaque memo reference. Verify successful exact finalized message, program/mint/source/destination/amount, zero fee and transaction-metadata balance delta. Receipt says transferred/finalized on devnet, not kept; permanent delegate can move tokens later.
+- Persist/lock before unsigned transaction release, with the prepared message, a `confirmed` blockhash, fee payer, lastValidBlockHeight and mandatory opaque memo reference; Envoi adds no compute-budget instructions. Verify at finality the saved blockhash, the buyer as sole signer/fee payer, exactly one transfer with program/mint/source/destination/amount, the memo, zero fee and transaction-metadata balance delta; only ComputeBudget and pinned Lighthouse assertion instructions may be added. Receipt says transferred/finalized on devnet, not kept; permanent delegate can move tokens later.
 - Unknown submission remains locked until finalized height passes lastValidBlockHeight plus complete finalized signature-window scan. Missing/pruned/null/429 evidence is not absence. Exact wallet blockhash preservation must be proven before that release rule is enabled; Solana guidance permits wallet refresh, so this is a real falsifier.
-- Phone separate-session candidate: single-use suggestions into a fresh server-priced review, never transfer purchase ownership or duplicate a released attempt. No phone transport/route extension is silently selected.
+- Phone path selected: an "Open in Phantom" Browse link carrying only public outlet/item IDs and quantities into a fresh wallet-browser session and server-priced review; no token, new route, cookie copy or ownership transfer. The original browser's PYUSD review is never prepared. Actual phone behavior is unproven.
 - Endpoints, data and the External table for the wallet path; no buyer key and no server signing.
 - PayPal must keep working if PYUSD fails, and a failed proof keeps the rail visibly disabled.
 
@@ -173,7 +174,7 @@ Render Free plus Neon Free plus in-app Better Auth plus GitHub Actions maintenan
 
 ### After Gate 2 approval
 
-Only after explicit approval, revise affected `03-program-design.md` contracts/clocks/tasks/tests and wallet pins, including separate mutation plans for image-bearing logs, each admission guard, rate rounding/age/version, mint/chain/message checks and complete-history release.
+Only after explicit approval, revise affected `03-program-design.md` contracts/clocks/tasks/tests and wallet pins, including separate mutation plans for image-bearing logs, each admission guard, rate rounding/age/version, mint/chain/blockhash checks, each instruction-allowlist rule and complete-history release.
 Do not change the OpenAI provider pin.
 Then revise `04-slices.md`: merge S11/S12, remove Zapier access, move S13 right after S4 and add PYUSD after S13, first in the cut order.
 Mirrors of the proposed amendment already exist; record approval separately in status/history/checklist/mirrors only when the user gives it.

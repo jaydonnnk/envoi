@@ -326,17 +326,50 @@ Devpost was not fetched or bypassed; the earlier official-rule date record remai
   **[hypothesis]** Require unfrozen verified accounts before preparation and describe the finalized transfer only, never guaranteed retained ownership.
   [Permanent delegate](https://solana.com/docs/tokens/extensions/permanent-delegate), [freeze account](https://solana.com/docs/tokens/basics/freeze-account).
 
+### Gate 2 review re-checks, 2026-10-11
+
+A review of the amendment against Gate 1 and these sources produced five changes the user accepted on 2026-10-11.
+Pages below were read in this run; no OpenAI API call, wallet, faucet, RPC request, transaction or installation was used.
+Where a point supersedes an earlier hypothesis above, it says so; the earlier text stays as the historical record.
+
+13. **[vendor claim] Phantom Lighthouse:** Phantom says a submitted transaction may be augmented with Lighthouse assertion instructions before it reaches the network, so the onchain transaction differs from what the dapp submitted, and assertions can make an otherwise valid transaction fail.
+    The page names no exception for devnet, the extension or partially signed transactions.
+    **[hypothesis]** Exact-bytes matching would leave ordinary Phantom payments uncertain, so verification checks the payment's meaning and allowlists ComputeBudget and Lighthouse assertion instructions only.
+    This supersedes the exact-prepared-message attribution and matching hypotheses in item 8 and the confirmation/history cross-checks above; blockhash preservation stays an enablement proof.
+    [Lighthouse](https://docs.phantom.com/developer-powertools/lighthouse).
+14. **[vendor claim] Phantom priority fees:** Phantom applies its own priority fees when the transaction has no signatures, no existing compute-budget instructions and stays under 1,232 bytes, and it discourages dapps from setting their own.
+    **[hypothesis]** Envoi's prepared transaction carries no compute-budget instructions; wallet-added ones are allowlisted.
+    [Priority fees](https://docs.phantom.com/developer-powertools/solana-priority-fees).
+15. **[vendor claim] Lighthouse program ID:** the Lighthouse repository README lists `L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95` for both devnet and mainnet beta.
+    **[unknown]** Whether Phantom's devnet assertions use that deployment; Gate 3 rechecks the program account before pinning it in code.
+    [Lighthouse repository](https://github.com/Jac0xb/lighthouse).
+16. **[vendor claim] Blockhash commitment:** Solana's confirmation guide says `confirmed` should almost always be used for RPC requests, that a `finalized` blockhash cuts transaction expiration by about 13 seconds (more under unstable conditions), and that a blockhash from an abandoned block is never recent on the finalized chain.
+    **[hypothesis]** Prepare with a `confirmed` blockhash for more buyer approval time; release still requires finalized block height past the saved `lastValidBlockHeight` plus a complete scan.
+    This supersedes the finalized-blockhash choice in the confirmation cross-check above.
+    [Confirmation and expiration](https://solana.com/developers/guides/advanced/confirmation).
+17. **[verified] OpenAI data page re-read:** the `/v1/responses` row lists no training use, 30-day abuse-monitoring retention and application state as none with listed exceptions; the text also describes a 30-day default application-state period.
+    The page states no general `store=false` rule for an ordinary foreground request; approved Zero Data Retention is what excludes content from abuse logs, and the CSAM manual-review exception is unchanged.
+    **[hypothesis]** The short consent states the facts a merchant needs; its details say the exact `store: false` effect is unpublished and separate from abuse monitoring.
+    [Your data](https://developers.openai.com/api/docs/guides/your-data).
+18. **[hypothesis] Browser-side shrink:** the browser decodes, orients and re-encodes one JPEG of at most 2,048 pixels/side and 2 MiB, the same target item 4 records for high detail; the server accepts only that, bounds the whole body at 2.5 MiB, re-validates, strips metadata and re-encodes.
+    By arithmetic a 2,048 x 2,048 frame is about 4.2 megapixels, roughly 17 MB as RGBA; this is not a `sharp` measurement.
+    **[unknown]** Browser decode memory and HEIC handling on target phones.
+    This supersedes item 4's JPEG/PNG admission choice and the earlier 5 MiB/20 MP/6,000-pixel server input.
+19. **[hypothesis] Phone path:** an "Open in Phantom" link built from item 10's documented Browse URL carries only public outlet/item IDs and quantities into a new wallet-browser session, where the server prices a fresh review.
+    It needs no token or new route, copies no cookie and transfers no ownership; the original browser's PYUSD review is never prepared.
+    This supersedes item 10's single-use handoff candidate; actual phone behavior remains **[unknown]**.
+
 ### Gate 2 proposal mirror and boundary
 
-**[hypothesis] Revised proposal:** request-memory-only JPEG/PNG import, bytes-free attempt, 90-second total/60-second model budget, one global in-flight request, 10/outlet and 50/global daily attempts, recorded spend ceiling, strict bounded draft, merchant edits/confirmation preserved and no import maintenance dependency.
+**[hypothesis] Revised proposal:** browser-shrunk JPEG at most 2,048 pixels/side and 2 MiB, request-memory-only import, bytes-free attempt, 90-second total/60-second model budget, one global in-flight request, 10/outlet and 50/global daily attempts, recorded spend ceiling, strict bounded draft, merchant edits/confirmation preserved and no import maintenance dependency.
 Drop source rows, image/result routes and capability principals, `ZAPIER_MENU_HOOK_URL`, `T_IMAGE_ACCESS`, `T_SOURCE_SWEEP`, `expire_imports` and `sweep_sources` in the later Gate 3 revision, not by editing it now.
 Separate `AI_MENU_MODEL` is proposed alongside unchanged `AI_MODEL`/provider/pin.
 
-**[hypothesis] PYUSD proposal:** devnet identity/mint/program/decimals as code constants, only RPC/enable env knobs, pre-existing verified merchant ATA, Ed25519/SIWS control proof, dated 30-day merchant rate, integer ceil rounding, persisted locked attempt before wallet sign-and-send, finalized exact-message verification and complete post-expiry recovery.
-Phone fresh-review handoff remains a candidate; no cookie sharing, transfer of ownership or broadcast by Envoi.
+**[hypothesis] PYUSD proposal:** devnet identity/mint/program/decimals as code constants, only RPC/enable env knobs, pre-existing verified merchant ATA, Ed25519/SIWS control proof, dated 30-day merchant rate, integer ceil rounding, persisted locked attempt with a `confirmed` blockhash before wallet sign-and-send, finalized verification of the transfer's meaning with allowlisted ComputeBudget/Lighthouse instructions and complete post-expiry recovery.
+Phone path is a Phantom Browse link into a fresh wallet-browser review; no cookie sharing, transfer of ownership or broadcast by Envoi.
 PayPal must remain independent.
 
-**[unknown] Carry forward:** model through judging; OpenAI sharing setting and `store: false` effect; Chinese-text draft accuracy; Render latency/decoder RAM; Phantom token display, chain honoring and message mutation; phone/session path; user faucet access; RPC shared-IP/history behavior.
+**[unknown] Carry forward:** model through judging; OpenAI sharing setting and `store: false` effect; Chinese-text draft accuracy; Render latency/decoder RAM and browser shrink on target phones; Phantom token display, chain honoring and blockhash/transfer preservation; phone Browse-link path; user faucet access; RPC shared-IP/history behavior.
 R2 narrows to general storage exhaustion; R6 expands to RAM/CPU; image-churn R7 is superseded by mis-sized spend/admission R7a.
 Other approved decisions and risks stand.
 The architecture is revised but not re-approved; Gate 3 and Gate 4 edits wait, and no runtime, spend or external-action authority follows from this research.
