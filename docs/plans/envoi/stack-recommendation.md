@@ -1,7 +1,7 @@
 # Envoi: proposed hackathon and production stack
 
 Supporting mirror, updated 2026-10-11.
-Gate 1 is re-approved; Gate 2's direct-vision/PYUSD amendment awaits re-approval in `02-architecture.md`.
+Gate 1 is re-approved; Gate 2's direct-vision/PYUSD amendment in `02-architecture.md` was re-approved on 2026-10-11.
 `03-program-design.md` and unapproved `04-slices.md` are unchanged in this revision; affected old import/wallet content is superseded pending their gates.
 Unaffected 2026-10-07 decisions, eight review dispositions and version pins stand, including OpenAI and `@ai-sdk/openai`.
 No approval establishes runtime/account proof or authorizes installation or implementation; the user separately authorized committing and pushing these planning documents on 2026-10-11.
@@ -72,7 +72,7 @@ Timeout says Envoi stopped waiting, did not store the photo or apply late result
 R2 narrows to general Neon exhaustion that still blocks payment-state writes; R6 expands to RAM/CPU; image-churn R7 is superseded by admission/spend-sizing R7a.
 Wallet display/chain and blockhash/transfer preservation, the phone Browse-link path, user faucet access and public RPC shared-IP/history completeness remain unknown.
 Full consent, limits, wallet rules and evidence: [architecture](02-architecture.md), [source supplement](research.md#gate-2-source-supplement-2026-10-10).
-Gate 3 revises affected contracts only after re-approval; this mirror is not implementation or publication authority.
+Gate 3 now revises the affected contracts; this mirror is not implementation authority.
 APIMatic/prize access remains account-conditional and unproven.
 
 ## Why this over the alternatives

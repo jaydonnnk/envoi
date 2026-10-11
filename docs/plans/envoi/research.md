@@ -4,8 +4,8 @@ Consolidated 2026-10-06; Gate 2 source supplement added 2026-10-10.
 This is documentation research plus the explicitly attributed read-only devnet observations, not an integration proof.
 No sandbox capture, wallet transfer, QR/menu photo trial or user test has been run.
 
-**[verified] Current approval record, 2026-10-10:** Gate 1 was re-approved; Gates 2 and 3 are reopened only for direct vision import and PYUSD.
-`02-architecture.md` is the revised Gate 2 proposal awaiting re-approval; Gate 3 and the unapproved Gate 4 draft remain unchanged.
+**[verified] Current approval record, 2026-10-11:** Gate 1 was re-approved on 2026-10-10 and Gate 2 on 2026-10-11; Gate 3 stays reopened only for direct vision import and PYUSD.
+`02-architecture.md` is the re-approved Gate 2 amendment; the Gate 3 revision is next and the unapproved Gate 4 draft waits for it.
 OpenAI and its dependency pin stay; no provider switch is proposed.
 The 2026-10-07 approvals, cross-check and eight finding dispositions remain historical authority for unaffected decisions, not approval of this amendment.
 See [Gate 3 cross-check](#gate-3-cross-check-2026-10-07) and [status](00-status.md#unresolved-review-findings).
@@ -372,6 +372,6 @@ PayPal must remain independent.
 **[unknown] Carry forward:** model through judging; OpenAI sharing setting and `store: false` effect; Chinese-text draft accuracy; Render latency/decoder RAM and browser shrink on target phones; Phantom token display, chain honoring and blockhash/transfer preservation; phone Browse-link path; user faucet access; RPC shared-IP/history behavior.
 R2 narrows to general storage exhaustion; R6 expands to RAM/CPU; image-churn R7 is superseded by mis-sized spend/admission R7a.
 Other approved decisions and risks stand.
-The architecture is revised but not re-approved; Gate 3 and Gate 4 edits wait, and no runtime, spend or external-action authority follows from this research.
+The architecture was re-approved on 2026-10-11; Gate 3 revises affected contracts next and Gate 4 waits for Gate 3, and no runtime, spend or external-action authority follows from this research.
 
 Documentary proof is recorded in [status](00-status.md#gate-2-amendment-documentary-verification-2026-10-10), not integration evidence.

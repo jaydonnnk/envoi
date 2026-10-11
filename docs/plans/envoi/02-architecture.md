@@ -1,10 +1,10 @@
 # Architecture: Envoi
 
-**Reopened and revised 2026-10-10, revised again after review on 2026-10-11; awaiting Gate 2 re-approval.**
+**Reopened and revised 2026-10-10, revised again after review on 2026-10-11, and RE-APPROVED by the user on 2026-10-11** ("gate 2 approved").
 This amendment replaces Zapier with a direct OpenAI vision request and includes the independently gated PYUSD devnet rail.
 The 2026-10-11 review changed five points: the browser shrinks the menu photo before upload, PYUSD verification checks the transfer's meaning and allowlists the instructions Phantom documents adding, preparation uses a `confirmed` blockhash, the phone path is a plain Phantom Browse link, and the consent text is short with details on request.
 Everything else approved on 2026-10-07 stands, including hosting, in-app auth, PayPal recovery, identity-only scan and MCP handoff.
-Gate 1 was re-approved on 2026-10-10; Gates 3 and 4 cannot be revised until their preceding gates are re-approved.
+Gate 1 was re-approved on 2026-10-10; Gate 3 may now revise affected contracts, and Gate 4 waits for Gate 3 re-approval.
 See [`00-status.md`](00-status.md#reopening-2026-10-10-zapier-removed) and [`handoff.md`](handoff.md#gate-2-handover-2026-10-10).
 
 Product authority: [approved Gate 1](01-product.md).
@@ -121,7 +121,7 @@ UI routes: `/buy`, `/review/{purchaseId}`, `/receipt/{purchaseId}`, `/merchant/s
 Separate `/mcp` endpoint: Streamable HTTP `POST`; stateless JSON responses, `GET` and `DELETE` return method-not-allowed unless a later approved transport needs them. Validate Origin/Host, transport version and bounded input. A scoped supported-client token permits `search_outlets`, `get_menu` and `create_purchase_request`; no capture, arbitrary transfer, menu-write or unrestricted receipt tools. Public registry reads remain available through HTTP. **[vendor claim]** MCP specifies Origin validation and transport security requirements; actual Next.js/SDK/client interoperability is **[unknown]**. [MCP transport specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports).
 
 Wallet routes are proposed in this amendment, not implemented or enabled.
-Gate 3 supplies their exact contracts only after Gate 2 re-approval.
+Gate 3 supplies their exact contracts in its revision.
 
 ## Data
 
@@ -224,7 +224,7 @@ Prove on the actual upload/error surfaces that no image is written to disk, data
 Begin with explicitly consented test photos, including Chinese text, rotated text, small prices, blur and non-SGD ambiguity.
 No zero-retention, physical-erasure or extraction-accuracy claim is established by `store: false`.
 Use a separate proposed `AI_MENU_MODEL` name so vision and text evaluations can choose different models without changing provider or dependency pin.
-Proposed re-approval includes that added name; neither model is chosen by this document.
+The 2026-10-11 re-approval includes that added name; neither model is chosen by this document.
 Both evaluations must select image/schema-capable models where needed, with documented availability past 16 Dec 2026 and actual account access.
 
 ### Buyer lookup and exact review
@@ -433,12 +433,13 @@ All other approved residual-risk dispositions, R11 containment and R12 acceptanc
 Gate 2 re-approval accepts only this direct-vision and PYUSD amendment with its proof conditions, proposed `AI_MENU_MODEL` name and pinned code-constant configuration, including the 2026-10-11 review changes.
 The user's data-sharing setting, dollar ceiling, actual models and phone proofs are not inferred from approval.
 It establishes no runtime/account success and does not approve Gate 3/4, application code, wallet/faucet use, spending, installation, provisioning, workflows, deployment or visibility change.
-On 2026-10-11 the user separately authorized committing and pushing this proposal to `main`; that publishes planning documents only and is not Gate 2 approval.
+On 2026-10-11 the user separately authorized committing this proposal, publishing its branch and merging it into `main`; Git publication is not gate approval.
 Changed product behavior reopens Gate 1; an architecture change reopens Gate 2 before dependent work.
 
 The eight earlier findings stay dispositioned with named residual risks in [status](00-status.md#unresolved-review-findings), not reopened wholesale.
-After explicit Gate 2 re-approval, revise only affected Gate 3 files/contracts/clocks/tasks/tests and wallet pins, proving each new guard with its own mutation plan.
+With Gate 2 re-approved, revise only affected Gate 3 files/contracts/clocks/tasks/tests and wallet pins, proving each new guard with its own mutation plan.
 Then revise Gate 4, preserving the user-decided S13 placement and PYUSD first-cut rule.
 `01-product.md`, the mockups, `03-program-design.md` and `04-slices.md` are not edited in this gate.
 
-**Approve Gate 2, or what should change?**
+**Gate 2 re-approved by the user on 2026-10-11 ("gate 2 approved").**
+Next is the Gate 3 revision described in the [Gate 3 handover](handoff.md#gate-3-handover-2026-10-11).
