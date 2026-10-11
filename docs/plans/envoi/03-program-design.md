@@ -1,8 +1,9 @@
 # Program Design: Envoi
 
-**Reopened 2026-10-10; revised 2026-10-11, revised again after the user's review the same day, and awaiting the user's decision on Gate 3.**
+**Reopened 2026-10-10; revised 2026-10-11, revised again after the user's review the same day, revised a third time the same day for fixes L and M after Gate 2 was reopened, and awaiting the user's decision on Gate 3.**
 The user removed Zapier because it is paid and reopened Gates 1, 2 and 3.
 Gate 1 was re-approved on 2026-10-10 and Gate 2 on 2026-10-11.
+Gate 2 was reopened again on 2026-10-11 for two PYUSD double-payment fixes and re-approved the same day, the user having approved the fixes in advance.
 This revision replaces only the contracts that depend on the re-approved Gate 2 amendment: the direct OpenAI vision import and the independently gated PYUSD devnet rail.
 Every other contract below stays as approved on 2026-10-07.
 See [Revision 2026-10-11](#revision-2026-10-11-direct-vision-and-pyusd), [`00-status.md`](00-status.md#reopening-2026-10-10-zapier-removed) and [`handoff.md`](handoff.md#gate-3-handover-2026-10-11).
@@ -29,13 +30,19 @@ This revision is a proposal: the user has not yet approved it, and the 2026-10-0
   - H: a later signature hint is verified when every earlier one was `not_ours` or `failed_landing`, up to three hints per attempt and within the read debounce.
   - I: the purchase and PYUSD attempt machines agree: a PYUSD purchase is paid only from `pending_payment`.
   - J: a stale sentence about the provisioning files and R11 is corrected.
-  - K: tests are batched into table-driven groups, 90 named tests and 225 cases, with an exact mapping from every previous name.
+  - K: tests are batched into table-driven groups, with an exact mapping from every previous name; the counts are stated under [Test plan](#test-plan).
   - The user also reviewed six least confident calls; the verdicts are noted under [Least confident choices](#least-confident-choices-in-the-2026-10-11-revision) and recorded in [`00-status.md`](00-status.md#approval-history).
+- **Revised after Gate 2 was reopened and re-approved on 2026-10-11 (fixes L and M):**
+  the review of fixes A-K found two ways one PYUSD purchase could be paid twice, and the user reopened Gate 2 for both and approved the fixes in advance.
+  - L: preparation releases the unsigned bytes exactly once and never stores them, and the browser asks the wallet once per release, because Phantom may add different priority-fee and Lighthouse instructions each time it signs, so two signings of one prepared message can both land.
+  - M: after expiry, the window scan runs to completion for every released attempt, including a confirmed or mismatched one, and records any other successful transaction carrying the reference as an extra transfer; the purchase stays paid, and the extra transfer is shown to the buyer, the merchant and the operator, with any refund arranged outside Envoi.
 - **Unchanged:** the OpenAI provider and the `@ai-sdk/openai` pin, PayPal recovery, scan, MCP, hosting, auth, R11 containment and the R12 region acceptance.
 - **Correction made in passing:** row 6 of the findings table named the maintenance boundary risk "R6", while that risk is R3 in every other place; the row now says R3.
   No decision changed.
 
-**No Gate 2 decision was found wrong or incomplete, and none of the review fixes changes one.**
+**Fixes A-K change no Gate 2 decision.**
+**Fixes L and M do: Gate 2 step 4 re-released the same unsigned bytes, which is unsafe when the wallet augments each signing, and its scan did not look for a second landing after confirmation.**
+Gate 2 was reopened for both and re-approved on 2026-10-11; see its [step 4](02-architecture.md#preparation-wallet-broadcast-and-verification) and [recovery](02-architecture.md#lost-response-recovery-and-rpc).
 Gate 2 rules this revision makes exact rather than changes:
 
 1. Lighthouse "assertion" instructions exclude its two memory instructions, discriminators 0 and 1, which create or close an account.
@@ -217,7 +224,7 @@ This gate does not stage, move or edit them; the R11 containment rules below sti
 | `src/domain/pyusd/challenge.ts` | **Added 2026-10-11.** SIWS-format challenge bytes, single-use Ed25519 verification and destination recording. |
 | `src/domain/pyusd/attempts.ts`, `state.ts` | **Added 2026-10-11.** Preparation, the lock, the PYUSD attempt transition table and signature binding. |
 | `src/domain/pyusd/verify.ts` | **Added 2026-10-11.** Pure verification of a finalized landed transaction by meaning. No RPC. |
-| `src/domain/pyusd/recovery.ts` | **Added 2026-10-11.** Expiry, scan coverage and release decisions. No RPC. |
+| `src/domain/pyusd/recovery.ts` | **Added 2026-10-11.** Expiry, scan coverage and release decisions; since fix M, candidate classification and extra transfers. No RPC. |
 | `src/domain/payments/attempts.ts`, `state.ts` | One active attempt per purchase, operation keys, dispatch legality, attempt lifecycle. |
 | `src/domain/suggestions/types.ts`, `suggest.ts` | AI tool schemas and bounded suggestion results. |
 | `src/domain/handoffs/types.ts`, `redeem.ts` | Agent purchase-request tokens and single redemption. |
@@ -277,7 +284,7 @@ The image proxy and the Zapier result routes are removed by the 2026-10-11 revis
 | --- | --- |
 | `src/lib/wallet/standard.ts` | Browser-only wallet discovery: keeps only wallets whose chains include `solana:devnet` and that offer the needed feature. |
 | `src/lib/wallet/phantom-browse.ts` | Builds the Phantom Browse link from public outlet and item ids only. |
-| `src/app/review/[purchaseId]/pyusd-pay.tsx` | Client component: prepare, hand the exact bytes to the wallet, post the signature hint; on a phone with no wallet, the Phantom link instead of a pay button. |
+| `src/app/review/[purchaseId]/pyusd-pay.tsx` | Client component: prepare, hand the exact bytes to the wallet once through a one-shot holder (fix L), post the signature hint; on a phone with no wallet, the Phantom link instead of a pay button. |
 | `src/app/merchant/setup/pyusd-wallet.tsx` | Client component: request a challenge, have the wallet sign the exact bytes, submit the proof; set the rate. |
 
 ### Maintenance and tests
@@ -679,7 +686,8 @@ export function canTransitionPurchase(t: PurchaseTransition): boolean;
 export function canTransitionAttempt(from: AttemptState, to: AttemptState): boolean;
 
 // added 2026-10-11 after review: PayPal abandonment is derived on read
-export type PurchaseView = { state: PurchaseState; paypalAttempt: AttemptState | null; pyusdAttempt: PyusdAttemptState | null; lock: BasketLockReason | null };
+export type PurchaseView = { state: PurchaseState; paypalAttempt: AttemptState | null; pyusdAttempt: PyusdAttemptState | null; lock: BasketLockReason | null;
+  extraTransfers: readonly ExtraTransfer[] };   // fix M: shown beside a paid state, never changing it
 export function derivePurchaseView(purchase: PurchaseRow, attempt: PaymentAttemptRow | PyusdAttempt | null, now: Date): PurchaseView; // pure
 export function applyDerivedTransitions(db: Db, purchaseId: string, now: Date): Promise<void>; // next touch: stores what the view reads, by compare-and-set
 
@@ -918,18 +926,27 @@ export type PyusdAttempt = {
   buyerWallet: Address; sourceTokenAccount: Address; destinationTokenAccount: Address;
   atomicAmount: bigint; rateVersionId: string;
   reference: string;                      // 128-bit random, base58; the only memo content
-  unsignedWireBase64: string;             // the exact bytes released, returned again while valid
-  messageFingerprint: string;             // SHA-256 of the compiled message; evidence, not a matching rule
+  messageFingerprint: string;             // SHA-256 of the compiled message; evidence, not a matching rule; fix L: the bytes themselves are never stored
   blockhash: string; lastValidBlockHeight: bigint; preparationSlot: bigint;
   fee: FeeEvidence;
   hints: readonly SignatureHint[];        // at most PYUSD_HINT_CAP, appended by compare-and-set on the count
   finalizedSignature: string | null;
-  scan: ScanCoverage | null;
+  scan: ScanCoverage | null;              // one window scan per attempt after expiry, whatever its state (fix M)
+  extraTransfers: readonly ExtraTransfer[];
   nextCheckAt: Date; leaseExpiresAt: Date | null;
 };
 
+// fix M, added 2026-10-11 after Gate 2 was reopened; rows of pyusd_extra_transfers, UNIQUE (attempt_id, signature)
+export type ExtraTransfer = {
+  signature: string; slot: bigint;
+  destinationDelta: bigint | null;        // from transaction metadata; null when the metadata is incomplete
+  verification: "verified" | VerificationFailure;
+  foundAt: Date;
+  refundReference: string | null;         // recorded out of band by the operator act of delta D1; changes no payment state
+};
+
 export type Preparation =
-  | { kind: "prepared" | "existing"; attemptId: string; transactionBase64: string; chain: "solana:devnet" }
+  | { kind: "prepared"; attemptId: string; transactionBase64: string; chain: "solana:devnet" }   // the only response that carries bytes, sent once
   | { kind: "locked"; attemptId: string; state: PyusdAttemptState }
   | { kind: "refused"; error: AppError };
 
@@ -948,10 +965,12 @@ export function buildUnsignedTransfer(input: {
 Its instructions are, in order, one memo carrying only the reference under the pinned memo program and one Token-2022 `TransferChecked` from the buyer's associated account to the merchant's, with the buyer as authority, the exact amount and 6 decimals.
 It adds no compute-budget, account-creation, authority, delegate or durable-nonce instruction, and leaves the signature slot empty.
 The memo comes first so a merchant account that requires incoming memos still accepts the transfer.
-`preparePyusdPayment` returns `existing` with the saved bytes only for the same wallet while the confirmed block height is at most `lastValidBlockHeight` minus 10; otherwise it returns `locked`, and never a refreshed blockhash or a second transaction.
+**Revised 2026-10-11 when Gate 2 was reopened (fix L):** the bytes leave the server once, in the response to the call that saved the attempt, and are never stored.
+For a purchase that already has an attempt, `preparePyusdPayment` returns `locked` with the attempt's state, for any wallet, and never the bytes, a refreshed blockhash or a second transaction.
+The earlier rule returned the saved bytes again while they were valid, on the reasoning that the same bytes cannot make a second transfer; that holds only for a wallet that signs the same message the same way, and Phantom documents adding priority-fee and Lighthouse instructions when it signs, which **[hypothesis]** can differ between two signings.
+A lost response therefore leaves the attempt locked until its window is scanned, and the buyer sees "checking payment".
 **Revised 2026-10-11 after review:** no PYUSD RPC read runs inside a database transaction.
-The height for an existing attempt is read through the limiter after a plain read of the attempt, with no row lock held, because the saved bytes never change and returning them again cannot create a second transfer.
-New preparations read every chain fact first and only then open the one short transaction that locks, rechecks and inserts.
+Preparation reads every chain fact first and only then opens the one short transaction that locks, rechecks and inserts.
 
 ```ts
 // src/domain/pyusd/verify.ts; pure, no RPC
@@ -1002,14 +1021,27 @@ export type RecoveryStep =
   | { action: "continue_scan"; before: string | null }
   | { action: "close_unpaid" }
   | { action: "hold"; reason: "automatic_release_not_enabled" }
-  | { action: "operator"; reason: "mismatch" };
+  | { action: "operator"; reason: "mismatch" }
+  | { action: "done" };                  // fix M: the window scan is complete and the state needs nothing more
+
+export type CandidateOutcome =          // fix M
+  | { kind: "bind"; evidence: PyusdEvidence }                // nothing bound yet, and this one verifies
+  | { kind: "mismatch"; reason: VerificationFailure }        // nothing bound yet, ours, successful, fails verification
+  | { kind: "extra"; transfer: ExtraTransfer }               // ours and successful, while another landing is bound or in mismatch
+  | { kind: "skip" };                                        // not ours, a failed landing, or the bound signature itself
 
 export function decideRecoveryStep(attempt: PyusdAttempt, finalizedBlockHeight: bigint, proofs: typeof PYUSD_PROOFS): RecoveryStep;
+export function classifyScanCandidate(attempt: PyusdAttempt, tx: LandedTransaction, result: VerificationResult, now: Date): CandidateOutcome;
+export function applyScanOutcome(db: Db, attemptId: string, outcome: CandidateOutcome, now: Date): Promise<void>; // compare-and-set; an extra never changes the purchase
 export function applyScanPage(coverage: ScanCoverage, page: readonly SignatureEntry[], preparationSlot: bigint): { candidates: string[]; pageReachesBeforePreparation: boolean; lastSignature: string | null };
 export function isScanComplete(coverage: ScanCoverage): boolean; // reachedBeforePreparation, which only a fully decided page can set
 ```
 
 A scan starts only after the finalized block height exceeds `lastValidBlockHeight`, so its fixed top boundary covers every slot in which the transaction could have landed.
+**Revised 2026-10-11 when Gate 2 was reopened (fix M):** every released attempt gets this window scan, including one already `confirmed` by a hint or in `mismatch`, and a scan does not stop when a candidate binds.
+`classifyScanCandidate` binds the first verifying landing when nothing is bound, and records every other successful landing that carries the reference as an extra transfer, whether or not it verifies.
+An extra transfer never changes the attempt or purchase state or the bound evidence; the receipt, the merchant's order view and the operator health view show it, and any refund is arranged outside Envoi.
+Because the window is fixed when the scan starts, the check ends; a transfer built later from a new blockhash with the same memo text is not Envoi's released transaction and is not watched.
 Candidates are all successful signatures at or after `preparationSlot`; a failed transaction moves no tokens, so it can be skipped.
 The RPC's memo summary is deliberately not used as a filter: a transfer that landed with an unexpected extra memo could be summarized without the reference and skipped, and closing that attempt unpaid would invite a second payment.
 A page counts toward coverage only when every candidate on it is decided; any gap leaves the cursor where it was.
@@ -1128,7 +1160,8 @@ pending_payment -> unpaid_closed       (cancel with no dispatched capture and no
 uncertain -> paid                      (a later provider read confirms the same PayPal capture)
 uncertain -> unpaid_closed             (a later provider read establishes a verified PayPal non-payment; a held PYUSD attempt closes unpaid
                                         once release is enabled; or an audited operator resolution closes a PYUSD mismatch)
-paid -> paid                           (terminal; a refund/dispute adds separate status, never rewrites this)
+paid -> paid                           (terminal; a refund/dispute adds separate status, never rewrites this; since fix M, so does an extra
+                                        transfer found by the window scan)
 ```
 
 Illegal and rejected by `canTransitionPurchase`: any transition out of `paid` to an unpaid state; any transition into `paid` that is not sourced from `decideCaptureOutcome = confirmed` or, since 2026-10-11, `verifyPyusdTransfer = confirmed`; `review_expired -> pending_payment`; `superseded -> anything`.
@@ -1174,8 +1207,12 @@ mismatch -> closed_unpaid              (an out-of-band, audited operator resolut
 ```
 
 `prepared`, `expired_scanning`, `held_no_match` and `mismatch` keep the purchase and its basket locked; only `confirmed` and `closed_unpaid` end the lock.
+**Revised 2026-10-11 when Gate 2 was reopened (fix M):** the window scan runs after expiry whatever the state, so `confirmed` and `mismatch` attempts are still scanned to completion, and the scan never moves either state.
+It only records extra transfers, each a successful landing carrying the reference other than the bound or mismatching one; an extra transfer is a separate status beside a paid or uncertain purchase and never a transition.
+A `confirmed` attempt still ends the basket lock at once, because a new purchase of the same basket has its own reference and cannot be confused with the old attempt's landings.
 `mismatch` has no automatic exit: it is operator-visible, and the system never moves it on its own.
 Its one exit is an out-of-band, audited operator resolution that records the operator, the reason and the evidence, such as an out-of-band refund reference or proof that no tokens reached the merchant, and closes the attempt unpaid; the receipt then shows that operator resolution rather than claiming no transfer happened.
+Since fix M the resolution also requires the attempt's window scan to be complete, so every landing that may need a refund is known before the attempt closes.
 There is no `mismatch -> confirmed`, because Gate 2 says mismatched evidence is never paid; accepting such a transfer would need a Gate 2 amendment.
 The resolution is not built in this gate: Gate 4 places it with the operator CLI of delta D1.
 No transition re-prepares, refreshes the blockhash or submits anything, and a wallet error or a missing hint changes no state.
@@ -1201,9 +1238,9 @@ There is no cancel, status-poll or automatic re-analysis path; a fresh merchant 
 | --- | --- | --- | --- |
 | `anonymous` (buyer) | Better Auth anonymous sign-in, HttpOnly cookie | read published outlets/menus, create and own reviews, start and complete their own payment, read their own receipt; since 2026-10-11, prepare PYUSD for their own review and post a signature hint for their own attempt | any merchant route; read another buyer's purchase; supply a price, payee or rail; supply an amount, RPC URL, token account or rate; prepare from another session's review |
 | `merchant` | permanent pre-provisioned account **plus** an operator-approved `merchant_memberships` row for that outlet | edit their outlet, upload a menu photo for a synchronous draft, reload the draft and the latest import outcome, correct and confirm a menu, publish when preconditions hold, view and acknowledge their orders; since 2026-10-11, request a wallet challenge, prove a wallet they control, and set or re-confirm the PYUSD rate | act on an outlet without a membership row; approve their own enrollment; connect an arbitrary pasted merchant id; make a PYUSD wallet active without the outlet's operator-approved enrollment |
-| `operator` | allowlisted flag on a permanent account | approve enrollments, prepare destination connections, read the operator health view, including held and mismatched PYUSD attempts; since 2026-10-11, resolve a PYUSD mismatch as unpaid, out of band and audited, through the operator act Gate 4 places in delta D1 | capture or create a payment on a buyer's behalf; sign or submit a transaction; mark a mismatched PYUSD attempt paid |
+| `operator` | allowlisted flag on a permanent account | approve enrollments, prepare destination connections, read the operator health view, including held and mismatched PYUSD attempts; since 2026-10-11, resolve a PYUSD mismatch as unpaid, out of band and audited, through the operator act Gate 4 places in delta D1, and, since fix M, read extra transfers and record an out-of-band refund reference against one through the same act | capture or create a payment on a buyer's behalf; sign or submit a transaction; mark a mismatched PYUSD attempt paid; move tokens or mark an extra transfer refunded without a recorded out-of-band reference |
 | `agent-token` | out-of-band scoped demo token, stored hashed | `search_outlets`, `get_menu`, `create_purchase_request` over MCP | capture, transfer, menu writes, receipt reads, private registry data |
-| `maintenance` | Actions secret `MAINTENANCE_DATABASE_URL` plus read-only provider config and, when PYUSD is configured, `SOLANA_RPC_URL` | claim due work, read provider orders, read devnet chain state, advance PYUSD scan coverage and attempt states, write heartbeat and audit | create or capture an order, sign, submit or rebroadcast a transaction, request an airdrop, re-analyze an image, replace a payment, migrate, keep the app awake |
+| `maintenance` | Actions secret `MAINTENANCE_DATABASE_URL` plus read-only provider config and, when PYUSD is configured, `SOLANA_RPC_URL` | claim due work, read provider orders, read devnet chain state, advance PYUSD scan coverage and attempt states, record extra transfers, write heartbeat and audit | create or capture an order, sign, submit or rebroadcast a transaction, request an airdrop, re-analyze an image, replace a payment, migrate, keep the app awake |
 
 Two rules make this table enforceable rather than descriptive. Every route begins with exactly one `require*` guard from `src/lib/auth-context.ts`, and a route that needs two principals does not exist. Guest-to-merchant escalation is blocked at two layers: `onLinkAccount` creates no membership, and `requireOutletMembership` reads the membership row rather than any property of the user record.
 
@@ -1361,9 +1398,8 @@ POST /api/v1/purchases/{id}/pyusd/prepare                           body { walle
   (revised 2026-10-11 after review: no RPC call runs inside a database transaction)
   requireBuyerSession -> assertSameOrigin -> requirePyusdEnabled
     -> plain read of the purchase and its attempt, no row lock:
-         an attempt in prepared, same wallet => getBlockHeight(confirmed) through the limiter, outside any transaction:
-           height <= lastValidBlockHeight - 10 ? the saved bytes ("existing") : locked
-         any other attempt => locked
+         any attempt, for any wallet => locked with the attempt's state, no bytes and no RPC call
+           (revised 2026-10-11 when Gate 2 was reopened, fix L: the bytes are released once and never stored)
     -> assertPaymentEligible (owner, T_REVIEW, published revision, destination version, rate version and age,
          PAYMENTS_ENABLED) as a read-only pre-check
     -> read-only RPC through the shared limiter, outside any transaction:
@@ -1375,18 +1411,21 @@ POST /api/v1/purchases/{id}/pyusd/prepare                           body { walle
          buildUnsignedTransfer (memo with the new reference, then TransferChecked; version 0; no compute budget)
     -> BEGIN: SELECT ... FOR UPDATE every purchase of this buyer with the same basket lock key, this one included, in id order
          recheck no attempt, unchanged eligibility, and findBasketLock over the others => execution_locked
-         INSERT payment_attempts (rail pyusd, prepared, all evidence, reference UNIQUE); purchase -> pending_payment; audit
+         INSERT payment_attempts (rail pyusd, prepared, fingerprint and all evidence but never the bytes, reference UNIQUE);
+         purchase -> pending_payment; audit (no bytes)
        COMMIT
-    -> only now respond { attemptId, transactionBase64, chain: "solana:devnet" }
-  a lost response leaves a locked attempt; a repeat call returns the same bytes while they are valid
+    -> only now respond { attemptId, transactionBase64, chain: "solana:devnet" }, built in memory and then dropped
+  a lost response leaves a locked attempt that recovery resolves; a repeat call returns locked and never the bytes
 
 browser (pyusd-pay.tsx)
   wallets = getWallets() with chains including solana:devnet and the solana:signAndSendTransaction feature
   none on a phone => an "Open in Phantom" link from buildPhantomBrowseLink; never a pay button
   none on a desktop => no pay button; explain that a devnet wallet is needed
-  -> signAndSendTransaction({ account, chain: "solana:devnet", transaction: exact bytes })
+  -> a one-shot holder gives the exact bytes to one call and drops them (fix L):
+     signAndSendTransaction({ account, chain: "solana:devnet", transaction: exact bytes })
   -> signature bytes -> base58 -> POST pyusd/submitted
-  a wallet error or rejection after preparation is shown as "checking payment", never as canceled
+  a wallet error or rejection after preparation is shown as "checking payment", never as canceled, and the wallet is never asked again;
+  a fresh review is possible only after recovery closes the attempt
 
 POST /api/v1/purchases/{id}/pyusd/submitted                         body { attemptId, signature }
   requireBuyerSession -> assertSameOrigin -> owner
@@ -1401,8 +1440,9 @@ POST /api/v1/purchases/{id}/pyusd/submitted                         body { attem
                               failed_landing => hint decided failed_landing; the next hint becomes readable
                               uncertain => attempt mismatch, purchase uncertain, operator-visible
          every state change is a compare-and-set in one short transaction after the read
-GET /receipt/{purchaseId}  polls stored state within the approved polling bounds; while an attempt is prepared, each
-  poll may call the debounced reconcile route, so at most one provider read happens per T_PROVIDER_READ_DEBOUNCE
+GET /receipt/{purchaseId}  polls stored state within the approved polling bounds; while an attempt is prepared, or its window
+  scan is not yet complete, each poll may call the debounced reconcile route, so at most one provider read happens per
+  T_PROVIDER_READ_DEBOUNCE; a paid receipt lists any extra transfer (fix M)
 ```
 
 The phone link is `https://phantom.com/ul/browse/<encoded APP_BASE_URL/buy?outlet=<id>&items=<itemId:qty,...>>?ref=<encoded APP_BASE_URL>`.
@@ -1418,18 +1458,23 @@ POST /api/v1/purchases/{id}/reconcile (rail pyusd), and maintenance reconcile_py
   -> decideRecoveryStep(attempt, finalized block height):
      prepared, height <= lastValidBlockHeight  => verify the readable hint, if any; otherwise wait
      prepared, height > lastValidBlockHeight   => verify the readable hint first; then expired_scanning with the top boundary fixed now
-     expired_scanning => getSignaturesFinalized(merchant token account, before = cursor, 1000)
+     confirmed or mismatch, height > lastValidBlockHeight, scan incomplete => start or continue the window scan (fix M)
+     window scan complete => done for confirmed; operator for mismatch; held or closed as below for no match
+     expired_scanning, or a scanning confirmed or mismatch attempt => getSignaturesFinalized(merchant token account, before = cursor, 1000)
          at most 3 pages and 20 candidate fetches per claim
          applyScanPage -> candidates: successful signatures at or after preparationSlot
-         each candidate -> getTransactionFinalized -> verifyPyusdTransfer
-            confirmed       => bind, attempt confirmed, purchase paid
-            uncertain       => attempt mismatch, purchase uncertain, operator alert; release is impossible
-            not_ours or failed_landing => continue
+         each candidate other than the bound signature -> getTransactionFinalized -> verifyPyusdTransfer -> classifyScanCandidate
+            bind            => attempt confirmed, purchase paid; the scan continues (fix M)
+            mismatch        => attempt mismatch, purchase uncertain, operator alert; release is impossible; the scan continues
+            extra           => applyScanOutcome records the extra transfer once, operator alert; no state changes (fix M)
+            skip            => continue
          429, null transaction, unavailable, oversized, page cap or identity change => record lastGap, keep the cursor, stop
          a page advances the cursor only after all its candidates are decided
          reachedBeforePreparation => complete:
-            PYUSD_PROOFS.automaticUnpaidRelease ? closed_unpaid, purchase unpaid_closed, basket unlocked
-                                                : held_no_match, purchase uncertain, operator alert
+            still expired_scanning (nothing bound, no mismatch) =>
+              PYUSD_PROOFS.automaticUnpaidRelease ? closed_unpaid, purchase unpaid_closed, basket unlocked
+                                                  : held_no_match, purchase uncertain, operator alert
+            confirmed or mismatch => the extra-transfer check is complete; no state changes
   -> persist coverage and state with compare-and-set; release the lease
 PYUSD_ENABLED false stops only new PYUSD actions; this recovery path still runs for prepared attempts.
 ```
@@ -1467,9 +1512,11 @@ PYUSD_ENABLED false stops only new PYUSD actions; this recovery path still runs 
 | Lost import response, merchant retries | The merchant reloads `GET menu-draft` first. A completed import is visible; a still-live attempt refuses a new admission until its deadline; after the deadline it reads expired and admission proceeds. A disconnect is not proof nothing committed. |
 | Import commit races a merchant edit or confirmation | `commitImport` locks the draft revision row and requires the base revision to be current and unconfirmed. Otherwise it closes with a conflict outcome and merges nothing. |
 | Model result after the deadline | `commitImport` writes only while `now < deadline_at`; a late result merges nothing and the attempt reads expired. Usage is still recorded. |
-| Two tabs prepare PYUSD for one purchase | `SELECT ... FOR UPDATE` on the purchase plus the one-active-attempt partial index, whose terminal set now includes `confirmed` and `closed_unpaid`. The second call gets the same bytes, for the same wallet while valid, or `locked`. |
-| Preparation response lost | The attempt commits before any byte leaves. A repeat call returns the same bytes while valid and never a new blockhash. |
-| Buyer rejects in the wallet, then retries | Same bytes while valid. After that, recovery only: no new review for the basket on either rail until the attempt ends. |
+| Two tabs prepare PYUSD for one purchase | `SELECT ... FOR UPDATE` on the purchase plus the one-active-attempt partial index, whose terminal set now includes `confirmed` and `closed_unpaid`. The second call gets `locked` and no bytes (fix L). |
+| Preparation response lost | The attempt commits before any byte leaves. A repeat call returns `locked`, never the bytes or a new blockhash; the bytes were never stored, so the attempt waits for expiry and its window scan (fix L). |
+| Buyer rejects in the wallet, then retries | The browser never asks the wallet again and the server never releases the bytes again (fix L). Recovery only: no new review for the basket on either rail until the attempt ends. |
+| One release signed twice (added with fixes L and M) | Envoi's code never offers a second signing: the bytes leave the server once and the browser holds them for one wallet call. If a faulty or modified client still lands two transfers before expiry, the window scan binds one and records the other as an extra transfer. |
+| A second landing after a hint confirmed the attempt (added with fix M) | The window scan still runs for the confirmed attempt after expiry, records the second landing as an extra transfer and leaves the purchase `paid`. |
 | Rate, destination or menu changes during an open PYUSD review | Preparation rechecks every pinned version inside its locked transaction and fails `review_invalidated`. Prepared attempts keep their saved amount and destination. |
 | Eligibility changes between the two preparation transactions | The second transaction rechecks eligibility and that no attempt exists before it inserts. |
 | Hint route and maintenance verify the same signature | `finalizedSignature` is unique and state changes are compare-and-set; the loser re-reads. |
@@ -1492,14 +1539,14 @@ All figures are **[hypothesis]** arithmetic over **[verified]** or **[vendor cla
 | Quota | Documented limit | Envoi budget | Guard |
 | --- | --- | --- | --- |
 | GitHub Actions minutes (private repo) | **[verified]** 2,000/month; public standard runners free; usage blocked with no payment method on file | every 6 hours = about 180 runs = about 180 minutes = 9%. Move to hourly (about 720 minutes = 36%) only after remaining quota is confirmed or the repository is public, which the official rules require for submission anyway | no payment method on file, plus a $0 spending limit; the workflow is disabled until the cadence decision is recorded. Since 2026-10-11, PYUSD reconciliation adds at most about 54 RPC calls a run, at least 27 seconds at the shared budget, inside `T_MAINT_RUN` |
-| Neon storage (revised 2026-10-11) | **[verified]** 1 GB/project; history window 6 hours; inserts, updates and deletes fail at the limit | domain data 50 MB, audit and events 20 MB, import metadata under 2 MB/month (at most 50 bytes-free rows a day), PYUSD challenges, rates, attempts and coverage under 5 MB; at the full RPC budget, limiter row writes could hold on the order of 20 MB in the 6-hour history window by arithmetic, and real use is far lower; about 900 MB headroom | no image bytes exist; `record_capacity` reports usage and alerts the operator at 70%; no import or payment admission depends on that reading (R2) |
+| Neon storage (revised 2026-10-11) | **[verified]** 1 GB/project; history window 6 hours; inserts, updates and deletes fail at the limit | domain data 50 MB, audit and events 20 MB, import metadata under 2 MB/month (at most 50 bytes-free rows a day), PYUSD challenges, rates, attempts, coverage and extra transfers under 5 MB; at the full RPC budget, limiter row writes could hold on the order of 20 MB in the 6-hour history window by arithmetic, and real use is far lower; about 900 MB headroom | no image bytes exist; `record_capacity` reports usage and alerts the operator at 70%; no import or payment admission depends on that reading (R2) |
 | Neon compute | **[vendor claim]** 100 CU-hours/project/month; mandatory scale-to-zero after 5 minutes | 720 maintenance wakes at about 10 s each is about 2 wall-clock hours; buyer sessions budgeted at 200 sessions x 3 minutes is about 10 wall-clock hours | no polling loop anywhere; browser polling only while an attempt is non-terminal, at most every 2 s for at most 60 s per page view. **[unknown]** exact CU conversion; measure in Slice 1 |
 | Neon transfer | **[vendor claim]** 5 GB/project/month | revised 2026-10-11: no image bytes cross the database; JSON polling dominates | negligible against quota; monitored by `record_capacity` |
 | Render Free instance hours | **[vendor claim]** 750 shared/month; sleep after 15 minutes idle | 744 hours in a month, so exactly one always-listening free service | one web service only; a second free service would halve availability below the month |
 | Cold start | **[vendor claim]** about a minute to wake | counted inside the approved three-minute buyer metric | a genuinely idle first visit is measured; no silent pre-warming |
 | OpenAI API spend (added 2026-10-11) | **[verified]** per-token billing; the pricing page names no free tier | the daily ceiling is **[unknown]** until the user records it; at most 50 reserved attempts a day | admission fails closed while the ceiling or the model's reviewed bounds are missing; a reservation whose model call was dispatched is never released, and only an attempt closed before dispatch counts zero; usage above a reservation stops imports |
 | Render Free memory and CPU for imports (added 2026-10-11) | **[vendor claim]** 512 MB and 0.1 CPU | one import at a time; per import at most a 2.5 MiB body, a 2 MiB part, a re-encoded JPEG of about 2 MiB, a base64 copy of about 2.7 MiB and one decoded frame of about 17 MB as RGBA by arithmetic; `sharp` overhead **[unknown]** | one global in-flight import; dimensions read from the header before decoding; peak RSS sampled per import and shown to the operator (R6) |
-| Public devnet RPC (added 2026-10-11) | **[verified]** published 100 requests/10 s/IP, 40/10 s/IP per method, 40 concurrent | 20 calls/10 s, 10/10 s per method and 2 concurrent across web and runner; per maintenance claim at most 3 pages and 20 transaction reads; about 4 reads per preparation | shared database limiter with jittered backoff; Render's shared outbound IP may consume the same allowance **[unknown]** |
+| Public devnet RPC (added 2026-10-11) | **[verified]** published 100 requests/10 s/IP, 40/10 s/IP per method, 40 concurrent | 20 calls/10 s, 10/10 s per method and 2 concurrent across web and runner; per maintenance claim at most 3 pages and 20 transaction reads; about 4 reads per preparation, and since fix M about 4 more per attempt for its window scan after expiry when the merchant account is quiet | shared database limiter with jittered backoff; Render's shared outbound IP may consume the same allowance **[unknown]** |
 
 `pg_database_size(current_database())` does not include Neon's history/instant-restore storage, so `record_capacity` records both that value and, where reachable, the provider-reported usage.
 If provider usage cannot be read programmatically, the operator reads the console weekly.
@@ -1523,7 +1570,7 @@ The user asked for fewer named tests and less test compute without weakening one
 - Pure-logic groups run with no database.
   Database groups share one PostgreSQL setup per test file and run each case inside a transaction that is rolled back, with the route's own transactions as savepoints; the schema and constraints are real, and nothing mocks the database.
   A guard whose proof needs two committed connections, such as a concurrency race, stays a standalone test that commits uniquely keyed rows and deletes them afterwards.
-- Counts: 90 named tests, which are 69 standalone tests and 21 groups, and 225 cases.
+- Counts: 92 named tests, which are 71 standalone tests and 21 groups, and 231 cases.
   A case is one table row; a standalone test is one row, and only the approved `publication requires all four preconditions` lists four mutations in its row.
 
 ### Pricing and checkout identity (unchanged from 2026-10-07; the Gate 4 draft assignment stands)
@@ -1836,7 +1883,7 @@ Solana RPC is faked at the bounded transport, and every fake response is a label
 | `active transfer hook refuses preparation` | a transfer-hook extension with a non-null program yields `transfer_hook_active` | ignore the hook program; this case fails |
 | `unreviewed mint extension refuses preparation` | a mint carrying an extension outside the eight reviewed ones, such as pausable, yields `unreviewed_extension` | ignore unknown extensions; this case fails |
 
-**Group `PYUSD preparation`**, 16 cases.
+**Group `PYUSD preparation`**, 15 cases.
 The preparation route handler against PostgreSQL, rolled back per case with its transaction as a savepoint, over a fake RPC transport.
 
 | Case | Asserts | Mutation |
@@ -1854,9 +1901,8 @@ The preparation route handler against PostgreSQL, rolled back per case with its 
 | `frozen buyer token account cannot prepare` | a frozen buyer account is refused with no attempt | skip the buyer frozen check; this case fails |
 | `merchant token account is rechecked at preparation` | a merchant account frozen after its proof refuses preparation with no attempt | skip the merchant account check in preparation; this case fails |
 | `no unsigned bytes leave before the attempt is saved` | when the attempt insert fails, the response carries no transaction | build and return the bytes before the commit; this case fails |
-| `repeated preparation returns the same bytes` | a second call for the same wallet while valid returns byte-identical `transactionBase64` | rebuild with a fresh blockhash; this case fails |
-| `expired bytes are never released again` | a repeat call once the confirmed height passes `lastValidBlockHeight` minus 10 returns `locked` and no bytes | return the saved bytes regardless of height; this case fails |
-| `a second wallet cannot prepare a locked purchase` | a call naming another wallet returns `locked` and no bytes | build new bytes for the new wallet; this case fails |
+| `a prepared purchase never releases bytes again` | a second preparation call for the same wallet, and one naming another wallet, each return `locked` with the attempt state and no transaction | return the transaction again for an existing attempt; this case fails |
+| `released transaction bytes are never stored` | after a successful preparation, a scan of the attempt row, its audit row and the purchase row finds no copy of the returned transaction as base64, base64url or hex, and the same scan finds the bytes when the case plants them in the attempt row | save the wire bytes on the attempt; this case fails |
 
 **Group `PYUSD attempt constraints`**, 2 cases.
 Direct inserts against the real schema in PostgreSQL, rolled back per case.
@@ -1875,7 +1921,7 @@ Standalone tests:
 
 ### PYUSD wallet handoff, hints and receipt (PYUSD purchase slice)
 
-**Group `browser wallet handoff`**, 3 cases.
+**Group `browser wallet handoff`**, 4 cases.
 The browser wallet modules with a fake Wallet Standard registry; no database and no network.
 
 | Case | Asserts | Mutation |
@@ -1883,6 +1929,7 @@ The browser wallet modules with a fake Wallet Standard registry; no database and
 | `wallet is asked for solana:devnet` | the fake Wallet Standard wallet receives `chain: "solana:devnet"` and the exact prepared bytes | omit the chain; this case fails |
 | `wallet without devnet sign-and-send is not offered` | a wallet lacking `solana:devnet` or the sign-and-send feature is not listed | skip the capability filter; this case fails |
 | `Phantom link carries only public outlet and item ids` | the decoded link targets `APP_BASE_URL/buy` with exactly the outlet id and item-quantity pairs, and no purchase id, session, price or payee | add the purchase id to the link; this case fails |
+| `the wallet is asked once per released transaction` | after one `signAndSendTransaction` call that resolves, rejects or throws, a second pay action makes no wallet call and the page shows "checking payment" | keep the bytes after the wallet call; this case fails |
 
 **Group `signature hints and reconcile before expiry`**, 8 cases.
 The hint and reconcile route handlers against PostgreSQL, rolled back per case, over a fake RPC transport whose block height stays below the attempt's bound.
@@ -1962,8 +2009,9 @@ The mint and decimals fixtures are marked successful although Token-2022 would r
 
 ### PYUSD recovery (PYUSD recovery slice)
 
-**Group `PYUSD recovery over a fake chain`**, 11 cases.
+**Group `PYUSD recovery over a fake chain`**, 15 cases.
 The shared reconcile path against PostgreSQL, rolled back per case, over a fake RPC transport with injected confirmed and finalized heights.
+Two cases added for fix M call the outcome writer or insert directly, so they do not depend on candidate classification.
 
 | Case | Asserts | Mutation |
 | --- | --- | --- |
@@ -1978,32 +2026,38 @@ The shared reconcile path against PostgreSQL, rolled back per case, over a fake 
 | `automatic unpaid release stays off until its proofs are recorded` | a complete empty scan ends in `held_no_match` while `PYUSD_PROOFS.automaticUnpaidRelease` is false | default the switch to true; this case fails |
 | `a complete empty scan closes the attempt once release is enabled` | with the switch true, a complete empty scan ends in `closed_unpaid`, the purchase `unpaid_closed` and the basket unlocked | never release; this case fails |
 | `devnet reset stops verification and scanning` | a genesis mismatch during recovery records `identity_changed` and changes no state | skip the identity check in recovery; this case fails |
+| `a confirmed or mismatched attempt is still scanned after expiry` | a hint-confirmed attempt and a mismatched attempt whose finalized height passes the bound each get a window scan that runs to completion, after which `decideRecoveryStep` yields `done` | yield `done` for `confirmed` or `mismatch` before the window scan completes; this case fails |
+| `the scan continues after a transfer binds` | an expired attempt whose window holds the verified transfer and older signatures binds it and still reaches before `preparationSlot` | stop the scan when a candidate binds; this case fails |
+| `an extra transfer keeps the purchase paid and alerts the operator` | applying an `extra` outcome to a confirmed attempt records the transfer with its destination delta, leaves the purchase `paid` and the bound evidence unchanged, and lists it in the operator health view | move the purchase to `uncertain` on an extra transfer; this case fails |
+| `an extra transfer is recorded once per attempt` | inserting the same attempt and signature into the extra-transfer table twice violates a unique constraint, so a resumed scan cannot record one twice | drop the unique index; this case fails |
 
 Standalone tests:
 
 | Test | Asserts | Mutation |
 | --- | --- | --- |
 | `web and runner cannot scan one attempt at once` | a web reconcile and a runner claim on one expired attempt advance its coverage once | skip the lease claim in the web reconcile path; test fails |
+| `a second reference landing is an extra transfer` | `classifyScanCandidate` returns `extra` with the destination delta for a successful transaction carrying the reference while another signature is bound, whether or not it verifies, and `skip` for the bound signature itself | classify every candidate as `skip` once a signature is bound; test fails |
+| `PYUSD receipt shows a detected extra transfer` | a paid receipt with one extra transfer says an extra transfer of that amount was detected on Solana devnet and that any refund is arranged with the shop outside Envoi, and never says it was refunded or that Envoi will refund it | hide extra transfers on a paid receipt; test fails |
 
 Integration tests run against a real PostgreSQL instance with the real schema and real constraints, because the guarantees above are index and transaction guarantees. A mocked database would prove none of them. Provider HTTP is faked at the `PayPalWriteClient` boundary, and every faked response is labeled as a fixture in test output and evidence.
 Since 2026-10-11, OpenAI HTTP is faked at the provider's fetch boundary and Solana RPC at the bounded transport, under the same labeling rule; landed-transaction fixtures are synthetic unless a slice records real devnet evidence for them.
 
 ## Test delta for the Gate 4 revision
 
-**Rewritten 2026-10-11 after review, replacing the earlier draft's list.**
+**Rewritten 2026-10-11 after review, replacing the earlier draft's list, and revised the same day for fixes L and M after Gate 2 was reopened.**
 The unapproved Gate 4 draft assigns each of the 54 Gate 3 test names approved on 2026-10-07 exactly once.
 The earlier draft of this revision kept 47 of them, removed 7 and added 145 names, for 192 named tests.
-This version batches them: 90 named tests, which are 69 standalone tests and 21 groups, and 225 cases.
+This version batches them: 92 named tests, which are 71 standalone tests and 21 groups, and 231 cases.
 `04-slices.md` is not edited by this gate, so its assignment check will fail until Gate 4 applies this delta.
 
 - **Previous names:** 199, which are the 54 approved on 2026-10-07 and the 145 drafted additions.
-- **Removed (8):** the 7 image-boundary names the earlier draft removed, all assigned to S11 in the Gate 4 draft, and `Lighthouse program must be an executable devnet program`, removed with Lighthouse from the runtime identity check.
+- **Removed (10):** the 7 image-boundary names the earlier draft removed, all assigned to S11 in the Gate 4 draft, `Lighthouse program must be an executable devnet program`, removed with Lighthouse from the runtime identity check, and two preparation names fix L makes redundant, `expired bytes are never released again` and `a second wallet cannot prepare a locked purchase`.
 - **Kept as standalone tests with the same name (63):** 42 approved and 21 drafted names.
-- **Grouped (128):** 5 approved and 123 drafted names now run as rows of a group.
-  119 keep their name as the case name, 1 is renamed, and 8 names that covered several call sites or cases split into 29 rows.
-- **Added (13 cases):** 7 rows in groups and 6 standalone tests, each tied to the review fix that needs it.
-- **Totals:** 90 named tests and 225 cases, against 192 named tests in the earlier draft.
-  By slice unit: the 2026-10-07 core keeps 41 named tests and 41 cases; the basket lock and PayPal abandonment have 5 and 5; the import slice has 17 and 57; the PYUSD purchase slice has 25 and 110; and the PYUSD recovery slice has 2 and 12.
+- **Grouped (126):** 5 approved and 121 drafted names now run as rows of a group.
+  116 keep their name as the case name, 2 are renamed, and 8 names that covered several call sites or cases split into 29 rows.
+- **Added (21 cases):** 13 rows in groups and 8 standalone tests, each tied to the review fix that needs it.
+- **Totals:** 92 named tests and 231 cases, against 192 named tests in the earlier draft.
+  By slice unit: the 2026-10-07 core keeps 41 named tests and 41 cases; the basket lock and PayPal abandonment have 5 and 5; the import slice has 17 and 57; the PYUSD purchase slice has 25 and 110; and the PYUSD recovery slice has 4 and 18.
 
 Every previous name maps below to where it now runs; a group case is written as the group, an arrow and the case.
 Every case in the test plan appears exactly once in the "Now" column of these two tables.
@@ -2143,9 +2197,9 @@ Every case in the test plan appears exactly once in the "Now" column of these tw
 | `rate expiry between review and preparation refuses preparation` | draft | `PYUSD preparation` -> `rate expiry between review and preparation refuses preparation` |
 | `rate change never alters a prepared attempt` | draft | standalone `rate change never alters a prepared attempt` |
 | `no unsigned bytes leave before the attempt is saved` | draft | `PYUSD preparation` -> `no unsigned bytes leave before the attempt is saved` |
-| `repeated preparation returns the same bytes` | draft | `PYUSD preparation` -> `repeated preparation returns the same bytes` |
-| `expired bytes are never released again` | draft | `PYUSD preparation` -> `expired bytes are never released again` |
-| `a second wallet cannot prepare a locked purchase` | draft | `PYUSD preparation` -> `a second wallet cannot prepare a locked purchase` |
+| `repeated preparation returns the same bytes` | draft | `PYUSD preparation` -> `a prepared purchase never releases bytes again` |
+| `expired bytes are never released again` | draft | removed |
+| `a second wallet cannot prepare a locked purchase` | draft | removed |
 | `preparation uses a confirmed blockhash` | draft | `bounded RPC transport` -> `preparation uses a confirmed blockhash` |
 | `prepared transaction is exactly a memo and one TransferChecked` | draft | standalone `prepared transaction is exactly a memo and one TransferChecked` |
 | `memo reference is unique per attempt` | draft | `PYUSD attempt constraints` -> `memo reference is unique per attempt` |
@@ -2222,16 +2276,27 @@ Added cases:
 | G | standalone `model dispatch is recorded before the call` |
 | B | `import commit merges nothing unless every recheck passes` -> `membership removed during an import merges nothing` |
 | K | `PYUSD preparation` -> `preparation refuses an ineligible mint` |
+| L | `PYUSD preparation` -> `released transaction bytes are never stored` |
+| L | `browser wallet handoff` -> `the wallet is asked once per released transaction` |
 | H | `signature hints and reconcile before expiry` -> `a later hint is verified when the first is not ours` |
 | H | `signature hints and reconcile before expiry` -> `hints beyond the per-attempt cap are not read` |
 | A, I | standalone `a PYUSD mismatch can close only unpaid` |
 | C | `PYUSD verification by meaning` -> `transfer of another mint is not paid` |
 | C | `PYUSD verification by meaning` -> `transfer with other decimals is not paid` |
+| M | `PYUSD recovery over a fake chain` -> `a confirmed or mismatched attempt is still scanned after expiry` |
+| M | `PYUSD recovery over a fake chain` -> `the scan continues after a transfer binds` |
+| M | `PYUSD recovery over a fake chain` -> `an extra transfer keeps the purchase paid and alerts the operator` |
+| M | `PYUSD recovery over a fake chain` -> `an extra transfer is recorded once per attempt` |
+| M | standalone `a second reference landing is an extra transfer` |
+| M | standalone `PYUSD receipt shows a detected extra transfer` |
 
 Same-name cases whose assertion or mutation wording changed (30), each now naming its specific reason or fixture: `import route rejects a foreign Origin`, `imports refuse while disabled`, `stale consent version is refused before admission`, `refused admission reads no image bytes`, `import body is counted, not trusted from Content-Length`, `slow upload stops at its read bound`, `JPEG over 2 MiB is refused inside a legal body`, `non-JPEG content is refused even when labeled JPEG`, `JPEG over 2,048 pixels per side is refused before decode`, `eleventh import for an outlet in a UTC day is refused`, `reservation beyond the daily ceiling is refused`, `aborted attempt keeps its spend reservation`, `malformed result is an error not a repair`, `blank price stays blank`, `zero or malformed price text stays blank`, `late result is rejected`, `base revision change is rejected`, `confirmed menu is never overwritten`, `wrong genesis hash disables PYUSD`, `mint under another token program disables PYUSD`, `mint with other decimals disables PYUSD`, `payments kill switch refuses PYUSD preparation`, `stale review cannot prepare PYUSD`, `a failed landing leaves the attempt prepared`, `disabled rail still reconciles prepared attempts`, `preparation uses a confirmed blockhash`, `verification reads at finalized commitment`, `RPC call stops at its timeout`, `scan starts only after expiry is final`, `429 or null transaction keeps the attempt locked`.
 Three of them hand part of their old assertion to another check rather than drop it: `blank price stays blank` leaves the `ambiguous` basis to `zero or malformed price text stays blank`; `malformed result is an error not a repair` leaves the unchanged draft to `commitImport`, whose input type accepts only a successful validation; and `RPC call stops at its timeout` leaves the unchanged attempt state to `429 or null transaction keeps the attempt locked`, which now also covers a timed-out read.
 
 Fix K marks `preparation refuses an ineligible mint`: the five mint-eligibility cases now test the pure function, so one route case keeps the preparation call site covered.
+
+Fix L renames `repeated preparation returns the same bytes` to `a prepared purchase never releases bytes again`, which also covers a call naming another wallet.
+`a second wallet cannot prepare a locked purchase` is removed because it now tests that same guard, and `expired bytes are never released again` is removed because no code path releases bytes twice, so its height check no longer exists.
 
 **Placement hint for Gate 4, not a decision here:** each section above names its slice unit.
 The import cases belong with the merged menu-import slice, the PYUSD purchase cases with the first PYUSD slice and the PYUSD recovery cases with the second.
@@ -2244,13 +2309,13 @@ This revision resolves only what it touches and lists the rest unchanged.
 
 | # | Status after this revision |
 | --- | --- |
-| D1 operator CLI | Not resolved here, but one operator act is now named. Held and mismatched PYUSD attempts are operator-visible in the health view. **Revised 2026-10-11 after review:** the PYUSD state machine names the only exit from `mismatch`, an out-of-band, audited operator resolution that records the operator, reason and evidence and moves `mismatch -> closed_unpaid`, never `confirmed`. Gate 4 places it as an operator CLI subcommand with its own contract and tests; this gate does not build it. |
+| D1 operator CLI | Not resolved here, but one operator act is now named. Held and mismatched PYUSD attempts are operator-visible in the health view. **Revised 2026-10-11 after review:** the PYUSD state machine names the only exit from `mismatch`, an out-of-band, audited operator resolution that records the operator, reason and evidence and moves `mismatch -> closed_unpaid`, never `confirmed`. Gate 4 places it as an operator CLI subcommand with its own contract and tests; this gate does not build it. Since fix M the resolution requires a complete window scan, and the same act records an out-of-band refund reference against an extra transfer, changing no payment state; Gate 4 names a test for each. |
 | D2 Node version | Not touched. The new pins require Node 20.18 or later, and the Wallet Standard packages declare Node 22 or later, which the proposed Node 24 LTS satisfies. |
 | D3 test database | Not touched. The new integration tests need the same disposable PostgreSQL, plus the labeled OpenAI and RPC fakes described in the test plan. |
 | D4 CI minutes | Not touched. |
-| D5 races and authorization without named tests | **Partly resolved:** every race and authorization rule added in this revision has a named test or case; the PayPal abandonment and two-start races added after review are tested by `capture is never dispatched once the review has expired` and `two open reviews of one basket cannot both start payment`. A membership revocation committed in the same instant as an import commit is covered only by the sequential case `membership removed during an import merges nothing`. The 2026-10-07 gaps D5 lists for PayPal stay with Gate 4. |
+| D5 races and authorization without named tests | **Partly resolved:** every race and authorization rule added in this revision has a named test or case; the PayPal abandonment and two-start races added after review are tested by `capture is never dispatched once the review has expired` and `two open reviews of one basket cannot both start payment`. A membership revocation committed in the same instant as an import commit is covered only by the sequential case `membership removed during an import merges nothing`. The two races added with fixes L and M are tested by `a prepared purchase never releases bytes again`, `the wallet is asked once per released transaction`, `a second reference landing is an extra transfer` and `a confirmed or mismatched attempt is still scanned after expiry`. The 2026-10-07 gaps D5 lists for PayPal stay with Gate 4. |
 | D6 OpenAPI | Not touched; the import route change does not affect the public read routes. |
-| D7 database roles | Not resolved here. The web role will also need `menu_imports`, `menu_import_admission`, `wallet_challenges`, `pyusd_rates` and the RPC limiter rows; the maintenance role needs PYUSD attempt columns and the limiter rows. Grants stay in migrations, as D7 proposes. |
+| D7 database roles | Not resolved here. The web role will also need `menu_imports`, `menu_import_admission`, `wallet_challenges`, `pyusd_rates`, `pyusd_extra_transfers` and the RPC limiter rows; the maintenance role needs PYUSD attempt columns, `pyusd_extra_transfers` and the limiter rows. Grants stay in migrations, as D7 proposes. |
 
 ## Least confident decisions
 
@@ -2309,6 +2374,7 @@ This revision resolves only what it touches and lists the rest unchanged.
     A `mismatch` ends only through the audited operator resolution of delta D1, and only as unpaid.
 18. **R18 Verification happens after broadcast (added 2026-10-11).**
     Envoi never sees the signed transaction before the wallet sends it, so verification can withhold confirmation but cannot prevent or undo a wrong transfer.
+    Since fix M, a second transfer from one release is detected and shown, not prevented on chain or undone; Envoi holds no keys, so any refund depends on the shop.
 
 ### Least confident choices in the 2026-10-11 revision
 
@@ -2357,12 +2423,18 @@ The user reviewed six of them on 2026-10-11, items 4, 5, 6, 7, 10 and 13; their 
     Server verification is exact, but Phantom's handling of a SIWS-format message through `signMessage` rather than `signIn` is **[unknown]**.
 12. **Version 0 transaction, memo first.**
     Phantom's handling of version 0 versus legacy transactions on devnet is **[unknown]**; the choice is cheap to flip before the PYUSD slice.
-13. **Batched tests: 90 named tests and 225 cases, down from 192 named tests.**
+13. **Batched tests: 92 named tests and 231 cases, down from 192 named tests.**
     **User review 2026-10-11: reduce named tests and compute by batching, without weakening one guard, one mutation; revised accordingly.**
-    Every guard still has its own row and mutation, and the review's fixes add 13 cases.
+    Every guard still has its own row and mutation; fixes A-K add 13 cases, and fixes L and M add 8 more and remove two cases whose guard no longer exists.
     The risk is that a slice discovers two rows of one group failing on the same mutation; the batching rules then move one row out rather than accept the overlap, which can raise the named count again.
     The PYUSD groups also assume the roadmap's two PYUSD slices; another split means regrouping by case.
-    PYUSD is first in the cut order, so its 27 named tests and 122 cases go with it if it is cut.
+    PYUSD is first in the cut order, so its 29 named tests and 128 cases go with it if it is cut.
+14. **Release the unsigned bytes once, and detect rather than prevent a second landing (fixes L and M).**
+    Gate 2 was reopened for both, and the user approved the fixes in advance on 2026-10-11.
+    Releasing once means Envoi's own code can never offer a second signing, but a rejected or failed first wallet try now costs the buyer the wait until the blockhash expires and the window scan completes, about two minutes by **[hypothesis]** arithmetic, and an operator release while automatic unpaid release stays off.
+    The alternative not taken is an Envoi-added Lighthouse assertion on the buyer's source balance, which would make a second landing fail on chain and allow a safe retry.
+    It was not chosen because it adds an Envoi-authored instruction to a transaction Gate 2 keeps to a memo and one transfer, depends on Lighthouse behaviour this design does not pin, and fails whenever the buyer's balance moves before landing.
+    Detection is the backstop for a faulty or modified client: an extra transfer is recorded and shown, never undone, and its refund depends on the shop.
 
 ## What this gate does not authorize
 
@@ -2372,7 +2444,7 @@ A discovery during implementation that changes an approved architecture decision
 
 **Added 2026-10-11.**
 Approving this revision would accept the import and PYUSD contracts as a proposal only.
-It would not authorize real merchant photos, any OpenAI call or evaluation spend, choosing `AI_MODEL` or `AI_MENU_MODEL`, recording a spend ceiling, wallet or faucet use, devnet transactions, enabling PYUSD, setting `PYUSD_PROOFS.automaticUnpaidRelease`, building or using the operator resolution of a PYUSD mismatch, or editing `04-slices.md`.
+It would not authorize real merchant photos, any OpenAI call or evaluation spend, choosing `AI_MODEL` or `AI_MENU_MODEL`, recording a spend ceiling, wallet or faucet use, devnet transactions, enabling PYUSD, setting `PYUSD_PROOFS.automaticUnpaidRelease`, building or using the operator resolution of a PYUSD mismatch or the refund reference of an extra transfer, or editing `04-slices.md`.
 The user's OpenAI data-sharing setting, daily spend ceiling, models and faucet access remain open and are not inferred from any approval.
 The revision itself used only read-only registry, GitHub and devnet reads; it installed, provisioned, spent and committed nothing.
-The revision after the user's review used no external read at all.
+The revision after the user's review used no external read at all, and neither did fixes L and M, which follow Gate 2's reopening and re-approval on 2026-10-11.

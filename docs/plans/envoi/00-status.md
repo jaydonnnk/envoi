@@ -4,7 +4,9 @@ Updated: 2026-10-11 (Asia/Singapore).
 
 - Gate 1 - Product: **RE-APPROVED 2026-10-10** by the user ("I approve gate one") after being reopened and revised the same day to remove Zapier, which the user rejected as paid, and to record the PYUSD decisions; see the [reopening record](#reopening-2026-10-10-zapier-removed). Previously **APPROVED 2026-10-07** by the user after reopening it to add a buyer-side scan entry point. Approval covers product scope and buyer/merchant journeys, including text and scan/paste entry points.
 - Gate 2 - Architecture: **RE-APPROVED 2026-10-11** by the user ("gate 2 approved") after being reopened and revised on 2026-10-10 and revised again after a 2026-10-11 review. Approval covers only the direct vision import and PYUSD amendment in `02-architecture.md`, including the five review changes; the OpenAI/provider pin and all unaffected 2026-10-07 decisions stand. It accepts a proposal, not runtime/account proof. Previously **APPROVED 2026-10-07**.
-- Gate 3 - Program Design: **REOPENED 2026-10-10, in progress; the revision of the affected import and PYUSD contracts was drafted on 2026-10-11, revised the same day after the user's review (fixes A-K), and awaits the user's decision** (`Approve Gate 3, or what should change?`).
+  **Reopened again and RE-APPROVED 2026-10-11** for two PYUSD double-payment fixes found in the Gate 3 review: the user approved the fixes in advance ("reopen gate 2 and approve the fixes i approve it already").
+  Preparation releases the unsigned bytes exactly once and never stores them, and the post-expiry window scan runs for every released attempt and records any extra transfer; see the [record](#gate-2-reopening-for-double-payment-fixes-2026-10-11).
+- Gate 3 - Program Design: **REOPENED 2026-10-10, in progress; the revision of the affected import and PYUSD contracts was drafted on 2026-10-11, revised the same day after the user's review (fixes A-K) and again for fixes L and M after Gate 2 was reopened, and awaits the user's decision** (`Approve Gate 3, or what should change?`).
   It follows the [Gate 3 handover](handoff.md#gate-3-handover-2026-10-11) on branch `envoi/gate-3-vision-pyusd`; see the [revision checklist](#gate-3-revision-checklist-2026-10-11).
   The user's verdicts on six least confident calls are review decisions recorded in the [approval history](#approval-history), not Gate 3 approval.
   The 2026-10-07 approval and eight finding dispositions still govern unaffected decisions.
@@ -13,7 +15,7 @@ Updated: 2026-10-11 (Asia/Singapore).
   [`04-slices.md`](04-slices.md) stays unchanged until Gate 3 is re-approved.
   No slice is authorized or started.
   Required later changes: merge S11/S12, remove Zapier checks, move S13 immediately after S4, add PYUSD after S13 and first in the cut order; scan and account-conditional S14 follow it.
-  Apply the Gate 3 [test delta](03-program-design.md#test-delta-for-the-gate-4-revision): it maps all 199 previous names (54 approved, 145 drafted) to 90 named tests and 225 cases, with 8 names removed and 13 cases added, so the draft's 54-name assignment check fails until Gate 4 is revised.
+  Apply the Gate 3 [test delta](03-program-design.md#test-delta-for-the-gate-4-revision): it maps all 199 previous names (54 approved, 145 drafted) to 92 named tests and 231 cases, with 10 names removed and 21 cases added, so the draft's 54-name assignment check fails until Gate 4 is revised.
 
 ### Reopening 2026-10-10: Zapier removed
 
@@ -31,6 +33,18 @@ Updated: 2026-10-11 (Asia/Singapore).
   3. **PYUSD: include, cut first.** A Gate 2 amendment pins the verified devnet mint, the buyer wallet, a merchant-set SGD rate and the public devnet RPC; Gate 3 adds wallet contracts; Gate 4 adds two slices after S13, first in the cut order.
   4. **S13 moves to right after S4.**
 - **Gate 1 revised and re-approved 2026-10-10.** `01-product.md` replaces Zapier with model drafting while the merchant waits, records PYUSD as built after PayPal and cut first, and adds the merchant-set PYUSD rate with a 30-day re-confirmation. `mockups/index.html`, `mockups/merchant-onboarding.html` and `mockups/review.html` carry the same changes.
+
+### Gate 2 reopening for double-payment fixes, 2026-10-11
+
+- **Findings:** the report on fixes A-K raised two ways one PYUSD purchase could be paid twice, left unfixed because they were Gate 2-level choices.
+  Re-releasing the same unsigned bytes lets a wallet that augments each signing differently land two transfers, and a second successful transfer with the same reference after `confirmed` was not detected.
+- **User decision, 2026-10-11:** "fix then then reopen gate 2 and approve the fixes i approve it already then once ure done publish gate 3, merge and push to main".
+  Gate 2 was reopened for these two fixes only and is recorded as re-approved for them, because the user approved the fixes in advance.
+- **Fix L, release once:** step 4 of `02-architecture.md` now releases the unsigned bytes exactly once and stores only their fingerprint; a repeat call gets the attempt's status, and the browser asks the wallet once per release.
+- **Fix M, extra transfers:** the post-expiry window scan now runs for every released attempt, including a confirmed or mismatched one, and records any other successful transaction carrying the reference as an extra transfer.
+  The paid state never changes; the buyer, merchant and operator see the extra transfer, and any refund is arranged outside Envoi.
+- **Gate 1 unchanged:** its rule "Provider/chain result uncertain: checking payment; no blind retry or immediate switch to the other method" already covers fix L, and no refund is promised.
+- **Gate 3** carries the matching contracts and tests as fixes L and M and still awaits the user's decision; "publish gate 3" is recorded as authority to publish this work in Git, not as Gate 3 approval.
 
 ## Slices
 
@@ -106,7 +120,11 @@ The claim in these documents that nothing was provisioned is now **stale**. A co
 
 ## Notes for a fresh session
 
-- **Current request, 2026-10-11, Gate 3 review revision:** the user reviewed the drafted revision, gave verdicts on six least confident calls and required fixes A-K, all applied to `03-program-design.md` and mirrored here, in `handoff.md`, `roadmap.md` and `stack-recommendation.md`.
+- **Current request, 2026-10-11, Gate 2 reopening and fixes L and M:** the user reopened Gate 2 for two PYUSD double-payment findings, approved the fixes in advance, and authorized publishing the Gate 3 work, merging it into `main` and pushing.
+  `02-architecture.md` releases the unsigned bytes once and scans every attempt's window for extra transfers; `03-program-design.md` carries the matching contracts and 92 named tests in 231 cases; the mirrors follow.
+  Gate 3 is not approved: next is the user's decision on `Approve Gate 3, or what should change?`.
+  AGENTS.md's uncommitted "Context transfer" section stays out of every commit unless the user says otherwise.
+- **Earlier request, 2026-10-11, Gate 3 review revision:** the user reviewed the drafted revision, gave verdicts on six least confident calls and required fixes A-K, all applied to `03-program-design.md` and mirrored here, in `handoff.md`, `roadmap.md` and `stack-recommendation.md`.
   No Gate 2 decision changed, so Gate 2 is not reopened; no external read, install, OpenAI call, wallet, faucet, RPC call, commit or push occurred.
   Fail-capable documentary checks passed in a fresh session and are recorded in the [review revision verification](#gate-3-review-revision-documentary-verification-2026-10-11).
   AGENTS.md carries an uncommitted "Context transfer" section that the revision did not write; ask the user before including it in any commit.
@@ -157,6 +175,7 @@ Fresh consolidation checks, 2026-10-06. **2026-10-07 re-check after the scan ame
 
 **Historical Git record, 2026-10-07:** the Gate 3 planning authorization completed at `ac13444`, fast-forwarded/pushed to `main` and verified remotely.
 It supplied no authority for later revisions. **2026-10-11:** the user authorized committing the uncommitted work and the review revision on `envoi/gate-4-slice-plan`, fast-forwarding `main` and pushing it; that authorization does not carry over to later changes. **2026-10-11, with the Gate 2 re-approval:** the user authorized publishing `envoi/gate-4-slice-plan` and merging it into `main`.
+**2026-10-11, with the second Gate 2 reopening:** the user authorized publishing the Gate 3 work on `envoi/gate-3-vision-pyusd`, merging it into `main` and pushing; a record cannot contain its own commit, so Git history and the remote are the evidence.
 
 **STOP here: the Gate 3 revision is drafted and awaits the user's decision.**
 The question asked is exactly `Approve Gate 3, or what should change?`; record an approval with its date and limits before any Gate 4 work, or revise and ask again.
@@ -169,7 +188,7 @@ The tracked provisioning files remain untouched; ignored credentials/config/gene
 
 ## Approved Gate 2 proposal and limits
 
-The core below remains approved from 2026-10-07; the two amendment bullets were **re-approved 2026-10-11**, including the five review changes.
+The core below remains approved from 2026-10-07; the two amendment bullets were **re-approved 2026-10-11**, including the five review changes, and the PYUSD bullet's two double-payment fixes were re-approved again the same day.
 
 - Free hosting only: Render Free app, Neon Free PostgreSQL, in-app Better Auth and finite GitHub Actions maintenance. Durable payment state is in the database; scheduling remains best effort with the Gate 3 quota-gated cadence. No paid worker, Supabase or Redis; MCP/HTTP share rules. The 2026-10-11 commit/push authorization covers publication only.
 - Better Auth anonymous buyer sessions; non-anonymous merchant login plus operator-approved membership. Sessions survive app sleep/redeploy. No public merchant signup or email/reset service assumed; private records are never public registry data.
@@ -178,6 +197,7 @@ The core below remains approved from 2026-10-07; the two amendment bullets were 
 - Render sleep/cold starts and Neon/GitHub quotas may break availability; include an idle first visit in the three-minute metric. OpenAI credits are user-reported, not account-verified; no paid hosting fallback or assumed sponsor credits.
 - Scan is identity lookup only; shared identifiers require outlet clarification. AI suggests registered items and cannot publish, capture or sign.
 - **PYUSD amendment, re-approved 2026-10-11:** reviewed devnet genesis/mint/Token-2022/decimals constants, only RPC/enable configuration, verified pre-existing merchant ATA and SIWS/Ed25519 challenge, dated integer merchant rate and ceil rounding. Persist/lock a prepared transaction with a `confirmed` blockhash and mandatory reference before Wallet Standard sign-and-send; verify the finalized transfer's meaning (saved blockhash, sole buyer signer, one exact transfer, memo, zero fee, per-transaction balance delta), allowlisting only ComputeBudget and pinned Lighthouse assertion instructions. Release an unknown attempt only after saved-height expiry plus complete attributable history, with proven wallet blockhash preservation; incomplete history stays uncertain. Phone path: a Phantom Browse link carrying public outlet/item IDs into a fresh wallet-browser review, unproven. PayPal remains isolated and PYUSD remains disabled until proofs pass.
+  Re-approved again on 2026-10-11: the unsigned bytes are released exactly once and never stored, the browser asks the wallet once per release, and the post-expiry window scan runs for every attempt and records extra transfers without changing the paid state.
 - APIMatic context remains development tooling; own-API generation remains account-conditional. R11 containment and R12 conditional region acceptance stand; no application, wallet/faucet, spend, install, provisioning, workflow, deployment or visibility change is authorized by the proposal, and the 2026-10-11 commit/push was separately authorized.
 
 ### Gate 2 preparation checklist, 2026-10-07 (historical)
@@ -204,6 +224,14 @@ The core below remains approved from 2026-10-07; the two amendment bullets were 
 - [x] Fresh documentary checks and diff inspection, recorded below.
 - [x] Explicit user re-approval of Gate 2, 2026-10-11.
 
+### Gate 2 reopening checklist, 2026-10-11 (double-payment fixes)
+
+- [x] User reopened Gate 2 for the two double-payment findings and approved the fixes in advance, 2026-10-11.
+- [x] Revise `02-architecture.md`: step 4 releases the bytes once and stores only the fingerprint, the window scan covers every attempt and records extra transfers, plus the prepare endpoint, the attempt data row, the falsifiers and the approval record; Gate 1 and the mockups stay unchanged.
+- [x] Mirror the reopening and re-approval in this file, `handoff.md`, `roadmap.md`, `stack-recommendation.md` and `research.md`.
+- [x] Fail-capable documentary checks, recorded in [the verification](#gate-2-reopening-and-fixes-l-m-documentary-verification-2026-10-11).
+- [x] Explicit user re-approval of the fixes, given in advance on 2026-10-11 ("reopen gate 2 and approve the fixes i approve it already").
+
 ### Gate 3 revision checklist, 2026-10-11
 
 - [x] Read AGENTS.md, the software-factory skill and every gate-folder document; confirm `main` equals `origin/main` and the remote at `9b4796b` with a clean tree; create `envoi/gate-3-vision-pyusd` and confirm it with `git branch --show-current`.
@@ -216,6 +244,8 @@ The core below remains approved from 2026-10-07; the two amendment bullets were 
 - [x] Apply fixes A-K to `03-program-design.md` without reopening Gate 2: the money-can-still-move basket lock with derived PayPal abandonment and the PYUSD mismatch operator exit, the import membership recheck, explicit mint/decimals verification, Lighthouse out of the runtime identity check, `T_MENU_MODEL`, no RPC inside transactions, pre-dispatch reservation release, later-hint verification, agreeing state machines, the stale provisioning sentence and batched tests with an exact delta mapping.
 - [x] Mirror the review revision in this file, `handoff.md`, `roadmap.md` and `stack-recommendation.md`; `research.md` needs no change because no evidence changed.
 - [x] Fail-capable documentary checks for the review revision, recorded in [its verification](#gate-3-review-revision-documentary-verification-2026-10-11).
+- [x] Apply fixes L and M to `03-program-design.md` after the Gate 2 reopening: bytes released once and never stored, one wallet call per release, a window scan of every attempt that records extra transfers, and the regenerated test plan and delta.
+- [x] Fail-capable documentary checks for fixes L and M, recorded in [their verification](#gate-2-reopening-and-fixes-l-m-documentary-verification-2026-10-11).
 - [ ] Explicit user approval of the Gate 3 revision.
 
 ### Gate 3 preparation checklist
@@ -292,6 +322,11 @@ All unaffected risk dispositions stand; the 2026-10-11 Gate 3 revision of the af
   6. Test count: reduce named tests and test compute by batching (fix K), without weakening one guard, one mutation.
   In the same message the user required fixes A-K, stated that none reopens Gate 2, and authorized editing only `03-program-design.md` and its five mirrors.
   It authorized no Gate 3 approval, edit to AGENTS.md, Gate 1, the mockups, Gate 2 or Gate 4, application code, install, provisioning, OpenAI call, wallet, faucet, RPC call, spending, commit or push.
+- 2026-10-11: after the report on fixes A-K, the user wrote "fix then then reopen gate 2 and approve the fixes i approve it already then once ure done publish gate 3, merge and push to main".
+  This reopened Gate 2 for the two PYUSD double-payment findings and re-approved their fixes in advance: bytes released once and never stored, and a window scan of every attempt that records extra transfers.
+  It authorized fixing Gate 3 to match and publishing this work by committing it, merging it into `main` and pushing.
+  It is not Gate 3 approval: Gate 3 still awaits `Approve Gate 3, or what should change?`, and the four deviations flagged with fixes A-K have no recorded verdict.
+  It authorized no application code, install, provisioning, OpenAI call, wallet, faucet, RPC call, spending, workflow, deployment or visibility change.
 
 ### Initial Gate 2 documentary verification, 2026-10-07 (historical, before free-hosting revision)
 
@@ -468,3 +503,37 @@ The checker is the previous run's checker with its approval rules unchanged and 
 - **External reads:** none.
   No package was installed, and no OpenAI call, wallet, faucet, RPC call, transaction, provisioning, workflow, deployment, commit or push occurred.
 - **What this does not establish:** no runtime, account, model, image, wallet, phone or usability evidence, no judgment of the design beyond these documentary rules, and no Gate 3 approval.
+
+### Gate 2 reopening and fixes L-M documentary verification, 2026-10-11
+
+Checks ran with the scratch checker and planted-fault harness of the review revision verification above, extended for this round.
+They compared the documents with `main` at `9b4796b`, and the sentence scan compared them with the A-K commit on this branch.
+
+- **[verified] Links and anchors:** 88 local links, 75 of them anchored, all resolve.
+- **[verified] Test plan and delta:** 92 named tests, which are 71 standalone tests and 21 groups, and 231 cases, generated from the same data model as before and spliced without hand edits.
+  Each of the 231 cases appears exactly once in the delta mapping, and each of the 199 previous names appears exactly once.
+  Recomputed from the mapping, the stated breakdown holds: 10 removed, 63 kept standalone, 126 grouped (116 same name, 2 renamed, 8 split into 29 rows) and 21 cases added.
+  The current-state lines in this file, `handoff.md` and `roadmap.md` state 92 named tests and 231 cases.
+- **[verified] Gate state:** the exact question `Approve Gate 3, or what should change?` is in this file and `handoff.md`, and no Gate 3 approval is claimed where the checker looks.
+  Both Gate 2 re-approval records are intact, the second in the Gate 2 status line, the approval history and `02-architecture.md`.
+- **[verified] Removed identifiers:** `unsignedWireBase64`, the `existing` preparation kind and Gate 2's re-release sentence are gone.
+  The old name `repeated preparation returns the same bytes` appears only as a previous name in the delta and in the line recording its rename.
+- **[verified] Writing and secrets:** no em dash in any added line, and the secret self-test detected 11 of 11 needles while 12 public controls raised nothing.
+  The sentence scan of every line added since the A-K commit first flagged four bold labels ending in a period; they became colon labels, and the rescan found no line holding two sentences.
+- **[verified] Fail-capability:** a pristine scratch copy passed, and each of 52 planted faults failed with only its own rule reported.
+  They are the faults of the review revision verification, less the change to `02-architecture.md`, which Gate 2's reopening removed from the protected files.
+  Ten are new: the second Gate 2 record removed from the approval history, from the Gate 2 status line or from `02-architecture.md`; `unsignedWireBase64`, the `existing` kind, Gate 2's re-release sentence or the old test name reintroduced; a stale count in this file's Gate 4 line or in `handoff.md`; and `03-program-design.md` stating no current named-test count.
+  `git diff --check` is clean on the repository, and in a scratch Git repository it failed on a planted trailing space.
+- **[verified] Scope:** this round changed `02-architecture.md`, reopened by the user, plus `03-program-design.md`, this file, `handoff.md`, `roadmap.md`, `stack-recommendation.md` and `research.md`.
+  `01-product.md`, `04-slices.md` and all seven mockup files are byte-identical to `main`, and AGENTS.md is byte-identical to its state at the start of this run and stays out of every commit.
+- **Checker changes in this round:** `02-architecture.md` left the protected files, the second Gate 2 record became required, and the removed re-release identifiers were added.
+  Because 90 and 225 survive as historical counts in the review revision record, a listed number alone no longer proves a count is current, so each current-state line must now state the current counts.
+- **Defects found and fixed during the run, preserved here:** the first harness run failed two faults.
+  A stale `90 named tests` in `handoff.md` passed because the count rules matched text, so "92 named tests" was found inside "192 named tests"; the same flaw had made the earlier check that `03-program-design.md` states its named-test count vacuous.
+  The rules now require a digit boundary, and a new fault that leaves 03 with only other allowed counts proves the presence check alone.
+  A duplicated delta entry also failed the mirror count rule, because that rule took the added count from the damaged mapping; mirrors are now checked against the added count 03 states, which the breakdown rule ties to the mapping.
+- **External reads:** none.
+  No package was installed, and no OpenAI call, wallet, faucet, RPC call, transaction, provisioning, workflow or deployment occurred.
+- **Git:** the user authorized committing this work, merging it into `main` and pushing; a record cannot contain its own commit, so Git history and the remote are the evidence.
+- **What this does not establish:** no runtime, wallet or usability evidence, and no Gate 3 approval.
+  That Phantom's additions differ between two signings is a hypothesis, and that every landing of a released transaction falls inside its window rests on the blockhash-preservation proof that enablement already requires.

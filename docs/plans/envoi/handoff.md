@@ -3,7 +3,8 @@
 Updated 2026-10-11.
 Gate 1 was re-approved on 2026-10-10; do not redo it.
 `02-architecture.md` was revised for direct vision import and PYUSD only, revised again after a 2026-10-11 review, and re-approved by the user on 2026-10-11 ("gate 2 approved").
-The Gate 3 revision of affected contracts was drafted on 2026-10-11 on branch `envoi/gate-3-vision-pyusd`, following the [Gate 3 handover](#gate-3-handover-2026-10-11), revised the same day after the user's review (fixes A-K), and awaits the user's decision; the unapproved `04-slices.md` is not revised yet.
+It was reopened again the same day for two PYUSD double-payment fixes and re-approved for them, the user having approved the fixes in advance.
+The Gate 3 revision of affected contracts was drafted on 2026-10-11 on branch `envoi/gate-3-vision-pyusd`, following the [Gate 3 handover](#gate-3-handover-2026-10-11), revised the same day after the user's review (fixes A-K) and for fixes L and M, and awaits the user's decision; the unapproved `04-slices.md` is not revised yet.
 All unaffected 2026-10-07 approvals stand, including Render Free/Neon Free/in-app Better Auth/GitHub Actions, PayPal recovery, identity-only scan, MCP, R11 and R12.
 No app or payment integration exists; the already-provisioned Neon database is recorded in status.
 On 2026-10-11 the user authorized committing this work, publishing its branch and merging it into `main`; Git publication is not gate approval.
@@ -18,7 +19,7 @@ Read applicable AGENTS.md and all documents under `docs/plans/envoi/` before res
 - `01-product.md`: approved Gate 1 product scope with buyer/merchant journeys, rules, sponsor roles, both buyer entry points (text and scan) and an untested usability target.
 - `mockups/index.html`: entry to five product screens. `merchant-onboarding.html` shows both uploads, editable drafts, manual/failure states and confirmation/publication blockers. `buyer.html` shows the text entry point and the scan entry point including an unenrolled-sticker result.
 - `research.md`: primary-source sponsor/menu limitations, corrections to the original brief, prior-art findings from shipped SGQR payment products, the 2026-10-07 Gate 3 source cross-check, and unresolved proof requirements.
-- `02-architecture.md`: Gate 2 amendment re-approved 2026-10-11; complete direct-vision and PYUSD boundaries, with unaffected approved decisions preserved.
+- `02-architecture.md`: Gate 2 amendment re-approved 2026-10-11, and re-approved again the same day for two PYUSD double-payment fixes; complete direct-vision and PYUSD boundaries, with unaffected approved decisions preserved.
 - `03-program-design.md`: 2026-10-07 approved contracts plus the 2026-10-11 revision of the import and PYUSD contracts, revised after the user's review the same day, which awaits approval.
   The source row, capabilities, image clocks and image tasks are removed; provider pin and unaffected contracts stand.
   Its [test delta](03-program-design.md#test-delta-for-the-gate-4-revision) lists what Gate 4 must reassign.
@@ -213,19 +214,23 @@ The user asked for a copy-paste prompt so another agent can run the Gate 3 revis
 ### Gate 3 revision status, 2026-10-11
 
 - **Drafted, not approved.**
-  `03-program-design.md` carries the revision on branch `envoi/gate-3-vision-pyusd`, created from `main` at `9b4796b`; nothing is committed or pushed.
+  `03-program-design.md` carries the revision on branch `envoi/gate-3-vision-pyusd`, created from `main` at `9b4796b`.
+  On 2026-10-11 the user authorized publishing this work, merging it into `main` and pushing; Git publication is not Gate 3 approval.
 - **Scope kept.**
-  The revision changed only `03-program-design.md`, `00-status.md`, this file, `roadmap.md`, `stack-recommendation.md` and `research.md`; Gate 1, the mockups, Gate 2 and Gate 4 are untouched, and the revision did not edit AGENTS.md.
+  The revision changed only `03-program-design.md`, `00-status.md`, this file, `roadmap.md`, `stack-recommendation.md` and `research.md`, plus `02-architecture.md` for the Gate 2 reopening below; Gate 1, the mockups and Gate 4 are untouched, and the revision did not edit AGENTS.md.
   AGENTS.md carries a separate uncommitted "Context transfer" section, saved after the revision's last edit; including it in any commit is the user's decision.
-- **No Gate 2 decision was found wrong or incomplete, and none of the review fixes changes one.**
-  The Gate 2 rules made exact and those restored after the review are listed in the revision summary at the top of `03-program-design.md`.
+- **Fixes A-K change no Gate 2 decision; fixes L and M do, and Gate 2 was reopened and re-approved for them on 2026-10-11.**
+  The Gate 2 rules made exact, those restored after the review and the two changed by the reopening are listed in the revision summary at the top of `03-program-design.md`.
 - **Revised after the user's review, 2026-10-11.**
   The user's verdicts on six least confident calls are recorded in `00-status.md` as review decisions.
   Fixes A-K are applied: the basket lock holds only while money can still move, derived on read, with PayPal abandonment once `T_REVIEW` passes and an audited operator exit for a PYUSD mismatch; the import commit rechecks membership; verification checks mint and decimals explicitly; Lighthouse leaves the runtime identity check; the clock is `T_MENU_MODEL`; no RPC runs inside a transaction; a reservation counts zero only before model dispatch; later signature hints are verified within a cap; the state machines agree; and a stale provisioning sentence is corrected.
   Two additions go slightly beyond the review list and are flagged for the user: `created` and `create_unknown` PayPal attempts also lock inside `T_REVIEW`, and both execution starts recheck the lock.
-- **Tests:** batched into 90 named tests, 69 standalone and 21 groups, and 225 cases, from 192 named tests; 8 names are removed and 13 cases added, each with its own mutation.
+- **Fixes L and M, after the Gate 2 reopening.**
+  L: preparation releases the unsigned bytes exactly once and never stores them, and the browser asks the wallet once per release, because the wallet may add different instructions at each signing.
+  M: after expiry, the window scan runs for every released attempt, including a confirmed one, and records any other successful transaction carrying the reference as an extra transfer that the buyer, merchant and operator see; the purchase stays paid, and any refund is arranged outside Envoi.
+- **Tests:** batched into 92 named tests, 71 standalone and 21 groups, and 231 cases, from 192 named tests; 10 names are removed and 21 cases added, each with its own mutation.
   The [test delta](03-program-design.md#test-delta-for-the-gate-4-revision) maps every one of the 199 previous names, and Gate 4 must apply it.
-- **Checked:** fail-capable documentary checks passed, and each of 43 planted faults failed on its own rule; see [the verification](00-status.md#gate-3-review-revision-documentary-verification-2026-10-11).
+- **Checked:** fail-capable documentary checks passed after fixes A-K and again after fixes L and M, when each of 52 planted faults failed on its own rule; see [the latest verification](00-status.md#gate-2-reopening-and-fixes-l-m-documentary-verification-2026-10-11).
 - **Still open, not inferred:** the OpenAI data-sharing setting (no answer recorded), the daily spend ceiling, the text and vision models, and faucet access.
 
 ### Gate 3 checks

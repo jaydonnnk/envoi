@@ -3,6 +3,9 @@
 **Reopened and revised 2026-10-10, revised again after review on 2026-10-11, and RE-APPROVED by the user on 2026-10-11** ("gate 2 approved").
 This amendment replaces Zapier with a direct OpenAI vision request and includes the independently gated PYUSD devnet rail.
 The 2026-10-11 review changed five points: the browser shrinks the menu photo before upload, PYUSD verification checks the transfer's meaning and allowlists the instructions Phantom documents adding, preparation uses a `confirmed` blockhash, the phone path is a plain Phantom Browse link, and the consent text is short with details on request.
+**Reopened again on 2026-10-11 for two PYUSD double-payment fixes found in the Gate 3 review, and RE-APPROVED the same day:** the user approved the fixes in advance ("reopen gate 2 and approve the fixes i approve it already").
+Preparation now releases the unsigned bytes exactly once and never stores them, because a wallet may add different instructions each time it signs ([step 4](#preparation-wallet-broadcast-and-verification)).
+The post-expiry history scan now runs for every released attempt, including a confirmed one, so a second transfer carrying the same reference is recorded and shown instead of going unnoticed ([recovery](#lost-response-recovery-and-rpc)).
 Everything else approved on 2026-10-07 stands, including hosting, in-app auth, PayPal recovery, identity-only scan and MCP handoff.
 Gate 1 was re-approved on 2026-10-10; Gate 3 may now revise affected contracts, and Gate 4 waits for Gate 3 re-approval.
 See [`00-status.md`](00-status.md#reopening-2026-10-10-zapier-removed) and [`handoff.md`](handoff.md#gate-2-handover-2026-10-10).
@@ -108,7 +111,7 @@ Proposed application API prefix: `/api/v1`. Body fields, response/error types an
 | `GET/PUT /merchant/outlets/{id}/menu-draft` | Membership: reload draft plus latest import outcome, or manual corrections with revision conflict checks. No import status-poll/cancel route. |
 | `POST /merchant/outlets/{id}/destinations/pyusd/challenge`, `PUT /merchant/outlets/{id}/destinations/pyusd` | Membership: issue a single-use wallet challenge; verify signed key control and the pre-existing merchant Token-2022 associated token account. Operator enrollment is still required. |
 | `PUT /merchant/outlets/{id}/pyusd-rate` | Membership: append/re-confirm the shop's positive integer atomic-units-per-SGD rate; invalidate unexecuted PYUSD reviews. |
-| `POST /purchases/{id}/pyusd/prepare` | Owning buyer explicitly continues; recheck review/rate/destination, persist and lock the attempt before releasing one unsigned devnet transaction. |
+| `POST /purchases/{id}/pyusd/prepare` | Owning buyer explicitly continues; recheck review/rate/destination, persist and lock the attempt before releasing one unsigned devnet transaction, exactly once; a repeat call returns the attempt's status, never the bytes (reopened 2026-10-11). |
 | `POST /purchases/{id}/pyusd/submitted` | Owning buyer posts the wallet's returned signature as a hint only; finalized server verification decides payment. Shared `reconcile` route handles both rails. |
 | `POST /merchant/outlets/{id}/confirm`, `POST /merchant/outlets/{id}/publish` | Confirm exact current revisions; publish only with enrollment, confirmed complete menu and an active accepted test destination. |
 | `GET /merchant/outlets/{id}/orders`, `POST /merchant/orders/{id}/acknowledge` | Membership-scoped list; acknowledge only a verified payment, independently of payment status. |
@@ -136,7 +139,7 @@ Gate 3 supplies their exact contracts in its revision.
 | `menu_imports` | Actor/outlet, base revision, consent version/time, model/config version, start/finish, outcome, result fingerprint, counts, reserved spend and latency. No image, image hash, URL or capability token. | Transactional one-in-flight/outlet and global/daily admission caps; compute expiry on read. Late work must still match its attempt/deadline/base revision before merging. No cleanup task. |
 | `wallet_challenges`, `pyusd_rates` | Merchant/outlet/wallet, exact challenge bytes, purpose/domain/cluster, nonce hash, issue/expiry/consumption; append-only integer rate, version and confirmation time. | Single-use challenge, membership-bound verification; compute 30-day rate expiry on read. Retain rate history for receipts, not external FX quotes. |
 | `purchases` | Owning buyer, entry point, immutable basket, menu/destination versions, rail/amount/currency, cost basis, review expiry and acknowledgment; PYUSD rate version/time, atomic amount and selected buyer wallet. | Buyer/merchant-scoped reads; lock before execution. Rate/destination changes invalidate only unexecuted reviews. Never mutate a released wallet attempt or transfer ownership between sessions. |
-| `payment_attempts`, `provider_events` | Existing PayPal identities/evidence; PYUSD prepared-message fingerprint, fee payer/source/destination, blockhash, last-valid block height, preparation slot, reference, submitted-signature hint, scan cursor/completeness and finalized evidence. | One active attempt/purchase; unique external reference and finalized signature binding. Persist before release; recovery needs complete evidence, not a timeout. No signed transaction or key storage. |
+| `payment_attempts`, `provider_events` | Existing PayPal identities/evidence; PYUSD prepared-message fingerprint, fee payer/source/destination, blockhash, last-valid block height, preparation slot, reference, submitted-signature hint, scan cursor/completeness and finalized evidence; since the 2026-10-11 reopening, extra transfers found by the window scan. | One active attempt/purchase; unique external reference and finalized signature binding. Persist before release; recovery needs complete evidence, not a timeout. No unsigned or signed transaction bytes and no key storage. |
 | `purchase_requests` | Agent token identity, suggested IDs, token hash, expiry and redeemed buyer/purchase binding. | One redemption; no payment authority or private receipt access for the creating agent. |
 | Better Auth tables | Library-owned users, accounts and durable sessions; anonymous-user marker. | Auth migrations are distinct from domain membership. Guest users cannot acquire merchant rights by linking/registering an account. |
 | `audit_events`, `maintenance_runs` and due fields on attempts | Actor/object IDs, transition/reason, evidence pointer; next-check time, lease/expiry, retry count and last successful maintenance time. | Business transition and due work persist in one transaction. Exclude raw prompts/images/base64/data URLs, QR payloads, bearer tokens and privileged provider/error bodies. Import metadata is not image storage. |
@@ -298,14 +301,17 @@ This amendment selects the boundaries below, not wallet execution, funding or en
    Use Token-2022 `TransferChecked` only when every fee that can apply in the current/next epoch is zero, including maximum fee zero, and the blockhash validity cannot cross a scheduled non-zero fee activation.
    A new non-null transfer hook or unsupported/changed extension disables new preparations pending review, rather than adding unknown instructions.
    **[vendor claim]** `SetTransferFee` activates two epochs later; this supports the bounded fee check, not a promise that a devnet reset or arbitrary epoch timing cannot change behavior.
-3. Fetch a fresh blockhash at `confirmed` commitment and persist the attempt before releasing unsigned bytes: prepared message/fingerprint, blockhash, lastValidBlockHeight, preparation slot, source/destination, buyer fee payer, amount, rate version and a unique opaque memo reference.
+3. Fetch a fresh blockhash at `confirmed` commitment and persist the attempt before releasing unsigned bytes: prepared-message fingerprint (since the 2026-10-11 reopening, never the bytes themselves), blockhash, lastValidBlockHeight, preparation slot, source/destination, buyer fee payer, amount, rate version and a unique opaque memo reference.
    **[vendor claim]** Solana's guide recommends `confirmed` for RPC requests and says a `finalized` blockhash cuts about 13 seconds from the signing window; a blockhash from a dropped fork never becomes recent on the finalized chain, so such a transaction can only expire unexecuted.
    **[hypothesis]** Release still compares finalized block height with the saved `lastValidBlockHeight`, so this choice gives the buyer more approval time without loosening release.
    The memo is mandatory for lost-signature attribution, not an optional identifier inferred from equal amounts.
    Envoi's prepared transaction contains exactly one `TransferChecked` and that memo, with no compute-budget instructions, leaving priority fees to the wallet as Phantom recommends; no account creation, authority/delegate changes, arbitrary programs, extra transfers or durable nonce.
 4. Lock the logical checkout and purchase from this release point, even if the response is lost or the wallet later reports rejection.
-   Repeated preparation returns the same saved bytes while valid, never a refreshed blockhash or a second transaction; expiry moves to reconciliation, not re-preparation.
-   Browser passes those exact bytes/account to Wallet Standard `solana:signAndSendTransaction` with chain `solana:devnet`.
+   **Revised when Gate 2 was reopened on 2026-10-11:** the server releases the unsigned bytes exactly once, in the response that follows the commit, and stores only their fingerprint, so no later request can receive them again.
+   A repeated preparation, reload or second tab gets the attempt's status, never the bytes, a refreshed blockhash or a second transaction; expiry moves to reconciliation, not re-preparation.
+   **[hypothesis]** Releasing the same bytes twice is not safe: Phantom chooses its priority-fee and Lighthouse assertion instructions when it signs, so two signings of one prepared message can be two different transactions, both valid until the blockhash expires.
+   Browser passes those exact bytes/account to Wallet Standard `solana:signAndSendTransaction` with chain `solana:devnet`, once per release.
+   After a wallet error, a rejection or a lost response the browser shows "checking payment" and never asks the wallet again, so a failed first try costs the buyer the wait until expiry and a complete scan before a fresh review.
    Phantom obtains human approval, may add its own compute-budget and Lighthouse assertion instructions, signs and broadcasts; Envoi has no signed-transaction-before-broadcast validation opportunity and never submits/rebroadcasts.
    Raw signature bytes returned by the wallet are encoded and posted as a hint, not a paid-state command.
 5. Server fetches the transaction at `finalized` on the verified devnet RPC.
@@ -347,6 +353,13 @@ Persist scan cursors/coverage across finite runs; 429, lag, null transaction, un
 An empty response alone is not an absence proof.
 Window coverage and wallet blockhash-preservation proofs are required before automatic unpaid release is enabled.
 [Signature history](https://solana.com/docs/rpc/http/getsignaturesforaddress).
+
+**Revised when Gate 2 was reopened on 2026-10-11: the window scan also runs for an attempt that is already confirmed or mismatched.**
+Any transaction built from the released message carries the saved blockhash, which enablement already requires the wallet to keep, so it can only land inside that window, and a complete scan sees every landing of every signing.
+Any successful transaction in the window that carries the attempt's reference, other than the one bound as the payment, is recorded as an extra transfer with its destination balance delta from the transaction metadata.
+An extra transfer never changes the paid state or the bound evidence, and it is never a second payment.
+It is shown to the buyer, the merchant and the operator as detected, and any refund is arranged outside Envoi, which holds no keys and moves no tokens.
+A transfer carrying the reference that was built after expiry from a new blockhash is not Envoi's released transaction and is not watched.
 
 **[hypothesis]** Shared server limiter across web/runner: at most 20 RPC calls/10 seconds globally, 10/10 seconds per method, 2 concurrent requests, bounded response bytes and retry backoff with jitter on 429.
 Debounce user-triggered provider reads with existing `T_PROVIDER_READ_DEBOUNCE` (30 seconds); persist due work rather than busy-polling.
@@ -428,12 +441,14 @@ All other approved residual-risk dispositions, R11 containment and R12 acceptanc
 | Wallet ignores devnet, changes the blockhash or Envoi's transfer/memo, adds non-allowlisted instructions or cannot display PYUSD | Keep PYUSD disabled until actual wallet proofs pass; a landed transaction outside the step 5 rule stays uncertain. No sign-only fallback, mainnet switch or claim of pre-broadcast enforcement. Reopen Gate 2 if the chosen wallet invalidates expiry safety. |
 | Phone cannot safely reach wallet from its own session | Prove on target phones that the Browse link opens the Envoi URL with its outlet/item IDs, that the wallet browser keeps its own session through approval, and that the fresh review and PYUSD journey complete there. Keep phone PYUSD unavailable until proven; never transfer purchase ownership or reuse a released checkout. |
 | RPC cannot establish finalized outcome or complete absence | Lost wallet response, 429, null/pruned history, page limits, reset and delayed maintenance must preserve the lock. A complete attributable finalized record or complete post-expiry scan is required; time passing alone cannot permit another payment. |
+| One release lands two transfers (added 2026-10-11) | Inject a repeated preparation, a second wallet call from one page, two landings of one release and a second landing after confirmation. The bytes must never leave twice, the paid state must stay bound to one transfer, and every extra transfer in the window must be recorded and shown. Keep PYUSD disabled if a landing in the window can go unrecorded. |
 | Mint fees/hooks/accounts or merchant rate become ineligible | Test current/next epoch schedules, extension changes, frozen/wrong ATA, expired/replaced rate and exact rounding. Disable new PYUSD attempts on mismatch; preserve released-attempt evidence and PayPal usability. |
 
 Gate 2 re-approval accepts only this direct-vision and PYUSD amendment with its proof conditions, proposed `AI_MENU_MODEL` name and pinned code-constant configuration, including the 2026-10-11 review changes.
 The user's data-sharing setting, dollar ceiling, actual models and phone proofs are not inferred from approval.
 It establishes no runtime/account success and does not approve Gate 3/4, application code, wallet/faucet use, spending, installation, provisioning, workflows, deployment or visibility change.
 On 2026-10-11 the user separately authorized committing this proposal, publishing its branch and merging it into `main`; Git publication is not gate approval.
+The second 2026-10-11 re-approval accepts only the release-once and extra-transfer fixes, approved in advance in the message that reopened Gate 2; the same message authorized publishing the Gate 3 work, merging it into `main` and pushing.
 Changed product behavior reopens Gate 1; an architecture change reopens Gate 2 before dependent work.
 
 The eight earlier findings stay dispositioned with named residual risks in [status](00-status.md#unresolved-review-findings), not reopened wholesale.
@@ -442,4 +457,5 @@ Then revise Gate 4, preserving the user-decided S13 placement and PYUSD first-cu
 `01-product.md`, the mockups, `03-program-design.md` and `04-slices.md` are not edited in this gate.
 
 **Gate 2 re-approved by the user on 2026-10-11 ("gate 2 approved").**
+**Reopened again and re-approved on 2026-10-11 for the release-once and extra-transfer fixes** ("reopen gate 2 and approve the fixes i approve it already").
 Next is the Gate 3 revision described in the [Gate 3 handover](handoff.md#gate-3-handover-2026-10-11).
