@@ -14,8 +14,9 @@ services:
     envVars:
       - key: DATABASE_URL
         sync: false
+      # Generated once by Render at creation and kept across deploys, so sessions survive a redeploy.
       - key: BETTER_AUTH_SECRET
-        sync: false
+        generateValue: true
       - key: BETTER_AUTH_URL
         sync: false
       - key: APP_BASE_URL
