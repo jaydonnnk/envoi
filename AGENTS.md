@@ -86,7 +86,10 @@ does not replace the gate documents.
   horizontal layers that cannot run end to end.
 - After each slice, show the actual result, update `00-status.md`, and use the
   `architect-reviewer` skill in post-slice cleanup mode to check for stale or
-  redundant files. Then ask `Continue to slice N+1, or re-steer?`.
+  redundant files. Then ask `Continue to slice N+1, or re-steer?`, naming the next
+  slice by its ID in the slice plan's build order.
+- Whenever a slice will start or continue in a fresh session, write its handoff
+  prompt as "Slice handoff prompts" below requires.
 - Documentation-only maintenance and instruction consolidation do not create a
   new product gate when they do not change product behaviour or approved decisions.
 
@@ -230,6 +233,53 @@ Use these rules to decide when to hand a session to a fresh chat. The
 - Transfer before a review. An independent reviewer works better in a fresh session.
 - Do not transfer a small, tightly coupled change that is nearly done, or a debug
   loop in progress where the failed attempts are the useful context.
+
+## Slice handoff prompts
+
+A fresh session knows nothing about the project. A copy-paste prompt that starts
+or continues a slice must therefore carry what the project is for and what the
+slice must deliver, not just a pointer to the documents. This applies whoever
+writes the prompt, including the `transfer-context` skill, whose own rules stay
+as they are; these sections are added to its output for any slice handoff.
+
+Build the prompt from the gate documents at the current `main` tip and the actual
+repository state, never from memory or a chat summary. It contains, in order:
+
+1. **Project in brief.** From `01-product.md`: what the product is in two or three
+   plain sentences; who the buyer and the merchant are and the problem each has,
+   in their own words; the success target and whether it is tested; and the hard
+   product rules, such as test money only, labeled fixtures, a human approving
+   every payment and pending never shown as paid. State each gate's approval
+   and date from `00-status.md`.
+2. **Where this slice sits.** From the slice plan: the whole build order by slice
+   ID, which slices are done according to the `00-status.md` checklist, which are
+   never cut, which are in the cut order and in what position, and the one or two
+   sentences that say why this slice matters to the product goal.
+3. **This slice's contract.** The slice's section from the slice plan, copied
+   rather than paraphrased: visible result, builds, assigned Gate 3 tests, named
+   additions with their mutations, evidence, falsifiers, exit decision and the
+   authorizations to request. Add the plan-wide slice rules and every delta or
+   Gate 2 or Gate 3 section the slice cites, with links.
+4. **Out of scope.** What the slice must not build because a later slice owns it,
+   and the cut, excluded or superseded scope that must not come back.
+5. **Current state.** The branch to create or continue, the `main` SHA, which
+   tools, accounts and credentials exist or are missing, pending access checks
+   and open user decisions, each labeled [verified] or [unknown] with its date.
+6. **Authority.** The user's own words authorizing this slice, with the date, and
+   every external action that must still be requested by name.
+7. **Read first.** This file, the software-factory skill, `00-status.md`, the
+   slice plan and the cited gate sections.
+8. **Done means.** The slice's exit checks, the evidence to record in
+   `00-status.md`, and the closing question `Continue to slice N+1, or re-steer?`
+   naming the next slice by ID.
+
+- Quote approved copy, names, numbers, error codes and test names exactly. Where
+  the prompt and a gate document disagree, the gate document wins.
+- Label claims as elsewhere in this file. Never present a plan, fixture, target or
+  untested claim as built, measured or proven.
+- Tell the receiving agent to re-verify Git and the files before acting, and to
+  stop and ask instead of guessing when it finds a conflict with the prompt.
+- Keep the prompt in one copy-pasteable block, with no secrets and no em dashes.
 
 ## Technology and proof boundaries
 
