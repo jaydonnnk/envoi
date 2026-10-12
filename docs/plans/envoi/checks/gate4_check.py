@@ -13,7 +13,7 @@ What the rules do not check:
 - whether a slice's tests can run on the code built by then, beyond Gate 3's unit placement (R15);
 - stale approval wording outside the current-state parts R9 scans, or phrased outside its pattern;
 - counts stated anywhere other than the curated claims of R14;
-- whether the 2026-10-12 Gate 3 reopening text is right: R10 only pins its reviewed SHA256;
+- whether the latest Gate 3 reopening text is right: R10 only pins its approved SHA256;
 - any runtime, account, model, wallet or usability fact.
 """
 import difflib, hashlib, html, os, re, subprocess, sys
@@ -372,9 +372,11 @@ for f, text in current.items():
             fail("R9", f"{f} current state still reads as unapproved: {l[:90]}")
 
 # R10 protected documents unchanged from the base; 01-product.md may change only its closing status line.
-# 03-program-design.md may instead equal the re-approved text of the 2026-10-12 Gate 3 reopening, pinned by hash;
+# 03-program-design.md may instead equal its latest re-approved text, pinned by hash;
 # any further edit to it must update this hash on purpose.
-G3_REOPENING_SHA256 = "b24f79865afdc655c4539092344bcb72d8db0d96eb577e7740e8599620688cb4"
+# b24f7986...20688cb4: the PayPal kill-switch reopening, re-approved 2026-10-12.
+# Current: the S1 TypeScript pin reopening, approved in advance by the user on 2026-10-12.
+G3_REOPENING_SHA256 = "98e6ac375bb2a99988304eea8eeea37c4a0a44556e6a39768cefd6d20cb5b3ad"
 for root, _, files in os.walk(folder):
     for name in sorted(files):
         rel = os.path.relpath(os.path.join(root, name), folder)

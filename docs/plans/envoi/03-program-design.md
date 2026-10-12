@@ -12,6 +12,13 @@ See [Revision 2026-10-11](#revision-2026-10-11-direct-vision-and-pyusd), [`00-st
 
 Gate 3 program design, 2026-10-07 (Asia/Singapore). **APPROVED by the user 2026-10-07** ("gate 3 is approved"), together with a separate authorization to commit these planning documents and push `main`. Authorities: [approved Gate 1 product](01-product.md) and [approved Gate 2 architecture](02-architecture.md). Approval accepts the contracts below and the disposition of the eight Gate 2 review findings; it establishes no runtime, account, integration or usability evidence, and it does not authorize implementation or Gate 4. A separate, narrowly scoped authorization on the same day covered the R11 flag flip, its redeploy and a read-only schema inspection, all now complete. This document contains contracts only: file map, types and signatures without bodies, call stacks, state transitions, race rules, capacity budgets and named failure tests. No application implementation, no installed application packages and no approved slices exist.
 
+## Reopening 2026-10-12: TypeScript pin after the S1 boot check
+
+- **Finding:** the S1 boot check, the falsifier this gate names for its version pins, failed on `typescript@7.0.2`: `typescript-eslint@8.71.1`, required by `eslint-config-next@16.4.0`, supports only `typescript >=4.8.4 <6.1.0`.
+- **Change:** the pin becomes `typescript@6.0.3`, and the resolved S1 package set, five supporting packages and the PostgreSQL 18 test image are recorded under [Version pins](#version-pins).
+  No contract, type, call stack, test name or test count changes.
+- **Approval:** the user reopened Gate 3 for this change and approved it in advance on 2026-10-12 ("for this change gate 3( i pre approve it)").
+
 ## Reopening 2026-10-12: PayPal payments kill switch
 
 Gate 2 names `PAYMENTS_ENABLED` as a web setting, but the 2026-10-11 contracts checked it only for PYUSD, so turning it off left PayPal able to start and capture.
@@ -142,7 +149,7 @@ Versions below were read from the npm registry on 2026-10-07 with `npm view <pkg
 | --- | --- | --- |
 | `next` | `16.4.0` | App Router, Node runtime on Render Free |
 | `react`, `react-dom` | `19.3.0` | UI |
-| `typescript` | `7.0.2` | Type checking; also builds the maintenance runner |
+| `typescript` | `6.0.3` | Type checking; also builds the maintenance runner. Pinned at `7.0.2` until the S1 boot check; see the resolved set below. |
 | `drizzle-orm` | `0.45.3` | Queries and row types |
 | `drizzle-kit` | `0.31.11` | Migration generation |
 | `postgres` | `3.4.9` | postgres.js driver, pooled for web and direct for maintenance/migrations |
@@ -176,7 +183,19 @@ Deliberately not added: `@solana/wallet-standard-chains`, because the chain is o
 Lighthouse instructions are therefore identified by reviewed discriminator constants taken from its source at a pinned commit.
 
 **Boot gate (Slice 1 falsifier):** if `better-auth@1.7.7`, `drizzle-orm@0.45.3` or `drizzle-kit@0.31.11` do not work against `next@16.4.0` / `typescript@7.0.2`, downgrade to the newest mutually supported majors and record the resolved set here. Do not patch around an incompatible auth library; a session bug is a receipt-ownership bug.
-The same boot check applies to the PYUSD pins when the first PYUSD slice installs them: they must typecheck under `typescript@7.0.2`, resolve the `@solana/sysvars` peer through `@solana/kit@8.4.0` without a second copy, and build in the browser and Node bundles.
+The same boot check applies to the PYUSD pins when the first PYUSD slice installs them: they must typecheck under the resolved `typescript@6.0.3`, resolve the `@solana/sysvars` peer through `@solana/kit@8.4.0` without a second copy, and build in the browser and Node bundles.
+
+**Resolved set after the S1 boot check, 2026-10-12 [verified].**
+The boot gate fired on one pin: `typescript@7.0.2`.
+`eslint-config-next@16.4.0` pulls in `typescript-eslint@8.71.1`, whose peer range is `typescript >=4.8.4 <6.1.0`, and which throws `typescript-eslint does not support TS 7.0.` at load.
+The pin is therefore downgraded to `typescript@6.0.3`, the newest release inside that range, and later slices typecheck under 6.0.3, including the PYUSD boot check above.
+No other pin changed, and the auth library is unchanged.
+Installed exactly, as read back from `package-lock.json`: `next@16.4.0`, `react@19.3.0`, `react-dom@19.3.0`, `typescript@6.0.3`, `drizzle-orm@0.45.3`, `drizzle-kit@0.31.11`, `postgres@3.4.9`, `better-auth@1.7.7`, `zod@4.6.5`, `vitest@5.0.3`, `@vitest/coverage-v8@5.0.3`, `tailwindcss@4.3.3`, `eslint@10.12.0` and `tsx@4.23.15`.
+Five supporting packages this table did not list are required to build, lint and typecheck the S1 files and are pinned exactly: `eslint-config-next@16.4.0`, `@tailwindcss/postcss@4.3.3`, `@types/node@24.19.2`, `@types/react@19.3.0` and `@types/react-dom@19.3.0`.
+`@playwright/test` is not installed in S1: its screens were checked in a real browser, and delta D4 keeps CI free of browser downloads.
+`npm audit` reports two advisories, both in build-time tooling that no request path imports: the `esbuild` development-server advisory under `drizzle-kit` (moderate; `npm audit --omit=dev` still lists it because `better-auth` declares `drizzle-kit` as a peer), and `braces` under `eslint-config-next` (high).
+The only fix npm offers is a breaking downgrade of `drizzle-kit`, so both are recorded rather than forced.
+Neon production reports PostgreSQL 18.6, so the local test cluster and the CI service image are on 18 (delta D3).
 
 `pg_advisory_lock`, prepared statements, `LISTEN/NOTIFY` and temporary tables are unsafe through transaction pooling, so leases use row-level `UPDATE ... WHERE ... RETURNING` and migrations plus any session-state work use `MIGRATION_DATABASE_URL`/`MAINTENANCE_DATABASE_URL` (direct). **[vendor claim]** Neon documents pooled versus direct differences; **[unknown]** for this account.
 
@@ -2341,6 +2360,7 @@ This revision resolves only what it touches and lists the rest unchanged.
 ## Least confident decisions
 
 1. **R1 TypeScript 7.0.2 with Next 16.4.0, Drizzle 0.45.3 and Better Auth 1.7.7.** All are current majors read from the registry today; their mutual compatibility is untested here. The Slice 1 boot check is the falsifier, and the fallback is to downgrade to the newest mutually supported set rather than to patch around it.
+   **Resolved by the S1 boot check, 2026-10-12:** TypeScript 7.0.2 failed through `typescript-eslint`, and the pin is now `typescript@6.0.3`; the other pins held. See [Version pins](#version-pins).
 2. **R2 Storage exhaustion has no in-application recovery.**
    Reclaiming bytes when `DELETE` itself fails is a console action whose immediacy is **[unknown]**.
    **Narrowed 2026-10-11:** no image bytes or image churn exist any more, so the risk is generic exhaustion, which still blocks purchase, payment evidence, auth and audit writes.

@@ -599,7 +599,7 @@ Twenty-eight named tests in 113 cases: Gate 3's PYUSD purchase unit, 25 named te
 
 | Addition | Asserts | Mutation |
 | --- | --- | --- |
-| `PYUSD pins build together` | The five PYUSD pins typecheck under `typescript@7.0.2`, resolve `@solana/sysvars` through `@solana/kit@8.4.0` without a second copy, and build in the browser and Node bundles. | None. This is Gate 3's PYUSD boot check, a falsifier, not a guard. |
+| `PYUSD pins build together` | The five PYUSD pins typecheck under `typescript@6.0.3`, the pin resolved by the S1 boot check, resolve `@solana/sysvars` through `@solana/kit@8.4.0` without a second copy, and build in the browser and Node bundles. | None. This is Gate 3's PYUSD boot check, a falsifier, not a guard. |
 
 **Evidence.**
 All on devnet with test tokens, and labeled so.
