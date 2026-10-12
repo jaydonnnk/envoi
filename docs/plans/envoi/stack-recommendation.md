@@ -1,8 +1,8 @@
 # Envoi: proposed hackathon and production stack
 
-Supporting mirror, updated 2026-10-11.
+Supporting mirror, updated 2026-10-12.
 Gate 1 is re-approved; Gate 2's direct-vision/PYUSD amendment in `02-architecture.md` was re-approved on 2026-10-11, and re-approved again the same day for two PYUSD double-payment fixes.
-`03-program-design.md` was revised on 2026-10-11 for the import and PYUSD contracts, revised again after the user's review and for those fixes the same day, and re-approved on 2026-10-11; unapproved `04-slices.md` is unchanged and its affected import/wallet content is superseded pending Gate 4.
+`03-program-design.md` was revised on 2026-10-11 for the import and PYUSD contracts, revised again after the user's review and for those fixes the same day, and re-approved on 2026-10-11, then reopened on 2026-10-12 only to make PayPal check `PAYMENTS_ENABLED`, awaiting re-approval; `04-slices.md` was revised on 2026-10-12 as an unapproved Gate 4 draft that applies those contracts.
 Unaffected 2026-10-07 decisions, eight review dispositions and version pins stand, including OpenAI and `@ai-sdk/openai`.
 The Gate 3 revision adds five proposed PYUSD pins read from the registry on 2026-10-11: `@solana/kit` 8.4.0, `@solana-program/token-2022` 0.19.0, `@solana-program/memo` 0.15.0, `@wallet-standard/app` 1.1.1 and `@solana/wallet-standard-features` 1.5.0.
 No approval establishes runtime/account proof or authorizes installation or implementation; the user separately authorized committing and pushing these planning documents on 2026-10-11.
@@ -13,7 +13,7 @@ Production remains outside the free-hosting scope.
 **Unchanged approved core:** Next.js/TypeScript on Render Free, Neon Free PostgreSQL, in-app Better Auth and finite quota-gated GitHub Actions maintenance, direct PayPal Orders v2 and shared HTTP/MCP rules.
 **[hypothesis] Amendment:** direct OpenAI menu vision on a browser-shrunk photo using request memory only and a bytes-free attempt; proposed separate `AI_MENU_MODEL`, no image proxy/storage/callback or import maintenance dependency.
 Include independently gated PYUSD devnet with reviewed constants, merchant-set rate, Wallet Standard broadcast and finalized/complete-history recovery.
-PYUSD remains disabled until proofs, after PayPal/S13 and first cut; S13 moves after S4 in the later Gate 4 revision.
+PYUSD remains disabled until proofs; the Gate 4 draft builds it as S16 and S17 after PayPal and S13, first in the cut order, and runs S13 right after S4.
 
 | Layer | Hackathon choice | Production choice / reason |
 | --- | --- | --- |

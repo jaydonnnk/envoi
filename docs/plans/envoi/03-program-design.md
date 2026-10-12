@@ -1,6 +1,7 @@
 # Program Design: Envoi
 
 **Reopened 2026-10-10; revised 2026-10-11, revised again after the user's review the same day, revised a third time the same day for fixes L and M after Gate 2 was reopened, and RE-APPROVED by the user on 2026-10-11** ("Yes approve commit the branch and push and merge to main").
+**Reopened 2026-10-12 for one change only, awaiting re-approval:** PayPal start and completion now check `PAYMENTS_ENABLED` and refuse with a new error code, `payments_disabled`; see [Reopening 2026-10-12](#reopening-2026-10-12-paypal-payments-kill-switch).
 Approval accepts these contracts as a proposal; it establishes no runtime, account, model, wallet or usability evidence and authorizes no implementation or Gate 4 approval.
 The user removed Zapier because it is paid and reopened Gates 1, 2 and 3.
 Gate 1 was re-approved on 2026-10-10 and Gate 2 on 2026-10-11.
@@ -10,6 +11,21 @@ Every other contract below stays as approved on 2026-10-07.
 See [Revision 2026-10-11](#revision-2026-10-11-direct-vision-and-pyusd), [`00-status.md`](00-status.md#reopening-2026-10-10-zapier-removed) and [`handoff.md`](handoff.md#gate-3-handover-2026-10-11).
 
 Gate 3 program design, 2026-10-07 (Asia/Singapore). **APPROVED by the user 2026-10-07** ("gate 3 is approved"), together with a separate authorization to commit these planning documents and push `main`. Authorities: [approved Gate 1 product](01-product.md) and [approved Gate 2 architecture](02-architecture.md). Approval accepts the contracts below and the disposition of the eight Gate 2 review findings; it establishes no runtime, account, integration or usability evidence, and it does not authorize implementation or Gate 4. A separate, narrowly scoped authorization on the same day covered the R11 flag flip, its redeploy and a read-only schema inspection, all now complete. This document contains contracts only: file map, types and signatures without bodies, call stacks, state transitions, race rules, capacity budgets and named failure tests. No application implementation, no installed application packages and no approved slices exist.
+
+## Reopening 2026-10-12: PayPal payments kill switch
+
+Gate 2 names `PAYMENTS_ENABLED` as a web setting, but the 2026-10-11 contracts checked it only for PYUSD, so turning it off left PayPal able to start and capture.
+Gate 4's review found the gap, recorded as delta D10, and on 2026-10-12 the user decided: "Add the check to paypal/start and paypal/complete, add an error code such as payments_disabled, and add a named test with its own mutation. One small Gate 3 reopening before S2."
+This reopening changes only the four places below; every other contract stays as re-approved on 2026-10-11, and Gate 2 is not reopened, because it already names the setting.
+
+- **Error code:** `payments_disabled` joins `ErrorCode`.
+  It is not retryable and not operator-visible, and it changes no stored state.
+- **Eligibility:** for a PayPal purchase, `assertPaymentEligible` refuses with `payments_disabled` while `PAYMENTS_ENABLED` is false.
+  PYUSD keeps its existing answer, `pyusd_unavailable` with `payments_disabled` in `details.reason`.
+- **Call stacks:** `paypal/start` and `paypal/complete` both reach the check through `assertPaymentEligible`, so `paypal/start` claims no attempt slot and creates no order, and `paypal/complete` takes no lease and dispatches no capture.
+  Reads stay open: `reconcile`, the webhook, receipt polling and maintenance never check the flag, so a capture already dispatched still converges, and an approved order left uncaptured reads as abandoned once `T_REVIEW` passes.
+- **Test:** the named test is `payments kill switch refuses PayPal start and completion`, with its own mutation.
+  As with the D1 operator acts, Gate 4 places it, as a named addition in S2, the slice that builds both routes, so the test plan counts below do not change.
 
 ## Revision 2026-10-11: direct vision and PYUSD
 
@@ -306,7 +322,7 @@ Declarations only. No bodies.
 export type ErrorCode =
   | "validation_failed" | "unauthorized" | "forbidden_membership" | "forbidden_origin" | "not_found"
   | "review_expired" | "review_invalidated" | "checkout_conflict" | "revision_conflict"
-  | "execution_locked" | "capture_already_dispatched" | "payment_uncertain"
+  | "execution_locked" | "capture_already_dispatched" | "payment_uncertain" | "payments_disabled"
   | "consent_required" | "import_rejected" | "import_expired" | "import_base_revision_changed"
   | "admission_rejected"
   | "pyusd_unavailable" | "rate_expired" | "wallet_proof_rejected" | "wallet_attempt_locked"
@@ -338,6 +354,7 @@ export function formatSgd(value: SgdCents): string;
 `admission_rejected` carries an `ImportRejection` in `details`.
 `import_rejected` carries the specific `BoundedRead`, `PhotoPart` or `NormalizedPhoto` reason in `details.reason`, and `pyusd_unavailable` names its cause there too: `rail_disabled`, `payments_disabled`, a `PyusdIdentity` reason or a `MintEligibility` reason.
 Each named test asserts that specific reason, not only the code.
+**Added 2026-10-12:** `payments_disabled` is PayPal's refusal while `PAYMENTS_ENABLED` is false; see [Reopening 2026-10-12](#reopening-2026-10-12-paypal-payments-kill-switch).
 
 ### Clocks
 
@@ -768,6 +785,7 @@ For `rail: "pyusd"`, `priceBasket` requires `PYUSD_ENABLED`, a PYUSD destination
 `CostProvenance.fx` stays `{ known: false }`, because the shop's own rate is not a market quote.
 `assertPaymentEligible` additionally rechecks, for PYUSD, that the review's rate version is still the shop's current version and is not past `T_RATE_AGE`, that `PAYMENTS_ENABLED` is true, and that no other attempt exists for the purchase.
 `PYUSD_ENABLED` is checked only by `requirePyusdEnabled`, so each flag has exactly one deciding check per call site.
+**Added 2026-10-12:** for PayPal, `assertPaymentEligible` also requires `PAYMENTS_ENABLED` and otherwise answers `payments_disabled`, so `PAYMENTS_ENABLED` too has its one deciding check there, on both rails.
 
 ### PayPal clients
 
@@ -1270,7 +1288,8 @@ POST /api/v1/purchases
 POST /api/v1/purchases/{id}/paypal/start
   requireBuyerSession -> SELECT ... FOR UPDATE purchases (since 2026-10-11: every purchase of this buyer with
     the same basket lock key, this one included, in id order)
-    -> assertPaymentEligible (owner, T_REVIEW, revision still published, destination still active)
+    -> assertPaymentEligible (owner, T_REVIEW, revision still published, destination still active,
+         and since 2026-10-12 PAYMENTS_ENABLED => payments_disabled, no attempt and no order)
     -> findBasketLock over the others (since 2026-10-11) => execution_locked, no attempt
     -> attempts.claimSlot (unique partial index: one non-terminal attempt per purchase)
     -> persist create_request_id
@@ -1279,7 +1298,8 @@ POST /api/v1/purchases/{id}/paypal/start
   returns the approval link; the human approves at PayPal
 
 POST /api/v1/purchases/{id}/paypal/complete
-  requireBuyerSession -> assertPaymentEligible (rechecks T_REVIEW and versions)
+  requireBuyerSession -> assertPaymentEligible (rechecks T_REVIEW and versions, and since 2026-10-12
+    PAYMENTS_ENABLED => payments_disabled, no lease and no capture)
     -> paypal/orders.readOrder -> verify order id, status, payee, amount, currency, correlation
     -> mismatch => payment_uncertain, operator alert, stop
     -> acquire attempt lease -> persist capture_request_id -> capture_dispatched
@@ -2438,6 +2458,10 @@ The user reviewed six of them on 2026-10-11, items 4, 5, 6, 7, 10 and 13; their 
     Detection is the backstop for a faulty or modified client: an extra transfer is recorded and shown, never undone, and its refund depends on the shop.
 
 ## What this gate does not authorize
+
+**Added 2026-10-12.**
+Re-approving the reopening would accept only the PayPal kill-switch contract above.
+It would not approve Gate 4, and it would not authorize implementation or any change to the flag on Render.
 
 Approving Gate 3 accepts these contracts. It does not authorize implementation, package installation, account provisioning, workflow creation, deployment, a repository visibility change, real merchant images, real merchant enrollment, any payment outside a sandbox, or Gate 4 slice selection. The R11 flag flip, its redeploy and a read-only schema inspection were separately authorized and executed on 2026-10-07; that authorization did not extend to `neon neon-auth disable`, which remains unauthorized. Gate 3 approval does not establish that any vendor claim above behaves as documented for this account, and it does not reopen Gate 1 or Gate 2: no approved product behaviour or architecture decision is changed here. Two recorded claims are relabeled in `research.md` under finding 7, which is an evidence correction, not a decision change.
 

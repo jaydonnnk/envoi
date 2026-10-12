@@ -4,8 +4,9 @@ Consolidated 2026-10-06; Gate 2 source supplement added 2026-10-10.
 This is documentation research plus the explicitly attributed read-only devnet observations, not an integration proof.
 No sandbox capture, wallet transfer, QR/menu photo trial or user test has been run.
 
-**[verified] Current approval record, 2026-10-11:** Gate 1 was re-approved on 2026-10-10 and Gate 2 on 2026-10-11, and again the same day for two PYUSD double-payment fixes that rest on the Phantom augmentation evidence already recorded here; Gate 3 stays reopened only for direct vision import and PYUSD.
-`02-architecture.md` is the re-approved Gate 2 amendment; the Gate 3 revision was drafted on 2026-10-11, revised twice the same day and re-approved on 2026-10-11, and the unapproved Gate 4 draft is revised next.
+**[verified] Current approval record, 2026-10-12:** Gate 1 was re-approved on 2026-10-10 and Gate 2 on 2026-10-11, and again the same day for two PYUSD double-payment fixes that rest on the Phantom augmentation evidence already recorded here; Gate 3 was re-approved on 2026-10-11, and the Gate 4 draft was revised on 2026-10-12.
+On 2026-10-12 Gate 3 was reopened for one change that needs no new evidence here: PayPal start and completion check `PAYMENTS_ENABLED`.
+`02-architecture.md` is the re-approved Gate 2 amendment; the Gate 3 revision was drafted on 2026-10-11, revised twice the same day and re-approved on 2026-10-11, and the unapproved Gate 4 draft was revised on 2026-10-12.
 Its source reads are in [Gate 3 revision reads](#gate-3-revision-reads-2026-10-11).
 OpenAI and its dependency pin stay; no provider switch is proposed.
 The 2026-10-07 approvals, cross-check and eight finding dispositions remain historical authority for unaffected decisions, not approval of this amendment.
@@ -116,7 +117,7 @@ Zapier supports error handlers and replay, with plan-dependent limits. Error han
 - Live launch: provider eligibility, qualified Singapore legal review, merchant ownership/enrollment, retention, support, monitoring, reconciliation and recovery. No-custody is a design boundary, not a licensing conclusion.
 
 Research and mockup checks do not establish runtime evidence.
-Gate 1 is re-approved, the Gate 2 amendment was re-approved on 2026-10-11, the Gate 3 revision drafted on 2026-10-11 was re-approved the same day and Gate 4 remains an unapproved draft.
+Gate 1 is re-approved, the Gate 2 amendment was re-approved on 2026-10-11, the Gate 3 revision drafted on 2026-10-11 was re-approved the same day and Gate 4 remains an unapproved draft, revised on 2026-10-12.
 No implementation, spend, installation, provisioning, workflow, commit, push or deployment is authorized by this work.
 The original brief and protected gate/mockup files remain unchanged in this revision.
 
@@ -216,7 +217,7 @@ Structured output with an image for a given provider and model is **[unknown]** 
 | Merchant-set rate alternative | The merchant states the PYUSD-per-SGD rate it accepts, with the date set, at enrollment; Envoi converts each review with it, rounds the atomic amount up, shows the basis and age, and requires the rate to be re-confirmed after a fixed age. No external FX source or terms are involved, and Gate 1 rule 4 already requires the basis and age to be labeled. | **[hypothesis]**, not yet a decision |
 | RPC | `https://api.devnet.solana.com` is "rate-limited": 100 requests per 10 seconds per IP, 40 per 10 seconds per IP for one RPC method, 40 concurrent connections and 100 MB per 30 seconds, and "The public RPC endpoints are not intended for production applications." Whether Render Free's outbound IP is shared with other tenants that consume the same per-IP limit is unknown. [Clusters](https://solana.com/docs/references/clusters) | **[verified]** limits; shared-IP effect **[unknown]** |
 | Finality and expiry | A blockhash is usable "for about 60 to 90 seconds"; 151 recent blockhashes are valid; a client polls `getBlockHeight` at `confirmed` until it exceeds the `lastValidBlockHeight` from `getLatestBlockhash`, after which "their previous transaction will NOT ever be processed". `finalized` avoids the dropped-fork risk at the cost of about 13 seconds of validity. This supports a rule that no replacement transfer is requested before the first one's last valid block height has passed. [Confirmation and expiration](https://solana.com/developers/guides/advanced/confirmation) | **[verified]** source; Envoi's rule is **[hypothesis]** |
-| Schedule | Adding the rail needs a Gate 2 amendment, Gate 3 wallet contracts and two slices (wallet purchase with the merchant wallet challenge, and wallet recovery) inside a plan that already has a 25 October checkpoint and a cut order. | **[hypothesis]** tight |
+| Schedule | Adding the rail needs a Gate 2 amendment, Gate 3 wallet contracts and two slices (wallet purchase with the merchant wallet challenge, and wallet recovery; S16 and S17 in the 2026-10-12 Gate 4 draft) inside a plan that already has a 25 October checkpoint and a cut order. | **[hypothesis]** tight |
 
 ## Gate 2 source supplement, 2026-10-10
 
@@ -373,7 +374,7 @@ PayPal must remain independent.
 **[unknown] Carry forward:** model through judging; OpenAI sharing setting and `store: false` effect; Chinese-text draft accuracy; Render latency/decoder RAM and browser shrink on target phones; Phantom token display, chain honoring and blockhash/transfer preservation; phone Browse-link path; user faucet access; RPC shared-IP/history behavior.
 R2 narrows to general storage exhaustion; R6 expands to RAM/CPU; image-churn R7 is superseded by mis-sized spend/admission R7a.
 Other approved decisions and risks stand.
-The architecture was re-approved on 2026-10-11; the Gate 3 revision of affected contracts was drafted and re-approved the same day, Gate 4 is revised next, and no runtime, spend or external-action authority follows from this research.
+The architecture was re-approved on 2026-10-11; the Gate 3 revision of affected contracts was drafted and re-approved the same day, the Gate 4 draft was revised on 2026-10-12, and no runtime, spend or external-action authority follows from this research.
 
 Documentary proof is recorded in [status](00-status.md#gate-2-amendment-documentary-verification-2026-10-10), not integration evidence.
 

@@ -1,10 +1,12 @@
-# Envoi: Gate 3 re-approved, Gate 4 revision next
+# Envoi: Gate 4 revision drafted and Gate 3 reopened for one change, both awaiting approval
 
-Updated 2026-10-11.
+Updated 2026-10-12.
 Gate 1 was re-approved on 2026-10-10; do not redo it.
 `02-architecture.md` was revised for direct vision import and PYUSD only, revised again after a 2026-10-11 review, and re-approved by the user on 2026-10-11 ("gate 2 approved").
 It was reopened again the same day for two PYUSD double-payment fixes and re-approved for them, the user having approved the fixes in advance.
-The Gate 3 revision of affected contracts was drafted on 2026-10-11 on branch `envoi/gate-3-vision-pyusd`, following the [Gate 3 handover](#gate-3-handover-2026-10-11), revised the same day after the user's review (fixes A-K) and for fixes L and M, and re-approved by the user on 2026-10-11 ("Yes approve commit the branch and push and merge to main"); the unapproved `04-slices.md` is not revised yet.
+The Gate 3 revision of affected contracts was drafted on 2026-10-11 on branch `envoi/gate-3-vision-pyusd`, following the [Gate 3 handover](#gate-3-handover-2026-10-11), revised the same day after the user's review (fixes A-K) and for fixes L and M, and re-approved by the user on 2026-10-11 ("Yes approve commit the branch and push and merge to main").
+On 2026-10-12 the user reopened Gate 3 for one change, a PayPal check of `PAYMENTS_ENABLED` with the error code `payments_disabled`, which awaits `Approve Gate 3, or what should change?`.
+The Gate 4 revision of `04-slices.md` was drafted on 2026-10-12 on branch `envoi/gate-4-vision-pyusd`, at the user's request, and awaits `Approve Gate 4, or what should change?`; it is uncommitted.
 All unaffected 2026-10-07 approvals stand, including Render Free/Neon Free/in-app Better Auth/GitHub Actions, PayPal recovery, identity-only scan, MCP, R11 and R12.
 No app or payment integration exists; the already-provisioned Neon database is recorded in status.
 On 2026-10-11 the user authorized committing this work, publishing its branch and merging it into `main`; Git publication is not gate approval.
@@ -21,10 +23,14 @@ Read applicable AGENTS.md and all documents under `docs/plans/envoi/` before res
 - `research.md`: primary-source sponsor/menu limitations, corrections to the original brief, prior-art findings from shipped SGQR payment products, the 2026-10-07 Gate 3 source cross-check, and unresolved proof requirements.
 - `02-architecture.md`: Gate 2 amendment re-approved 2026-10-11, and re-approved again the same day for two PYUSD double-payment fixes; complete direct-vision and PYUSD boundaries, with unaffected approved decisions preserved.
 - `03-program-design.md`: 2026-10-07 approved contracts plus the 2026-10-11 revision of the import and PYUSD contracts, revised after the user's review and for fixes L and M the same day, re-approved on 2026-10-11.
+  Reopened 2026-10-12 for the PayPal kill switch only (Gate 4 delta D10), awaiting re-approval; see its [reopening section](03-program-design.md#reopening-2026-10-12-paypal-payments-kill-switch).
   The source row, capabilities, image clocks and image tasks are removed; provider pin and unaffected contracts stand.
   Its [test delta](03-program-design.md#test-delta-for-the-gate-4-revision) lists what Gate 4 must reassign.
 - `stack-recommendation.md`: mirror of the revised architecture and unaffected Gate 3 pins; not approval authority.
-- `04-slices.md`: **unapproved Gate 4 draft.** Fifteen slices in build order, the assignment of all 54 Gate 3 tests plus 20 named additions, Gate 3 deltas D1-D7, access checks, per-slice authorizations, schedule and cut order, and least confident decisions.
+- `04-slices.md`: **unapproved Gate 4 draft, revised 2026-10-12.** Sixteen slices under stable IDs in the build order S1, S2, S3, S4, S13, S6, S5, S7, S8, S11, S9, S10, S16, S17, S14, S15, with S12 merged into S11; all 92 named tests and 231 cases of the re-approved Gate 3 assigned once each, plus 39 named additions; Gate 3 deltas D1-D10; access checks; per-slice authorizations; two checkpoints and the cut order PYUSD, scan, S14, plus a go/no-go on PYUSD after S11; and least confident decisions.
+  Flagged for review because the user did not ask for them: S11 ahead of S9 and S10, the PayPal basket lock in S7 with its `paypal/start` recheck, the R2 storage-exhaustion decision moved from S11 to S15, the 1 Nov checkpoint, the PYUSD go/no-go, D8 and D9's public-route limits.
+  An independent review on 2026-10-12 found four major issues, all fixed in the draft as recorded in [`00-status.md`](00-status.md#gate-4-review-fixes-2026-10-12).
+  Its minor findings are fixed or dispositioned as recorded in [the minor review fixes](00-status.md#gate-4-minor-review-fixes-2026-10-12); for delta D10 the user reopened Gate 3, and S2 gains `payments kill switch refuses PayPal start and completion`.
 - `roadmap.md`: updated discussion candidates and proof conditions; not a revised Gate 4 order or approval.
 - `00-status.md`: current approvals, the Gate 3 cross-check results, the findings disposition table, evidence boundary and fresh checks. The older JPG preview is historical; current HTML is authoritative for review.
 
@@ -46,10 +52,14 @@ Proposed target remains 4 of 5 first-time buyers completing an eligible test-env
 
 ## Next authorized action
 
-**Next action: on the user's request, revise Gate 4 (`04-slices.md`) with the Gate 3 [test delta](03-program-design.md#test-delta-for-the-gate-4-revision) and ask `Approve Gate 4, or what should change?`.**
+**Next action: wait for the user's answers to `Approve Gate 3, or what should change?`, for the 2026-10-12 Gate 3 reopening, and `Approve Gate 4, or what should change?` on the 2026-10-12 revision of `04-slices.md`, which applies the Gate 3 [test delta](03-program-design.md#test-delta-for-the-gate-4-revision).**
+Revise on any requested change and ask again; on approval, record it in `00-status.md` and its mirrors and start no slice until the user authorizes it by its slice ID, as rule 1 of `04-slices.md` says.
+The four major and the minor findings of the 2026-10-12 independent review are fixed or dispositioned, and delta D10 is carried by the Gate 3 reopening.
+The user said they intend to approve and then commit the working tree, merge it into `main` and push; do that only on their instruction after the approvals, and record the approvals first.
+Rerun the checker and its fault harness under [`checks/`](checks/gate4_check.py) after any edit to the gate folder.
 Gate 3 was re-approved on 2026-10-11 with fixes A-M; its record, mirrors and fail-capable checks are in `00-status.md`.
 The four reopening questions were already answered and Gates 1 and 2 are re-approved; do not ask them again or revise either gate.
-No application code, install, account provisioning, wallet/faucet, spending, workflow, deployment or visibility change is authorized; the 2026-10-11 commit/push authorization covered these planning documents only.
+No application code, install, account provisioning, wallet/faucet, spending, workflow, deployment or visibility change is authorized; the 2026-10-11 commit/push authorization covered those planning documents only, and committing, pushing or merging the Gate 4 revision needs its own authorization.
 The R11 flag/redeploy/inspection are complete, not work to repeat.
 
 **Two provisioned-state questions were resolved by the user on 2026-10-07.**
@@ -77,11 +87,11 @@ A fresh session can continue from these files; no material decision exists only 
 
 - **Zapier is removed because it is paid.** Gate 1 is revised/re-approved; Gate 2 is revised awaiting approval; Gate 3/4 revisions wait.
 - **Only direct-vision and PYUSD-dependent decisions change.** Every other approved decision stands.
-- **Cut order after all 2026-10-10 answers:** PYUSD first, scan next, account-conditional S14 after scan. Gate 4 applies it only after re-approvals; S14 still drops for unavailable own-API access.
+- **Cut order after all 2026-10-10 answers:** PYUSD first, scan next, account-conditional S14 after scan. The 2026-10-12 Gate 4 revision applies it as S16 and S17, then S10, then S14; S14 still drops for unavailable own-API access.
 - **PYUSD is included, not merely being reconsidered.** Its remaining proof blockers are below; no test transfer is claimed.
 - **Answers to the four questions, 2026-10-10.** OpenAI stays as the AI provider because the user has credits, so the approved Gate 2 provider and the `@ai-sdk/openai` pin do not change. A direct vision call inside the upload request replaces Zapier, so no image bytes are stored and no image URL exists. PYUSD is included, built after the PayPal journey and S13, and first in the cut order; the merchant sets the PYUSD rate it accepts. S13 moves to right after S4.
 - **Gate 1 revised and RE-APPROVED 2026-10-10** ("I approve gate one") in `01-product.md` and three mockups (`index.html`, `merchant-onboarding.html`, `review.html`).
-- **Branch names use `<project>/`.** The user changed `AGENTS.md` so slices use `envoi/slice-<N>-<slug>` and gate work uses `envoi/...`. The current branch is `envoi/gate-4-slice-plan`.
+- **Branch names use `<project>/`.** The user changed `AGENTS.md` so slices use `envoi/slice-<N>-<slug>` and gate work uses `envoi/...`. The branch then was `envoi/gate-4-slice-plan`; the 2026-10-12 Gate 4 revision runs on `envoi/gate-4-vision-pyusd`.
 
 **[verified] 2026-10-10:** sponsor tools are optional, there is no Zapier prize, a project can win at most one sponsor prize, APIMatic's prize is $1,000 plus six months of its Business plan, and "Best Use of Agentic Commerce" is a grand prize. Sources are in [`research.md`](research.md#sponsor-rules-re-check-2026-10-10).
 
@@ -117,7 +127,7 @@ PayPal must stay usable if PYUSD fails, and a failed proof keeps the rail disabl
 
 ### Other known blockers
 
-- This Mac has only `git`. Node 24 LTS and a local PostgreSQL must be installed by the user before S1.
+- This Mac had only `git` on 2026-10-10. On 2026-10-12 Node 24 LTS (`v24.21.0`) and the GitHub CLI were installed under `~/.local`; a local PostgreSQL must still be installed by the user before S1.
 - `.env.local` with the Neon credentials did not come over from Windows.
 - The repository is private; the rules require it public with a license at submission (S15).
 - APIMatic own-API generation likely needs more than the participant offer of one month of Basic; the PayPal Context Plugin in S2 is the safe APIMatic use.
@@ -133,6 +143,7 @@ PayPal must stay usable if PYUSD fails, and a failed proof keeps the rail disabl
    Ask `Approve Gate 3, or what should change?`.
    **Done 2026-10-11, revised after the user's review and for fixes L and M the same day; re-approved 2026-10-11.**
 6. After Gate 3 re-approval, revise `04-slices.md`: merge S11/S12, remove Zapier access, reassign tests, add PYUSD after S13/first cut and move S13 immediately after S4. Ask `Approve Gate 4, or what should change?`.
+   **Drafted 2026-10-12 on `envoi/gate-4-vision-pyusd`; awaiting approval.**
 7. Mirror every change in `00-status.md`, this file, `roadmap.md`, `stack-recommendation.md` and `research.md`, and run documentary checks proven able to fail.
 
 On 2026-10-11 the user authorized committing this work on `envoi/gate-4-slice-plan` in `/Users/jayd0/Desktop/envoi`, fast-forwarding `main` and pushing it.
@@ -247,6 +258,8 @@ The draft specifies the file map, types and signatures without bodies, call stac
 ## Gate 4 handoff: executed as a draft 2026-10-10 (affected image obligations superseded)
 
 The user requested Gate 4 on 2026-10-10, and these saved instructions were followed. Every obligation below is carried into a named slice in `04-slices.md`, which awaits approval.
+The 2026-10-12 revision keeps every obligation: the real-image obligation is now S11's exit decision on the deployed leak probes, and the R2 decision moves to S15 because no image churn remains.
+That move was not asked for and is flagged for review above and in `00-status.md`.
 
 Select the visible slices and their acceptance evidence into `04-slices.md`, one runnable capability per slice, with Slice 1 as the tracer bullet. Carry these Gate 3 obligations into the slice plan rather than restating them as prose:
 

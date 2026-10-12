@@ -1,9 +1,9 @@
 # Envoi: gate roadmap and candidate slices
 
-Discussion candidates, updated 2026-10-11; not Gate 4 approval or a replacement build order.
-Gate 1 is re-approved; Gate 2's direct-vision/PYUSD amendment was re-approved on 2026-10-11, and re-approved again the same day for two PYUSD double-payment fixes; the Gate 3 revision of affected contracts was drafted on 2026-10-11, revised after the user's review and for those fixes the same day, and re-approved on 2026-10-11; the unapproved Gate 4 draft is revised next.
+Discussion candidates, updated 2026-10-12; not Gate 4 approval or a replacement build order.
+Gate 1 is re-approved; Gate 2's direct-vision/PYUSD amendment was re-approved on 2026-10-11, and re-approved again the same day for two PYUSD double-payment fixes; the Gate 3 revision of affected contracts was drafted on 2026-10-11, revised after the user's review and for those fixes the same day, and re-approved on 2026-10-11, then reopened on 2026-10-12 for one PayPal kill-switch check that awaits `Approve Gate 3, or what should change?`; the unapproved Gate 4 draft was revised on 2026-10-12 and awaits `Approve Gate 4, or what should change?`.
 All unaffected 2026-10-07 decisions and eight review dispositions stand.
-Required later Gate 4 changes: merge S11/S12, drop Zapier access, move S13 immediately after S4, add PYUSD after S13 and first in the cut order, and apply the Gate 3 test delta recorded in `03-program-design.md` (199 previous names mapped to 92 named tests and 231 cases; 10 names removed, 21 cases added).
+The 2026-10-12 Gate 4 revision merged S11/S12 into S11, dropped the Zapier access check, moved S13 immediately after S4, added PYUSD as S16 and S17 after S13 and first in the cut order, and applied the Gate 3 test delta recorded in `03-program-design.md` (199 previous names mapped to 92 named tests and 231 cases; 10 names removed, 21 cases added), assigning every named test once.
 The candidate numbers below are not S-numbers.
 
 The unchanged core is Render Free, Neon Free, in-app Better Auth, quota-gated finite GitHub Actions maintenance and direct sandbox Orders v2 with a distinct seller and lease-serialized recovery.
@@ -49,11 +49,11 @@ These are capability boundaries, not a promise of duration or final numbering. T
 | 5 | An authorized demo merchant publishes its confirmed outlet/menu and connected accepted test destination. | Both image paths plus fallback; draft invisible until authorization, complete menu confirmation and connection checks pass. Edits invalidate confirmation. PYUSD connection is optional. | 2, 3, 4. |
 | 6 | A buyer identifies a registered outlet and available items, by text request **or by scanning/pasting its SGQR sticker**. | Registered, merchant-confirmed prices; ambiguity, missing location/item asks for clarification. The scan path additionally proves an unenrolled sticker yields no purchase, a shared identifier covering several outlets asks which one, and camera denial falls back to paste then text. Model cannot invent prices or destinations. | 5. |
 | 7 | Review eligible rails with sourced costs and a bound, expiring purchase. | Payer/merchant fee split; unknown FX stays unknown; changed items, amount, recipient, currency or rail require fresh approval. | 2, 6. |
-| 8 | Complete a separate PYUSD devnet purchase after PayPal and MCP proof. | Pinned devnet mint/program/decimals, pre-existing merchant ATA and key-control proof, 30-day merchant rate/ceil amount, finalized wallet transfer verified by meaning with allowlisted wallet-added instructions. | 7, 12; user funding, wallet/phone proofs and approved Gate 2/3 contracts. |
+| 8 | Complete a separate PYUSD devnet purchase after PayPal and MCP proof (S16 in the Gate 4 draft). | Pinned devnet mint/program/decimals, pre-existing merchant ATA and key-control proof, 30-day merchant rate/ceil amount, finalized wallet transfer verified by meaning with allowlisted wallet-added instructions. | 7, 12; user funding, wallet/phone proofs and approved Gate 2/3 contracts. |
 | 9 | Merchant sees confirmed payment and acknowledges the order. | Buyer/merchant agree on payment evidence; pending is not paid; acknowledgment remains separate. | 2, 5; include 8 when available. |
 | 10 | Expand PayPal recovery for lost responses/callbacks. | Duplicate/out-of-order events, reload and timeout converge on one capture. No blind recharge or cross-rail retry. | 2, 9. |
-| 11 | Recover a lost wallet signature or confirmation response. | Persisted locked attempt, attributable finalized evidence that passes the transfer verification rule, or complete post-expiry absence; RPC gaps remain uncertain. Maintenance submits nothing. | 8, 9. |
-| 12 | Compatible external MCP client discovers the shop and opens the unchanged human approval journey. | Published capabilities, single-use suggestions redeemed to a new server-priced review, no receipt readback or payment authority. In Gate 4, S13 moves just after S4. | 6, 7, 10; advertise PYUSD unavailable until its own proofs pass. |
+| 11 | Recover a lost wallet signature or confirmation response (S17 in the Gate 4 draft). | Persisted locked attempt, attributable finalized evidence that passes the transfer verification rule, or complete post-expiry absence; RPC gaps remain uncertain. Maintenance submits nothing. | 8, 9. |
+| 12 | Compatible external MCP client discovers the shop and opens the unchanged human approval journey. | Published capabilities, single-use suggestions redeemed to a new server-priced review, no receipt readback or payment authority. In the Gate 4 draft, S13 runs right after S4. | 6, 7, 10; advertise PYUSD unavailable until its own proofs pass. |
 | 13 | Developer uses an APIMatic-generated registry client/documentation where access supports it. | Client calls the running API; contract check passes; describe only demonstrated features. Raw documentation is a fallback, not proof of generated-client integration. | 12; actual generation/portal tier and terms confirmed. |
 | 14 | Optional merchant offer within explicit rules. | Editable caps/time window; resulting price changes require renewed approval. Dialogue cannot authorize amounts. | Core payment/recovery slices pass. |
 | 15 | Reproducible judged release with access and recorded evidence. | Import/failure evidence, actual payment references, proposed 4-of-5/3-minute usability test, mobile/keyboard checks, setup/reset, OSS license and short functioning video. Access lasts through judging. | All included slices; 13 is account-conditional and 14 optional. |
@@ -75,9 +75,12 @@ Reopen Product/Architecture/Program Design for changed live capabilities before 
 
 ## Scheduling without invented effort estimates
 
-Planning windows, not duration estimates: 6-11 Oct gates and early evidence setup; 12-25 Oct core journeys and payment proofs; 26 Oct-1 Nov recovery/MCP/SDK work; 2-8 Nov rehearsal and submission assets; 9-12 Nov correction buffer. Target submission before 12 Nov evening SGT; official cutoff is 13 Nov 04:00 SGT. Gate approval delays and runtime failures can change these windows.
+Planning windows, not duration estimates: 6-11 Oct gates and early evidence setup; 12-25 Oct core journeys, payment proofs, PayPal recovery (S3) and the MCP handoff (S13); 26 Oct-1 Nov menu import, scan, PYUSD purchase and recovery (S16, S17) and SDK work; 2-8 Nov rehearsal and submission assets; 9-12 Nov correction buffer.
+The Gate 4 draft places a **[hypothesis]** PYUSD go/no-go when S11 is done, or on 28 Oct at the latest.
+Target submission before 12 Nov evening SGT; official cutoff is 13 Nov 04:00 SGT.
+Gate approval delays and runtime failures can change these windows.
 
-User-decided capability cut order: PYUSD first, scan next, account-conditional APIMatic S14 after scan.
+User-decided capability cut order: PYUSD (S16 and S17) first, scan (S10) next, account-conditional APIMatic S14 after scan.
 Optional voice/negotiation/AG Grid/catalogue breadth do not become core work ahead of those decisions.
 Never cut payment evidence, approval/recipient checks, menu confirmation, no-image-retention controls or uncertainty handling.
 Manual fallback alone cannot support an AI-drafting claim; cutting affected product scope must be recorded/re-approved rather than hidden.
