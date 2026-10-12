@@ -1,8 +1,9 @@
 # Vertical Slices: Envoi
 
 Gate 4 slice plan, drafted 2026-10-10 and revised 2026-10-12 (Asia/Singapore).
-**Unapproved draft.**
-Authorities: [re-approved Gate 1 product](01-product.md), [re-approved Gate 2 architecture](02-architecture.md) and [Gate 3 program design](03-program-design.md), re-approved on 2026-10-11 and reopened on 2026-10-12 for one change, which awaits re-approval.
+**APPROVED by the user on 2026-10-12** ("I approve both pls publish the branches and commit all the changes to main so that we can proceed with the first slice").
+Approval starts no slice; each starts only on an authorization naming its slice ID.
+Authorities: [re-approved Gate 1 product](01-product.md), [re-approved Gate 2 architecture](02-architecture.md) and [Gate 3 program design](03-program-design.md), re-approved on 2026-10-11, reopened on 2026-10-12 for one change and re-approved the same day.
 This plan selects and orders runnable slices.
 It changes no approved product or architecture decision.
 Its one contract change, delta D10, is made in Gate 3 itself, which you reopened for it on 2026-10-12.

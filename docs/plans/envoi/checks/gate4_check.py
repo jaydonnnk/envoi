@@ -11,7 +11,7 @@ What the rules do not check:
 - whether a slice's "Depends on" list is complete, beyond R16's curated build tokens (R6 checks only that each listed slice comes earlier);
 - which additions are contract tests and which are refinements (R14 checks only that the stated parts sum and agree);
 - whether a slice's tests can run on the code built by then, beyond Gate 3's unit placement (R15);
-- approval claims phrased in ways R9's sentence heuristic does not recognize;
+- stale approval wording outside the current-state parts R9 scans, or phrased outside its pattern;
 - counts stated anywhere other than the curated claims of R14;
 - whether the 2026-10-12 Gate 3 reopening text is right: R10 only pins its reviewed SHA256;
 - any runtime, account, model, wallet or usability fact.
@@ -336,80 +336,45 @@ hits = scan(added) + [h for f in md.values() for h in scan(f.splitlines())] + sc
 if hits:
     fail("R8", f"secret-shaped value, pattern {hits[0][0]}")
 
-# R9 gate state: Gate 4 unapproved everywhere, and the exact question recorded.
-# The approval heuristic splits every line into table cells and sentences and attaches each approval
-# word to one gate mention: one that directly follows it ("approved Gate 2", "approval of the Gate 4"),
-# else the nearest one before it, else the nearest one after it. An approval word attached to Gate 4
-# or the slice plan fails unless the sentence marks it unapproved, negated, conditional or false, it is
-# the required question, an unchecked box, the "Approving Gate 4" wording, or a "Depends on" cell.
+# R9 gate state after the user's approval on 2026-10-12 ("I approve both"): Gate 3 re-approved and Gate 4
+# approved in the status lines, the ticked checklist items, the approval history, 04-slices.md and the
+# handoff.md title; and no current-state line still calls either gate a draft or awaiting approval.
+# Before the approval this rule did the reverse; its approval-claim heuristic is retired because the claims are now true.
 status, handoff = md["00-status.md"], md["handoff.md"]
-q = "Approve Gate 4, or what should change?"
-for f in ("00-status.md", "handoff.md"):
-    if q not in md[f]:
-        fail("R9", f"{f} lacks the exact Gate 4 question")
-if not re.search(r"^- Gate 4 - Slice plan: \*\*in progress", status, flags=re.M):
-    fail("R9", "00-status.md Gate 4 line is not in progress")
-if "**Unapproved draft.**" not in s4:
-    fail("R9", "04-slices.md does not say it is an unapproved draft")
-MENTION = re.compile(r"\bGates? (\d)((?:\s*(?:-|,|and|or|to)\s*\d)*)\b|\bGate four\b|\bslice plan\b", re.I)
-APPROVAL = re.compile(r"\b\w*approv\w*", re.I)
-SAFE = [
-    re.compile(r"\bunapproved\b", re.I),
-    re.compile(re.escape(q)),
-    re.compile(r"\b(?:not|no|never|without|until|before|awaits?|awaiting|pending|unauthori[sz]ed|requires?|needs?|false|ask(?:s|ed|ing)?|wait(?:s|ing)? (?:for|on))\b(?:\W+\w+){0,6}?\W+\w*approv", re.I),
-    re.compile(r"^\s*-\s*\[ \]"),
-    re.compile(r"^\s*Approving Gate 4\b"),
-]
-
-
-def gates_of(m):
-    if m.group(1) is None:
-        return {4}
-    nums = [int(m.group(1))] + [int(x) for x in re.findall(r"\d", m.group(2) or "")]
-    if re.search(r"-|to", m.group(2) or "") and len(nums) == 2:
-        return set(range(nums[0], nums[1] + 1))
-    return set(nums)
-
-
-def claims_gate4(sentence):
-    mentions = list(MENTION.finditer(sentence))
-    for a in APPROVAL.finditer(sentence):
-        follow = [m for m in mentions if a.end() <= m.start() and re.fullmatch(r"\s+(?:of\s+)?(?:the\s+)?", sentence[a.end():m.start()])]
-        before = [m for m in mentions if m.end() <= a.start()]
-        after = [m for m in mentions if m.start() >= a.end()]
-        target = follow[0] if follow else before[-1] if before else after[0] if after else None
-        if target is not None and 4 in gates_of(target):
-            return True
-    return False
-
-
-approval_hits = []
-for f, s in md.items():
-    lines = s.splitlines()
-    header = []
-    for i, line in enumerate(lines):
-        text = re.sub(r"[*`]", "", line)
-        cells = [text]
-        if line.startswith("|"):
-            cells = [c.strip() for c in text.strip().strip("|").split("|")]
-            if i + 1 < len(lines) and re.match(r"^\|\s*-{3}", lines[i + 1]):
-                header = cells
-                continue
-            cells = [c for j, c in enumerate(cells) if not (j < len(header) and re.search(r"depends on|prerequisite", header[j], re.I))]
-        elif not line.strip():
-            header = []
-        for cell in cells:
-            for sentence in re.split(r"(?<=[.!?;])\s+", cell):
-                if claims_gate4(sentence) and not any(p.search(sentence) for p in SAFE):
-                    approval_hits.append((f, sentence.strip()))
-for f, sentence in approval_hits:
-    fail("R9", f"{f} may claim Gate 4 approval: {sentence[:100]}")
+QUOTE = "I approve both pls publish the branches and commit all the changes to main"
+if not re.search(r"^- Gate 4 - Slice plan: \*\*APPROVED 2026-10-12\*\* by the user", status, flags=re.M):
+    fail("R9", "00-status.md Gate 4 line does not record the 2026-10-12 approval")
+if not re.search(r"^- Gate 3 - Program Design: \*\*RE-APPROVED 2026-10-12\*\* by the user", status, flags=re.M):
+    fail("R9", "00-status.md Gate 3 line does not record the 2026-10-12 re-approval")
+for item in ("- [x] Explicit user approval of Gate 4, 2026-10-12", "- [x] Explicit user re-approval of Gate 3, 2026-10-12"):
+    if item not in status:
+        fail("R9", f"00-status.md checklist lacks: {item}")
+history = status.split("\n### Approval history\n", 1)[1].split("\n### ", 1)[0] if "\n### Approval history\n" in status else ""
+if QUOTE not in history:
+    fail("R9", "00-status.md approval history lacks the user's approval")
+if "**APPROVED by the user on 2026-10-12**" not in s4:
+    fail("R9", "04-slices.md does not record its approval")
+if not handoff.startswith("# Envoi: Gates 1-4 approved"):
+    fail("R9", "handoff.md title does not record the approvals")
+STALE = re.compile(r"unapproved (?:Gate 4 )?draft|awaits? re-approval|awaiting re-approval|awaits? (?:the user's answers? to )?`Approve Gate [34]|pending Gate 4 approval", re.I)
+current = {
+    "00-status.md": status.split("\n### Reopening 2026-10-10", 1)[0] + status.split("\n## Slices\n", 1)[1].split("\n## ", 1)[0],
+    "04-slices.md": s4.split("\n## Revision 2026-10-12\n", 1)[0],
+    "handoff.md": handoff.split("\n## Product scope to preserve\n", 1)[0] + handoff.split("\n## Next authorized action\n", 1)[1].split("\n## ", 1)[0],
+    "roadmap.md": md["roadmap.md"].split("\n## ", 1)[0],
+    "stack-recommendation.md": md["stack-recommendation.md"].split("\n## ", 1)[0],
+    "research.md": md["research.md"].split("\n## ", 1)[0],
+    "01-product.md": md["01-product.md"].rstrip().splitlines()[-1],
+}
+for f, text in current.items():
+    for l in text.splitlines():
+        if STALE.search(l):
+            fail("R9", f"{f} current state still reads as unapproved: {l[:90]}")
 
 # R10 protected documents unchanged from the base; 01-product.md may change only its closing status line.
-# 03-program-design.md may instead equal the reviewed text of the 2026-10-12 Gate 3 reopening, pinned by hash;
+# 03-program-design.md may instead equal the re-approved text of the 2026-10-12 Gate 3 reopening, pinned by hash;
 # any further edit to it must update this hash on purpose.
-G3_REOPENING_SHA256 = "d5f9e3c1eed945dcd590ad447f95c3e268252db2df27f14b72203a43e4171c15"
-g3_reopened = False
+G3_REOPENING_SHA256 = "b24f79865afdc655c4539092344bcb72d8db0d96eb577e7740e8599620688cb4"
 for root, _, files in os.walk(folder):
     for name in sorted(files):
         rel = os.path.relpath(os.path.join(root, name), folder)
@@ -418,16 +383,8 @@ for root, _, files in os.walk(folder):
             if data == git_show(f"docs/plans/envoi/{rel}"):
                 continue
             if rel == "03-program-design.md" and hashlib.sha256(data).hexdigest() == G3_REOPENING_SHA256:
-                g3_reopened = True
                 continue
             fail("R10", f"protected file changed: {rel}")
-if g3_reopened:
-    q3 = "Approve Gate 3, or what should change?"
-    for f in ("00-status.md", "handoff.md"):
-        if q3 not in md[f]:
-            fail("R9", f"{f} lacks the exact Gate 3 question while Gate 3 is reopened")
-    if not re.search(r"^- Gate 3 - Program Design: \*\*reopened 2026-10-12, in progress", status, flags=re.M):
-        fail("R9", "00-status.md Gate 3 line does not say Gate 3 is reopened and in progress")
 b01 = git_show("docs/plans/envoi/01-product.md").decode("utf-8").splitlines()
 a01 = md["01-product.md"].splitlines()
 changed = [l for l in difflib.unified_diff(b01, a01, lineterm="", n=0) if l[:1] in "+-" and l[:3] not in ("+++", "---")]

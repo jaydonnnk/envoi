@@ -4,9 +4,9 @@ Consolidated 2026-10-06; Gate 2 source supplement added 2026-10-10.
 This is documentation research plus the explicitly attributed read-only devnet observations, not an integration proof.
 No sandbox capture, wallet transfer, QR/menu photo trial or user test has been run.
 
-**[verified] Current approval record, 2026-10-12:** Gate 1 was re-approved on 2026-10-10 and Gate 2 on 2026-10-11, and again the same day for two PYUSD double-payment fixes that rest on the Phantom augmentation evidence already recorded here; Gate 3 was re-approved on 2026-10-11, and the Gate 4 draft was revised on 2026-10-12.
-On 2026-10-12 Gate 3 was reopened for one change that needs no new evidence here: PayPal start and completion check `PAYMENTS_ENABLED`.
-`02-architecture.md` is the re-approved Gate 2 amendment; the Gate 3 revision was drafted on 2026-10-11, revised twice the same day and re-approved on 2026-10-11, and the unapproved Gate 4 draft was revised on 2026-10-12.
+**[verified] Current approval record, 2026-10-12:** Gate 1 was re-approved on 2026-10-10 and Gate 2 on 2026-10-11, and again the same day for two PYUSD double-payment fixes that rest on the Phantom augmentation evidence already recorded here; Gate 3 was re-approved on 2026-10-11, and Gate 4 was revised and approved on 2026-10-12.
+On 2026-10-12 Gate 3 was reopened and re-approved for one change that needs no new evidence here: PayPal start and completion check `PAYMENTS_ENABLED`.
+`02-architecture.md` is the re-approved Gate 2 amendment; the Gate 3 revision was drafted on 2026-10-11, revised twice the same day and re-approved on 2026-10-11, and the Gate 4 slice plan was revised and approved on 2026-10-12.
 Its source reads are in [Gate 3 revision reads](#gate-3-revision-reads-2026-10-11).
 OpenAI and its dependency pin stay; no provider switch is proposed.
 The 2026-10-07 approvals, cross-check and eight finding dispositions remain historical authority for unaffected decisions, not approval of this amendment.
@@ -117,7 +117,7 @@ Zapier supports error handlers and replay, with plan-dependent limits. Error han
 - Live launch: provider eligibility, qualified Singapore legal review, merchant ownership/enrollment, retention, support, monitoring, reconciliation and recovery. No-custody is a design boundary, not a licensing conclusion.
 
 Research and mockup checks do not establish runtime evidence.
-Gate 1 is re-approved, the Gate 2 amendment was re-approved on 2026-10-11, the Gate 3 revision drafted on 2026-10-11 was re-approved the same day and Gate 4 remains an unapproved draft, revised on 2026-10-12.
+Gate 1 is re-approved, the Gate 2 amendment was re-approved on 2026-10-11, the Gate 3 revision drafted on 2026-10-11 was re-approved the same day and Gate 4 was revised and approved on 2026-10-12.
 No implementation, spend, installation, provisioning, workflow, commit, push or deployment is authorized by this work.
 The original brief and protected gate/mockup files remain unchanged in this revision.
 

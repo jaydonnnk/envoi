@@ -2,7 +2,7 @@
 
 Supporting mirror, updated 2026-10-12.
 Gate 1 is re-approved; Gate 2's direct-vision/PYUSD amendment in `02-architecture.md` was re-approved on 2026-10-11, and re-approved again the same day for two PYUSD double-payment fixes.
-`03-program-design.md` was revised on 2026-10-11 for the import and PYUSD contracts, revised again after the user's review and for those fixes the same day, and re-approved on 2026-10-11, then reopened on 2026-10-12 only to make PayPal check `PAYMENTS_ENABLED`, awaiting re-approval; `04-slices.md` was revised on 2026-10-12 as an unapproved Gate 4 draft that applies those contracts.
+`03-program-design.md` was revised on 2026-10-11 for the import and PYUSD contracts, revised again after the user's review and for those fixes the same day, and re-approved on 2026-10-11, then reopened on 2026-10-12 only to make PayPal check `PAYMENTS_ENABLED` and re-approved the same day; `04-slices.md` was revised and approved on 2026-10-12 as the Gate 4 slice plan that applies those contracts.
 Unaffected 2026-10-07 decisions, eight review dispositions and version pins stand, including OpenAI and `@ai-sdk/openai`.
 The Gate 3 revision adds five proposed PYUSD pins read from the registry on 2026-10-11: `@solana/kit` 8.4.0, `@solana-program/token-2022` 0.19.0, `@solana-program/memo` 0.15.0, `@wallet-standard/app` 1.1.1 and `@solana/wallet-standard-features` 1.5.0.
 No approval establishes runtime/account proof or authorizes installation or implementation; the user separately authorized committing and pushing these planning documents on 2026-10-11.

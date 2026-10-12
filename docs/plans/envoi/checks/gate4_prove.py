@@ -75,9 +75,6 @@ fault(["R6"], "section order", move_s9)
 fault(["R7"], "em dash", lambda d: sub(d, "roadmap.md", "None of these candidates authorizes implementation.", "None of these candidates authorizes implementation \u2014 none."))
 fault(["R7"], "em dash entity", lambda d: sub(d, "04-slices.md", "Sections follow the build order.", "Sections follow the build order &" + "mdash; always."))
 fault(["R8"], "secret value", lambda d: sub(d, "research.md", "Research and mockup checks do not establish runtime evidence.", "Research and mockup checks do not establish runtime evidence. " + NPG))
-fault(["R9"], "false approval", lambda d: sub(d, "00-status.md", "- Gate 4 - Slice plan: **in progress, unapproved draft, revised 2026-10-12**", "- Gate 4 - Slice plan: **APPROVED 2026-10-12**"))
-fault(["R9"], "approval in handoff", lambda d: sub(d, "handoff.md", "## Next authorized action\n", "## Next authorized action\n\nThe user approved Gate 4 on 2026-10-12.\n"))
-fault(["R9"], "missing question", lambda d: sub(d, "handoff.md", "Approve Gate 4, or what should change?", "Approve gate four?", count=100))
 fault(["R10"], "Gate 3 edited", lambda d: sub(d, "03-program-design.md", "Every test must be able to fail.", "Every test must be able to fail, always."))
 fault(["R10"], "product scope edited", lambda d: sub(d, "01-product.md", "Seeded merchants and test transactions cannot be mistaken", "Seeded merchants and test transactions can never be mistaken"))
 fault(["R10"], "mockup edited", lambda d: append(d, os.path.join("mockups", "index.html"), "<!-- x -->\n"))
@@ -86,8 +83,6 @@ fault(["R12"], "mirror misses S17", lambda d: sub(d, "stack-recommendation.md", 
 fault(["R14"], "mirror miscounts additions", lambda d: sub(d, "handoff.md", "plus 39 named additions", "plus 38 named additions"))
 
 # The nine faults of the 2026-10-12 independent review, adapted to the current text
-fault(["R9"], "review 1: 'has been approved'", lambda d: sub(d, "handoff.md", "## Next authorized action\n", "## Next authorized action\n\nGate 4 has been approved by the user.\n"))
-fault(["R9"], "review 2: 'approved the Gate 4 slice plan'", lambda d: sub(d, "00-status.md", "### Approval history\n", "### Approval history\n\n- 2026-10-12: the user approved the Gate 4 slice plan.\n"))
 fault(["R13"], "review 3: roadmap cut order contradicts 04", lambda d: sub(d, "roadmap.md", "User-decided capability cut order: PYUSD (S16 and S17) first, scan (S10) next", "User-decided capability cut order: scan (S10) first, PYUSD (S16 and S17) next"))
 fault(["R14", "R15"], "review 4: S17 recovery group moved into S16 with the table updated", lambda d: (
     sub(d, "04-slices.md", "Gate 3: group `PYUSD recovery over a fake chain` (15 cases), ", "Gate 3: "),
@@ -99,11 +94,8 @@ fault([], "review 5: S6 dropped from S7's dependencies (known limit: list comple
 fault(["R14"], "review 6: wrong S16 prose count", lambda d: sub(d, "04-slices.md", "Twenty-eight named tests in 113 cases", "Twenty-nine named tests in 120 cases"))
 fault(["R13"], "review 7: cut order swapped in 04's revision bullet", lambda d: sub(d, "04-slices.md", "- **Cut order** is PYUSD, then scan, then S14", "- **Cut order** is S14, then scan, then PYUSD"))
 fault(["R14"], "review 8: wrong additions baseline in 00-status", lambda d: sub(d, "00-status.md", "39 named additions, up from 20", "39 named additions, up from 26"))
-fault(["R9"], "review 9: plain APPROVED in roadmap", lambda d: sub(d, "roadmap.md", "None of these candidates authorizes implementation.", "None of these candidates authorizes implementation. Gate 4: APPROVED 2026-10-12."))
 
 # Faults for the rules added after the review
-fault(["R9"], "appositive approval", lambda d: sub(d, "roadmap.md", "None of these candidates authorizes implementation.", "None of these candidates authorizes implementation. Gate 4, the slice plan, is approved."))
-fault(["R9"], "slice plan approved", lambda d: sub(d, "handoff.md", "## Next authorized action\n", "## Next authorized action\n\nThe slice plan was approved on 2026-10-12.\n"))
 fault(["R13"], "handoff cut order contradicts 04", lambda d: sub(d, "handoff.md", "the cut order PYUSD, scan, S14", "the cut order scan, PYUSD, S14"))
 fault(["R13"], "checklist cut rank contradicts 04", lambda d: sub(d, "00-status.md", "- [ ] S10 - Buyer scan or paste; second in the cut order.", "- [ ] S10 - Buyer scan or paste; third in the cut order."))
 fault(["R14"], "handoff build order contradicts 04", lambda d: sub(d, "handoff.md", "S1, S2, S3, S4, S13, S6, S5, S7, S8,", "S1, S2, S3, S4, S13, S5, S6, S7, S8,"))
@@ -132,10 +124,18 @@ fault(["R16"], "limiter named before S4 builds it", lambda d: sub(d, "04-slices.
 fault(["R4"], "minor 3: operator-flag addition loses its mutation", lambda d: sub(d, "04-slices.md", "| Skip the flag check in `record-extra-transfer-refund`; the test fails. |", "| |"))
 # Faults for the 2026-10-12 Gate 3 reopening (delta D10)
 fault(["R10"], "reopened Gate 3 text edited after review", lambda d: sub(d, "03-program-design.md", "It is not retryable and not operator-visible", "It is retryable and not operator-visible"))
-fault(["R9"], "Gate 3 question missing from handoff", lambda d: sub(d, "handoff.md", "Approve Gate 3, or what should change?", "Approve gate three?", count=100))
-fault(["R9"], "Gate 3 line no longer says reopened", lambda d: sub(d, "00-status.md", "- Gate 3 - Program Design: **reopened 2026-10-12, in progress", "- Gate 3 - Program Design: **RE-APPROVED 2026-10-12"))
 fault(["R14"], "D10 part of the contract split miscounted", lambda d: sub(d, "04-slices.md", "and the one D10 kill switch", "and the two D10 kill switch"))
 fault(["R4"], "kill-switch addition loses its mutation", lambda d: sub(d, "04-slices.md", "| Skip the `PAYMENTS_ENABLED` check in PayPal eligibility; the test fails. |", "| |"))
+# Faults for the approval record of 2026-10-12; the earlier approval-claim faults retired with R9's heuristic
+fault(["R9"], "Gate 4 approval reverted in the status line", lambda d: sub(d, "00-status.md", "- Gate 4 - Slice plan: **APPROVED 2026-10-12** by the user", "- Gate 4 - Slice plan: **in progress** by the user"))
+fault(["R9"], "Gate 3 re-approval reverted in the status line", lambda d: sub(d, "00-status.md", "- Gate 3 - Program Design: **RE-APPROVED 2026-10-12** by the user", "- Gate 3 - Program Design: **reopened 2026-10-12** by the user"))
+fault(["R9"], "Gate 4 checklist item unticked", lambda d: sub(d, "00-status.md", "- [x] Explicit user approval of Gate 4, 2026-10-12", "- [ ] Explicit user approval of Gate 4, 2026-10-12"))
+fault(["R9"], "approval missing from the history", lambda d: sub(d, "00-status.md", '- 2026-10-12: the user said "I approve both pls publish', '- 2026-10-12: the user said "I will approve later, pls publish'))
+fault(["R9"], "04 approval marker removed", lambda d: sub(d, "04-slices.md", "**APPROVED by the user on 2026-10-12**", "**Draft.**"))
+fault(["R9"], "handoff title reverted", lambda d: sub(d, "handoff.md", "# Envoi: Gates 1-4 approved, ready for S1", "# Envoi: Gate 4 revision drafted"))
+fault(["R9"], "stale draft wording in roadmap", lambda d: sub(d, "roadmap.md", "the Gate 4 slice plan was revised and approved on 2026-10-12", "the unapproved Gate 4 draft was revised on 2026-10-12"))
+fault(["R9"], "stale draft wording in the 01-product closing line", lambda d: sub(d, "01-product.md", "The slice plan in `04-slices.md` was revised and approved on 2026-10-12", "The slice plan is an unapproved draft in `04-slices.md`"))
+fault(["R9"], "handoff still awaits the Gate 4 question", lambda d: sub(d, "handoff.md", "## Next authorized action\n", "## Next authorized action\n\nThis awaits `Approve Gate 4, or what should change?`.\n"))
 fault(["R8"], "literal secret in a checker source", lambda d: append(d, os.path.join("checks", "gate4_check.py"), "# " + NPG + "\n"))
 
 results = []
