@@ -1,0 +1,28 @@
+# Render Free web service for the S1 tracer. Secret values are entered in the Render dashboard
+# (sync: false) and never committed. Migrations and operator commands run locally, not on Render.
+services:
+  - type: web
+    name: envoi
+    runtime: node
+    plan: free
+    # Next to Neon's aws-us-east-2, so database round trips stay in-region (R12 measures the rest).
+    region: ohio
+    branch: envoi/slice-1-tracer
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    autoDeployTrigger: commit
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: BETTER_AUTH_SECRET
+        sync: false
+      - key: BETTER_AUTH_URL
+        sync: false
+      - key: APP_BASE_URL
+        sync: false
+      - key: ENVOI_ENVIRONMENT
+        value: sandbox
+      - key: LOG_LEVEL
+        value: info
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
