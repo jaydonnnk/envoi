@@ -52,9 +52,10 @@ Proposed target remains 4 of 5 first-time buyers completing an eligible test-env
 
 ## Next authorized action
 
-**Next action: S1, only when the user authorizes it by its slice ID, such as "start S1", as rule 1 of `04-slices.md` says.**
-Gate 3's 2026-10-12 reopening was re-approved and Gate 4 was approved on 2026-10-12; both are recorded in `00-status.md`.
-On "start S1", create `envoi/slice-1-tracer` from the current `main` tip, confirm it with `git branch --show-current`, and request S1's listed authorizations by name before any install, migration, push or deployment.
+**Next action: S2, only when the user authorizes it by its slice ID, such as "start S2", as rule 1 of `04-slices.md` says.**
+S1 is done (2026-10-12): the tracer runs at `https://envoi-helx.onrender.com`, and its evidence and R12 numbers are in [`00-status.md`](00-status.md#s1-tracer-bullet-on-render-free-2026-10-12).
+Gate 3 was reopened and re-approved twice on 2026-10-12, for the PayPal kill switch and then for the `typescript@6.0.3` pin found by the S1 boot check; Gate 4 was approved the same day.
+On "start S2", create `envoi/slice-2-<slug>` from the current `main` tip, confirm it with `git branch --show-current`, and request S2's listed authorizations by name before any install, migration, push or deployment.
 The four major and the minor findings of the 2026-10-12 independent review are fixed or dispositioned, and delta D10 is carried by the Gate 3 reopening.
 The user authorized committing the work, publishing the branches, merging into `main` and pushing with the approvals; Git history and the remote are the evidence.
 Rerun the checker and its fault harness under [`checks/`](checks/gate4_check.py) after any edit to the gate folder.

@@ -19,7 +19,7 @@ Updated: 2026-10-12 (Asia/Singapore).
   The OpenAI provider pin does not change, and the completed R11 action/R12 region decision are not reopened.
 - Gate 4 - Slice plan: **APPROVED 2026-10-12** by the user ("I approve both pls publish the branches and commit all the changes to main so that we can proceed with the first slice"), on branch `envoi/gate-4-vision-pyusd`.
   Approval accepts the slice order, the test assignment, the cut order, deltas D1-D9 as refinements and D10's placement in S2; it starts no slice and authorizes no install, provisioning, deployment, spending, wallet use or OpenAI call.
-  No slice is authorized or started; S1 starts only on an authorization naming it, such as "start S1".
+  At approval no slice was authorized or started; S1 started on 2026-10-12 under the user's handover prompt and is done (see [S1](#s1-tracer-bullet-on-render-free-2026-10-12)).
   [`04-slices.md`](04-slices.md) now applies the reopened gates: S11 and S12 merge into S11, menu photo import with direct vision; the Zapier check is gone; S13 runs right after S4; PYUSD is added as S16, devnet purchase, and S17, recovery, after S13 and first in the cut order, with scan (S10) and account-conditional S14 following it.
   It applies the Gate 3 [test delta](03-program-design.md#test-delta-for-the-gate-4-revision): all 92 named tests and 231 cases are assigned once each, the 10 removed names nowhere, and 39 named additions, up from 20: 33 cover contracts with no named test in the slice that builds them, four are refinements of this plan and two are pin falsifiers.
   Proposed beyond the user's instructions and flagged for review: S11 moves ahead of S9 and S10, the PayPal basket lock lands in S7 with its `paypal/start` recheck, the R2 storage-exhaustion decision moves from S11 to S15, a second checkpoint on 1 Nov, a PYUSD go/no-go when S11 is done, delta D8, a static "PYUSD unavailable" option from S2, and delta D9's public-route limits.
@@ -75,11 +75,11 @@ Updated: 2026-10-12 (Asia/Singapore).
 
 Build order from `04-slices.md`, revised and approved 2026-10-12.
 Slice IDs are stable names, so the list below is in build order rather than numeric order; S12 is retired, merged into S11.
-No slice is authorized or started, and each one starts only on an explicit authorization that names its slice ID, such as "start S13"; a number in that request is the slice ID, not a build position.
-No application, payment integration or sponsor integration exists.
+S1 is done; every later slice starts only on an explicit authorization that names its slice ID, such as "start S13"; a number in that request is the slice ID, not a build position.
+The S1 tracer application is deployed on Render Free; no payment integration or sponsor integration exists.
 The candidate list in `roadmap.md` remains discussion material and is superseded as a build order by `04-slices.md` once that is approved.
 
-- [ ] S1 - Tracer bullet on Render Free: labeled demo shop from Neon to an explicitly unpaid stub receipt; boot check, auth schema pin, R12 latency measurement.
+- [x] S1 - Tracer bullet on Render Free: labeled demo shop from Neon to an explicitly unpaid stub receipt; boot check, auth schema pin, R12 latency measurement.
 - [ ] S2 - PayPal sandbox happy path with recipient and amount binding, lease-serialized capture, abandonment derived on read and PYUSD shown as unavailable.
 - [ ] S3 - PayPal recovery: lost responses, webhooks, reconcile, "checking payment".
 - [ ] S4 - Text entry with AI suggestions and the pre-registered model evaluation.
@@ -95,6 +95,40 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [ ] S17 - PYUSD recovery, extra transfers and the operator mismatch and refund acts.
 - [ ] S14 - APIMatic client and docs, account-conditional; third in the cut order.
 - [ ] S15 - Judged release.
+
+### S1 Tracer bullet on Render Free, 2026-10-12
+
+- **Branch:** `envoi/slice-1-tracer`, from `main` at `a1aa232`. Started on the user's handover prompt; the user authorized A1-A7 by name ("I authorize A1 to A7").
+- **Result [verified]:** `https://envoi-helx.onrender.com` (Render Free, Ohio; manual web service because Blueprints are paid on this account) lists one shop labeled "Demo fixture", read from Neon; its menu opens; "Review" stores the fixed fixture basket; "Continue" shows a receipt stating "No payment was attempted".
+  The user repeated the journey on their phone in Singapore on 2026-10-12.
+- **Tests [verified]:** all pass locally on PostgreSQL 18.6 and in CI.
+  - Gate 3: `auth configuration matches the approved gate`, `no secret reaches the committed tree` (self-test plants a connection string and its JSON-escaped form, a bearer value, and Windows paths in backslash, JSON-escaped and forward-slash forms, plus a macOS home path), `region latency is measured, not assumed` (reads `evidence/s1-r12-latency.json`).
+  - Additions: `auth tables resolve to public only`, `receipt is private to its session`, `re-seeding never changes an existing fixture`, `buyer session survives a redeploy` (on Render), `pinned versions boot together` (install, typecheck, build, start and an anonymous request, locally and on Render).
+- **Mutations, each recorded failing alone and passing once restored byte-identical:** neon.ts `auth: true`; removing each of the four scanner rules (connection string, bearer value, Windows path, macOS path); removing the `search_path` pin from migration 0001 (Better Auth then wrote into the `neon_auth` decoy); dropping the owner predicate (another session got 200); letting a re-seed write a new revision; deleting the R12 evidence file (`ENOENT`).
+  The redeploy guard's mutation, a new `BETTER_AUTH_SECRET` per boot, was proven on a local production build across a restart (same browser then got 404), not on Render.
+- **Redeploy on Render [verified]:** a session created before the `d4f1ac0` auto-deploy still read its receipt (200) afterwards; another session gets 404 on both the receipt page and the API.
+- **Resolved package set:** recorded in [Gate 3 Version pins](03-program-design.md#version-pins). The boot check failed on `typescript@7.0.2`, so Gate 3 was reopened and re-approved for `typescript@6.0.3`.
+- **Database [verified]:** Neon production reports PostgreSQL 18.6; the local test cluster (Postgres.app 18.6) and the CI `postgres:18` service image match (D3).
+  `envoi_web` was created by SQL (no superuser, createdb or createrole) under A2, its password written only to the ignored `.env.local` and Render; migrations 0000-0001 applied; `envoi_web` holds no grant in `neon_auth` and resolves `search_path=public` through both the direct and the pooled connection.
+  `seed-demo-fixture` created outlet `out_wgoyp6kgg75472b6s772dplgoq`; a second run changed nothing.
+- **`neon_auth` listing [verified]:** before and after migration it holds exactly the nine tables recorded on 2026-10-07.
+  The "before" listing ran only SELECTs but its read-only startup setting did not take effect through Neon; the "after" listing ran inside an enforced `READ ONLY` transaction.
+- **CI minutes [verified]:** about 1 to 1.5 minutes per run on `ubuntu-24.04` (D4).
+- **R12 [verified], client in Singapore (stated by the user), 2026-10-12, [evidence file](evidence/s1-r12-latency.json):**
+
+  | Visit | Interactive buy page | Render wake (derived) | Database share (Neon wake + queries) | Server time |
+  | --- | --- | --- | --- | --- |
+  | cold-1, 22:13 SGT | 36.2 s | 32.7 s | 1.8 s | 1.8 s |
+  | cold-2, 22:34 SGT | 26.1 s | 23.0 s | 1.5 s | 1.5 s |
+  | cold-3, 22:56 SGT | 26.3 s | 22.7 s | 2.0 s | 2.0 s |
+  | warm-1, 22:56 SGT | 1.8 s | 0.2 s | 0.01 s | 0.01 s |
+
+  Every cold visit's database share is far under the pre-registered 18-second threshold, so relocation is not put to the user; the Neon wake itself is about 1.5 to 2 seconds (cold minus warm database time).
+  Render's cold start, 23 to 33 seconds, is the dominant cost and uses up to about 20% of the three-minute budget before the buyer has done anything.
+  Cold means at least 21 minutes without a request; "interactive" means the server-rendered HTML plus every referenced stylesheet and script.
+- **Screens [verified]:** checked in a real browser at 390px and 1280px on Render, with the fixture label in every view; three defects found and fixed (basket copy, receipt reference wrap, total alignment).
+- **Post-slice cleanup:** `isId` and `systemNow` removed with the user's approval; no orphan file, TODO or skipped test.
+- **Known limits:** no Playwright journey test exists yet (D4); the redeploy mutation was not run on Render; `npm audit` advisories in build tooling are recorded in Gate 3; `.env` also holds owner credentials locally (ignored, the user's file).
 
 ## Gate 3 cross-check results, 2026-10-07
 
@@ -224,7 +258,7 @@ It supplied no authority for later revisions. **2026-10-11:** the user authorize
 
 **2026-10-12, with the Gate 3 re-approval and the Gate 4 approval:** the user authorized publishing the branches, committing the work and merging it into `main`; a record cannot contain its own commit, so Git history and the remote are the evidence.
 
-**STOP here: Gates 1-4 are approved, and no slice is started.** The next step is S1, only on the user's authorization naming it, such as "start S1".
+**STOP here: Gates 1-4 are approved and S1 is done.** The next step is S2, only on the user's authorization naming it, such as "start S2".
 Gate 3 was re-approved on 2026-10-12 after its one-change reopening, and Gate 4 was approved the same day ("I approve both pls publish the branches and commit all the changes to main so that we can proceed with the first slice").
 Further commits, pushes or merges need their own authorization.
 No slice starts without an authorization naming its slice ID.
