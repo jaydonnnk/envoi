@@ -1,5 +1,7 @@
-# Render Free web service for the S1 tracer. Secret values are entered in the Render dashboard
-# (sync: false) and never committed. Migrations and operator commands run locally, not on Render.
+# Render Free web service for the S1 tracer. NOT applied as a Blueprint (Blueprints are paid on
+# this account): the service is created by hand in the dashboard with exactly these settings, and
+# this file is the record to keep them in sync with. Secret values are entered in the dashboard and
+# never committed. Migrations and operator commands run locally, not on Render.
 services:
   - type: web
     name: envoi
@@ -14,9 +16,10 @@ services:
     envVars:
       - key: DATABASE_URL
         sync: false
-      # Generated once by Render at creation and kept across deploys, so sessions survive a redeploy.
+      # Generated once by the operator, entered by hand and never rotated per deploy, so sessions
+      # survive a redeploy.
       - key: BETTER_AUTH_SECRET
-        generateValue: true
+        sync: false
       - key: BETTER_AUTH_URL
         sync: false
       - key: APP_BASE_URL
