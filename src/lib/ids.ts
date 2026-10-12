@@ -24,7 +24,3 @@ function base32(bytes: Uint8Array): string {
 export function newId(prefix: IdPrefix): string {
   return `${prefix}_${base32(randomBytes(16))}`;
 }
-
-export function isId(prefix: IdPrefix, value: string): boolean {
-  return new RegExp(`^${prefix}_[a-z2-7]{26}$`).test(value);
-}

@@ -6,7 +6,6 @@ const DURATION_MS: Record<ClockName, number> = {
 };
 
 export type Now = () => Date;
-export const systemNow: Now = () => new Date();
 
 export function deadlineOf(clock: ClockName, startedAt: Date): Date {
   return new Date(startedAt.getTime() + DURATION_MS[clock]);
