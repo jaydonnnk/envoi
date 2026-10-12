@@ -39,7 +39,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ purcha
             <span className="money">{formatSgd(sgdFromCents(line.lineSgdCents))}</span>
           </div>
         ))}
-        <div className="row">
+        <div className="row total-row">
           <strong>Reviewed total</strong>
           <span className="total money">{formatSgd(sgdFromCents(purchase.totalSgdCents))}</span>
         </div>
@@ -47,7 +47,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ purcha
           <span className="muted">Reviewed</span>
           <span>{SINGAPORE_TIME.format(purchase.createdAt)}</span>
         </div>
-        <div className="row">
+        <div className="row stacked">
           <span className="muted">Reference</span>
           <span className="mono">{purchase.id}</span>
         </div>

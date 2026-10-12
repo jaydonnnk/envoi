@@ -40,6 +40,11 @@ main { max-width: 960px; margin: auto; padding: 28px 24px 56px; }
 .card.warning { background: var(--warn); border-color: #e3c17f; }
 .row { display: flex; align-items: start; justify-content: space-between; gap: 16px; padding: 11px 0; border-bottom: 1px solid var(--line); }
 .row:last-child { border: 0; }
+.row.total-row { align-items: center; }
+/* A long identifier gets its own full-width line instead of wrapping beside its label. */
+@media (max-width: 640px) {
+  .row.stacked { flex-direction: column; gap: 2px; }
+}
 .muted, small { color: var(--muted); }
 small { font-size: 13px; display: block; }
 .total { font-size: 28px; font-weight: 700; letter-spacing: -0.03em; }

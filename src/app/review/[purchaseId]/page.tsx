@@ -33,7 +33,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ purchas
               <span className="money">{formatSgd(sgdFromCents(line.lineSgdCents))}</span>
             </div>
           ))}
-          <div className="row">
+          <div className="row total-row">
             <strong>Total</strong>
             <span className="total money">{formatSgd(sgdFromCents(purchase.totalSgdCents))}</span>
           </div>

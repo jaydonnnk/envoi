@@ -45,8 +45,8 @@ export default async function BuyPage({ searchParams }: { searchParams: Promise<
           <section className="card" aria-labelledby="tracer-heading">
             <h2 id="tracer-heading">Fixture basket</h2>
             <p className="muted">
-              This tracer build reviews one fixed basket chosen by the server: one {menu.items[0]?.name ?? "item"} and two{" "}
-              {menu.items[1]?.name ?? "items"}. Choosing your own items comes later.
+              This tracer build reviews one fixed basket chosen by the server: 1 × {menu.items[0]?.name ?? "item"} and 2 ×{" "}
+              {menu.items[1]?.name ?? "item"}. Choosing your own items comes later.
             </p>
             <ReviewButton outletId={menu.outlet.id} />
           </section>
