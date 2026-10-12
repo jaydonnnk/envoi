@@ -1,0 +1,12 @@
+import { defineConfig } from "drizzle-kit";
+
+// Generation only reads the schema file; migrations are applied by src/lib/db/migrate.ts.
+// The schema filter keeps drizzle-kit away from the neon_auth schema (R11 containment).
+export default defineConfig({
+  dialect: "postgresql",
+  schema: "./src/lib/db/schema.ts",
+  out: "./drizzle",
+  schemaFilter: ["public"],
+  strict: true,
+  verbose: true,
+});

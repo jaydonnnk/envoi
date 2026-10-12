@@ -10,3 +10,5 @@ playwright-report/
 test-results/
 .vitest/
 *.tsbuildinfo
+!.env.example
+next-env.d.ts
