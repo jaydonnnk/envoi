@@ -1,0 +1,197 @@
+{
+ "recorded": "2026-10-13",
+ "branch": "envoi/slice-2-paypal-happy-path",
+ "method": "Each guard mutated alone in the working tree, the named test run alone (vitest -t), the file restored and its SHA-256 compared with the original, then the test rerun. Integration tests ran on local PostgreSQL 18.6 with the real schema; PayPal is the labeled fixture fake at the PayPalWriteClient boundary.",
+ "results": [
+  {
+   "id": "prices",
+   "test": "prices come only from the confirmed revision",
+   "mutation": "route passes the raw body lines and priceBasket prefers a body unitSgdCents",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected 3 to be 600 // Object.is equality",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "unknown-price",
+   "test": "unknown price never becomes zero",
+   "mutation": "priceBasket defaults a null price to 0",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected 201 to be 400 // Object.is equality",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "same-basket",
+   "test": "same basket twice returns the same review",
+   "mutation": "drop the purchases_one_open_review partial unique index from migration 0002",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "Error: Failed query: insert into \"purchases\" (\"id\", \"buyer_user_id\", \"outlet_id\", \"menu_revision_id\", \"state\", \"entry_point\", \"lines\", \"total_sgd_cents\", \"currency\", \"review_expires_at\", \"created_at\", \"rail\", \"destinatio",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "revision-key",
+   "test": "a changed menu revision is a new checkout",
+   "mutation": "remove menuRevisionId from the hash input",
+   "mutated": "Tests  1 failed | 2 skipped (3)",
+   "error": "AssertionError: expected 'f6d81c7f428a0479c274b4c54286e4c6e56a1\u2026' not to be 'f6d81c7f428a0479c274b4c54286e4c6e56a1\u2026' // Object.is equality",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "proof": true
+  },
+  {
+   "id": "replacement",
+   "test": "replacement only from a terminal unpaid state",
+   "mutation": "allow replacement from any state (no pending_payment/uncertain refusal)",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected 201 to be 409 // Object.is equality",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "lease",
+   "test": "capture requires an owned lease",
+   "mutation": "remove the lease check (proceed without an owned lease)",
+   "mutated": "Tests  1 failed | 7 skipped (8)",
+   "error": "AssertionError: expected { Object (status, view, ...) } to match object { status: 'in_flight' } (the second completion captured without a lease; the unhandled rejection is the first completion's lease release after the test closed its pool)",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 7 skipped (8)",
+   "proof": true
+  },
+  {
+   "id": "amount",
+   "test": "amount mismatch quarantines",
+   "mutation": "relax the amount comparison to a one-cent tolerance",
+   "mutated": "Tests  1 failed | 7 skipped (8)",
+   "error": "AssertionError: expected { ok: true, \u2026(1) } to match object { ok: true, data: { \u2026(2) } }",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 7 skipped (8)",
+   "proof": true
+  },
+  {
+   "id": "payee",
+   "test": "payee mismatch quarantines",
+   "mutation": "drop the payee comparison in decideCaptureOutcome",
+   "mutated": "Tests  1 failed | 7 skipped (8)",
+   "error": "AssertionError: expected { ok: true, \u2026(1) } to match object { ok: true, \u2026(1) }",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 7 skipped (8)",
+   "proof": true
+  },
+  {
+   "id": "precapture-payee",
+   "test": "an approved order that does not match is never captured",
+   "mutation": "drop the payee comparison in verifyApprovedOrder",
+   "mutated": "Tests  1 failed | 7 skipped (8)",
+   "error": "AssertionError: expected 200 to be 409 // Object.is equality",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 7 skipped (8)",
+   "proof": true
+  },
+  {
+   "id": "return-get",
+   "test": "GET return page cannot capture",
+   "mutation": "add a capture (completePayPal) to the GET return page",
+   "mutated": "Tests  1 failed (1)",
+   "error": "AssertionError: expected [ { op: 'createOrder', \u2026(2) }, \u2026(1) ] to have a length of 1 but got 2",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed (1)",
+   "proof": true
+  },
+  {
+   "id": "expired-start",
+   "test": "expired review cannot start a payment",
+   "mutation": "skip the T_REVIEW clock check in assertPaymentEligible",
+   "mutated": "Tests  1 failed | 2 skipped (3)",
+   "error": "AssertionError: expected 200 to be 409 // Object.is equality",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "proof": true
+  },
+  {
+   "id": "never-returns",
+   "test": "an approved PayPal order that never returns closes unpaid",
+   "mutation": "give externally_approved no exit (drop it from PRE_CAPTURE_STATES)",
+   "mutated": "Tests  1 failed | 7 skipped (8)",
+   "error": "AssertionError: expected { ok: true, data: { \u2026(14) } } to match object { ok: true, data: { \u2026(2) } }",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 7 skipped (8)",
+   "proof": true
+  },
+  {
+   "id": "dispatch-deadline",
+   "test": "capture is never dispatched once the review has expired",
+   "mutation": "drop the review-deadline predicate from the dispatch compare-and-set",
+   "mutated": "Tests  1 failed | 7 skipped (8)",
+   "error": "AssertionError: expected { ok: true, \u2026(1) } to match object { ok: false, \u2026(1) }",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 7 skipped (8)",
+   "proof": true
+  },
+  {
+   "id": "double-start",
+   "test": "double start returns the same attempt",
+   "mutation": "remove the purchase row lock (FOR UPDATE) in startPayPal",
+   "mutated": "Tests  1 failed | 2 skipped (3)",
+   "error": "AssertionError: expected { code: 'execution_locked', \u2026(3) } to not have property \"code\"",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "proof": true
+  },
+  {
+   "id": "one-active",
+   "test": "a purchase holds at most one non-terminal attempt",
+   "mutation": "drop the payment_attempts_one_active partial unique index from migration 0002",
+   "mutated": "Tests  1 failed | 2 skipped (3)",
+   "error": "AssertionError: promise resolved \"undefined\" instead of rejecting",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "proof": true
+  },
+  {
+   "id": "destination-once",
+   "test": "a rerun naming the same or another seller changes no row or version and reports the existing one",
+   "mutation": "let a rerun replace the destination (ON CONFLICT DO UPDATE)",
+   "mutated": "Tests  1 failed | 1 skipped (2)",
+   "error": "AssertionError: expected { status: 'created', \u2026(4) } to deeply equal { status: 'unchanged', \u2026(4) }",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 1 skipped (2)",
+   "proof": true
+  },
+  {
+   "id": "live-host",
+   "test": "live PayPal host is refused at boot",
+   "mutation": "add the live host api-m.paypal.com to the allowlist",
+   "mutated": "Tests  1 failed | 1 skipped (2)",
+   "error": "AssertionError: https://api-m.paypal.com: expected [Function] to throw an error",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 1 skipped (2)",
+   "proof": true
+  },
+  {
+   "id": "rail-pyusd",
+   "test": "rail pyusd is refused before PYUSD exists",
+   "mutation": "let priceBasket price any rail as PayPal",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected 201 to be 409 // Object.is equality",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "kill-switch",
+   "test": "payments kill switch refuses PayPal start and completion",
+   "mutation": "skip the PAYMENTS_ENABLED check in assertPaymentEligible",
+   "mutated": "Tests  2 failed (2)",
+   "error": "AssertionError: expected 200 to be 503 // Object.is equality",
+   "restored_identical": true,
+   "rerun": "Tests  2 passed (2)",
+   "proof": true
+  }
+ ]
+}
