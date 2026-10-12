@@ -1,11 +1,14 @@
-// Named clocks (Gate 3, Named clocks). S1 uses only T_REVIEW; later slices add their durations here.
-export type ClockName = "T_REVIEW";
+// Named clocks (Gate 3, Named clocks). Later slices add their durations here.
+export type ClockName = "T_REVIEW" | "T_LEASE";
 
 const DURATION_MS: Record<ClockName, number> = {
   T_REVIEW: 5 * 60_000,
+  T_LEASE: 5 * 60_000,
 };
 
 export type Now = () => Date;
+
+export const systemNow: Now = () => new Date();
 
 export function deadlineOf(clock: ClockName, startedAt: Date): Date {
   return new Date(startedAt.getTime() + DURATION_MS[clock]);

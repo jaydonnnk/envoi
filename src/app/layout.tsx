@@ -22,10 +22,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </header>
         <div className="notice" role="note">
-          Demo fixture shops only. No real money. This build attempts no payment.
+          Demo fixture shops and PayPal sandbox test money only. No real money moves.
         </div>
         {children}
-        <footer>Envoi tracer build. Shops shown here are labeled demo fixtures, not real merchants.</footer>
+        <footer>Envoi test build. Shops shown here are labeled demo fixtures, not real merchants, and payments use PayPal sandbox accounts.</footer>
       </body>
     </html>
   );

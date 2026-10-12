@@ -18,6 +18,13 @@ const webSchema = z.object({
   APP_BASE_URL: z.url(),
   ENVOI_ENVIRONMENT: environment,
   LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
+  // Sandbox REST app credentials. The API host is a reviewed code constant, never configuration.
+  PAYPAL_CLIENT_ID: z.string().min(1),
+  PAYPAL_CLIENT_SECRET: z.string().min(1),
+  PAYPAL_PARTNER_ATTRIBUTION_ID: z.string().min(1),
+  // Kill switch for new PayPal starts and captures (D10). Must be stated explicitly; reads,
+  // reconcile, webhooks and maintenance never check it.
+  PAYMENTS_ENABLED: z.enum(["true", "false"]).transform((value) => value === "true"),
 });
 
 const migrationSchema = z.object({ MIGRATION_DATABASE_URL: postgresUrl });

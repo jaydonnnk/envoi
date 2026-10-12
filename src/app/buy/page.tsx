@@ -1,7 +1,6 @@
 import { getPublishedMenu, listPublishedOutlets } from "@/domain/outlets/search";
 import { webDb } from "@/lib/db/web";
-import { formatSgd, sgdFromCents } from "@/lib/money";
-import { ReviewButton } from "./review-button";
+import { BasketForm } from "./basket-form";
 
 export const dynamic = "force-dynamic";
 
@@ -32,25 +31,10 @@ export default async function BuyPage({ searchParams }: { searchParams: Promise<
         <p className="lead">
           {menu.outlet.area} {menu.outlet.isDemoFixture && <span className="chip warn">Demo fixture</span>}
         </p>
-        <div className="stack">
-          <section className="card" aria-labelledby="menu-heading">
-            <h2 id="menu-heading">Menu</h2>
-            {menu.items.map((item) => (
-              <div className="row" key={item.id}>
-                <span>{item.name}</span>
-                <span className="money">{item.unitSgdCents === null ? "Price not set" : formatSgd(sgdFromCents(item.unitSgdCents))}</span>
-              </div>
-            ))}
-          </section>
-          <section className="card" aria-labelledby="tracer-heading">
-            <h2 id="tracer-heading">Fixture basket</h2>
-            <p className="muted">
-              This tracer build reviews one fixed basket chosen by the server: 1 × {menu.items[0]?.name ?? "item"} and 2 ×{" "}
-              {menu.items[1]?.name ?? "item"}. Choosing your own items comes later.
-            </p>
-            <ReviewButton outletId={menu.outlet.id} />
-          </section>
-        </div>
+        <section className="card" aria-labelledby="menu-heading">
+          <h2 id="menu-heading">Choose items</h2>
+          <BasketForm outletId={menu.outlet.id} items={menu.items} />
+        </section>
       </main>
     );
   }

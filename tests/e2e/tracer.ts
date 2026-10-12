@@ -1,4 +1,6 @@
-// S1 end-to-end checks against a running deployment (local `next start` or Render).
+// Session and privacy checks against a running deployment (local `next start` or Render), first
+// written for S1 and kept for every redeploy. Since S2 the review is a real server-priced basket;
+// no payment is started, so the receipt must read "Not paid".
 //
 //   npx tsx tests/e2e/tracer.ts start <baseUrl> <jarFile>   buyer journey + other-session 404; saves the session
 //   npx tsx tests/e2e/tracer.ts check <baseUrl> <jarFile>   after a redeploy: same session still reads its receipt
@@ -39,17 +41,21 @@ async function start(baseUrl: string, jarFile: string): Promise<void> {
   const buy = await (await fetch(`${baseUrl}/buy`)).text();
   if (!buy.includes("Demo fixture")) fail("/buy does not label the demo fixture");
 
+  const menu = (await (await fetch(`${baseUrl}/api/v1/outlets/${fixture.id}/menu`)).json()) as { data: { items: { id: string; unitSgdCents: number | null }[] } };
+  const item = menu.data.items.find((candidate) => candidate.unitSgdCents !== null);
+  if (!item) fail("the demo fixture has no priced item");
+
   const cookie = await anonymous(baseUrl);
   const created = await fetch(`${baseUrl}/api/v1/purchases`, {
     method: "POST",
     headers: { cookie, "content-type": "application/json", origin: baseUrl },
-    body: JSON.stringify({ outletId: fixture.id }),
+    body: JSON.stringify({ outletId: fixture.id, rail: "paypal", lines: [{ menuItemId: item.id, quantity: 1 }] }),
   });
   if (created.status !== 201) fail(`POST /api/v1/purchases answered ${created.status}`);
   const { data } = (await created.json()) as { data: { purchaseId: string } };
 
   const own = await receipt(baseUrl, cookie, data.purchaseId);
-  if (own.status !== 200 || !own.html.includes("No payment was attempted")) fail(`own receipt answered ${own.status}`);
+  if (own.status !== 200 || !own.html.includes("Not paid") || own.html.includes("PayPal sandbox capture")) fail(`own receipt answered ${own.status}`);
 
   const other = await anonymous(baseUrl);
   const theirs = await receipt(baseUrl, other, data.purchaseId);
@@ -57,13 +63,13 @@ async function start(baseUrl: string, jarFile: string): Promise<void> {
   if (theirs.status !== 404 || theirsApi.status !== 404) fail(`other session got page ${theirs.status}, api ${theirsApi.status}`);
 
   writeFileSync(jarFile, JSON.stringify({ cookie, purchaseId: data.purchaseId } satisfies Jar), { mode: 0o600 });
-  console.log(`PASS journey: purchase ${data.purchaseId}; own receipt 200 "No payment was attempted"; other session page 404, api 404`);
+  console.log(`PASS journey: purchase ${data.purchaseId}; own receipt 200 "Not paid"; other session page 404, api 404`);
 }
 
 async function check(baseUrl: string, jarFile: string): Promise<void> {
   const jar = JSON.parse(readFileSync(jarFile, "utf8")) as Jar;
   const own = await receipt(baseUrl, jar.cookie, jar.purchaseId);
-  if (own.status !== 200 || !own.html.includes("No payment was attempted")) fail(`same session after redeploy answered ${own.status}`);
+  if (own.status !== 200 || !own.html.includes("Not paid")) fail(`same session after redeploy answered ${own.status}`);
   console.log(`PASS same session still reads receipt ${jar.purchaseId} (200)`);
 }
 

@@ -27,5 +27,10 @@ export function webEnvFor(databaseUrl: string): Record<string, string> {
     APP_BASE_URL: TEST_BASE_URL,
     ENVOI_ENVIRONMENT: "local",
     LOG_LEVEL: "warn",
+    // Fixture values: tests fake PayPal at the PayPalWriteClient boundary and never call it.
+    PAYPAL_CLIENT_ID: "fixture-client-id",
+    PAYPAL_CLIENT_SECRET: "fixture-client-secret",
+    PAYPAL_PARTNER_ATTRIBUTION_ID: "fixture-attribution",
+    PAYMENTS_ENABLED: "true",
   };
 }

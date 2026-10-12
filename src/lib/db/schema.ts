@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, index, integer, jsonb, pgTable, text, timestamp, type AnyPgColumn } from "drizzle-orm/pg-core";
+import { boolean, check, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex, type AnyPgColumn } from "drizzle-orm/pg-core";
 
 // Every table lives in public. drizzle-orm refuses pgSchema("public"), so the schema pin is the
 // web role's search_path, set per database in migration 0001 (R11 containment).
@@ -123,9 +123,47 @@ export const menuItems = pgTable(
   ],
 );
 
-// Purchases. S1 stores only tracer reviews; S2 replaces the tracer with real pricing.
+// Payment destinations. Written only by the operator CLI, which creates one per outlet and rail and
+// never replaces it (D1). The seller id is verified data, not a secret.
+
+export const paymentDestinations = pgTable(
+  "payment_destinations",
+  {
+    id: text("id").primaryKey(),
+    outletId: text("outlet_id")
+      .notNull()
+      .references(() => outlets.id),
+    rail: text("rail").notNull(),
+    environment: text("environment").notNull(),
+    sellerMerchantId: text("seller_merchant_id").notNull(),
+    status: text("status").notNull(),
+    version: integer("version").notNull().default(1),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    check("payment_destinations_rail_check", sql`${t.rail} in ('paypal')`),
+    check("payment_destinations_environment_check", sql`${t.environment} = 'sandbox'`),
+    check("payment_destinations_status_check", sql`${t.status} in ('active', 'disconnected')`),
+    check("payment_destinations_version_check", sql`${t.version} > 0`),
+    uniqueIndex("payment_destinations_outlet_rail_unique").on(t.outletId, t.rail),
+  ],
+);
+
+// Purchases. Tracer rows from S1 keep entry point fixture_tracer and carry no payment binding;
+// every later review is bound to its rail, destination version and checkout key.
 
 export type StoredLine = { menuItemId: string; name: string; quantity: number; unitSgdCents: number; lineSgdCents: number };
+
+export const PURCHASE_STATES = [
+  "review_open",
+  "review_expired",
+  "review_invalidated",
+  "superseded",
+  "pending_payment",
+  "paid",
+  "unpaid_closed",
+  "uncertain",
+] as const;
 
 export const purchases = pgTable(
   "purchases",
@@ -147,15 +185,106 @@ export const purchases = pgTable(
     currency: text("currency").notNull(),
     reviewExpiresAt: timestamp("review_expires_at", { withTimezone: true }).notNull(),
     createdAt: createdAt(),
+    rail: text("rail"),
+    destinationId: text("destination_id").references(() => paymentDestinations.id),
+    destinationVersion: integer("destination_version"),
+    checkoutKey: text("checkout_key"),
+    supersedesPurchaseId: text("supersedes_purchase_id").references((): AnyPgColumn => purchases.id),
   },
   (t) => [
     check(
       "purchases_state_check",
       sql`${t.state} in ('review_open', 'review_expired', 'review_invalidated', 'superseded', 'pending_payment', 'paid', 'unpaid_closed', 'uncertain')`,
     ),
-    check("purchases_entry_point_check", sql`${t.entryPoint} in ('fixture_tracer')`),
+    check("purchases_entry_point_check", sql`${t.entryPoint} in ('fixture_tracer', 'manual')`),
     check("purchases_currency_check", sql`${t.currency} = 'SGD'`),
     check("purchases_total_check", sql`${t.totalSgdCents} > 0`),
+    check("purchases_rail_check", sql`${t.rail} is null or ${t.rail} in ('paypal', 'pyusd')`),
+    check(
+      "purchases_binding_check",
+      sql`${t.entryPoint} = 'fixture_tracer' or (${t.rail} is not null and ${t.destinationId} is not null and ${t.destinationVersion} is not null and ${t.checkoutKey} is not null)`,
+    ),
     index("purchases_buyer_idx").on(t.buyerUserId),
+    // One open review per buyer and checkout key (Gate 3 Races: two tabs create the same basket).
+    uniqueIndex("purchases_one_open_review").on(t.buyerUserId, t.checkoutKey).where(sql`${t.state} = 'review_open'`),
   ],
+);
+
+// PayPal payment attempts. Operation keys are persisted before the provider call they name, and
+// at most one attempt per purchase is outside a terminal state.
+
+export const ATTEMPT_STATES = [
+  "created",
+  "order_created",
+  "externally_approved",
+  "capture_dispatched",
+  "capture_confirmed",
+  "capture_failed",
+  "create_unknown",
+  "capture_unknown",
+  "abandoned",
+] as const;
+
+export const paymentAttempts = pgTable(
+  "payment_attempts",
+  {
+    id: text("id").primaryKey(),
+    purchaseId: text("purchase_id")
+      .notNull()
+      .references(() => purchases.id),
+    state: text("state").notNull(),
+    // Snapshot of what the order must carry, taken from the purchase and its destination.
+    payeeMerchantId: text("payee_merchant_id").notNull(),
+    totalSgdCents: integer("total_sgd_cents").notNull(),
+    currency: text("currency").notNull(),
+    createRequestId: text("create_request_id").notNull().unique(),
+    orderId: text("order_id").unique(),
+    approvalUrl: text("approval_url"),
+    captureRequestId: text("capture_request_id").unique(),
+    captureId: text("capture_id").unique(),
+    captureGrossSgdCents: integer("capture_gross_sgd_cents"),
+    captureVerifiedAt: timestamp("capture_verified_at", { withTimezone: true }),
+    outcomeReason: text("outcome_reason"),
+    leaseOwner: text("lease_owner"),
+    leaseExpiresAt: timestamp("lease_expires_at", { withTimezone: true }),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    check(
+      "payment_attempts_state_check",
+      sql`${t.state} in ('created', 'order_created', 'externally_approved', 'capture_dispatched', 'capture_confirmed', 'capture_failed', 'create_unknown', 'capture_unknown', 'abandoned')`,
+    ),
+    check("payment_attempts_currency_check", sql`${t.currency} = 'SGD'`),
+    check("payment_attempts_total_check", sql`${t.totalSgdCents} > 0`),
+    // A capture is never dispatched without its request id persisted first.
+    check(
+      "payment_attempts_capture_key_check",
+      sql`${t.state} not in ('capture_dispatched', 'capture_confirmed', 'capture_unknown') or ${t.captureRequestId} is not null`,
+    ),
+    check("payment_attempts_confirmed_check", sql`${t.state} <> 'capture_confirmed' or ${t.captureId} is not null`),
+    // One non-terminal attempt per purchase (Gate 3 Races: double click on "continue to PayPal").
+    uniqueIndex("payment_attempts_one_active")
+      .on(t.purchaseId)
+      .where(sql`${t.state} not in ('abandoned', 'capture_failed', 'capture_confirmed')`),
+  ],
+);
+
+// Append-only audit trail: the web role may insert but never update or delete. Details hold
+// allowlisted identifiers and reasons only, never provider bodies, tokens or personal data.
+
+export const auditEvents = pgTable(
+  "audit_events",
+  {
+    id: text("id").primaryKey(),
+    at: timestamp("at", { withTimezone: true }).notNull(),
+    actor: text("actor").notNull(),
+    action: text("action").notNull(),
+    purchaseId: text("purchase_id"),
+    attemptId: text("attempt_id"),
+    outletId: text("outlet_id"),
+    operatorVisible: boolean("operator_visible").notNull(),
+    details: jsonb("details").$type<Record<string, string | number | boolean | null>>().notNull(),
+  },
+  (t) => [index("audit_events_purchase_idx").on(t.purchaseId), index("audit_events_operator_idx").on(t.operatorVisible, t.at)],
 );
