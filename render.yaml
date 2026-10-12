@@ -1,4 +1,4 @@
-# Render Free web service for the S1 tracer. NOT applied as a Blueprint (Blueprints are paid on
+# Render Free web service. NOT applied as a Blueprint (Blueprints are paid on
 # this account): the service is created by hand in the dashboard with exactly these settings, and
 # this file is the record to keep them in sync with. Secret values are entered in the dashboard and
 # never committed. Migrations and operator commands run locally, not on Render.
@@ -9,7 +9,7 @@ services:
     plan: free
     # Next to Neon's aws-us-east-2, so database round trips stay in-region (R12 measures the rest).
     region: ohio
-    branch: envoi/slice-1-tracer
+    branch: main
     buildCommand: npm ci && npm run build
     startCommand: npm run start
     autoDeployTrigger: commit
@@ -30,3 +30,17 @@ services:
         value: info
       - key: NEXT_TELEMETRY_DISABLED
         value: "1"
+      # PayPal sandbox REST app (S2). Secret values are entered by hand; the API host is a code
+      # constant on a sandbox-only allowlist, so no variable can point the app at live PayPal.
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: PAYPAL_PARTNER_ATTRIBUTION_ID
+        sync: false
+      # Set now so S3 needs no Render change; the app reads it from S3 (webhook verification).
+      - key: PAYPAL_WEBHOOK_ID
+        sync: false
+      # Kill switch for new PayPal starts and captures (D10): "true" or "false", entered by hand.
+      - key: PAYMENTS_ENABLED
+        sync: false
