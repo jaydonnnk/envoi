@@ -1,4 +1,4 @@
-# Envoi: Gates 1-4 approved, S1 and S2 done, ready for S3
+# Envoi: Gates 1-4 approved, S1, S2 and S3 done, ready for S4
 
 Updated 2026-10-13.
 Gate 1 was re-approved on 2026-10-10; do not redo it.
@@ -8,7 +8,7 @@ The Gate 3 revision of affected contracts was drafted on 2026-10-11 on branch `e
 On 2026-10-12 the user reopened Gate 3 for one change, a PayPal check of `PAYMENTS_ENABLED` with the error code `payments_disabled`, and re-approved it the same day.
 The Gate 4 revision of `04-slices.md` was drafted on 2026-10-12 on branch `envoi/gate-4-vision-pyusd` and approved by the user on 2026-10-12 ("I approve both pls publish the branches and commit all the changes to main so that we can proceed with the first slice"); the user authorized committing it and merging it into `main`.
 All unaffected 2026-10-07 approvals stand, including Render Free/Neon Free/in-app Better Auth/GitHub Actions, PayPal recovery, identity-only scan, MCP, R11 and R12.
-The application runs on Render Free with the S2 PayPal sandbox payment; its evidence is in status.
+The application runs on Render Free with the S2 PayPal sandbox payment and S3's PayPal recovery and verified webhook inbox; their evidence is in status.
 On 2026-10-11 the user authorized committing this work, publishing its branch and merging it into `main`; Git publication is not gate approval.
 
 Workspace: `/Users/jayd0/Desktop/envoi` on macOS (arm64) since 2026-10-10; Gates 1-3 ran at `C:\Users\jayd0\OneDrive\Desktop\envoi` on Windows. An earlier revision of this file recorded `C:\Users\jayd0\OneDrive - Temasek Polytechnic\Documents 1\Envoi`; that path is stale and is corrected here. No decision depended on it.
@@ -52,12 +52,11 @@ Proposed target remains 4 of 5 first-time buyers completing an eligible test-env
 
 ## Next authorized action
 
-**Next action: S3, only when the user authorizes it by its slice ID, such as "start S3", as rule 1 of `04-slices.md` says.**
-S2 is done (2026-10-13): a real sandbox capture paid the distinct seller `EQN6264CF9F4Y` exactly, and its evidence is in [`00-status.md`](00-status.md#s2-paypal-sandbox-happy-path-2026-10-13).
-Two purchases from the S2 run stay `uncertain` until S3's provider reconciliation: their captures were refused before the seller consented, and no money moved.
+**Next action: S4, only when the user authorizes it by its slice ID, such as "start S4", as rule 1 of `04-slices.md` says.**
+S3 is done (2026-10-13): fixture fault injection shows lost responses converging on the same capture or staying "Checking payment", and a real sandbox webhook reached Render, was verified and triggered a provider read; its evidence is in [`00-status.md`](00-status.md#s3-paypal-recovery-2026-10-13).
+The two S2 purchases that PayPal refused before the seller consented stay `uncertain` for good, by the user's choice on 2026-10-13: PayPal no longer holds either order, so the approved failure rule cannot close them, and no money moved.
 The seller's consent to Envoi's Platform app was granted out of band through a sandbox partner-referral link; Envoi does not check it before creating an order.
-`PAYPAL_WEBHOOK_ID` is already set in `.env.local` and on Render for S3.
-On "start S3", create `envoi/slice-3-<slug>` from the current `main` tip, confirm it with `git branch --show-current`, and request S3's listed authorizations by name before any install, migration, push or deployment.
+S4 makes Envoi's first OpenAI call; on "start S4", create `envoi/slice-4-text-entry` from the current `main` tip, confirm it with `git branch --show-current`, and request S4's listed authorizations by name before any install, migration, model call, push or deployment.
 Rerun the checker and its fault harness under [`checks/`](checks/gate4_check.py) after any edit to the gate folder.
 Gate 3 was re-approved on 2026-10-11 with fixes A-M; its record, mirrors and fail-capable checks are in `00-status.md`.
 The four reopening questions were already answered and Gates 1 and 2 are re-approved; do not ask them again or revise either gate.

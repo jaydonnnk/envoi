@@ -1,0 +1,41 @@
+FIXTURE fault-injection transcript, Slice S3 PayPal recovery.
+Every order id, capture id, webhook event id and PayPal response below is a labeled test fixture.
+PayPal is faked at the PayPalWriteClient boundary by tests/support/fake-paypal.ts, and webhook deliveries are signed and verified by the fixture postback in tests/support/fake-webhooks.ts.
+No real PayPal call, sandbox or live, was made to produce this file.
+Recorded 2026-10-13 on branch envoi/slice-3-paypal-recovery at aeec852, on local PostgreSQL 18.6.
+Command: ENVOI_TRANSCRIPT=1 npx vitest run tests/integration/paypal-recovery.test.ts tests/integration/paypal-webhook.test.ts --reporter=verbose --silent=false
+Result: Test Files  2 passed (2) | Tests  18 passed (18)
+
+Test: tests/integration/paypal-webhook.test.ts > PayPal webhook inbox (fixture deliveries) > a verified webhook triggers a provider read that confirms a lost capture
+[FIXTURE fault injection] webhook after a lost capture response
+  - verified PAYMENT.CAPTURE.COMPLETED FIXTURE-WH-aae37676: inbox row read_due, one read-only provider read, no capture call; purchase paid with FIXTURE-CAPTURE-5EB483AA-1
+
+Test: tests/integration/paypal-recovery.test.ts > PayPal recovery (fixture fault injection) > lost create response replays the same key
+[FIXTURE fault injection] lost create response
+  - start: PayPal created the order but the response was lost; attempt create_unknown, no order id, receipt "Not paid yet"
+  - both starts: fake PayPal createOrder(order=FIXTURE-ORDER-85A5671D-1, PayPal-Request-Id=a2bc4803-86d5-48cf-8a76-1202f3388fe1)
+  - both starts: fake PayPal createOrder(order=FIXTURE-ORDER-85A5671D-1, PayPal-Request-Id=a2bc4803-86d5-48cf-8a76-1202f3388fe1)
+  - second start replayed the same key: attempt order_created with order FIXTURE-ORDER-85A5671D-1; no second order exists
+
+Test: tests/integration/paypal-recovery.test.ts > PayPal recovery (fixture fault injection) > lost capture response replays the same capture key
+[FIXTURE fault injection] lost capture request, recovered by Check status
+  - complete: capture request lost before PayPal acted; purchase uncertain, receipt "Checking payment", polling made no provider call
+  - captures: fake PayPal captureOrder(order=FIXTURE-ORDER-A60B51EC-1, PayPal-Request-Id=bcb5dc6e-1cee-483a-b726-d035826f1cb7)
+  - captures: fake PayPal captureOrder(order=FIXTURE-ORDER-A60B51EC-1, PayPal-Request-Id=bcb5dc6e-1cee-483a-b726-d035826f1cb7)
+  - Check status replayed the persisted key bcb5dc6e-1cee-483a-b726-d035826f1cb7; provider read decided paid with capture FIXTURE-CAPTURE-A60B51EC-1
+
+Test: tests/integration/paypal-recovery.test.ts > PayPal recovery (fixture fault injection) > Check status converges on the same capture id
+[FIXTURE fault injection] lost capture response, converged by Check status
+  - complete: PayPal captured but the response was lost; receipt "Checking payment", never Paid or Canceled
+  - captures: fake PayPal captureOrder(order=FIXTURE-ORDER-CFD02B04-1, PayPal-Request-Id=0b493b8f-eb1f-497b-b48b-9d0bd7960fa0)
+  - Check status read the order: paid with capture FIXTURE-CAPTURE-CFD02B04-1; a second check 31 s later read the same capture, and no second capture was sent
+
+Test: tests/integration/paypal-recovery.test.ts > PayPal recovery (fixture fault injection) > cancel after dispatch reports uncertain
+[FIXTURE fault injection] cancel races capture
+  - cancel while the capture was dispatched: 409 payment_uncertain, purchase pending_payment, receipt "Checking payment"
+  - cancel after the lost capture response: 409 payment_uncertain, purchase uncertain; receipt and PayPal cancel page both say "Checking payment"
+
+Test: tests/integration/paypal-recovery.test.ts > PayPal recovery (fixture fault injection) > a verified failure needs an outright refusal and no capture at all > a refused same-key replay whose order shows no capture closes unpaid
+[FIXTURE fault injection] capture refused by PayPal, verified failure
+  - complete: PayPal refused the capture with 403 NOT_AUTHORIZED,PAYEE_NOT_CONSENTED; purchase uncertain, receipt "Checking payment"
+  - Check status replayed key b19e9363-e1f2-4233-a07a-c1daa249abde: refused again, and the order read shows no capture; attempt capture_failed, purchase unpaid_closed, receipt "Not paid"

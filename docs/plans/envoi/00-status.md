@@ -75,13 +75,13 @@ Updated: 2026-10-13 (Asia/Singapore).
 
 Build order from `04-slices.md`, revised and approved 2026-10-12.
 Slice IDs are stable names, so the list below is in build order rather than numeric order; S12 is retired, merged into S11.
-S1 and S2 are done; every later slice starts only on an explicit authorization that names its slice ID, such as "start S13"; a number in that request is the slice ID, not a build position.
-The application is deployed on Render Free from `main` with the S2 PayPal sandbox payment; no other sponsor integration exists.
+S1, S2 and S3 are done; every later slice starts only on an explicit authorization that names its slice ID, such as "start S13"; a number in that request is the slice ID, not a build position.
+The application is deployed on Render Free from `main` with the S2 PayPal sandbox payment and S3's recovery, reconcile and verified webhook inbox; no other sponsor integration exists.
 The candidate list in `roadmap.md` remains discussion material and is superseded as a build order by `04-slices.md` once that is approved.
 
 - [x] S1 - Tracer bullet on Render Free: labeled demo shop from Neon to an explicitly unpaid stub receipt; boot check, auth schema pin, R12 latency measurement.
 - [x] S2 - PayPal sandbox happy path with recipient and amount binding, lease-serialized capture, abandonment derived on read and PYUSD shown as unavailable.
-- [ ] S3 - PayPal recovery: lost responses, webhooks, reconcile, "checking payment".
+- [x] S3 - PayPal recovery: lost responses, webhooks, reconcile, "checking payment".
 - [ ] S4 - Text entry with AI suggestions and the pre-registered model evaluation.
 - [ ] S13 - Agent handoff over MCP, moved to right after S4.
 - [ ] S6 - Merchant sign-in and manual menu draft.
@@ -95,6 +95,58 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [ ] S17 - PYUSD recovery, extra transfers and the operator mismatch and refund acts.
 - [ ] S14 - APIMatic client and docs, account-conditional; third in the cut order.
 - [ ] S15 - Judged release.
+
+### S3 PayPal recovery, 2026-10-13
+
+- **Branch:** `envoi/slice-3-paypal-recovery`, from `main` at `ea4f107`; commits `b3cae17` (recovery, reconcile, webhook inbox, receipt polling) and `aeec852` (a PayPal answer without an order record reports `no_record`), then this record.
+  CI passed on both commits, on the branch and on `main` (runs `38409309969`, `38409915571`, `38409537114`, `38410092206`).
+  Started on the user's handover prompt; the user authorized A1-A5 by name ("I authorize A1 to A5"): A1 read-only Neon inspection and migrations; A2 PayPal sandbox calls from the Mac (reads, same-key replays of the two stuck S2 captures, reading the webhook delivery; no webhook simulator); A3 commits; A4 push the slice branch; A5 merge into `main` and push, which deploys to Render, more than once during S3.
+- **Two decisions made by the user, 2026-10-13, within the approved contracts:**
+  - A capture whose outcome is unknown becomes a verified failure (`capture_unknown -> capture_failed`, purchase `unpaid_closed`) only when the lease holder's same-key capture replay is refused with a 4xx naming PayPal issue codes (not 408, 409, 429, 5xx, a timeout or a network error) and a following order read shows no capture at all.
+    Anything else stays "Checking payment".
+  - Receipt polling reads Envoi's stored state every 2 seconds for at most 60 seconds; only "Check status" and the webhook ask PayPal, at most once per 30 seconds per payment.
+    A verified webhook asks PayPal directly through the read-only client, because S5's runner does not exist yet, and still stores the due mark.
+- **Result, fixture fault injection [verified]:** with PayPal faked to lose requests or responses, the receipt shows "Checking payment" and never Paid or Canceled until a provider read decides; "Check status" converges on the same capture id and never sends a second capture; canceling after capture dispatch answers 409 `payment_uncertain` and both the receipt and the PayPal cancel page say "Checking payment".
+  The labeled transcript, six blocks from 18 passing tests, is the [fault-injection evidence file](evidence/s3-fault-injection.txt); every id in it is a `FIXTURE-` value and no real PayPal call produced it.
+- **Result, real sandbox webhook on `https://envoi-helx.onrender.com` [verified], 2026-10-13:** Render served `aeec852` (its receipt chunk carries the `no_record` message and not the replaced one).
+  The user bought 1 × Kaya toast set, S$4.50, and approved at PayPal as the sandbox buyer: purchase `pur_k7lvke26ismp3rkwnafhrfchee`, attempt `att_i62f7a3mwzbe4h2wftslwygybu`, order `6H599583W9288815M`, capture `6JW28731G6386661D`; the buyer's own completion confirmed the capture at 14:23:59 UTC and the receipt reads Paid.
+  PayPal then delivered three events to the registered webhook, each verified by PayPal's verify-webhook-signature postback against `PAYPAL_WEBHOOK_ID` and stored in `provider_events` with disposition `read_due` and the attempt id; the route writes a row only after PayPal answers `verification_status: SUCCESS`.
+
+  | Event id | Type | Received (UTC) |
+  | --- | --- | --- |
+  | `WH-66A483654W0356204-73J76930E0512494G` | `CHECKOUT.ORDER.APPROVED` | 14:24:03.186 |
+  | `WH-5HM259154U8866205-67U593340D381694P` | `PAYMENT.CAPTURE.COMPLETED` | 14:24:20.041 |
+  | `WH-4U8121198B5955318-66V27873TR3558227` | `CHECKOUT.ORDER.COMPLETED` | 14:24:46.541 |
+
+  The attempt's `last_provider_read_at` is 14:24:46.619, 78 ms after the third event, and its `provider_read_due_at` is null; the code clears the due mark only after a read PayPal answered, so the third delivery triggered an answered provider read.
+  The purchase stayed `paid` and the attempt `capture_confirmed`; no event changed anything by its content.
+  A read of each event id from the PayPal sandbox events API returned it with the matching resource id (the order, the capture, the order); that API listed no transmission details.
+  [hypothesis] The first event triggered a read at 14:24:03 and the second was debounced, 17 seconds later; Render's `paypal_webhook_read` log lines would confirm each outcome and were not read, because this Mac has no Render access.
+  The three rows are the only ones in `provider_events` (read in an enforced `READ ONLY` transaction).
+- **Falsifier outcome, the two S2 purchases [verified]:** `pur_uevzbfis3egmt7f63le7v3mxqa` (order `10847751JY084190K`) and `pur_kkc7ofn4bja4fubzbylmufotza` (order `0895766012238161A`) were reconciled twice through the product's `reconcileAttempt` as `envoi_web`, actor `operator:s3-recovery-a2`.
+  For both, the order read, the same-key capture replay and the second read all answered 404 `RESOURCE_NOT_FOUND,INVALID_RESOURCE_ID`: PayPal no longer holds either order.
+  Under the approved failure rule that is not a verified failure, so both stay `uncertain` / `capture_unknown` with operator-visible `paypal_recovery_inconclusive` audit rows, and "Check status" reports `no_record`: this is S3's falsifier, recovery that cannot converge, with its approved response.
+  The user chose on 2026-10-13 to leave them so: "Option 1: leave them uncertain and record it as the falsifier outcome."
+  The user's reasoning: only the browser session that made them sees the two "Checking payment" receipts, any lock covers only those two baskets in that session, and closing them unpaid without PayPal's evidence would change the approved failure rule and reopen Gate 3 for a case that arose only in testing.
+  As context, not as the app's own proof: the S2 section above records the 13 Oct provider reads of both orders, `CREATED` with no capture, which is why no money moved.
+- **Tests [verified]:** typecheck, lint, 18 unit and 42 integration tests pass locally on PostgreSQL 18.6 and in CI.
+  - Gate 3: `lost create response replays the same key`, `create_unknown without an order id is recreatable`, `capture_unknown never becomes abandoned`, `duplicate webhook changes nothing`, `unverified webhook signature is rejected`, `webhook content alone cannot mark paid`, `cancel after dispatch reports uncertain`, `polling stops at a terminal state`.
+  - Additions: `lost capture response replays the same capture key`, `no callback downgrades paid`, `unknown-order webhook is quarantined`.
+  - Beyond the plan, each with its own guard: `a create replay PayPal refuses outright is recreated under a new key`, `only a 4xx naming issue codes is a definitive refusal`, `Check status converges on the same capture id`, `a status check that began before dispatch never replays the capture key`, `provider reads are debounced by T_PROVIDER_READ_DEBOUNCE`, `a verified webhook triggers a provider read that confirms a lost capture`, `polls at most every 2 seconds for at most 60 seconds, and not at all from a terminal page`, and the group `a verified failure needs an outright refusal and no capture at all` (five rows).
+  - PayPal is faked at the `PayPalWriteClient` boundary by `tests/support/fake-paypal.ts` (faults `lose_request`, `lose_response`, `refuse`; per-key idempotency; `forget`), webhooks are signed and verified by the fixture postback in `tests/support/fake-webhooks.ts`, and `tests/support/transcript.ts` prints the labeled transcript only when `ENVOI_TRANSCRIPT` is set.
+- **Mutations [verified], 29 of 29, all on the final code at `aeec852`, each alone, restored byte-identical (SHA-256) and rerun passing; [evidence file](evidence/s3-mutations.json).**
+  Every one of the 26 S3 tests has its own mutation; `cancel after dispatch reports uncertain` has three (the cancel route, the cancel page and the receipt), `unknown-order webhook is quarantined` two (the disposition and the operator-visible audit row), `an order PayPal no longer holds stays checking payment` two (no failure without a record, and the `no_record` outcome) and the polling cadence three (the 60-second limit, the 2-second interval and a page rendered in a terminal state).
+  Five of the 29 were added in this close-out, because a review of the first 24 found tests without their own mutation: the three polling-cadence guards, `Check status converges on the same capture id` (replaying the key although the first read already shows the capture) and `a refused same-key replay whose order shows no capture closes unpaid` (never recording a verified failure).
+  The `duplicate-webhook` and `unknown-order` mutations fail through a database error, the missing unique index and the `read_due` check constraint respectively.
+  The `unreachable` mutation was redefined after `aeec852` replaced the code it mutated.
+- **Neon [verified], A1:** before the migrations, four migrations, the nine `neon_auth` tables and no `envoi_web` grant in `neon_auth`; migrations 0004-0005 applied (six in total).
+  0004 adds `provider_events` with a unique index on `(provider, event_id)` and a check that `read_due` needs an attempt id, plus the attempt columns `provider_read_due_at` and `last_provider_read_at`; 0005 grants `envoi_web` SELECT and INSERT on `provider_events` and UPDATE on the two new attempt columns only (delta D7).
+  After: `neon_auth` still holds exactly the nine tables and `envoi_web` no grant in it; all inspection ran in enforced `READ ONLY` transactions.
+- **Screens [verified]:** locally, on a disposable database copy with injected `FIXTURE` states and never Neon: "Checking payment" with Check status, "Not paid yet / Order not confirmed" with "Back to the review", "PayPal refused this payment and its record shows no capture" and the PayPal cancel landing's "Checking payment", at 390px and 1280px with the demo-fixture and sandbox labels visible.
+  Polling measured in the browser: 29 polls about 2 seconds apart, the last at 58.9 seconds, none after; "Check status" against an unreachable PayPal showed the "did not answer" message.
+  On Render, the paid receipt of `pur_k7lvke26ismp3rkwnafhrfchee` at 390px and 1280px: no horizontal scroll, "Paid to (sandbox seller)", the sandbox capture and order ids, the demo-fixture label and the test-money notice.
+- **Deviations recorded, no behaviour change:** `decideCreateRecovery(attempt)` drops the `now` parameter because no clock decides create recovery; the webhook verification result also carries `eventType`; the inbox write `recordPayPalEvent` lives in `verify.ts`, where Gate 3's Files table assigns deduplication; the webhook performs its provider read inline until S5's runner exists; `reconcileAttempt` returns a `ReconcileOutcome` (`read`, `no_record`, `provider_unreachable`, `debounced`, `in_flight`, `no_order`); the receipt adds the UI files `live-status.tsx` and `polling.ts`; the receipt labels the payee "Recipient (sandbox seller)" until paid.
+- **Known limits:** no Playwright journey test exists (D4); Render's webhook log lines were not read; the operator sees quarantine and inconclusive recovery only as audit rows until S5's health view; the two S2 purchases stay uncertain.
 
 ### S2 PayPal sandbox happy path, 2026-10-13
 
@@ -114,6 +166,7 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
   This is Gate 2's "distinct allowlisted sandbox seller with confirmed permissions"; no approved decision changed.
   The referral link was created by a scratch script under A3, not by product code, so a seller's consent is an out-of-band operator step until S7 builds destination selection.
   The two quarantined purchases stay `uncertain` and lock their baskets until S3's provider reconciliation closes them.
+  S3 could not close them, because PayPal no longer holds either order; see [S3](#s3-paypal-recovery-2026-10-13).
 - **Tests [verified]:** typecheck, lint, 13 unit and 24 integration tests pass locally on PostgreSQL 18.6 and in CI (run `38283494935` on the branch).
   - Gate 3: `prices come only from the confirmed revision`, `unknown price never becomes zero`, `same basket twice returns the same review`, `a changed menu revision is a new checkout`, `replacement only from a terminal unpaid state`, `capture requires an owned lease`, `amount mismatch quarantines`, `payee mismatch quarantines`, `GET return page cannot capture`, `expired review cannot start a payment`, `an approved PayPal order that never returns closes unpaid`, `capture is never dispatched once the review has expired`.
   - Additions: `double start returns the same attempt`, `a purchase holds at most one non-terminal attempt`, `a PayPal destination is assigned once`, `live PayPal host is refused at boot`, `rail pyusd is refused before PYUSD exists`, `payments kill switch refuses PayPal start and completion`.
