@@ -157,6 +157,24 @@ The harness is [`s4-model-eval.mts`](evidence/s4-model-eval.mts); its `CASES` li
 - **Data sharing:** the user confirmed on 2026-10-14 that their OpenAI organization has not opted in to data sharing.
 - **Limits of this evaluation [hypothesis]:** 20 requests, one run each, written by the builder; it can show a candidate is unfit, but a pass does not establish accuracy for real buyers, which S15 tests.
 
+#### S4 model evaluation, results, 2026-10-14
+
+Run once after the pre-registration commits (`622056c`, `3ba713e`), with real OpenAI calls against the FIXTURE shops; every result is in [`s4-model-eval.json`](evidence/s4-model-eval.json).
+Estimated spend from returned token usage and the list prices above: US$0.057 of the US$5 limit.
+
+| Model | Correct | Median | Slowest | Cost of 20 | Result |
+| --- | --- | --- | --- | --- | --- |
+| `gpt-6-luna` | 20 of 20 | 7.7 s | 11.7 s | US$0.0055 | pass |
+| `gpt-5.6-luna` | 18 of 20 | 5.2 s | 11.8 s | US$0.0105 | pass |
+| `gpt-4.1-mini` | 16 of 20 | 4.5 s | 8.3 s | US$0.0152 | fail |
+| `gpt-5.4-mini` | 19 of 20 | 2.8 s | 5.5 s | US$0.0263 | pass |
+
+- Wrong answers: `gpt-5.6-luna` R12 and R19 answered no match; `gpt-4.1-mini` R6, R12 and R19 answered no match and R7 asked for the item; `gpt-5.4-mini` R12 answered no match.
+  No candidate produced a model failure or `budget_exceeded`, and no answer showed an unregistered id or a model-written price (Envoi's checks make both impossible to show).
+- **Chosen by the pre-registered rule (most correct): `AI_MODEL=gpt-6-luna`.**
+  It is also the cheapest; it is the slowest of the passing candidates, with a median of 7.7 s, inside the 10-second threshold and the 30-second `T_AI_BUDGET`.
+- [hypothesis] One run of 20 builder-written requests separates the candidates only coarsely: one request is 5 points, and `gpt-5.4-mini` would win on time if accuracy tied.
+
 ### S3 PayPal recovery, 2026-10-13
 
 - **Branch:** `envoi/slice-3-paypal-recovery`, from `main` at `ea4f107`; commits `b3cae17` (recovery, reconcile, webhook inbox, receipt polling) and `aeec852` (a PayPal answer without an order record reports `no_record`), then this record.

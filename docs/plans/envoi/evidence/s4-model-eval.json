@@ -1,0 +1,1424 @@
+{
+ "label": "FIXTURE shops and fixture requests; real OpenAI calls",
+ "ranAt": "2026-10-13T16:12:17.226Z",
+ "spendLimitUsd": 5,
+ "spentUsd": 0.057406,
+ "threshold": {
+  "correct": 18,
+  "of": 20,
+  "medianMs": 10000
+ },
+ "candidates": [
+  {
+   "model": "gpt-6-luna",
+   "correct": 20,
+   "of": 20,
+   "medianMs": 7714,
+   "usd": 0.005451,
+   "passes": true,
+   "completed": true,
+   "rows": [
+    {
+     "id": "R1",
+     "correct": true,
+     "ms": 4806,
+     "usd": 0.000078,
+     "usage": {
+      "input": 472,
+      "cached": 0,
+      "output": 61
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "R2",
+     "correct": true,
+     "ms": 11651,
+     "usd": 0.000469,
+     "usage": {
+      "input": 2350,
+      "cached": 0,
+      "output": 469
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Lorong Demo Kopi",
+      "items": [
+       "Kaya toast set",
+       "Kopi O"
+      ]
+     }
+    },
+    {
+     "id": "R3",
+     "correct": true,
+     "ms": 8075,
+     "usd": 0.000333,
+     "usage": {
+      "input": 1998,
+      "cached": 0,
+      "output": 266
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Lorong Demo Kopi",
+      "items": [
+       "Kaya toast set",
+       "Kopi O"
+      ]
+     }
+    },
+    {
+     "id": "R4",
+     "correct": true,
+     "ms": 2461,
+     "usd": 0.000079,
+     "usage": {
+      "input": 471,
+      "cached": 0,
+      "output": 63
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "R5",
+     "correct": true,
+     "ms": 2333,
+     "usd": 0.00008,
+     "usage": {
+      "input": 471,
+      "cached": 0,
+      "output": 66
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "R6",
+     "correct": true,
+     "ms": 8358,
+     "usd": 0.000367,
+     "usage": {
+      "input": 2152,
+      "cached": 0,
+      "output": 304
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Demo Noodle Stall",
+      "items": [
+       "Laksa"
+      ]
+     }
+    },
+    {
+     "id": "R7",
+     "correct": true,
+     "ms": 8176,
+     "usd": 0.000308,
+     "usage": {
+      "input": 1847,
+      "cached": 0,
+      "output": 246
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Demo Roti House",
+      "items": [
+       "Roti prata"
+      ]
+     }
+    },
+    {
+     "id": "R8",
+     "correct": true,
+     "ms": 6832,
+     "usd": 0.000329,
+     "usage": {
+      "input": 2090,
+      "cached": 0,
+      "output": 240
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "R9",
+     "correct": true,
+     "ms": 10926,
+     "usd": 0.000361,
+     "usage": {
+      "input": 1913,
+      "cached": 0,
+      "output": 339
+     },
+     "got": {
+      "kind": "outlets",
+      "outlets": [
+       "Lorong Demo Kopi"
+      ]
+     }
+    },
+    {
+     "id": "R10",
+     "correct": true,
+     "ms": 6688,
+     "usd": 0.000227,
+     "usage": {
+      "input": 1221,
+      "cached": 0,
+      "output": 209
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Demo Roti House",
+      "items": [
+       "Milo dinosaur"
+      ]
+     }
+    },
+    {
+     "id": "R11",
+     "correct": true,
+     "ms": 8543,
+     "usd": 0.000354,
+     "usage": {
+      "input": 2091,
+      "cached": 0,
+      "output": 290
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Demo Noodle Stall",
+      "items": [
+       "Fishball noodles",
+       "Kopi C"
+      ]
+     }
+    },
+    {
+     "id": "R12",
+     "correct": true,
+     "ms": 6282,
+     "usd": 0.000199,
+     "usage": {
+      "input": 1103,
+      "cached": 0,
+      "output": 177
+     },
+     "got": {
+      "kind": "outlets",
+      "outlets": [
+       "Lorong Demo Kopi"
+      ]
+     }
+    },
+    {
+     "id": "R13",
+     "correct": true,
+     "ms": 9543,
+     "usd": 0.000396,
+     "usage": {
+      "input": 2208,
+      "cached": 0,
+      "output": 351
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Lorong Demo Kopi",
+      "items": [
+       "Soft-boiled eggs (2)"
+      ]
+     }
+    },
+    {
+     "id": "R14",
+     "correct": true,
+     "ms": 6526,
+     "usd": 0.000271,
+     "usage": {
+      "input": 1292,
+      "cached": 0,
+      "output": 283
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "R15",
+     "correct": true,
+     "ms": 7866,
+     "usd": 0.000353,
+     "usage": {
+      "input": 1587,
+      "cached": 0,
+      "output": 389
+     },
+     "got": {
+      "kind": "outlets",
+      "outlets": [
+       "Demo Noodle Stall",
+       "Lorong Demo Kopi"
+      ]
+     }
+    },
+    {
+     "id": "R16",
+     "correct": true,
+     "ms": 7562,
+     "usd": 0.000276,
+     "usage": {
+      "input": 1158,
+      "cached": 0,
+      "output": 321
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "R17",
+     "correct": true,
+     "ms": 2485,
+     "usd": 0.000084,
+     "usage": {
+      "input": 469,
+      "cached": 0,
+      "output": 75
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "R18",
+     "correct": true,
+     "ms": 1968,
+     "usd": 0.000083,
+     "usage": {
+      "input": 471,
+      "cached": 0,
+      "output": 71
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "R19",
+     "correct": true,
+     "ms": 9117,
+     "usd": 0.000328,
+     "usage": {
+      "input": 1829,
+      "cached": 0,
+      "output": 291
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Demo Roti House",
+      "items": [
+       "Roti prata",
+       "Teh tarik"
+      ]
+     }
+    },
+    {
+     "id": "R20",
+     "correct": true,
+     "ms": 10193,
+     "usd": 0.000476,
+     "usage": {
+      "input": 2853,
+      "cached": 0,
+      "output": 382
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Lorong Demo Kopi",
+      "items": [
+       "Kaya toast set",
+       "Kopi O"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "model": "gpt-5.6-luna",
+   "correct": 18,
+   "of": 20,
+   "medianMs": 5159,
+   "usd": 0.010453,
+   "passes": true,
+   "completed": true,
+   "rows": [
+    {
+     "id": "R1",
+     "correct": true,
+     "ms": 1518,
+     "usd": 0.000139,
+     "usage": {
+      "input": 472,
+      "cached": 0,
+      "output": 37
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "R2",
+     "correct": true,
+     "ms": 7872,
+     "usd": 0.001033,
+     "usage": {
+      "input": 2893,
+      "cached": 0,
+      "output": 379
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Lorong Demo Kopi",
+      "items": [
+       "Kaya toast set",
+       "Kopi O"
+      ]
+     }
+    },
+    {
+     "id": "R3",
+     "correct": true,
+     "ms": 7017,
+     "usd": 0.000783,
+     "usage": {
+      "input": 2121,
+      "cached": 0,
+      "output": 299
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Lorong Demo Kopi",
+      "items": [
+       "Kaya toast set",
+       "Kopi O"
+      ]
+     }
+    },
+    {
+     "id": "R4",
+     "correct": true,
+     "ms": 2070,
+     "usd": 0.000139,
+     "usage": {
+      "input": 471,
+      "cached": 0,
+      "output": 37
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "R5",
+     "correct": true,
+     "ms": 1521,
+     "usd": 0.000139,
+     "usage": {
+      "input": 471,
+      "cached": 0,
+      "output": 37
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "R6",
+     "correct": true,
+     "ms": 4321,
+     "usd": 0.000542,
+     "usage": {
+      "input": 1502,
+      "cached": 0,
+      "output": 201
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Demo Noodle Stall",
+      "items": [
+       "Laksa"
+      ]
+     }
+    },
+    {
+     "id": "R7",
+     "correct": true,
+     "ms": 5997,
+     "usd": 0.000603,
+     "usage": {
+      "input": 1815,
+      "cached": 0,
+      "output": 200
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Demo Roti House",
+      "items": [
+       "Roti prata"
+      ]
+     }
+    },
+    {
+     "id": "R8",
+     "correct": true,
+     "ms": 3896,
+     "usd": 0.000442,
+     "usage": {
+      "input": 1369,
+      "cached": 0,
+      "output": 140
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "R9",
+     "correct": true,
+     "ms": 9291,
+     "usd": 0.000919,
+     "usage": {
+      "input": 1876,
+      "cached": 0,
+      "output": 453
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Lorong Demo Kopi",
+      "items": [
+       "Kaya toast set",
+       "Kopi O",
+       "Soft-boiled eggs (2)",
+       "Teh C peng"
+      ]
+     }
+    },
+    {
+     "id": "R10",
+     "correct": true,
+     "ms": 3819,
+     "usd": 0.000352,
+     "usage": {
+      "input": 1122,
+      "cached": 0,
+      "output": 106
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Demo Roti House",
+      "items": [
+       "Milo dinosaur"
+      ]
+     }
+    },
+    {
+     "id": "R11",
+     "correct": true,
+     "ms": 11779,
+     "usd": 0.000591,
+     "usage": {
+      "input": 1505,
+      "cached": 0,
+      "output": 242
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Demo Noodle Stall",
+      "items": [
+       "Fishball noodles",
+       "Kopi C"
+      ]
+     }
+    },
+    {
+     "id": "R12",
+     "correct": false,
+     "ms": 3723,
+     "usd": 0.000338,
+     "usage": {
+      "input": 1020,
+      "cached": 0,
+      "output": 112
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "R13",
+     "correct": true,
+     "ms": 6972,
+     "usd": 0.000834,
+     "usage": {
+      "input": 2107,
+      "cached": 0,
+      "output": 344
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Lorong Demo Kopi",
+      "items": [
+       "Soft-boiled eggs (2)"
+      ]
+     }
+    },
+    {
+     "id": "R14",
+     "correct": true,
+     "ms": 3882,
+     "usd": 0.000386,
+     "usage": {
+      "input": 1137,
+      "cached": 0,
+      "output": 132
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "R15",
+     "correct": true,
+     "ms": 7175,
+     "usd": 0.000818,
+     "usage": {
+      "input": 2164,
+      "cached": 0,
+      "output": 321
+     },
+     "got": {
+      "kind": "outlets",
+      "outlets": [
+       "Demo Noodle Stall",
+       "Lorong Demo Kopi"
+      ]
+     }
+    },
+    {
+     "id": "R16",
+     "correct": true,
+     "ms": 6451,
+     "usd": 0.000675,
+     "usage": {
+      "input": 1779,
+      "cached": 0,
+      "output": 266
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "R17",
+     "correct": true,
+     "ms": 1362,
+     "usd": 0.000138,
+     "usage": {
+      "input": 469,
+      "cached": 0,
+      "output": 37
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "R18",
+     "correct": true,
+     "ms": 1965,
+     "usd": 0.000173,
+     "usage": {
+      "input": 471,
+      "cached": 0,
+      "output": 66
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "R19",
+     "correct": false,
+     "ms": 6732,
+     "usd": 0.000591,
+     "usage": {
+      "input": 1666,
+      "cached": 0,
+      "output": 215
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "R20",
+     "correct": true,
+     "ms": 6694,
+     "usd": 0.000818,
+     "usage": {
+      "input": 2529,
+      "cached": 0,
+      "output": 260
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Lorong Demo Kopi",
+      "items": [
+       "Kaya toast set",
+       "Kopi O"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "model": "gpt-4.1-mini",
+   "correct": 16,
+   "of": 20,
+   "medianMs": 4512,
+   "usd": 0.01523,
+   "passes": false,
+   "completed": true,
+   "rows": [
+    {
+     "id": "R1",
+     "correct": true,
+     "ms": 8291,
+     "usd": 0.001212,
+     "usage": {
+      "input": 2451,
+      "cached": 0,
+      "output": 145
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "R2",
+     "correct": true,
+     "ms": 5712,
+     "usd": 0.001083,
+     "usage": {
+      "input": 1944,
+      "cached": 0,
+      "output": 191
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Lorong Demo Kopi",
+      "items": [
+       "Kaya toast set",
+       "Kopi O"
+      ]
+     }
+    },
+    {
+     "id": "R3",
+     "correct": true,
+     "ms": 3585,
+     "usd": 0.000718,
+     "usage": {
+      "input": 1306,
+      "cached": 0,
+      "output": 122
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Lorong Demo Kopi",
+      "items": [
+       "Kaya toast set",
+       "Kopi O"
+      ]
+     }
+    },
+    {
+     "id": "R4",
+     "correct": true,
+     "ms": 5979,
+     "usd": 0.000796,
+     "usage": {
+      "input": 2207,
+      "cached": 1024,
+      "output": 138
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "R5",
+     "correct": true,
+     "ms": 3544,
+     "usd": 0.000258,
+     "usage": {
+      "input": 504,
+      "cached": 0,
+      "output": 35
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "R6",
+     "correct": false,
+     "ms": 4383,
+     "usd": 0.000508,
+     "usage": {
+      "input": 1013,
+      "cached": 0,
+      "output": 64
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "R7",
+     "correct": false,
+     "ms": 2860,
+     "usd": 0.000482,
+     "usage": {
+      "input": 968,
+      "cached": 0,
+      "output": 59
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "item"
+      ]
+     }
+    },
+    {
+     "id": "R8",
+     "correct": true,
+     "ms": 4641,
+     "usd": 0.000572,
+     "usage": {
+      "input": 1049,
+      "cached": 0,
+      "output": 95
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "R9",
+     "correct": true,
+     "ms": 6376,
+     "usd": 0.00109,
+     "usage": {
+      "input": 1814,
+      "cached": 0,
+      "output": 228
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Lorong Demo Kopi",
+      "items": [
+       "Kaya toast set",
+       "Kopi O",
+       "Soft-boiled eggs (2)",
+       "Teh C peng"
+      ]
+     }
+    },
+    {
+     "id": "R10",
+     "correct": true,
+     "ms": 2962,
+     "usd": 0.00052,
+     "usage": {
+      "input": 1063,
+      "cached": 0,
+      "output": 59
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Demo Roti House",
+      "items": [
+       "Milo dinosaur"
+      ]
+     }
+    },
+    {
+     "id": "R11",
+     "correct": true,
+     "ms": 5036,
+     "usd": 0.001004,
+     "usage": {
+      "input": 1939,
+      "cached": 0,
+      "output": 143
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Demo Noodle Stall",
+      "items": [
+       "Fishball noodles",
+       "Kopi C"
+      ]
+     }
+    },
+    {
+     "id": "R12",
+     "correct": false,
+     "ms": 3222,
+     "usd": 0.000487,
+     "usage": {
+      "input": 973,
+      "cached": 0,
+      "output": 61
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "R13",
+     "correct": true,
+     "ms": 7159,
+     "usd": 0.001137,
+     "usage": {
+      "input": 2011,
+      "cached": 0,
+      "output": 208
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Lorong Demo Kopi",
+      "items": [
+       "Soft-boiled eggs (2)"
+      ]
+     }
+    },
+    {
+     "id": "R14",
+     "correct": true,
+     "ms": 4017,
+     "usd": 0.000782,
+     "usage": {
+      "input": 1626,
+      "cached": 0,
+      "output": 82
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "R15",
+     "correct": true,
+     "ms": 5066,
+     "usd": 0.001043,
+     "usage": {
+      "input": 1875,
+      "cached": 0,
+      "output": 183
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Lorong Demo Kopi",
+      "items": [
+       "Kopi O"
+      ]
+     }
+    },
+    {
+     "id": "R16",
+     "correct": true,
+     "ms": 2495,
+     "usd": 0.000481,
+     "usage": {
+      "input": 967,
+      "cached": 0,
+      "output": 59
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "R17",
+     "correct": true,
+     "ms": 4645,
+     "usd": 0.000758,
+     "usage": {
+      "input": 1458,
+      "cached": 0,
+      "output": 109
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "R18",
+     "correct": true,
+     "ms": 3813,
+     "usd": 0.000727,
+     "usage": {
+      "input": 1473,
+      "cached": 0,
+      "output": 86
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "R19",
+     "correct": false,
+     "ms": 2874,
+     "usd": 0.00048,
+     "usage": {
+      "input": 973,
+      "cached": 0,
+      "output": 57
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "R20",
+     "correct": true,
+     "ms": 6503,
+     "usd": 0.001092,
+     "usage": {
+      "input": 1965,
+      "cached": 0,
+      "output": 191
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Lorong Demo Kopi",
+      "items": [
+       "Kaya toast set",
+       "Kopi O"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "model": "gpt-5.4-mini",
+   "correct": 19,
+   "of": 20,
+   "medianMs": 2769,
+   "usd": 0.026274,
+   "passes": true,
+   "completed": true,
+   "rows": [
+    {
+     "id": "R1",
+     "correct": true,
+     "ms": 1310,
+     "usd": 0.000521,
+     "usage": {
+      "input": 472,
+      "cached": 0,
+      "output": 37
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "R2",
+     "correct": true,
+     "ms": 3057,
+     "usd": 0.001834,
+     "usage": {
+      "input": 1443,
+      "cached": 0,
+      "output": 167
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Lorong Demo Kopi",
+      "items": [
+       "Kaya toast set",
+       "Kopi O"
+      ]
+     }
+    },
+    {
+     "id": "R3",
+     "correct": true,
+     "ms": 2719,
+     "usd": 0.001568,
+     "usage": {
+      "input": 1323,
+      "cached": 0,
+      "output": 128
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Lorong Demo Kopi",
+      "items": [
+       "Kaya toast set",
+       "Kopi O"
+      ]
+     }
+    },
+    {
+     "id": "R4",
+     "correct": true,
+     "ms": 1225,
+     "usd": 0.00052,
+     "usage": {
+      "input": 471,
+      "cached": 0,
+      "output": 37
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "R5",
+     "correct": true,
+     "ms": 1471,
+     "usd": 0.00052,
+     "usage": {
+      "input": 471,
+      "cached": 0,
+      "output": 37
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "R6",
+     "correct": true,
+     "ms": 3944,
+     "usd": 0.001848,
+     "usage": {
+      "input": 1876,
+      "cached": 0,
+      "output": 98
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Demo Noodle Stall",
+      "items": [
+       "Laksa"
+      ]
+     }
+    },
+    {
+     "id": "R7",
+     "correct": true,
+     "ms": 3850,
+     "usd": 0.001655,
+     "usage": {
+      "input": 1631,
+      "cached": 0,
+      "output": 96
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Demo Roti House",
+      "items": [
+       "Roti prata"
+      ]
+     }
+    },
+    {
+     "id": "R8",
+     "correct": true,
+     "ms": 2612,
+     "usd": 0.001045,
+     "usage": {
+      "input": 991,
+      "cached": 0,
+      "output": 67
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "R9",
+     "correct": true,
+     "ms": 2472,
+     "usd": 0.001119,
+     "usage": {
+      "input": 1030,
+      "cached": 0,
+      "output": 77
+     },
+     "got": {
+      "kind": "outlets",
+      "outlets": [
+       "Lorong Demo Kopi"
+      ]
+     }
+    },
+    {
+     "id": "R10",
+     "correct": true,
+     "ms": 4367,
+     "usd": 0.001694,
+     "usage": {
+      "input": 1665,
+      "cached": 0,
+      "output": 99
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Demo Roti House",
+      "items": [
+       "Milo dinosaur"
+      ]
+     }
+    },
+    {
+     "id": "R11",
+     "correct": true,
+     "ms": 3978,
+     "usd": 0.00161,
+     "usage": {
+      "input": 1439,
+      "cached": 0,
+      "output": 118
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Demo Noodle Stall",
+      "items": [
+       "Fishball noodles",
+       "Kopi C"
+      ]
+     }
+    },
+    {
+     "id": "R12",
+     "correct": false,
+     "ms": 2757,
+     "usd": 0.001045,
+     "usage": {
+      "input": 991,
+      "cached": 0,
+      "output": 67
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "R13",
+     "correct": true,
+     "ms": 4563,
+     "usd": 0.002335,
+     "usage": {
+      "input": 1998,
+      "cached": 0,
+      "output": 186
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Lorong Demo Kopi",
+      "items": [
+       "Soft-boiled eggs (2)"
+      ]
+     }
+    },
+    {
+     "id": "R14",
+     "correct": true,
+     "ms": 4288,
+     "usd": 0.001615,
+     "usage": {
+      "input": 1631,
+      "cached": 0,
+      "output": 87
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "R15",
+     "correct": true,
+     "ms": 2707,
+     "usd": 0.001154,
+     "usage": {
+      "input": 1047,
+      "cached": 0,
+      "output": 82
+     },
+     "got": {
+      "kind": "outlets",
+      "outlets": [
+       "Lorong Demo Kopi"
+      ]
+     }
+    },
+    {
+     "id": "R16",
+     "correct": true,
+     "ms": 2781,
+     "usd": 0.001026,
+     "usage": {
+      "input": 984,
+      "cached": 0,
+      "output": 64
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "R17",
+     "correct": true,
+     "ms": 1322,
+     "usd": 0.000518,
+     "usage": {
+      "input": 469,
+      "cached": 0,
+      "output": 37
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "R18",
+     "correct": true,
+     "ms": 1360,
+     "usd": 0.00052,
+     "usage": {
+      "input": 471,
+      "cached": 0,
+      "output": 37
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "R19",
+     "correct": true,
+     "ms": 5490,
+     "usd": 0.002283,
+     "usage": {
+      "input": 2264,
+      "cached": 0,
+      "output": 130
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Demo Roti House",
+      "items": [
+       "Roti prata",
+       "Teh tarik"
+      ]
+     }
+    },
+    {
+     "id": "R20",
+     "correct": true,
+     "ms": 3632,
+     "usd": 0.001844,
+     "usage": {
+      "input": 1457,
+      "cached": 0,
+      "output": 167
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Lorong Demo Kopi",
+      "items": [
+       "Kaya toast set",
+       "Kopi O"
+      ]
+     }
+    }
+   ]
+  }
+ ]
+}
