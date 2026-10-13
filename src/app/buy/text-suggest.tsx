@@ -7,6 +7,9 @@ import { ensureBuyerSession, postJson } from "@/lib/browser/session";
 
 const MAX_TEXT = 280;
 const MAX_AREA = 80;
+// The server answers within T_AI_BUDGET (30 seconds) plus its own reads. A dropped connection can
+// leave the request open with no answer, so the page gives up after 40 seconds and offers the list.
+const CLIENT_TIMEOUT_MS = 40_000;
 
 function sgd(cents: number): string {
   return `S$${Math.floor(cents / 100)}.${String(cents % 100).padStart(2, "0")}`;
@@ -52,7 +55,7 @@ export function TextSuggest({ manualListId }: { manualListId: string }) {
     try {
       await ensureBuyerSession();
       const body = area.trim() ? { text: text.trim(), area: area.trim() } : { text: text.trim() };
-      const result = await postJson<{ suggestion: Suggestion }>("/api/v1/buyer/suggestions", body);
+      const result = await postJson<{ suggestion: Suggestion }>("/api/v1/buyer/suggestions", body, AbortSignal.timeout(CLIENT_TIMEOUT_MS));
       if (!result.ok || !result.data) {
         showManual(result.error?.message ?? "Suggestions are not available right now. Pick a shop from the list instead.");
         return;
@@ -61,8 +64,12 @@ export function TextSuggest({ manualListId }: { manualListId: string }) {
       setSuggestion(next);
       if (next.kind === "budget_exceeded") showManual("Suggestions took too long. Pick a shop from the list instead.");
       if (next.kind === "clarification" && next.missing.includes("area")) areaRef.current?.focus();
-    } catch {
-      showManual("Suggestions are not available right now. Pick a shop from the list instead.");
+    } catch (err) {
+      showManual(
+        err instanceof DOMException && err.name === "TimeoutError"
+          ? "Suggestions took too long. Pick a shop from the list instead."
+          : "Suggestions are not available right now. Pick a shop from the list instead.",
+      );
     } finally {
       setBusy(false);
     }
