@@ -132,7 +132,7 @@ fault(["R9"], "Gate 3 re-approval reverted in the status line", lambda d: sub(d,
 fault(["R9"], "Gate 4 checklist item unticked", lambda d: sub(d, "00-status.md", "- [x] Explicit user approval of Gate 4, 2026-10-12", "- [ ] Explicit user approval of Gate 4, 2026-10-12"))
 fault(["R9"], "approval missing from the history", lambda d: sub(d, "00-status.md", '- 2026-10-12: the user said "I approve both pls publish', '- 2026-10-12: the user said "I will approve later, pls publish'))
 fault(["R9"], "04 approval marker removed", lambda d: sub(d, "04-slices.md", "**APPROVED by the user on 2026-10-12**", "**Draft.**"))
-fault(["R9"], "handoff title reverted", lambda d: sub(d, "handoff.md", "# Envoi: Gates 1-4 approved, ready for S1", "# Envoi: Gate 4 revision drafted"))
+fault(["R9"], "handoff title reverted", lambda d: sub(d, "handoff.md", "# Envoi: Gates 1-4 approved", "# Envoi: Gate 4 revision drafted"))
 fault(["R9"], "stale draft wording in roadmap", lambda d: sub(d, "roadmap.md", "the Gate 4 slice plan was revised and approved on 2026-10-12", "the unapproved Gate 4 draft was revised on 2026-10-12"))
 fault(["R9"], "stale draft wording in the 01-product closing line", lambda d: sub(d, "01-product.md", "The slice plan in `04-slices.md` was revised and approved on 2026-10-12", "The slice plan is an unapproved draft in `04-slices.md`"))
 fault(["R9"], "handoff still awaits the Gate 4 question", lambda d: sub(d, "handoff.md", "## Next authorized action\n", "## Next authorized action\n\nThis awaits `Approve Gate 4, or what should change?`.\n"))

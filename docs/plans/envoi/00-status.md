@@ -1,6 +1,6 @@
 # Status: Envoi
 
-Updated: 2026-10-12 (Asia/Singapore).
+Updated: 2026-10-13 (Asia/Singapore).
 
 - Gate 1 - Product: **RE-APPROVED 2026-10-10** by the user ("I approve gate one") after being reopened and revised the same day to remove Zapier, which the user rejected as paid, and to record the PYUSD decisions; see the [reopening record](#reopening-2026-10-10-zapier-removed). Previously **APPROVED 2026-10-07** by the user after reopening it to add a buyer-side scan entry point. Approval covers product scope and buyer/merchant journeys, including text and scan/paste entry points.
 - Gate 2 - Architecture: **RE-APPROVED 2026-10-11** by the user ("gate 2 approved") after being reopened and revised on 2026-10-10 and revised again after a 2026-10-11 review. Approval covers only the direct vision import and PYUSD amendment in `02-architecture.md`, including the five review changes; the OpenAI/provider pin and all unaffected 2026-10-07 decisions stand. It accepts a proposal, not runtime/account proof. Previously **APPROVED 2026-10-07**.
@@ -75,12 +75,12 @@ Updated: 2026-10-12 (Asia/Singapore).
 
 Build order from `04-slices.md`, revised and approved 2026-10-12.
 Slice IDs are stable names, so the list below is in build order rather than numeric order; S12 is retired, merged into S11.
-S1 is done; every later slice starts only on an explicit authorization that names its slice ID, such as "start S13"; a number in that request is the slice ID, not a build position.
-The S1 tracer application is deployed on Render Free; no payment integration or sponsor integration exists.
+S1 and S2 are done; every later slice starts only on an explicit authorization that names its slice ID, such as "start S13"; a number in that request is the slice ID, not a build position.
+The application is deployed on Render Free from `main` with the S2 PayPal sandbox payment; no other sponsor integration exists.
 The candidate list in `roadmap.md` remains discussion material and is superseded as a build order by `04-slices.md` once that is approved.
 
 - [x] S1 - Tracer bullet on Render Free: labeled demo shop from Neon to an explicitly unpaid stub receipt; boot check, auth schema pin, R12 latency measurement.
-- [ ] S2 - PayPal sandbox happy path with recipient and amount binding, lease-serialized capture, abandonment derived on read and PYUSD shown as unavailable.
+- [x] S2 - PayPal sandbox happy path with recipient and amount binding, lease-serialized capture, abandonment derived on read and PYUSD shown as unavailable.
 - [ ] S3 - PayPal recovery: lost responses, webhooks, reconcile, "checking payment".
 - [ ] S4 - Text entry with AI suggestions and the pre-registered model evaluation.
 - [ ] S13 - Agent handoff over MCP, moved to right after S4.
@@ -95,6 +95,45 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [ ] S17 - PYUSD recovery, extra transfers and the operator mismatch and refund acts.
 - [ ] S14 - APIMatic client and docs, account-conditional; third in the cut order.
 - [ ] S15 - Judged release.
+
+### S2 PayPal sandbox happy path, 2026-10-13
+
+- **Branch:** `envoi/slice-2-paypal-happy-path`, from `main` at `8582d1f`. Started on the user's handover prompt; the user authorized A1-A6 by name ("i authroize A1 to A6 , then publish the branch and merge, and then push to main(no co authro)").
+  A1 migrations on Neon, A2 `assign-paypal-destination` on Neon, A3 PayPal sandbox API calls from the Mac, A4 commits, A5 push, A6 merge into `main` and push, which deploys to Render.
+- **Result [verified] on `https://envoi-helx.onrender.com`, 2026-10-13:** the buyer picks items and quantities; the review shows the server-priced basket, the distinct sandbox seller `EQN6264CF9F4Y` and "PayPal sandbox, test money", and lists PYUSD as unavailable with "PYUSD has not passed its tests yet" and no way to select it.
+  "Continue to PayPal" opens sandbox approval; after the user approved as the sandbox buyer, the receipt read Paid with the actual capture id.
+  - **Approve and capture:** purchase `pur_7wr6v3btxbindbspxrxjyjf5hi`, 2 × Teh C peng, S$4.40; order `5F251269WJ476713C`; capture `9JR60357TL4155832`.
+    A provider read of the order shows `COMPLETED`, payee `EQN6264CF9F4Y`, amount SGD 4.40, our `custom_id` and items; a provider read of the capture shows `COMPLETED`, gross SGD 4.40, PayPal sandbox fee SGD 0.65, net SGD 3.75, payee `EQN6264CF9F4Y`.
+    Database: purchase `paid`; attempt `capture_confirmed` with the capture id, gross 440, a verified time and the lease released; audit rows `review_created`, `paypal_attempt_created`, `paypal_capture_confirmed`.
+  - **Cancel at PayPal:** purchase `pur_hppsflzgw7an6pko2av7qtr5za` reads "Not paid", "You canceled at PayPal. Nothing was charged.", with no success message; attempt `abandoned` (`buyer_canceled`), no capture request id; the provider shows `PAYER_ACTION_REQUIRED` with no capture.
+  - **Approved or left at PayPal and never returned:** purchase `pur_m32v3ks6m6o5jjfhfjoglue6gq` read `unpaid_closed` with its attempt `abandoned` (`review_window_passed`) after the five-minute window; no capture request id was ever stored.
+- **Falsifier, distinct seller [verified]: passed after seller consent.** Envoi's own sandbox account (the Platform app's API caller) is `PJPWJW3VL4ET8`; PayPal pays it when an order names no payee, so every order names the seller explicitly.
+  The first two real captures were refused and quarantined, never shown as paid: `pur_uevzbfis3egmt7f63le7v3mxqa` (`capture_http_error`, card funding; the issue code was not yet recorded) and `pur_kkc7ofn4bja4fubzbylmufotza` (`capture_http_403:NOT_AUTHORIZED,PAYEE_NOT_CONSENTED`).
+  PayPal created and the buyer approved both orders, but refused the capture because the seller had not consented to the platform; both orders still read `CREATED` with no capture, so no money moved.
+  The seller then granted consent through a sandbox partner-referral link (`POST /v2/customer/partner-referrals`, tracking id `envoi-demo-fixture-1`, features `PAYMENT` and `REFUND`), opened by the user while logged in as the seller; `GET /v1/customer/partners/PJPWJW3VL4ET8/merchant-integrations/EQN6264CF9F4Y` then showed `payments_receivable: true`, a confirmed email and one `OAUTH_THIRD_PARTY` integration.
+  This is Gate 2's "distinct allowlisted sandbox seller with confirmed permissions"; no approved decision changed.
+  The referral link was created by a scratch script under A3, not by product code, so a seller's consent is an out-of-band operator step until S7 builds destination selection.
+  The two quarantined purchases stay `uncertain` and lock their baskets until S3's provider reconciliation closes them.
+- **Tests [verified]:** typecheck, lint, 13 unit and 24 integration tests pass locally on PostgreSQL 18.6 and in CI (run `38283494935` on the branch).
+  - Gate 3: `prices come only from the confirmed revision`, `unknown price never becomes zero`, `same basket twice returns the same review`, `a changed menu revision is a new checkout`, `replacement only from a terminal unpaid state`, `capture requires an owned lease`, `amount mismatch quarantines`, `payee mismatch quarantines`, `GET return page cannot capture`, `expired review cannot start a payment`, `an approved PayPal order that never returns closes unpaid`, `capture is never dispatched once the review has expired`.
+  - Additions: `double start returns the same attempt`, `a purchase holds at most one non-terminal attempt`, `a PayPal destination is assigned once`, `live PayPal host is refused at boot`, `rail pyusd is refused before PYUSD exists`, `payments kill switch refuses PayPal start and completion`.
+  - Beyond the plan, each with its own guard: `an approved order that does not match is never captured` (the pre-capture payee check, separate from `decideCaptureOutcome`), a fixture happy path, line-order and quantity-range cases of the checkout key, the sandbox-only approval-link check, and the operator's refusal of a malformed seller id.
+  - PayPal is faked at the `PayPalWriteClient` boundary by `tests/support/fake-paypal.ts`, whose order and capture ids are labeled `FIXTURE-`.
+- **Mutations [verified], 19 of 19, each alone, restored byte-identical (SHA-256) and rerun passing; [evidence file](evidence/s2-mutations.json).**
+  Every assigned test and addition above has its own mutation, plus the pre-capture payee check.
+  The `capture requires an owned lease` mutation fails on its assertion (the second completion captured); the run also reports an unhandled rejection, which is the first completion's lease release after the test closed its pool.
+  The two partial unique indexes were mutated by deleting their line from migration 0002, because the tests build each database from the migrations.
+- **Neon [verified], A1 and A2:** migrations 0002-0003 applied (four in total); `payment_destinations`, `payment_attempts` and `audit_events` exist; `envoi_web` holds SELECT on destinations, SELECT and INSERT plus column-level UPDATE on attempts, UPDATE only on `purchases.state` and INSERT only on audit events; it still holds no grant in `neon_auth`, which still holds exactly the nine 2026-10-07 tables (read in an enforced `READ ONLY` transaction before and after).
+  `assign-paypal-destination out_wgoyp6kgg75472b6s772dplgoq EQN6264CF9F4Y` created `dst_hckkx7g6uitqinbglsj54bquc4` version 1; a rerun reported the existing destination and changed nothing.
+- **Render [verified]:** deploys from `main` (`render.yaml` updated); the user entered `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_PARTNER_ATTRIBUTION_ID`, `PAYPAL_WEBHOOK_ID` (read from S3) and `PAYMENTS_ENABLED=true`.
+  The boot check now stops the process on invalid configuration: locally, `PAYMENTS_ENABLED=maybe` exits 1 with "boot configuration refused", where before Next kept serving a 500 to every request.
+- **Screens [verified]:** buy, review and both receipts checked in a real browser at 390px and 1280px, on Render and locally, with the demo-fixture label and "PayPal sandbox, test money" in every view.
+  Two defects found and fixed: the seller id wrapped mid-id at 1280px, and the selected-rail chip wrapped under its title at 390px.
+- **Deviations recorded, no behaviour change:** `PriceQuote` carries `outletId`, `rail` and `destinationVersion`, which `createReview` needs for the checkout key and the pinned destination version; `decideCaptureOutcome` takes the verification time as a third argument; `assertPaymentEligible` returns `attemptId: string | null`; `ProviderResult`'s `http_error` carries PayPal's issue codes; `PurchaseView` omits the PYUSD attempt, basket lock and extra transfers until S7, S16 and S17 build them.
+  A declined capture is held in `capture_unknown` rather than `capture_failed`, because Gate 3's table has no `capture_dispatched -> capture_failed`; S3's provider read may then record the failure.
+  Cancel of a `review_open` purchase answers `validation_failed`, because Gate 3 gives `review_open` no transition to `unpaid_closed`.
+- **APIMatic PayPal Context Plugin:** not used during integration. The adapter was written from PayPal's REST documentation and real sandbox responses.
+- **Known limits:** no Playwright journey test exists (D4); lost-response recovery, webhooks and reconcile are S3, so the two quarantined purchases stay uncertain; the basket lock across reviews is S7; the seller's consent is not checked by Envoi before an order is created.
 
 ### S1 Tracer bullet on Render Free, 2026-10-12
 
@@ -258,7 +297,7 @@ It supplied no authority for later revisions. **2026-10-11:** the user authorize
 
 **2026-10-12, with the Gate 3 re-approval and the Gate 4 approval:** the user authorized publishing the branches, committing the work and merging it into `main`; a record cannot contain its own commit, so Git history and the remote are the evidence.
 
-**STOP here: Gates 1-4 are approved and S1 is done.** The next step is S2, only on the user's authorization naming it, such as "start S2".
+**STOP here: Gates 1-4 are approved and S1 and S2 are done.** The next step is S3, only on the user's authorization naming it, such as "start S3".
 Gate 3 was re-approved on 2026-10-12 after its one-change reopening, and Gate 4 was approved the same day ("I approve both pls publish the branches and commit all the changes to main so that we can proceed with the first slice").
 Further commits, pushes or merges need their own authorization.
 No slice starts without an authorization naming its slice ID.
