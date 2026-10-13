@@ -141,8 +141,20 @@ The harness is [`s4-model-eval.mts`](evidence/s4-model-eval.mts); its `CASES` li
 - **Choice among passing candidates:** most correct; then lowest measured cost from token usage and the list prices recorded below; then lowest median time.
   The chosen model becomes `AI_MODEL`.
 - **Falsifier response:** if no candidate passes, `AI_MODEL` stays unset, `/buy` shows manual selection only, no AI-suggestion claim is made, and a provider change goes through Gate 2.
-- **Candidates:** to be fixed here before the first model call, from models the key can list (a listing is not a model call), that support function calling and structured output in the Responses API and have no published shutdown before 16 Dec 2026 (02-architecture.md); at most four.
-- **Spend:** the user's stated limit, recorded here before the first call; the harness stops before any request whose worst case could pass it.
+- **Candidates, fixed 2026-10-14 before the first model call:** from the key's model listing (`GET /v1/models`, 200, a project key; no model was called), the four lowest-priced general text models with no published shutdown before 16 Dec 2026 (02-architecture.md):
+
+  | Model | Input | Cached input | Output |
+  | --- | --- | --- | --- |
+  | `gpt-6-luna` | $0.10 | $0.01 | $0.50 |
+  | `gpt-5.6-luna` | $0.20 | $0.02 | $1.20 |
+  | `gpt-4.1-mini` | $0.40 | $0.10 | $1.60 |
+  | `gpt-5.4-mini` | $0.75 | $0.075 | $4.50 |
+
+  USD per million tokens, standard tier, read from [OpenAI pricing](https://developers.openai.com/api/docs/pricing) on 2026-10-14; [OpenAI deprecations](https://developers.openai.com/api/docs/deprecations) lists no shutdown for any of the four.
+  Excluded: `gpt-5-mini` and `gpt-5-nano` (snapshots shut down 11 Dec 2026), `gpt-4.1-nano` (23 Oct 2026); `gpt-5.4-nano` (shutdown 1 Apr 2027) is left out as the fifth-cheapest.
+  Function calling and structured output in the Responses API are [vendor claim] for these models; the evaluation itself shows whether they work through the adapter.
+- **Spend limit:** US$5, stated by the user on 2026-10-14 ("Yep US$5 sounds good"); the harness stops before any request whose worst case could pass it.
+- **Data sharing:** the user confirmed on 2026-10-14 that their OpenAI organization has not opted in to data sharing.
 - **Limits of this evaluation [hypothesis]:** 20 requests, one run each, written by the builder; it can show a candidate is unfit, but a pass does not establish accuracy for real buyers, which S15 tests.
 
 ### S3 PayPal recovery, 2026-10-13
