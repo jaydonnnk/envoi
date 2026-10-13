@@ -56,6 +56,7 @@ Proposed target remains 4 of 5 first-time buyers completing an eligible test-env
 S3 is done (2026-10-13): fixture fault injection shows lost responses converging on the same capture or staying "Checking payment", and a real sandbox webhook reached Render, was verified and triggered a provider read; its evidence is in [`00-status.md`](00-status.md#s3-paypal-recovery-2026-10-13).
 The two S2 purchases that PayPal refused before the seller consented stay `uncertain` for good, by the user's choice on 2026-10-13: PayPal no longer holds either order, so the approved failure rule cannot close them, and no money moved.
 The seller's consent to Envoi's Platform app was granted out of band through a sandbox partner-referral link; Envoi does not check it before creating an order.
+An independent review of S3 on 2026-10-13 led to small test and record fixes on `envoi/slice-3-paypal-recovery-fixes` (see [status](00-status.md#s3-review-fixes-2026-10-13)); S4 starts from a `main` that contains them, once the user authorizes committing and merging them.
 S4 makes Envoi's first OpenAI call; on "start S4", create `envoi/slice-4-text-entry` from the current `main` tip, confirm it with `git branch --show-current`, and request S4's listed authorizations by name before any install, migration, model call, push or deployment.
 Rerun the checker and its fault harness under [`checks/`](checks/gate4_check.py) after any edit to the gate folder.
 Gate 3 was re-approved on 2026-10-11 with fixes A-M; its record, mirrors and fail-capable checks are in `00-status.md`.

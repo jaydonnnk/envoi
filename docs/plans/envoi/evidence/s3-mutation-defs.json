@@ -1,0 +1,462 @@
+[
+ {
+  "id": "lost-create-key",
+  "test": "lost create response replays the same key",
+  "test_file": "tests/integration/paypal-recovery.test.ts",
+  "mutation": "the create replay generates a fresh PayPal-Request-Id",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "    attempt.createRequestId,\n",
+    "new": "    attempt.state === \"create_unknown\" ? randomUUID() : attempt.createRequestId,\n"
+   }
+  ]
+ },
+ {
+  "id": "create-recreatable",
+  "test": "create_unknown without an order id is recreatable",
+  "test_file": "tests/unit/payment-recovery.test.ts",
+  "mutation": "decideCreateRecovery returns safe_to_recreate unconditionally",
+  "edits": [
+   {
+    "file": "src/domain/purchases/reconcile.ts",
+    "old": "  if (attempt.state !== \"create_unknown\" || attempt.orderId !== null) return \"block_uncertain\";",
+    "new": "  return \"safe_to_recreate\";"
+   }
+  ]
+ },
+ {
+  "id": "capture-unknown-abandoned",
+  "test": "capture_unknown never becomes abandoned",
+  "test_file": "tests/unit/payment-recovery.test.ts",
+  "mutation": "allow capture_unknown -> abandoned in the attempt table",
+  "edits": [
+   {
+    "file": "src/domain/payments/state.ts",
+    "old": "  capture_unknown: [\"capture_confirmed\", \"capture_failed\"],",
+    "new": "  capture_unknown: [\"capture_confirmed\", \"capture_failed\", \"abandoned\"],"
+   }
+  ]
+ },
+ {
+  "id": "duplicate-webhook",
+  "test": "duplicate webhook changes nothing",
+  "test_file": "tests/integration/paypal-webhook.test.ts",
+  "mutation": "drop the provider_events (provider, event_id) unique index and the conflict target that needs it, so a second delivery inserts a second row",
+  "edits": [
+   {
+    "file": "drizzle/0004_s3_paypal_recovery.sql",
+    "old": "CREATE UNIQUE INDEX \"provider_events_event_id_unique\" ON \"provider_events\" USING btree (\"provider\",\"event_id\");",
+    "new": "SELECT 1;"
+   },
+   {
+    "file": "src/integrations/paypal/verify.ts",
+    "old": ".onConflictDoNothing({ target: [providerEvents.provider, providerEvents.eventId] })",
+    "new": ".onConflictDoNothing()"
+   }
+  ]
+ },
+ {
+  "id": "unverified",
+  "test": "unverified webhook signature is rejected",
+  "test_file": "tests/integration/paypal-webhook.test.ts",
+  "mutation": "ignore PayPal's verification_status (skip verification)",
+  "edits": [
+   {
+    "file": "src/integrations/paypal/verify.ts",
+    "old": "result.value.verification_status !== \"SUCCESS\"",
+    "new": "false"
+   }
+  ]
+ },
+ {
+  "id": "content-alone",
+  "test": "webhook content alone cannot mark paid",
+  "test_file": "tests/integration/paypal-webhook.test.ts",
+  "mutation": "trust a PAYMENT.CAPTURE.COMPLETED event and mark its purchase paid",
+  "edits": [
+   {
+    "file": "src/app/api/v1/integrations/paypal/webhook/route.ts",
+    "old": "  if (recorded.duplicate || recorded.disposition !== \"read_due\" || !recorded.attemptId) return answer(200);",
+    "new": "  if (!recorded.duplicate && recorded.attemptId && verification.eventType === \"PAYMENT.CAPTURE.COMPLETED\") {\n    const { sql } = await import(\"drizzle-orm\");\n    await db.execute(sql`update purchases set state = 'paid' where id = (select purchase_id from payment_attempts where id = ${recorded.attemptId})`);\n  }\n  if (recorded.duplicate || recorded.disposition !== \"read_due\" || !recorded.attemptId) return answer(200);"
+   }
+  ]
+ },
+ {
+  "id": "cancel-after-dispatch",
+  "test": "cancel after dispatch reports uncertain",
+  "test_file": "tests/integration/paypal-recovery.test.ts",
+  "mutation": "cancel closes the purchase unpaid_closed after a capture was dispatched",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "      if (!isPreCapture(state)) return appError(\"payment_uncertain\", \"PayPal may already be completing this payment. Check the receipt; do not pay again.\");",
+    "new": "      if (!isPreCapture(state)) {\n        await transitionPurchase(tx, purchaseId, [\"pending_payment\", \"uncertain\"], \"unpaid_closed\", \"buyer_canceled\");\n        return { view: { state: \"unpaid_closed\", paypalAttempt: state } };\n      }"
+   }
+  ]
+ },
+ {
+  "id": "cancel-page",
+  "test": "cancel after dispatch reports uncertain",
+  "test_file": "tests/integration/paypal-recovery.test.ts",
+  "mutation": "the PayPal cancel page ignores a dispatched or uncertain capture",
+  "edits": [
+   {
+    "file": "src/app/paypal/cancel/page.tsx",
+    "old": "  if (purchase.view.state === \"uncertain\" || purchase.view.state === \"paid\" || attempt === \"capture_dispatched\" || attempt === \"capture_unknown\") {",
+    "new": "  if (false) {"
+   }
+  ]
+ },
+ {
+  "id": "receipt-dispatched",
+  "test": "cancel after dispatch reports uncertain",
+  "test_file": "tests/integration/paypal-recovery.test.ts",
+  "mutation": "the receipt shows a dispatched capture as Not paid yet instead of Checking payment",
+  "edits": [
+   {
+    "file": "src/app/receipt/[purchaseId]/page.tsx",
+    "old": "      if (purchase.view.paypalAttempt && CAPTURE_IN_FLIGHT.has(purchase.view.paypalAttempt)) return CHECKING;\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "polling-terminal",
+  "test": "polling stops at a terminal state",
+  "test_file": "tests/unit/payment-recovery.test.ts",
+  "mutation": "keep polling after a terminal state",
+  "edits": [
+   {
+    "file": "src/app/receipt/[purchaseId]/polling.ts",
+    "old": "    if (isTerminalPurchaseState(current.state)) {\n      stopped = true;\n      return;\n    }\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "lost-capture-key",
+  "test": "lost capture response replays the same capture key",
+  "test_file": "tests/integration/paypal-recovery.test.ts",
+  "mutation": "the capture replay generates a new key",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "  const replayed = await deps.replay.captureOrder(attempt.orderId, captureKey);",
+    "new": "  const replayed = await deps.replay.captureOrder(attempt.orderId, randomUUID());"
+   }
+  ]
+ },
+ {
+  "id": "no-downgrade",
+  "test": "no callback downgrades paid",
+  "test_file": "tests/integration/paypal-webhook.test.ts",
+  "mutation": "allow paid -> uncertain in the purchase table",
+  "edits": [
+   {
+    "file": "src/domain/purchases/state.ts",
+    "old": "  paid: [],",
+    "new": "  paid: [\"uncertain\"],"
+   }
+  ]
+ },
+ {
+  "id": "unknown-order",
+  "test": "unknown-order webhook is quarantined",
+  "test_file": "tests/integration/paypal-webhook.test.ts",
+  "mutation": "treat an unknown order id as known: the inbox matches any stored attempt instead of the event's order",
+  "edits": [
+   {
+    "file": "src/integrations/paypal/verify.ts",
+    "old": ".from(paymentAttempts).where(eq(paymentAttempts.orderId, event.knownOrderId))",
+    "new": ".from(paymentAttempts).limit(1)"
+   }
+  ]
+ },
+ {
+  "id": "webhook-read",
+  "test": "a verified webhook triggers a provider read",
+  "test_file": "tests/integration/paypal-webhook.test.ts",
+  "mutation": "the webhook records the event but performs no provider read",
+  "edits": [
+   {
+    "file": "src/app/api/v1/integrations/paypal/webhook/route.ts",
+    "old": "  const check = await reconcileAttempt({ db, read: paypalReadClient(), replay: null, now: systemNow, actor: \"paypal_webhook\" }, recorded.attemptId);",
+    "new": "  const check = \"skipped\" as string; void reconcileAttempt; void paypalReadClient;"
+   }
+  ]
+ },
+ {
+  "id": "debounce",
+  "test": "provider reads are debounced by T_PROVIDER_READ_DEBOUNCE",
+  "test_file": "tests/integration/paypal-recovery.test.ts",
+  "mutation": "drop the debounce window from the provider-read claim",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "        or(isNull(paymentAttempts.lastProviderReadAt), lte(paymentAttempts.lastProviderReadAt, windowStart)),\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "lease-less-replay",
+  "test": "a status check that began before dispatch never replays the capture key",
+  "test_file": "tests/integration/paypal-recovery.test.ts",
+  "mutation": "drop the in_flight guard after the attempt re-read",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "    if (CAPTURE_IN_FLIGHT.includes(attempt.state as AttemptState) && !lease) return \"in_flight\";\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "failure-needs-refusal",
+  "test": "a replay that gets no answer stays checking payment",
+  "test_file": "tests/integration/paypal-recovery.test.ts",
+  "mutation": "count any non-ok replay as a refusal",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "  if (after.value.captures.length === 0 && isDefinitiveRefusal(replayed)) {",
+    "new": "  if (after.value.captures.length === 0 && replayed.kind !== \"ok\") {"
+   }
+  ]
+ },
+ {
+  "id": "failure-needs-no-capture",
+  "test": "a refused replay is not a failure while PayPal shows any capture",
+  "test_file": "tests/integration/paypal-recovery.test.ts",
+  "mutation": "drop the no-capture condition from the verified failure",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "  if (after.value.captures.length === 0 && isDefinitiveRefusal(replayed)) {",
+    "new": "  if (isDefinitiveRefusal(replayed)) {"
+   }
+  ]
+ },
+ {
+  "id": "refusal-issues",
+  "test": "only a 4xx naming issue codes is a definitive refusal",
+  "test_file": "tests/unit/payment-recovery.test.ts",
+  "mutation": "accept a 4xx without issue codes as a refusal",
+  "edits": [
+   {
+    "file": "src/domain/purchases/reconcile.ts",
+    "old": " && Boolean(issues);",
+    "new": ";"
+   }
+  ]
+ },
+ {
+  "id": "recreate-new-key",
+  "test": "a create replay PayPal refuses outright is recreated under a new key",
+  "test_file": "tests/integration/paypal-recovery.test.ts",
+  "mutation": "recreate under the old create key",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "    return createAndRecord(tx, deps, purchase, next);",
+    "new": "    return createAndRecord(tx, deps, purchase, { ...next, createRequestId: current.createRequestId });"
+   }
+  ]
+ },
+ {
+  "id": "unknown-order-audit",
+  "test": "unknown-order webhook is quarantined",
+  "test_file": "tests/integration/paypal-webhook.test.ts",
+  "mutation": "quarantine an unknown order without the operator-visible audit row",
+  "edits": [
+   {
+    "file": "src/integrations/paypal/verify.ts",
+    "old": "    if (disposition === \"quarantined_unknown_order\") {",
+    "new": "    if (disposition === \"quarantined_unknown_order\" && false) {"
+   }
+  ]
+ },
+ {
+  "id": "unreachable",
+  "test": "a check PayPal never answers reports provider_unreachable and changes nothing",
+  "test_file": "tests/integration/paypal-recovery.test.ts",
+  "mutation": "drop the provider_unreachable outcome when no read got an answer (reported as no_record)",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "    if (answer === \"unreachable\") return \"provider_unreachable\";\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "no-record-not-failure",
+  "test": "an order PayPal no longer holds stays checking payment",
+  "test_file": "tests/integration/paypal-recovery.test.ts",
+  "mutation": "count a refused replay as a verified failure when the order read has no record",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "  if (after.kind !== \"ok\") return apply({ kind: \"inconclusive\", reason: providerReason(\"read\", after) });",
+    "new": "  if (after.kind !== \"ok\") return apply(isDefinitiveRefusal(replayed) ? { kind: \"failed\", reason: \"capture_refused\" } : { kind: \"inconclusive\", reason: providerReason(\"read\", after) });"
+   }
+  ]
+ },
+ {
+  "id": "no-record-label",
+  "test": "an order PayPal no longer holds stays checking payment",
+  "test_file": "tests/integration/paypal-recovery.test.ts",
+  "mutation": "report a 4xx answer as provider_unreachable",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "  return answeredWithout ? \"no_record\" : \"unreachable\";",
+    "new": "  return answeredWithout ? \"unreachable\" : \"unreachable\";"
+   }
+  ]
+ },
+ {
+  "id": "polling-limit",
+  "test": "polls at most every 2 seconds for at most 60 seconds, and not at all from a terminal page",
+  "test_file": "tests/unit/payment-recovery.test.ts",
+  "mutation": "drop the 60-second polling limit",
+  "edits": [
+   {
+    "file": "src/app/receipt/[purchaseId]/polling.ts",
+    "old": "    if (deps.now() - startedAt + POLL_INTERVAL_MS > POLL_LIMIT_MS) {\n      stopped = true;\n      return;\n    }\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "polling-interval",
+  "test": "polls at most every 2 seconds for at most 60 seconds, and not at all from a terminal page",
+  "test_file": "tests/unit/payment-recovery.test.ts",
+  "mutation": "reschedule each poll after 1 second instead of 2",
+  "edits": [
+   {
+    "file": "src/app/receipt/[purchaseId]/polling.ts",
+    "old": "\n    handle = deps.schedule(() => void tick(), POLL_INTERVAL_MS);",
+    "new": "\n    handle = deps.schedule(() => void tick(), POLL_INTERVAL_MS / 2);"
+   }
+  ]
+ },
+ {
+  "id": "polling-terminal-page",
+  "test": "polls at most every 2 seconds for at most 60 seconds, and not at all from a terminal page",
+  "test_file": "tests/unit/payment-recovery.test.ts",
+  "mutation": "start polling from a page rendered in a terminal state",
+  "edits": [
+   {
+    "file": "src/app/receipt/[purchaseId]/polling.ts",
+    "old": "  if (isTerminalPurchaseState(initial.state)) return () => {};\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "converge-no-second-capture",
+  "test": "Check status converges on the same capture id",
+  "test_file": "tests/integration/paypal-recovery.test.ts",
+  "mutation": "replay the capture key even when the first order read already shows the capture",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "  if (first.kind === \"ok\") {\n",
+    "new": "  if (first.kind === \"ok\" && false) {\n"
+   }
+  ]
+ },
+ {
+  "id": "verified-failure-closes",
+  "test": "a refused same-key replay whose order shows no capture closes unpaid",
+  "test_file": "tests/integration/paypal-recovery.test.ts",
+  "mutation": "never record a verified failure, even after an outright refusal with no capture",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "  if (after.value.captures.length === 0 && isDefinitiveRefusal(replayed)) {",
+    "new": "  if (false && after.value.captures.length === 0 && isDefinitiveRefusal(replayed)) {"
+   }
+  ]
+ },
+ {
+  "id": "reconcile-lease",
+  "test": "a status check never replays while another holder has the lease",
+  "test_file": "tests/integration/paypal-recovery.test.ts",
+  "mutation": "Check status takes no lease for an in-flight capture and acts as if it held one",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "? await acquireLease(deps.db, attemptId, deps.now()) : null;",
+    "new": "? randomUUID() : null;"
+   }
+  ]
+ },
+ {
+  "id": "polling-interval-constant",
+  "test": "polls at most every 2 seconds for at most 60 seconds, and not at all from a terminal page",
+  "test_file": "tests/unit/payment-recovery.test.ts",
+  "mutation": "set the poll interval constant to 500 ms",
+  "edits": [
+   {
+    "file": "src/app/receipt/[purchaseId]/polling.ts",
+    "old": "export const POLL_INTERVAL_MS = 2_000;",
+    "new": "export const POLL_INTERVAL_MS = 500;"
+   }
+  ]
+ },
+ {
+  "id": "polling-limit-constant",
+  "test": "polls at most every 2 seconds for at most 60 seconds, and not at all from a terminal page",
+  "test_file": "tests/unit/payment-recovery.test.ts",
+  "mutation": "set the polling limit constant to 600 s",
+  "edits": [
+   {
+    "file": "src/app/receipt/[purchaseId]/polling.ts",
+    "old": "export const POLL_LIMIT_MS = 60_000;",
+    "new": "export const POLL_LIMIT_MS = 600_000;"
+   }
+  ]
+ },
+ {
+  "id": "no-record-only-404",
+  "test": "a PayPal error that says nothing about the order keeps the read due",
+  "test_file": "tests/integration/paypal-recovery.test.ts",
+  "mutation": "count any 4xx except 408 and 429 as PayPal holding no record",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "read.kind === \"http_error\" && read.status === 404);",
+    "new": "read.kind === \"http_error\" && read.status >= 400 && read.status < 500 && read.status !== 408 && read.status !== 429);"
+   }
+  ]
+ },
+ {
+  "id": "switch-off-reconcile",
+  "test": "Check status still converges with the payments switch off",
+  "test_file": "tests/integration/payments-kill-switch.test.ts",
+  "mutation": "the reconcile route refuses while PAYMENTS_ENABLED is false",
+  "edits": [
+   {
+    "file": "src/app/api/v1/purchases/[id]/reconcile/route.ts",
+    "old": "  const { id } = await params;\n",
+    "new": "  const { id } = await params;\n  if (!(await import(\"@/env\")).webEnv().PAYMENTS_ENABLED) return httpErr(appError(\"payments_disabled\", \"mutant\"));\n"
+   }
+  ]
+ },
+ {
+  "id": "switch-off-webhook",
+  "test": "a verified webhook still triggers a provider read with the payments switch off",
+  "test_file": "tests/integration/payments-kill-switch.test.ts",
+  "mutation": "the webhook skips its provider read while PAYMENTS_ENABLED is false",
+  "edits": [
+   {
+    "file": "src/app/api/v1/integrations/paypal/webhook/route.ts",
+    "old": "  if (recorded.duplicate || recorded.disposition !== \"read_due\" || !recorded.attemptId) return answer(200);",
+    "new": "  if (recorded.duplicate || recorded.disposition !== \"read_due\" || !recorded.attemptId || !webEnv().PAYMENTS_ENABLED) return answer(200);"
+   }
+  ]
+ }
+]

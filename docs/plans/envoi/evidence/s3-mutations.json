@@ -1,24 +1,28 @@
 {
- "recorded": "2026-10-13",
- "branch": "envoi/slice-3-paypal-recovery",
- "commit": "aeec852",
- "method": "Each guard mutated alone in the working tree by exact text replacement, the named test run alone (vitest -t), the file restored and its SHA-256 compared with the original, then the test rerun. All 29 ran on the final code at aeec852. Integration tests ran on local PostgreSQL 18.6 with the real schema built from the migrations; PayPal is the labeled fixture fake at the PayPalWriteClient boundary and webhook signatures use the fixture postback.",
+ "branch": "envoi/slice-3-paypal-recovery-fixes",
+ "base_commit": "e909791",
+ "uncommitted_changes": true,
+ "method": "Each definition in s3-mutation-defs.json applied alone by exact text replacement, its named test run alone (vitest -t), every touched file restored and compared by SHA-256, then the test rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations; PayPal is the labeled fixture fake at the PayPalWriteClient boundary and webhook signatures use the fixture postback.",
  "results": [
   {
    "id": "lost-create-key",
    "test": "lost create response replays the same key",
-   "file": "src/domain/payments/attempts.ts",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
    "mutation": "the create replay generates a fresh PayPal-Request-Id",
-   "mutated": "Tests  1 failed | 11 skipped (12)",
-   "error": "AssertionError: expected 'd4000403-68e0-4e2f-a69a-a91eec0e1703' to be '1d869303-8550-4114-9c36-2734b1e3932e' // Object.is equality",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected '50c08b5a-08c0-4fcb-9b7b-ce4e1c2e32ac' to be '7953361f-07eb-4a4a-9257-bb085b766c09' // Object.is equality",
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "rerun": "Tests  1 passed | 13 skipped (14)",
    "proof": true
   },
   {
    "id": "create-recreatable",
    "test": "create_unknown without an order id is recreatable",
-   "file": "src/domain/purchases/reconcile.ts",
+   "files": [
+    "src/domain/purchases/reconcile.ts"
+   ],
    "mutation": "decideCreateRecovery returns safe_to_recreate unconditionally",
    "mutated": "Tests  1 failed | 4 skipped (5)",
    "error": "AssertionError: expected 'safe_to_recreate' to be 'replay_same_key' // Object.is equality",
@@ -29,7 +33,9 @@
   {
    "id": "capture-unknown-abandoned",
    "test": "capture_unknown never becomes abandoned",
-   "file": "src/domain/payments/state.ts",
+   "files": [
+    "src/domain/payments/state.ts"
+   ],
    "mutation": "allow capture_unknown -> abandoned in the attempt table",
    "mutated": "Tests  1 failed | 4 skipped (5)",
    "error": "AssertionError: expected true to be false // Object.is equality",
@@ -40,19 +46,23 @@
   {
    "id": "duplicate-webhook",
    "test": "duplicate webhook changes nothing",
-   "file": "drizzle/0004_s3_paypal_recovery.sql",
-   "mutation": "drop the provider_events (provider, event_id) unique index from migration 0004",
+   "files": [
+    "drizzle/0004_s3_paypal_recovery.sql",
+    "src/integrations/paypal/verify.ts"
+   ],
+   "mutation": "drop the provider_events (provider, event_id) unique index and the conflict target that needs it, so a second delivery inserts a second row",
    "mutated": "Tests  1 failed | 5 skipped (6)",
-   "error": "Error: Failed query: insert into \"provider_events\" (\"id\", \"provider\", \"event_id\", \"event_type\", \"resource_type\", \"order_id\", \"attempt_id\", \"disposition\", \"received_at\") values ($1, $2, $3, $4, $5, $6, $7, $8, $9) on conflict (\"provider\",\"event_id\") do nothing returning \"id\"",
+   "error": "AssertionError: expected [ \u2026(2) ] to have a length of 1 but got 2",
    "restored_identical": true,
    "rerun": "Tests  1 passed | 5 skipped (6)",
-   "proof": true,
-   "note": "Fails through a database error: without the unique index, ON CONFLICT (provider, event_id) has no matching constraint."
+   "proof": true
   },
   {
    "id": "unverified",
    "test": "unverified webhook signature is rejected",
-   "file": "src/integrations/paypal/verify.ts",
+   "files": [
+    "src/integrations/paypal/verify.ts"
+   ],
    "mutation": "ignore PayPal's verification_status (skip verification)",
    "mutated": "Tests  1 failed | 5 skipped (6)",
    "error": "AssertionError: expected 200 to be 400 // Object.is equality",
@@ -63,7 +73,9 @@
   {
    "id": "content-alone",
    "test": "webhook content alone cannot mark paid",
-   "file": "src/app/api/v1/integrations/paypal/webhook/route.ts",
+   "files": [
+    "src/app/api/v1/integrations/paypal/webhook/route.ts"
+   ],
    "mutation": "trust a PAYMENT.CAPTURE.COMPLETED event and mark its purchase paid",
    "mutated": "Tests  1 failed | 5 skipped (6)",
    "error": "AssertionError: expected { purchase: 'paid', \u2026(3) } to match object { purchase: 'uncertain', \u2026(2) }",
@@ -74,40 +86,48 @@
   {
    "id": "cancel-after-dispatch",
    "test": "cancel after dispatch reports uncertain",
-   "file": "src/domain/payments/attempts.ts",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
    "mutation": "cancel closes the purchase unpaid_closed after a capture was dispatched",
-   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
    "error": "AssertionError: expected { status: 200, \u2026(4) } to match object { status: 409, \u2026(4) }",
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "rerun": "Tests  1 passed | 13 skipped (14)",
    "proof": true
   },
   {
    "id": "cancel-page",
    "test": "cancel after dispatch reports uncertain",
-   "file": "src/app/paypal/cancel/page.tsx",
+   "files": [
+    "src/app/paypal/cancel/page.tsx"
+   ],
    "mutation": "the PayPal cancel page ignores a dispatched or uncertain capture",
-   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
    "error": "AssertionError: expected '<main><p class=\"eyebrow\">PayPal sandb\u2026' to contain '<h1>Checking payment</h1>'",
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "rerun": "Tests  1 passed | 13 skipped (14)",
    "proof": true
   },
   {
    "id": "receipt-dispatched",
    "test": "cancel after dispatch reports uncertain",
-   "file": "src/app/receipt/[purchaseId]/page.tsx",
+   "files": [
+    "src/app/receipt/[purchaseId]/page.tsx"
+   ],
    "mutation": "the receipt shows a dispatched capture as Not paid yet instead of Checking payment",
-   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
    "error": "AssertionError: expected { status: 409, \u2026(4) } to match object { status: 409, \u2026(4) }",
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "rerun": "Tests  1 passed | 13 skipped (14)",
    "proof": true
   },
   {
    "id": "polling-terminal",
    "test": "polling stops at a terminal state",
-   "file": "src/app/receipt/[purchaseId]/polling.ts",
+   "files": [
+    "src/app/receipt/[purchaseId]/polling.ts"
+   ],
    "mutation": "keep polling after a terminal state",
    "mutated": "Tests  1 failed | 4 skipped (5)",
    "error": "AssertionError: expected [ Array(30) ] to have a length of 2 but got 30",
@@ -118,18 +138,22 @@
   {
    "id": "lost-capture-key",
    "test": "lost capture response replays the same capture key",
-   "file": "src/domain/payments/attempts.ts",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
    "mutation": "the capture replay generates a new key",
-   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
    "error": "AssertionError: expected [ \u2026(2) ] to deeply equal [ \u2026(2) ]",
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "rerun": "Tests  1 passed | 13 skipped (14)",
    "proof": true
   },
   {
    "id": "no-downgrade",
    "test": "no callback downgrades paid",
-   "file": "src/domain/purchases/state.ts",
+   "files": [
+    "src/domain/purchases/state.ts"
+   ],
    "mutation": "allow paid -> uncertain in the purchase table",
    "mutated": "Tests  1 failed | 5 skipped (6)",
    "error": "AssertionError: expected { purchase: 'uncertain', \u2026(3) } to match object { purchase: 'paid', \u2026(2) }",
@@ -140,19 +164,22 @@
   {
    "id": "unknown-order",
    "test": "unknown-order webhook is quarantined",
-   "file": "src/integrations/paypal/verify.ts",
-   "mutation": "treat an unknown order id as known (read_due)",
+   "files": [
+    "src/integrations/paypal/verify.ts"
+   ],
+   "mutation": "treat an unknown order id as known: the inbox matches any stored attempt instead of the event's order",
    "mutated": "Tests  1 failed | 5 skipped (6)",
-   "error": "Error: Failed query: insert into \"provider_events\" (\"id\", \"provider\", \"event_id\", \"event_type\", \"resource_type\", \"order_id\", \"attempt_id\", \"disposition\", \"received_at\") values ($1, $2, $3, $4, $5, $6, $7, $8, $9) on conflict (\"provider\",\"event_id\") do nothing returning \"id\"",
+   "error": "AssertionError: expected [ { disposition: 'read_due', \u2026(2) } ] to deeply equal [ { \u2026(3) } ]",
    "restored_identical": true,
    "rerun": "Tests  1 passed | 5 skipped (6)",
-   "proof": true,
-   "note": "Fails through a database error: the provider_events check constraint refuses read_due without an attempt id. unknown-order-audit separately proves the operator-visible audit row."
+   "proof": true
   },
   {
    "id": "webhook-read",
    "test": "a verified webhook triggers a provider read",
-   "file": "src/app/api/v1/integrations/paypal/webhook/route.ts",
+   "files": [
+    "src/app/api/v1/integrations/paypal/webhook/route.ts"
+   ],
    "mutation": "the webhook records the event but performs no provider read",
    "mutated": "Tests  1 failed | 5 skipped (6)",
    "error": "AssertionError: expected 1 to be 2 // Object.is equality",
@@ -163,51 +190,61 @@
   {
    "id": "debounce",
    "test": "provider reads are debounced by T_PROVIDER_READ_DEBOUNCE",
-   "file": "src/domain/payments/attempts.ts",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
    "mutation": "drop the debounce window from the provider-read claim",
-   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
    "error": "AssertionError: expected 'read' to be 'debounced' // Object.is equality",
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "rerun": "Tests  1 passed | 13 skipped (14)",
    "proof": true
   },
   {
    "id": "lease-less-replay",
    "test": "a status check that began before dispatch never replays the capture key",
-   "file": "src/domain/payments/attempts.ts",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
    "mutation": "drop the in_flight guard after the attempt re-read",
-   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
    "error": "AssertionError: expected 'read' to be 'in_flight' // Object.is equality",
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "rerun": "Tests  1 passed | 13 skipped (14)",
    "proof": true
   },
   {
    "id": "failure-needs-refusal",
    "test": "a replay that gets no answer stays checking payment",
-   "file": "src/domain/payments/attempts.ts",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
    "mutation": "count any non-ok replay as a refusal",
-   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
    "error": "AssertionError: expected { purchase: 'unpaid_closed', \u2026(1) } to match object { purchase: 'uncertain', \u2026(1) }",
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "rerun": "Tests  1 passed | 13 skipped (14)",
    "proof": true
   },
   {
    "id": "failure-needs-no-capture",
    "test": "a refused replay is not a failure while PayPal shows any capture",
-   "file": "src/domain/payments/attempts.ts",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
    "mutation": "drop the no-capture condition from the verified failure",
-   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
    "error": "AssertionError: expected { purchase: 'unpaid_closed', \u2026(1) } to match object { purchase: 'uncertain', \u2026(1) }",
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "rerun": "Tests  1 passed | 13 skipped (14)",
    "proof": true
   },
   {
    "id": "refusal-issues",
    "test": "only a 4xx naming issue codes is a definitive refusal",
-   "file": "src/domain/purchases/reconcile.ts",
+   "files": [
+    "src/domain/purchases/reconcile.ts"
+   ],
    "mutation": "accept a 4xx without issue codes as a refusal",
    "mutated": "Tests  1 failed | 4 skipped (5)",
    "error": "AssertionError: expected true to be false // Object.is equality",
@@ -218,18 +255,22 @@
   {
    "id": "recreate-new-key",
    "test": "a create replay PayPal refuses outright is recreated under a new key",
-   "file": "src/domain/payments/attempts.ts",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
    "mutation": "recreate under the old create key",
-   "mutated": "Tests  1 failed | 11 skipped (12)",
-   "error": "AssertionError: expected 'e1408715-8123-4434-b6ff-8cd76bbdf177' not to be 'e1408715-8123-4434-b6ff-8cd76bbdf177' // Object.is equality",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected '42245014-a6e4-4a15-b9c4-815f5b9ea288' not to be '42245014-a6e4-4a15-b9c4-815f5b9ea288' // Object.is equality",
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "rerun": "Tests  1 passed | 13 skipped (14)",
    "proof": true
   },
   {
    "id": "unknown-order-audit",
    "test": "unknown-order webhook is quarantined",
-   "file": "src/integrations/paypal/verify.ts",
+   "files": [
+    "src/integrations/paypal/verify.ts"
+   ],
    "mutation": "quarantine an unknown order without the operator-visible audit row",
    "mutated": "Tests  1 failed | 5 skipped (6)",
    "error": "AssertionError: expected [] to deeply equal [ { operator_visible: true, \u2026(2) } ]",
@@ -240,41 +281,48 @@
   {
    "id": "unreachable",
    "test": "a check PayPal never answers reports provider_unreachable and changes nothing",
-   "file": "src/domain/payments/attempts.ts",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
    "mutation": "drop the provider_unreachable outcome when no read got an answer (reported as no_record)",
-   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
    "error": "AssertionError: expected { check: 'no_record', \u2026(1) } to match object { check: 'provider_unreachable', \u2026(1) }",
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 11 skipped (12)",
-   "proof": true,
-   "note": "Definition updated after the no_record refactor (aeec852), which replaced the earlier answered flag with the outcome mapping mutated here."
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
   },
   {
    "id": "no-record-not-failure",
    "test": "an order PayPal no longer holds stays checking payment",
-   "file": "src/domain/payments/attempts.ts",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
    "mutation": "count a refused replay as a verified failure when the order read has no record",
-   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
    "error": "AssertionError: expected { check: 'no_record', \u2026(1) } to match object { check: 'no_record', \u2026(1) }",
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "rerun": "Tests  1 passed | 13 skipped (14)",
    "proof": true
   },
   {
    "id": "no-record-label",
    "test": "an order PayPal no longer holds stays checking payment",
-   "file": "src/domain/payments/attempts.ts",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
    "mutation": "report a 4xx answer as provider_unreachable",
-   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
    "error": "AssertionError: expected { check: 'provider_unreachable', \u2026(1) } to match object { check: 'no_record', \u2026(1) }",
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "rerun": "Tests  1 passed | 13 skipped (14)",
    "proof": true
   },
   {
    "id": "polling-limit",
    "test": "polls at most every 2 seconds for at most 60 seconds, and not at all from a terminal page",
-   "file": "src/app/receipt/[purchaseId]/polling.ts",
+   "files": [
+    "src/app/receipt/[purchaseId]/polling.ts"
+   ],
    "mutation": "drop the 60-second polling limit",
    "mutated": "Tests  1 failed | 4 skipped (5)",
    "error": "AssertionError: expected [ Array(60) ] to have a length of 30 but got 60",
@@ -285,7 +333,9 @@
   {
    "id": "polling-interval",
    "test": "polls at most every 2 seconds for at most 60 seconds, and not at all from a terminal page",
-   "file": "src/app/receipt/[purchaseId]/polling.ts",
+   "files": [
+    "src/app/receipt/[purchaseId]/polling.ts"
+   ],
    "mutation": "reschedule each poll after 1 second instead of 2",
    "mutated": "Tests  1 failed | 4 skipped (5)",
    "error": "AssertionError: expected [ 2000, 3000, 4000, 5000, 6000, \u2026(53) ] to have a length of 30 but got 58",
@@ -296,7 +346,9 @@
   {
    "id": "polling-terminal-page",
    "test": "polls at most every 2 seconds for at most 60 seconds, and not at all from a terminal page",
-   "file": "src/app/receipt/[purchaseId]/polling.ts",
+   "files": [
+    "src/app/receipt/[purchaseId]/polling.ts"
+   ],
    "mutation": "start polling from a page rendered in a terminal state",
    "mutated": "Tests  1 failed | 4 skipped (5)",
    "error": "AssertionError: expected [ 2000 ] to deeply equal []",
@@ -307,23 +359,105 @@
   {
    "id": "converge-no-second-capture",
    "test": "Check status converges on the same capture id",
-   "file": "src/domain/payments/attempts.ts",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
    "mutation": "replay the capture key even when the first order read already shows the capture",
-   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
    "error": "AssertionError: expected [ { op: 'captureOrder', \u2026(2) }, \u2026(1) ] to have a length of 1 but got 2",
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "rerun": "Tests  1 passed | 13 skipped (14)",
    "proof": true
   },
   {
    "id": "verified-failure-closes",
    "test": "a refused same-key replay whose order shows no capture closes unpaid",
-   "file": "src/domain/payments/attempts.ts",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
    "mutation": "never record a verified failure, even after an outright refusal with no capture",
-   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
    "error": "AssertionError: expected { purchase: 'uncertain', \u2026(1) } to match object { purchase: 'unpaid_closed', \u2026(1) }",
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "reconcile-lease",
+   "test": "a status check never replays while another holder has the lease",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
+   "mutation": "Check status takes no lease for an in-flight capture and acts as if it held one",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected { check: 'read', purchase: { \u2026(14) } } to match object { check: 'in_flight', \u2026(1) }",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "polling-interval-constant",
+   "test": "polls at most every 2 seconds for at most 60 seconds, and not at all from a terminal page",
+   "files": [
+    "src/app/receipt/[purchaseId]/polling.ts"
+   ],
+   "mutation": "set the poll interval constant to 500 ms",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected [ 500, 1000, 1500, 2000, 2500, \u2026(115) ] to have a length of 30 but got 120",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "polling-limit-constant",
+   "test": "polls at most every 2 seconds for at most 60 seconds, and not at all from a terminal page",
+   "files": [
+    "src/app/receipt/[purchaseId]/polling.ts"
+   ],
+   "mutation": "set the polling limit constant to 600 s",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected [ Array(60) ] to have a length of 30 but got 60",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "no-record-only-404",
+   "test": "a PayPal error that says nothing about the order keeps the read due",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
+   "mutation": "count any 4xx except 408 and 429 as PayPal holding no record",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected 'no_record' to be 'provider_unreachable' // Object.is equality",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "switch-off-reconcile",
+   "test": "Check status still converges with the payments switch off",
+   "files": [
+    "src/app/api/v1/purchases/[id]/reconcile/route.ts"
+   ],
+   "mutation": "the reconcile route refuses while PAYMENTS_ENABLED is false",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
+   "error": "AssertionError: expected 503 to be 200 // Object.is equality",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 3 skipped (4)",
+   "proof": true
+  },
+  {
+   "id": "switch-off-webhook",
+   "test": "a verified webhook still triggers a provider read with the payments switch off",
+   "files": [
+    "src/app/api/v1/integrations/paypal/webhook/route.ts"
+   ],
+   "mutation": "the webhook skips its provider read while PAYMENTS_ENABLED is false",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
+   "error": "AssertionError: expected { state: 'uncertain', \u2026(2) } to deeply equal { state: 'paid', \u2026(2) }",
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 3 skipped (4)",
    "proof": true
   }
  ]
