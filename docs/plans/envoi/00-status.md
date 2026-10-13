@@ -1,6 +1,6 @@
 # Status: Envoi
 
-Updated: 2026-10-13 (Asia/Singapore).
+Updated: 2026-10-14 (Asia/Singapore).
 
 - Gate 1 - Product: **RE-APPROVED 2026-10-10** by the user ("I approve gate one") after being reopened and revised the same day to remove Zapier, which the user rejected as paid, and to record the PYUSD decisions; see the [reopening record](#reopening-2026-10-10-zapier-removed). Previously **APPROVED 2026-10-07** by the user after reopening it to add a buyer-side scan entry point. Approval covers product scope and buyer/merchant journeys, including text and scan/paste entry points.
 - Gate 2 - Architecture: **RE-APPROVED 2026-10-11** by the user ("gate 2 approved") after being reopened and revised on 2026-10-10 and revised again after a 2026-10-11 review. Approval covers only the direct vision import and PYUSD amendment in `02-architecture.md`, including the five review changes; the OpenAI/provider pin and all unaffected 2026-10-07 decisions stand. It accepts a proposal, not runtime/account proof. Previously **APPROVED 2026-10-07**.
@@ -75,14 +75,14 @@ Updated: 2026-10-13 (Asia/Singapore).
 
 Build order from `04-slices.md`, revised and approved 2026-10-12.
 Slice IDs are stable names, so the list below is in build order rather than numeric order; S12 is retired, merged into S11.
-S1, S2 and S3 are done; every later slice starts only on an explicit authorization that names its slice ID, such as "start S13"; a number in that request is the slice ID, not a build position.
-The application is deployed on Render Free from `main` with the S2 PayPal sandbox payment and S3's recovery, reconcile and verified webhook inbox; no other sponsor integration exists.
+S1, S2, S3 and S4 are done; every later slice starts only on an explicit authorization that names its slice ID, such as "start S13"; a number in that request is the slice ID, not a build position.
+The application is deployed on Render Free from `main` with the S2 PayPal sandbox payment, S3's recovery, reconcile and verified webhook inbox, and S4's text suggestions through OpenAI `gpt-6-luna`; no other sponsor integration exists.
 The candidate list in `roadmap.md` remains discussion material and is superseded as a build order by `04-slices.md` once that is approved.
 
 - [x] S1 - Tracer bullet on Render Free: labeled demo shop from Neon to an explicitly unpaid stub receipt; boot check, auth schema pin, R12 latency measurement.
 - [x] S2 - PayPal sandbox happy path with recipient and amount binding, lease-serialized capture, abandonment derived on read and PYUSD shown as unavailable.
 - [x] S3 - PayPal recovery: lost responses, webhooks, reconcile, "checking payment".
-- [ ] S4 - Text entry with AI suggestions and the pre-registered model evaluation.
+- [x] S4 - Text entry with AI suggestions and the pre-registered model evaluation.
 - [ ] S13 - Agent handoff over MCP, moved to right after S4.
 - [ ] S6 - Merchant sign-in and manual menu draft.
 - [ ] S5 - Maintenance runner, manual runs, operator health view behind the operator guard; built after S6, whose sign-in it needs.
@@ -96,12 +96,39 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [ ] S14 - APIMatic client and docs, account-conditional; third in the cut order.
 - [ ] S15 - Judged release.
 
-### S4 Text entry with AI suggestions, in progress, 2026-10-13
+### S4 Text entry with AI suggestions, 2026-10-13 to 2026-10-14
 
-- **Branch:** `envoi/slice-4-text-entry`, from `main` at `03efb2a`.
+- **Branch:** `envoi/slice-4-text-entry`, from `main` at `03efb2a`; commits `91cd423` (feature), `622056c` and `3ba713e` (evaluation pre-registration), `b9ce587` (evaluation results), `9d8ca4a` (area fix found in the browser), `1a93f66` (mutation evidence), `bc8ba49` (client timeout found on Render), then this record.
+  All merged into `main` by fast-forward and pushed; CI passed on `1a93f66` and `bc8ba49`, on the branch and on `main`.
   Started on the user's handover prompt after the S3 review fixes reached `main` ("Yes please do so"); the user authorized S4's listed actions on 2026-10-13 ("Yes i authroize them go ahead and start S4"): install `ai@7.0.130` and `@ai-sdk/openai@4.0.86`, evaluation spend within a limit the user states, migrations on Neon for the limiter rows, commits, pushing the slice branch, and merging into `main` and pushing, which deploys.
-  The user performs: the OpenAI key in `.env.local` and Render.
-- **Code so far:** commit `91cd423` (see the S4 record when the slice closes).
+  The user put `OPENAI_API_KEY` into `.env.local`, `.env` and Render and `AI_MODEL=gpt-6-luna` into Render on 2026-10-14; the builder's attempt to add `AI_MODEL` to `.env.local` was refused, so local text entry needs the user to add it.
+- **Built:** `POST /api/v1/buyer/suggestions` (`requireBuyerSession`, body bounds, the D9 limiter, then `suggestFromText`); `src/domain/suggestions/` (types, the three price-free read tools, the registry filter and area rule, server-written clarification questions); `src/integrations/ai/openai.ts` (AI SDK Responses API, `store: false`, strict structured output, `T_AI_BUDGET` 30 s from the request start, at most three tool calls, no retries); `src/lib/ratelimit.ts` with the `rate_limit_hits` table; the text card on `/buy` following the Gate 1 buyer mockup, with the manual list always below it; a suggested item set opens the shop with those items at quantity 1, and the review prices them again.
+- **Result on Render [verified], 2026-10-14, `https://envoi-helx.onrender.com`, serving `bc8ba49`:** "kaya toast and kopi" asked "Which area are you in? For example, Tanjong Pagar." with "Envoi does not know your location and cannot choose the nearest shop."; adding "near Tanjong Pagar" returned Lorong Demo Kopi (demo fixture) with Kopi O S$1.60 and Kaya toast set S$4.50 in 8.4 s (curl: 7.0 s and 15.0 s); "Choose quantities" opened the shop with both at 1, and the S2 review `pur_nxa5jova6pmvucpjoquskqydvm` priced 2 × Kopi O and 1 × Kaya toast set at S$7.70 from the server, with the sandbox seller and demo-fixture labels; no payment was made.
+  The first basket (1 + 1) answered "A payment for this basket may still be in progress": that browser session holds the two S2 purchases left `uncertain` by the user's choice, and the review route's `execution_locked` check covers the same basket; one more Kopi O made a different basket.
+  With the suggestion request stubbed to never answer, the page gave up after 40,013 ms with "Suggestions took too long. Pick a shop from the list instead."
+  Screens at 390px and 1280px: no horizontal scroll, the test-environment badge, the sandbox notice and the demo-fixture chip visible.
+- **Two defects found by end-to-end checks and fixed, each reproduced first:**
+  - Locally with `gpt-6-luna`, the area "near Tanjong Pagar" answered no match, because the model passed the area as written to `search_outlets`; a new test reproduced it (`[]`), and the tools now pass only the place words and match when either text contains the other (`9d8ca4a`).
+  - On Render the in-app browser's connection dropped mid-request (`ERR_QUIC_PROTOCOL_ERROR.QUIC_NETWORK_IDLE_TIMEOUT`) while the server answered, leaving "Looking…" with no end; the page now aborts after 40 seconds and offers the list (`bc8ba49`).
+    This path has no automated test; it was checked on Render with a stubbed request.
+- **Tests [verified]:** typecheck, lint, 18 unit and 62 integration tests pass locally on PostgreSQL 18.6 and in CI; S4 added 16 integration tests (`buyer-suggestions.test.ts` 13, `suggestion-rate-limits.test.ts` 3), counted from the diff.
+  - Gate 3: `model cannot invent a price`, `model tool budget is enforced`.
+  - Additions: `missing area asks for clarification`, `text suggestions are rate limited per buyer session`, `text suggestions are rate limited across all sessions`.
+  - Beyond the plan, each with its own guard: `an unregistered outlet id is dropped`, `no tool output carries a price`, `the tools find a shop from an area written the way buyers write it`, `kaya toast and kopi asks for an area, then near Tanjong Pagar returns the demo shop and items`, `an area the buyer did not write is not trusted`, `a shop outside the stated area is not suggested`, `a failed model call offers manual selection`, `suggestions need a buyer session`, `a model still working 30 seconds after the request started yields budget_exceeded`, `a model answering 25 seconds after the request started is not cut off`, `concurrent requests cannot pass the per-session window together`.
+  - The limits, windows and budget are asserted as literals (10 and 600,000 ms; 100 and 3,600,000 ms; 30 s), not through the module's constants.
+  - OpenAI is faked at the provider's fetch boundary by `tests/support/fake-openai.ts`, labeled FIXTURE.
+- **Mutations [verified], 22 of 22, all on `9d8ca4a`, each alone, failing its named test on an AssertionError, restored byte-identical (SHA-256) and rerun passing;** definitions, runner and results in [`s4-mutation-defs.json`](evidence/s4-mutation-defs.json), [`s4-mutate.py`](evidence/s4-mutate.py) and [`s4-mutations.json`](evidence/s4-mutations.json) (its `uncommitted_changes` flag is the three evidence files themselves, untracked during the run).
+  The runner now also requires the mutated failure to be an AssertionError.
+  `missing area asks for clarification` has two (a fixed default area; "near me" accepted as an area), the per-session test four (no window, 11 allowed, a 9-minute window, a refused request still calling the model), the global test three and the area-forms test two.
+- **Neon [verified], 2026-10-14:** before, six migrations, the nine `neon_auth` tables and no `envoi_web` grant in `neon_auth`; migrations 0006 (`rate_limit_hits`) and 0007 (`envoi_web` SELECT, INSERT and DELETE on it, delta D7) applied; after, eight migrations, the same nine `neon_auth` tables and still no grant there, all inspected in enforced `READ ONLY` transactions.
+- **Deviations recorded, no approved decision changed:**
+  - `suggestFromText` takes the model as a fifth parameter, as the PayPal client is injected elsewhere, and returns `{ kind: "unavailable" }` for a failed call, which the route answers with the existing `provider_unreachable`; Gate 3's `Suggestion` union gains no member.
+  - The `items` suggestion also carries the outlet summary, so the page can name the shop.
+  - The per-session window is keyed by the buyer's user id, which an anonymous session owns one-to-one.
+  - The global-window test needs no raised per-session window: ten buyers ask ten times each and an eleventh asks once, so no session reaches its own limit.
+  - `OPENAI_API_KEY` and `AI_MODEL` are optional; without both, `/buy` shows the manual list only.
+  - `next.config.ts` sets `agentRules: false`, because `next dev` appended its own block to `AGENTS.md`; the block was removed.
+- **Known limits:** one evaluation run of 20 builder-written requests; real-buyer accuracy is S15's; the client timeout has no automated test; the end-to-end time on Render was 7 to 15 s per request, inside `T_AI_BUDGET`, against S15's untested three-minute target; Render's logs were not read, because this Mac has no Render access.
 
 #### S4 model evaluation, pre-registration (R5)
 
