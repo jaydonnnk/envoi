@@ -72,15 +72,17 @@ describe("receipt polling", () => {
   });
 
   it("polls at most every 2 seconds for at most 60 seconds, and not at all from a terminal page", async () => {
+    // The approved cadence as literals, so a change to the module's constants fails here too.
     const { fetches } = poller([{ state: "pending_payment", attemptState: "capture_unknown" }]);
-    await vi.advanceTimersByTimeAsync(POLL_LIMIT_MS * 2);
-    expect(fetches).toHaveLength(POLL_LIMIT_MS / POLL_INTERVAL_MS);
-    expect(fetches.at(-1)).toBeLessThanOrEqual(POLL_LIMIT_MS);
-    expect(fetches.every((at, index) => index === 0 || at - fetches[index - 1]! >= POLL_INTERVAL_MS)).toBe(true);
+    await vi.advanceTimersByTimeAsync(120_000);
+    expect(fetches).toHaveLength(30);
+    expect(fetches[0]).toBe(2_000);
+    expect(fetches.at(-1)).toBeLessThanOrEqual(60_000);
+    expect(fetches.every((at, index) => index === 0 || at - fetches[index - 1]! >= 2_000)).toBe(true);
     vi.useRealTimers();
 
     const terminal = poller([], { state: "paid", attemptState: "capture_confirmed" });
-    await vi.advanceTimersByTimeAsync(POLL_LIMIT_MS);
+    await vi.advanceTimersByTimeAsync(60_000);
     expect(terminal.fetches).toEqual([]);
   });
 });

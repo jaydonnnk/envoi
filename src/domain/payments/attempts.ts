@@ -524,13 +524,14 @@ async function applyVerdict(deps: ReconcileDeps, purchaseId: string, purchaseSta
   });
 }
 
-// What PayPal's reads of the order gave back: its record, an answer without one (such as a 404 for
-// an order PayPal no longer holds), or no answer at all.
+// What PayPal's reads of the order gave back: its record, an answer that it holds none (a 404 for an
+// order PayPal no longer holds), or no usable answer at all. A refused token or any other error says
+// nothing about the order, so it counts as unreachable and the due read stays due.
 type ProviderAnswer = "record" | "no_record" | "unreachable";
 
 function answerOf(reads: readonly ProviderResult<unknown>[]): ProviderAnswer {
   if (reads.some((read) => read.kind === "ok")) return "record";
-  const answeredWithout = reads.some((read) => read.kind === "http_error" && read.status >= 400 && read.status < 500 && read.status !== 408 && read.status !== 429);
+  const answeredWithout = reads.some((read) => read.kind === "http_error" && read.status === 404);
   return answeredWithout ? "no_record" : "unreachable";
 }
 

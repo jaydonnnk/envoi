@@ -1,6 +1,6 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { completePayPal, reconcileAttempt } from "@/domain/payments/attempts";
-import type { PayPalWriteClient } from "@/integrations/paypal/orders";
+import type { PayPalWriteClient, ProviderResult } from "@/integrations/paypal/orders";
 import { getAuth } from "@/lib/auth";
 import { isPrincipal, requireBuyerSession } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
@@ -274,6 +274,21 @@ describe("PayPal recovery (fixture fault injection)", () => {
     expect(await rows(purchaseId)).toMatchObject({ purchase: "uncertain", attempts: [{ state: "capture_unknown" }] });
   });
 
+  it("a status check never replays while another holder has the lease", async () => {
+    const { cookie, purchaseId } = await approvedPurchase(11);
+    fake.fail("captureOrder", "lose_request");
+    expect((await complete(cookie, purchaseId)).status).toBe(200);
+    const [attempt] = (await rows(purchaseId)).attempts;
+    expect(attempt).toMatchObject({ state: "capture_unknown" });
+    // Another recovery, such as the webhook's or a second tab's, is replaying the capture key now.
+    await fixture.database.admin`update payment_attempts set lease_owner = 'another-holder', lease_expires_at = now() + interval '5 minutes' where id = ${attempt!.id}`;
+    const before = { reads: fake.reads().length, captures: fake.captures().length };
+    expect(await reconcile(cookie, purchaseId)).toMatchObject({ check: "in_flight", purchase: { state: "uncertain" } });
+    expect(fake.captures()).toHaveLength(before.captures);
+    expect(fake.reads()).toHaveLength(before.reads);
+    expect(await rows(purchaseId)).toMatchObject({ purchase: "uncertain", attempts: [{ state: "capture_unknown", capture_id: null }] });
+  });
+
   it("provider reads are debounced by T_PROVIDER_READ_DEBOUNCE", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     const { cookie, purchaseId } = await openReview(4);
@@ -341,6 +356,22 @@ describe("PayPal recovery (fixture fault injection)", () => {
       const checked = await reconcile(cookie, purchaseId);
       expect(checked).toMatchObject({ check: "no_record", purchase: { state: "uncertain" } });
       expect(await rows(purchaseId)).toMatchObject({ purchase: "uncertain", attempts: [{ state: "capture_unknown" }] });
+    });
+
+    it("a PayPal error that says nothing about the order keeps the read due", async () => {
+      const { cookie, purchaseId } = await approvedPurchase(12);
+      fake.fail("captureOrder", "lose_request");
+      expect((await complete(cookie, purchaseId)).status).toBe(200);
+      const [attempt] = (await rows(purchaseId)).attempts;
+      await fixture.database.admin`update payment_attempts set provider_read_due_at = now() where id = ${attempt!.id}`;
+      // FIXTURE: PayPal refuses Envoi's credentials, a 401 that names no issue code and no order.
+      const refused: ProviderResult<never> = { kind: "http_error", status: 401, retryable: false };
+      const unauthorized = { readOrder: async () => refused, captureOrder: async () => refused };
+      const check = await reconcileAttempt({ db: webDb(), read: unauthorized, replay: unauthorized, now: systemNow, actor: "test" }, attempt!.id);
+      expect(check).toBe("provider_unreachable");
+      const [after] = await fixture.database.admin`select state, provider_read_due_at from payment_attempts where id = ${attempt!.id}`;
+      expect(after!.state).toBe("capture_unknown");
+      expect(after!.provider_read_due_at).not.toBeNull();
     });
 
     it("a refused replay is not a failure while PayPal shows any capture", async () => {
