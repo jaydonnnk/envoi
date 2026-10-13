@@ -437,8 +437,9 @@ export async function cancelPurchase(deps: Pick<PayPalDeps, "db" | "now">, princ
 // replacement payment or captures an order whose capture was never dispatched. Reads are never
 // gated on PAYMENTS_ENABLED, so a dispatched capture still converges with the switch off.
 
-// read: PayPal answered and its record was applied; provider_unreachable: no read got an answer.
-export type ReconcileOutcome = "read" | "provider_unreachable" | "debounced" | "in_flight" | "no_order";
+// read: PayPal returned its record of the order and it was applied; no_record: PayPal answered but
+// holds no usable record (the purchase keeps its state); provider_unreachable: no read got an answer.
+export type ReconcileOutcome = "read" | "no_record" | "provider_unreachable" | "debounced" | "in_flight" | "no_order";
 
 export type ReconcileDeps = {
   db: Db;
@@ -523,40 +524,56 @@ async function applyVerdict(deps: ReconcileDeps, purchaseId: string, purchaseSta
   });
 }
 
+// What PayPal's reads of the order gave back: its record, an answer without one (such as a 404 for
+// an order PayPal no longer holds), or no answer at all.
+type ProviderAnswer = "record" | "no_record" | "unreachable";
+
+function answerOf(reads: readonly ProviderResult<unknown>[]): ProviderAnswer {
+  if (reads.some((read) => read.kind === "ok")) return "record";
+  const answeredWithout = reads.some((read) => read.kind === "http_error" && read.status >= 400 && read.status < 500 && read.status !== 408 && read.status !== 429);
+  return answeredWithout ? "no_record" : "unreachable";
+}
+
 // Reads the order and, for a capture whose outcome is unknown, replays the persisted capture key
-// as the lease holder. Paid is decided only by decideCaptureOutcome on a server read. Returns
-// whether any read got PayPal's answer.
-async function recoverCapture(deps: ReconcileDeps, purchase: PurchaseFacts & { state: PurchaseState }, attempt: PaymentAttemptRow & { orderId: string }): Promise<boolean> {
+// as the lease holder. Paid is decided only by decideCaptureOutcome on a server read.
+async function recoverCapture(deps: ReconcileDeps, purchase: PurchaseFacts & { state: PurchaseState }, attempt: PaymentAttemptRow & { orderId: string }): Promise<ProviderAnswer> {
   const expected = expectedPurchase(purchase, attempt);
   const decide = (order: PayPalOrder) => decideCaptureOutcome(order, expected, deps.now());
-  const apply = async (verdict: RecoveryVerdict, answered: boolean) => {
+  const reads: ProviderResult<PayPalOrder>[] = [];
+  const readOrder = async () => {
+    const read = await deps.read.readOrder(attempt.orderId);
+    reads.push(read);
+    return read;
+  };
+  const apply = async (verdict: RecoveryVerdict) => {
     await applyVerdict(deps, purchase.id, purchase.state, attempt, verdict);
-    return answered;
+    return answerOf(reads);
   };
 
-  const first = await deps.read.readOrder(attempt.orderId);
+  const first = await readOrder();
   if (first.kind === "ok") {
     const decision = decide(first.value);
-    if (decision.decision === "confirmed") return apply({ kind: "confirmed", decision }, true);
+    if (decision.decision === "confirmed") return apply({ kind: "confirmed", decision });
     // A capture PayPal reports but that does not match, or is not complete, is never paid and
     // never failed: it stays uncertain.
-    if (first.value.captures.length > 0) return apply({ kind: "inconclusive", reason: decision.reason }, true);
+    if (first.value.captures.length > 0) return apply({ kind: "inconclusive", reason: decision.reason });
   }
 
   const captureKey = attempt.captureRequestId;
   if (!deps.replay || !captureKey || !CAPTURE_IN_FLIGHT.includes(attempt.state as AttemptState)) {
-    return apply({ kind: "inconclusive", reason: first.kind === "ok" ? "no_capture_seen" : providerReason("read", first) }, first.kind === "ok");
+    return apply({ kind: "inconclusive", reason: first.kind === "ok" ? "no_capture_seen" : providerReason("read", first) });
   }
 
   const replayed = await deps.replay.captureOrder(attempt.orderId, captureKey);
-  const after = await deps.read.readOrder(attempt.orderId);
-  if (after.kind !== "ok") return apply({ kind: "inconclusive", reason: providerReason("read", after) }, first.kind === "ok");
+  const after = await readOrder();
+  // Without PayPal's record of the order nothing is proven, whatever the replay answered.
+  if (after.kind !== "ok") return apply({ kind: "inconclusive", reason: providerReason("read", after) });
   const decision = decide(after.value);
-  if (decision.decision === "confirmed") return apply({ kind: "confirmed", decision }, true);
+  if (decision.decision === "confirmed") return apply({ kind: "confirmed", decision });
   if (after.value.captures.length === 0 && isDefinitiveRefusal(replayed)) {
-    return apply({ kind: "failed", reason: `capture_refused_${replayed.status}:${replayed.issues}` }, true);
+    return apply({ kind: "failed", reason: `capture_refused_${replayed.status}:${replayed.issues}` });
   }
-  return apply({ kind: "inconclusive", reason: replayed.kind === "ok" ? decision.reason : providerReason("capture_replay", replayed) }, true);
+  return apply({ kind: "inconclusive", reason: replayed.kind === "ok" ? decision.reason : providerReason("capture_replay", replayed) });
 }
 
 // Test-only barrier; production callers pass none.
@@ -585,13 +602,13 @@ export async function reconcileAttempt(deps: ReconcileDeps, attemptId: string, h
 
     // Before any capture was dispatched a read changes nothing: reconciliation never performs an
     // initial capture, and the buyer's own completion does that.
-    const answered = CAPTURE_STATES.includes(attempt.state as AttemptState)
+    const answer = CAPTURE_STATES.includes(attempt.state as AttemptState)
       ? await recoverCapture(deps, { ...purchase, state: purchase.state as PurchaseState }, { ...attempt, orderId: attempt.orderId })
-      : (await deps.read.readOrder(attempt.orderId)).kind === "ok";
-    if (!answered) return "provider_unreachable";
+      : answerOf([await deps.read.readOrder(attempt.orderId)]);
+    if (answer === "unreachable") return "provider_unreachable";
     // The due read is done; a webhook that arrives later makes the next one due.
     await deps.db.update(paymentAttempts).set({ providerReadDueAt: null }).where(eq(paymentAttempts.id, attemptId));
-    return "read";
+    return answer === "record" ? "read" : "no_record";
   } finally {
     if (lease) await releaseLease(deps.db, attemptId, lease);
   }

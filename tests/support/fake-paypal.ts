@@ -27,6 +27,8 @@ export type FakePayPal = {
   captures(): FakeCall[];
   reads(): FakeCall[];
   approve(orderId: string): void;
+  // PayPal no longer holds the order, as after an uncaptured order expires: reads and captures 404.
+  forget(orderId: string): void;
   // The next `times` calls of `op` suffer `fault`.
   fail(op: FakeOp, fault: Fault, times?: number): void;
   // Every capture with a new request id is refused with this status and these issue codes.
@@ -86,6 +88,9 @@ export function createFakePayPal(): FakePayPal {
       const order = orders.get(orderId);
       if (!order) throw new Error(`no fixture order ${orderId}`);
       order.status = "APPROVED";
+    },
+    forget(orderId) {
+      orders.delete(orderId);
     },
     fail(op, fault, times = 1) {
       for (let i = 0; i < times; i++) faults.push({ op, fault });

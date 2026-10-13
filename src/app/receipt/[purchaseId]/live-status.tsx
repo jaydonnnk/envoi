@@ -5,10 +5,11 @@ import { useEffect, useState } from "react";
 import { postJson } from "@/lib/browser/session";
 import { startReceiptPolling, type PolledState } from "./polling";
 
-type Check = "read" | "provider_unreachable" | "debounced" | "in_flight" | "no_order";
+type Check = "read" | "no_record" | "provider_unreachable" | "debounced" | "in_flight" | "no_order";
 
 const CHECK_MESSAGE: Record<Check, string> = {
-  read: "PayPal answered just now. This receipt shows its record.",
+  read: "PayPal answered just now. The status above is up to date.",
+  no_record: "PayPal has no usable record of this order, so the payment stays unconfirmed. Do not pay again; it is flagged for the operator.",
   provider_unreachable: "PayPal did not answer, so nothing changed. Do not pay again; try Check status in a moment.",
   debounced: "Envoi asked PayPal less than 30 seconds ago. This receipt shows that answer; try again shortly.",
   in_flight: "PayPal is still completing this payment. Try again in a moment.",

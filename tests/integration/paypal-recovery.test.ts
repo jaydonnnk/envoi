@@ -331,6 +331,18 @@ describe("PayPal recovery (fixture fault injection)", () => {
       expect(await rows(purchaseId)).toMatchObject({ purchase: "uncertain", attempts: [{ state: "capture_unknown" }] });
     });
 
+    it("an order PayPal no longer holds stays checking payment", async () => {
+      const { cookie, purchaseId, orderId } = await approvedPurchase(10);
+      fake.refuseCapture = { status: 403, issues: "NOT_AUTHORIZED,PAYEE_NOT_CONSENTED" };
+      expect((await complete(cookie, purchaseId)).status).toBe(200);
+      // Both the read and the same-key replay now answer 404 RESOURCE_NOT_FOUND.
+      fake.forget(orderId);
+      fake.refuseCapture = null;
+      const checked = await reconcile(cookie, purchaseId);
+      expect(checked).toMatchObject({ check: "no_record", purchase: { state: "uncertain" } });
+      expect(await rows(purchaseId)).toMatchObject({ purchase: "uncertain", attempts: [{ state: "capture_unknown" }] });
+    });
+
     it("a refused replay is not a failure while PayPal shows any capture", async () => {
       const { cookie, purchaseId } = await approvedPurchase(7);
       fake.fail("captureOrder", "lose_request");
