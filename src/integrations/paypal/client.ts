@@ -20,7 +20,9 @@ export type PayPalConfig = {
 
 export type ProviderResult<T> =
   | { kind: "ok"; value: T }
-  | { kind: "http_error"; status: number; retryable: boolean }
+  // issues: PayPal's upper-case error name and issue codes only, never the body (added in S2 so
+  // a quarantined attempt records why PayPal refused).
+  | { kind: "http_error"; status: number; retryable: boolean; issues?: string }
   | { kind: "network_error"; retryable: true }
   | { kind: "timeout"; responseReceived: false };
 
@@ -125,8 +127,9 @@ export function createPayPalHttp(cfg: PayPalConfig): PayPalHttp {
         });
         const body: unknown = await response.json().catch(() => null);
         if (!response.ok) {
-          log("warn", "paypal_http_error", { method: request.method, status: response.status, issues: issueCodes(body) });
-          return { kind: "http_error", status: response.status, retryable: response.status === 429 || response.status >= 500 };
+          const issues = issueCodes(body);
+          log("warn", "paypal_http_error", { method: request.method, status: response.status, issues });
+          return { kind: "http_error", status: response.status, retryable: response.status === 429 || response.status >= 500, issues };
         }
         return { kind: "ok", value: body };
       } catch (err) {

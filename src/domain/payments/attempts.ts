@@ -301,7 +301,10 @@ export async function completePayPal(deps: PayPalDeps, principal: BuyerPrincipal
     const captured = await paypal.captureOrder(attempt.orderId, captureRequestId);
     // Paid is decided on a server read of the order after the capture, never on the capture call.
     const evidence = captured.kind === "ok" ? await paypal.readOrder(attempt.orderId) : captured;
-    const decision = evidence.kind === "ok" ? decideCaptureOutcome(evidence.value, expected, now()) : { decision: "no_evidence" as const, reason: `capture_${evidence.kind}` };
+    const decision =
+      evidence.kind === "ok"
+        ? decideCaptureOutcome(evidence.value, expected, now())
+        : { decision: "no_evidence" as const, reason: evidence.kind === "http_error" ? `capture_http_${evidence.status}${evidence.issues ? `:${evidence.issues}` : ""}` : `capture_${evidence.kind}` };
     await recordOutcome(db, purchase, attempt, decision, now());
     const view = await currentView(db, principal, purchaseId, now());
     return decision.decision === "confirmed"
