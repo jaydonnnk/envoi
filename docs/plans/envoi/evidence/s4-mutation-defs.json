@@ -1,0 +1,288 @@
+[
+ {
+  "id": "invent-item",
+  "test": "model cannot invent a price",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "mutation": "trust the model's item ids instead of the published menu",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "  const matches: PublishedItemSummary[] = menu.items\n    .filter((item) => wanted.has(item.id) && item.unitSgdCents !== null && item.available !== false)\n",
+    "new": "  const matches: PublishedItemSummary[] = [...wanted]\n    .map((id) => menu.items.find((item) => item.id === id) ?? { id, name: id, unitSgdCents: 1, available: null })\n    .filter((item) => item.unitSgdCents !== null && item.available !== false)\n"
+   }
+  ]
+ },
+ {
+  "id": "invent-outlet",
+  "test": "an unregistered outlet id is dropped",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "mutation": "trust the model's outlet ids instead of the published registry",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "      .map((id) => byId.get(id))\n",
+    "new": "      .map((id) => byId.get(id) ?? { id, name: id, area: \"Tanjong Pagar\", isDemoFixture: false })\n"
+   }
+  ]
+ },
+ {
+  "id": "tool-price",
+  "test": "no tool output carries a price",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "mutation": "get_published_menu returns each item's price",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "items: menu.items.map((item) => ({ id: item.id, name: item.name, available: item.available })),",
+    "new": "items: menu.items.map((item) => ({ id: item.id, name: item.name, available: item.available, unitSgdCents: item.unitSgdCents })),"
+   }
+  ]
+ },
+ {
+  "id": "tool-area-overlap",
+  "test": "the tools find a shop from an area written the way buyers write it",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "mutation": "match only an outlet area that contains the searched text",
+  "edits": [
+   {
+    "file": "src/domain/outlets/search.ts",
+    "old": " or position(lower(${column}) in lower(${trimmed})) > 0)`",
+    "new": ")`"
+   }
+  ]
+ },
+ {
+  "id": "tool-area-clean",
+  "test": "the tools find a shop from an area written the way buyers write it",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "mutation": "pass the model's area to the search uncleaned",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "searchPublishedOutlets(db, { area: usableArea(search.area), name: search.name })",
+    "new": "searchPublishedOutlets(db, { area: search.area, name: search.name })"
+   }
+  ]
+ },
+ {
+  "id": "tool-budget",
+  "test": "model tool budget is enforced",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "mutation": "remove the tool-call counter",
+  "edits": [
+   {
+    "file": "src/integrations/ai/openai.ts",
+    "old": "      if (toolCalls > MAX_TOOL_CALLS) {",
+    "new": "      if (false) {"
+   }
+  ]
+ },
+ {
+  "id": "area-default",
+  "test": "missing area asks for clarification",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "mutation": "default to a fixed area",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "text.includes(proposedArea) ? proposedArea : null);",
+    "new": "text.includes(proposedArea) ? proposedArea : \"tanjong pagar\");"
+   }
+  ]
+ },
+ {
+  "id": "area-vague-words",
+  "test": "missing area asks for clarification",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "mutation": "accept \"near me\" as an area",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "!VAGUE_PLACE_WORDS.has(word)",
+    "new": "(VAGUE_PLACE_WORDS.size > 0)"
+   }
+  ]
+ },
+ {
+  "id": "area-own-words",
+  "test": "an area the buyer did not write is not trusted",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "mutation": "trust the area the model reports",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "(proposedArea && text.includes(proposedArea) ? proposedArea : null)",
+    "new": "proposedArea"
+   }
+  ]
+ },
+ {
+  "id": "area-scope",
+  "test": "a shop outside the stated area is not suggested",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "mutation": "every outlet counts as in scope",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "const inScope = (outlet: PublishedOutletSummary) => named.has(outlet.id) || (area !== null && inArea(outlet, area));",
+    "new": "const inScope = (outlet: PublishedOutletSummary) => outlet.id.length > 0;"
+   }
+  ]
+ },
+ {
+  "id": "model-failure",
+  "test": "a failed model call offers manual selection",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "mutation": "a failed model call answers 200 instead of provider_unreachable",
+  "edits": [
+   {
+    "file": "src/app/api/v1/buyer/suggestions/route.ts",
+    "old": "  if (result.kind === \"unavailable\") {",
+    "new": "  if (result.kind === \"unavailable\" && Date.now() < 0) {"
+   }
+  ]
+ },
+ {
+  "id": "session-guard",
+  "test": "suggestions need a buyer session",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "mutation": "skip requireBuyerSession",
+  "edits": [
+   {
+    "file": "src/app/api/v1/buyer/suggestions/route.ts",
+    "old": "  const principal = await requireBuyerSession(getAuth(), request.headers);\n  if (!isPrincipal(principal)) return httpErr(principal);\n",
+    "new": "  void requireBuyerSession; void getAuth; void isPrincipal;\n  const principal = { kind: \"buyer\" as const, userId: \"FIXTURE-nobody\", isAnonymous: true };\n"
+   }
+  ]
+ },
+ {
+  "id": "ai-budget-late",
+  "test": "a model still working 30 seconds after the request started yields budget_exceeded",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "mutation": "T_AI_BUDGET of 60 seconds",
+  "edits": [
+   {
+    "file": "src/integrations/ai/openai.ts",
+    "old": "export const T_AI_BUDGET_MS = 30_000;",
+    "new": "export const T_AI_BUDGET_MS = 60_000;"
+   }
+  ]
+ },
+ {
+  "id": "ai-budget-early",
+  "test": "a model answering 25 seconds after the request started is not cut off",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "mutation": "T_AI_BUDGET of 20 seconds",
+  "edits": [
+   {
+    "file": "src/integrations/ai/openai.ts",
+    "old": "export const T_AI_BUDGET_MS = 30_000;",
+    "new": "export const T_AI_BUDGET_MS = 20_000;"
+   }
+  ]
+ },
+ {
+  "id": "per-session-window",
+  "test": "text suggestions are rate limited per buyer session",
+  "test_file": "tests/integration/suggestion-rate-limits.test.ts",
+  "mutation": "remove the per-session window",
+  "edits": [
+   {
+    "file": "src/lib/ratelimit.ts",
+    "old": "    if ((subjectHits?.n ?? 0) >= limits.perSubject.max) return { kind: \"rate_limited\", window: \"per_subject\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "per-session-max",
+  "test": "text suggestions are rate limited per buyer session",
+  "test_file": "tests/integration/suggestion-rate-limits.test.ts",
+  "mutation": "allow 11 per session",
+  "edits": [
+   {
+    "file": "src/lib/ratelimit.ts",
+    "old": "perSubject: { max: 10, windowMs: 10 * 60_000 },",
+    "new": "perSubject: { max: 11, windowMs: 10 * 60_000 },"
+   }
+  ]
+ },
+ {
+  "id": "per-session-length",
+  "test": "text suggestions are rate limited per buyer session",
+  "test_file": "tests/integration/suggestion-rate-limits.test.ts",
+  "mutation": "a 9-minute per-session window",
+  "edits": [
+   {
+    "file": "src/lib/ratelimit.ts",
+    "old": "perSubject: { max: 10, windowMs: 10 * 60_000 },",
+    "new": "perSubject: { max: 10, windowMs: 9 * 60_000 },"
+   }
+  ]
+ },
+ {
+  "id": "limit-before-model",
+  "test": "text suggestions are rate limited per buyer session",
+  "test_file": "tests/integration/suggestion-rate-limits.test.ts",
+  "mutation": "a refused request still calls the model",
+  "edits": [
+   {
+    "file": "src/app/api/v1/buyer/suggestions/route.ts",
+    "old": "  if (admission.kind === \"rate_limited\") {\n",
+    "new": "  if (admission.kind === \"rate_limited\") {\n    const early = suggestionModel();\n    if (early) await suggestFromText(db, principal, parsed.data, now, early);\n"
+   }
+  ]
+ },
+ {
+  "id": "global-window",
+  "test": "text suggestions are rate limited across all sessions",
+  "test_file": "tests/integration/suggestion-rate-limits.test.ts",
+  "mutation": "remove the global window",
+  "edits": [
+   {
+    "file": "src/lib/ratelimit.ts",
+    "old": "    if ((allHits?.n ?? 0) >= limits.global.max) return { kind: \"rate_limited\", window: \"global\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "global-max",
+  "test": "text suggestions are rate limited across all sessions",
+  "test_file": "tests/integration/suggestion-rate-limits.test.ts",
+  "mutation": "allow 101 an hour",
+  "edits": [
+   {
+    "file": "src/lib/ratelimit.ts",
+    "old": "global: { max: 100, windowMs: 60 * 60_000 },",
+    "new": "global: { max: 101, windowMs: 60 * 60_000 },"
+   }
+  ]
+ },
+ {
+  "id": "global-length",
+  "test": "text suggestions are rate limited across all sessions",
+  "test_file": "tests/integration/suggestion-rate-limits.test.ts",
+  "mutation": "a 59-minute global window",
+  "edits": [
+   {
+    "file": "src/lib/ratelimit.ts",
+    "old": "global: { max: 100, windowMs: 60 * 60_000 },",
+    "new": "global: { max: 100, windowMs: 59 * 60_000 },"
+   }
+  ]
+ },
+ {
+  "id": "limiter-lock",
+  "test": "concurrent requests cannot pass the per-session window together",
+  "test_file": "tests/integration/suggestion-rate-limits.test.ts",
+  "mutation": "remove the per-bucket advisory lock",
+  "edits": [
+   {
+    "file": "src/lib/ratelimit.ts",
+    "old": "    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`envoi:ratelimit:${bucket}`}))`);\n",
+    "new": "    void sql;\n"
+   }
+  ]
+ }
+]
