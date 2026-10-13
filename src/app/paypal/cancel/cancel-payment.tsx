@@ -15,7 +15,8 @@ export function CancelPayment({ purchaseId }: { purchaseId: string }) {
     if (started.current) return;
     started.current = true;
     void postJson(`/api/v1/purchases/${encodeURIComponent(purchaseId)}/cancel`).then((result) => {
-      if (result.ok) router.replace(receipt);
+      // payment_uncertain: a capture was already dispatched; the receipt shows "Checking payment".
+      if (result.ok || result.error?.code === "payment_uncertain") router.replace(receipt);
       else setError(result.error?.message ?? "The purchase could not be closed.");
     });
   }, [purchaseId, receipt, router]);

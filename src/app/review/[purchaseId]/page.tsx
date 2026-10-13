@@ -21,7 +21,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ purchas
   if (purchase.view.state !== purchase.state) await applyDerivedTransitions(webDb(), purchase.id, now);
 
   const receiptHref = `/receipt/${encodeURIComponent(purchase.id)}`;
-  const payable = purchase.view.state === "review_open" || (purchase.view.state === "pending_payment" && purchase.view.paypalAttempt === "order_created");
+  const payable = purchase.view.state === "review_open" || (purchase.view.state === "pending_payment" && (purchase.view.paypalAttempt === "order_created" || purchase.view.paypalAttempt === "create_unknown"));
   const total = formatSgd(sgdFromCents(purchase.totalSgdCents));
 
   return (

@@ -31,6 +31,7 @@ export function webEnvFor(databaseUrl: string): Record<string, string> {
     PAYPAL_CLIENT_ID: "fixture-client-id",
     PAYPAL_CLIENT_SECRET: "fixture-client-secret",
     PAYPAL_PARTNER_ATTRIBUTION_ID: "fixture-attribution",
+    PAYPAL_WEBHOOK_ID: "FIXTURE-WEBHOOK-ID",
     PAYMENTS_ENABLED: "true",
   };
 }

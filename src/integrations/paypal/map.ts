@@ -1,5 +1,6 @@
 import type { PayPalOrder, ProviderAmount, ProviderCapture, ProviderItem } from "@/domain/purchases/reconcile";
 import { sgdFromDecimalString } from "@/lib/money";
+import type { ProviderResult } from "./client";
 
 // Provider payload to domain shape. Missing or unreadable fields map to null rather than a
 // default, so the domain decisions see them and quarantine instead of guessing.
@@ -54,3 +55,12 @@ export function mapOrder(body: unknown): PayPalOrder | null {
     approvalUrl: approvalUrl(body.links),
   };
 }
+
+// A 2xx we cannot read is not evidence of anything; it is treated like a lost response.
+export function mapOrderResult(result: ProviderResult<unknown>): ProviderResult<PayPalOrder> {
+  if (result.kind !== "ok") return result;
+  const order = mapOrder(result.value);
+  return order ? { kind: "ok", value: order } : { kind: "http_error", status: 502, retryable: true };
+}
+
+export const orderPath = (orderId: string) => `/v2/checkout/orders/${encodeURIComponent(orderId)}`;

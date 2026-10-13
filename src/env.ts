@@ -22,6 +22,8 @@ const webSchema = z.object({
   PAYPAL_CLIENT_ID: z.string().min(1),
   PAYPAL_CLIENT_SECRET: z.string().min(1),
   PAYPAL_PARTNER_ATTRIBUTION_ID: z.string().min(1),
+  // The sandbox app's webhook registration; every delivery is verified against it (S3).
+  PAYPAL_WEBHOOK_ID: z.string().min(1),
   // Kill switch for new PayPal starts and captures (D10). Must be stated explicitly; reads,
   // reconcile, webhooks and maintenance never check it.
   PAYMENTS_ENABLED: z.enum(["true", "false"]).transform((value) => value === "true"),

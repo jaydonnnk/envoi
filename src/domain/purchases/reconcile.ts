@@ -96,3 +96,31 @@ export function decideCaptureOutcome(order: PayPalOrder, expected: ExpectedPurch
     evidence: { orderId: order.id, captureId: capture.id, grossSgdCents: expected.totalSgdCents, currency: "SGD", payeeId: expected.payeeId, verifiedAt },
   };
 }
+
+// Outcome-reason prefix stored when a same-key create replay was refused outright by PayPal.
+export const CREATE_REPLAY_REFUSED = "create_replay_refused";
+
+export type CreateRecovery = "replay_same_key" | "safe_to_recreate" | "block_uncertain";
+
+export type CreateRecoveryInput = { state: string; orderId: string | null; outcomeReason: string | null };
+
+// Lost create response (Gate 3 Races). First replay the identical PayPal-Request-Id, because
+// PayPal returns the latest status of the earlier request with that key. Recreating with a new
+// key is safe only when the attempt never held an order id: capture needs an order id Envoi never
+// received, and the buyer never received an approval link, so no external effect is possible.
+// An attempt that holds an order id is never recreated; its review window closes it.
+export function decideCreateRecovery(attempt: CreateRecoveryInput): CreateRecovery {
+  if (attempt.state !== "create_unknown" || attempt.orderId !== null) return "block_uncertain";
+  if (attempt.outcomeReason?.startsWith(CREATE_REPLAY_REFUSED)) return "safe_to_recreate";
+  return "replay_same_key";
+}
+
+// A refusal PayPal states outright: a 4xx naming its issue codes. Request timeouts, conflicts, rate
+// limits, 5xx, network errors and timeouts prove nothing about what PayPal did.
+type HttpRefusal = { kind: "http_error"; status: number; issues?: string };
+
+export function isDefinitiveRefusal<T extends { kind: string }>(result: T): result is Extract<T, HttpRefusal> {
+  if (result.kind !== "http_error") return false;
+  const { status, issues } = result as unknown as HttpRefusal;
+  return status >= 400 && status < 500 && status !== 408 && status !== 409 && status !== 429 && Boolean(issues);
+}

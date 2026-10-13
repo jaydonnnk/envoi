@@ -29,6 +29,20 @@
       "when": 1791823839973,
       "tag": "0003_s2_web_role_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791898550453,
+      "tag": "0004_s3_paypal_recovery",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791898550795,
+      "tag": "0005_s3_web_role_grants",
+      "breakpoints": true
     }
   ]
 }

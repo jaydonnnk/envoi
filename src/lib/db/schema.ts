@@ -247,6 +247,10 @@ export const paymentAttempts = pgTable(
     outcomeReason: text("outcome_reason"),
     leaseOwner: text("lease_owner"),
     leaseExpiresAt: timestamp("lease_expires_at", { withTimezone: true }),
+    // Recovery (S3): a verified webhook marks a provider read as due; the last bounded read starts
+    // the T_PROVIDER_READ_DEBOUNCE window for the status and reconcile paths.
+    providerReadDueAt: timestamp("provider_read_due_at", { withTimezone: true }),
+    lastProviderReadAt: timestamp("last_provider_read_at", { withTimezone: true }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -267,6 +271,34 @@ export const paymentAttempts = pgTable(
     uniqueIndex("payment_attempts_one_active")
       .on(t.purchaseId)
       .where(sql`${t.state} not in ('abandoned', 'capture_failed', 'capture_confirmed')`),
+  ],
+);
+
+// Verified PayPal webhook inbox. One row per provider event id: a duplicate delivery inserts
+// nothing and changes nothing. Rows hold identifiers and the disposition only, never the event
+// body. Event content never marks anything paid; it can only make a provider read due.
+
+export const PROVIDER_EVENT_DISPOSITIONS = ["read_due", "quarantined_unknown_order", "no_order"] as const;
+
+export const providerEvents = pgTable(
+  "provider_events",
+  {
+    id: text("id").primaryKey(),
+    provider: text("provider").notNull(),
+    eventId: text("event_id").notNull(),
+    eventType: text("event_type").notNull(),
+    resourceType: text("resource_type").notNull(),
+    orderId: text("order_id"),
+    attemptId: text("attempt_id").references(() => paymentAttempts.id),
+    disposition: text("disposition").notNull(),
+    receivedAt: timestamp("received_at", { withTimezone: true }).notNull(),
+  },
+  (t) => [
+    check("provider_events_provider_check", sql`${t.provider} = 'paypal'`),
+    check("provider_events_disposition_check", sql`${t.disposition} in ('read_due', 'quarantined_unknown_order', 'no_order')`),
+    check("provider_events_known_order_check", sql`${t.disposition} <> 'read_due' or ${t.attemptId} is not null`),
+    // Gate 3 Races: duplicate or out-of-order webhook.
+    uniqueIndex("provider_events_event_id_unique").on(t.provider, t.eventId),
   ],
 );
 

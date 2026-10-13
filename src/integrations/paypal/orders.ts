@@ -2,7 +2,7 @@ import type { PayPalOrder } from "@/domain/purchases/reconcile";
 import { webEnv } from "@/env";
 import { sgdFromCents, sgdToDecimalString } from "@/lib/money";
 import { createPayPalHttp, paypalConfigFromEnv, type PayPalConfig, type ProviderResult } from "./client";
-import { mapOrder } from "./map";
+import { mapOrderResult, orderPath } from "./map";
 
 // Orders v2 write client: create, read and capture. Every amount, payee and item comes from the
 // stored purchase and its destination, never from the browser.
@@ -60,26 +60,17 @@ export function createOrderBody(input: CreateOrderInput): unknown {
   };
 }
 
-function mapped(result: ProviderResult<unknown>): ProviderResult<PayPalOrder> {
-  if (result.kind !== "ok") return result;
-  const order = mapOrder(result.value);
-  // A 2xx we cannot read is not evidence of anything; treat it like a lost response.
-  return order ? { kind: "ok", value: order } : { kind: "http_error", status: 502, retryable: true };
-}
-
-const orderPath = (orderId: string) => `/v2/checkout/orders/${encodeURIComponent(orderId)}`;
-
 export function createPayPalWriteClient(cfg: PayPalConfig): PayPalWriteClient {
   const http = createPayPalHttp(cfg);
   return {
     async createOrder(input, requestId) {
-      return mapped(await http.send({ method: "POST", path: "/v2/checkout/orders", body: createOrderBody(input), requestId }));
+      return mapOrderResult(await http.send({ method: "POST", path: "/v2/checkout/orders", body: createOrderBody(input), requestId }));
     },
     async readOrder(orderId) {
-      return mapped(await http.send({ method: "GET", path: orderPath(orderId) }));
+      return mapOrderResult(await http.send({ method: "GET", path: orderPath(orderId) }));
     },
     async captureOrder(orderId, requestId) {
-      return mapped(await http.send({ method: "POST", path: `${orderPath(orderId)}/capture`, body: {}, requestId }));
+      return mapOrderResult(await http.send({ method: "POST", path: `${orderPath(orderId)}/capture`, body: {}, requestId }));
     },
   };
 }

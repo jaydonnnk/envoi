@@ -7,6 +7,7 @@ const config: PayPalConfig = {
   clientId: "fixture-client-id",
   clientSecret: "fixture-client-secret",
   partnerAttributionId: "fixture-attribution",
+  webhookId: "FIXTURE-WEBHOOK-ID",
   timeoutMs: 1_000,
 };
 

@@ -15,6 +15,7 @@ export type PayPalConfig = {
   clientId: string;
   clientSecret: string;
   partnerAttributionId: string;
+  webhookId: string;
   timeoutMs: number;
 };
 
@@ -53,11 +54,14 @@ export function paypalConfigFromEnv(env: WebEnv): PayPalConfig {
     clientId: env.PAYPAL_CLIENT_ID,
     clientSecret: env.PAYPAL_CLIENT_SECRET,
     partnerAttributionId: env.PAYPAL_PARTNER_ATTRIBUTION_ID,
+    webhookId: env.PAYPAL_WEBHOOK_ID,
     timeoutMs: 15_000,
   };
 }
 
-export type PayPalRequest = { method: "GET" | "POST"; path: string; body?: unknown; requestId?: string };
+// rawBody is sent byte for byte instead of serializing body, for a payload that must reach PayPal
+// exactly as PayPal sent it (webhook verification).
+export type PayPalRequest = { method: "GET" | "POST"; path: string; body?: unknown; rawBody?: string; requestId?: string };
 
 export type PayPalHttp = { send(request: PayPalRequest): Promise<ProviderResult<unknown>> };
 
@@ -122,7 +126,7 @@ export function createPayPalHttp(cfg: PayPalConfig): PayPalHttp {
         const response = await fetch(`${cfg.apiBase}${request.path}`, {
           method: request.method,
           headers,
-          body: request.method === "POST" ? JSON.stringify(request.body ?? {}) : undefined,
+          body: request.method === "POST" ? (request.rawBody ?? JSON.stringify(request.body ?? {})) : undefined,
           signal: AbortSignal.timeout(cfg.timeoutMs),
         });
         const body: unknown = await response.json().catch(() => null);

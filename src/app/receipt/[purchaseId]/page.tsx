@@ -7,10 +7,21 @@ import { getAuth } from "@/lib/auth";
 import { isPrincipal, requireBuyerSession } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
 import { formatSgd, sgdFromCents } from "@/lib/money";
+import { LiveStatus } from "./live-status";
 
 export const dynamic = "force-dynamic";
 
 type Status = { title: string; chip: string; tone: "ok" | "warn"; body: string };
+
+// A capture was sent, or may have been: only a provider read can decide it now.
+const CAPTURE_IN_FLIGHT = new Set(["capture_dispatched", "capture_unknown"]);
+
+const CHECKING: Status = {
+  title: "Checking payment",
+  chip: "Not confirmed",
+  tone: "warn",
+  body: "PayPal's answer has not arrived or did not match this purchase, so it is not shown as paid. Do not pay again. Check status asks PayPal for its record, and the payment is flagged for the operator.",
+};
 
 // Only a verified capture reads as paid. Every other state says plainly that it is not.
 function statusOf(purchase: OwnPurchase): Status {
@@ -22,6 +33,15 @@ function statusOf(purchase: OwnPurchase): Status {
     case "paid":
       return { title: "Paid", chip: "Paid", tone: "ok", body: "PayPal sandbox confirmed this capture to the shop's sandbox seller. Test money only: no real money moved." };
     case "pending_payment":
+      if (purchase.view.paypalAttempt && CAPTURE_IN_FLIGHT.has(purchase.view.paypalAttempt)) return CHECKING;
+      if (purchase.view.paypalAttempt === "create_unknown") {
+        return {
+          title: "Not paid yet",
+          chip: "Order not confirmed",
+          tone: "warn",
+          body: `PayPal did not confirm the order, so nothing has been charged. Go back to the review to try PayPal again before ${deadline} Singapore time.`,
+        };
+      }
       return {
         title: "Not paid yet",
         chip: "Waiting for PayPal",
@@ -29,21 +49,18 @@ function statusOf(purchase: OwnPurchase): Status {
         body: `Nothing has been charged. Approve in PayPal before ${deadline} Singapore time, or this purchase closes unpaid.`,
       };
     case "uncertain":
-      return {
-        title: "Checking payment",
-        chip: "Not confirmed",
-        tone: "warn",
-        body: "PayPal's answer did not match this purchase or did not arrive, so it is not shown as paid. Do not pay again; the operator checks it.",
-      };
+      return CHECKING;
     case "unpaid_closed":
       return {
         title: "Not paid",
         chip: "Not paid",
         tone: "warn",
         body:
-          purchase.attempt?.outcomeReason === "buyer_canceled"
-            ? "You canceled at PayPal. Nothing was charged."
-            : "The review window closed before the payment finished. Nothing was charged.",
+          purchase.attempt?.state === "capture_failed"
+            ? "PayPal refused this payment and its record shows no capture. Nothing was charged."
+            : purchase.attempt?.outcomeReason === "buyer_canceled"
+              ? "You canceled at PayPal. Nothing was charged."
+              : "The review window closed before the payment finished. Nothing was charged.",
       };
     case "review_open":
       return { title: "Not paid", chip: "Not paid", tone: "warn", body: `No payment has started. This review stays open until ${deadline} Singapore time.` };
@@ -63,7 +80,10 @@ export default async function ReceiptPage({ params }: { params: Promise<{ purcha
 
   const status = statusOf(purchase);
   const paid = purchase.view.state === "paid" && purchase.attempt?.captureId;
-  const canContinue = purchase.view.state === "review_open" || (purchase.view.state === "pending_payment" && purchase.view.paypalAttempt === "order_created");
+  const attemptState = purchase.view.paypalAttempt;
+  const canContinue =
+    purchase.view.state === "review_open" || (purchase.view.state === "pending_payment" && (attemptState === "order_created" || attemptState === "create_unknown"));
+  const canCheck = purchase.view.state === "uncertain" || (purchase.view.state === "pending_payment" && attemptState !== null && CAPTURE_IN_FLIGHT.has(attemptState));
 
   return (
     <main>
@@ -98,7 +118,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ purcha
         )}
         {purchase.sellerMerchantId && (
           <div className="row stacked">
-            <span className="muted">Paid to (sandbox seller)</span>
+            <span className="muted">{paid ? "Paid to (sandbox seller)" : "Recipient (sandbox seller)"}</span>
             <span className="mono">{purchase.sellerMerchantId}</span>
           </div>
         )}
@@ -123,6 +143,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ purcha
           <span className="mono">{purchase.id}</span>
         </div>
       </section>
+      {purchase.entryPoint !== "fixture_tracer" && <LiveStatus purchaseId={purchase.id} state={purchase.view.state} attemptState={attemptState} canCheck={canCheck} />}
       {canContinue && (
         <div className="actions">
           <a className="button" href={`/review/${encodeURIComponent(purchase.id)}`}>

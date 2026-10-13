@@ -3,18 +3,36 @@ import { and, eq, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { buyerActor, recordAudit } from "@/domain/audit/events";
 import { canTransitionAttempt, isPreCapture, TERMINAL_ATTEMPT_STATES, type AttemptState } from "@/domain/payments/state";
 import type { PricedLine } from "@/domain/purchases/price";
-import { decideCaptureOutcome, verifyApprovedOrder, type CaptureDecision, type ExpectedPurchase } from "@/domain/purchases/reconcile";
+import {
+  CREATE_REPLAY_REFUSED,
+  decideCaptureOutcome,
+  decideCreateRecovery,
+  isDefinitiveRefusal,
+  verifyApprovedOrder,
+  type CaptureDecision,
+  type ExpectedPurchase,
+  type PayPalOrder,
+} from "@/domain/purchases/reconcile";
 import { assertPaymentEligible, getOwnPurchase, latestAttempt, type OwnPurchase } from "@/domain/purchases/review";
-import { derivePurchaseView, storeDerivedTransitions, transitionPurchase, type PaymentAttemptRow, type PurchaseView } from "@/domain/purchases/state";
+import {
+  canTransitionPurchase,
+  derivePurchaseView,
+  storeDerivedTransitions,
+  transitionPurchase,
+  type PaymentAttemptRow,
+  type PurchaseState,
+  type PurchaseView,
+} from "@/domain/purchases/state";
 import { isSandboxApprovalUrl } from "@/integrations/paypal/client";
-import type { PayPalWriteClient } from "@/integrations/paypal/orders";
+import type { PayPalWriteClient, ProviderResult } from "@/integrations/paypal/orders";
+import type { PayPalReadClient } from "@/integrations/paypal/orders-read";
 import type { BuyerPrincipal } from "@/lib/auth-context";
-import { paymentAttempts, paymentDestinations, purchases } from "@/lib/db/schema";
+import { paymentAttempts, paymentDestinations, PURCHASE_STATES, purchases, type StoredLine } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
 import { newId } from "@/lib/ids";
 import { sgdFromCents } from "@/lib/money";
-import { deadlineOf, type Now } from "@/lib/time";
+import { deadlineOf, durationMs, type Now } from "@/lib/time";
 
 // PayPal execution (Gate 3, Call stacks: paypal/start and paypal/complete). One active attempt per
 // purchase, operation keys persisted before the call they name, capture serialized behind a lease
@@ -26,7 +44,7 @@ type Conn = Db | Tx;
 export type PayPalDeps = { db: Db; paypal: PayPalWriteClient; now: Now; appBaseUrl: string };
 
 // Test-only barriers; production callers pass none.
-export type FlowHooks = { afterExistingAttemptRead?: () => Promise<void>; afterLease?: () => Promise<void> };
+export type FlowHooks = { afterExistingAttemptRead?: () => Promise<void>; afterLease?: () => Promise<void>; afterDispatch?: () => Promise<void> };
 
 class SlotTaken extends Error {}
 
@@ -92,11 +110,95 @@ function existingStartAnswer(attempt: PaymentAttemptRow): StartResult | AppError
   return appError("payment_uncertain", "We are still confirming the PayPal order for this review. Do not pay again.");
 }
 
+type LockedPurchase = { id: string; totalSgdCents: number; lines: StoredLine[] };
+
+// The order is built from the stored purchase and the attempt's payee snapshot only, so a replay
+// sends exactly what the first request sent.
+function createOrderFor(deps: PayPalDeps, purchase: LockedPurchase, attempt: PaymentAttemptRow) {
+  const query = `purchase=${encodeURIComponent(purchase.id)}`;
+  return deps.paypal.createOrder(
+    {
+      purchaseId: purchase.id,
+      attemptId: attempt.id,
+      correlationId: purchase.id,
+      payeeMerchantId: attempt.payeeMerchantId,
+      lines: purchase.lines.map((line) => ({ name: line.name, quantity: line.quantity, unitSgdCents: line.unitSgdCents })),
+      totalSgdCents: purchase.totalSgdCents,
+      returnUrl: `${deps.appBaseUrl}/paypal/return?${query}`,
+      cancelUrl: `${deps.appBaseUrl}/paypal/cancel?${query}`,
+    },
+    attempt.createRequestId,
+  );
+}
+
+const providerReason = (prefix: string, result: ProviderResult<unknown>) =>
+  result.kind === "http_error" ? `${prefix}_http_${result.status}${result.issues ? `:${result.issues}` : ""}` : `${prefix}_${result.kind}`;
+
+const createUnconfirmed = () => appError("provider_unreachable", "PayPal did not confirm the order. Nothing was charged; try again.", { retryable: true, operatorVisible: true });
+
+// Sends the create for a new attempt, or replays it for an attempt in create_unknown, always with
+// the attempt's own persisted request id, and records what came back.
+async function createAndRecord(tx: Tx, deps: PayPalDeps, purchase: LockedPurchase, attempt: PaymentAttemptRow): Promise<StartResult | AppError> {
+  const replay = attempt.state === "create_unknown";
+  const created = await createOrderFor(deps, purchase, attempt);
+  const after = deps.now();
+  if (created.kind === "ok" && created.value.approvalUrl && isSandboxApprovalUrl(created.value.approvalUrl)) {
+    await transitionAttempt(tx, attempt.id, [attempt.state as AttemptState], "order_created", after, {
+      orderId: created.value.id,
+      approvalUrl: created.value.approvalUrl,
+      outcomeReason: null,
+    });
+    if (replay) await recordAudit(tx, { at: after, actor: "system", action: "paypal_create_recovered", purchaseId: purchase.id, attemptId: attempt.id, operatorVisible: true, details: { orderId: created.value.id } });
+    return { attemptId: attempt.id, approvalUrl: created.value.approvalUrl };
+  }
+
+  // Unknown outcome: the buyer received no approval link, so no capture can follow. An order id
+  // PayPal did return is kept, which rules out ever recreating this attempt.
+  const orderId = created.kind === "ok" ? created.value.id : attempt.orderId;
+  if (!replay) {
+    const reason = created.kind === "ok" ? "no_sandbox_approval_link" : providerReason("create", created);
+    await transitionAttempt(tx, attempt.id, ["created"], "create_unknown", after, { orderId, outcomeReason: reason });
+    await recordAudit(tx, { at: after, actor: "system", action: "paypal_create_unknown", purchaseId: purchase.id, attemptId: attempt.id, operatorVisible: true, details: { reason } });
+    return createUnconfirmed();
+  }
+  const reason =
+    created.kind === "ok" ? "replay_no_sandbox_approval_link" : isDefinitiveRefusal(created) ? `${CREATE_REPLAY_REFUSED}:${created.status}:${created.issues}` : providerReason("create_replay", created);
+  await tx.update(paymentAttempts).set({ orderId, outcomeReason: reason, updatedAt: after }).where(and(eq(paymentAttempts.id, attempt.id), eq(paymentAttempts.state, "create_unknown")));
+  await recordAudit(tx, { at: after, actor: "system", action: "paypal_create_replayed", purchaseId: purchase.id, attemptId: attempt.id, operatorVisible: true, details: { reason } });
+  return createUnconfirmed();
+}
+
+// A lost create response (Gate 3 Races, decideCreateRecovery): replay the same key first; only an
+// attempt that never held an order id, and whose replay PayPal refused outright, is closed and
+// recreated under a new key.
+async function recoverCreate(tx: Tx, deps: PayPalDeps, purchase: LockedPurchase, attempt: PaymentAttemptRow): Promise<StartResult | AppError> {
+  let current = attempt;
+  let answer: StartResult | AppError | null = null;
+  if (decideCreateRecovery(current) === "replay_same_key") {
+    answer = await createAndRecord(tx, deps, purchase, current);
+    if (!("code" in answer)) return answer;
+    const [fresh] = await tx.select().from(paymentAttempts).where(eq(paymentAttempts.id, current.id));
+    if (!fresh) throw new Error("attempt vanished during create recovery");
+    current = fresh;
+  }
+  const decision = decideCreateRecovery(current);
+  if (decision === "safe_to_recreate") {
+    const now = deps.now();
+    await transitionAttempt(tx, current.id, ["create_unknown"], "abandoned", now, { outcomeReason: "create_recreated" });
+    const next = await claimSlot(tx, { purchaseId: purchase.id, payeeMerchantId: current.payeeMerchantId, totalSgdCents: purchase.totalSgdCents, now });
+    await recordAudit(tx, { at: now, actor: "system", action: "paypal_create_recreated", purchaseId: purchase.id, attemptId: next.id, operatorVisible: true, details: { replaces: current.id } });
+    return createAndRecord(tx, deps, purchase, next);
+  }
+  if (answer) return answer;
+  return decision === "replay_same_key" ? createUnconfirmed() : appError("payment_uncertain", "We are still confirming the PayPal order for this review. Do not pay again.");
+}
+
 export async function startPayPal(deps: PayPalDeps, principal: BuyerPrincipal, purchaseId: string, hooks: FlowHooks = {}): Promise<StartResult | AppError> {
   try {
     return await deps.db.transaction(async (tx): Promise<StartResult | AppError> => {
       // The purchase row lock serializes starts of one review: a second start waits here, then
-      // finds the first start's attempt and returns the same approval link.
+      // finds the first start's attempt and returns the same approval link. It also serializes
+      // create replays, so one key is never in flight twice.
       const [locked] = await tx
         .select({ id: purchases.id, state: purchases.state, totalSgdCents: purchases.totalSgdCents, lines: purchases.lines, destinationId: purchases.destinationId })
         .from(purchases)
@@ -110,6 +212,7 @@ export async function startPayPal(deps: PayPalDeps, principal: BuyerPrincipal, p
       await hooks.afterExistingAttemptRead?.();
       if (existingId) {
         const [existing] = await tx.select().from(paymentAttempts).where(eq(paymentAttempts.id, existingId));
+        if (existing?.state === "create_unknown") return recoverCreate(tx, deps, locked, existing);
         if (existing) return existingStartAnswer(existing);
       }
       if (locked.state !== "review_open") return appError("review_invalidated", "This review is closed. Review the basket again to pay.");
@@ -124,32 +227,7 @@ export async function startPayPal(deps: PayPalDeps, principal: BuyerPrincipal, p
       const attempt = await claimSlot(tx, { purchaseId, payeeMerchantId: destination.sellerMerchantId, totalSgdCents: locked.totalSgdCents, now });
       await transitionPurchase(tx, purchaseId, ["review_open"], "pending_payment", "paypal_start");
       await recordAudit(tx, { at: now, actor: buyerActor(principal.userId), action: "paypal_attempt_created", purchaseId, attemptId: attempt.id, operatorVisible: false });
-
-      const query = `purchase=${encodeURIComponent(purchaseId)}`;
-      const created = await deps.paypal.createOrder(
-        {
-          purchaseId,
-          attemptId: attempt.id,
-          correlationId: purchaseId,
-          payeeMerchantId: attempt.payeeMerchantId,
-          lines: locked.lines.map((line) => ({ name: line.name, quantity: line.quantity, unitSgdCents: line.unitSgdCents })),
-          totalSgdCents: locked.totalSgdCents,
-          returnUrl: `${deps.appBaseUrl}/paypal/return?${query}`,
-          cancelUrl: `${deps.appBaseUrl}/paypal/cancel?${query}`,
-        },
-        attempt.createRequestId,
-      );
-      const after = deps.now();
-      if (created.kind === "ok" && created.value.approvalUrl && isSandboxApprovalUrl(created.value.approvalUrl)) {
-        await transitionAttempt(tx, attempt.id, ["created"], "order_created", after, { orderId: created.value.id, approvalUrl: created.value.approvalUrl });
-        return { attemptId: attempt.id, approvalUrl: created.value.approvalUrl };
-      }
-      // Unknown outcome: the buyer received no approval link, so no capture can follow. S3 decides
-      // between same-key replay and recreation; until then the review window closes it.
-      const reason = created.kind === "ok" ? "no_sandbox_approval_link" : `create_${created.kind}`;
-      await transitionAttempt(tx, attempt.id, ["created"], "create_unknown", after, { orderId: created.kind === "ok" ? created.value.id : null, outcomeReason: reason });
-      await recordAudit(tx, { at: after, actor: "system", action: "paypal_create_unknown", purchaseId, attemptId: attempt.id, operatorVisible: true, details: { reason } });
-      return appError("provider_unreachable", "PayPal did not confirm the order. Nothing was charged.", { retryable: true, operatorVisible: true });
+      return createAndRecord(tx, deps, locked, attempt);
     });
   } catch (err) {
     if (err instanceof SlotTaken) return appError("execution_locked", "Another payment start for this review is in progress.");
@@ -192,7 +270,9 @@ async function dispatchCapture(db: Db, attemptId: string, captureRequestId: stri
   return moved.length === 1;
 }
 
-function expectedPurchase(purchase: OwnPurchase, attempt: PaymentAttemptRow): ExpectedPurchase {
+type PurchaseFacts = Pick<OwnPurchase, "id" | "outletId" | "lines" | "totalSgdCents">;
+
+function expectedPurchase(purchase: PurchaseFacts, attempt: PaymentAttemptRow): ExpectedPurchase {
   const lines: PricedLine[] = purchase.lines.map((line) => ({
     menuItemId: line.menuItemId,
     name: line.name,
@@ -298,13 +378,14 @@ export async function completePayPal(deps: PayPalDeps, principal: BuyerPrincipal
     if (!(await dispatchCapture(db, attempt.id, captureRequestId, now()))) {
       return appError("review_expired", "This review expired before PayPal was charged. Nothing was charged.");
     }
+    await hooks.afterDispatch?.();
     const captured = await paypal.captureOrder(attempt.orderId, captureRequestId);
     // Paid is decided on a server read of the order after the capture, never on the capture call.
     const evidence = captured.kind === "ok" ? await paypal.readOrder(attempt.orderId) : captured;
     const decision =
       evidence.kind === "ok"
         ? decideCaptureOutcome(evidence.value, expected, now())
-        : { decision: "no_evidence" as const, reason: evidence.kind === "http_error" ? `capture_http_${evidence.status}${evidence.issues ? `:${evidence.issues}` : ""}` : `capture_${evidence.kind}` };
+        : { decision: "no_evidence" as const, reason: providerReason("capture", evidence) };
     await recordOutcome(db, purchase, attempt, decision, now());
     const view = await currentView(db, principal, purchaseId, now());
     return decision.decision === "confirmed"
@@ -347,4 +428,171 @@ export async function cancelPurchase(deps: Pick<PayPalDeps, "db" | "now">, princ
     if (view.state === "review_open") return appError("validation_failed", "No payment was started. This review closes on its own.");
     return { view };
   });
+}
+
+// Provider recovery (Gate 3 Races: lost capture response, duplicate or out-of-order webhook).
+// Shared by the buyer's "Check status", the verified webhook and, from S5, maintenance. Reads are
+// debounced per attempt by T_PROVIDER_READ_DEBOUNCE. Only a caller holding the attempt lease may
+// replay the persisted capture request id; nothing here ever mints a new capture key, creates a
+// replacement payment or captures an order whose capture was never dispatched. Reads are never
+// gated on PAYMENTS_ENABLED, so a dispatched capture still converges with the switch off.
+
+// read: PayPal answered and its record was applied; provider_unreachable: no read got an answer.
+export type ReconcileOutcome = "read" | "provider_unreachable" | "debounced" | "in_flight" | "no_order";
+
+export type ReconcileDeps = {
+  db: Db;
+  read: PayPalReadClient;
+  // Same-key capture replay; null on read-only paths such as the webhook.
+  replay: Pick<PayPalWriteClient, "captureOrder"> | null;
+  now: Now;
+  actor: string;
+};
+
+const CAPTURE_IN_FLIGHT: readonly AttemptState[] = ["capture_dispatched", "capture_unknown"];
+const CAPTURE_STATES: readonly AttemptState[] = [...CAPTURE_IN_FLIGHT, "capture_confirmed", "capture_failed"];
+
+// Every purchase state the transition table lets move to `to`. A recovery write therefore can
+// never take a purchase anywhere the table forbids, such as out of paid.
+function purchaseStatesInto(to: PurchaseState, reason: string): PurchaseState[] {
+  return PURCHASE_STATES.filter((from) => canTransitionPurchase({ from, to, reason }));
+}
+
+// Starts a debounce window by compare-and-set; false while one is still open.
+async function claimProviderRead(db: Db, attemptId: string, now: Date): Promise<boolean> {
+  const windowStart = new Date(now.getTime() - durationMs("T_PROVIDER_READ_DEBOUNCE"));
+  const claimed = await db
+    .update(paymentAttempts)
+    .set({ lastProviderReadAt: now })
+    .where(
+      and(
+        eq(paymentAttempts.id, attemptId),
+        or(isNull(paymentAttempts.lastProviderReadAt), lte(paymentAttempts.lastProviderReadAt, windowStart)),
+      ),
+    )
+    .returning({ id: paymentAttempts.id });
+  return claimed.length === 1;
+}
+
+type RecoveryVerdict =
+  | { kind: "confirmed"; decision: Extract<CaptureDecision, { decision: "confirmed" }> }
+  | { kind: "failed"; reason: string }
+  | { kind: "inconclusive"; reason: string };
+
+async function applyVerdict(deps: ReconcileDeps, purchaseId: string, purchaseState: PurchaseState, attempt: PaymentAttemptRow, verdict: RecoveryVerdict): Promise<void> {
+  const now = deps.now();
+  await deps.db.transaction(async (tx) => {
+    const audit = (action: string, operatorVisible: boolean, details: Record<string, string | number | boolean | null>) =>
+      recordAudit(tx, { at: now, actor: deps.actor, action, purchaseId, attemptId: attempt.id, operatorVisible, details: { orderId: attempt.orderId, ...details } });
+
+    if (verdict.kind === "confirmed") {
+      const { evidence } = verdict.decision;
+      const moved = await transitionAttempt(tx, attempt.id, ["capture_dispatched", "capture_unknown"], "capture_confirmed", now, {
+        captureId: evidence.captureId,
+        captureGrossSgdCents: evidence.grossSgdCents,
+        captureVerifiedAt: evidence.verifiedAt,
+      });
+      if (!moved) {
+        // Already decided. A confirmed capture after a verified failure is the operator's to see.
+        if (attempt.state === "capture_failed") await audit("paypal_capture_after_failure", true, { captureId: evidence.captureId });
+        return;
+      }
+      await transitionPurchase(tx, purchaseId, purchaseStatesInto("paid", "capture_confirmed"), "paid", "capture_confirmed");
+      await audit("paypal_capture_confirmed", false, { captureId: evidence.captureId, grossSgdCents: evidence.grossSgdCents, payeeId: evidence.payeeId, recovered: true });
+      return;
+    }
+
+    if (verdict.kind === "failed") {
+      // A verified failure: PayPal refused the same-key replay outright and the order shows no
+      // capture at all. Anything weaker stays checking payment.
+      await transitionAttempt(tx, attempt.id, ["capture_dispatched"], "capture_unknown", now, { outcomeReason: verdict.reason });
+      const moved = await transitionAttempt(tx, attempt.id, ["capture_unknown"], "capture_failed", now, { outcomeReason: verdict.reason });
+      if (moved) {
+        await transitionPurchase(tx, purchaseId, purchaseStatesInto("unpaid_closed", "capture_failed"), "unpaid_closed", "capture_failed");
+        await audit("paypal_capture_failed", true, { reason: verdict.reason });
+      }
+      return;
+    }
+
+    // Inconclusive: quarantine (or keep quarantined) as uncertain with an operator alert. The
+    // purchase only moves where the table allows, so a paid purchase is never downgraded.
+    await transitionAttempt(tx, attempt.id, ["capture_dispatched"], "capture_unknown", now, { outcomeReason: verdict.reason });
+    const moved = await transitionPurchase(tx, purchaseId, purchaseStatesInto("uncertain", verdict.reason), "uncertain", verdict.reason);
+    const stillPaid = purchaseState === "paid" && !moved;
+    await audit(stillPaid ? "paypal_paid_read_mismatch" : "paypal_recovery_inconclusive", true, { reason: verdict.reason });
+  });
+}
+
+// Reads the order and, for a capture whose outcome is unknown, replays the persisted capture key
+// as the lease holder. Paid is decided only by decideCaptureOutcome on a server read. Returns
+// whether any read got PayPal's answer.
+async function recoverCapture(deps: ReconcileDeps, purchase: PurchaseFacts & { state: PurchaseState }, attempt: PaymentAttemptRow & { orderId: string }): Promise<boolean> {
+  const expected = expectedPurchase(purchase, attempt);
+  const decide = (order: PayPalOrder) => decideCaptureOutcome(order, expected, deps.now());
+  const apply = async (verdict: RecoveryVerdict, answered: boolean) => {
+    await applyVerdict(deps, purchase.id, purchase.state, attempt, verdict);
+    return answered;
+  };
+
+  const first = await deps.read.readOrder(attempt.orderId);
+  if (first.kind === "ok") {
+    const decision = decide(first.value);
+    if (decision.decision === "confirmed") return apply({ kind: "confirmed", decision }, true);
+    // A capture PayPal reports but that does not match, or is not complete, is never paid and
+    // never failed: it stays uncertain.
+    if (first.value.captures.length > 0) return apply({ kind: "inconclusive", reason: decision.reason }, true);
+  }
+
+  const captureKey = attempt.captureRequestId;
+  if (!deps.replay || !captureKey || !CAPTURE_IN_FLIGHT.includes(attempt.state as AttemptState)) {
+    return apply({ kind: "inconclusive", reason: first.kind === "ok" ? "no_capture_seen" : providerReason("read", first) }, first.kind === "ok");
+  }
+
+  const replayed = await deps.replay.captureOrder(attempt.orderId, captureKey);
+  const after = await deps.read.readOrder(attempt.orderId);
+  if (after.kind !== "ok") return apply({ kind: "inconclusive", reason: providerReason("read", after) }, first.kind === "ok");
+  const decision = decide(after.value);
+  if (decision.decision === "confirmed") return apply({ kind: "confirmed", decision }, true);
+  if (after.value.captures.length === 0 && isDefinitiveRefusal(replayed)) {
+    return apply({ kind: "failed", reason: `capture_refused_${replayed.status}:${replayed.issues}` }, true);
+  }
+  return apply({ kind: "inconclusive", reason: replayed.kind === "ok" ? decision.reason : providerReason("capture_replay", replayed) }, true);
+}
+
+// Test-only barrier; production callers pass none.
+export type ReconcileHooks = { afterLeaseDecision?: () => Promise<void> };
+
+export async function reconcileAttempt(deps: ReconcileDeps, attemptId: string, hooks: ReconcileHooks = {}): Promise<ReconcileOutcome> {
+  const [initial] = await deps.db.select().from(paymentAttempts).where(eq(paymentAttempts.id, attemptId));
+  if (!initial) throw new Error(`no attempt ${attemptId}`);
+  if (!initial.orderId) return "no_order";
+
+  // Only an in-flight capture is replayed, and only by the lease holder.
+  const lease = CAPTURE_IN_FLIGHT.includes(initial.state as AttemptState) ? await acquireLease(deps.db, attemptId, deps.now()) : null;
+  if (CAPTURE_IN_FLIGHT.includes(initial.state as AttemptState) && !lease) return "in_flight";
+  try {
+    await hooks.afterLeaseDecision?.();
+    if (!(await claimProviderRead(deps.db, attemptId, deps.now()))) return "debounced";
+    const [attempt] = await deps.db.select().from(paymentAttempts).where(eq(paymentAttempts.id, attemptId));
+    const [purchase] = await deps.db
+      .select({ id: purchases.id, outletId: purchases.outletId, lines: purchases.lines, totalSgdCents: purchases.totalSgdCents, state: purchases.state })
+      .from(purchases)
+      .where(eq(purchases.id, initial.purchaseId));
+    if (!attempt?.orderId || !purchase) throw new Error(`attempt ${attemptId} lost its order or purchase`);
+    // A completion dispatched the capture after this check began: it holds the lease, so this
+    // call neither reads into its outcome nor replays its key.
+    if (CAPTURE_IN_FLIGHT.includes(attempt.state as AttemptState) && !lease) return "in_flight";
+
+    // Before any capture was dispatched a read changes nothing: reconciliation never performs an
+    // initial capture, and the buyer's own completion does that.
+    const answered = CAPTURE_STATES.includes(attempt.state as AttemptState)
+      ? await recoverCapture(deps, { ...purchase, state: purchase.state as PurchaseState }, { ...attempt, orderId: attempt.orderId })
+      : (await deps.read.readOrder(attempt.orderId)).kind === "ok";
+    if (!answered) return "provider_unreachable";
+    // The due read is done; a webhook that arrives later makes the next one due.
+    await deps.db.update(paymentAttempts).set({ providerReadDueAt: null }).where(eq(paymentAttempts.id, attemptId));
+    return "read";
+  } finally {
+    if (lease) await releaseLease(deps.db, attemptId, lease);
+  }
 }
