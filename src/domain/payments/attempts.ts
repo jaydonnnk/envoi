@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { and, eq, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { buyerActor, recordAudit } from "@/domain/audit/events";
-import { canTransitionAttempt, isPreCapture, type AttemptState } from "@/domain/payments/state";
+import { canTransitionAttempt, isPreCapture, TERMINAL_ATTEMPT_STATES, type AttemptState } from "@/domain/payments/state";
 import type { PricedLine } from "@/domain/purchases/price";
 import { decideCaptureOutcome, verifyApprovedOrder, type CaptureDecision, type ExpectedPurchase } from "@/domain/purchases/reconcile";
 import { assertPaymentEligible, getOwnPurchase, latestAttempt, type OwnPurchase } from "@/domain/purchases/review";
@@ -336,7 +336,7 @@ export async function cancelPurchase(deps: Pick<PayPalDeps, "db" | "now">, princ
       return { view };
     }
     if (view.state === "paid") return appError("validation_failed", "This purchase is already paid.");
-    if (attempt && !(["abandoned", "capture_failed", "capture_confirmed"] as string[]).includes(attempt.state)) {
+    if (attempt && !(TERMINAL_ATTEMPT_STATES as readonly string[]).includes(attempt.state)) {
       const state = attempt.state as AttemptState;
       if (!isPreCapture(state)) return appError("payment_uncertain", "PayPal may already be completing this payment. Check the receipt; do not pay again.");
       await transitionAttempt(tx, attempt.id, [state], "abandoned", now, { outcomeReason: "buyer_canceled" });
