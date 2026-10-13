@@ -1,4 +1,4 @@
-import { and, asc, eq, isNotNull } from "drizzle-orm";
+import { and, asc, eq, isNotNull, sql } from "drizzle-orm";
 import { menuItems, menuRevisions, outlets } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 
@@ -37,4 +37,36 @@ export async function getPublishedMenu(db: Db, outletId: string): Promise<Publis
     menuRevisionId: first.menuRevisionId,
     items: rows.flatMap((row) => (row.item ? [row.item] : [])),
   };
+}
+
+// Price-free reads for the AI suggestion tools. Nothing here returns a price: the model never sees
+// one, and pricing always re-reads the confirmed revision server-side.
+
+export type OutletSearch = { area: string | null; name: string | null };
+
+export type PublishedItemName = { outletId: string; outletName: string; itemId: string; name: string };
+
+function containsInsensitive(column: typeof outlets.area | typeof outlets.name, value: string | null) {
+  const trimmed = value?.trim();
+  return trimmed ? sql`position(lower(${trimmed}) in lower(${column})) > 0` : undefined;
+}
+
+export async function searchPublishedOutlets(db: Db, search: OutletSearch, limit = 10): Promise<PublishedOutletSummary[]> {
+  return db
+    .select({ id: outlets.id, name: outlets.name, area: outlets.area, isDemoFixture: outlets.isDemoFixture })
+    .from(outlets)
+    .where(and(isNotNull(outlets.publishedMenuRevisionId), containsInsensitive(outlets.area, search.area), containsInsensitive(outlets.name, search.name)))
+    .orderBy(asc(outlets.name), asc(outlets.id))
+    .limit(limit);
+}
+
+export async function listPublishedItemNames(db: Db, area: string | null, limit = 50): Promise<PublishedItemName[]> {
+  return db
+    .select({ outletId: outlets.id, outletName: outlets.name, itemId: menuItems.id, name: menuItems.name })
+    .from(outlets)
+    .innerJoin(menuRevisions, and(eq(menuRevisions.id, outlets.publishedMenuRevisionId), eq(menuRevisions.status, "confirmed")))
+    .innerJoin(menuItems, eq(menuItems.menuRevisionId, menuRevisions.id))
+    .where(containsInsensitive(outlets.area, area))
+    .orderBy(asc(outlets.name), asc(outlets.id), asc(menuItems.position))
+    .limit(limit);
 }

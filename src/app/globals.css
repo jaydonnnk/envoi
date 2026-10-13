@@ -81,6 +81,18 @@ small { font-size: 13px; display: block; }
 .shop:hover { border-color: var(--blue); }
 .error { color: #9b1c1c; margin-top: 12px; }
 
+label { display: block; font-weight: 600; margin: 16px 0 6px; }
+label:first-child { margin-top: 0; }
+input, textarea { font: inherit; color: var(--ink); padding: 12px; background: var(--paper); border: 1px solid #8da3bb; border-radius: 7px; width: 100%; }
+textarea { resize: vertical; min-height: 92px; }
+form > .button.full { margin-top: 18px; }
+.fine { font-size: 13px; margin: 14px 0 0; }
+.suggestion { margin-top: 18px; }
+.suggestion .row:first-child { padding-top: 0; }
+.status small { margin-top: 2px; }
+.shops { margin-top: 28px; }
+.list-heading { margin: 0; }
+
 footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; color: var(--muted); }
 :focus-visible { outline: 3px solid #d67911; outline-offset: 4px; }
 

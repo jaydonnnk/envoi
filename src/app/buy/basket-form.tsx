@@ -14,9 +14,11 @@ function sgd(cents: number): string {
 
 // The browser sends item ids and quantities only. The server prices them from the published menu
 // on the next page; the subtotal here is a preview of the same menu prices.
-export function BasketForm({ outletId, items }: { outletId: string; items: BasketItem[] }) {
+export function BasketForm({ outletId, items, preselected = [] }: { outletId: string; items: BasketItem[]; preselected?: string[] }) {
   const router = useRouter();
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [quantities, setQuantities] = useState<Record<string, number>>(() =>
+    Object.fromEntries(items.filter((item) => preselected.includes(item.id) && item.unitSgdCents !== null && item.available !== false).map((item) => [item.id, 1])),
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

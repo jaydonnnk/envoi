@@ -320,3 +320,24 @@ export const auditEvents = pgTable(
   },
   (t) => [index("audit_events_purchase_idx").on(t.purchaseId), index("audit_events_operator_idx").on(t.operatorVisible, t.at)],
 );
+
+// Public-route limiter (Gate 4 delta D9). One row per admitted request; a refused request writes
+// nothing. Admission prunes rows older than the bucket's longest window, so the table stays small
+// without a maintenance task.
+
+export const RATE_LIMIT_BUCKETS = ["buyer_suggestion"] as const;
+
+export const rateLimitHits = pgTable(
+  "rate_limit_hits",
+  {
+    id: text("id").primaryKey(),
+    bucket: text("bucket").notNull(),
+    subject: text("subject").notNull(),
+    at: timestamp("at", { withTimezone: true }).notNull(),
+  },
+  (t) => [
+    check("rate_limit_hits_bucket_check", sql`${t.bucket} in ('buyer_suggestion')`),
+    index("rate_limit_hits_bucket_at_idx").on(t.bucket, t.at),
+    index("rate_limit_hits_subject_idx").on(t.bucket, t.subject, t.at),
+  ],
+);
