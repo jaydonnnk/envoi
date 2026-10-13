@@ -9,6 +9,9 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // next dev would otherwise append its own block to AGENTS.md, which holds this repository's
+  // reviewed agent instructions.
+  agentRules: false,
   // The framework image optimizer stays unused (Gate 3, Files).
   images: { unoptimized: true },
   async headers() {

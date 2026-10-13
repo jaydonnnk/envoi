@@ -46,16 +46,18 @@ export type OutletSearch = { area: string | null; name: string | null };
 
 export type PublishedItemName = { outletId: string; outletName: string; itemId: string; name: string };
 
-function containsInsensitive(column: typeof outlets.area | typeof outlets.name, value: string | null) {
+// Matches when either text contains the other, so "Tanjong Pagar MRT" finds an outlet in
+// "Tanjong Pagar" and "Pagar" finds it too.
+function overlapsInsensitive(column: typeof outlets.area | typeof outlets.name, value: string | null) {
   const trimmed = value?.trim();
-  return trimmed ? sql`position(lower(${trimmed}) in lower(${column})) > 0` : undefined;
+  return trimmed ? sql`(position(lower(${trimmed}) in lower(${column})) > 0 or position(lower(${column}) in lower(${trimmed})) > 0)` : undefined;
 }
 
 export async function searchPublishedOutlets(db: Db, search: OutletSearch, limit = 10): Promise<PublishedOutletSummary[]> {
   return db
     .select({ id: outlets.id, name: outlets.name, area: outlets.area, isDemoFixture: outlets.isDemoFixture })
     .from(outlets)
-    .where(and(isNotNull(outlets.publishedMenuRevisionId), containsInsensitive(outlets.area, search.area), containsInsensitive(outlets.name, search.name)))
+    .where(and(isNotNull(outlets.publishedMenuRevisionId), overlapsInsensitive(outlets.area, search.area), overlapsInsensitive(outlets.name, search.name)))
     .orderBy(asc(outlets.name), asc(outlets.id))
     .limit(limit);
 }
@@ -66,7 +68,7 @@ export async function listPublishedItemNames(db: Db, area: string | null, limit 
     .from(outlets)
     .innerJoin(menuRevisions, and(eq(menuRevisions.id, outlets.publishedMenuRevisionId), eq(menuRevisions.status, "confirmed")))
     .innerJoin(menuItems, eq(menuItems.menuRevisionId, menuRevisions.id))
-    .where(containsInsensitive(outlets.area, area))
+    .where(overlapsInsensitive(outlets.area, area))
     .orderBy(asc(outlets.name), asc(outlets.id), asc(menuItems.position))
     .limit(limit);
 }

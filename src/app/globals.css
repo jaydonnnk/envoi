@@ -89,7 +89,9 @@ form > .button.full { margin-top: 18px; }
 .fine { font-size: 13px; margin: 14px 0 0; }
 .suggestion { margin-top: 18px; }
 .suggestion .row:first-child { padding-top: 0; }
+.suggestion > .button.full { margin-top: 16px; }
 .status small { margin-top: 2px; }
+[aria-live] > .status { margin: 18px 0 0; }
 .shops { margin-top: 28px; }
 .list-heading { margin: 0; }
 

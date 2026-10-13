@@ -103,6 +103,27 @@ describe("buyer text suggestions", () => {
     }
   });
 
+  it("the tools find a shop from an area written the way buyers write it", async () => {
+    script = (index) =>
+      index === 0
+        ? {
+            kind: "tools",
+            calls: [
+              { name: "search_outlets", args: { area: "near Tanjong Pagar", name: null } },
+              { name: "list_item_names", args: { area: "Tanjong Pagar MRT" } },
+              { name: "search_outlets", args: { area: "Tanjong-Pagar", name: null } },
+            ],
+          }
+        : { kind: "answer", proposal: proposal({ kind: "no_match" }) };
+
+    await suggest({ text: "kaya toast and kopi", area: "near Tanjong Pagar" });
+
+    const [near, items, hyphenated] = fake.toolOutputs();
+    expect(near).toContain("Lorong Demo Kopi");
+    expect(items).toContain("Kaya toast set");
+    expect(hyphenated).toContain("Lorong Demo Kopi");
+  });
+
   it("model tool budget is enforced", async () => {
     script = (index) => (index < 4 ? { kind: "tools", calls: [{ name: "search_outlets", args: { area: "Tanjong Pagar", name: null } }] } : { kind: "answer", proposal: proposal({ kind: "outlets", outletIds: [fixture.outletId], area: "Tanjong Pagar" }) });
 

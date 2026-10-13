@@ -44,7 +44,9 @@ function clarify(missing: SuggestionGap[]): Suggestion {
 
 export function suggestionTools(db: Db): SuggestionTools {
   return {
-    searchOutlets: (search) => searchPublishedOutlets(db, search),
+    // The model passes areas the way buyers write them ("near Tanjong Pagar"); only the place
+    // words reach the search.
+    searchOutlets: (search) => searchPublishedOutlets(db, { area: usableArea(search.area), name: search.name }),
     getPublishedMenu: async (outletId) => {
       const menu = await getPublishedMenu(db, outletId);
       if (!menu) return null;
@@ -53,7 +55,7 @@ export function suggestionTools(db: Db): SuggestionTools {
         items: menu.items.map((item) => ({ id: item.id, name: item.name, available: item.available })),
       };
     },
-    listItemNames: (area) => listPublishedItemNames(db, area),
+    listItemNames: (area) => listPublishedItemNames(db, usableArea(area)),
   };
 }
 
