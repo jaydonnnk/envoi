@@ -252,13 +252,14 @@ describe("maintenance runner (fixture PayPal)", () => {
   it("a task that times out takes no further item and the next task waits for the one it was running", async () => {
     const ids = await dueAttempts(3);
     try {
-      // FIXTURE: each provider read takes 300 ms of real time and reconcile_attempts times out after
-      // 450 ms, during the second read.
+      // FIXTURE: reconcile_attempts times out after 1,500 ms. The first read answers at once and the
+      // second takes 2,500 ms, so the timeout falls inside the second read with a wide margin.
       const fake = createFakePayPal();
       const reads: { orderId: string; endedAt: number }[] = [];
+      let calls = 0;
       const slowRead: PayPalReadClient = {
         async readOrder(orderId) {
-          await new Promise((resolve) => setTimeout(resolve, 300));
+          if (calls++ === 1) await new Promise((resolve) => setTimeout(resolve, 2_500));
           const answer = await fake.client.readOrder(orderId);
           reads.push({ orderId, endedAt: Date.now() });
           return answer;
@@ -266,7 +267,7 @@ describe("maintenance runner (fixture PayPal)", () => {
       };
       let closeStartedAt = 0;
       const tasks: MaintenanceTask[] = MAINTENANCE_TASKS.map((task) => {
-        if (task.name === "reconcile_attempts") return { ...task, timeoutMs: 450 };
+        if (task.name === "reconcile_attempts") return { ...task, timeoutMs: 1_500 };
         if (task.name === "close_expired_reviews") {
           return {
             ...task,
