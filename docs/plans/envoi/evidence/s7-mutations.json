@@ -1,0 +1,302 @@
+{
+ "branch": "envoi/slice-7-publication",
+ "base_commit": "4b83f8a",
+ "uncommitted_changes": false,
+ "method": "Each definition in s7-mutation-defs.json applied alone by exact text replacement, its named test run alone (vitest -t), every touched file restored and compared by SHA-256, then the test rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations, so a mutation of a migration file reaches the disposable database; merchant and operator accounts are created by the operator functions with passwords generated in memory per run. PayPal is the labeled FIXTURE fake and OpenAI is never called; merchant shops are taken through the real merchant routes and the operator functions. A proof also needs the mutated run to fail on an AssertionError.",
+ "results": [
+  {
+   "id": "pub-enrollment",
+   "test": "publication requires all four preconditions",
+   "files": [
+    "src/domain/outlets/publish.ts"
+   ],
+   "mutation": "Drop the enrollment precondition from publication.",
+   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "error": "AssertionError: enrollment: expected 200 to be 400 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "proof": true
+  },
+  {
+   "id": "pub-outlet-details",
+   "test": "publication requires all four preconditions",
+   "files": [
+    "src/domain/outlets/publish.ts"
+   ],
+   "mutation": "Drop the outlet confirmation precondition.",
+   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "error": "AssertionError: outlet_details: expected 200 to be 400 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "proof": true
+  },
+  {
+   "id": "pub-menu-confirmation",
+   "test": "publication requires all four preconditions",
+   "files": [
+    "src/domain/outlets/publish.ts"
+   ],
+   "mutation": "Drop the menu confirmation precondition.",
+   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "error": "AssertionError: menu_confirmation: expected undefined to be 400 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "proof": true
+  },
+  {
+   "id": "pub-destination",
+   "test": "publication requires all four preconditions",
+   "files": [
+    "src/domain/outlets/publish.ts"
+   ],
+   "mutation": "Drop the accepted active destination precondition.",
+   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "error": "AssertionError: destination: expected 200 to be 400 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "proof": true
+  },
+  {
+   "id": "edit-published-in-place",
+   "test": "editing a published menu creates an unpublished revision",
+   "files": [
+    "src/domain/menu/draft.ts"
+   ],
+   "mutation": "Mutate in place: the draft is the outlet's newest revision even when it is the published one.",
+   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "error": "AssertionError: expected undefined to be 200 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "proof": true
+  },
+  {
+   "id": "republish-pointer-reread",
+   "test": "republication invalidates an open review at execution",
+   "files": [
+    "src/domain/purchases/review.ts"
+   ],
+   "mutation": "Skip the published-pointer re-read in assertPaymentEligible.",
+   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "error": "AssertionError: expected 200 to be 409 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "proof": true
+  },
+  {
+   "id": "republish-stores-invalidation",
+   "test": "republication invalidates an open review at execution",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
+   "mutation": "paypal/start refuses a stale review but leaves it stored as review_open.",
+   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "error": "AssertionError: expected 'review_open' to be 'review_invalidated' // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "proof": true
+  },
+  {
+   "id": "destination-version",
+   "test": "destination change invalidates an open review",
+   "files": [
+    "src/domain/purchases/review.ts"
+   ],
+   "mutation": "Skip the destination version check in assertPaymentEligible.",
+   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "error": "AssertionError: expected 200 to be 409 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "proof": true
+  },
+  {
+   "id": "destination-replace-open-review",
+   "test": "an open review pinned to a changed destination is replaced, not reused",
+   "files": [
+    "src/domain/purchases/review.ts"
+   ],
+   "mutation": "createReview returns a same-key open review whatever destination version it pinned.",
+   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "error": "AssertionError: expected 200 to be 201 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "proof": true
+  },
+  {
+   "id": "arbitrary-merchant-id",
+   "test": "arbitrary merchant id cannot connect",
+   "files": [
+    "src/domain/outlets/destination.ts"
+   ],
+   "mutation": "Accept the body value: the named seller id is not compared with the operator-prepared one.",
+   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "error": "AssertionError: expected 200 to be 400 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "proof": true
+  },
+  {
+   "id": "details-confirmation-cleared",
+   "test": "editing shop details clears their confirmation",
+   "files": [
+    "src/domain/outlets/merchant.ts"
+   ],
+   "mutation": "Saving details without the confirmation keeps an earlier confirmation.",
+   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "error": "AssertionError: expected true to be false // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "proof": true
+  },
+  {
+   "id": "approve-enrollment-once",
+   "test": "approve-enrollment approves once and repeats unchanged",
+   "files": [
+    "src/operator/cli.ts"
+   ],
+   "mutation": "approve-enrollment approves again when already approved.",
+   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "error": "AssertionError: expected { status: 'approved', \u2026(2) } to match object { status: 'unchanged', \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "proof": true
+  },
+  {
+   "id": "trigger-published-items",
+   "test": "a published menu's items refuse every write",
+   "files": [
+    "drizzle/0017_s7_publication_guards.sql"
+   ],
+   "mutation": "Drop the published-items trigger from migration 0017.",
+   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "error": "AssertionError: expected 'ok' to match /belongs to a published revision/",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "proof": true
+  },
+  {
+   "id": "trigger-published-revision",
+   "test": "a published revision refuses every change",
+   "files": [
+    "drizzle/0017_s7_publication_guards.sql"
+   ],
+   "mutation": "Drop the published-revision trigger from migration 0017.",
+   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "error": "AssertionError: expected 'ok' to match /was published and cannot change/",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "proof": true
+  },
+  {
+   "id": "trigger-pointer-target",
+   "test": "the published pointer names only a confirmed revision of its own outlet",
+   "files": [
+    "drizzle/0017_s7_publication_guards.sql"
+   ],
+   "mutation": "The pointer trigger checks only that the revision exists.",
+   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "error": "AssertionError: expected 'ok' to match /may only publish a confirmed revision\u2026/",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "proof": true
+  },
+  {
+   "id": "trigger-membership-binding",
+   "test": "a bound membership is never rebound",
+   "files": [
+    "drizzle/0017_s7_publication_guards.sql"
+   ],
+   "mutation": "Drop the membership binding trigger from migration 0017.",
+   "mutated": "Tests  1 failed | 11 skipped (12)",
+   "error": "AssertionError: expected 'ok' to match /already bound to an outlet/",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 11 skipped (12)",
+   "proof": true
+  },
+  {
+   "id": "lock-key-by-revision",
+   "test": "a payment that can still move blocks the same basket on a republished menu",
+   "files": [
+    "src/domain/purchases/review.ts"
+   ],
+   "mutation": "Key the lock by menu revision.",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
+   "error": "AssertionError: expected 201 to be 409 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 3 skipped (4)",
+   "proof": true
+  },
+  {
+   "id": "lock-any-pending-payment",
+   "test": "a PayPal order abandoned before capture does not lock a republished basket",
+   "files": [
+    "src/domain/purchases/state.ts"
+   ],
+   "mutation": "Lock on any pending_payment purchase.",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
+   "error": "AssertionError: expected 409 to be 201 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 3 skipped (4)",
+   "proof": true
+  },
+  {
+   "id": "race-lock-only-at-review",
+   "test": "two PayPal reviews of one basket across a republish cannot both start",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
+   "mutation": "Check the basket lock only at review creation: paypal/start does not recheck it.",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
+   "error": "AssertionError: expected { \u2026(2) } to match object { code: 'execution_locked', \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 3 skipped (4)",
+   "proof": true
+  },
+  {
+   "id": "race-recheck-without-locking",
+   "test": "two PayPal reviews of one basket across a republish cannot both start",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
+   "mutation": "Recheck the lock in paypal/start without first locking the buyer's same-basket purchases.",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
+   "error": "AssertionError: expected { \u2026(2) } to match object { code: 'execution_locked', \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 3 skipped (4)",
+   "proof": true
+  },
+  {
+   "id": "backfill-form",
+   "test": "the migration backfill computes the application's basket lock key",
+   "files": [
+    "drizzle/0017_s7_publication_guards.sql"
+   ],
+   "mutation": "The migration backfill joins lines with a different separator.",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
+   "error": "AssertionError: expected '26fd6dd46cb0760193061af01c288cd4a8403\u2026' to be 'b28a8d326fc2482528d96eb8c8102807b87cd\u2026' // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 3 skipped (4)",
+   "proof": true
+  }
+ ]
+}
