@@ -215,6 +215,11 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - **Noticed, not changed:** the receipt, review and PayPal return and cancel pages call `notFound()` the same way, so a browser without JavaScript gets an empty page instead of their not-found page; with JavaScript the not-found page shows.
   Pre-existing and outside F3; proposed as a separate fix.
 - **CI [verified]:** passed on `eb21a84` on the branch (run 38576267836).
+- **Deploy check on Render [verified], 2026-10-14, `https://envoi-helx.onrender.com`:** `main` was fast-forwarded to `51c75e7` and pushed; the deploy showed about 75 seconds later, when `GET /api/v1/zzz-unknown` turned from Next's HTML page into the JSON `not_found`.
+  - With no session and with a fresh anonymous session, `/operator/health`, `/operator/zzz-unknown` and `/zzz-unknown` each answered 404 with the same 6,866-byte body (SHA-256 prefix `8b0603156c96`), and `GET /api/v1/health/operator` and `/api/v1/zzz-unknown` the same 95-byte JSON `not_found`; no page mentioned operator health or the heartbeat.
+  - Residual at the edge, outside the app: Cloudflare in front of Render answers `/operator/health` (any query) and `/buy` with an HTTP 103 Early Hints carrying a stylesheet `Link` before the final status, and `/operator/zzz-unknown` and `/zzz-unknown` with none; it replays hints for paths that once answered 200, as `/operator/health` did for the operator, and the local `next start` sends no 103.
+    With the `x-middleware-rewrite` header above, an observer can tell that `/operator/health` has served a page, but gets no health data.
+  - The operator view on Render was not re-checked, because signing in needs the operator's password; the local production build covered the operator path.
 
 ### S6 Merchant sign-in and manual menu draft, 2026-10-14
 
