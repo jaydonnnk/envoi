@@ -1,0 +1,316 @@
+[
+ {
+  "id": "agent-receipt",
+  "test": "agent token cannot read a receipt",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "accept the agent principal: a request presenting an agent token is treated as a buyer request",
+  "edits": [
+   {
+    "file": "src/lib/auth-context.ts",
+    "old": "  if (headers.has(\"authorization\")) {",
+    "new": "  if (false && headers.has(\"authorization\")) {"
+   }
+  ]
+ },
+ {
+  "id": "agent-redeem",
+  "test": "agent token cannot redeem a handoff",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "accept the agent principal on the redeem route (the same guard as agent-receipt, proved against its second test)",
+  "edits": [
+   {
+    "file": "src/lib/auth-context.ts",
+    "old": "  if (headers.has(\"authorization\")) {",
+    "new": "  if (false && headers.has(\"authorization\")) {"
+   }
+  ]
+ },
+ {
+  "id": "redeem-once",
+  "test": "handoff redeems once",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "remove the once constraint: bind the redemption without requiring redeemed_at to be null",
+  "edits": [
+   {
+    "file": "src/domain/handoffs/redeem.ts",
+    "old": ".where(and(eq(purchaseRequests.id, request.id), isNull(purchaseRequests.redeemedAt)))",
+    "new": ".where(eq(purchaseRequests.id, request.id))"
+   }
+  ]
+ },
+ {
+  "id": "redeem-once-race",
+  "test": "concurrent redemptions bind once",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "remove the once constraint (the same guard as redeem-once) under two concurrent redemptions",
+  "edits": [
+   {
+    "file": "src/domain/handoffs/redeem.ts",
+    "old": ".where(and(eq(purchaseRequests.id, request.id), isNull(purchaseRequests.redeemedAt)))",
+    "new": ".where(eq(purchaseRequests.id, request.id))"
+   }
+  ]
+ },
+ {
+  "id": "agent-total",
+  "test": "handoff carries no amount",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "accept the agent total: keep an agent-supplied totalSgdCents with the lines and use it at redemption",
+  "edits": [
+   {
+    "file": "src/domain/handoffs/input.ts",
+    "old": "    .max(MAX_LINES),\n};",
+    "new": "    .max(MAX_LINES),\n  totalSgdCents: z.number().int().optional(),\n};"
+   },
+   {
+    "file": "src/domain/handoffs/redeem.ts",
+    "old": "      lines: input.lines.map((line) => ({ menuItemId: line.menuItemId, quantity: line.quantity })),\n",
+    "new": "      lines: input.lines.map((line) => ({ menuItemId: line.menuItemId, quantity: line.quantity, agentTotal: (input as { totalSgdCents?: number }).totalSgdCents })),\n"
+   },
+   {
+    "file": "src/domain/handoffs/redeem.ts",
+    "old": "      if (!quote.ok) throw new Unbound(request.redeemedAt ? { kind: \"already_redeemed\" } : { kind: \"refused\", error: quote.error });\n",
+    "new": "      if (!quote.ok) throw new Unbound(request.redeemedAt ? { kind: \"already_redeemed\" } : { kind: \"refused\", error: quote.error });\n      const agentTotal = (request.lines[0] as { agentTotal?: number }).agentTotal;\n      if (agentTotal) Object.assign(quote, { totalSgdCents: agentTotal });\n"
+   }
+  ]
+ },
+ {
+  "id": "creation-price",
+  "test": "handoff carries no amount",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "price at creation, not redemption: keep the creation-time total with the lines and use it at redemption",
+  "edits": [
+   {
+    "file": "src/domain/handoffs/redeem.ts",
+    "old": "      lines: input.lines.map((line) => ({ menuItemId: line.menuItemId, quantity: line.quantity })),\n",
+    "new": "      lines: input.lines.map((line) => ({ menuItemId: line.menuItemId, quantity: line.quantity, quotedTotal: quote.totalSgdCents })),\n"
+   },
+   {
+    "file": "src/domain/handoffs/redeem.ts",
+    "old": "      if (!quote.ok) throw new Unbound(request.redeemedAt ? { kind: \"already_redeemed\" } : { kind: \"refused\", error: quote.error });\n",
+    "new": "      if (!quote.ok) throw new Unbound(request.redeemedAt ? { kind: \"already_redeemed\" } : { kind: \"refused\", error: quote.error });\n      Object.assign(quote, { totalSgdCents: (request.lines[0] as { quotedTotal?: number }).quotedTotal });\n"
+   }
+  ]
+ },
+ {
+  "id": "t-handoff-9",
+  "test": "handoff expires after T_HANDOFF",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "T_HANDOFF of 9 minutes",
+  "edits": [
+   {
+    "file": "src/lib/time.ts",
+    "old": "  T_HANDOFF: 10 * 60_000,",
+    "new": "  T_HANDOFF: 9 * 60_000,"
+   }
+  ]
+ },
+ {
+  "id": "t-handoff-11",
+  "test": "handoff expires after T_HANDOFF",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "T_HANDOFF of 11 minutes",
+  "edits": [
+   {
+    "file": "src/lib/time.ts",
+    "old": "  T_HANDOFF: 10 * 60_000,",
+    "new": "  T_HANDOFF: 11 * 60_000,"
+   }
+  ]
+ },
+ {
+  "id": "t-handoff-boundary",
+  "test": "handoff expires after T_HANDOFF",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "boundary: a link is still redeemable at exactly 600,000 ms (> instead of >=)",
+  "edits": [
+   {
+    "file": "src/domain/handoffs/redeem.ts",
+    "old": "      if (now.getTime() >= request.expiresAt.getTime()) return request.redeemedAt",
+    "new": "      if (now.getTime() > request.expiresAt.getTime()) return request.redeemedAt"
+   }
+  ]
+ },
+ {
+  "id": "t-handoff-unenforced",
+  "test": "handoff expires after T_HANDOFF",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "remove the expiry check at redemption",
+  "edits": [
+   {
+    "file": "src/domain/handoffs/redeem.ts",
+    "old": "      if (now.getTime() >= request.expiresAt.getTime()) return request.redeemedAt ? ({ kind: \"already_redeemed\" } as const) : ({ kind: \"expired\" } as const);\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "preview-redeemed",
+  "test": "approval preview closes a used, expired or unknown link",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "the approval page shows a used link as open",
+  "edits": [
+   {
+    "file": "src/domain/handoffs/redeem.ts",
+    "old": "  if (row.request.redeemedAt) return { kind: \"already_redeemed\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "preview-expired",
+  "test": "approval preview closes a used, expired or unknown link",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "the approval page shows an expired link as open",
+  "edits": [
+   {
+    "file": "src/domain/handoffs/redeem.ts",
+    "old": "  if (now.getTime() >= row.request.expiresAt.getTime()) return { kind: \"expired\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "preview-price",
+  "test": "approval preview shows names and quantities only",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "the approval preview carries a unit price",
+  "edits": [
+   {
+    "file": "src/domain/handoffs/redeem.ts",
+    "old": "quantity: line.quantity })),\n    expiresAt",
+    "new": "quantity: line.quantity, unitSgdCents: 160 })),\n    expiresAt"
+   }
+  ]
+ },
+ {
+  "id": "mcp-get",
+  "test": "MCP refuses GET and DELETE",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "allow GET",
+  "edits": [
+   {
+    "file": "src/app/mcp/route.ts",
+    "old": "export async function GET(): Promise<Response> {\n  return methodNotAllowed();",
+    "new": "export async function GET(): Promise<Response> {\n  return new Response(null, { status: 200 });"
+   }
+  ]
+ },
+ {
+  "id": "mcp-delete",
+  "test": "MCP refuses GET and DELETE",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "allow DELETE",
+  "edits": [
+   {
+    "file": "src/app/mcp/route.ts",
+    "old": "export async function DELETE(): Promise<Response> {\n  return methodNotAllowed();",
+    "new": "export async function DELETE(): Promise<Response> {\n  return new Response(null, { status: 200 });"
+   }
+  ]
+ },
+ {
+  "id": "mcp-origin",
+  "test": "foreign Origin is rejected",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "skip the Origin check",
+  "edits": [
+   {
+    "file": "src/app/mcp/route.ts",
+    "old": "  if (origin !== null && origin !== base.origin) return \"origin\";\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "mcp-host",
+  "test": "foreign Host is rejected",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "skip the Host check",
+  "edits": [
+   {
+    "file": "src/app/mcp/route.ts",
+    "old": "  if (request.headers.get(\"host\") !== base.host) return \"host\";\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "mcp-body-cap",
+  "test": "MCP reads at most 16 KiB of body",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "a 32 KiB cap",
+  "edits": [
+   {
+    "file": "src/app/mcp/route.ts",
+    "old": "const MAX_BODY_BYTES = 16_384;",
+    "new": "const MAX_BODY_BYTES = 32_768;"
+   }
+  ]
+ },
+ {
+  "id": "mcp-fourth-tool",
+  "test": "MCP lists only the three scoped tools",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "register a fourth tool that reads a receipt",
+  "edits": [
+   {
+    "file": "src/app/mcp/route.ts",
+    "old": "  return server;\n}",
+    "new": "  server.registerTool(\"read_receipt\", { description: \"Read a receipt\" }, async () => json({}));\n  return server;\n}"
+   }
+  ]
+ },
+ {
+  "id": "revoked-token",
+  "test": "purchase requests need a live agent token",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "accept a revoked agent token",
+  "edits": [
+   {
+    "file": "src/lib/auth-context.ts",
+    "old": ".where(and(eq(agentTokens.tokenHash, hashToken(token)), isNull(agentTokens.revokedAt)))",
+    "new": ".where(eq(agentTokens.tokenHash, hashToken(token)))"
+   }
+  ]
+ },
+ {
+  "id": "registry-letters",
+  "test": "an MCP client finds the shop, reads the menu and gets a link a buyer redeems",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "match the agent's area as letters instead of whole words",
+  "edits": [
+   {
+    "file": "src/domain/handoffs/registry.ts",
+    "old": "  return containsWords(value, wanted) || containsWords(wanted, value);",
+    "new": "  return value.includes(wanted) || wanted.includes(value);"
+   }
+  ]
+ },
+ {
+  "id": "mcp-create-leak",
+  "test": "an MCP client finds the shop, reads the menu and gets a link a buyer redeems",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "create_purchase_request also returns a purchase id",
+  "edits": [
+   {
+    "file": "src/app/mcp/route.ts",
+    "old": "        url: created.url,\n",
+    "new": "        url: created.url,\n        purchaseId: \"pur_fixture\",\n"
+   }
+  ]
+ },
+ {
+  "id": "log-handoff-url",
+  "test": "no handoff token or agent token reaches the log",
+  "test_file": "tests/integration/agent-handoff.test.ts",
+  "mutation": "log the handoff link with the tool outcome",
+  "edits": [
+   {
+    "file": "src/app/mcp/route.ts",
+    "old": "outcome: created.kind });",
+    "new": "outcome: created.kind, url: created.kind === \"created\" ? created.url : \"\" });"
+   }
+  ]
+ }
+]

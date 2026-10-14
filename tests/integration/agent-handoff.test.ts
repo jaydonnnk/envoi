@@ -159,6 +159,17 @@ describe("agent handoff over MCP", () => {
     expect(bound!.redeemed_by_user_id).toBe(first.principal.userId);
   });
 
+  it("concurrent redemptions bind once", async () => {
+    const created = await createPurchaseRequest(web.db, agent, { outletId: fixture.outletId, lines: [{ menuItemId: item("Teh C peng").id, quantity: 2 }] }, new Date());
+    if (created.kind !== "created") throw new Error("not created");
+    const [first, second] = [await buyer(), await buyer()];
+
+    const outcomes = await Promise.all([first, second].map((who) => redeemPurchaseRequest(web.db, who.principal, created.handoffToken, new Date())));
+    expect(outcomes.map((outcome) => outcome.kind).sort()).toEqual(["already_redeemed", "redeemed"]);
+    const reviews = await fixture.database.admin`select id from purchases where buyer_user_id in (${first.principal.userId}, ${second.principal.userId})`;
+    expect(reviews).toHaveLength(1);
+  });
+
   it("handoff carries no amount", async () => {
     const eggs = item("Soft-boiled eggs (2)");
     const url = await newLink([{ menuItemId: eggs.id, quantity: 2 }], { totalSgdCents: 1, unitSgdCents: 1, amount: "0.01" });
@@ -204,6 +215,21 @@ describe("agent handoff over MCP", () => {
     const preview = await previewPurchaseRequest(web.db, tokenOf(url), new Date());
     expect(preview).toMatchObject({ kind: "open", outlet: { id: fixture.outletId, isDemoFixture: true }, lines: [{ name: "Kopi O", quantity: 3 }] });
     expect(JSON.stringify(preview)).not.toMatch(/cents|price|total|amount/i);
+  });
+
+  it("approval preview closes a used, expired or unknown link", async () => {
+    const at = new Date(Date.UTC(2026, 9, 14, 3, 0, 0));
+    const lines = [{ menuItemId: item("Kopi O").id, quantity: 1 }];
+    const used = await createPurchaseRequest(web.db, agent, { outletId: fixture.outletId, lines }, at);
+    const stale = await createPurchaseRequest(web.db, agent, { outletId: fixture.outletId, lines }, at);
+    if (used.kind !== "created" || stale.kind !== "created") throw new Error("not created");
+    expect((await redeemPurchaseRequest(web.db, (await buyer()).principal, used.handoffToken, at)).kind).toBe("redeemed");
+
+    expect(await previewPurchaseRequest(web.db, used.handoffToken, at)).toEqual({ kind: "already_redeemed" });
+    expect((await previewPurchaseRequest(web.db, stale.handoffToken, new Date(at.getTime() + 599_999))).kind).toBe("open");
+    expect(await previewPurchaseRequest(web.db, stale.handoffToken, new Date(at.getTime() + 600_000))).toEqual({ kind: "expired" });
+    expect(await previewPurchaseRequest(web.db, "a".repeat(52), at)).toEqual({ kind: "invalid" });
+    expect(await previewPurchaseRequest(web.db, "not-a-token", at)).toEqual({ kind: "invalid" });
   });
 
   it("a basket that no longer prices is refused and stays redeemable", async () => {
