@@ -254,8 +254,21 @@
   "edits": [
    {
     "file": "src/app/operator/health/page.tsx",
-    "old": "  if (!isOperator(principal)) notFound();\n",
-    "new": ""
+    "old": "export default async function OperatorHealthPage() {\n  if (!(await isOperatorRequest())) notFound();\n",
+    "new": "export default async function OperatorHealthPage() {\n"
+   }
+  ]
+ },
+ {
+  "id": "operator-metadata-guard",
+  "test": "the operator page is the not-found page for everyone but the operator",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "the operator page's metadata, with its title, is returned to any caller",
+  "edits": [
+   {
+    "file": "src/app/operator/health/page.tsx",
+    "old": "export async function generateMetadata(): Promise<Metadata> {\n  if (!(await isOperatorRequest())) notFound();\n",
+    "new": "export async function generateMetadata(): Promise<Metadata> {\n"
    }
   ]
  },

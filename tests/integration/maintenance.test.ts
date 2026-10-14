@@ -370,14 +370,16 @@ describe("maintenance runner (fixture PayPal)", () => {
 
     it("the operator page is the not-found page for everyone but the operator", async () => {
       const { renderToStaticMarkup } = await import("react-dom/server");
-      const { default: OperatorHealthPage } = await import("@/app/operator/health/page");
+      const { default: OperatorHealthPage, generateMetadata } = await import("@/app/operator/health/page");
       request.cookie = await anonymousCookie(routes.auth.POST);
       await expect(OperatorHealthPage()).rejects.toMatchObject({ digest: expect.stringMatching(/404/) });
+      await expect(generateMetadata()).rejects.toMatchObject({ digest: expect.stringMatching(/404/) });
 
       request.cookie = (await operatorCookie("health-page")).cookie;
       const html = renderToStaticMarkup(await OperatorHealthPage());
       expect(html).toContain("Maintenance heartbeat");
       expect(html).toContain("pg_database_size covers this database only");
+      expect((await generateMetadata()).title).toBe("Operator health | Envoi");
     });
   });
 });

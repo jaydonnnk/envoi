@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import { readOperatorHealth, type OperatorHealth } from "@/domain/maintenance/health";
 import { getAuth } from "@/lib/auth";
 import { isOperator, requireOperator } from "@/lib/auth-context";
@@ -9,7 +10,14 @@ import { systemNow } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "Operator health | Envoi", robots: { index: false, follow: false } };
+// One guard read per request, shared by the metadata and the page. The metadata is guarded too:
+// otherwise its title reaches everyone in the not-found payload and tells the route apart.
+const isOperatorRequest = cache(async () => isOperator(await requireOperator(getAuth(), webDb(), await headers())));
+
+export async function generateMetadata(): Promise<Metadata> {
+  if (!(await isOperatorRequest())) notFound();
+  return { title: "Operator health | Envoi", robots: { index: false, follow: false } };
+}
 
 const SINGAPORE = new Intl.DateTimeFormat("en-SG", { timeZone: "Asia/Singapore", dateStyle: "medium", timeStyle: "medium" });
 
@@ -106,8 +114,7 @@ function OverdueWork({ health }: { health: OperatorHealth }) {
 // The operator health view (S5). Anyone but a flagged operator gets the same not-found page as an
 // unknown address.
 export default async function OperatorHealthPage() {
-  const principal = await requireOperator(getAuth(), webDb(), await headers());
-  if (!isOperator(principal)) notFound();
+  if (!(await isOperatorRequest())) notFound();
   const health = await readOperatorHealth(webDb(), systemNow());
   return (
     <main>
