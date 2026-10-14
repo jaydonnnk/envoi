@@ -82,7 +82,7 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [x] S1 - Tracer bullet on Render Free: labeled demo shop from Neon to an explicitly unpaid stub receipt; boot check, auth schema pin, R12 latency measurement.
 - [x] S2 - PayPal sandbox happy path with recipient and amount binding, lease-serialized capture, abandonment derived on read and PYUSD shown as unavailable.
 - [x] S3 - PayPal recovery: lost responses, webhooks, reconcile, "checking payment".
-- [x] S4 - Text entry with AI suggestions and the pre-registered model evaluation.
+- [x] S4 - Text entry with AI suggestions and the pre-registered model evaluation; review fixes 2026-10-14.
 - [ ] S13 - Agent handoff over MCP, moved to right after S4.
 - [ ] S6 - Merchant sign-in and manual menu draft.
 - [ ] S5 - Maintenance runner, manual runs, operator health view behind the operator guard; built after S6, whose sign-in it needs.
@@ -116,6 +116,7 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
   - Additions: `missing area asks for clarification`, `text suggestions are rate limited per buyer session`, `text suggestions are rate limited across all sessions`.
   - Beyond the plan, each with its own guard: `an unregistered outlet id is dropped`, `no tool output carries a price`, `the tools find a shop from an area written the way buyers write it`, `kaya toast and kopi asks for an area, then near Tanjong Pagar returns the demo shop and items`, `an area the buyer did not write is not trusted`, `a shop outside the stated area is not suggested`, `a failed model call offers manual selection`, `suggestions need a buyer session`, `a model still working 30 seconds after the request started yields budget_exceeded`, `a model answering 25 seconds after the request started is not cut off`, `concurrent requests cannot pass the per-session window together`.
   - The limits, windows and budget are asserted as literals (10 and 600,000 ms; 100 and 3,600,000 ms; 30 s), not through the module's constants.
+    Corrected by the [review fixes](#s4-review-fixes-2026-10-14): the two `T_AI_BUDGET` tests then only held the budget between 25 and about 32 seconds; they now hold it within 0.2 seconds of 30.
   - OpenAI is faked at the provider's fetch boundary by `tests/support/fake-openai.ts`, labeled FIXTURE.
 - **Mutations [verified], 22 of 22, all on `9d8ca4a`, each alone, failing its named test on an AssertionError, restored byte-identical (SHA-256) and rerun passing;** definitions, runner and results in [`s4-mutation-defs.json`](evidence/s4-mutation-defs.json), [`s4-mutate.py`](evidence/s4-mutate.py) and [`s4-mutations.json`](evidence/s4-mutations.json) (its `uncommitted_changes` flag is the three evidence files themselves, untracked during the run).
   The runner now also requires the mutated failure to be an AssertionError.
@@ -200,7 +201,35 @@ Estimated spend from returned token usage and the list prices above: US$0.057 of
   No candidate produced a model failure or `budget_exceeded`, and no answer showed an unregistered id or a model-written price (Envoi's checks make both impossible to show).
 - **Chosen by the pre-registered rule (most correct): `AI_MODEL=gpt-6-luna`.**
   It is also the cheapest; it is the slowest of the passing candidates, with a median of 7.7 s, inside the 10-second threshold and the 30-second `T_AI_BUDGET`.
+- **Added by the [review fixes](#s4-review-fixes-2026-10-14):** the run used the code before `9d8ca4a`, whose `search_outlets` and `list_item_names` matched only an outlet area containing the text the model passed, such as "near Tanjong Pagar" or "Bugis MRT".
+  The R12 and R19 "no match" answers above fit that defect rather than the models: **[hypothesis]** the failing rows used about 1,000 input tokens, as one tool call that found nothing would.
+  So the wrong answers measure the earlier tools as much as the models, and the shipped tools were not evaluated.
+  The choice stands under the pre-registered rule: even if the other candidates gained those rows, `gpt-6-luna` stays at least tied on correct answers and is the cheapest, which decides a tie.
+  No re-run was made; it would cost about US$0.06 within the US$5 limit, and only on the user's word.
 - [hypothesis] One run of 20 builder-written requests separates the candidates only coarsely: one request is 5 points, and `gpt-5.4-mini` would win on time if accuracy tied.
+
+### S4 review fixes, 2026-10-14
+
+- **Review:** an independent adversarial review of S4 on 2026-10-14 found no path for a model-written price, name or id to reach the buyer or the review, and no change to an approved decision, so no gate reopens.
+  It found one defect in a guard, one unbounded body read, one weak clock test, nine guards with no failing test and one record gap in the R5 results.
+  The user approved fixing them before S13 ("Fix findings 1 and 3-5 and amend the record for finding 2 on a review-fix branch").
+- **Branch:** `envoi/slice-4-text-entry-fixes`, from `main` at `ae7d40d`.
+- **Defect fixed, the area rule (finding 1):** `settle` trusted a model's area whenever the buyer's normalized text contained it as letters, and `inArea` matched letters inside an outlet's area.
+  Reproduced at the domain boundary with a FIXTURE stub model on local PostgreSQL: "kopi near me" with the model's area "o", and "kaya toast and kopi" with "an" or "a", each returned items at Lorong Demo Kopi instead of asking for an area.
+  It could not be reproduced on Render, because the real model would have to misbehave; the trigger is a hallucination or an instruction planted in merchant-written names, which S6 makes possible.
+  Areas and shop names now match only as whole words (`containsWords` in `src/domain/suggestions/suggest.ts`), so "near Tanjong Pagar", "Tanjong Pagar MRT" and "Tanjong-Pagar" still match and "an" or "o" do not.
+  The model tools' SQL search still matches by containment; it only decides what the model reads, and every answer is checked again here.
+- **Defect fixed, the body bound (finding 5):** the route read its body with `request.json()`, so a free anonymous session could send any size.
+  It now reads through `readCountedBody` in `src/lib/http/bounded-body.ts`, the Gate 3 file and signature, built here ahead of S11, with a 4 KiB cap and a 5-second bound **[hypothesis]**, before parsing; a refusal answers `validation_failed` with `details.reason` and makes no model call.
+- **Test strengthened, `T_AI_BUDGET` (finding 3):** the FIXTURE request now gives up 200 ms after it is sent instead of 2 seconds, and the second test starts 29.8 seconds in the past instead of 25, renamed `a model answering 29.8 seconds after the request started is not cut off`.
+  Before, budgets of 26, 31 and 31.9 seconds all passed both tests; now 29 and 31 seconds each fail one, and both have their own mutation.
+- **Tests added, each with its own mutation (finding 4):** `a model area the buyer did not write as a word is not trusted`, `an area that is only part of a word matches no shop`, `an area that names more than the shop's area still matches it`, `a shop the buyer names needs no area`, `an item marked unavailable is not suggested`, `an item with no price is not suggested`, `a failed model call is not retried`, `OpenAI is asked not to store the request`, `the buyer's text never reaches the log` (with an injected self-test proving the capture sees the logger's real output), `text longer than 280 characters is refused before any model call`, `a body over 4 KiB is refused unread` and `a refused suggestion request records nothing`; and four unit tests of `readCountedBody`: the cap, one byte over it, a stalled body and an abort.
+  Before, each of those guards could be removed with all 62 integration tests still passing.
+- **Record amended, the R5 results (finding 2):** the evaluation ran on the code before `9d8ca4a`, whose tools searched only for an outlet area containing the model's text; the results subsection now says so.
+- **Mutations [verified], 39 of 39** on `2fb7769`: the 22 earlier ones, two of them updated to the new code, plus 17 new, each alone, failing its named test on an AssertionError, restored byte-identical (SHA-256) and rerun passing; the record's `uncommitted_changes` flag is the definitions file, edited during the run.
+  Their definitions are in [`s4-mutation-defs.json`](evidence/s4-mutation-defs.json), and the results replace [`s4-mutations.json`](evidence/s4-mutations.json); the earlier record at `9d8ca4a` stays in Git history.
+- **Not changed, noted:** `s4-model-eval.mts` is outside typecheck and lint (`tsconfig.json` includes only `**/*.ts`, and eslint ignores `docs/**`); `rate_limit_hits` is pruned only when the next request arrives, so its last rows, which hold anonymous user ids, stay until then; the buyer copy says "an AI model" without naming OpenAI, which no gate requires; the 40-second client timeout still has no automated test.
+- **Tests [verified]:** typecheck, lint, 22 unit and 74 integration tests pass locally on PostgreSQL 18.6, three full runs in a row.
 
 ### S3 PayPal recovery, 2026-10-13
 

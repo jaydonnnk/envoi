@@ -54,6 +54,7 @@ Proposed target remains 4 of 5 first-time buyers completing an eligible test-env
 
 **Next action: S13, only when the user authorizes it by its slice ID, such as "start S13", as rule 1 of `04-slices.md` says.**
 S4 is done (2026-10-14): "kaya toast and kopi" asks for an area, "near Tanjong Pagar" returns the demo shop and its items from `gpt-6-luna`, chosen by the pre-registered R5 evaluation (20 of 20), and failure, budget or a dropped connection points the buyer at the manual list; its evidence is in [`00-status.md`](00-status.md#s4-text-entry-with-ai-suggestions-2026-10-13-to-2026-10-14).
+An independent review then found that a one-letter area from the model could pass the area rule and that the suggestion body was read unbounded; both are fixed with 12 integration and 4 unit tests and 39 of 39 mutations, see [S4 review fixes](00-status.md#s4-review-fixes-2026-10-14).
 The two S2 purchases that PayPal refused before the seller consented stay `uncertain` for good, by the user's choice on 2026-10-13, and keep locking their basket (1 Kopi O and 1 Kaya toast set) in the browser session that made them.
 On "start S13", create `envoi/slice-13-<slug>` from the current `main` tip, confirm it with `git branch --show-current`, and request S13's listed authorizations by name (install `@modelcontextprotocol/sdk`, migrations, push and deploy) before acting.
 Rerun the checker and its fault harness under [`checks/`](checks/gate4_check.py) after any edit to the gate folder.
