@@ -1,6 +1,6 @@
 {
  "branch": "envoi/slice-5-maintenance",
- "base_commit": "949a557",
+ "base_commit": "c85757e",
  "uncommitted_changes": false,
  "method": "Each definition in s5-mutation-defs.json applied alone by exact text replacement, its named test run alone (vitest -t), every touched file restored and compared by SHA-256, then the test rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations, so a mutation of a migration file reaches the disposable database; merchant and operator accounts are created by the operator functions with passwords generated in memory per run. PayPal is the labeled FIXTURE fake and OpenAI is never called; a test that builds the maintenance runner compiles the mutated source with tsconfig.runner.json. A proof also needs the mutated run to fail on an AssertionError.",
  "results": [
@@ -124,7 +124,7 @@
    ],
    "mutation": "purge every session, not only expired ones",
    "mutated": "Tests  1 failed | 13 skipped (14)",
-   "error": "AssertionError: expected [] to deeply equal [ 't51bNhMmu6wBM5SX64rIv3qKROffp3wh' ]",
+   "error": "AssertionError: expected [] to deeply equal [ 'OkckRfd0QJ1lf5fi2LHlFH3njPoLyWt8' ]",
    "fails_on_assertion": true,
    "restored_identical": true,
    "rerun": "Tests  1 passed | 13 skipped (14)",
@@ -279,6 +279,20 @@
    "mutation": "the operator page renders for any caller",
    "mutated": "Tests  1 failed | 13 skipped (14)",
    "error": "AssertionError: promise resolved \"{ \u2026(10) }\" instead of rejecting",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "operator-metadata-guard",
+   "test": "the operator page is the not-found page for everyone but the operator",
+   "files": [
+    "src/app/operator/health/page.tsx"
+   ],
+   "mutation": "the operator page's metadata, with its title, is returned to any caller",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: promise resolved \"{ \u2026(2) }\" instead of rejecting",
    "fails_on_assertion": true,
    "restored_identical": true,
    "rerun": "Tests  1 passed | 13 skipped (14)",
