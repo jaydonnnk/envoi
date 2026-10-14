@@ -75,15 +75,15 @@ Updated: 2026-10-14 (Asia/Singapore).
 
 Build order from `04-slices.md`, revised and approved 2026-10-12.
 Slice IDs are stable names, so the list below is in build order rather than numeric order; S12 is retired, merged into S11.
-S1, S2, S3 and S4 are done; every later slice starts only on an explicit authorization that names its slice ID, such as "start S13"; a number in that request is the slice ID, not a build position.
-The application is deployed on Render Free from `main` with the S2 PayPal sandbox payment, S3's recovery, reconcile and verified webhook inbox, and S4's text suggestions through OpenAI `gpt-6-luna`; no other sponsor integration exists.
+S1, S2, S3, S4 and S13 are done; every later slice starts only on an explicit authorization that names its slice ID, such as "start S13"; a number in that request is the slice ID, not a build position.
+The application is deployed on Render Free from `main` with the S2 PayPal sandbox payment, S3's recovery, reconcile and verified webhook inbox, S4's text suggestions through OpenAI `gpt-6-luna`, and S13's agent handoff over MCP; no other sponsor integration exists.
 The candidate list in `roadmap.md` remains discussion material and is superseded as a build order by `04-slices.md` once that is approved.
 
 - [x] S1 - Tracer bullet on Render Free: labeled demo shop from Neon to an explicitly unpaid stub receipt; boot check, auth schema pin, R12 latency measurement.
 - [x] S2 - PayPal sandbox happy path with recipient and amount binding, lease-serialized capture, abandonment derived on read and PYUSD shown as unavailable.
 - [x] S3 - PayPal recovery: lost responses, webhooks, reconcile, "checking payment".
 - [x] S4 - Text entry with AI suggestions and the pre-registered model evaluation; review fixes 2026-10-14.
-- [ ] S13 - Agent handoff over MCP, moved to right after S4.
+- [x] S13 - Agent handoff over MCP, moved to right after S4; done 2026-10-14.
 - [ ] S6 - Merchant sign-in and manual menu draft.
 - [ ] S5 - Maintenance runner, manual runs, operator health view behind the operator guard; built after S6, whose sign-in it needs.
 - [ ] S7 - Merchant destination and publication, with stale-review invalidation and the PayPal basket lock at review creation and inside `paypal/start`.
@@ -95,6 +95,45 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [ ] S17 - PYUSD recovery, extra transfers and the operator mismatch and refund acts.
 - [ ] S14 - APIMatic client and docs, account-conditional; third in the cut order.
 - [ ] S15 - Judged release.
+
+### S13 Agent handoff over MCP, 2026-10-14
+
+- **Branch:** `envoi/slice-13-mcp-handoff`, from `main` at `07bea26`; commits `5f4afd0` (exact pin `@modelcontextprotocol/sdk@1.32.1`), `9dedcfe` (feature), `acffc53` (two more guard tests and the mutation runner), `08a705d` (mutation results), then this record.
+  All merged into `main` by fast-forward and pushed; CI passed on `9dedcfe` on the branch and on `08a705d` on the branch and on `main`; Render serves `08a705d`.
+- **Authorizations, 2026-10-14:** the user granted, by multiple choice, all four S13 actions: install the SDK, apply the S13 migrations to Neon, commit and push the slice branch, and fast-forward `main` to it and push, which deploys.
+  The user also decided that the named MCP client is Claude Code, that the D7 extension below is a refinement and that the `agent_tokens` table is a refinement; no gate reopens.
+  The user issued the agent token with `npm run operator -- issue-agent-token "Claude Code"` and configured Claude Code themselves; the token never entered the chat, a file or a screenshot.
+- **Built:** `src/app/mcp/route.ts` (POST only, stateless Streamable HTTP with JSON responses, `requireAgentToken`, then the `Origin` and `Host` check against `APP_BASE_URL`, then `readCountedBody` at 16 KiB and 5 seconds **[hypothesis]**; tools `search_outlets`, `get_menu` and `create_purchase_request`, each labeling demo fixtures and the test environment; `GET` and `DELETE` answer 405 with `Allow: POST`); `src/domain/handoffs/` (`createPurchaseRequest`, `previewPurchaseRequest`, `redeemPurchaseRequest`, the registry search with S4's whole-word rule); `POST /api/v1/purchase-requests` and `POST /api/v1/purchase-requests/redeem`; `/approve/[handoffToken]`, which redeems only on an explicit "Open the review" tap, sends `no-referrer` and `noindex, nofollow` and has no analytics; `requireAgentToken` and the agent principal in `src/lib/auth-context.ts`; migrations 0008 (`agent_tokens`, `purchase_requests` with SHA-256 digests only, the all-or-none redemption binding, entry point `agent_handoff`) and 0009 (grants); operator `issue-agent-token`, which prints an `envoi_agent_` token once; secret-scanner rules for agent tokens and handoff links, each with a planted needle.
+- **Result on Render [verified], 2026-10-14, `https://envoi-helx.onrender.com`, serving `08a705d`:**
+  - In Claude Code, the agent searched near Tanjong Pagar, read the Lorong Demo Kopi menu and created three purchase requests at 11:07 SGT, each returned as a link; Envoi stored them with `expires_at` 600,000 ms after `created_at`.
+  - Link A (2 Teh C peng and 1 Soft-boiled eggs (2)) was opened on the user's phone and redeemed by tap into review `pur_wneaxkpio72d6wbsdunflwmdae`, priced S$6.40 by the server, entry point `agent_handoff`; the user paid in the PayPal sandbox and Neon shows the purchase `paid` with the attempt `capture_confirmed`, read in an enforced `READ ONLY` transaction.
+  - Opening link A again showed "This link was already used"; Neon shows it bound once, at 11:10:11 SGT.
+  - `GET /api/v1/purchases/pur_wneaxkpio72d6wbsdunflwmdae` with an agent bearer header answered 403 `forbidden_membership`, `details.reason` `agent_token`; without any credential it answered 401.
+    The check refuses any `Authorization` header on buyer routes, so it does not need a valid token, and no MCP tool reads a purchase.
+  - Link B (1 Kaya toast set) was left unopened: before 11:17 it showed the basket with names and quantities only, and at 11:21 SGT, after `T_HANDOFF`, "This link has expired" at 390px and 1280px.
+  - Link C (1 Kopi O and 1 Teh C peng), tapped in the builder's in-app browser, answered "A payment for this basket may still be in progress. Check its receipt first.": that browser session already held an unfinished purchase for the same basket, so `execution_locked` refused it, nothing was bound and the link stayed redeemable until it expired.
+  - Without a token, `POST /mcp` answered 401, and `GET` and `DELETE` 405 with `Allow: POST`.
+  - Claude Code's requests passed the `Host` rule on Render, so Render forwards the public host; a foreign `Origin` or `Host` was checked on a real server under `next dev` on a disposable local database (403 `forbidden_origin` with `origin` or `host`; `127.0.0.1` in place of `localhost` is refused too), not on Render, because that needs a token in the builder's hands.
+  - Screens at 375px, 390px and 1280px: the approval page shows the test-environment badge, the sandbox notice and the demo-fixture chip, with no price and no horizontal scroll.
+- **Tests [verified]:** typecheck, lint, 22 unit and 91 integration tests pass locally on PostgreSQL 18.6 and in CI; S13 added 17 integration tests in `tests/integration/agent-handoff.test.ts`.
+  - Gate 3: `agent token cannot read a receipt`, `handoff redeems once`, `handoff carries no amount`.
+  - Additions: `MCP refuses GET and DELETE`, `foreign Origin is rejected`.
+  - Beyond the plan: `agent token cannot redeem a handoff`, `concurrent redemptions bind once`, `handoff expires after T_HANDOFF`, `approval preview shows names and quantities only`, `approval preview closes a used, expired or unknown link`, `a basket that no longer prices is refused and stays redeemable`, `purchase requests need a live agent token`, `foreign Host is rejected`, `MCP reads at most 16 KiB of body`, `MCP lists only the three scoped tools`, `an MCP client finds the shop, reads the menu and gets a link a buyer redeems`, `no handoff token or agent token reaches the log`.
+  - `T_HANDOFF` is asserted as the literal 600,000 ms, with redemption at 9 minutes and 599,999 ms and expiry at 600,000 ms and 11 minutes.
+- **Mutations [verified], 23 of 23 on `acffc53`, each alone, failing its named test on an AssertionError, restored byte-identical (SHA-256) and rerun passing;** definitions, runner and results in [`s13-mutation-defs.json`](evidence/s13-mutation-defs.json), [`s13-mutate.py`](evidence/s13-mutate.py) and [`s13-mutations.json`](evidence/s13-mutations.json).
+  `handoff carries no amount` has two (accept the agent total; price at creation instead of redemption) and `T_HANDOFF` four (9 minutes, 11 minutes, `>` at the boundary, no check at redemption).
+  The agent-principal and once mutations are each run against two tests, because one guard serves both; they count as one guard each.
+  `a basket that no longer prices is refused and stays redeemable` has no mutation: nothing can be bound without a purchase id, which the database's all-or-none check enforces.
+- **Neon [verified], 2026-10-14:** before, eight migrations, no S13 tables, the nine `neon_auth` tables and no `envoi_web` grant there; migrations 0008 and 0009 applied; after, ten migrations, `envoi_web` with SELECT on `agent_tokens` and SELECT, INSERT and UPDATE of only `redeemed_at`, `redeemed_by_user_id` and `purchase_id` on `purchase_requests`, the entry-point check including `agent_handoff`, and the same nine `neon_auth` tables with still no grant there, all inspected in enforced `READ ONLY` transactions.
+- **Deviations recorded, no approved decision changed:**
+  - `createPurchaseRequest` takes `{ outletId, lines }` and a `now` parameter and returns `created` or `refused`: redemption must price a basket, and Gate 2 stores only the suggested ids, so free text would be neither stored, shown nor used.
+  - `HandoffRedemption` gains `refused` (a basket that no longer prices, or the buyer's same basket still being paid); nothing is bound and the link stays redeemable.
+  - `createReview` takes a transaction-capable connection and the entry point, so a redemption's review exists only if its binding commits; the `review_created` audit carries the entry point.
+  - The redeem route answers 201 for `redeemed` and 200 `{ outcome }` for `expired`, `already_redeemed` and `invalid`.
+  - The agent's 403 uses `forbidden_membership`, because Gate 3 has no agent error code.
+  - S4's `normalize`, `usableArea` and `containsWords` are exported unchanged for the registry search.
+  - `/mcp` also checks `Host`, beyond the `Origin` check the slice names, as MCP's transport guidance on DNS rebinding asks.
+- **Known limits:** no agent-token revoke subcommand exists (revocation is a direct database update, tested); the `Origin` and `Host` refusals were not exercised on Render; one end-to-end run with one client; S15 owns the usability result.
 
 ### S4 Text entry with AI suggestions, 2026-10-13 to 2026-10-14
 

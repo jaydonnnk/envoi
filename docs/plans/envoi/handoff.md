@@ -52,11 +52,12 @@ Proposed target remains 4 of 5 first-time buyers completing an eligible test-env
 
 ## Next authorized action
 
-**Next action: S13, only when the user authorizes it by its slice ID, such as "start S13", as rule 1 of `04-slices.md` says.**
-S4 is done (2026-10-14): "kaya toast and kopi" asks for an area, "near Tanjong Pagar" returns the demo shop and its items from `gpt-6-luna`, chosen by the pre-registered R5 evaluation (20 of 20), and failure, budget or a dropped connection points the buyer at the manual list; its evidence is in [`00-status.md`](00-status.md#s4-text-entry-with-ai-suggestions-2026-10-13-to-2026-10-14).
-An independent review then found that a one-letter area from the model could pass the area rule and that the suggestion body was read unbounded; both are fixed with 12 integration and 4 unit tests and 39 of 39 mutations, see [S4 review fixes](00-status.md#s4-review-fixes-2026-10-14).
+**Next action: S6, only when the user authorizes it by its slice ID, such as "start S6", as rule 1 of `04-slices.md` says.**
+S13 is done (2026-10-14): in Claude Code, an agent holding a scoped demo token searched, read the menu and created purchase requests over `/mcp` on Render; the user's phone redeemed one once into a fresh server-priced review and paid S$6.40 in the PayPal sandbox, the second opening said already used, the agent's receipt read answered 403 and an unopened link expired after `T_HANDOFF`; its evidence and 23 of 23 mutations are in [`00-status.md`](00-status.md#s13-agent-handoff-over-mcp-2026-10-14).
+S4 is done (2026-10-14), with its review fixes, see [S4 review fixes](00-status.md#s4-review-fixes-2026-10-14).
 The two S2 purchases that PayPal refused before the seller consented stay `uncertain` for good, by the user's choice on 2026-10-13, and keep locking their basket (1 Kopi O and 1 Kaya toast set) in the browser session that made them.
-On "start S13", create `envoi/slice-13-<slug>` from the current `main` tip, confirm it with `git branch --show-current`, and request S13's listed authorizations by name (install `@modelcontextprotocol/sdk`, migrations, push and deploy) before acting.
+The Claude Code agent token stays live in Neon (`agt_ggembpdxft5soezukk2c6remma`, label "Claude Code"); no revoke subcommand exists.
+On "start S6", create `envoi/slice-6-<slug>` from the current `main` tip, confirm it with `git branch --show-current`, and request S6's listed authorizations by name before acting.
 Rerun the checker and its fault harness under [`checks/`](checks/gate4_check.py) after any edit to the gate folder.
 Gate 3 was re-approved on 2026-10-11 with fixes A-M; its record, mirrors and fail-capable checks are in `00-status.md`.
 The four reopening questions were already answered and Gates 1 and 2 are re-approved; do not ask them again or revise either gate.
