@@ -1,6 +1,6 @@
 {
  "branch": "envoi/slice-6-merchant-draft",
- "base_commit": "8983fea",
+ "base_commit": "68f3550",
  "uncommitted_changes": false,
  "method": "Each definition in s6-mutation-defs.json applied alone by exact text replacement, its named test run alone (vitest -t), every touched file restored and compared by SHA-256, then the test rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations, so a mutation of a migration file reaches the disposable database; merchant accounts are created by the operator functions with passwords generated in memory per run. PayPal and OpenAI are never called. A proof also needs the mutated run to fail on an AssertionError.",
  "results": [
@@ -11,11 +11,11 @@
     "src/lib/auth-context.ts"
    ],
    "mutation": "check only authentication in requireOutletMembership: any session passes without a membership row",
-   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "mutated": "Tests  1 failed | 17 skipped (18)",
    "error": "AssertionError: expected 200 to be 403 // Object.is equality",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "rerun": "Tests  1 passed | 17 skipped (18)",
    "proof": true
   },
   {
@@ -25,11 +25,11 @@
     "src/lib/auth-context.ts"
    ],
    "mutation": "check only authentication in requireMerchantMembership: any session passes without a membership row",
-   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "mutated": "Tests  1 failed | 17 skipped (18)",
    "error": "AssertionError: expected 200 to be 403 // Object.is equality",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "rerun": "Tests  1 passed | 17 skipped (18)",
    "proof": true
   },
   {
@@ -39,11 +39,11 @@
     "src/lib/auth-context.ts"
    ],
    "mutation": "drop the agent-credential refusal from the merchant guards",
-   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "mutated": "Tests  1 failed | 17 skipped (18)",
    "error": "AssertionError: expected 401 to be 403 // Object.is equality",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "rerun": "Tests  1 passed | 17 skipped (18)",
    "proof": true
   },
   {
@@ -54,11 +54,11 @@
     "src/lib/auth.ts"
    ],
    "mutation": "create a membership on link: onLinkAccount inserts an approved membership for the signed-in account, with the web role also granted INSERT so the hook can run",
-   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "mutated": "Tests  1 failed | 17 skipped (18)",
    "error": "AssertionError: expected 200 to be 403 // Object.is equality",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "rerun": "Tests  1 passed | 17 skipped (18)",
    "proof": true
   },
   {
@@ -68,11 +68,11 @@
     "src/lib/auth.ts"
    ],
    "mutation": "leave the default deletion on: disableDeleteAnonymousUser false",
-   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "mutated": "Tests  1 failed | 17 skipped (18)",
    "error": "AssertionError: expected 401 to be 200 // Object.is equality",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "rerun": "Tests  1 passed | 17 skipped (18)",
    "proof": true
   },
   {
@@ -82,11 +82,11 @@
     "src/lib/auth-context.ts"
    ],
    "mutation": "check any membership: requireOutletMembership ignores which outlet the membership is for",
-   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "mutated": "Tests  1 failed | 17 skipped (18)",
    "error": "AssertionError: expected 200 to be 403 // Object.is equality",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "rerun": "Tests  1 passed | 17 skipped (18)",
    "proof": true
   },
   {
@@ -96,11 +96,11 @@
     "src/lib/auth-context.ts"
    ],
    "mutation": "ignore revocation in requireOutletMembership",
-   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "mutated": "Tests  1 failed | 17 skipped (18)",
    "error": "AssertionError: expected 200 to be 403 // Object.is equality",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "rerun": "Tests  1 passed | 17 skipped (18)",
    "proof": true
   },
   {
@@ -138,11 +138,11 @@
     "src/domain/menu/draft.ts"
    ],
    "mutation": "treat a blank price as complete",
-   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "mutated": "Tests  1 failed | 17 skipped (18)",
    "error": "AssertionError: expected { complete: true, itemCount: 2 } to deeply equal { complete: false, \u2026(2) }",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "rerun": "Tests  1 passed | 17 skipped (18)",
    "proof": true
   },
   {
@@ -152,11 +152,11 @@
     "src/domain/menu/confirm.ts"
    ],
    "mutation": "confirm without consulting assessMenuCompleteness",
-   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "mutated": "Tests  1 failed | 17 skipped (18)",
    "error": "AssertionError: expected 200 to be 400 // Object.is equality",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "rerun": "Tests  1 passed | 17 skipped (18)",
    "proof": true
   },
   {
@@ -166,11 +166,11 @@
     "src/domain/menu/confirm.ts"
    ],
    "mutation": "drop the empty-menu refusal",
-   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "mutated": "Tests  1 failed | 17 skipped (18)",
    "error": "AssertionError: expected 200 to be 400 // Object.is equality",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "rerun": "Tests  1 passed | 17 skipped (18)",
    "proof": true
   },
   {
@@ -180,11 +180,11 @@
     "src/domain/menu/draft.ts"
    ],
    "mutation": "drop the revision check: a write based on any version of the current revision is applied",
-   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "mutated": "Tests  1 failed | 17 skipped (18)",
    "error": "AssertionError: expected 200 to be 409 // Object.is equality",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "rerun": "Tests  1 passed | 17 skipped (18)",
    "proof": true
   },
   {
@@ -194,11 +194,11 @@
     "src/domain/menu/confirm.ts"
    ],
    "mutation": "drop the version check from confirmation",
-   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "mutated": "Tests  1 failed | 17 skipped (18)",
    "error": "AssertionError: expected 200 to be 409 // Object.is equality",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "rerun": "Tests  1 passed | 17 skipped (18)",
    "proof": true
   },
   {
@@ -208,11 +208,11 @@
     "src/domain/menu/draft.ts"
    ],
    "mutation": "keep the confirmation when a confirmed draft is edited",
-   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "mutated": "Tests  1 failed | 17 skipped (18)",
    "error": "AssertionError: expected { \u2026(7) } to match object { status: 'draft', \u2026(2) }",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "rerun": "Tests  1 passed | 17 skipped (18)",
    "proof": true
   },
   {
@@ -222,11 +222,11 @@
     "src/domain/outlets/merchant.ts"
    ],
    "mutation": "create an outlet from any live membership, bound or not",
-   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "mutated": "Tests  1 failed | 17 skipped (18)",
    "error": "AssertionError: expected 201 to be 403 // Object.is equality",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "rerun": "Tests  1 passed | 17 skipped (18)",
    "proof": true
   },
   {
@@ -236,11 +236,11 @@
     "src/domain/outlets/merchant.ts"
    ],
    "mutation": "edit a published outlet's details",
-   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "mutated": "Tests  1 failed | 17 skipped (18)",
    "error": "AssertionError: expected 200 to be 400 // Object.is equality",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "rerun": "Tests  1 passed | 17 skipped (18)",
    "proof": true
   },
   {
@@ -250,11 +250,11 @@
     "src/domain/outlets/search.ts"
    ],
    "mutation": "list outlets without the published-revision filter",
-   "mutated": "Tests  1 failed | 16 skipped (17)",
-   "error": "AssertionError: expected [ \u2026(2) ] to not include 'out_yvsnlav5gxcocnpcqraiukuxti'",
+   "mutated": "Tests  1 failed | 17 skipped (18)",
+   "error": "AssertionError: expected [ \u2026(2) ] to not include 'out_b5nbkvgc55n3dov5fo5rh5cr2y'",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "rerun": "Tests  1 passed | 17 skipped (18)",
    "proof": true
   },
   {
@@ -264,11 +264,11 @@
     "src/lib/auth.ts"
    ],
    "mutation": "enable public signup",
-   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "mutated": "Tests  1 failed | 17 skipped (18)",
    "error": "AssertionError: expected 200 to be 400 // Object.is equality",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "rerun": "Tests  1 passed | 17 skipped (18)",
    "proof": true
   },
   {
@@ -279,11 +279,11 @@
     "src/app/api/v1/merchant/outlets/input.ts"
    ],
    "mutation": "accept a zero price at both layers: the request schema allows 0 and the menu_items check allows 0",
-   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "mutated": "Tests  1 failed | 17 skipped (18)",
    "error": "AssertionError: expected 200 to be 400 // Object.is equality",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "rerun": "Tests  1 passed | 17 skipped (18)",
    "proof": true
   },
   {
@@ -312,6 +312,48 @@
    "fails_on_assertion": true,
    "restored_identical": true,
    "rerun": "Tests  1 passed | 3 skipped (4)",
+   "proof": true
+  },
+  {
+   "id": "grant-outlet-insert",
+   "test": "the web role cannot create a published outlet, an approved enrollment or a confirmed revision",
+   "files": [
+    "drizzle/0013_s6_web_role_insert_columns.sql"
+   ],
+   "mutation": "grant the web role INSERT on every column of outlets again",
+   "mutated": "Tests  1 failed | 17 skipped (18)",
+   "error": "AssertionError: expected 'inserted' to match /permission denied/",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 17 skipped (18)",
+   "proof": true
+  },
+  {
+   "id": "grant-enrollment-insert",
+   "test": "the web role cannot create a published outlet, an approved enrollment or a confirmed revision",
+   "files": [
+    "drizzle/0013_s6_web_role_insert_columns.sql"
+   ],
+   "mutation": "grant the web role INSERT on every column of enrollments again",
+   "mutated": "Tests  1 failed | 17 skipped (18)",
+   "error": "AssertionError: expected 'inserted' to match /permission denied/",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 17 skipped (18)",
+   "proof": true
+  },
+  {
+   "id": "grant-revision-insert",
+   "test": "the web role cannot create a published outlet, an approved enrollment or a confirmed revision",
+   "files": [
+    "drizzle/0013_s6_web_role_insert_columns.sql"
+   ],
+   "mutation": "grant the web role INSERT on every column of menu_revisions again",
+   "mutated": "Tests  1 failed | 17 skipped (18)",
+   "error": "AssertionError: expected 'inserted' to match /permission denied/",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 17 skipped (18)",
    "proof": true
   }
  ]
