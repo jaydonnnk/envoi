@@ -61,10 +61,8 @@ export default async function MerchantSetupPage() {
   return (
     <main>
       <p className="eyebrow">Merchant setup</p>
-      <h1>Your shop draft</h1>
-      <p className="lead">
-        Signed in as {session.user.name}. Drafts are invisible to buyers; nothing here is published.
-      </p>
+      <h1>Your shop</h1>
+      <p className="lead">Signed in as {session.user.name}. Buyers see only what you publish; drafts stay invisible to them.</p>
       <Workspace initial={initial} initialDraft={draft ? draftJson(draft) : null} />
       <div className="actions">
         <SignOutButton />

@@ -32,8 +32,20 @@ function rowsOf(draft: DraftJson): Row[] {
   return draft.items.map((item) => ({ key: item.id, id: item.id, name: item.name, portion: item.portion ?? "", price: priceText(item.priceSgdCents), availability: item.availability }));
 }
 
-// The page renders the draft it loaded on the server; the editor reloads it only when asked.
-export function MenuEditor({ outletId, initialDraft }: { outletId: string; initialDraft: DraftJson | null }) {
+// The page renders the draft it loaded on the server; the editor reloads it only when asked. When the
+// shop is published and has no unpublished changes, the editor shows the published menu; saving an
+// edit of it creates a new draft, and buyers keep the published menu until the next publication.
+export function MenuEditor({
+  outletId,
+  outletPublished,
+  initialDraft,
+  onDraftChange,
+}: {
+  outletId: string;
+  outletPublished: boolean;
+  initialDraft: DraftJson | null;
+  onDraftChange: () => void;
+}) {
   const url = `/api/v1/merchant/outlets/${encodeURIComponent(outletId)}`;
   const [draft, setDraft] = useState<DraftJson | null>(initialDraft);
   const [rows, setRows] = useState<Row[]>(() => (initialDraft ? rowsOf(initialDraft) : []));
@@ -106,6 +118,7 @@ export function MenuEditor({ outletId, initialDraft }: { outletId: string; initi
     setRows(rowsOf(result.data));
     setDirty(false);
     setMessage({ tone: "ok", text: `Draft saved as version ${result.data.version}.` });
+    onDraftChange();
   }
 
   async function confirm() {
@@ -125,6 +138,7 @@ export function MenuEditor({ outletId, initialDraft }: { outletId: string; initi
     }
     setDraft(result.data);
     setAttested(false);
+    onDraftChange();
   }
 
   if (!draft) {
@@ -141,12 +155,16 @@ export function MenuEditor({ outletId, initialDraft }: { outletId: string; initi
 
   const incomplete = new Set(draft.completeness.complete ? [] : draft.completeness.incompleteItemIds);
   const confirmed = draft.status === "confirmed" && !dirty;
+  const live = draft.published && !dirty;
   const canConfirm = !dirty && !confirmed && !conflict && rows.length > 0 && draft.completeness.complete && attested && !busy;
 
   return (
     <section className="card" aria-labelledby="menu-heading">
       <h2 id="menu-heading">2. Menu</h2>
       <p className="muted">Type each item with its SGD price. Leave a price blank if you do not know it yet: it stays blank, never zero, and blocks confirmation until you fill it.</p>
+      {draft.published && (
+        <p className="muted">Changes you save here become a new draft. Buyers keep seeing the published menu until you confirm and publish the new version.</p>
+      )}
 
       {rows.length === 0 && <p className="muted">No items yet.</p>}
       {parsed.map(({ row, price }, index) => {
@@ -225,11 +243,18 @@ export function MenuEditor({ outletId, initialDraft }: { outletId: string; initi
       </div>
 
       <div className={`status draft-status${confirmed ? " ok" : ""}`}>
-        {confirmed ? (
+        {live ? (
+          <>
+            <strong>Published menu</strong>
+            <small>This is the menu buyers see now.</small>
+          </>
+        ) : confirmed ? (
           <>
             <strong>Confirmed version {draft.version}</strong>
             <small>
-              Confirmed {draft.confirmedAt ? SINGAPORE.format(new Date(draft.confirmedAt)) : ""}. Not published: buyers cannot see this shop or its menu. Any edit needs confirming again.
+              Confirmed {draft.confirmedAt ? SINGAPORE.format(new Date(draft.confirmedAt)) : ""}.{" "}
+              {outletPublished ? "Not published yet: buyers still see the menu you published last." : "Not published: buyers cannot see this shop or its menu."} Any edit needs
+              confirming again.
             </small>
           </>
         ) : (
@@ -248,7 +273,7 @@ export function MenuEditor({ outletId, initialDraft }: { outletId: string; initi
         )}
       </div>
 
-      {!confirmed && (
+      {!confirmed && !live && (
         <>
           <label className="check">
             <input type="checkbox" checked={attested} disabled={dirty || !draft.completeness.complete || rows.length === 0} onChange={(event) => setAttested(event.target.checked)} />

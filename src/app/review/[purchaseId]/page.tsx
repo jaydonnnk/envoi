@@ -94,7 +94,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ purchas
                 This review is valid until {SINGAPORE_CLOCK.format(purchase.reviewExpiresAt)} Singapore time. You approve the exact amount in PayPal&apos;s sandbox; Envoi charges nothing before
                 that.
               </p>
-              <ContinueToPayPal purchaseId={purchase.id} />
+              <ContinueToPayPal purchaseId={purchase.id} outletId={purchase.outletId} />
             </section>
           ) : (
             <section className="card warning" aria-labelledby="closed-heading">
@@ -104,7 +104,9 @@ export default async function ReviewPage({ params }: { params: Promise<{ purchas
                   ? "This purchase is paid."
                   : purchase.view.state === "review_expired" || purchase.view.state === "unpaid_closed"
                     ? "This review closed without payment. Nothing was charged."
-                    : "This purchase is already with PayPal or being checked. Do not pay again."}
+                    : purchase.view.state === "review_invalidated" || purchase.view.state === "superseded"
+                      ? "The shop changed its menu, prices or payment details since this review, so it closed. Nothing was charged."
+                      : "This purchase is already with PayPal or being checked. Do not pay again."}
               </p>
               <div className="actions">
                 <a className="button" href={receiptHref}>
