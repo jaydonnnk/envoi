@@ -1,0 +1,280 @@
+[
+ {
+  "id": "pub-enrollment",
+  "test": "publication requires all four preconditions",
+  "test_file": "tests/integration/merchant-publication.test.ts",
+  "mutation": "Drop the enrollment precondition from publication.",
+  "edits": [
+   {
+    "file": "src/domain/outlets/publish.ts",
+    "old": "  if (!facts.enrollmentApproved) missing.push(\"enrollment\");\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "pub-outlet-details",
+  "test": "publication requires all four preconditions",
+  "test_file": "tests/integration/merchant-publication.test.ts",
+  "mutation": "Drop the outlet confirmation precondition.",
+  "edits": [
+   {
+    "file": "src/domain/outlets/publish.ts",
+    "old": "  if (!facts.detailsConfirmed) missing.push(\"outlet_details\");\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "pub-menu-confirmation",
+  "test": "publication requires all four preconditions",
+  "test_file": "tests/integration/merchant-publication.test.ts",
+  "mutation": "Drop the menu confirmation precondition.",
+  "edits": [
+   {
+    "file": "src/domain/outlets/publish.ts",
+    "old": "  if (facts.draft?.status !== \"confirmed\") missing.push(\"menu_confirmation\");\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "pub-destination",
+  "test": "publication requires all four preconditions",
+  "test_file": "tests/integration/merchant-publication.test.ts",
+  "mutation": "Drop the accepted active destination precondition.",
+  "edits": [
+   {
+    "file": "src/domain/outlets/publish.ts",
+    "old": "  if (!facts.destinationAccepted) missing.push(\"destination\");\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "edit-published-in-place",
+  "test": "editing a published menu creates an unpublished revision",
+  "test_file": "tests/integration/merchant-publication.test.ts",
+  "mutation": "Mutate in place: the draft is the outlet's newest revision even when it is the published one.",
+  "edits": [
+   {
+    "file": "src/domain/menu/draft.ts",
+    "old": ".where(and(eq(menuRevisions.outletId, outletId), isNull(menuRevisions.publishedAt)))",
+    "new": ".where(eq(menuRevisions.outletId, outletId))"
+   }
+  ]
+ },
+ {
+  "id": "republish-pointer-reread",
+  "test": "republication invalidates an open review at execution",
+  "test_file": "tests/integration/merchant-publication.test.ts",
+  "mutation": "Skip the published-pointer re-read in assertPaymentEligible.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/review.ts",
+    "old": "  if (row.publishedRevisionId !== purchase.menuRevisionId) {",
+    "new": "  if (false) {"
+   }
+  ]
+ },
+ {
+  "id": "republish-stores-invalidation",
+  "test": "republication invalidates an open review at execution",
+  "test_file": "tests/integration/merchant-publication.test.ts",
+  "mutation": "paypal/start refuses a stale review but leaves it stored as review_open.",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "          await transitionPurchase(tx, purchaseId, [\"review_open\"], \"review_invalidated\", String(reason));\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "destination-version",
+  "test": "destination change invalidates an open review",
+  "test_file": "tests/integration/merchant-publication.test.ts",
+  "mutation": "Skip the destination version check in assertPaymentEligible.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/review.ts",
+    "old": " || destination.version !== purchase.destinationVersion) {",
+    "new": ") {"
+   }
+  ]
+ },
+ {
+  "id": "destination-replace-open-review",
+  "test": "an open review pinned to a changed destination is replaced, not reused",
+  "test_file": "tests/integration/merchant-publication.test.ts",
+  "mutation": "createReview returns a same-key open review whatever destination version it pinned.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/review.ts",
+    "old": "        if (row.destinationVersion === quote.destinationVersion) return",
+    "new": "        if (true) return"
+   }
+  ]
+ },
+ {
+  "id": "arbitrary-merchant-id",
+  "test": "arbitrary merchant id cannot connect",
+  "test_file": "tests/integration/merchant-publication.test.ts",
+  "mutation": "Accept the body value: the named seller id is not compared with the operator-prepared one.",
+  "edits": [
+   {
+    "file": "src/domain/outlets/destination.ts",
+    "old": "    if (row.sellerMerchantId !== input.sellerMerchantId) {",
+    "new": "    if (false) {"
+   }
+  ]
+ },
+ {
+  "id": "details-confirmation-cleared",
+  "test": "editing shop details clears their confirmation",
+  "test_file": "tests/integration/merchant-publication.test.ts",
+  "mutation": "Saving details without the confirmation keeps an earlier confirmation.",
+  "edits": [
+   {
+    "file": "src/domain/outlets/merchant.ts",
+    "old": ".set({ name: input.name, area: input.area, detailsConfirmedAt: input.detailsConfirmed ? input.now : null })",
+    "new": ".set({ name: input.name, area: input.area, ...(input.detailsConfirmed ? { detailsConfirmedAt: input.now } : {}) })"
+   }
+  ]
+ },
+ {
+  "id": "approve-enrollment-once",
+  "test": "approve-enrollment approves once and repeats unchanged",
+  "test_file": "tests/integration/merchant-publication.test.ts",
+  "mutation": "approve-enrollment approves again when already approved.",
+  "edits": [
+   {
+    "file": "src/operator/cli.ts",
+    "old": "    if (enrollment.status === \"approved\") return { status: \"unchanged\", outletId: input.outletId, enrollmentId: enrollment.id };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "trigger-published-items",
+  "test": "a published menu's items refuse every write",
+  "test_file": "tests/integration/merchant-publication.test.ts",
+  "mutation": "Drop the published-items trigger from migration 0017.",
+  "edits": [
+   {
+    "file": "drizzle/0017_s7_publication_guards.sql",
+    "old": "CREATE TRIGGER menu_items_published_immutable BEFORE INSERT OR UPDATE OR DELETE ON \"menu_items\" FOR EACH ROW EXECUTE FUNCTION envoi_published_items_immutable();",
+    "new": "SELECT 1;"
+   }
+  ]
+ },
+ {
+  "id": "trigger-published-revision",
+  "test": "a published revision refuses every change",
+  "test_file": "tests/integration/merchant-publication.test.ts",
+  "mutation": "Drop the published-revision trigger from migration 0017.",
+  "edits": [
+   {
+    "file": "drizzle/0017_s7_publication_guards.sql",
+    "old": "CREATE TRIGGER menu_revisions_published_immutable BEFORE UPDATE OR DELETE ON \"menu_revisions\" FOR EACH ROW EXECUTE FUNCTION envoi_published_revision_immutable();",
+    "new": "SELECT 1;"
+   }
+  ]
+ },
+ {
+  "id": "trigger-pointer-target",
+  "test": "the published pointer names only a confirmed revision of its own outlet",
+  "test_file": "tests/integration/merchant-publication.test.ts",
+  "mutation": "The pointer trigger checks only that the revision exists.",
+  "edits": [
+   {
+    "file": "drizzle/0017_s7_publication_guards.sql",
+    "old": "  IF NOT FOUND OR target.outlet_id <> NEW.id OR target.status <> 'confirmed' THEN",
+    "new": "  IF NOT FOUND THEN"
+   }
+  ]
+ },
+ {
+  "id": "trigger-membership-binding",
+  "test": "a bound membership is never rebound",
+  "test_file": "tests/integration/merchant-publication.test.ts",
+  "mutation": "Drop the membership binding trigger from migration 0017.",
+  "edits": [
+   {
+    "file": "drizzle/0017_s7_publication_guards.sql",
+    "old": "CREATE TRIGGER merchant_memberships_binding_once BEFORE UPDATE ON \"merchant_memberships\" FOR EACH ROW EXECUTE FUNCTION envoi_membership_binding_once();",
+    "new": "SELECT 1;"
+   }
+  ]
+ },
+ {
+  "id": "lock-key-by-revision",
+  "test": "a payment that can still move blocks the same basket on a republished menu",
+  "test_file": "tests/integration/basket-lock.test.ts",
+  "mutation": "Key the lock by menu revision.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/review.ts",
+    "old": "computeBasketLockKey({ buyerUserId: principal.userId, outletId: quote.outletId, lines: quote.lockLines })",
+    "new": "computeBasketLockKey({ buyerUserId: principal.userId, outletId: `${quote.outletId}:${quote.menuRevisionId}`, lines: quote.lockLines })"
+   }
+  ]
+ },
+ {
+  "id": "lock-any-pending-payment",
+  "test": "a PayPal order abandoned before capture does not lock a republished basket",
+  "test_file": "tests/integration/basket-lock.test.ts",
+  "mutation": "Lock on any pending_payment purchase.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/state.ts",
+    "old": "  if (view.paypalAttempt === \"capture_dispatched\" || view.paypalAttempt === \"capture_unknown\") return \"paypal_capture_in_flight\";",
+    "new": "  if (view.purchaseState === \"pending_payment\") return \"paypal_review_window\";\n  if (view.paypalAttempt === \"capture_dispatched\" || view.paypalAttempt === \"capture_unknown\") return \"paypal_capture_in_flight\";"
+   }
+  ]
+ },
+ {
+  "id": "race-lock-only-at-review",
+  "test": "two PayPal reviews of one basket across a republish cannot both start",
+  "test_file": "tests/integration/basket-lock.test.ts",
+  "mutation": "Check the basket lock only at review creation: paypal/start does not recheck it.",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "        if (lock) return basketLocked(lock);\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "race-recheck-without-locking",
+  "test": "two PayPal reviews of one basket across a republish cannot both start",
+  "test_file": "tests/integration/basket-lock.test.ts",
+  "mutation": "Recheck the lock in paypal/start without first locking the buyer's same-basket purchases.",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "  await tx.select({ id: purchases.id }).from(purchases).where(eq(purchases.basketLockKey, own.key)).orderBy(asc(purchases.id)).for(\"update\");\n",
+    "new": ""
+   },
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "exceptPurchaseId: purchaseId, lockRows: true",
+    "new": "exceptPurchaseId: purchaseId, lockRows: false"
+   }
+  ]
+ },
+ {
+  "id": "backfill-form",
+  "test": "the migration backfill computes the application's basket lock key",
+  "test_file": "tests/integration/basket-lock.test.ts",
+  "mutation": "The migration backfill joins lines with a different separator.",
+  "edits": [
+   {
+    "file": "drizzle/0017_s7_publication_guards.sql",
+    "old": "(l.value->>'quantity'), ','",
+    "new": "(l.value->>'quantity'), ';'"
+   }
+  ]
+ }
+]

@@ -6,6 +6,7 @@ import type { BuyerPrincipal } from "@/lib/auth-context";
 import { connectWeb } from "@/lib/db/web";
 import { log } from "@/lib/log";
 import { createFakeOpenAI, FIXTURE_AI_ENV, proposal, type FakeOpenAI, type FakeTurn } from "../support/fake-openai";
+import { handEditPublishedMenu } from "../support/db";
 import { createPaymentsFixture, jsonPost, type PaymentsFixture } from "../support/payments";
 import { anonymousCookie } from "../support/session";
 
@@ -229,14 +230,14 @@ describe("buyer text suggestions", () => {
     const kopi = item("Kopi O");
     const kaya = item("Kaya toast set");
     script = () => ({ kind: "answer", proposal: proposal({ kind: "items", outletId: fixture.outletId, itemIds: [kopi.id, kaya.id], area: "Tanjong Pagar" }) });
-    await fixture.database.admin`update menu_items set available = false where id = ${kopi.id}`;
+    await handEditPublishedMenu(fixture.database.admin, (sql) => sql`update menu_items set available = false where id = ${kopi.id}`);
     try {
       const result = await suggest({ text: "kaya toast and kopi near Tanjong Pagar" });
 
       expect(result.suggestion).toMatchObject({ kind: "items", matches: [{ id: kaya.id }] });
       expect(JSON.stringify(result.suggestion)).not.toContain(kopi.id);
     } finally {
-      await fixture.database.admin`update menu_items set available = true where id = ${kopi.id}`;
+      await handEditPublishedMenu(fixture.database.admin, (sql) => sql`update menu_items set available = true where id = ${kopi.id}`);
     }
   });
 
@@ -244,14 +245,14 @@ describe("buyer text suggestions", () => {
     const teh = item("Teh C peng");
     const kaya = item("Kaya toast set");
     script = () => ({ kind: "answer", proposal: proposal({ kind: "items", outletId: fixture.outletId, itemIds: [teh.id, kaya.id], area: "Tanjong Pagar" }) });
-    await fixture.database.admin`update menu_items set unit_sgd_cents = null where id = ${teh.id}`;
+    await handEditPublishedMenu(fixture.database.admin, (sql) => sql`update menu_items set unit_sgd_cents = null where id = ${teh.id}`);
     try {
       const result = await suggest({ text: "kaya toast and teh near Tanjong Pagar" });
 
       expect(result.suggestion).toMatchObject({ kind: "items", matches: [{ id: kaya.id }] });
       expect(JSON.stringify(result.suggestion)).not.toContain(teh.id);
     } finally {
-      await fixture.database.admin`update menu_items set unit_sgd_cents = 220 where id = ${teh.id}`;
+      await handEditPublishedMenu(fixture.database.admin, (sql) => sql`update menu_items set unit_sgd_cents = 220 where id = ${teh.id}`);
     }
   });
 

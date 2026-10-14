@@ -5,6 +5,7 @@ import type { AgentPrincipal, BuyerPrincipal } from "@/lib/auth-context";
 import * as schema from "@/lib/db/schema";
 import { connectWeb, type Db } from "@/lib/db/web";
 import { issueAgentToken } from "@/operator/cli";
+import { handEditPublishedMenu } from "../support/db";
 import { createPaymentsFixture, jsonPost, routeParams, type PaymentsFixture } from "../support/payments";
 import { anonymousCookie, TEST_BASE_URL } from "../support/session";
 
@@ -179,7 +180,7 @@ describe("agent handoff over MCP", () => {
     expect(columns.map((column) => column.column_name).filter((name) => /total|amount|price|cents/.test(name))).toEqual([]);
 
     // The shop's price changes after the agent asked; the review uses the price at redemption.
-    await fixture.database.admin`update menu_items set unit_sgd_cents = 250 where id = ${eggs.id}`;
+    await handEditPublishedMenu(fixture.database.admin, (sql) => sql`update menu_items set unit_sgd_cents = 250 where id = ${eggs.id}`);
     try {
       const { cookie } = await buyer();
       const redeemed = await redeem(tokenOf(url), cookie);
@@ -188,7 +189,7 @@ describe("agent handoff over MCP", () => {
       expect(purchase!.total_sgd_cents).toBe(500);
       expect(purchase!.entry_point).toBe("agent_handoff");
     } finally {
-      await fixture.database.admin`update menu_items set unit_sgd_cents = ${eggs.unitSgdCents} where id = ${eggs.id}`;
+      await handEditPublishedMenu(fixture.database.admin, (sql) => sql`update menu_items set unit_sgd_cents = ${eggs.unitSgdCents} where id = ${eggs.id}`);
     }
   });
 
@@ -235,13 +236,13 @@ describe("agent handoff over MCP", () => {
   it("a basket that no longer prices is refused and stays redeemable", async () => {
     const kopi = item("Kopi O");
     const token = tokenOf(await newLink([{ menuItemId: kopi.id, quantity: 1 }]));
-    await fixture.database.admin`update menu_items set available = false where id = ${kopi.id}`;
+    await handEditPublishedMenu(fixture.database.admin, (sql) => sql`update menu_items set available = false where id = ${kopi.id}`);
     try {
       const refused = await redeem(token, (await buyer()).cookie);
       expect(refused.status).toBe(400);
       expect(refused.body.error!.code).toBe("validation_failed");
     } finally {
-      await fixture.database.admin`update menu_items set available = true where id = ${kopi.id}`;
+      await handEditPublishedMenu(fixture.database.admin, (sql) => sql`update menu_items set available = true where id = ${kopi.id}`);
     }
     const later = await redeem(token, (await buyer()).cookie);
     expect(later.body.data!.outcome).toBe("redeemed");

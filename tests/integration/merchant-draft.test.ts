@@ -31,6 +31,8 @@ describe("merchant sign-in and manual menu draft", () => {
     outlet: typeof import("@/app/api/v1/merchant/outlets/[id]/route");
     draft: typeof import("@/app/api/v1/merchant/outlets/[id]/menu-draft/route");
     confirm: typeof import("@/app/api/v1/merchant/outlets/[id]/confirm/route");
+    destination: typeof import("@/app/api/v1/merchant/outlets/[id]/destinations/paypal/route");
+    publish: typeof import("@/app/api/v1/merchant/outlets/[id]/publish/route");
     purchases: typeof import("@/app/api/v1/purchases/route");
     purchase: typeof import("@/app/api/v1/purchases/[id]/route");
     publicOutlets: typeof import("@/app/api/v1/outlets/route");
@@ -45,6 +47,8 @@ describe("merchant sign-in and manual menu draft", () => {
       outlet: await import("@/app/api/v1/merchant/outlets/[id]/route"),
       draft: await import("@/app/api/v1/merchant/outlets/[id]/menu-draft/route"),
       confirm: await import("@/app/api/v1/merchant/outlets/[id]/confirm/route"),
+      destination: await import("@/app/api/v1/merchant/outlets/[id]/destinations/paypal/route"),
+      publish: await import("@/app/api/v1/merchant/outlets/[id]/publish/route"),
       purchases: await import("@/app/api/v1/purchases/route"),
       purchase: await import("@/app/api/v1/purchases/[id]/route"),
       publicOutlets: await import("@/app/api/v1/outlets/route"),
@@ -93,6 +97,9 @@ describe("merchant sign-in and manual menu draft", () => {
       await getDraft(outletId, cookie, headers),
       await putDraft(outletId, cookie, { revisionId: draft.id, version: draft.version, items: [] }, headers),
       await confirm(outletId, cookie, { revisionId: draft.id, version: draft.version }, headers),
+      // S7
+      await routes.destination.PUT(jsonRequest("PUT", `/api/v1/merchant/outlets/${outletId}/destinations/paypal`, cookie, { sellerMerchantId: "FXTRSELLER2AB" }, headers), routeParams(outletId)),
+      await routes.publish.POST(jsonRequest("POST", `/api/v1/merchant/outlets/${outletId}/publish`, cookie, { revisionId: draft.id, version: draft.version }, headers), routeParams(outletId)),
     ];
   }
 

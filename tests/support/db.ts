@@ -63,3 +63,14 @@ export async function createTestDatabase(label: string, options: { migrate?: boo
     },
   };
 }
+
+// FIXTURE: a hand edit of a published menu, which no role may make since S7 (migration 0017 makes a
+// published revision and its items immutable; in the product only republication changes a menu).
+// Older tests use it to put the published fixture menu into a state they then check, so it runs as
+// the superuser with triggers off for this one transaction only.
+export async function handEditPublishedMenu(admin: postgres.Sql, edit: (sql: postgres.TransactionSql) => Promise<unknown>): Promise<void> {
+  await admin.begin(async (sql) => {
+    await sql`set local session_replication_role = replica`;
+    await edit(sql);
+  });
+}
