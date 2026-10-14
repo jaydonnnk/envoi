@@ -1,8 +1,19 @@
-import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import { buyerActor, recordAudit } from "@/domain/audit/events";
-import { computeCheckoutKey } from "@/domain/purchases/checkout-key";
+import { computeBasketLockKey, computeCheckoutKey, type BasketLockKey } from "@/domain/purchases/checkout-key";
 import type { PriceQuote } from "@/domain/purchases/price";
-import { derivePurchaseView, storeDerivedTransitions, type PaymentAttemptRow, type PurchaseRow, type PurchaseView } from "@/domain/purchases/state";
+import {
+  derivePurchaseView,
+  moneyCanStillMove,
+  storeDerivedTransitions,
+  transitionPurchase,
+  type BasketLockReason,
+  type PaymentAttemptRow,
+  type PurchaseRow,
+  type PurchaseState,
+  type PurchaseView,
+} from "@/domain/purchases/state";
+import type { AttemptState } from "@/domain/payments/state";
 import { webEnv } from "@/env";
 import type { BuyerPrincipal } from "@/lib/auth-context";
 import { outlets, paymentAttempts, paymentDestinations, purchases, type StoredLine } from "@/lib/db/schema";
@@ -30,9 +41,44 @@ export async function latestAttempt(db: Conn, purchaseId: string): Promise<Payme
   return row ?? null;
 }
 
-// One open review per buyer and checkout key. A same-key review still inside T_REVIEW is returned
-// as it is. A replacement is legal only once every same-key purchase is terminal: one whose money
-// could still move (pending_payment not yet abandoned, or uncertain) refuses with execution_locked.
+export type BasketLock = { purchaseId: string; reason: BasketLockReason };
+
+// The first purchase with this basket lock key, other than exceptPurchaseId, for which money can
+// still move (Gate 3 findBasketLock, S7). The key includes the buyer, so only that buyer's purchases
+// match. With lockRows, used inside an execution start, every matching purchase is locked FOR
+// UPDATE in id order before it is judged. A purchase whose derived state differs from its stored one
+// has that transition stored here, best effort; no lock decision waits for it.
+export async function findBasketLock(
+  db: Conn,
+  input: { key: BasketLockKey; exceptPurchaseId: string | null; lockRows: boolean; now: Date },
+): Promise<BasketLock | null> {
+  const query = db
+    .select()
+    .from(purchases)
+    .where(and(eq(purchases.basketLockKey, input.key), input.exceptPurchaseId === null ? undefined : ne(purchases.id, input.exceptPurchaseId)))
+    .orderBy(asc(purchases.id));
+  const rows = input.lockRows ? await query.for("update") : await query;
+  for (const row of rows) {
+    const attempt = await latestAttempt(db, row.id);
+    const reason = moneyCanStillMove(
+      { purchaseState: row.state as PurchaseState, reviewExpiresAt: row.reviewExpiresAt, paypalAttempt: (attempt?.state ?? null) as AttemptState | null },
+      input.now,
+    );
+    if (reason) return { purchaseId: row.id, reason };
+    if (derivePurchaseView(row, attempt, input.now).state !== row.state) await storeDerivedTransitions(db, row.id, input.now);
+  }
+  return null;
+}
+
+export const basketLocked = (lock: BasketLock): AppError =>
+  appError("execution_locked", "A payment for this basket may still be in progress. Check its receipt first.", {
+    details: { purchaseId: lock.purchaseId, reason: lock.reason },
+  });
+
+// One open review per buyer and checkout key. A same-key review still inside T_REVIEW and pinned to
+// the current destination version is returned as it is. Before anything else, the basket lock
+// refuses with execution_locked while money can still move for a purchase of the same basket on
+// either rail, whatever menu revision or destination it was priced on.
 export type EntryPoint = "manual" | "agent_handoff";
 
 // conn may be a transaction: a handoff redemption creates its review inside the transaction that
@@ -49,7 +95,12 @@ export async function createReview(conn: Conn, principal: BuyerPrincipal, quote:
     pyusdRateVersionId: null,
   });
 
+  const basketLockKey = computeBasketLockKey({ buyerUserId: principal.userId, outletId: quote.outletId, lines: quote.lockLines });
+
   return conn.transaction(async (tx) => {
+    const lock = await findBasketLock(tx, { key: basketLockKey, exceptPurchaseId: null, lockRows: false, now });
+    if (lock) return { kind: "conflict", error: basketLocked(lock) } as const;
+
     const sameKey = await tx
       .select()
       .from(purchases)
@@ -60,14 +111,13 @@ export async function createReview(conn: Conn, principal: BuyerPrincipal, quote:
     let replaces: PurchaseRow | null = null;
     for (const row of sameKey) {
       const view = derivePurchaseView(row, await latestAttempt(tx, row.id), now);
-      if (view.state === "review_open") return { kind: "existing_open_review", purchaseId: row.id, expiresAt: row.reviewExpiresAt } as const;
-      if (view.state === "pending_payment" || view.state === "uncertain") {
-        return {
-          kind: "conflict",
-          error: appError("execution_locked", "A payment for this basket may still be in progress. Check its receipt first.", {
-            details: { purchaseId: row.id },
-          }),
-        } as const;
+      if (view.state === "review_open") {
+        if (row.destinationVersion === quote.destinationVersion) return { kind: "existing_open_review", purchaseId: row.id, expiresAt: row.reviewExpiresAt } as const;
+        // The destination changed since this review was priced: it can never execute, so it is
+        // closed and replaced.
+        await transitionPurchase(tx, row.id, ["review_open"], "review_invalidated", "destination_changed");
+        replaces = row;
+        continue;
       }
       if (view.state !== row.state) await storeDerivedTransitions(tx, row.id, now);
       replaces = view.state === "paid" ? null : row;
@@ -94,6 +144,7 @@ export async function createReview(conn: Conn, principal: BuyerPrincipal, quote:
         destinationId: quote.destinationId,
         destinationVersion: quote.destinationVersion,
         checkoutKey,
+        basketLockKey,
         supersedesPurchaseId: replaces?.id ?? null,
       })
       .onConflictDoNothing({ target: [purchases.buyerUserId, purchases.checkoutKey], where: sql`state = 'review_open'` })
@@ -213,10 +264,14 @@ export async function assertPaymentEligible(db: Conn, purchaseId: string, princi
       return refuse(appError("review_invalidated", "This review is closed. Review the basket again to pay."));
   }
   if (row.publishedRevisionId !== purchase.menuRevisionId) {
-    return refuse(appError("review_invalidated", "The shop changed its menu. Review the basket again.", { details: { reason: "menu_changed" } }));
+    return refuse(
+      appError("review_invalidated", "The shop changed its menu or prices since you reviewed. Nothing was charged.", {
+        details: { reason: "menu_changed" },
+      }),
+    );
   }
   if (!destination || destination.status !== "active" || destination.version !== purchase.destinationVersion) {
-    return refuse(appError("review_invalidated", "The shop changed how it is paid. Review the basket again.", { details: { reason: "destination_changed" } }));
+    return refuse(appError("review_invalidated", "The shop changed how it is paid since you reviewed. Nothing was charged.", { details: { reason: "destination_changed" } }));
   }
   if (!webEnv().PAYMENTS_ENABLED) {
     return refuse(appError("payments_disabled", "Payments are switched off in this test environment right now. Nothing was charged."));

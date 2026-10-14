@@ -2,6 +2,8 @@ import { and, asc, eq, isNotNull, isNull, sql } from "drizzle-orm";
 import { recordAudit } from "@/domain/audit/events";
 import { getMenuDraft } from "@/domain/menu/draft";
 import type { MenuDraft } from "@/domain/menu/types";
+import { getPayPalConnection, type PayPalConnection } from "@/domain/outlets/destination";
+import { publicationStatus, type PublicationStatus } from "@/domain/outlets/publish";
 import { enrollments, merchantMemberships, outlets } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
@@ -19,6 +21,10 @@ export type MerchantOutlet = {
   isDemoFixture: boolean;
   published: boolean;
   enrollment: "pending" | "approved" | null;
+  // S7: the merchant confirmed exactly the current name and area.
+  detailsConfirmed: boolean;
+  paypal: PayPalConnection | null;
+  publication: PublicationStatus;
 };
 
 export type MerchantOutlets = { outlets: MerchantOutlet[]; canCreateOutlet: boolean };
@@ -31,12 +37,23 @@ const outletColumns = {
   area: outlets.area,
   isDemoFixture: outlets.isDemoFixture,
   publishedMenuRevisionId: outlets.publishedMenuRevisionId,
+  detailsConfirmedAt: outlets.detailsConfirmedAt,
   enrollment: enrollments.status,
 };
 
-type OutletRow = { id: string; name: string; area: string; isDemoFixture: boolean; publishedMenuRevisionId: string | null; enrollment: string | null };
+type OutletRow = {
+  id: string;
+  name: string;
+  area: string;
+  isDemoFixture: boolean;
+  publishedMenuRevisionId: string | null;
+  detailsConfirmedAt: Date | null;
+  enrollment: string | null;
+};
 
-function toMerchantOutlet(row: OutletRow): MerchantOutlet {
+async function toMerchantOutlet(db: Pick<Db, "select">, row: OutletRow): Promise<MerchantOutlet> {
+  const publication = await publicationStatus(db, row.id);
+  if (!publication) throw new Error("an outlet read in this transaction has no publication status");
   return {
     id: row.id,
     name: row.name,
@@ -44,7 +61,16 @@ function toMerchantOutlet(row: OutletRow): MerchantOutlet {
     isDemoFixture: row.isDemoFixture,
     published: row.publishedMenuRevisionId !== null,
     enrollment: row.enrollment === "approved" ? "approved" : row.enrollment === "pending" ? "pending" : null,
+    detailsConfirmed: row.detailsConfirmedAt !== null,
+    paypal: await getPayPalConnection(db, row.id),
+    publication,
   };
+}
+
+// One outlet as its merchant sees it. The caller has already checked the membership.
+export async function describeOutlet(db: Pick<Db, "select">, outletId: string): Promise<MerchantOutlet | null> {
+  const [row] = await db.select(outletColumns).from(outlets).leftJoin(enrollments, eq(enrollments.outletId, outlets.id)).where(eq(outlets.id, outletId));
+  return row ? toMerchantOutlet(db, row) : null;
 }
 
 // The outlets this account holds a live membership for, and whether an approved, unbound membership
@@ -62,10 +88,16 @@ export async function listMerchantOutlets(db: Pick<Db, "select">, userId: string
     .from(merchantMemberships)
     .where(and(eq(merchantMemberships.userId, userId), isNull(merchantMemberships.revokedAt), isNull(merchantMemberships.outletId)))
     .limit(1);
-  return { outlets: rows.map(toMerchantOutlet), canCreateOutlet: unbound !== undefined };
+  const described: MerchantOutlet[] = [];
+  for (const row of rows) described.push(await toMerchantOutlet(db, row));
+  return { outlets: described, canCreateOutlet: unbound !== undefined };
 }
 
 export type OutletInput = { name: string; area: string };
+
+// detailsConfirmed: the merchant declares they reviewed exactly these details. Saving without it
+// clears any earlier confirmation, so a confirmation always names the current name and area.
+export type OutletUpdate = OutletInput & { detailsConfirmed: boolean };
 
 export type CreatedOutlet = { outlet: MerchantOutlet; draft: MenuDraft };
 
@@ -105,16 +137,15 @@ export async function createMerchantOutlet(db: Db, input: OutletInput & { userId
       details: { membershipId: membership.id, menuRevisionId, isDemo: membership.isDemo },
     });
     const draft = await getMenuDraft(tx, outletId);
-    if (!draft) throw new Error("The new outlet's draft revision was not found in its own transaction.");
-    return {
-      outlet: { id: outletId, name: input.name, area: input.area, isDemoFixture: membership.isDemo, published: false, enrollment: "pending" },
-      draft,
-    };
+    const outlet = await describeOutlet(tx, outletId);
+    if (!draft || !outlet) throw new Error("The new outlet or its draft revision was not found in its own transaction.");
+    return { outlet, draft };
   });
 }
 
-// Edits the name and area of an unpublished outlet. A published outlet is not edited here.
-export async function updateMerchantOutlet(db: Db, input: OutletInput & { outletId: string; userId: string; now: Date }): Promise<MerchantOutlet | AppError> {
+// Edits the name and area of an unpublished outlet, and sets or clears its outlet confirmation. A
+// published outlet is not edited here.
+export async function updateMerchantOutlet(db: Db, input: OutletUpdate & { outletId: string; userId: string; now: Date }): Promise<MerchantOutlet | AppError> {
   return db.transaction(async (tx) => {
     const [current] = await tx
       .select(outletColumns)
@@ -126,15 +157,20 @@ export async function updateMerchantOutlet(db: Db, input: OutletInput & { outlet
     if (current.publishedMenuRevisionId !== null) {
       return appError("validation_failed", "A published shop's details cannot be edited here.", { details: { reason: "outlet_published" } });
     }
-    await tx.update(outlets).set({ name: input.name, area: input.area }).where(eq(outlets.id, input.outletId));
+    await tx
+      .update(outlets)
+      .set({ name: input.name, area: input.area, detailsConfirmedAt: input.detailsConfirmed ? input.now : null })
+      .where(eq(outlets.id, input.outletId));
     await recordAudit(tx, {
       at: input.now,
       actor: merchantActor(input.userId),
       action: "outlet_updated",
       outletId: input.outletId,
       operatorVisible: false,
-      details: { nameChanged: current.name !== input.name, areaChanged: current.area !== input.area },
+      details: { nameChanged: current.name !== input.name, areaChanged: current.area !== input.area, detailsConfirmed: input.detailsConfirmed },
     });
-    return toMerchantOutlet({ ...current, name: input.name, area: input.area });
+    const outlet = await describeOutlet(tx, input.outletId);
+    if (!outlet) throw new Error("the outlet vanished in its own transaction");
+    return outlet;
   });
 }

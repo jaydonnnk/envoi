@@ -24,6 +24,9 @@ export type MenuDraft = {
   version: number;
   status: "draft" | "confirmed";
   confirmedAt: Date | null;
+  // True when this is the published menu itself: there are no unpublished changes. Saving changes to
+  // it creates a new draft revision; buyers keep reading this one until the next publication.
+  published: boolean;
   items: MenuItemDraft[];
   completeness: MenuCompleteness;
 };

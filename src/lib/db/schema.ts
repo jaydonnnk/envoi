@@ -84,6 +84,9 @@ export const outlets = pgTable("outlets", {
   // Stable key the operator seed uses to find its fixture; null for any real outlet.
   fixtureKey: text("fixture_key").unique(),
   publishedMenuRevisionId: text("published_menu_revision_id").references((): AnyPgColumn => menuRevisions.id),
+  // Outlet confirmation (S7): the merchant reviewed exactly the current name and area. Any edit of
+  // either clears it, and publication requires it.
+  detailsConfirmedAt: timestamp("details_confirmed_at", { withTimezone: true }),
   createdAt: createdAt(),
 });
 
@@ -99,12 +102,17 @@ export const menuRevisions = pgTable(
     // Draft version (S6): every saved draft write increments it, and a write or confirmation based
     // on an older version is refused with revision_conflict and changes nothing.
     version: integer("version").notNull().default(1),
+    // Set once, by the database, when an outlet's published pointer first names this revision (S7,
+    // migration 0017). From then on the revision and its items refuse every write: editing a
+    // published menu creates a new, unpublished revision.
+    publishedAt: timestamp("published_at", { withTimezone: true }),
     createdAt: createdAt(),
   },
   (t) => [
     check("menu_revisions_status_check", sql`${t.status} in ('draft', 'confirmed')`),
     check("menu_revisions_confirmed_check", sql`(${t.status} = 'confirmed') = (${t.confirmedAt} is not null)`),
     check("menu_revisions_version_check", sql`${t.version} > 0`),
+    check("menu_revisions_published_check", sql`${t.publishedAt} is null or ${t.status} = 'confirmed'`),
     index("menu_revisions_outlet_id_idx").on(t.outletId),
   ],
 );
@@ -124,11 +132,16 @@ export const menuItems = pgTable(
     // Merchant-supplied availability; null is unknown, which blocks confirmation (S6).
     available: boolean("available"),
     source: text("source").notNull().default("merchant"),
+    // The item's identity across revisions (S7). A new item's key is its own id; a revision copied
+    // from the published one keeps each item's key, so "the same lines" of a basket are recognized
+    // on a republished menu. The web role may insert it but never update it.
+    itemKey: text("item_key").notNull(),
   },
   (t) => [
     check("menu_items_price_check", sql`${t.unitSgdCents} is null or ${t.unitSgdCents} > 0`),
     check("menu_items_source_check", sql`${t.source} in ('merchant', 'import_suggestion')`),
     index("menu_items_revision_idx").on(t.menuRevisionId, t.position),
+    uniqueIndex("menu_items_revision_item_key_unique").on(t.menuRevisionId, t.itemKey),
   ],
 );
 
@@ -201,9 +214,14 @@ export const paymentDestinations = pgTable(
     sellerMerchantId: text("seller_merchant_id").notNull(),
     status: text("status").notNull(),
     version: integer("version").notNull().default(1),
+    // The outlet's merchant selected this operator-prepared connection (S7). Acceptance raises the
+    // version, so a review pinned to the earlier version is invalidated at execution.
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+    acceptedByUserId: text("accepted_by_user_id").references(() => user.id),
     createdAt: createdAt(),
   },
   (t) => [
+    check("payment_destinations_accepted_check", sql`(${t.acceptedAt} is null) = (${t.acceptedByUserId} is null)`),
     check("payment_destinations_rail_check", sql`${t.rail} in ('paypal')`),
     check("payment_destinations_environment_check", sql`${t.environment} = 'sandbox'`),
     check("payment_destinations_status_check", sql`${t.status} in ('active', 'disconnected')`),
@@ -252,6 +270,9 @@ export const purchases = pgTable(
     destinationId: text("destination_id").references(() => paymentDestinations.id),
     destinationVersion: integer("destination_version"),
     checkoutKey: text("checkout_key"),
+    // Rail-independent basket identity (Gate 3 BasketLockKey; S7): buyer, outlet and item keys with
+    // quantities, without rail, destination or menu revision. Immutable like the lines it hashes.
+    basketLockKey: text("basket_lock_key"),
     supersedesPurchaseId: text("supersedes_purchase_id").references((): AnyPgColumn => purchases.id),
   },
   (t) => [
@@ -268,6 +289,7 @@ export const purchases = pgTable(
       sql`${t.entryPoint} = 'fixture_tracer' or (${t.rail} is not null and ${t.destinationId} is not null and ${t.destinationVersion} is not null and ${t.checkoutKey} is not null)`,
     ),
     index("purchases_buyer_idx").on(t.buyerUserId),
+    index("purchases_basket_lock_key_idx").on(t.basketLockKey),
     // One open review per buyer and checkout key (Gate 3 Races: two tabs create the same basket).
     uniqueIndex("purchases_one_open_review").on(t.buyerUserId, t.checkoutKey).where(sql`${t.state} = 'review_open'`),
   ],

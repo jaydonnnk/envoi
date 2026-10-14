@@ -113,6 +113,20 @@
       "when": 1791963113324,
       "tag": "0015_s5_role_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1791988734608,
+      "tag": "0016_s7_publication",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1791988735049,
+      "tag": "0017_s7_publication_guards",
+      "breakpoints": true
     }
   ]
 }

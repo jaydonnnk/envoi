@@ -31,7 +31,28 @@ export function canTransitionPurchase(t: PurchaseTransition): boolean {
   return t.to !== "paid" || PAID_REASONS.has(t.reason);
 }
 
-// PYUSD attempts, the basket lock and extra transfers join this view in S7, S16 and S17.
+// The basket lock (Gate 3, S7): why money can still move for a purchase, derived on read with no
+// stored lock and no maintenance dependency. PYUSD's reason joins in S16.
+export type BasketLockReason = "paypal_capture_in_flight" | "paypal_review_window" | "purchase_uncertain";
+
+export type PurchaseLockView = {
+  purchaseState: PurchaseState; // as stored; the derivation below needs no stored transition
+  reviewExpiresAt: Date;
+  paypalAttempt: AttemptState | null; // the purchase's latest attempt
+};
+
+// Pure. Money can still move while a capture was dispatched or its outcome is unknown, while an
+// attempt that never dispatched a capture is still inside its review window, and while the
+// purchase is uncertain. Once T_REVIEW passes, an attempt that never dispatched a capture can never
+// send one, so it stops locking even while its purchase is still stored as pending_payment.
+export function moneyCanStillMove(view: PurchaseLockView, now: Date): BasketLockReason | null {
+  if (view.paypalAttempt === "capture_dispatched" || view.paypalAttempt === "capture_unknown") return "paypal_capture_in_flight";
+  if (view.paypalAttempt !== null && isPreCapture(view.paypalAttempt) && now.getTime() < view.reviewExpiresAt.getTime()) return "paypal_review_window";
+  if (view.purchaseState === "uncertain") return "purchase_uncertain";
+  return null;
+}
+
+// PYUSD attempts and extra transfers join this view in S16 and S17.
 export type PurchaseView = { state: PurchaseState; paypalAttempt: AttemptState | null };
 
 // Pure. A review past T_REVIEW reads expired. A PayPal attempt that never dispatched a capture

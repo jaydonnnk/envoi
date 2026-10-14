@@ -3,7 +3,7 @@ import { recordAudit } from "@/domain/audit/events";
 import { menuRevisions } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
-import { assessMenuCompleteness, currentDraftRevision, draftOf, itemsOf, revisionConflict, toDraftItem } from "./draft";
+import { assessMenuCompleteness, currentDraftRevision, draftOf, itemsOf, lockOutlet, revisionConflict, toDraftItem } from "./draft";
 import type { MenuDraft } from "./types";
 
 export type DraftConfirmation = { outletId: string; revisionId: string; version: number; actorUserId: string; now: Date };
@@ -13,6 +13,7 @@ export type DraftConfirmation = { outletId: string; revisionId: string; version:
 // changes nothing. Confirming an already confirmed version returns it unchanged.
 export async function confirmMenuDraft(db: Db, confirmation: DraftConfirmation): Promise<MenuDraft | AppError> {
   return db.transaction(async (tx) => {
+    if (!(await lockOutlet(tx, confirmation.outletId))) return appError("not_found", "Shop not found.");
     const revision = await currentDraftRevision(tx, confirmation.outletId, true);
     if (!revision) return appError("not_found", "This shop has no menu draft.");
     if (revision.id !== confirmation.revisionId || revision.version !== confirmation.version) return revisionConflict(revision);

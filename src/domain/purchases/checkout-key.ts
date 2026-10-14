@@ -48,3 +48,22 @@ export function computeCheckoutKey(input: CheckoutKeyInput): CheckoutKey {
   ]);
   return createHash("sha256").update(canonical).digest("hex") as CheckoutKey;
 }
+
+// Rail-independent basket identity (Gate 3 BasketLockKey, S7). It deliberately leaves out the rail,
+// destination, menu revision and rate, so the same items on a republished menu or a changed
+// destination are the same basket. Lines name each item by its key, which a revision copied from
+// the published one keeps, not by the revision-specific item id. Migration 0017 backfills stored
+// purchases with this exact form, so the two must change together.
+export type BasketLockKey = string & { readonly __brand: "BasketLockKey" };
+export type BasketLockLine = { itemKey: string; quantity: number };
+
+export function computeBasketLockKey(input: { buyerUserId: string; outletId: string; lines: readonly BasketLockLine[] }): BasketLockKey {
+  for (const line of input.lines) {
+    if (!isValidQuantity(line.quantity)) throw new RangeError(`quantity must be ${MIN_QUANTITY}..${MAX_QUANTITY}`);
+  }
+  const lines = [...input.lines]
+    .sort((a, b) => (a.itemKey < b.itemKey ? -1 : a.itemKey > b.itemKey ? 1 : 0))
+    .map((line) => `${line.itemKey}:${line.quantity}`)
+    .join(",");
+  return createHash("sha256").update(["basket-lock-v1", input.buyerUserId, input.outletId, lines].join("\n")).digest("hex") as BasketLockKey;
+}

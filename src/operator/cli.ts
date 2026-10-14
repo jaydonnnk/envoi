@@ -54,14 +54,10 @@ export async function seedDemoFixture(db: OperatorDb, now: Date = new Date()): P
     const menuRevisionId = newId("mrv");
     await tx.insert(schema.menuRevisions).values({ id: menuRevisionId, outletId, status: "confirmed", confirmedAt: now, createdAt: now });
     await tx.insert(schema.menuItems).values(
-      DEMO_FIXTURE.items.map((item, position) => ({
-        id: newId("itm"),
-        menuRevisionId,
-        position,
-        name: item.name,
-        unitSgdCents: item.unitSgdCents,
-        available: true,
-      })),
+      DEMO_FIXTURE.items.map((item, position) => {
+        const id = newId("itm");
+        return { id, itemKey: id, menuRevisionId, position, name: item.name, unitSgdCents: item.unitSgdCents, available: true };
+      }),
     );
     await tx.update(schema.outlets).set({ publishedMenuRevisionId: menuRevisionId }).where(eq(schema.outlets.id, outletId));
     return { status: "created", outletId, menuRevisionId };
@@ -211,6 +207,35 @@ export async function approveMembership(db: OperatorDb, input: { email: string; 
   });
 }
 
+export type EnrollmentResult = { status: "approved" | "unchanged"; outletId: string; enrollmentId: string };
+
+// Approves an outlet's pending enrollment (S7): the operator recorded the demo authority out of
+// band. Only this act approves one; the web role cannot write the status. An approved enrollment
+// stays approved and nothing changes. An outlet without an enrollment is refused.
+export async function approveEnrollment(db: OperatorDb, input: { outletId: string; evidenceRef?: string | null }, now: Date = new Date()): Promise<EnrollmentResult> {
+  const evidenceRef = input.evidenceRef?.trim() || null;
+  if (evidenceRef !== null && evidenceRef.length > 200) throw new Error("The evidence reference must be at most 200 characters.");
+  return db.transaction(async (tx) => {
+    const [enrollment] = await tx
+      .select({ id: schema.enrollments.id, status: schema.enrollments.status })
+      .from(schema.enrollments)
+      .where(eq(schema.enrollments.outletId, input.outletId))
+      .for("update");
+    if (!enrollment) throw new Error(`Outlet ${input.outletId} has no enrollment; only a merchant-created outlet has one.`);
+    if (enrollment.status === "approved") return { status: "unchanged", outletId: input.outletId, enrollmentId: enrollment.id };
+    await tx.update(schema.enrollments).set({ status: "approved", approvedAt: now, evidenceRef }).where(eq(schema.enrollments.id, enrollment.id));
+    await recordAudit(tx, {
+      at: now,
+      actor: "operator",
+      action: "enrollment_approved",
+      outletId: input.outletId,
+      operatorVisible: true,
+      details: { enrollmentId: enrollment.id, hasEvidence: evidenceRef !== null },
+    });
+    return { status: "approved", outletId: input.outletId, enrollmentId: enrollment.id };
+  });
+}
+
 export type OperatorGrantResult = { status: "created" | "unchanged"; userId: string; grantId: string };
 
 // Flags a permanent account made with create-merchant as the operator (S5). The operator health
@@ -284,10 +309,10 @@ function promptHidden(prompt: string): Promise<string> {
   });
 }
 
-const COMMANDS = ["seed-demo-fixture", "assign-paypal-destination", "issue-agent-token", "create-merchant", "approve-membership", "grant-operator"];
+const COMMANDS = ["seed-demo-fixture", "assign-paypal-destination", "issue-agent-token", "create-merchant", "approve-membership", "approve-enrollment", "grant-operator"];
 
 const USAGE =
-  "usage: npm run operator -- seed-demo-fixture | assign-paypal-destination <outletId> <sellerMerchantId> | issue-agent-token <label> | create-merchant <email> <name> | approve-membership <email> [evidenceRef] | grant-operator <email> [evidenceRef]";
+  "usage: npm run operator -- seed-demo-fixture | assign-paypal-destination <outletId> <sellerMerchantId> | issue-agent-token <label> | create-merchant <email> <name> | approve-membership <email> [evidenceRef] | approve-enrollment <outletId> [evidenceRef] | grant-operator <email> [evidenceRef]";
 
 async function run(db: OperatorDb, argv: string[]): Promise<number> {
   const [command, ...args] = argv;
@@ -332,6 +357,15 @@ async function run(db: OperatorDb, argv: string[]): Promise<number> {
       result.status === "created"
         ? `approved membership ${result.membershipId} for account ${result.userId}; its next shop creation binds it`
         : `account ${result.userId} already holds unbound membership ${result.membershipId}; nothing changed`,
+    );
+    return 0;
+  }
+  if (command === "approve-enrollment" && (args.length === 1 || args.length === 2)) {
+    const result = await approveEnrollment(db, { outletId: args[0]!, evidenceRef: args[1] ?? null });
+    console.log(
+      result.status === "approved"
+        ? `approved enrollment ${result.enrollmentId} of outlet ${result.outletId}; its merchant can publish once the other checks hold`
+        : `enrollment ${result.enrollmentId} of outlet ${result.outletId} is already approved; nothing changed`,
     );
     return 0;
   }

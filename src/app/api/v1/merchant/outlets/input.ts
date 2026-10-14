@@ -12,6 +12,10 @@ export const outletBody = z.object({
   area: text(OUTLET_LIMITS.maxTextChars).min(1),
 });
 
+// S7: saving with detailsConfirmed true confirms exactly these details; without it, any earlier
+// confirmation is cleared.
+export const outletUpdateBody = outletBody.extend({ detailsConfirmed: z.boolean().default(false) });
+
 const id = z.string().min(1).max(64);
 
 const item = z.object({
@@ -35,3 +39,7 @@ export const draftBody = z.object({
 
 export const confirmBody = z.object({ revisionId: id, version: z.number().int().min(1) });
 
+
+// The merchant names the seller id of the connection it selects; only the operator-prepared one is
+// accepted. Nothing else in the body is read.
+export const paypalConnectionBody = z.object({ sellerMerchantId: z.string().trim().min(1).max(64) });

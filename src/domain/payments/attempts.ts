@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { and, eq, inArray, isNull, lte, or, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { buyerActor, recordAudit } from "@/domain/audit/events";
 import { canTransitionAttempt, isPreCapture, TERMINAL_ATTEMPT_STATES, type AttemptState } from "@/domain/payments/state";
 import type { PricedLine } from "@/domain/purchases/price";
@@ -13,7 +13,8 @@ import {
   type ExpectedPurchase,
   type PayPalOrder,
 } from "@/domain/purchases/reconcile";
-import { assertPaymentEligible, getOwnPurchase, latestAttempt, type OwnPurchase } from "@/domain/purchases/review";
+import type { BasketLockKey } from "@/domain/purchases/checkout-key";
+import { assertPaymentEligible, basketLocked, findBasketLock, getOwnPurchase, latestAttempt, type OwnPurchase } from "@/domain/purchases/review";
 import {
   canTransitionPurchase,
   derivePurchaseView,
@@ -44,7 +45,12 @@ type Conn = Db | Tx;
 export type PayPalDeps = { db: Db; paypal: PayPalWriteClient; now: Now; appBaseUrl: string };
 
 // Test-only barriers; production callers pass none.
-export type FlowHooks = { afterExistingAttemptRead?: () => Promise<void>; afterLease?: () => Promise<void>; afterDispatch?: () => Promise<void> };
+export type FlowHooks = {
+  afterExistingAttemptRead?: () => Promise<void>;
+  beforeAttemptSaved?: () => Promise<void>;
+  afterLease?: () => Promise<void>;
+  afterDispatch?: () => Promise<void>;
+};
 
 class SlotTaken extends Error {}
 
@@ -193,9 +199,24 @@ async function recoverCreate(tx: Tx, deps: PayPalDeps, purchase: LockedPurchase,
   return decision === "replay_same_key" ? createUnconfirmed() : appError("payment_uncertain", "We are still confirming the PayPal order for this review. Do not pay again.");
 }
 
+// Locks every purchase of this buyer with the same basket lock key, this one included, in id order
+// (Gate 3 paypal/start, S7). Two starts of one basket, on any review of it, then serialize here: the
+// second waits, and its basket-lock check sees the first one's attempt. A purchase without a key, a
+// fixture tracer row, locks only itself.
+async function lockBasket(tx: Tx, principal: BuyerPrincipal, purchaseId: string): Promise<BasketLockKey | null> {
+  const [own] = await tx
+    .select({ key: purchases.basketLockKey })
+    .from(purchases)
+    .where(and(eq(purchases.id, purchaseId), eq(purchases.buyerUserId, principal.userId)));
+  if (!own?.key) return null;
+  await tx.select({ id: purchases.id }).from(purchases).where(eq(purchases.basketLockKey, own.key)).orderBy(asc(purchases.id)).for("update");
+  return own.key as BasketLockKey;
+}
+
 export async function startPayPal(deps: PayPalDeps, principal: BuyerPrincipal, purchaseId: string, hooks: FlowHooks = {}): Promise<StartResult | AppError> {
   try {
     return await deps.db.transaction(async (tx): Promise<StartResult | AppError> => {
+      const basketKey = await lockBasket(tx, principal, purchaseId);
       // The purchase row lock serializes starts of one review: a second start waits here, then
       // finds the first start's attempt and returns the same approval link. It also serializes
       // create replays, so one key is never in flight twice.
@@ -207,7 +228,14 @@ export async function startPayPal(deps: PayPalDeps, principal: BuyerPrincipal, p
       if (!locked) return appError("not_found", "Purchase not found.");
 
       const eligibility = await assertPaymentEligible(tx, purchaseId, principal, deps.now());
-      if (!eligibility.eligible) return eligibility.error;
+      if (!eligibility.eligible) {
+        // A review pinned to a replaced revision or a changed destination can never execute.
+        const reason = eligibility.error.details?.reason;
+        if (locked.state === "review_open" && (reason === "menu_changed" || reason === "destination_changed")) {
+          await transitionPurchase(tx, purchaseId, ["review_open"], "review_invalidated", String(reason));
+        }
+        return eligibility.error;
+      }
       const existingId = eligibility.attemptId;
       await hooks.afterExistingAttemptRead?.();
       if (existingId) {
@@ -217,11 +245,18 @@ export async function startPayPal(deps: PayPalDeps, principal: BuyerPrincipal, p
       }
       if (locked.state !== "review_open") return appError("review_invalidated", "This review is closed. Review the basket again to pay.");
 
+      // Another review of the same basket, on any revision or destination, whose money can still move.
+      if (basketKey) {
+        const lock = await findBasketLock(tx, { key: basketKey, exceptPurchaseId: purchaseId, lockRows: true, now: deps.now() });
+        if (lock) return basketLocked(lock);
+      }
+      await hooks.beforeAttemptSaved?.();
+
       const [destination] = await tx
         .select({ sellerMerchantId: paymentDestinations.sellerMerchantId })
         .from(paymentDestinations)
         .where(eq(paymentDestinations.id, locked.destinationId ?? ""));
-      if (!destination) return appError("review_invalidated", "The shop changed how it is paid. Review the basket again.");
+      if (!destination) return appError("review_invalidated", "The shop changed how it is paid since you reviewed. Nothing was charged.");
 
       const now = deps.now();
       const attempt = await claimSlot(tx, { purchaseId, payeeMerchantId: destination.sellerMerchantId, totalSgdCents: locked.totalSgdCents, now });

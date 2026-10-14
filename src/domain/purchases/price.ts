@@ -1,7 +1,7 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { getPublishedMenu } from "@/domain/outlets/search";
-import { isValidQuantity, MAX_QUANTITY, type PurchaseLine, type RailId } from "@/domain/purchases/checkout-key";
-import { paymentDestinations } from "@/lib/db/schema";
+import { isValidQuantity, MAX_QUANTITY, type BasketLockLine, type PurchaseLine, type RailId } from "@/domain/purchases/checkout-key";
+import { menuItems, paymentDestinations } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
 import { multiplySgd, sgdFromCents, sumSgd, type SgdCents } from "@/lib/money";
@@ -20,11 +20,13 @@ export type CostProvenance = {
 export type PriceQuote =
   | {
       ok: true;
-      // outletId, rail and destinationVersion are not in Gate 3's PriceQuote; createReview needs them
-      // to compute the CheckoutKey and pin the destination version, so the quote carries them.
+      // outletId, rail, destinationVersion and lockLines are not in Gate 3's PriceQuote; createReview
+      // needs them to compute the CheckoutKey and the BasketLockKey and to pin the destination
+      // version, so the quote carries them.
       outletId: string;
       rail: RailId;
       lines: PricedLine[];
+      lockLines: BasketLockLine[];
       totalSgdCents: SgdCents;
       currency: "SGD";
       menuRevisionId: string;
@@ -82,6 +84,18 @@ export async function priceBasket(db: Pick<Db, "select">, input: { outletId: str
     lines.push({ menuItemId: item.id, name: item.name, quantity: line.quantity, unitSgdCents: unit, lineSgdCents: multiplySgd(unit, line.quantity) });
   }
 
+  // Each item's key across revisions, read from the same published revision as its price.
+  const keys = await db
+    .select({ id: menuItems.id, itemKey: menuItems.itemKey })
+    .from(menuItems)
+    .where(and(eq(menuItems.menuRevisionId, menu.menuRevisionId), inArray(menuItems.id, lines.map((line) => line.menuItemId))));
+  const keyOf = new Map(keys.map((row) => [row.id, row.itemKey]));
+  const lockLines = lines.map((line) => {
+    const itemKey = keyOf.get(line.menuItemId);
+    if (itemKey === undefined) throw new Error("a priced item has no key in its own revision");
+    return { itemKey, quantity: line.quantity };
+  });
+
   const [destination] = await db
     .select({ id: paymentDestinations.id, version: paymentDestinations.version })
     .from(paymentDestinations)
@@ -96,6 +110,7 @@ export async function priceBasket(db: Pick<Db, "select">, input: { outletId: str
     outletId: menu.outlet.id,
     rail: "paypal",
     lines,
+    lockLines,
     totalSgdCents: sumSgd(lines.map((line) => line.lineSgdCents)),
     currency: "SGD",
     menuRevisionId: menu.menuRevisionId,
