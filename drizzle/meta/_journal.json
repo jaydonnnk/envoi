@@ -85,6 +85,20 @@
       "when": 1791952036885,
       "tag": "0011_s6_web_role_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791953297667,
+      "tag": "0012_s6_enrollment_pending_default",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791953298093,
+      "tag": "0013_s6_web_role_insert_columns",
+      "breakpoints": true
     }
   ]
 }

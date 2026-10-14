@@ -172,7 +172,9 @@ export const enrollments = pgTable(
       .notNull()
       .unique()
       .references(() => outlets.id),
-    status: text("status").notNull(),
+    // The web role cannot write this column (migration 0013), so an enrollment it creates is
+    // always pending; only the operator approves one.
+    status: text("status").notNull().default("pending"),
     isDemo: boolean("is_demo").notNull(),
     evidenceRef: text("evidence_ref"),
     approvedAt: timestamp("approved_at", { withTimezone: true }),

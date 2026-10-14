@@ -1,6 +1,6 @@
-import { and, asc, eq, isNotNull, isNull } from "drizzle-orm";
+import { and, asc, eq, isNotNull, isNull, sql } from "drizzle-orm";
 import { recordAudit } from "@/domain/audit/events";
-import { enrollments, menuRevisions, merchantMemberships, outlets } from "@/lib/db/schema";
+import { enrollments, merchantMemberships, outlets } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
 import { newId } from "@/lib/ids";
@@ -85,9 +85,13 @@ export async function createMerchantOutlet(db: Db, input: OutletInput & { userId
 
     const outletId = newId("out");
     const menuRevisionId = newId("mrv");
-    await tx.insert(outlets).values({ id: outletId, name: input.name, area: input.area, isDemoFixture: membership.isDemo, createdAt: input.now });
-    await tx.insert(enrollments).values({ id: newId("enr"), outletId, status: "pending", isDemo: membership.isDemo, createdAt: input.now });
-    await tx.insert(menuRevisions).values({ id: menuRevisionId, outletId, status: "draft", version: 1, createdAt: input.now });
+    // The web role may insert only these columns (migration 0013), and Drizzle's insert names every
+    // column, so these three rows are written with explicit column lists. The database then refuses
+    // an outlet born published, an enrollment born approved and a revision born confirmed.
+    const createdAt = input.now.toISOString();
+    await tx.execute(sql`insert into outlets (id, name, area, is_demo_fixture, created_at) values (${outletId}, ${input.name}, ${input.area}, ${membership.isDemo}, ${createdAt})`);
+    await tx.execute(sql`insert into enrollments (id, outlet_id, is_demo, created_at) values (${newId("enr")}, ${outletId}, ${membership.isDemo}, ${createdAt})`);
+    await tx.execute(sql`insert into menu_revisions (id, outlet_id, status, version, created_at) values (${menuRevisionId}, ${outletId}, 'draft', 1, ${createdAt})`);
     await tx.update(merchantMemberships).set({ outletId }).where(eq(merchantMemberships.id, membership.id));
     await recordAudit(tx, {
       at: input.now,
