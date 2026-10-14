@@ -1,5 +1,5 @@
 import { and, eq, isNull } from "drizzle-orm";
-import { appError, type AppError } from "@/lib/errors";
+import { appError, unknownRouteError, type AppError } from "@/lib/errors";
 import type { Auth } from "@/lib/auth";
 import { agentTokens, merchantMemberships, operatorGrants } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
@@ -117,7 +117,7 @@ export function isOutletMember(value: OutletMemberPrincipal | AppError): value i
 // a grant, gets the same 404 not_found and learns nothing about the route.
 export type OperatorPrincipal = { kind: "operator"; userId: string };
 
-const operatorNotFound = () => appError("not_found", "Not found.");
+const operatorNotFound = unknownRouteError;
 
 export async function requireOperator(auth: Auth, db: Db, headers: Headers): Promise<OperatorPrincipal | AppError> {
   if (headers.has("authorization")) return operatorNotFound();

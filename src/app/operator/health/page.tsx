@@ -11,11 +11,13 @@ import { systemNow } from "@/lib/time";
 export const dynamic = "force-dynamic";
 
 // One guard read per request, shared by the metadata and the page. The metadata is guarded too:
-// otherwise its title reaches everyone in the not-found payload and tells the route apart.
+// otherwise its title reaches everyone in the not-found payload and tells the route apart. It
+// returns the layout's defaults rather than calling notFound(), which from metadata answers an error
+// shell with no page body instead of the not-found page an unknown address gets.
 const isOperatorRequest = cache(async () => isOperator(await requireOperator(getAuth(), webDb(), await headers())));
 
 export async function generateMetadata(): Promise<Metadata> {
-  if (!(await isOperatorRequest())) notFound();
+  if (!(await isOperatorRequest())) return {};
   return { title: "Operator health | Envoi", robots: { index: false, follow: false } };
 }
 
@@ -67,7 +69,15 @@ function Capacity({ health }: { health: OperatorHealth }) {
   const { capacity } = health;
   return (
     <section className="card" aria-labelledby="capacity-heading">
-      <h2 id="capacity-heading">Capacity</h2>
+      <div className="rail-head">
+        <h2 id="capacity-heading">Capacity</h2>
+        {capacity.databaseSizeBytes !== null && <span className={`chip ${capacity.alert ? "warn" : "ok"}`}>{capacity.alert ? "Over 70%" : "Under 70%"}</span>}
+      </div>
+      {capacity.alert && (
+        <p className="status" role="alert">
+          Storage has reached 70% of the 1 GB project limit. At the limit, inserts, updates and deletes fail; check the Neon console and free space.
+        </p>
+      )}
       <div className="row">
         <span>Database size</span>
         <strong className="money">{capacity.databaseSizeBytes === null ? "not measured yet" : megabytes(capacity.databaseSizeBytes)}</strong>
