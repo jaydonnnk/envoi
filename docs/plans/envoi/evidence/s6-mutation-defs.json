@@ -304,5 +304,44 @@
     "new": "    if (!account) throw"
    }
   ]
+ },
+ {
+  "id": "grant-outlet-insert",
+  "test": "the web role cannot create a published outlet, an approved enrollment or a confirmed revision",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "grant the web role INSERT on every column of outlets again",
+  "edits": [
+   {
+    "file": "drizzle/0013_s6_web_role_insert_columns.sql",
+    "old": "GRANT INSERT (\"id\", \"name\", \"area\", \"is_demo_fixture\", \"created_at\") ON TABLE public.\"outlets\" TO envoi_web;",
+    "new": "GRANT INSERT ON TABLE public.\"outlets\" TO envoi_web;"
+   }
+  ]
+ },
+ {
+  "id": "grant-enrollment-insert",
+  "test": "the web role cannot create a published outlet, an approved enrollment or a confirmed revision",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "grant the web role INSERT on every column of enrollments again",
+  "edits": [
+   {
+    "file": "drizzle/0013_s6_web_role_insert_columns.sql",
+    "old": "GRANT INSERT (\"id\", \"outlet_id\", \"is_demo\", \"created_at\") ON TABLE public.\"enrollments\" TO envoi_web;",
+    "new": "GRANT INSERT ON TABLE public.\"enrollments\" TO envoi_web;"
+   }
+  ]
+ },
+ {
+  "id": "grant-revision-insert",
+  "test": "the web role cannot create a published outlet, an approved enrollment or a confirmed revision",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "grant the web role INSERT on every column of menu_revisions again",
+  "edits": [
+   {
+    "file": "drizzle/0013_s6_web_role_insert_columns.sql",
+    "old": "GRANT INSERT (\"id\", \"outlet_id\", \"status\", \"version\", \"created_at\") ON TABLE public.\"menu_revisions\" TO envoi_web;",
+    "new": "GRANT INSERT ON TABLE public.\"menu_revisions\" TO envoi_web;"
+   }
+  ]
  }
 ]

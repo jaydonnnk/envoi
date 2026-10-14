@@ -1,4 +1,5 @@
 import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import * as schema from "@/lib/db/schema";
 import { issueAgentToken } from "@/operator/cli";
@@ -349,6 +350,22 @@ describe("merchant sign-in and manual menu draft", () => {
     expect(refused.status).toBe(400);
     expect((await body(refused)).error).toMatchObject({ code: "validation_failed", details: { reason: "outlet_published" } });
     expect(await merchantState()).toEqual(before);
+  });
+
+  it("the web role cannot create a published outlet, an approved enrollment or a confirmed revision", async () => {
+    const web = postgres(fixture.database.webUrl, { max: 1, onnotice: () => {} });
+    try {
+      const [fixtureRevision] = await fixture.database.admin<{ id: string }[]>`select published_menu_revision_id as id from outlets where id = ${fixture.outletId}`;
+      const { outletId } = await merchantWithOutlet("grants");
+      const outcome = async (query: Promise<unknown>) => query.then(() => "inserted", (err: { message: string }) => err.message);
+
+      expect(await outcome(web`insert into outlets (id, name, area, is_demo_fixture, created_at, published_menu_revision_id) values ('out_grant_test', 'Born published', 'Nowhere', true, now(), ${fixtureRevision!.id})`)).toMatch(/permission denied/);
+      expect(await outcome(web`insert into enrollments (id, outlet_id, is_demo, created_at, status, approved_at) values ('enr_grant_test', ${fixture.outletId}, true, now(), 'approved', now())`)).toMatch(/permission denied/);
+      expect(await outcome(web`insert into menu_revisions (id, outlet_id, status, version, created_at, confirmed_at) values ('mrv_grant_test', ${outletId}, 'confirmed', 1, now(), now())`)).toMatch(/permission denied/);
+      expect(await fixture.database.admin`select id from outlets where id = 'out_grant_test' union all select id from enrollments where id = 'enr_grant_test' union all select id from menu_revisions where id = 'mrv_grant_test'`).toHaveLength(0);
+    } finally {
+      await web.end({ timeout: 5 });
+    }
   });
 
   it("public signup is refused", async () => {
