@@ -164,7 +164,57 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
   - No runner runs against Neon, by the user's choice, so the deployed view shows no heartbeat and "Overdue" until a scheduled workflow exists (S15), and the two uncertain S2 purchases stay listed as overdue work.
   - Neon's provider storage figure is not read; the page states the limitation.
   - The operator grant has no revoke subcommand; revocation is a `revoked_at` written by hand.
+- **Review fixes, 2026-10-14:** an independent review found six minor findings; all are fixed with their own tests and mutations, including the operator page answering non-operators as an unknown address and the runner stopping 10,000 ms before `T_MAINT_RUN`; see [S5 review fixes](#s5-review-fixes-2026-10-14).
 - **Local housekeeping:** a cleanup pattern of `envoi_t_%` also matched the empty base database `envoi_test`, because `_` is a wildcard in `LIKE`; it was recreated empty, and the integration tests pass from it.
+
+### S5 review fixes, 2026-10-14
+
+- **Review:** an independent review of S5 on 2026-10-14 (verdict PASS WITH MINOR) found six minor findings, F1-F6; none moves money, captures, or shows a non-paid purchase as paid.
+  It confirmed on `6a67147` typecheck, lint, 163 of 163 tests, 26 of 26 mutations, the runner's build graph, both manual runs and disjoint claims under six concurrent claimers.
+- **Authorizations, 2026-10-14:** after seeing the findings the user chose, by multiple choice, to fix all of F1-F6 before S7 on a new branch from `main`, each with a test and a mutation ("Fix first, then S7"), and then authorized committing, pushing the branch and fast-forwarding `main` and pushing, which deploys.
+- **Branch:** `envoi/slice-5-review-fixes`, from `main` at `6a67147`; commits `0268578` (F5), `13dcb2a` (F1, F2, F4, F6), `587989f` (F3, and the F4 view), `eb21a84` (tests and mutation definitions), then the mutation results and this record.
+- **Every finding was reproduced first [verified], 2026-10-14,** with the review's probes on a disposable local PostgreSQL 18 database and FIXTURE PayPal, and for F3 and F5 end to end:
+  - F1: eleven `capture_unknown` attempts over three runs got `maintenance_checks` 3,3,3,3,3,3,3,3,3,3,0; the newest was never read.
+  - F2: a run reported `reconcile_attempts` failed with `reconcile_attempts_timeout`, and about 1.5 seconds later the purchase went from `uncertain` to `paid`.
+  - F6: one debounced and one in-flight attempt were each counted as checked (`processed` 2, `maintenance_checks` 1 each) with no PayPal read.
+  - F5: the compiled runner started through a symlink, and from a copy in a directory with a space, exited 0 with no output and no run; started directly it ran.
+  - F3, on `next build` and `next start` with no session: `/operator/health` answered 6,118 bytes, `<html id="__next_error__">` with no `<main>`, while `/operator/zzz-unknown` and `/zzz-unknown` answered the 6,866-byte not-found page; `GET /api/v1/health/operator` answered a 95-byte JSON `not_found` while unknown `/api/v1` paths answered the HTML page.
+  - F4: read from the code; the view showed the storage share with no alert.
+- **Fixes:**
+  - F1: `claimDueAttempts` in `src/domain/maintenance/due.ts` orders by `maintenance_checked_at` nulls first, then by due time, and processes in that order, so each due attempt is read in turn.
+  - F2: in `src/domain/maintenance/tasks.ts` a task that times out takes no further item, and the next task starts only once the item it was running has finished, never past the run's deadline.
+    Related: the kill timer in `src/maintenance/run.ts` fired at the same `T_MAINT_RUN` as the work deadline; the run now stops taking work `RUN_FINISH_RESERVE_MS` (10,000 ms, **[hypothesis]** a reviewed constant) earlier, at 110,000 ms, so its report is written first.
+    `runMaintenance` takes an optional task list, `MAINTENANCE_TASKS` by default, so a test can shorten one task's timeout.
+  - F6: only the reconcile outcomes `read`, `no_record` and `no_order` count as a maintenance check; `in_flight` and `debounced` report `partial` with that reason, record no check and keep the attempt first in line.
+  - F4: `isCapacityAlert` in `src/domain/maintenance/health.ts` is true from 70% of the 10^9-byte limit; `record_capacity` logs at `warn` and the health view shows an "Over 70%" chip with an alert line.
+  - F5: `isEntrypoint` in `src/lib/entrypoint.ts` compares `import.meta.url` with `argv[1]` resolved through `realpath` and encoded by `pathToFileURL`; the runner, `src/lib/db/migrate.ts` and `src/operator/cli.ts` all used the old comparison and now use it.
+  - F3: the review's hypothesis, `notFound()` thrown from `generateMetadata`, was refuted: with the metadata returning `{}`, the page still answered the error shell.
+    Next.js 16.4 renders any page-level `notFound()` during streaming as that shell, which only client JavaScript fills in, so no page-level change can match an unknown address.
+    `src/proxy.ts`, matched to `/operator/:path*`, rewrites every request that `requireOperator` refuses to `/_envoi/unknown-route`, which no route matches, before any rendering; the page keeps its own guard and its metadata returns the layout defaults.
+    `src/app/api/v1/[...path]/route.ts` answers every unknown `/api/v1` path with `unknownRouteError()`, the same 404 `not_found` that `requireOperator` returns, exporting only `GET` as the operator route does.
+- **F3 on a production build [verified], 2026-10-14,** `next build` and `next start` on a disposable database, with a FIXTURE operator and a FIXTURE merchant without the flag made by the operator functions, passwords generated in memory, cookies handed to the browser pane by a one-shot local helper and never shown:
+  - With no session, an anonymous session and the merchant, `/operator/health`, `/operator/zzz-unknown`, `/operator` and `/zzz-unknown` each answered 404 with the same 6,866-byte body (SHA-256 prefix `dd66d6d8a3f9`), and the RSC payloads of `/operator/health` and `/operator/zzz-unknown` were identical.
+  - `GET /api/v1/health/operator`, `/api/v1/health/zzz-unknown`, `/api/v1/zzz-unknown` and `/api/v1/outlets/out_x/zzz` each answered the same 95-byte JSON `not_found` with identical headers; `POST` answered 405 on both kinds.
+  - The operator got the view (200) and the JSON (200), and `/operator/zzz-unknown` still the not-found page.
+  - Residual, recorded rather than fixed: responses under `/operator/*` for non-operators carry Next's `x-middleware-rewrite` header naming the rewrite target, which root-level unknown addresses do not, so the operator area as a whole is visible, but not which operator page exists; Next.js sets that header itself (`resolve-routes.js`).
+  - Screens at 390px and 1280px: the not-found page for an anonymous browser, and the operator view with a FIXTURE capacity reading of 750,000,000 bytes showing "Over 70%" and the alert, both with the test-environment badge and the sandbox notice and no horizontal scroll; the alert first rendered as fine print and now uses the existing amber `status` style.
+  Inspected, not saved; the server was stopped and the database dropped.
+- **Tests [verified]:** typecheck, lint, 33 unit and 140 integration tests pass locally on PostgreSQL 18; counted from `git diff 6a67147`, the fixes add 2 unit tests in `tests/unit/entrypoint.test.ts` and 8 integration tests in `tests/integration/maintenance.test.ts`:
+  - `maintenance checks every due attempt in turn when more are due than one run takes` (F1);
+  - `a task that times out takes no further item and the next task waits for the one it was running` and `a run stops taking work 10,000 ms before T_MAINT_RUN to finish its report` (F2);
+  - `an operator page answers everyone but the operator as an unknown address` and `an unknown API path answers exactly what the operator route answers everyone else` (F3);
+  - `the operator is alerted when storage reaches 70% of the project limit` (F4);
+  - `the runner started through a symlink in a path with a space still runs`, `a script started through a symlink in a path with a space is its own entrypoint` and `every script decides it is the entrypoint through isEntrypoint` (F5);
+  - `an attempt skipped as in flight or just read is not counted as checked` (F6).
+  `the operator page is the not-found page for everyone but the operator` now asserts that the metadata returns `{}` for a non-operator instead of throwing.
+- **Mutations [verified], 38 of 38 on `eb21a84` with a clean tree, each alone, failing its named test on an AssertionError, restored byte-identical (SHA-256) and rerun passing;** definitions in [`s5-mutation-defs.json`](evidence/s5-mutation-defs.json), and the results replace [`s5-mutations.json`](evidence/s5-mutations.json); the earlier record of 26 on `c85757e` stays in Git history.
+  - New, one per guard: `claim-least-recently-checked` (F1); `timeout-takes-more-work`, `timeout-no-wait` and `finish-reserve` (F2); `proxy-passes-everyone`, `unknown-api-default` and `operator-metadata-notfound` (F3); `capacity-alert-boundary` and `capacity-alert-hidden` (F4); `entrypoint-plain-url` and `cli-entrypoint-unresolved` (F5); `skipped-counted-checked` (F6).
+  - Changed: `operator-metadata-guard` now removes the guard before the metadata's `return {}`, failing because the operator title reaches a non-operator.
+  - The 25 other S5 mutations still prove on the fixed code.
+- **Deviations recorded, no approved decision changed:** `src/proxy.ts`, `src/lib/entrypoint.ts` and `src/app/api/v1/[...path]/route.ts` are files beyond Gate 3's list; `runMaintenance` gains an optional fourth parameter; the S5 record's "stops taking work at `T_MAINT_RUN`" is now 10,000 ms before it.
+- **Noticed, not changed:** the receipt, review and PayPal return and cancel pages call `notFound()` the same way, so a browser without JavaScript gets an empty page instead of their not-found page; with JavaScript the not-found page shows.
+  Pre-existing and outside F3; proposed as a separate fix.
+- **CI [verified]:** passed on `eb21a84` on the branch (run 38576267836).
 
 ### S6 Merchant sign-in and manual menu draft, 2026-10-14
 
