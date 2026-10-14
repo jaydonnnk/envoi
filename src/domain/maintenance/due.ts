@@ -17,24 +17,33 @@ export const attemptDue = (now: Date): SQL => or(inArray(paymentAttempts.state, 
 
 // Claims up to `limit` due attempts for `owner` until T_LEASE from now. An attempt another runner
 // still holds is skipped, so overlapping runs take disjoint attempts; a claim left by a crashed run
-// becomes claimable again once its T_LEASE passes.
+// becomes claimable again once its T_LEASE passes. Attempts never checked come first, then the one
+// checked longest ago: an attempt a read leaves uncertain keeps its updated_at, so ordering by due
+// time alone would hand the same oldest attempts to every run and never reach the rest.
 export async function claimDueAttempts(db: Db, now: Date, limit: number, owner: string): Promise<DueRow[]> {
   const claimFree = or(isNull(paymentAttempts.maintenanceClaimExpiresAt), lte(paymentAttempts.maintenanceClaimExpiresAt, now));
   const candidates = db
     .select({ id: paymentAttempts.id })
     .from(paymentAttempts)
     .where(and(attemptDue(now), claimFree))
-    .orderBy(asc(sql`coalesce(${paymentAttempts.providerReadDueAt}, ${paymentAttempts.updatedAt})`), asc(paymentAttempts.id))
+    .orderBy(
+      sql`${paymentAttempts.maintenanceCheckedAt} asc nulls first`,
+      asc(sql`coalesce(${paymentAttempts.providerReadDueAt}, ${paymentAttempts.updatedAt})`),
+      asc(paymentAttempts.id),
+    )
     .limit(limit)
     .for("update", { skipLocked: true });
   const claimed = await db
     .update(paymentAttempts)
     .set({ maintenanceClaimOwner: owner, maintenanceClaimExpiresAt: deadlineOf("T_LEASE", now) })
     .where(and(inArray(paymentAttempts.id, candidates), claimFree))
-    .returning({ id: paymentAttempts.id, providerReadDueAt: paymentAttempts.providerReadDueAt, updatedAt: paymentAttempts.updatedAt });
+    .returning({ id: paymentAttempts.id, checkedAt: paymentAttempts.maintenanceCheckedAt, providerReadDueAt: paymentAttempts.providerReadDueAt, updatedAt: paymentAttempts.updatedAt });
+  // RETURNING keeps no order, so the claim order is restored for processing.
+  const checked = (at: Date | null) => at?.getTime() ?? Number.NEGATIVE_INFINITY;
   return claimed
-    .map((row) => ({ id: row.id, dueAt: row.providerReadDueAt ?? row.updatedAt }))
-    .sort((a, b) => a.dueAt.getTime() - b.dueAt.getTime() || a.id.localeCompare(b.id));
+    .map((row) => ({ id: row.id, checkedAt: row.checkedAt, dueAt: row.providerReadDueAt ?? row.updatedAt }))
+    .sort((a, b) => checked(a.checkedAt) - checked(b.checkedAt) || a.dueAt.getTime() - b.dueAt.getTime() || a.id.localeCompare(b.id))
+    .map(({ id, dueAt }) => ({ id, dueAt }));
 }
 
 // Gives the claim back and records the check. Only the owner's claim is released.

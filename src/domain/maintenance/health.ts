@@ -11,6 +11,14 @@ import { attemptDue, isHeartbeatOverdue } from "./due";
 // errs high.
 export const NEON_STORAGE_LIMIT_BYTES = 1_000_000_000;
 
+// Gate 3's capacity table: record_capacity "alerts the operator at 70%" of the project limit. An
+// operator alert only; no import or payment admission depends on it (R2).
+export const CAPACITY_ALERT_SHARE = 0.7;
+
+export function isCapacityAlert(databaseSizeBytes: number | null): boolean {
+  return databaseSizeBytes !== null && databaseSizeBytes >= CAPACITY_ALERT_SHARE * NEON_STORAGE_LIMIT_BYTES;
+}
+
 export const CAPACITY_LIMITATION =
   "pg_database_size covers this database only; Neon's history and restore storage also counts against the project limit and is not included. Read the Neon console for the provider figure.";
 
@@ -20,7 +28,7 @@ export type OperatorHealth = {
   checkedAt: string;
   heartbeat: { lastAt: string | null; overdue: boolean; overdueAfterMinutes: number };
   lastRun: { id: string; trigger: string; status: string; startedAt: string; finishedAt: string | null; tasks: MaintenanceReportJson["tasks"] } | null;
-  capacity: { databaseSizeBytes: number | null; measuredAt: string | null; limitBytes: number; share: number | null; limitation: string };
+  capacity: { databaseSizeBytes: number | null; measuredAt: string | null; limitBytes: number; share: number | null; alert: boolean; limitation: string };
   overdueWork: { dueAttempts: number; uncertainPurchases: number; items: OverdueItem[] };
 };
 
@@ -69,6 +77,7 @@ export async function readOperatorHealth(db: Pick<Db, "select">, now: Date): Pro
       measuredAt: measured?.at.toISOString() ?? null,
       limitBytes: NEON_STORAGE_LIMIT_BYTES,
       share: measured?.bytes == null ? null : measured.bytes / NEON_STORAGE_LIMIT_BYTES,
+      alert: isCapacityAlert(measured?.bytes ?? null),
       limitation: CAPACITY_LIMITATION,
     },
     overdueWork: {

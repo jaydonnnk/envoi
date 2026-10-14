@@ -1,10 +1,11 @@
-import { reconcileAttempt } from "@/domain/payments/attempts";
+import { reconcileAttempt, type ReconcileOutcome } from "@/domain/payments/attempts";
 import { applyDerivedTransitions } from "@/domain/purchases/state";
 import type { PayPalReadClient } from "@/integrations/paypal/orders-read";
 import type { Db } from "@/lib/db/web";
 import { newId } from "@/lib/ids";
 import type { RedactingLogger } from "@/lib/log";
 import { deadlineOf, type Now } from "@/lib/time";
+import { isCapacityAlert } from "./health";
 import { claimDueAttempts, expiredReviews, finishRun, purgeExpiredSessions, recordDatabaseSize, releaseAttemptClaim, writeHeartbeat } from "./due";
 
 // The maintenance run (Gate 3 Maintenance; S5). A fixed, finite list of tasks, each reading or
@@ -54,10 +55,16 @@ const recordCapacity: MaintenanceTask = {
   claim: once("record_capacity"),
   async run(db, _work, deps, run) {
     const bytes = await recordDatabaseSize(db, run.runId);
-    deps.log("info", "maintenance_capacity", { runId: run.runId, databaseSizeBytes: bytes });
+    // At 70% of the project limit the operator is alerted, here and on the health view.
+    deps.log(isCapacityAlert(bytes) ? "warn" : "info", "maintenance_capacity", { runId: run.runId, databaseSizeBytes: bytes });
     return { status: "ok", processed: 1 };
   },
 };
+
+// Reconcile outcomes that read the attempt's record: only these count as a maintenance check.
+// "in_flight" (a completion holds the capture lease) and "debounced" (a provider read happened
+// within T_PROVIDER_READ_DEBOUNCE) skip the read, so the attempt stays first in line for the next run.
+const CHECKED_OUTCOMES: readonly ReconcileOutcome[] = ["read", "no_record", "no_order"];
 
 // Reads PayPal's record of each due attempt through the read-only client and applies what it
 // proves. A capture whose outcome is unknown is never replayed here: replay is null, so an attempt
@@ -73,9 +80,9 @@ const reconcileAttempts: MaintenanceTask = {
     let checked = false;
     try {
       const outcome = await reconcileAttempt({ db, read: deps.paypal, replay: null, now: deps.now, actor: "maintenance" }, work.id);
-      checked = outcome !== "provider_unreachable";
+      checked = CHECKED_OUTCOMES.includes(outcome);
       deps.log("info", "maintenance_reconcile", { runId: run.runId, attemptId: work.id, outcome });
-      return checked ? { status: "ok", processed: 1 } : { status: "partial", processed: 0, blockedReason: "provider_unreachable" };
+      return checked ? { status: "ok", processed: 1 } : { status: "partial", processed: 0, blockedReason: outcome };
     } finally {
       await releaseAttemptClaim(db, work.id, run.runId, checked ? deps.now() : null);
     }
@@ -128,15 +135,15 @@ function report(name: TaskName, outcome: TaskOutcome): TaskReport {
   return { name, status: outcome.status, processed: outcome.processed, reason: outcome.status === "partial" ? outcome.blockedReason : null };
 }
 
-// Resolves with `onTimeout` once `ms` pass. The work itself is not cancelled; the entrypoint ends
-// the process, and with it any call still running, when the run is over.
-async function withTimeout<T>(ms: number, work: () => Promise<T>, onTimeout: T): Promise<T> {
+// Resolves with `work`'s result, or with `onTimeout()` once `ms` pass. The timer calls `onTimeout`
+// itself, so whatever it marks is marked before any other callback runs. The work is not stopped.
+async function withTimeout<T>(ms: number, work: Promise<T>, onTimeout: () => T): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<T>((resolve) => {
-    timer = setTimeout(() => resolve(onTimeout), Math.max(0, ms));
+    timer = setTimeout(() => resolve(onTimeout()), Math.max(0, ms));
   });
   try {
-    return await Promise.race([work(), timeout]);
+    return await Promise.race([work, timeout]);
   } finally {
     clearTimeout(timer);
   }
@@ -144,26 +151,41 @@ async function withTimeout<T>(ms: number, work: () => Promise<T>, onTimeout: T):
 
 const RUN_DEADLINE = "run_deadline";
 
+// The run stops taking work this long before T_MAINT_RUN, leaving time to write its report and
+// close its connection before the entrypoint's T_MAINT_RUN kill timer ends the process.
+// [hypothesis] 10 seconds, a reviewed constant.
+export const RUN_FINISH_RESERVE_MS = 10_000;
+
 // One finite run: the heartbeat, then each task in order, each claiming its due work once and
-// processing it until the work runs out, the task's own timeout or the run's T_MAINT_RUN deadline.
-// No task loops back for more work. A failed outcome is operator-visible and fails the run.
-export async function runMaintenance(db: Db, deps: MaintenanceDeps, trigger: RunContext["trigger"]): Promise<MaintenanceReport> {
+// processing it until the work runs out, the task's own timeout or the run's deadline, which is
+// T_MAINT_RUN less RUN_FINISH_RESERVE_MS. No task loops back for more work. A task that times out
+// takes no further item, and the next task starts only once the item it was running has finished,
+// or not at all once the run's deadline passes. A failed outcome is operator-visible and fails the
+// run. `tasks` is MAINTENANCE_TASKS except in tests, which shorten a task's timeout.
+export async function runMaintenance(
+  db: Db,
+  deps: MaintenanceDeps,
+  trigger: RunContext["trigger"],
+  tasks: readonly MaintenanceTask[] = MAINTENANCE_TASKS,
+): Promise<MaintenanceReport> {
   const run: RunContext = { runId: newId("mnt"), trigger };
   const startedAt = deps.now();
-  const deadline = deadlineOf("T_MAINT_RUN", startedAt).getTime();
+  const deadline = deadlineOf("T_MAINT_RUN", startedAt).getTime() - RUN_FINISH_RESERVE_MS;
   const remaining = () => deadline - deps.now().getTime();
-  const tasks: TaskReport[] = [];
+  const reports: TaskReport[] = [];
 
-  for (const task of MAINTENANCE_TASKS) {
+  for (const task of tasks) {
     if (remaining() <= 0) {
-      tasks.push(report(task.name, { status: "partial", processed: 0, blockedReason: RUN_DEADLINE }));
+      reports.push(report(task.name, { status: "partial", processed: 0, blockedReason: RUN_DEADLINE }));
       continue;
     }
     let processed = 0;
     let blockedReason: string | null = null;
+    let timedOut = false;
     const work = async (): Promise<TaskOutcome> => {
       const claimed = await task.claim(db, task.name === "heartbeat" ? startedAt : deps.now(), task.limit, run);
       for (const item of claimed) {
+        if (timedOut) return { status: "partial", processed, blockedReason: `${task.name}_timeout` };
         if (remaining() <= 0) return { status: "partial", processed, blockedReason: RUN_DEADLINE };
         const outcome = await task.run(db, item, deps, run);
         if (outcome.status === "failed") return outcome;
@@ -172,21 +194,37 @@ export async function runMaintenance(db: Db, deps: MaintenanceDeps, trigger: Run
       }
       return blockedReason === null ? { status: "ok", processed } : { status: "partial", processed, blockedReason };
     };
+    const running = work();
     let outcome: TaskOutcome;
     try {
-      outcome = await withTimeout(Math.min(task.timeoutMs, remaining()), work, { status: "failed", reason: `${task.name}_timeout`, operatorVisible: true });
+      outcome = await withTimeout(Math.min(task.timeoutMs, remaining()), running, () => {
+        timedOut = true;
+        return { status: "failed", reason: `${task.name}_timeout`, operatorVisible: true };
+      });
     } catch (err) {
       outcome = { status: "failed", reason: err instanceof Error ? err.name : "Error", operatorVisible: true };
     }
-    tasks.push(report(task.name, outcome));
+    // The item a timed-out task was running cannot be stopped; the next task waits for it, until
+    // the run's deadline at most.
+    if (timedOut) {
+      await withTimeout(
+        remaining(),
+        running.then(
+          () => undefined,
+          () => undefined,
+        ),
+        () => undefined,
+      );
+    }
+    reports.push(report(task.name, outcome));
     // Without a heartbeat row there is nowhere to report to; the run stops here and fails.
     if (task.name === "heartbeat" && outcome.status !== "ok") break;
   }
 
-  const operatorVisible = tasks.some((task) => task.status === "failed");
+  const operatorVisible = reports.some((task) => task.status === "failed");
   const finishedAt = deps.now();
-  if (tasks[0]?.status === "ok") {
-    await finishRun(db, run.runId, finishedAt, { tasks, operatorVisible });
+  if (reports[0]?.status === "ok") {
+    await finishRun(db, run.runId, finishedAt, { tasks: reports, operatorVisible });
   }
-  return { runId: run.runId, trigger, startedAt, finishedAt, tasks, operatorVisible };
+  return { runId: run.runId, trigger, startedAt, finishedAt, tasks: reports, operatorVisible };
 }
