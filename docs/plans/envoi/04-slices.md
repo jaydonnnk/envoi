@@ -353,7 +353,7 @@ The merchant signs in at `/merchant/setup`, creates an unpublished outlet and ty
 A blank price stays blank and blocks confirmation until the merchant supplies it, and then the exact complete revision is confirmed.
 A buyer cannot see the draft or reach any merchant route.
 Signing in on a browser that already holds a buyer receipt keeps that purchase owned by its buyer session, which stays readable with that session, and grants the merchant account nothing extra.
-The browser itself can no longer open that receipt once the merchant session replaces the buyer session, so `/merchant/setup` says so before sign-in (wording decided by you on 2026-10-14; Gate 3 unchanged).
+The browser itself can no longer open that receipt once the merchant session replaces the buyer session, so `/merchant/setup` says so before sign-in (a Gate 4 amendment you confirmed on 2026-10-14; Gate 3 unchanged).
 
 **Builds.**
 Email and password sign-in for allowlisted accounts with public signup disabled; `onLinkAccount` creating no membership; `merchant_memberships` and `enrollments`; `requireOutletMembership`; `POST /merchant/outlets` and `PATCH /merchant/outlets/{id}`; `PUT menu-draft` with a revision conflict check; `POST confirm`; `assessMenuCompleteness`; operator `create-merchant` and `approve-membership`.
