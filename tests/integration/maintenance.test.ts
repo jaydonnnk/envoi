@@ -317,6 +317,8 @@ describe("maintenance runner (fixture PayPal)", () => {
     }
 
     it("only an operator reads the operator health view", async () => {
+      // Its own run, so the view has a heartbeat and a capacity reading whatever ran before.
+      await runMaintenance(maintenance.db, deps(createFakePayPal(), () => new Date()), "manual");
       const anonymous = await anonymousCookie(routes.auth.POST);
       await expectNotFound(await healthOf(anonymous));
 
