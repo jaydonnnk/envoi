@@ -1,4 +1,5 @@
-import { and, eq } from "drizzle-orm";
+import { hashPassword } from "better-auth/crypto";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { recordAudit } from "@/domain/audit/events";
@@ -127,9 +128,129 @@ export async function issueAgentToken(db: OperatorDb, label: string, now: Date =
   return { agentTokenId, label: trimmed, token };
 }
 
-const COMMANDS = ["seed-demo-fixture", "assign-paypal-destination", "issue-agent-token"];
+// Merchant accounts (S6). Public signup is off, so this is the only way a permanent account comes
+// into being. The password is typed by the operator at a hidden prompt and passed here in memory;
+// only Better Auth's scrypt hash is stored, and the password is never printed, logged or written.
 
-const USAGE = "usage: npm run operator -- seed-demo-fixture | assign-paypal-destination <outletId> <sellerMerchantId> | issue-agent-token <label>";
+export const PASSWORD_LENGTH = { min: 12, max: 128 } as const;
+
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export type MerchantAccountResult = { status: "created" | "unchanged"; userId: string };
+
+// Creates the account only when no account has this email. Run again, it changes nothing, and in
+// particular never resets the existing password. The account holds no membership until
+// approve-membership grants one.
+export async function createMerchant(db: OperatorDb, input: { email: string; name: string; password: string }, now: Date = new Date()): Promise<MerchantAccountResult> {
+  const email = input.email.trim().toLowerCase();
+  const name = input.name.trim();
+  if (!EMAIL.test(email) || email.length > 254) throw new Error("The email must look like name@example.com.");
+  if (name.length < 1 || name.length > 64) throw new Error("The name must be 1 to 64 characters.");
+  if (input.password.length < PASSWORD_LENGTH.min || input.password.length > PASSWORD_LENGTH.max) {
+    throw new Error(`The password must be ${PASSWORD_LENGTH.min} to ${PASSWORD_LENGTH.max} characters.`);
+  }
+  const hash = await hashPassword(input.password);
+  return db.transaction(async (tx) => {
+    const userId = newId("usr");
+    const inserted = await tx
+      .insert(schema.user)
+      .values({ id: userId, name, email, emailVerified: false, isAnonymous: false, createdAt: now, updatedAt: now })
+      .onConflictDoNothing({ target: schema.user.email })
+      .returning({ id: schema.user.id });
+    if (inserted.length === 0) {
+      const [existing] = await tx.select({ id: schema.user.id }).from(schema.user).where(eq(schema.user.email, email));
+      if (!existing) throw new Error("Account conflict without an account; inspect it by hand.");
+      return { status: "unchanged", userId: existing.id };
+    }
+    await tx.insert(schema.account).values({ id: newId("acc"), accountId: userId, providerId: "credential", userId, password: hash, createdAt: now, updatedAt: now });
+    await recordAudit(tx, { at: now, actor: "operator", action: "merchant_account_created", operatorVisible: true, details: { userId } });
+    return { status: "created", userId };
+  });
+}
+
+export type MembershipResult = { status: "created" | "unchanged"; userId: string; membershipId: string };
+
+// Approves one unbound membership for a permanent account: the merchant's next outlet creation
+// binds it to that outlet. An account that already holds an unbound membership keeps it and
+// nothing changes. An anonymous or unknown account is refused.
+export async function approveMembership(db: OperatorDb, input: { email: string; evidenceRef?: string | null }, now: Date = new Date()): Promise<MembershipResult> {
+  const email = input.email.trim().toLowerCase();
+  const evidenceRef = input.evidenceRef?.trim() || null;
+  if (evidenceRef !== null && evidenceRef.length > 200) throw new Error("The evidence reference must be at most 200 characters.");
+  return db.transaction(async (tx) => {
+    const [account] = await tx
+      .select({ id: schema.user.id, isAnonymous: schema.user.isAnonymous })
+      .from(schema.user)
+      .innerJoin(schema.account, and(eq(schema.account.userId, schema.user.id), eq(schema.account.providerId, "credential")))
+      .where(eq(schema.user.email, email))
+      .limit(1);
+    if (!account || account.isAnonymous) throw new Error(`No merchant account ${email}; create it with create-merchant first.`);
+    const membershipId = newId("mbr");
+    const inserted = await tx
+      .insert(schema.merchantMemberships)
+      .values({ id: membershipId, userId: account.id, role: "owner", isDemo: true, evidenceRef, approvedAt: now, createdAt: now })
+      .onConflictDoNothing({ target: schema.merchantMemberships.userId, where: sql`${schema.merchantMemberships.outletId} is null and ${schema.merchantMemberships.revokedAt} is null` })
+      .returning({ id: schema.merchantMemberships.id });
+    if (inserted.length === 0) {
+      const [existing] = await tx
+        .select({ id: schema.merchantMemberships.id })
+        .from(schema.merchantMemberships)
+        .where(and(eq(schema.merchantMemberships.userId, account.id), isNull(schema.merchantMemberships.outletId), isNull(schema.merchantMemberships.revokedAt)));
+      if (!existing) throw new Error("Membership conflict without a membership; inspect it by hand.");
+      return { status: "unchanged", userId: account.id, membershipId: existing.id };
+    }
+    await recordAudit(tx, {
+      at: now,
+      actor: "operator",
+      action: "membership_approved",
+      operatorVisible: true,
+      details: { membershipId, userId: account.id, hasEvidence: evidenceRef !== null },
+    });
+    return { status: "created", userId: account.id, membershipId };
+  });
+}
+
+// Reads one line from the terminal without echoing it. Refuses when stdin is not a terminal, so a
+// password is never piped in from a file or a shell history.
+function promptHidden(prompt: string): Promise<string> {
+  const input = process.stdin;
+  if (!input.isTTY) return Promise.reject(new Error("create-merchant reads the password from a terminal; run it interactively."));
+  return new Promise((resolve, reject) => {
+    let value = "";
+    const finish = () => {
+      input.setRawMode(false);
+      input.pause();
+      input.removeListener("data", onData);
+      process.stdout.write("\n");
+    };
+    const onData = (chunk: string) => {
+      for (const char of chunk) {
+        if (char === "\r" || char === "\n") {
+          finish();
+          resolve(value);
+          return;
+        }
+        if (char === "\u0003") {
+          finish();
+          reject(new Error("cancelled"));
+          return;
+        }
+        if (char === "\u007f" || char === "\b") value = value.slice(0, -1);
+        else value += char;
+      }
+    };
+    process.stdout.write(prompt);
+    input.setRawMode(true);
+    input.setEncoding("utf8");
+    input.on("data", onData);
+    input.resume();
+  });
+}
+
+const COMMANDS = ["seed-demo-fixture", "assign-paypal-destination", "issue-agent-token", "create-merchant", "approve-membership"];
+
+const USAGE =
+  "usage: npm run operator -- seed-demo-fixture | assign-paypal-destination <outletId> <sellerMerchantId> | issue-agent-token <label> | create-merchant <email> <name> | approve-membership <email> [evidenceRef]";
 
 async function run(db: OperatorDb, argv: string[]): Promise<number> {
   const [command, ...args] = argv;
@@ -155,6 +276,26 @@ async function run(db: OperatorDb, argv: string[]): Promise<number> {
     const issued = await issueAgentToken(db, args[0]!);
     console.log(`issued agent token ${issued.agentTokenId} for "${issued.label}". Copy it into the MCP client now; Envoi keeps only its digest and cannot show it again:`);
     console.log(issued.token);
+    return 0;
+  }
+  if (command === "create-merchant" && args.length === 2) {
+    const password = await promptHidden(`Password for ${args[0]} (${PASSWORD_LENGTH.min} to ${PASSWORD_LENGTH.max} characters, not shown): `);
+    if ((await promptHidden("Type it again: ")) !== password) throw new Error("The two passwords differ; nothing was created.");
+    const result = await createMerchant(db, { email: args[0]!, name: args[1]!, password });
+    console.log(
+      result.status === "created"
+        ? `created merchant account ${result.userId}. It holds no membership yet: run approve-membership ${args[0]}`
+        : `an account with that email already exists (${result.userId}); nothing changed and its password was not touched`,
+    );
+    return 0;
+  }
+  if (command === "approve-membership" && (args.length === 1 || args.length === 2)) {
+    const result = await approveMembership(db, { email: args[0]!, evidenceRef: args[1] ?? null });
+    console.log(
+      result.status === "created"
+        ? `approved membership ${result.membershipId} for account ${result.userId}; its next shop creation binds it`
+        : `account ${result.userId} already holds unbound membership ${result.membershipId}; nothing changed`,
+    );
     return 0;
   }
   console.error(USAGE);

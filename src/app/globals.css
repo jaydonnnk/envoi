@@ -95,6 +95,25 @@ form > .button.full { margin-top: 18px; }
 .shops { margin-top: 28px; }
 .list-heading { margin: 0; }
 
+/* Merchant setup (S6): one bordered group per draft item; flagged items need a price, a name or
+   an availability choice before the menu can be confirmed. */
+select { font: inherit; color: var(--ink); padding: 12px; background: var(--paper); border: 1px solid #8da3bb; border-radius: 7px; width: 100%; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.draft-item { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 1.45fr) auto; gap: 10px 12px; align-items: start; border: 1px solid var(--line); border-radius: 10px; padding: 14px; margin: 0 0 12px; }
+.draft-item.flagged { border-color: #e3c17f; background: #fffaf0; }
+.draft-item .field label { margin: 0 0 6px; font-size: 14px; line-height: 20px; }
+/* Lines the button up with the inputs, below the 20px label and its 6px gap, whatever hint sits under them. */
+.draft-item .remove { padding-top: 26px; }
+.draft-item .remove .button { padding: 12px 14px; }
+.draft-item select { padding-right: 8px; }
+[aria-live] > p { margin: 12px 0 0; }
+.status.draft-status { margin: 16px 0 0; }
+input[aria-invalid="true"], select[aria-invalid="true"] { border-color: #c98a1d; }
+.hint { color: var(--amber); margin-top: 4px; }
+label.check { display: flex; gap: 10px; align-items: flex-start; font-weight: 600; margin: 18px 0 0; }
+label.check input { width: 20px; height: 20px; margin: 2px 0 0; flex: none; }
+nav.card { display: flex; flex-wrap: wrap; gap: 10px; }
+
 footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; color: var(--muted); }
 :focus-visible { outline: 3px solid #d67911; outline-offset: 4px; }
 
@@ -106,4 +125,9 @@ footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; 
   footer { padding: 0 16px 24px; }
   .card { padding: 18px; }
   .layout { grid-template-columns: 1fr; }
+  .draft-item { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .draft-item .wide { grid-column: 1 / -1; }
+  .draft-item .remove { padding-top: 0; grid-column: 1 / -1; }
+  /* A warning that must be read before acting comes first in the single column. */
+  .layout > .first-on-phone { order: -1; }
 }

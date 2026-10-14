@@ -51,3 +51,8 @@ export function statusOf(code: ErrorCode): number {
 export function appError(code: ErrorCode, message: string, extra: Partial<Omit<AppError, "code" | "message">> = {}): AppError {
   return { code, message, retryable: false, operatorVisible: false, ...extra };
 }
+
+// Tells a domain refusal from a domain result; no result type carries both code and retryable.
+export function isAppError(value: unknown): value is AppError {
+  return typeof value === "object" && value !== null && "code" in value && "retryable" in value && "operatorVisible" in value;
+}

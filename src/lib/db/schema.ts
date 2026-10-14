@@ -96,10 +96,15 @@ export const menuRevisions = pgTable(
       .references(() => outlets.id),
     status: text("status").notNull(),
     confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+    // Draft version (S6): every saved draft write increments it, and a write or confirmation based
+    // on an older version is refused with revision_conflict and changes nothing.
+    version: integer("version").notNull().default(1),
     createdAt: createdAt(),
   },
   (t) => [
     check("menu_revisions_status_check", sql`${t.status} in ('draft', 'confirmed')`),
+    check("menu_revisions_confirmed_check", sql`(${t.status} = 'confirmed') = (${t.confirmedAt} is not null)`),
+    check("menu_revisions_version_check", sql`${t.version} > 0`),
     index("menu_revisions_outlet_id_idx").on(t.outletId),
   ],
 );
@@ -113,13 +118,69 @@ export const menuItems = pgTable(
       .references(() => menuRevisions.id),
     position: integer("position").notNull(),
     name: text("name").notNull(),
+    portion: text("portion"),
     // Unknown price stays null; it never becomes zero.
     unitSgdCents: integer("unit_sgd_cents"),
+    // Merchant-supplied availability; null is unknown, which blocks confirmation (S6).
     available: boolean("available"),
+    source: text("source").notNull().default("merchant"),
   },
   (t) => [
     check("menu_items_price_check", sql`${t.unitSgdCents} is null or ${t.unitSgdCents} > 0`),
+    check("menu_items_source_check", sql`${t.source} in ('merchant', 'import_suggestion')`),
     index("menu_items_revision_idx").on(t.menuRevisionId, t.position),
+  ],
+);
+
+// Merchant memberships (Gate 2 data model; S6). Only the operator CLI inserts one, so every row is
+// operator-approved. A row starts unbound (outlet_id null): the merchant's own outlet creation binds
+// it to the new outlet in the same transaction, which is the only update the web role may make.
+// Authorization reads these rows, never a property of the user record.
+
+export const merchantMemberships = pgTable(
+  "merchant_memberships",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id),
+    outletId: text("outlet_id").references(() => outlets.id),
+    role: text("role").notNull(),
+    isDemo: boolean("is_demo").notNull(),
+    evidenceRef: text("evidence_ref"),
+    approvedAt: timestamp("approved_at", { withTimezone: true }).notNull(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    check("merchant_memberships_role_check", sql`${t.role} = 'owner'`),
+    // One live membership per user and outlet, and at most one live unbound membership per user.
+    uniqueIndex("merchant_memberships_live_outlet_unique").on(t.userId, t.outletId).where(sql`${t.outletId} is not null and ${t.revokedAt} is null`),
+    uniqueIndex("merchant_memberships_live_unbound_unique").on(t.userId).where(sql`${t.outletId} is null and ${t.revokedAt} is null`),
+    index("merchant_memberships_outlet_idx").on(t.outletId),
+  ],
+);
+
+// Outlet enrollment with Envoi (Gate 2 data model). S6 opens one pending enrollment with each
+// merchant-created outlet; only the operator approves it (S7, approve-enrollment).
+
+export const enrollments = pgTable(
+  "enrollments",
+  {
+    id: text("id").primaryKey(),
+    outletId: text("outlet_id")
+      .notNull()
+      .unique()
+      .references(() => outlets.id),
+    status: text("status").notNull(),
+    isDemo: boolean("is_demo").notNull(),
+    evidenceRef: text("evidence_ref"),
+    approvedAt: timestamp("approved_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    check("enrollments_status_check", sql`${t.status} in ('pending', 'approved')`),
+    check("enrollments_approved_check", sql`(${t.status} = 'approved') = (${t.approvedAt} is not null)`),
   ],
 );
 

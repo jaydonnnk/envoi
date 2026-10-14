@@ -71,6 +71,20 @@
       "when": 1791939206929,
       "tag": "0009_s13_web_role_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791952027636,
+      "tag": "0010_s6_merchant_draft",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791952036885,
+      "tag": "0011_s6_web_role_grants",
+      "breakpoints": true
     }
   ]
 }
