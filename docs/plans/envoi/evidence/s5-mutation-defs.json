@@ -267,7 +267,7 @@
   "edits": [
    {
     "file": "src/app/operator/health/page.tsx",
-    "old": "export async function generateMetadata(): Promise<Metadata> {\n  if (!(await isOperatorRequest())) notFound();\n",
+    "old": "export async function generateMetadata(): Promise<Metadata> {\n  if (!(await isOperatorRequest())) return {};\n",
     "new": "export async function generateMetadata(): Promise<Metadata> {\n"
    }
   ]
@@ -339,6 +339,162 @@
     "file": "src/operator/cli.ts",
     "old": "      .innerJoin(schema.account, and(eq(schema.account.userId, schema.user.id), eq(schema.account.providerId, \"credential\")))\n      .where(eq(schema.user.email, email))\n      .limit(1);\n    if (!account || account.isAnonymous) throw new Error(`No permanent account",
     "new": "      .where(eq(schema.user.email, email))\n      .limit(1);\n    if (!account) throw new Error(`No permanent account"
+   }
+  ]
+ },
+ {
+  "id": "claim-least-recently-checked",
+  "test": "maintenance checks every due attempt in turn when more are due than one run takes",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "due attempts are claimed by due time only, not least recently checked first (review F1)",
+  "edits": [
+   {
+    "file": "src/domain/maintenance/due.ts",
+    "old": "      sql`${paymentAttempts.maintenanceCheckedAt} asc nulls first`,\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "timeout-takes-more-work",
+  "test": "a task that times out takes no further item and the next task waits for the one it was running",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "a task that timed out keeps taking items (review F2)",
+  "edits": [
+   {
+    "file": "src/domain/maintenance/tasks.ts",
+    "old": "        if (timedOut) return { status: \"partial\", processed, blockedReason: `${task.name}_timeout` };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "timeout-no-wait",
+  "test": "a task that times out takes no further item and the next task waits for the one it was running",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "the next task starts without waiting for the item a timed-out task was running (review F2)",
+  "edits": [
+   {
+    "file": "src/domain/maintenance/tasks.ts",
+    "old": "      await withTimeout(\n        remaining(),",
+    "new": "      void withTimeout(\n        remaining(),"
+   }
+  ]
+ },
+ {
+  "id": "finish-reserve",
+  "test": "a run stops taking work 10,000 ms before T_MAINT_RUN to finish its report",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "no finishing reserve: work is taken until T_MAINT_RUN, when the kill timer also fires (review F2)",
+  "edits": [
+   {
+    "file": "src/domain/maintenance/tasks.ts",
+    "old": "export const RUN_FINISH_RESERVE_MS = 10_000;",
+    "new": "export const RUN_FINISH_RESERVE_MS = 0;"
+   }
+  ]
+ },
+ {
+  "id": "skipped-counted-checked",
+  "test": "an attempt skipped as in flight or just read is not counted as checked",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "every outcome but provider_unreachable counts as a check, as before the fix (review F6)",
+  "edits": [
+   {
+    "file": "src/domain/maintenance/tasks.ts",
+    "old": "      checked = CHECKED_OUTCOMES.includes(outcome);",
+    "new": "      checked = outcome !== \"provider_unreachable\";"
+   }
+  ]
+ },
+ {
+  "id": "capacity-alert-boundary",
+  "test": "the operator is alerted when storage reaches 70% of the project limit",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "the alert starts only above 70%, not at it (review F4)",
+  "edits": [
+   {
+    "file": "src/domain/maintenance/health.ts",
+    "old": "databaseSizeBytes >= CAPACITY_ALERT_SHARE",
+    "new": "databaseSizeBytes > CAPACITY_ALERT_SHARE"
+   }
+  ]
+ },
+ {
+  "id": "capacity-alert-hidden",
+  "test": "the operator is alerted when storage reaches 70% of the project limit",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "the health view never shows the alert message (review F4)",
+  "edits": [
+   {
+    "file": "src/app/operator/health/page.tsx",
+    "old": "      {capacity.alert && (\n",
+    "new": "      {false && (\n"
+   }
+  ]
+ },
+ {
+  "id": "unknown-api-default",
+  "test": "an unknown API path answers exactly what the operator route answers everyone else",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "an unknown API path answers a plain 404 instead of the operator route's not_found (review F3)",
+  "edits": [
+   {
+    "file": "src/app/api/v1/[...path]/route.ts",
+    "old": "  return httpErr(unknownRouteError());",
+    "new": "  return new Response(\"Not found.\", { status: 404 });"
+   }
+  ]
+ },
+ {
+  "id": "operator-metadata-notfound",
+  "test": "the operator page is the not-found page for everyone but the operator",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "the metadata calls notFound() for a non-operator, as before the fix (review F3)",
+  "edits": [
+   {
+    "file": "src/app/operator/health/page.tsx",
+    "old": "  if (!(await isOperatorRequest())) return {};\n",
+    "new": "  if (!(await isOperatorRequest())) notFound();\n"
+   }
+  ]
+ },
+ {
+  "id": "entrypoint-plain-url",
+  "test": "the runner started through a symlink in a path with a space still runs",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "the entrypoint check compares import.meta.url with file://argv[1] unresolved (review F5)",
+  "edits": [
+   {
+    "file": "src/lib/entrypoint.ts",
+    "old": "    return moduleUrl === pathToFileURL(realpathSync(argv1)).href;",
+    "new": "    return moduleUrl === `file://${argv1}`;"
+   }
+  ]
+ },
+ {
+  "id": "cli-entrypoint-unresolved",
+  "test": "every script decides it is the entrypoint through isEntrypoint",
+  "test_file": "tests/unit/entrypoint.test.ts",
+  "mutation": "the operator CLI goes back to its own unresolved file://argv[1] comparison (review F5)",
+  "edits": [
+   {
+    "file": "src/operator/cli.ts",
+    "old": "if (isEntrypoint(import.meta.url)) {",
+    "new": "if (import.meta.url === `file://${process.argv[1]}`) {"
+   }
+  ]
+ },
+ {
+  "id": "proxy-passes-everyone",
+  "test": "an operator page answers everyone but the operator as an unknown address",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "the proxy passes every request through to the operator page (review F3)",
+  "edits": [
+   {
+    "file": "src/proxy.ts",
+    "old": "  if (isOperator(await requireOperator(getAuth(), webDb(), request.headers))) return NextResponse.next();",
+    "new": "  if (true) return NextResponse.next();"
    }
   ]
  }

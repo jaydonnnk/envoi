@@ -1,12 +1,15 @@
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
+import { mkdtempSync, rmSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { claimDueAttempts } from "@/domain/maintenance/due";
-import { runMaintenance, type MaintenanceDeps } from "@/domain/maintenance/tasks";
+import { readOperatorHealth } from "@/domain/maintenance/health";
+import { MAINTENANCE_TASKS, runMaintenance, type MaintenanceDeps, type MaintenanceTask } from "@/domain/maintenance/tasks";
+import type { PayPalReadClient } from "@/integrations/paypal/orders-read";
 import type { PayPalWriteClient } from "@/integrations/paypal/orders";
 import * as schema from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
@@ -42,6 +45,7 @@ describe("maintenance runner (fixture PayPal)", () => {
     start: typeof import("@/app/api/v1/purchases/[id]/paypal/start/route");
     complete: typeof import("@/app/api/v1/purchases/[id]/paypal/complete/route");
     health: typeof import("@/app/api/v1/health/operator/route");
+    unknownApi: typeof import("@/app/api/v1/[...path]/route");
   };
 
   beforeAll(async () => {
@@ -56,6 +60,7 @@ describe("maintenance runner (fixture PayPal)", () => {
       start: await import("@/app/api/v1/purchases/[id]/paypal/start/route"),
       complete: await import("@/app/api/v1/purchases/[id]/paypal/complete/route"),
       health: await import("@/app/api/v1/health/operator/route"),
+      unknownApi: await import("@/app/api/v1/[...path]/route"),
     };
     build = await buildRunner("finite");
   }, 120_000);
@@ -214,6 +219,134 @@ describe("maintenance runner (fixture PayPal)", () => {
     }
   });
 
+  it("a run stops taking work 10,000 ms before T_MAINT_RUN to finish its report", async () => {
+    const ids = await dueAttempts(4);
+    try {
+      // Each provider read takes 37 seconds on the run's clock. Three reads end 111 seconds in, past
+      // 110,000 ms but inside the 120,000 ms T_MAINT_RUN, so a fourth is never started.
+      const start = Date.now();
+      let elapsed = 0;
+      const reads: string[] = [];
+      const slow: MaintenanceDeps = {
+        paypal: {
+          async readOrder(orderId) {
+            reads.push(orderId);
+            elapsed += 37_000;
+            return { kind: "timeout", responseReceived: false };
+          },
+        },
+        solana: null,
+        now: () => new Date(start + 31_000 + elapsed),
+        log: quiet,
+      };
+      const report = await runMaintenance(maintenance.db, slow, "manual");
+      expect(reads).toHaveLength(3);
+      expect(report.tasks.find((task) => task.name === "reconcile_attempts")).toMatchObject({ status: "partial", reason: "run_deadline" });
+      const [run] = await admin()<{ status: string; finished_at: Date | null }[]>`select status, finished_at from maintenance_runs where id = ${report.runId}`;
+      expect(run!.finished_at).not.toBeNull();
+    } finally {
+      await settle(ids);
+    }
+  });
+
+  it("a task that times out takes no further item and the next task waits for the one it was running", async () => {
+    const ids = await dueAttempts(3);
+    try {
+      // FIXTURE: each provider read takes 300 ms of real time and reconcile_attempts times out after
+      // 450 ms, during the second read.
+      const fake = createFakePayPal();
+      const reads: { orderId: string; endedAt: number }[] = [];
+      const slowRead: PayPalReadClient = {
+        async readOrder(orderId) {
+          await new Promise((resolve) => setTimeout(resolve, 300));
+          const answer = await fake.client.readOrder(orderId);
+          reads.push({ orderId, endedAt: Date.now() });
+          return answer;
+        },
+      };
+      let closeStartedAt = 0;
+      const tasks: MaintenanceTask[] = MAINTENANCE_TASKS.map((task) => {
+        if (task.name === "reconcile_attempts") return { ...task, timeoutMs: 450 };
+        if (task.name === "close_expired_reviews") {
+          return {
+            ...task,
+            claim: (...args) => {
+              closeStartedAt = Date.now();
+              return task.claim(...args);
+            },
+          };
+        }
+        return task;
+      });
+
+      const report = await runMaintenance(maintenance.db, { paypal: slowRead, solana: null, now: later, log: quiet }, "manual", tasks);
+
+      expect(report.tasks.find((task) => task.name === "reconcile_attempts")).toMatchObject({ status: "failed", reason: "reconcile_attempts_timeout" });
+      expect(reads).toHaveLength(2);
+      expect(closeStartedAt).toBeGreaterThanOrEqual(reads.at(-1)!.endedAt);
+      const checks = await admin()<{ maintenance_checks: number }[]>`select maintenance_checks from payment_attempts where id in ${admin()(ids)} order by maintenance_checks desc`;
+      expect(checks.map((row) => row.maintenance_checks)).toEqual([1, 1, 0]);
+    } finally {
+      await settle(ids);
+    }
+  });
+
+  it("maintenance checks every due attempt in turn when more are due than one run takes", async () => {
+    // FIXTURE: eleven attempts PayPal shows no capture for, so each read leaves them uncertain and
+    // their updated_at unchanged. A run takes at most 10.
+    const ids = await dueAttempts(11);
+    try {
+      const fake = createFakePayPal();
+      const reads: string[] = [];
+      const read: PayPalReadClient = {
+        async readOrder(orderId) {
+          reads.push(orderId);
+          return fake.client.readOrder(orderId);
+        },
+      };
+      // Two runs an hour apart, each past the T_PROVIDER_READ_DEBOUNCE of the one before.
+      const base = Date.now();
+      const runAt = (offsetMs: number): MaintenanceDeps => ({ paypal: read, solana: null, now: () => new Date(base + offsetMs), log: quiet });
+      await runMaintenance(maintenance.db, runAt(3_600_000), "manual");
+      const first = new Set(reads);
+      expect(first.size).toBe(10);
+      reads.length = 0;
+      await runMaintenance(maintenance.db, runAt(7_200_000), "manual");
+      const orders = (await admin()<{ order_id: string }[]>`select order_id from payment_attempts where id in ${admin()(ids)}`).map((row) => row.order_id);
+      const missed = orders.filter((order) => !first.has(order));
+      expect(missed).toHaveLength(1);
+      // The attempt the first run left unread is read first in the second.
+      expect(reads[0]).toBe(missed[0]);
+    } finally {
+      await settle(ids);
+    }
+  });
+
+  it("an attempt skipped as in flight or just read is not counted as checked", async () => {
+    const [debounced, inFlight] = await dueAttempts(2);
+    try {
+      // FIXTURE: a buyer's status check read one attempt just now, within T_PROVIDER_READ_DEBOUNCE,
+      // and a completion holds the other's capture lease.
+      await admin()`update payment_attempts set last_provider_read_at = now() where id = ${debounced!}`;
+      await admin()`update payment_attempts set state = 'capture_dispatched', lease_owner = 'FIXTURE-completion', lease_expires_at = now() + interval '5 minutes' where id = ${inFlight!}`;
+      const fake = createFakePayPal();
+
+      const report = await runMaintenance(maintenance.db, deps(fake, () => new Date()), "manual");
+
+      expect(fake.reads()).toHaveLength(0);
+      expect(report.tasks.find((task) => task.name === "reconcile_attempts")).toMatchObject({ status: "partial", processed: 0 });
+      const rows = await admin()<{ maintenance_checks: number; maintenance_checked_at: Date | null; maintenance_claim_owner: string | null }[]>`
+        select maintenance_checks, maintenance_checked_at, maintenance_claim_owner from payment_attempts where id in (${debounced!}, ${inFlight!})`;
+      expect(rows).toEqual([
+        { maintenance_checks: 0, maintenance_checked_at: null, maintenance_claim_owner: null },
+        { maintenance_checks: 0, maintenance_checked_at: null, maintenance_claim_owner: null },
+      ]);
+    } finally {
+      await admin()`update payment_attempts set lease_owner = null, lease_expires_at = null where id = ${inFlight!}`;
+      await settle([debounced!, inFlight!]);
+    }
+  });
+
   it("close_expired_reviews stores what the buyer already reads", async () => {
     const { purchaseId } = await openReview(createFakePayPal());
     await admin()`update purchases set review_expires_at = now() - interval '1 minute' where id = ${purchaseId}`;
@@ -254,17 +387,10 @@ describe("maintenance runner (fixture PayPal)", () => {
     expect(await admin()`select id from payment_attempts where id = 'att_role_test'`).toHaveLength(0);
   });
 
-  it("maintenance run is finite", async () => {
-    // Nothing is due for PayPal, so the compiled runner, which holds the real sandbox client, makes
-    // no provider call; it still has a review to close and a session to purge.
-    expect(await admin()`select id from payment_attempts where state in ('capture_dispatched', 'capture_unknown') or provider_read_due_at is not null`).toHaveLength(0);
-    const { purchaseId } = await openReview(createFakePayPal());
-    await admin()`update purchases set review_expires_at = now() - interval '1 minute' where id = ${purchaseId}`;
-    await anonymousCookie(routes.auth.POST);
-    await admin()`update session set expires_at = now() - interval '1 minute' where id = (select id from session order by created_at desc limit 1)`;
-    const runsBefore = (await admin()`select id from maintenance_runs`).length;
-
-    const child = spawn(process.execPath, ["--import", join(build.outDir, "src/maintenance/resolve-hook.js"), join(build.outDir, "src/maintenance/run.js")], {
+  // Starts the compiled runner as its own process from `entry`, the directory holding the build's
+  // src/maintenance, and resolves with its exit code, or "running" if it has not exited in 30 s.
+  async function startRunner(entry: string): Promise<number | null | "running"> {
+    const child = spawn(process.execPath, ["--import", join(entry, "src/maintenance/resolve-hook.js"), join(entry, "src/maintenance/run.js")], {
       // No .env.local in the working directory: the runner reads only what is given here.
       cwd: tmpdir(),
       env: {
@@ -288,7 +414,20 @@ describe("maintenance runner (fixture PayPal)", () => {
       });
     });
     if (exit === "running") child.kill("SIGKILL");
-    expect(exit).toBe(0);
+    return exit;
+  }
+
+  it("maintenance run is finite", async () => {
+    // Nothing is due for PayPal, so the compiled runner, which holds the real sandbox client, makes
+    // no provider call; it still has a review to close and a session to purge.
+    expect(await admin()`select id from payment_attempts where state in ('capture_dispatched', 'capture_unknown') or provider_read_due_at is not null`).toHaveLength(0);
+    const { purchaseId } = await openReview(createFakePayPal());
+    await admin()`update purchases set review_expires_at = now() - interval '1 minute' where id = ${purchaseId}`;
+    await anonymousCookie(routes.auth.POST);
+    await admin()`update session set expires_at = now() - interval '1 minute' where id = (select id from session order by created_at desc limit 1)`;
+    const runsBefore = (await admin()`select id from maintenance_runs`).length;
+
+    expect(await startRunner(build.outDir)).toBe(0);
 
     const runs = await admin()<{ trigger: string; status: string; finished_at: Date | null }[]>`select trigger, status, finished_at from maintenance_runs order by started_at`;
     expect(runs).toHaveLength(runsBefore + 1);
@@ -298,6 +437,24 @@ describe("maintenance runner (fixture PayPal)", () => {
     const [connections] = await admin()<{ count: number }[]>`
       select count(*)::int as count from pg_stat_activity where application_name = 'envoi-maintenance' and datname = current_database()`;
     expect(connections!.count).toBe(0);
+  }, 60_000);
+
+  it("the runner started through a symlink in a path with a space still runs", async () => {
+    // Node gives the main module its real path, percent-encoded, so a start through a symlink or a
+    // directory with a space must still be recognized as the entrypoint rather than doing nothing.
+    const dir = mkdtempSync(join(tmpdir(), "envoi runner "));
+    try {
+      const link = join(dir, "linked build");
+      symlinkSync(build.outDir, link);
+      const runsBefore = (await admin()`select id from maintenance_runs`).length;
+      expect(await startRunner(link)).toBe(0);
+      const runs = await admin()<{ status: string; finished_at: Date | null }[]>`select status, finished_at from maintenance_runs order by started_at`;
+      expect(runs).toHaveLength(runsBefore + 1);
+      expect(runs.at(-1)).toMatchObject({ status: "ok" });
+      expect(runs.at(-1)!.finished_at).not.toBeNull();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   }, 60_000);
 
   describe("operator health view", () => {
@@ -368,12 +525,70 @@ describe("maintenance runner (fixture PayPal)", () => {
       }
     });
 
+    it("an unknown API path answers exactly what the operator route answers everyone else", async () => {
+      const refused = await healthOf(await anonymousCookie(routes.auth.POST));
+      const unknown = routes.unknownApi.GET();
+      expect(unknown.status).toBe(refused.status);
+      for (const header of ["content-type", "cache-control"]) expect(unknown.headers.get(header)).toBe(refused.headers.get(header));
+      expect(await unknown.text()).toBe(await refused.text());
+    });
+
+    it("an operator page answers everyone but the operator as an unknown address", async () => {
+      // A notFound() from the page renders an empty error shell during streaming, unlike an unknown
+      // address, so the proxy rewrites every non-operator request to a path no route matches.
+      const { proxy, UNKNOWN_ROUTE_PATH } = await import("@/proxy");
+      const { NextRequest } = await import("next/server");
+      const through = (cookie: string | null, headers: Record<string, string> = {}) =>
+        proxy(new NextRequest("http://localhost:3000/operator/health", { headers: { ...(cookie ? { cookie } : {}), ...headers } }));
+      const rewritten = (response: Response) => response.headers.get("x-middleware-rewrite");
+      const unknown = `http://localhost:3000${UNKNOWN_ROUTE_PATH}`;
+
+      expect(rewritten(await through(null))).toBe(unknown);
+      expect(rewritten(await through(await anonymousCookie(routes.auth.POST)))).toBe(unknown);
+      const merchant = await newMerchant(fixture.database, "proxy-merchant", { membership: true });
+      expect(rewritten(await through(await signInCookie(routes.auth.POST, merchant)))).toBe(unknown);
+      const { cookie } = await operatorCookie("proxy-operator");
+      expect(rewritten(await through(cookie, { authorization: "Bearer envoi_agent_FIXTURE" }))).toBe(unknown);
+
+      const passed = await through(cookie);
+      expect(rewritten(passed)).toBeNull();
+      expect(passed.headers.get("x-middleware-next")).toBe("1");
+    });
+
+    it("the operator is alerted when storage reaches 70% of the project limit", async () => {
+      const { renderToStaticMarkup } = await import("react-dom/server");
+      const { default: OperatorHealthPage } = await import("@/app/operator/health/page");
+      request.cookie = (await operatorCookie("health-capacity")).cookie;
+      const web = drizzle(admin(), { schema });
+      // FIXTURE: runs dated ahead of every real run, so each is the latest capacity reading in turn.
+      const reading = async (id: string, bytes: number, daysAhead: number) => {
+        await admin()`insert into maintenance_runs (id, trigger, status, started_at, finished_at, database_size_bytes)
+          values (${id}, 'manual', 'ok', now() + ${`${daysAhead} days`}::interval, now() + ${`${daysAhead} days`}::interval, ${bytes})`;
+        return { health: await readOperatorHealth(web, new Date()), html: renderToStaticMarkup(await OperatorHealthPage()) };
+      };
+      try {
+        // 699,999,999 of 1,000,000,000 bytes is under 70%; exactly 700,000,000 is at it.
+        const under = await reading("mnt_fixture_capacity_under", 699_999_999, 1);
+        expect(under.health.capacity.alert).toBe(false);
+        expect(under.html).toContain("Under 70%");
+        expect(under.html).not.toContain('role="alert"');
+        const at = await reading("mnt_fixture_capacity_at", 700_000_000, 2);
+        expect(at.health.capacity.alert).toBe(true);
+        expect(at.html).toContain("Over 70%");
+        expect(at.html).toContain("Storage has reached 70% of the 1 GB project limit.");
+      } finally {
+        await admin()`delete from maintenance_runs where id in ('mnt_fixture_capacity_under', 'mnt_fixture_capacity_at')`;
+      }
+    });
+
     it("the operator page is the not-found page for everyone but the operator", async () => {
       const { renderToStaticMarkup } = await import("react-dom/server");
       const { default: OperatorHealthPage, generateMetadata } = await import("@/app/operator/health/page");
       request.cookie = await anonymousCookie(routes.auth.POST);
       await expect(OperatorHealthPage()).rejects.toMatchObject({ digest: expect.stringMatching(/404/) });
-      await expect(generateMetadata()).rejects.toMatchObject({ digest: expect.stringMatching(/404/) });
+      // The metadata gives the layout's defaults, not a not-found of its own: a notFound() from
+      // metadata answers an error shell with no page body, unlike an unknown address.
+      expect(await generateMetadata().catch((err: { digest?: string }) => ({ thrown: err.digest ?? "error" }))).toEqual({});
 
       request.cookie = (await operatorCookie("health-page")).cookie;
       const html = renderToStaticMarkup(await OperatorHealthPage());
