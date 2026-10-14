@@ -75,8 +75,8 @@ Updated: 2026-10-14 (Asia/Singapore).
 
 Build order from `04-slices.md`, revised and approved 2026-10-12.
 Slice IDs are stable names, so the list below is in build order rather than numeric order; S12 is retired, merged into S11.
-S1, S2, S3, S4 and S13 are done; every later slice starts only on an explicit authorization that names its slice ID, such as "start S13"; a number in that request is the slice ID, not a build position.
-The application is deployed on Render Free from `main` with the S2 PayPal sandbox payment, S3's recovery, reconcile and verified webhook inbox, S4's text suggestions through OpenAI `gpt-6-luna`, and S13's agent handoff over MCP; no other sponsor integration exists.
+S1, S2, S3, S4, S13 and S6 are done; every later slice starts only on an explicit authorization that names its slice ID, such as "start S13"; a number in that request is the slice ID, not a build position.
+The application is deployed on Render Free from `main` with the S2 PayPal sandbox payment, S3's recovery, reconcile and verified webhook inbox, S4's text suggestions through OpenAI `gpt-6-luna`, S13's agent handoff over MCP and S6's merchant sign-in with a manual, unpublished menu draft; no other sponsor integration exists.
 The candidate list in `roadmap.md` remains discussion material and is superseded as a build order by `04-slices.md` once that is approved.
 
 - [x] S1 - Tracer bullet on Render Free: labeled demo shop from Neon to an explicitly unpaid stub receipt; boot check, auth schema pin, R12 latency measurement.
@@ -84,7 +84,7 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [x] S3 - PayPal recovery: lost responses, webhooks, reconcile, "checking payment".
 - [x] S4 - Text entry with AI suggestions and the pre-registered model evaluation; review fixes 2026-10-14.
 - [x] S13 - Agent handoff over MCP, moved to right after S4; done 2026-10-14.
-- [ ] S6 - Merchant sign-in and manual menu draft.
+- [x] S6 - Merchant sign-in and manual menu draft; done 2026-10-14.
 - [ ] S5 - Maintenance runner, manual runs, operator health view behind the operator guard; built after S6, whose sign-in it needs.
 - [ ] S7 - Merchant destination and publication, with stale-review invalidation and the PayPal basket lock at review creation and inside `paypal/start`.
 - [ ] S8 - Merchant orders and separate acknowledgment.
@@ -95,6 +95,51 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [ ] S17 - PYUSD recovery, extra transfers and the operator mismatch and refund acts.
 - [ ] S14 - APIMatic client and docs, account-conditional; third in the cut order.
 - [ ] S15 - Judged release.
+
+### S6 Merchant sign-in and manual menu draft, 2026-10-14
+
+- **Branch:** `envoi/slice-6-merchant-draft`, from `main` at `37ce067`; commits `d999d7b` (feature), `8983fea` (tests and mutation runner), `46f3b1b` (first mutation results), `9cb16a7` (narrowed web-role INSERT grants, migrations 0012 and 0013), `68f3550` (grant test), `906d683` (mutation results, 25 of 25), then this record.
+  All merged into `main` by fast-forward and pushed; CI passed on `906d683` on the branch (run 38513567659); Render serves the S6 build (the commit Render deployed was not read from its dashboard).
+- **Authorizations, 2026-10-14:** the user started S6 and granted, by multiple choice, all three S6 actions: apply the S6 migrations to Neon, commit and push the slice branch, and fast-forward `main` to it and push, which deploys.
+  The user created the deployed demo merchant account with `create-merchant`, typing its password, and approved its membership with `approve-membership`; the password never entered the chat, a file or a screenshot.
+- **User decisions, 2026-10-14, none reopening a gate:**
+  - `assertSameOrigin` and `src/lib/http/origin.ts` stay with S11, as `04-slices.md` and Gate 3's S6 call stacks say; the S6 merchant write routes rely on the session cookie's `SameSite=Lax` until then.
+  - Membership model: `approve-membership` grants one approved, unbound membership; `POST /merchant/outlets` uses it up and binds it to the new outlet in the same transaction, so the merchant never waits on the operator mid-flow.
+  - Receipt after sign-in: keep Gate 3 and disclose.
+    An experiment on Better Auth 1.7.7 showed **[verified]** that signing in replaces the browser's session cookie; with `disableDeleteAnonymousUser: true` the buyer user and session survive and that session still reads its receipt, but the browser no longer holds it.
+    `/merchant/setup` warns a buyer browser before sign-in, and the S6 visible-result sentence in `04-slices.md` is reworded to match, a Gate 4 wording fix the user chose.
+- **Built:** email and password sign-in with `disableSignUp: true`; `onLinkAccount`, which writes an operator-visible `anonymous_session_linked` audit row and creates nothing; `merchant_memberships` and `enrollments` (migration 0010) with `menu_revisions.version`, `menu_items.portion` and `menu_items.source`; `requireMerchantMembership` and `requireOutletMembership` in `src/lib/auth-context.ts`, each reading live membership rows and refusing an agent credential; `GET` and `POST /api/v1/merchant/outlets`, `PATCH /api/v1/merchant/outlets/{id}`, `GET` and `PUT .../menu-draft` with the version check, `POST .../confirm`; `src/domain/menu/{types,draft,confirm,serialize}.ts` with `assessMenuCompleteness`; `src/domain/outlets/merchant.ts`; operator `create-merchant` (hidden prompt typed twice, 12 to 128 characters, only Better Auth's scrypt hash stored, never resets an existing account) and `approve-membership`; `/merchant/setup` with sign-in, the buyer-session warning, shop details and the menu editor.
+  Web-role grants live in migrations 0011 and 0013 (D7): SELECT and `UPDATE (outlet_id)` on memberships; INSERT on `outlets` (id, name, area, is_demo_fixture, created_at), `enrollments` (id, outlet_id, is_demo, created_at) and `menu_revisions` (id, outlet_id, status, version, created_at) only; `UPDATE (name, area)` on outlets; `UPDATE (status, confirmed_at, version)` on revisions; INSERT, DELETE and a column UPDATE on items.
+- **Result on Render [verified], 2026-10-14, `https://envoi-helx.onrender.com`:**
+  - Public signup answered 400 `EMAIL_PASSWORD_SIGN_UP_DISABLED`; the merchant API without a session answered 401.
+  - The user's account `usr_o2tys4cx5id37b634ar3nv5dae` and its membership `mbr_mzrz2mjo6kcvnhzfuscmw7i3ze` were made with the operator CLI; the user signed in and created the unpublished outlet "Test Shop" (`out_vrlbnc3zylbrr6g2drovaiqkfu`), demo-labeled, enrollment pending, the membership bound to it.
+  - The builder's browser pane made review `pur_uudcydhoicezedvxju7gjjncoy` (1 Soft-boiled eggs (2), S$2.00), whose receipt opened; the user then signed in there, which warned first.
+    Neon shows one `anonymous_session_linked` row, the purchase still owned by anonymous user `1C1SKxqmopeLGWLS17SrZyixSb6npdM7` with its session live, and no membership for any anonymous user; the browser's receipt page now says "Not found", as disclosed.
+  - In that browser the builder typed Kopi C (Hot, S$1.80, available), Mee siam (blank price, available) and Kaya toast set (S$4.50, availability not chosen) and saved version 2; the price stayed `null`, the editor flagged both items, and a direct `POST .../confirm` of version 2 answered 400 `validation_failed` with reason `missing_price` and both item ids.
+    After S$5.50 and "Unavailable" were filled in and saved as version 3, the confirmation of version 3 succeeded; Neon shows revision `mrv_wl5pn6p3gaq4467x4j5453cx24` confirmed at version 3 with exactly those three items and the outlet still unpublished.
+  - A fresh anonymous session got 403 `forbidden_membership` on all six merchant calls; the draft outlet's public menu answered 404, `GET /api/v1/outlets` listed only Lorong Demo Kopi and `/buy` does not mention Test Shop.
+  - Screens at 390px and 1280px show the test-environment badge, the sandbox notice and the demo-fixture chip, with no horizontal scroll.
+- **Local run [verified]:** under `next dev` on a disposable local database, three throwaway merchants whose passwords were generated in memory and handed to the browser through the clipboard and a one-shot local helper, never shown or written, went through the same flow; it found and fixed a cut-off availability select, misaligned Remove buttons, cramped status spacing, a shared "Saving" label, the warning sitting below the form on phones and a half-width select on phones.
+  One blank screen after the first outlet creation was not reproduced on a warm server or on Render **[hypothesis: a dev-only Fast Refresh while the route first compiled]**.
+- **Tests [verified]:** typecheck, lint, 25 unit and 113 integration tests pass locally on PostgreSQL 18 and in CI; S6 added 3 unit and 22 integration tests in `tests/unit/menu-completeness.test.ts`, `tests/integration/merchant-draft.test.ts` and `tests/integration/merchant-operator.test.ts`.
+  - Gate 3: `anonymous buyer cannot reach a merchant route`, `linking an anonymous account creates no membership`, `linking preserves purchase ownership`, `membership is per outlet`, `incomplete menu blocks confirmation`.
+  - Addition: `stale draft write is rejected`.
+  - Beyond the plan: `an agent token cannot reach a merchant route`, `an approved membership creates exactly one outlet`, `a blank price stays blank and blocks confirmation until it is supplied`, `a zero price is refused and changes nothing`, `a confirmation of an older version is rejected`, `editing a confirmed draft invalidates its confirmation`, `a confirmed draft stays invisible to buyers`, `an empty menu cannot be confirmed`, `a revoked membership reaches nothing`, `a published outlet's details are not edited here`, `the web role cannot create a published outlet, an approved enrollment or a confirmed revision`, `public signup is refused`, `a merchant edits the name and area of its unpublished outlet`, `a blank price or a blank name is incomplete and named first`, `a menu whose every item has a name, a price and a chosen availability is complete`, and the four operator tests.
+- **Mutations [verified], 25 of 25 on `68f3550`, each alone, failing its named test on an AssertionError, restored byte-identical (SHA-256) and rerun passing;** definitions, runner and results in [`s6-mutation-defs.json`](evidence/s6-mutation-defs.json), [`s6-mutate.py`](evidence/s6-mutate.py) and [`s6-mutations.json`](evidence/s6-mutations.json).
+  `anonymous buyer cannot reach a merchant route` has two, one per guard; `create a membership on link` also grants the web role INSERT, because without that grant the hook's insert fails with `permission denied for table merchant_memberships`, which a separate run showed **[verified]**, a third layer below the hook and the guard.
+  The zero-price mutation widens both the request schema and the `menu_items_price_check` constraint, since either alone refuses a zero price.
+  `approve-membership` repeating as unchanged has no mutation: the partial unique index enforces one live unbound membership per account.
+- **Neon [verified], 2026-10-14, every read in an enforced `READ ONLY` transaction:** before, ten migrations, no S6 tables or columns, the one menu revision confirmed with `confirmed_at` (so the new `menu_revisions_confirmed_check` held), no permanent account, the nine `neon_auth` tables and no `envoi_web` grant there.
+  Migrations 0010 and 0011 were applied, then 0012 and 0013 after the grant review below; after, fourteen migrations, both new tables, the S6 columns, the web-role grants listed above and the same nine `neon_auth` tables with still no grant there.
+- **Deviations recorded, no approved decision changed:**
+  - Files beyond Gate 3's list: `src/domain/outlets/merchant.ts` (merchant outlet creation and edits), `src/domain/menu/serialize.ts`, `src/app/api/v1/merchant/outlets/input.ts` (request schemas) and `src/app/merchant/setup/{sign-in,workspace,menu-editor}.tsx`; `GET /api/v1/merchant/outlets` lists the merchant's outlets for the setup page.
+  - Two guards: `requireMerchantMembership` for the outlet list and creation, which have no outlet id yet, and `requireOutletMembership` for every outlet route; each reads membership rows only.
+  - The draft is mutable in place with a `version` conflict token, as Gate 3's call stack "upsert items -> confirmation invalidated" implies; a published revision is never edited here, and S7 creates the unpublished revision for a published menu.
+  - `assessMenuCompleteness` lists every incomplete item and names the first failing check in the order price, name, availability; an empty menu is refused separately with reason `no_items`, since Gate 3's type has no such reason; refusals carry the ids comma-joined in `details`, whose values Gate 3 types as scalars.
+  - `PATCH` refuses a published outlet with `validation_failed` reason `outlet_published`, because Gate 2 scopes it to an unpublished draft.
+  - Prices are capped at S$1,000 (100,000 cents) **[hypothesis]**; names and portions at 120 characters as for the import, shop name and area at 80.
+  - Migrations 0012 and 0013 were added after the first Neon migration, when the grant inspection showed table-level INSERT would let the web role create an outlet already published, an enrollment already approved or a revision already confirmed; outlet creation writes those rows with explicit column lists because Drizzle's insert names every column.
+- **Known limits:** no revoke, password reset or email verification exists; Better Auth's built-in sign-in rate limit is its in-memory default, not tested here; outlet confirmation (the publication precondition) is S7's; one Render run with one merchant.
 
 ### S13 Agent handoff over MCP, 2026-10-14
 
@@ -807,6 +852,9 @@ All unaffected risk dispositions stand; the 2026-10-11 Gate 3 revision of the af
 - 2026-10-12: the user said "Add the check to paypal/start and paypal/complete, add an error code such as payments_disabled, and add a named test with its own mutation. One small Gate 3 reopening before S2. Then once ure done, let me know then i can approve and we can commit the working tree and merge to main and push to main".
   This reopened Gate 3 for that change only and authorized editing `03-program-design.md` for it, with its mirrors and the checker.
   It is not Gate 3 re-approval or Gate 4 approval, and it does not yet authorize the commit, merge or push, which the user tied to approving first.
+
+- 2026-10-14: the user started S6 and, by multiple choice, authorized the S6 migrations on Neon, pushing the slice branch and fast-forwarding `main`, which deploys; chose to leave `assertSameOrigin` to S11, the approve-first membership model and, for a buyer browser that signs in, to keep Gate 3 and disclose.
+  That last choice rewords one sentence of S6's visible result in `04-slices.md`; it is a wording fix, not a change to Gate 3, and no gate reopens.
 
 ### Initial Gate 2 documentary verification, 2026-10-07 (historical, before free-hosting revision)
 
