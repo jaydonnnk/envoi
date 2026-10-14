@@ -1,10 +1,12 @@
 // Named clocks (Gate 3, Named clocks). Later slices add their durations here.
-export type ClockName = "T_REVIEW" | "T_LEASE" | "T_PROVIDER_READ_DEBOUNCE";
+export type ClockName = "T_REVIEW" | "T_LEASE" | "T_PROVIDER_READ_DEBOUNCE" | "T_HANDOFF";
 
 const DURATION_MS: Record<ClockName, number> = {
   T_REVIEW: 5 * 60_000,
   T_LEASE: 5 * 60_000,
   T_PROVIDER_READ_DEBOUNCE: 30_000,
+  // From agent request creation; enforced by the redeem route.
+  T_HANDOFF: 10 * 60_000,
 };
 
 export type Now = () => Date;

@@ -24,6 +24,16 @@ export const RULES: readonly Rule[] = [
     pattern: /\bBearer\s+[A-Za-z0-9._~+/-]{20,}=*/,
   },
   {
+    // S13 agent bearer tokens carry a fixed prefix so a leaked one is recognizable.
+    id: "agent-token",
+    pattern: /\benvoi_agent_[a-z2-7]{52}\b/,
+  },
+  {
+    // A handoff link is a single-use bearer of the buyer's next step until it expires.
+    id: "handoff-link",
+    pattern: new RegExp(String.raw`${SEP}approve${SEP}[a-z2-7]{52}\b`),
+  },
+  {
     id: "windows-user-path",
     pattern: new RegExp(String.raw`\b[A-Za-z]:${SEP}+(?:Users|Documents and Settings)${SEP}+[^\\/\s"':]+`, "i"),
     skip: HISTORICAL_RECORD,

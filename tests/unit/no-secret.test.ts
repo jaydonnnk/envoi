@@ -17,11 +17,16 @@ const scheme = ["postgresql", ":"].join("");
 const credentials = [user, secret].join(":");
 const drive = ["C", ":"].join("");
 const bearer = ["Bear", "er"].join("");
+const base32Token = "abcdefghijklmnopqrstuvwxyz234567".repeat(2).slice(0, 52);
+const agentPrefix = ["envoi", "agent", ""].join("_");
 
 const PLANTED: ReadonlyArray<{ file: string; content: string; rule: string }> = [
   { file: "conn.txt", content: `url=${scheme}//${credentials}@${host}/db\n`, rule: "connection-string" },
   { file: "conn-escaped.json", content: `{"url":"${scheme}\\/\\/${credentials}@${host}\\/db"}\n`, rule: "connection-string" },
   { file: "bearer.txt", content: `Authorization: ${bearer} ${secret}${secret}abcdef\n`, rule: "bearer-value" },
+  { file: "agent-token.txt", content: `token=${agentPrefix}${base32Token}\n`, rule: "agent-token" },
+  { file: "handoff-link.txt", content: `https://${host}/approve/${base32Token}\n`, rule: "handoff-link" },
+  { file: "handoff-escaped.json", content: `{"url":"https:\\/\\/${host}\\/approve\\/${base32Token}"}\n`, rule: "handoff-link" },
   { file: "win-backslash.txt", content: `${drive}\\Users\\${winUser}\\envoi\\src\n`, rule: "windows-user-path" },
   { file: "win-escaped.json", content: `{"path":"${drive}\\\\Users\\\\${winUser}\\\\envoi"}\n`, rule: "windows-user-path" },
   { file: "win-forward.txt", content: `${drive}/Users/${winUser}/envoi/src\n`, rule: "windows-user-path" },

@@ -46,7 +46,7 @@ const PAYPAL_PROVENANCE: CostProvenance = {
 
 const refuse = (error: AppError): PriceQuote => ({ ok: false, error });
 
-export async function priceBasket(db: Db, input: { outletId: string; lines: readonly PurchaseLine[]; rail: RailId; now: Date }): Promise<PriceQuote> {
+export async function priceBasket(db: Pick<Db, "select">, input: { outletId: string; lines: readonly PurchaseLine[]; rail: RailId; now: Date }): Promise<PriceQuote> {
   // Only PayPal exists before S16 (D8): the same answer Gate 3 gives while PYUSD is switched off.
   if (input.rail !== "paypal") {
     return refuse(appError("pyusd_unavailable", "PYUSD has not passed its tests yet.", { details: { reason: "rail_disabled" } }));

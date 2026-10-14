@@ -33,7 +33,11 @@ export async function latestAttempt(db: Conn, purchaseId: string): Promise<Payme
 // One open review per buyer and checkout key. A same-key review still inside T_REVIEW is returned
 // as it is. A replacement is legal only once every same-key purchase is terminal: one whose money
 // could still move (pending_payment not yet abandoned, or uncertain) refuses with execution_locked.
-export async function createReview(db: Db, principal: BuyerPrincipal, quote: PriceQuote & { ok: true }, now: Date): Promise<ReviewCreation> {
+export type EntryPoint = "manual" | "agent_handoff";
+
+// conn may be a transaction: a handoff redemption creates its review inside the transaction that
+// binds the redemption, so the review exists only if the binding commits.
+export async function createReview(conn: Conn, principal: BuyerPrincipal, quote: PriceQuote & { ok: true }, now: Date, entryPoint: EntryPoint = "manual"): Promise<ReviewCreation> {
   const checkoutKey = computeCheckoutKey({
     buyerUserId: principal.userId,
     outletId: quote.outletId,
@@ -45,7 +49,7 @@ export async function createReview(db: Db, principal: BuyerPrincipal, quote: Pri
     pyusdRateVersionId: null,
   });
 
-  return db.transaction(async (tx) => {
+  return conn.transaction(async (tx) => {
     const sameKey = await tx
       .select()
       .from(purchases)
@@ -80,7 +84,7 @@ export async function createReview(db: Db, principal: BuyerPrincipal, quote: Pri
         outletId: quote.outletId,
         menuRevisionId: quote.menuRevisionId,
         state: "review_open",
-        entryPoint: "manual",
+        entryPoint,
         lines,
         totalSgdCents: quote.totalSgdCents,
         currency: quote.currency,
@@ -112,7 +116,7 @@ export async function createReview(db: Db, principal: BuyerPrincipal, quote: Pri
       purchaseId,
       outletId: quote.outletId,
       operatorVisible: false,
-      details: { totalSgdCents: quote.totalSgdCents, rail: quote.rail, supersedes: replaces?.id ?? null },
+      details: { totalSgdCents: quote.totalSgdCents, rail: quote.rail, supersedes: replaces?.id ?? null, entryPoint },
     });
     return { kind: "created", purchaseId, expiresAt } as const;
   });

@@ -18,7 +18,7 @@ const QUESTIONS: Record<SuggestionGap, string> = {
   outlet: "Which shop are you at?",
 };
 
-function normalize(value: string): string {
+export function normalize(value: string): string {
   return value.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
 }
 
@@ -26,7 +26,7 @@ function normalize(value: string): string {
 // "near me" names no area and must be asked about rather than guessed.
 const VAGUE_PLACE_WORDS = new Set(["near", "nearby", "nearest", "closest", "close", "around", "me", "my", "here", "this", "location", "area", "the", "by", "in", "at", "to"]);
 
-function usableArea(value: string | null | undefined): string | null {
+export function usableArea(value: string | null | undefined): string | null {
   if (!value) return null;
   const words = normalize(value).split(" ").filter((word) => word.length > 0 && !VAGUE_PLACE_WORDS.has(word));
   return words.length > 0 ? words.join(" ") : null;
@@ -35,7 +35,7 @@ function usableArea(value: string | null | undefined): string | null {
 // Whole words only: both sides are normalized to words joined by single spaces, so "an" is not
 // found in "tanjong pagar" or in "kaya toast and kopi", and a one-letter area from the model
 // cannot pass for one the buyer wrote.
-function containsWords(haystack: string, needle: string): boolean {
+export function containsWords(haystack: string, needle: string): boolean {
   return needle.length > 0 && ` ${haystack} `.includes(` ${needle} `);
 }
 

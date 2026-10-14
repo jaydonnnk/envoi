@@ -35,3 +35,7 @@ export async function recordAudit(db: Writer, event: AuditInput): Promise<void> 
 export function buyerActor(userId: string): string {
   return `buyer:${userId}`;
 }
+
+export function agentActor(agentTokenId: string): string {
+  return `agent:${agentTokenId}`;
+}

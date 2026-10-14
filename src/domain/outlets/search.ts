@@ -18,7 +18,7 @@ export async function listPublishedOutlets(db: Db, limit = 50): Promise<Publishe
     .limit(limit);
 }
 
-export async function getPublishedMenu(db: Db, outletId: string): Promise<PublishedMenu | null> {
+export async function getPublishedMenu(db: Pick<Db, "select">, outletId: string): Promise<PublishedMenu | null> {
   const rows = await db
     .select({
       outlet: { id: outlets.id, name: outlets.name, area: outlets.area, isDemoFixture: outlets.isDemoFixture },

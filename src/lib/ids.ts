@@ -1,6 +1,6 @@
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 
-export type IdPrefix = "out" | "mrv" | "itm" | "pur" | "dst" | "att" | "aud" | "pev" | "rlh";
+export type IdPrefix = "out" | "mrv" | "itm" | "pur" | "dst" | "att" | "aud" | "pev" | "rlh" | "prq" | "agt";
 
 // 128 random bits, base32-encoded, so a receipt id cannot be guessed or enumerated.
 const ALPHABET = "abcdefghijklmnopqrstuvwxyz234567";
@@ -23,4 +23,14 @@ function base32(bytes: Uint8Array): string {
 
 export function newId(prefix: IdPrefix): string {
   return `${prefix}_${base32(randomBytes(16))}`;
+}
+
+// 256 random bits, base32-encoded: agent handoff tokens and agent bearer tokens (Gate 3 Files).
+// Only hashToken's digest is stored; the token itself is shown once and never persisted.
+export function newSecretToken(): string {
+  return base32(randomBytes(32));
+}
+
+export function hashToken(token: string): string {
+  return createHash("sha256").update(token, "utf8").digest("hex");
 }

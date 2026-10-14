@@ -196,7 +196,7 @@ export const purchases = pgTable(
       "purchases_state_check",
       sql`${t.state} in ('review_open', 'review_expired', 'review_invalidated', 'superseded', 'pending_payment', 'paid', 'unpaid_closed', 'uncertain')`,
     ),
-    check("purchases_entry_point_check", sql`${t.entryPoint} in ('fixture_tracer', 'manual')`),
+    check("purchases_entry_point_check", sql`${t.entryPoint} in ('fixture_tracer', 'manual', 'agent_handoff')`),
     check("purchases_currency_check", sql`${t.currency} = 'SGD'`),
     check("purchases_total_check", sql`${t.totalSgdCents} > 0`),
     check("purchases_rail_check", sql`${t.rail} is null or ${t.rail} in ('paypal', 'pyusd')`),
@@ -339,5 +339,60 @@ export const rateLimitHits = pgTable(
     check("rate_limit_hits_bucket_check", sql`${t.bucket} in ('buyer_suggestion')`),
     index("rate_limit_hits_bucket_at_idx").on(t.bucket, t.at),
     index("rate_limit_hits_subject_idx").on(t.bucket, t.subject, t.at),
+  ],
+);
+
+// Agent bearer tokens (Gate 2 "Supported MCP clients"; S13). The operator CLI inserts one per
+// supported client and prints the token once; only its SHA-256 digest is stored. The web role may
+// only look a digest up. Scope is fixed in code: search_outlets, get_menu, create_purchase_request.
+
+export const agentTokens = pgTable(
+  "agent_tokens",
+  {
+    id: text("id").primaryKey(),
+    label: text("label").notNull(),
+    tokenHash: text("token_hash").notNull().unique(),
+    createdAt: createdAt(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  },
+  (t) => [check("agent_tokens_hash_check", sql`${t.tokenHash} ~ '^[0-9a-f]{64}$'`)],
+);
+
+// Agent purchase requests (Gate 2 data model; Gate 3 "Suggestions and handoffs"). A request holds
+// the suggested outlet and item ids with quantities, never a price or total: redemption prices the
+// basket afresh. The handoff token is stored only as its digest. Redemption binds the buyer and the
+// purchase it created, once.
+
+export type SuggestedLine = { menuItemId: string; quantity: number };
+
+export const purchaseRequests = pgTable(
+  "purchase_requests",
+  {
+    id: text("id").primaryKey(),
+    agentTokenId: text("agent_token_id")
+      .notNull()
+      .references(() => agentTokens.id),
+    tokenHash: text("token_hash").notNull().unique(),
+    outletId: text("outlet_id")
+      .notNull()
+      .references(() => outlets.id),
+    lines: jsonb("lines").$type<SuggestedLine[]>().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    redeemedAt: timestamp("redeemed_at", { withTimezone: true }),
+    redeemedByUserId: text("redeemed_by_user_id").references(() => user.id),
+    purchaseId: text("purchase_id").references(() => purchases.id),
+  },
+  (t) => [
+    check("purchase_requests_hash_check", sql`${t.tokenHash} ~ '^[0-9a-f]{64}$'`),
+    check("purchase_requests_expiry_check", sql`${t.expiresAt} > ${t.createdAt}`),
+    // Redeemed means all three bindings at once, or none of them.
+    check(
+      "purchase_requests_redemption_check",
+      sql`(${t.redeemedAt} is null and ${t.redeemedByUserId} is null and ${t.purchaseId} is null) or (${t.redeemedAt} is not null and ${t.redeemedByUserId} is not null and ${t.purchaseId} is not null)`,
+    ),
+    // Not unique: a redemption that finds the buyer's same basket already open binds that review.
+    index("purchase_requests_purchase_idx").on(t.purchaseId),
+    index("purchase_requests_agent_idx").on(t.agentTokenId, t.createdAt),
   ],
 );

@@ -5,7 +5,7 @@ import { recordAudit } from "@/domain/audit/events";
 import { loadLocalEnvFile, migrationEnv } from "@/env";
 import * as schema from "@/lib/db/schema";
 import { pgConnection } from "@/lib/db/web";
-import { newId } from "@/lib/ids";
+import { hashToken, newId, newSecretToken } from "@/lib/ids";
 import { redact } from "@/lib/log";
 
 // Operator acts (Gate 4 delta D1), run locally by the human operator with MIGRATION_DATABASE_URL.
@@ -108,7 +108,28 @@ export async function assignPayPalDestination(db: OperatorDb, outletId: string, 
   });
 }
 
-const USAGE = "usage: npm run operator -- seed-demo-fixture | assign-paypal-destination <outletId> <sellerMerchantId>";
+export const AGENT_TOKEN_PREFIX = "envoi_agent_";
+
+export type IssuedAgentToken = { agentTokenId: string; label: string; token: string };
+
+// Issues a scoped demo token for one supported MCP client (Gate 2; S13). The token is returned once
+// for the operator to copy into the client; only its SHA-256 digest is stored, so it cannot be shown
+// again. Its scope is fixed in code to search_outlets, get_menu and create_purchase_request.
+export async function issueAgentToken(db: OperatorDb, label: string, now: Date = new Date()): Promise<IssuedAgentToken> {
+  const trimmed = label.trim();
+  if (!/^[A-Za-z0-9 ._-]{1,64}$/.test(trimmed)) throw new Error("The label must be 1 to 64 letters, digits, spaces, dots, dashes or underscores.");
+  const token = `${AGENT_TOKEN_PREFIX}${newSecretToken()}`;
+  const agentTokenId = newId("agt");
+  await db.transaction(async (tx) => {
+    await tx.insert(schema.agentTokens).values({ id: agentTokenId, label: trimmed, tokenHash: hashToken(token), createdAt: now });
+    await recordAudit(tx, { at: now, actor: "operator", action: "agent_token_issued", operatorVisible: true, details: { agentTokenId, label: trimmed } });
+  });
+  return { agentTokenId, label: trimmed, token };
+}
+
+const COMMANDS = ["seed-demo-fixture", "assign-paypal-destination", "issue-agent-token"];
+
+const USAGE = "usage: npm run operator -- seed-demo-fixture | assign-paypal-destination <outletId> <sellerMerchantId> | issue-agent-token <label>";
 
 async function run(db: OperatorDb, argv: string[]): Promise<number> {
   const [command, ...args] = argv;
@@ -130,12 +151,18 @@ async function run(db: OperatorDb, argv: string[]): Promise<number> {
     );
     return 0;
   }
+  if (command === "issue-agent-token" && args.length === 1) {
+    const issued = await issueAgentToken(db, args[0]!);
+    console.log(`issued agent token ${issued.agentTokenId} for "${issued.label}". Copy it into the MCP client now; Envoi keeps only its digest and cannot show it again:`);
+    console.log(issued.token);
+    return 0;
+  }
   console.error(USAGE);
   return 2;
 }
 
 async function main(argv: string[]): Promise<number> {
-  if (argv[0] !== "seed-demo-fixture" && argv[0] !== "assign-paypal-destination") {
+  if (!COMMANDS.includes(argv[0] ?? "")) {
     console.error(USAGE);
     return 2;
   }
