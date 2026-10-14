@@ -1,0 +1,359 @@
+{
+ "branch": "envoi/slice-5-maintenance",
+ "base_commit": "949a557",
+ "uncommitted_changes": false,
+ "method": "Each definition in s5-mutation-defs.json applied alone by exact text replacement, its named test run alone (vitest -t), every touched file restored and compared by SHA-256, then the test rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations, so a mutation of a migration file reaches the disposable database; merchant and operator accounts are created by the operator functions with passwords generated in memory per run. PayPal is the labeled FIXTURE fake and OpenAI is never called; a test that builds the maintenance runner compiles the mutated source with tsconfig.runner.json. A proof also needs the mutated run to fail on an AssertionError.",
+ "results": [
+  {
+   "id": "capture-module-in-runner",
+   "test": "maintenance cannot capture",
+   "files": [
+    "src/maintenance/run.ts"
+   ],
+   "mutation": "the runner entrypoint imports the PayPal capture module",
+   "mutated": "Tests  1 failed | 1 skipped (2)",
+   "error": "AssertionError: expected [ 'src/domain/audit/events.js', \u2026(23) ] to not include 'src/integrations/paypal/orders.js'",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 1 skipped (2)",
+   "proof": true
+  },
+  {
+   "id": "poll-loop",
+   "test": "maintenance run is finite",
+   "files": [
+    "src/maintenance/run.ts"
+   ],
+   "mutation": "the runner polls: after its run it sleeps a second and runs again, forever",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected 'running' to be +0 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "heartbeat-skip",
+   "test": "maintenance run is finite",
+   "files": [
+    "src/domain/maintenance/tasks.ts"
+   ],
+   "mutation": "the heartbeat task writes no run row",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected [] to have a length of 1 but got +0",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "per-item-deadline",
+   "test": "a run stops taking work at T_MAINT_RUN",
+   "files": [
+    "src/domain/maintenance/tasks.ts"
+   ],
+   "mutation": "a task keeps taking claimed work after the run's T_MAINT_RUN deadline",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected [ \u2026(3) ] to have a length of 2 but got 3",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "claim-lease-predicate",
+   "test": "overlapping runs claim disjoint work",
+   "files": [
+    "src/domain/maintenance/due.ts"
+   ],
+   "mutation": "remove the lease predicate: a claim ignores another runner's live claim",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected [ \u2026(4) ] to have a length of 2 but got 4",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "reconcile-claims-nothing",
+   "test": "maintenance reconciles an uncertain capture with no buyer page open",
+   "files": [
+    "src/domain/maintenance/tasks.ts"
+   ],
+   "mutation": "reconcile_attempts claims no due attempt",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected { purchase: 'uncertain', \u2026(1) } to deeply equal { purchase: 'paid', \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "replay-capture",
+   "test": "maintenance never replays a capture",
+   "files": [
+    "src/domain/maintenance/tasks.ts"
+   ],
+   "mutation": "maintenance passes its PayPal client as the capture replay",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected [ { op: 'captureOrder', \u2026(2) }, \u2026(1) ] to have a length of 1 but got 2",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "close-reviews-skip",
+   "test": "close_expired_reviews stores what the buyer already reads",
+   "files": [
+    "src/domain/maintenance/tasks.ts"
+   ],
+   "mutation": "close_expired_reviews stores nothing",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected { purchase: 'review_open', \u2026(1) } to deeply equal { purchase: 'review_expired', \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "purge-expiry-predicate",
+   "test": "purge_expired_sessions deletes only expired sessions and keeps their purchases",
+   "files": [
+    "src/domain/maintenance/due.ts"
+   ],
+   "mutation": "purge every session, not only expired ones",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected [] to deeply equal [ 't51bNhMmu6wBM5SX64rIv3qKROffp3wh' ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "capacity-skip",
+   "test": "only an operator reads the operator health view",
+   "files": [
+    "src/domain/maintenance/tasks.ts"
+   ],
+   "mutation": "record_capacity records no database size",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected 0 to be greater than 0",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "maintenance-role-insert-attempt",
+   "test": "the maintenance role cannot create an attempt, dispatch a capture or change a price",
+   "files": [
+    "drizzle/0015_s5_role_grants.sql"
+   ],
+   "mutation": "grant the maintenance role INSERT on payment_attempts",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected 'allowed' to match /permission denied/",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "maintenance-role-capture-key",
+   "test": "the maintenance role cannot create an attempt, dispatch a capture or change a price",
+   "files": [
+    "drizzle/0015_s5_role_grants.sql"
+   ],
+   "mutation": "grant the maintenance role UPDATE of capture_request_id",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected 'allowed' to match /permission denied/",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "maintenance-role-price",
+   "test": "the maintenance role cannot create an attempt, dispatch a capture or change a price",
+   "files": [
+    "drizzle/0015_s5_role_grants.sql"
+   ],
+   "mutation": "grant the maintenance role UPDATE of purchases.total_sgd_cents",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected 'allowed' to match /permission denied/",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "route-guard-dropped",
+   "test": "only an operator reads the operator health view",
+   "files": [
+    "src/app/api/v1/health/operator/route.ts"
+   ],
+   "mutation": "drop requireOperator from GET /health/operator: both refusal cases fail",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected 200 to be 404 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "guard-any-permanent",
+   "test": "only an operator reads the operator health view",
+   "files": [
+    "src/lib/auth-context.ts"
+   ],
+   "mutation": "requireOperator accepts any permanent account: the merchant case fails while the anonymous case still passes",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected 200 to be 404 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "operator-anonymous",
+   "test": "an anonymous session is refused even when it holds an operator grant row",
+   "files": [
+    "src/lib/auth-context.ts"
+   ],
+   "mutation": "requireOperator does not refuse an anonymous session",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected 200 to be 404 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "operator-agent-header",
+   "test": "an agent credential never reaches the operator health view",
+   "files": [
+    "src/lib/auth-context.ts"
+   ],
+   "mutation": "requireOperator ignores an Authorization header",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected 200 to be 404 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "operator-revoked",
+   "test": "a revoked operator grant reaches nothing",
+   "files": [
+    "src/lib/auth-context.ts"
+   ],
+   "mutation": "requireOperator ignores revocation",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected 200 to be 404 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "web-role-grants-operator",
+   "test": "the web role cannot grant an operator",
+   "files": [
+    "drizzle/0015_s5_role_grants.sql"
+   ],
+   "mutation": "grant the web role INSERT on operator_grants",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected 'inserted' to match /permission denied/",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "operator-page-guard",
+   "test": "the operator page is the not-found page for everyone but the operator",
+   "files": [
+    "src/app/operator/health/page.tsx"
+   ],
+   "mutation": "the operator page renders for any caller",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: promise resolved \"{ \u2026(10) }\" instead of rejecting",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "overdue-boundary",
+   "test": "maintenance is overdue only after 90 minutes without a heartbeat",
+   "files": [
+    "src/domain/maintenance/due.ts"
+   ],
+   "mutation": "overdue at exactly T_MAINT_OVERDUE instead of after it",
+   "mutated": "Tests  1 failed | 1 skipped (2)",
+   "error": "AssertionError: expected true to be false // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 1 skipped (2)",
+   "proof": true
+  },
+  {
+   "id": "maint-run-duration",
+   "test": "maintenance clocks have their approved durations",
+   "files": [
+    "src/lib/time.ts"
+   ],
+   "mutation": "T_MAINT_RUN of 3 minutes instead of 2",
+   "mutated": "Tests  1 failed | 1 skipped (2)",
+   "error": "AssertionError: expected 180000 to be 120000 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 1 skipped (2)",
+   "proof": true
+  },
+  {
+   "id": "maint-overdue-duration",
+   "test": "maintenance clocks have their approved durations",
+   "files": [
+    "src/lib/time.ts"
+   ],
+   "mutation": "T_MAINT_OVERDUE of 120 minutes instead of 90",
+   "mutated": "Tests  1 failed | 1 skipped (2)",
+   "error": "AssertionError: expected 7200000 to be 5400000 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 1 skipped (2)",
+   "proof": true
+  },
+  {
+   "id": "grant-operator-unchanged",
+   "test": "grant-operator flags a permanent account once and repeats as unchanged",
+   "files": [
+    "drizzle/0014_s5_maintenance.sql",
+    "src/operator/cli.ts"
+   ],
+   "mutation": "make the live operator grant index non-unique and drop onConflictDoNothing, so a repeat creates a second grant",
+   "mutated": "Tests  1 failed | 5 skipped (6)",
+   "error": "AssertionError: expected { status: 'created', \u2026(2) } to deeply equal { status: 'unchanged', \u2026(2) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 5 skipped (6)",
+   "proof": true
+  },
+  {
+   "id": "grant-operator-anonymous",
+   "test": "grant-operator refuses an anonymous or unknown account",
+   "files": [
+    "src/operator/cli.ts"
+   ],
+   "mutation": "grant-operator flags any account by email, including an anonymous buyer",
+   "mutated": "Tests  1 failed | 5 skipped (6)",
+   "error": "AssertionError: promise resolved \"{ status: 'created', \u2026(2) }\" instead of rejecting",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 5 skipped (6)",
+   "proof": true
+  }
+ ]
+}
