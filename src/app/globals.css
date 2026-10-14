@@ -49,9 +49,12 @@ main { max-width: 960px; margin: auto; padding: 28px 24px 56px; }
 small { font-size: 13px; display: block; }
 .total { font-size: 28px; font-weight: 700; letter-spacing: -0.03em; }
 .money { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.nowrap { white-space: nowrap; }
 .mono { font: 13px/1.6 ui-monospace, Consolas, monospace; overflow-wrap: anywhere; }
 /* An id beside its label never breaks mid-id; at phone width .row.stacked gives it its own line. */
 .row > .mono { white-space: nowrap; }
+/* The 13px mono text shares a baseline with the 16px text beside it instead of riding high. */
+.row:has(> .mono) { align-items: baseline; }
 
 .button { font: 600 15px "Segoe UI", system-ui, Arial, sans-serif; border: 1px solid var(--blue); border-radius: 7px; background: var(--blue); color: #fff; padding: 13px 18px; display: inline-block; text-decoration: none; cursor: pointer; text-align: center; }
 .button.secondary { color: var(--ink); background: var(--paper); border-color: #8da3bb; }

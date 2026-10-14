@@ -32,7 +32,7 @@ function Heartbeat({ health }: { health: OperatorHealth }) {
         <h2 id="heartbeat-heading">Maintenance heartbeat</h2>
         <span className={`chip ${heartbeat.overdue ? "warn" : "ok"}`}>{heartbeat.overdue ? "Overdue" : "On time"}</span>
       </div>
-      <div className="row">
+      <div className="row stacked">
         <span>Last heartbeat</span>
         <strong>{when(heartbeat.lastAt)}</strong>
       </div>
@@ -103,7 +103,7 @@ function OverdueWork({ health }: { health: OperatorHealth }) {
           <span className="mono">{item.purchaseId}</span>
           <span>
             {item.purchaseState}
-            {item.attemptState ? `, attempt ${item.attemptState}` : ""}, since {when(item.since)}
+            {item.attemptState ? `, attempt ${item.attemptState}` : ""}, since <span className="nowrap">{when(item.since)}</span>
           </span>
         </div>
       ))}
