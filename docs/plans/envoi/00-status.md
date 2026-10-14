@@ -148,7 +148,10 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 
 - **Review:** an independent review of S6 on 2026-10-14 found one UI defect, one unproven guard pair, one Gate 2 conformance gap and five record errors.
   The user authorized the fixes and the record corrections ("Yep note down the item fixes and the record corrections and the S5 implementation part of the prompt into a brand new prompt . I also do conirm the receipt rewording ammendment"); the receipt sentence is recorded as a Gate 4 amendment in the [Gate 4 status line](#status-envoi) and the [approval history](#approval-history).
-- **Branch:** `envoi/slice-6-review-fixes`, from `main` at `9daed72`.
+- **Branch:** `envoi/slice-6-review-fixes`, from `main` at `9daed72`; commits `292a8d6` (item 1), `478c55b` (item 3), `91e97f6` (item 2), `8c7dffc` (mutation definitions), `36062d5` (this record), then the deploy check below.
+  The user authorized, by multiple choice on 2026-10-14, committing, pushing the branch and fast-forwarding `main` and pushing, which deploys; CI passed on `36062d5` on the branch (run 38526935102), and `main` was fast-forwarded to it and pushed.
+- **Deploy check on Render [verified], 2026-10-14:** after the deploy a fresh anonymous session got 403 `forbidden_membership` with reason `anonymous_session` from `GET` and `POST /api/v1/merchant/outlets` and from Test Shop's `menu-draft`, a request with no session got 401 `unauthorized`, and Test Shop's public menu still answered 404.
+  The new reason showed on the fourth check about a minute after the push, which is how the deploy was told apart, since Render has no version endpoint.
 - **What the review confirmed [verified by the reviewer, 2026-10-14]:**
   - Typecheck, lint and 138 tests passed, and `s6-mutate.py` reran 25 of 25.
   - Neon had 14 migrations, the grants recorded above, no `envoi_maintenance` role and nine `neon_auth` tables with no `envoi_web` grant.
