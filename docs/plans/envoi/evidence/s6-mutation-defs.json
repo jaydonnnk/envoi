@@ -1,7 +1,7 @@
 [
  {
   "id": "outlet-guard-auth-only",
-  "test": "anonymous buyer cannot reach a merchant route",
+  "test": "linking an anonymous account creates no membership",
   "test_file": "tests/integration/merchant-draft.test.ts",
   "mutation": "check only authentication in requireOutletMembership: any session passes without a membership row",
   "edits": [
@@ -14,7 +14,7 @@
  },
  {
   "id": "account-guard-auth-only",
-  "test": "anonymous buyer cannot reach a merchant route",
+  "test": "linking an anonymous account creates no membership",
   "test_file": "tests/integration/merchant-draft.test.ts",
   "mutation": "check only authentication in requireMerchantMembership: any session passes without a membership row",
   "edits": [
@@ -257,24 +257,6 @@
   ]
  },
  {
-  "id": "zero-price",
-  "test": "a zero price is refused and changes nothing",
-  "test_file": "tests/integration/merchant-draft.test.ts",
-  "mutation": "accept a zero price at both layers: the request schema allows 0 and the menu_items check allows 0",
-  "edits": [
-   {
-    "file": "src/app/api/v1/merchant/outlets/input.ts",
-    "old": "priceSgdCents: z.number().int().min(1)",
-    "new": "priceSgdCents: z.number().int().min(0)"
-   },
-   {
-    "file": "drizzle/0000_init.sql",
-    "old": "CONSTRAINT \"menu_items_price_check\" CHECK (\"menu_items\".\"unit_sgd_cents\" is null or \"menu_items\".\"unit_sgd_cents\" > 0)",
-    "new": "CONSTRAINT \"menu_items_price_check\" CHECK (\"menu_items\".\"unit_sgd_cents\" is null or \"menu_items\".\"unit_sgd_cents\" >= 0)"
-   }
-  ]
- },
- {
   "id": "create-merchant-unchanged",
   "test": "create-merchant never changes an existing account",
   "test_file": "tests/integration/merchant-operator.test.ts",
@@ -341,6 +323,128 @@
     "file": "drizzle/0013_s6_web_role_insert_columns.sql",
     "old": "GRANT INSERT (\"id\", \"outlet_id\", \"status\", \"version\", \"created_at\") ON TABLE public.\"menu_revisions\" TO envoi_web;",
     "new": "GRANT INSERT ON TABLE public.\"menu_revisions\" TO envoi_web;"
+   }
+  ]
+ },
+ {
+  "id": "anonymous-session",
+  "test": "an anonymous session is refused even when it holds membership rows",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "drop the anonymous-session refusal from merchantSession: an anonymous session holding membership rows is admitted by them",
+  "edits": [
+   {
+    "file": "src/lib/auth-context.ts",
+    "old": "  if (result.user.isAnonymous === true) {\n    return appError(\"forbidden_membership\", \"Sign in with your merchant account.\", { details: { reason: \"anonymous_session\" } });\n  }\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "anonymous-session-gate3",
+  "test": "anonymous buyer cannot reach a merchant route",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "drop the anonymous-session refusal from merchantSession: an anonymous buyer is refused only for lacking a membership row",
+  "edits": [
+   {
+    "file": "src/lib/auth-context.ts",
+    "old": "  if (result.user.isAnonymous === true) {\n    return appError(\"forbidden_membership\", \"Sign in with your merchant account.\", { details: { reason: \"anonymous_session\" } });\n  }\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "zero-price-schema",
+  "test": "a zero price is refused and changes nothing",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "accept a zero price in the request schema only; the menu_items check still refuses it, so the route throws",
+  "edits": [
+   {
+    "file": "src/app/api/v1/merchant/outlets/input.ts",
+    "old": "priceSgdCents: z.number().int().min(1)",
+    "new": "priceSgdCents: z.number().int().min(0)"
+   }
+  ]
+ },
+ {
+  "id": "zero-price-check",
+  "test": "the database refuses a zero price from the web role",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "accept a zero price in the menu_items_price_check constraint only",
+  "edits": [
+   {
+    "file": "drizzle/0000_init.sql",
+    "old": "CONSTRAINT \"menu_items_price_check\" CHECK (\"menu_items\".\"unit_sgd_cents\" is null or \"menu_items\".\"unit_sgd_cents\" > 0)",
+    "new": "CONSTRAINT \"menu_items_price_check\" CHECK (\"menu_items\".\"unit_sgd_cents\" is null or \"menu_items\".\"unit_sgd_cents\" >= 0)"
+   }
+  ]
+ },
+ {
+  "id": "created-draft",
+  "test": "a new outlet comes back with its empty draft",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "answer an outlet creation with the outlet only, without its empty draft",
+  "edits": [
+   {
+    "file": "src/app/api/v1/merchant/outlets/route.ts",
+    "old": "  return httpOk({ outlet: created.outlet, draft: draftJson(created.draft) }, { status: 201 });",
+    "new": "  return httpOk({ outlet: created.outlet, draft: draftJson(created.draft) && undefined }, { status: 201 });"
+   }
+  ]
+ },
+ {
+  "id": "request-json-network",
+  "test": "a network failure resolves as a failed result instead of throwing",
+  "test_file": "tests/unit/request-json.test.ts",
+  "mutation": "let requestJson reject on a network failure instead of resolving as a failed result",
+  "edits": [
+   {
+    "file": "src/lib/browser/session.ts",
+    "old": "  }).catch(() => null);\n  if (response === null) return { status: 0, ok: false };",
+    "new": "  });"
+   }
+  ]
+ },
+ {
+  "id": "revoked-account-membership",
+  "test": "a revoked membership reaches nothing",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "ignore revocation in requireMerchantMembership (found by the 2026-10-14 review)",
+  "edits": [
+   {
+    "file": "src/lib/auth-context.ts",
+    "old": ".where(and(eq(merchantMemberships.userId, session.userId), isNull(merchantMemberships.revokedAt)))\n    .limit(1);\n  if (!row) return noMembership();\n  return { kind: \"merchant_account\"",
+    "new": ".where(eq(merchantMemberships.userId, session.userId))\n    .limit(1);\n  if (!row) return noMembership();\n  return { kind: \"merchant_account\""
+   }
+  ]
+ },
+ {
+  "id": "create-merchant-lowercase",
+  "test": "create-merchant never changes an existing account",
+  "test_file": "tests/integration/merchant-operator.test.ts",
+  "mutation": "stop lowercasing the email in createMerchant, so a repeat in another case creates a second account (found by the 2026-10-14 review)",
+  "edits": [
+   {
+    "file": "src/operator/cli.ts",
+    "old": "export async function createMerchant(db: OperatorDb, input: { email: string; name: string; password: string }, now: Date = new Date()): Promise<MerchantAccountResult> {\n  const email = input.email.trim().toLowerCase();",
+    "new": "export async function createMerchant(db: OperatorDb, input: { email: string; name: string; password: string }, now: Date = new Date()): Promise<MerchantAccountResult> {\n  const email = input.email.trim();"
+   }
+  ]
+ },
+ {
+  "id": "approve-membership-unchanged",
+  "test": "approve-membership grants one unbound membership and repeats as unchanged",
+  "test_file": "tests/integration/merchant-operator.test.ts",
+  "mutation": "make the live unbound membership index non-unique and drop onConflictDoNothing, so a repeat approval creates a second membership (found by the 2026-10-14 review)",
+  "edits": [
+   {
+    "file": "drizzle/0010_s6_merchant_draft.sql",
+    "old": "CREATE UNIQUE INDEX \"merchant_memberships_live_unbound_unique\"",
+    "new": "CREATE INDEX \"merchant_memberships_live_unbound_unique\""
+   },
+   {
+    "file": "src/operator/cli.ts",
+    "old": "      .onConflictDoNothing({ target: schema.merchantMemberships.userId, where: sql`${schema.merchantMemberships.outletId} is null and ${schema.merchantMemberships.revokedAt} is null` })\n",
+    "new": ""
    }
   ]
  }
