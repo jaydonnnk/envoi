@@ -1,0 +1,332 @@
+[
+ {
+  "id": "capture-module-in-runner",
+  "test": "maintenance cannot capture",
+  "test_file": "tests/unit/maintenance-build.test.ts",
+  "mutation": "the runner entrypoint imports the PayPal capture module",
+  "edits": [
+   {
+    "file": "src/maintenance/run.ts",
+    "old": "import { connectRunner } from \"@/lib/db/runner\";",
+    "new": "import { connectRunner } from \"@/lib/db/runner\";\nimport \"@/integrations/paypal/orders\";"
+   }
+  ]
+ },
+ {
+  "id": "poll-loop",
+  "test": "maintenance run is finite",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "the runner polls: after its run it sleeps a second and runs again, forever",
+  "edits": [
+   {
+    "file": "src/maintenance/run.ts",
+    "old": "    return report.operatorVisible ? 1 : 0;",
+    "new": "    for (;;) {\n      await new Promise((resolve) => setTimeout(resolve, 1_000));\n      await runMaintenance(db, { paypal: createPayPalReadClient(paypalConfigFromEnv(env)), solana: null, now: systemNow, log }, trigger);\n    }"
+   }
+  ]
+ },
+ {
+  "id": "heartbeat-skip",
+  "test": "maintenance run is finite",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "the heartbeat task writes no run row",
+  "edits": [
+   {
+    "file": "src/domain/maintenance/tasks.ts",
+    "old": "    await writeHeartbeat(db, { id: run.runId, trigger: run.trigger, startedAt: work.dueAt });\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "per-item-deadline",
+  "test": "a run stops taking work at T_MAINT_RUN",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "a task keeps taking claimed work after the run's T_MAINT_RUN deadline",
+  "edits": [
+   {
+    "file": "src/domain/maintenance/tasks.ts",
+    "old": "        if (remaining() <= 0) return { status: \"partial\", processed, blockedReason: RUN_DEADLINE };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "claim-lease-predicate",
+  "test": "overlapping runs claim disjoint work",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "remove the lease predicate: a claim ignores another runner's live claim",
+  "edits": [
+   {
+    "file": "src/domain/maintenance/due.ts",
+    "old": "  const claimFree = or(isNull(paymentAttempts.maintenanceClaimExpiresAt), lte(paymentAttempts.maintenanceClaimExpiresAt, now));",
+    "new": "  const claimFree = sql`true`;"
+   }
+  ]
+ },
+ {
+  "id": "reconcile-claims-nothing",
+  "test": "maintenance reconciles an uncertain capture with no buyer page open",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "reconcile_attempts claims no due attempt",
+  "edits": [
+   {
+    "file": "src/domain/maintenance/tasks.ts",
+    "old": "    return (await claimDueAttempts(db, now, limit, run.runId)).map(",
+    "new": "    return (await claimDueAttempts(db, now, 0, run.runId)).map("
+   }
+  ]
+ },
+ {
+  "id": "replay-capture",
+  "test": "maintenance never replays a capture",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "maintenance passes its PayPal client as the capture replay",
+  "edits": [
+   {
+    "file": "src/domain/maintenance/tasks.ts",
+    "old": "replay: null, now: deps.now, actor: \"maintenance\" }",
+    "new": "replay: deps.paypal as never, now: deps.now, actor: \"maintenance\" }"
+   }
+  ]
+ },
+ {
+  "id": "close-reviews-skip",
+  "test": "close_expired_reviews stores what the buyer already reads",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "close_expired_reviews stores nothing",
+  "edits": [
+   {
+    "file": "src/domain/maintenance/tasks.ts",
+    "old": "    await applyDerivedTransitions(db, work.id, deps.now());",
+    "new": "    void work;"
+   }
+  ]
+ },
+ {
+  "id": "purge-expiry-predicate",
+  "test": "purge_expired_sessions deletes only expired sessions and keeps their purchases",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "purge every session, not only expired ones",
+  "edits": [
+   {
+    "file": "src/domain/maintenance/due.ts",
+    "old": "  const expired = db.select({ id: session.id }).from(session).where(lte(session.expiresAt, now)).limit(limit);",
+    "new": "  const expired = db.select({ id: session.id }).from(session).limit(limit);"
+   }
+  ]
+ },
+ {
+  "id": "capacity-skip",
+  "test": "only an operator reads the operator health view",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "record_capacity records no database size",
+  "edits": [
+   {
+    "file": "src/domain/maintenance/tasks.ts",
+    "old": "    const bytes = await recordDatabaseSize(db, run.runId);",
+    "new": "    const bytes = 0;"
+   }
+  ]
+ },
+ {
+  "id": "maintenance-role-insert-attempt",
+  "test": "the maintenance role cannot create an attempt, dispatch a capture or change a price",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "grant the maintenance role INSERT on payment_attempts",
+  "edits": [
+   {
+    "file": "drizzle/0015_s5_role_grants.sql",
+    "old": "GRANT SELECT ON TABLE public.\"payment_attempts\", public.\"purchases\" TO envoi_maintenance;",
+    "new": "GRANT SELECT ON TABLE public.\"payment_attempts\", public.\"purchases\" TO envoi_maintenance; GRANT INSERT ON TABLE public.\"payment_attempts\" TO envoi_maintenance;"
+   }
+  ]
+ },
+ {
+  "id": "maintenance-role-capture-key",
+  "test": "the maintenance role cannot create an attempt, dispatch a capture or change a price",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "grant the maintenance role UPDATE of capture_request_id",
+  "edits": [
+   {
+    "file": "drizzle/0015_s5_role_grants.sql",
+    "old": "GRANT UPDATE (\"state\", \"updated_at\", \"capture_id\",",
+    "new": "GRANT UPDATE (\"state\", \"updated_at\", \"capture_request_id\", \"capture_id\","
+   }
+  ]
+ },
+ {
+  "id": "maintenance-role-price",
+  "test": "the maintenance role cannot create an attempt, dispatch a capture or change a price",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "grant the maintenance role UPDATE of purchases.total_sgd_cents",
+  "edits": [
+   {
+    "file": "drizzle/0015_s5_role_grants.sql",
+    "old": "GRANT UPDATE (\"state\") ON TABLE public.\"purchases\" TO envoi_maintenance;",
+    "new": "GRANT UPDATE (\"state\", \"total_sgd_cents\") ON TABLE public.\"purchases\" TO envoi_maintenance;"
+   }
+  ]
+ },
+ {
+  "id": "route-guard-dropped",
+  "test": "only an operator reads the operator health view",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "drop requireOperator from GET /health/operator: both refusal cases fail",
+  "edits": [
+   {
+    "file": "src/app/api/v1/health/operator/route.ts",
+    "old": "  const principal = await requireOperator(getAuth(), webDb(), request.headers);\n  if (!isOperator(principal)) return httpErr(principal);\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "guard-any-permanent",
+  "test": "only an operator reads the operator health view",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "requireOperator accepts any permanent account: the merchant case fails while the anonymous case still passes",
+  "edits": [
+   {
+    "file": "src/lib/auth-context.ts",
+    "old": "  if (!grant) return operatorNotFound();\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "operator-anonymous",
+  "test": "an anonymous session is refused even when it holds an operator grant row",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "requireOperator does not refuse an anonymous session",
+  "edits": [
+   {
+    "file": "src/lib/auth-context.ts",
+    "old": "  if (!result || result.user.isAnonymous === true) return operatorNotFound();",
+    "new": "  if (!result) return operatorNotFound();"
+   }
+  ]
+ },
+ {
+  "id": "operator-agent-header",
+  "test": "an agent credential never reaches the operator health view",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "requireOperator ignores an Authorization header",
+  "edits": [
+   {
+    "file": "src/lib/auth-context.ts",
+    "old": "  if (headers.has(\"authorization\")) return operatorNotFound();\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "operator-revoked",
+  "test": "a revoked operator grant reaches nothing",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "requireOperator ignores revocation",
+  "edits": [
+   {
+    "file": "src/lib/auth-context.ts",
+    "old": ".where(and(eq(operatorGrants.userId, result.user.id), isNull(operatorGrants.revokedAt)))",
+    "new": ".where(eq(operatorGrants.userId, result.user.id))"
+   }
+  ]
+ },
+ {
+  "id": "web-role-grants-operator",
+  "test": "the web role cannot grant an operator",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "grant the web role INSERT on operator_grants",
+  "edits": [
+   {
+    "file": "drizzle/0015_s5_role_grants.sql",
+    "old": "GRANT SELECT ON TABLE public.\"maintenance_runs\", public.\"operator_grants\" TO envoi_web;",
+    "new": "GRANT SELECT ON TABLE public.\"maintenance_runs\", public.\"operator_grants\" TO envoi_web; GRANT INSERT ON TABLE public.\"operator_grants\" TO envoi_web;"
+   }
+  ]
+ },
+ {
+  "id": "operator-page-guard",
+  "test": "the operator page is the not-found page for everyone but the operator",
+  "test_file": "tests/integration/maintenance.test.ts",
+  "mutation": "the operator page renders for any caller",
+  "edits": [
+   {
+    "file": "src/app/operator/health/page.tsx",
+    "old": "  if (!isOperator(principal)) notFound();\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "overdue-boundary",
+  "test": "maintenance is overdue only after 90 minutes without a heartbeat",
+  "test_file": "tests/unit/maintenance-clocks.test.ts",
+  "mutation": "overdue at exactly T_MAINT_OVERDUE instead of after it",
+  "edits": [
+   {
+    "file": "src/domain/maintenance/due.ts",
+    "old": "now.getTime() - lastHeartbeatAt.getTime() > durationMs(\"T_MAINT_OVERDUE\")",
+    "new": "now.getTime() - lastHeartbeatAt.getTime() >= durationMs(\"T_MAINT_OVERDUE\")"
+   }
+  ]
+ },
+ {
+  "id": "maint-run-duration",
+  "test": "maintenance clocks have their approved durations",
+  "test_file": "tests/unit/maintenance-clocks.test.ts",
+  "mutation": "T_MAINT_RUN of 3 minutes instead of 2",
+  "edits": [
+   {
+    "file": "src/lib/time.ts",
+    "old": "  T_MAINT_RUN: 2 * 60_000,",
+    "new": "  T_MAINT_RUN: 3 * 60_000,"
+   }
+  ]
+ },
+ {
+  "id": "maint-overdue-duration",
+  "test": "maintenance clocks have their approved durations",
+  "test_file": "tests/unit/maintenance-clocks.test.ts",
+  "mutation": "T_MAINT_OVERDUE of 120 minutes instead of 90",
+  "edits": [
+   {
+    "file": "src/lib/time.ts",
+    "old": "  T_MAINT_OVERDUE: 90 * 60_000,",
+    "new": "  T_MAINT_OVERDUE: 120 * 60_000,"
+   }
+  ]
+ },
+ {
+  "id": "grant-operator-unchanged",
+  "test": "grant-operator flags a permanent account once and repeats as unchanged",
+  "test_file": "tests/integration/merchant-operator.test.ts",
+  "mutation": "make the live operator grant index non-unique and drop onConflictDoNothing, so a repeat creates a second grant",
+  "edits": [
+   {
+    "file": "drizzle/0014_s5_maintenance.sql",
+    "old": "CREATE UNIQUE INDEX \"operator_grants_live_user_unique\"",
+    "new": "CREATE INDEX \"operator_grants_live_user_unique\""
+   },
+   {
+    "file": "src/operator/cli.ts",
+    "old": "      .onConflictDoNothing({ target: schema.operatorGrants.userId, where: sql`${schema.operatorGrants.revokedAt} is null` })\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "grant-operator-anonymous",
+  "test": "grant-operator refuses an anonymous or unknown account",
+  "test_file": "tests/integration/merchant-operator.test.ts",
+  "mutation": "grant-operator flags any account by email, including an anonymous buyer",
+  "edits": [
+   {
+    "file": "src/operator/cli.ts",
+    "old": "      .innerJoin(schema.account, and(eq(schema.account.userId, schema.user.id), eq(schema.account.providerId, \"credential\")))\n      .where(eq(schema.user.email, email))\n      .limit(1);\n    if (!account || account.isAnonymous) throw new Error(`No permanent account",
+    "new": "      .where(eq(schema.user.email, email))\n      .limit(1);\n    if (!account) throw new Error(`No permanent account"
+   }
+  ]
+ }
+]

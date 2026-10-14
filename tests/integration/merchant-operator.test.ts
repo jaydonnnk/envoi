@@ -2,12 +2,12 @@ import { randomBytes } from "node:crypto";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import * as schema from "@/lib/db/schema";
-import { approveMembership, createMerchant } from "@/operator/cli";
+import { approveMembership, createMerchant, grantOperator } from "@/operator/cli";
 import { createTestDatabase, type TestDatabase } from "../support/db";
 import { anonymousCookie, webEnvFor } from "../support/session";
 
-// Operator acts for merchant accounts (Gate 4 delta D1). FIXTURE passwords are generated in memory
-// for this run only.
+// Operator acts for merchant and operator accounts (Gate 4 delta D1). FIXTURE passwords are
+// generated in memory for this run only.
 describe("operator merchant acts", () => {
   let database: TestDatabase;
   let db: ReturnType<typeof drizzle<typeof schema>>;
@@ -59,5 +59,26 @@ describe("operator merchant acts", () => {
     await expect(approveMembership(db, { email: anonymous!.email })).rejects.toThrow(/No merchant account/);
     await expect(approveMembership(db, { email: "nobody@merchant.example.test" })).rejects.toThrow(/No merchant account/);
     expect(await database.admin`select m.id from merchant_memberships m join "user" u on u.id = m.user_id where u.is_anonymous`).toHaveLength(0);
+  });
+
+  it("grant-operator flags a permanent account once and repeats as unchanged", async () => {
+    const { userId } = await createMerchant(db, { email: "operator@merchant.example.test", name: "FIXTURE operator", password: password() });
+    const first = await grantOperator(db, { email: "operator@merchant.example.test", evidenceRef: "FIXTURE evidence" });
+    expect(first).toMatchObject({ status: "created", userId });
+    const second = await grantOperator(db, { email: "OPERATOR@merchant.example.test" });
+    expect(second).toEqual({ status: "unchanged", userId, grantId: first.grantId });
+    expect(await database.admin`select user_id, evidence_ref, revoked_at from operator_grants where user_id = ${userId}`).toEqual([
+      { user_id: userId, evidence_ref: "FIXTURE evidence", revoked_at: null },
+    ]);
+    expect(await database.admin`select id from merchant_memberships where user_id = ${userId}`).toHaveLength(0);
+  });
+
+  it("grant-operator refuses an anonymous or unknown account", async () => {
+    const { POST } = await import("@/app/api/auth/[...all]/route");
+    await anonymousCookie(POST);
+    const [anonymous] = await database.admin<{ email: string }[]>`select email from "user" where is_anonymous limit 1`;
+    await expect(grantOperator(db, { email: anonymous!.email })).rejects.toThrow(/No permanent account/);
+    await expect(grantOperator(db, { email: "nobody@merchant.example.test" })).rejects.toThrow(/No permanent account/);
+    expect(await database.admin`select g.id from operator_grants g join "user" u on u.id = g.user_id where u.is_anonymous`).toHaveLength(0);
   });
 });
