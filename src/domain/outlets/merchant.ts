@@ -1,5 +1,7 @@
 import { and, asc, eq, isNotNull, isNull, sql } from "drizzle-orm";
 import { recordAudit } from "@/domain/audit/events";
+import { getMenuDraft } from "@/domain/menu/draft";
+import type { MenuDraft } from "@/domain/menu/types";
 import { enrollments, merchantMemberships, outlets } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
@@ -65,11 +67,12 @@ export async function listMerchantOutlets(db: Pick<Db, "select">, userId: string
 
 export type OutletInput = { name: string; area: string };
 
-export type CreatedOutlet = { outlet: MerchantOutlet; menuRevisionId: string };
+export type CreatedOutlet = { outlet: MerchantOutlet; draft: MenuDraft };
 
 // Uses up the account's approved, unbound membership: in one transaction it creates the unpublished
 // outlet, its pending enrollment and an empty draft revision, and binds the membership to the new
-// outlet. Without such a membership nothing is created. Two concurrent creations cannot share one
+// outlet. It returns that empty draft, so the setup page shows the menu editor without a second
+// request. Without such a membership nothing is created. Two concurrent creations cannot share one
 // membership, because the second waits on the row lock and then finds it bound.
 export async function createMerchantOutlet(db: Db, input: OutletInput & { userId: string; now: Date }): Promise<CreatedOutlet | AppError> {
   return db.transaction(async (tx) => {
@@ -101,9 +104,11 @@ export async function createMerchantOutlet(db: Db, input: OutletInput & { userId
       operatorVisible: true,
       details: { membershipId: membership.id, menuRevisionId, isDemo: membership.isDemo },
     });
+    const draft = await getMenuDraft(tx, outletId);
+    if (!draft) throw new Error("The new outlet's draft revision was not found in its own transaction.");
     return {
       outlet: { id: outletId, name: input.name, area: input.area, isDemoFixture: membership.isDemo, published: false, enrollment: "pending" },
-      menuRevisionId,
+      draft,
     };
   });
 }

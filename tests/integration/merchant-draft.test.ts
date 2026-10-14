@@ -207,6 +207,17 @@ describe("merchant sign-in and manual menu draft", () => {
     expect(list.data).toMatchObject({ outlets: [{ name: "FIXTURE first", published: false, enrollment: "pending", isDemoFixture: true }], canCreateOutlet: false });
   });
 
+  it("a new outlet comes back with its empty draft", async () => {
+    const merchant = await newMerchant(fixture.database, "created-draft", { membership: true });
+    const cookie = await signInCookie(routes.auth.POST, merchant);
+    const created = await routes.outlets.POST(jsonRequest("POST", "/api/v1/merchant/outlets", cookie, { name: "FIXTURE drafted", area: "Bugis" }));
+    expect(created.status).toBe(201);
+    const { data } = await body<{ outlet: { id: string }; draft: DraftJson }>(created);
+    expect(data.draft).toMatchObject({ outletId: data.outlet.id, version: 1, status: "draft", confirmedAt: null, items: [] });
+    // The setup page renders this draft at once, so it must be the one the draft route serves.
+    expect(data.draft).toEqual(await draftOf(data.outlet.id, cookie));
+  });
+
   it("a blank price stays blank and blocks confirmation until it is supplied", async () => {
     const { cookie, outletId } = await merchantWithOutlet("blank-price");
     const empty = await draftOf(outletId, cookie);

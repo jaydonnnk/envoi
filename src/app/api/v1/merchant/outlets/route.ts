@@ -1,3 +1,4 @@
+import { draftJson } from "@/domain/menu/serialize";
 import { createMerchantOutlet, listMerchantOutlets } from "@/domain/outlets/merchant";
 import { getAuth } from "@/lib/auth";
 import { isMerchantAccount, requireMerchantMembership } from "@/lib/auth-context";
@@ -15,7 +16,8 @@ export async function GET(request: Request): Promise<Response> {
   return httpOk(await listMerchantOutlets(webDb(), principal.userId));
 }
 
-// Creates an unpublished outlet with an empty menu draft, using up one approved membership.
+// Creates an unpublished outlet with an empty menu draft, using up one approved membership, and
+// returns both.
 export async function POST(request: Request): Promise<Response> {
   const principal = await requireMerchantMembership(getAuth(), webDb(), request.headers);
   if (!isMerchantAccount(principal)) return httpErr(principal);
@@ -25,5 +27,5 @@ export async function POST(request: Request): Promise<Response> {
 
   const created = await createMerchantOutlet(webDb(), { ...parsed.data, userId: principal.userId, now: new Date() });
   if (isAppError(created)) return httpErr(created);
-  return httpOk(created, { status: 201 });
+  return httpOk({ outlet: created.outlet, draft: draftJson(created.draft) }, { status: 201 });
 }

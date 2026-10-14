@@ -17,7 +17,9 @@ function OutletChips({ outlet }: { outlet: MerchantOutlet }) {
 }
 
 // Name and area for a new shop, or for editing an unpublished one.
-function OutletForm({ outlet, submitLabel, onSaved, onCancel }: { outlet?: MerchantOutlet; submitLabel: string; onSaved: (outlet: MerchantOutlet) => void; onCancel?: () => void }) {
+type Saved = { outlet: MerchantOutlet; draft?: DraftJson };
+
+function OutletForm({ outlet, submitLabel, onSaved, onCancel }: { outlet?: MerchantOutlet; submitLabel: string; onSaved: (saved: Saved) => void; onCancel?: () => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,14 +30,14 @@ function OutletForm({ outlet, submitLabel, onSaved, onCancel }: { outlet?: Merch
     setBusy(true);
     setError(null);
     const result = outlet
-      ? await requestJson<{ outlet: MerchantOutlet }>("PATCH", `/api/v1/merchant/outlets/${encodeURIComponent(outlet.id)}`, body)
-      : await requestJson<{ outlet: MerchantOutlet }>("POST", "/api/v1/merchant/outlets", body);
+      ? await requestJson<Saved>("PATCH", `/api/v1/merchant/outlets/${encodeURIComponent(outlet.id)}`, body)
+      : await requestJson<Saved>("POST", "/api/v1/merchant/outlets", body);
     setBusy(false);
     if (!result.ok || !result.data) {
       setError(result.error?.message ?? "The shop could not be saved. Try again.");
       return;
     }
-    onSaved(result.data.outlet);
+    onSaved(result.data);
   }
 
   const prefix = outlet ? `outlet-${outlet.id}` : "new-outlet";
@@ -64,6 +66,8 @@ function OutletForm({ outlet, submitLabel, onSaved, onCancel }: { outlet?: Merch
   );
 }
 
+// A draft that cannot be loaded, including on a network failure, is null: the menu editor then shows
+// its error with "Try again".
 const fetchDraft = async (outletId: string) => (await requestJson<DraftJson>("GET", `/api/v1/merchant/outlets/${encodeURIComponent(outletId)}/menu-draft`)).data ?? null;
 
 export function Workspace({ initial, initialDraft }: { initial: MerchantOutlets; initialDraft: DraftJson | null }) {
@@ -80,13 +84,15 @@ export function Workspace({ initial, initialDraft }: { initial: MerchantOutlets;
     setSelected({ id: outletId, draft: await fetchDraft(outletId) });
   }
 
-  async function created(created: MerchantOutlet) {
-    setOutlets((current) => [...current, created]);
+  // The creation response carries the new outlet's empty draft, so its editor shows at once.
+  function created({ outlet, draft }: Saved) {
+    setOutlets((current) => [...current, outlet]);
     setCanCreate(false);
-    await select(created.id);
+    setEditing(false);
+    setSelected({ id: outlet.id, draft: draft ?? null });
   }
 
-  function updated(outlet: MerchantOutlet) {
+  function updated({ outlet }: Saved) {
     setOutlets((current) => current.map((candidate) => (candidate.id === outlet.id ? outlet : candidate)));
     setEditing(false);
   }
