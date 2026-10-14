@@ -1,0 +1,331 @@
+{
+ "branch": "envoi/slice-13-mcp-handoff",
+ "base_commit": "acffc53",
+ "uncommitted_changes": false,
+ "method": "Each definition in s13-mutation-defs.json applied alone by exact text replacement, its named test run alone (vitest -t), every touched file restored and compared by SHA-256, then the test rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations; PayPal and OpenAI are never called by these tests; agent tokens are issued by the operator function into the disposable database. A proof also needs the mutated run to fail on an AssertionError.",
+ "results": [
+  {
+   "id": "agent-receipt",
+   "test": "agent token cannot read a receipt",
+   "files": [
+    "src/lib/auth-context.ts"
+   ],
+   "mutation": "accept the agent principal: a request presenting an agent token is treated as a buyer request",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected 401 to be 403 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  },
+  {
+   "id": "agent-redeem",
+   "test": "agent token cannot redeem a handoff",
+   "files": [
+    "src/lib/auth-context.ts"
+   ],
+   "mutation": "accept the agent principal on the redeem route (the same guard as agent-receipt, proved against its second test)",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected 401 to be 403 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  },
+  {
+   "id": "redeem-once",
+   "test": "handoff redeems once",
+   "files": [
+    "src/domain/handoffs/redeem.ts"
+   ],
+   "mutation": "remove the once constraint: bind the redemption without requiring redeemed_at to be null",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected { outcome: 'redeemed', \u2026(1) } to deeply equal { outcome: 'already_redeemed' }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  },
+  {
+   "id": "redeem-once-race",
+   "test": "concurrent redemptions bind once",
+   "files": [
+    "src/domain/handoffs/redeem.ts"
+   ],
+   "mutation": "remove the once constraint (the same guard as redeem-once) under two concurrent redemptions",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected [ 'redeemed', 'redeemed' ] to deeply equal [ 'already_redeemed', 'redeemed' ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  },
+  {
+   "id": "agent-total",
+   "test": "handoff carries no amount",
+   "files": [
+    "src/domain/handoffs/input.ts",
+    "src/domain/handoffs/redeem.ts"
+   ],
+   "mutation": "accept the agent total: keep an agent-supplied totalSgdCents with the lines and use it at redemption",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected 1 to be 500 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  },
+  {
+   "id": "creation-price",
+   "test": "handoff carries no amount",
+   "files": [
+    "src/domain/handoffs/redeem.ts"
+   ],
+   "mutation": "price at creation, not redemption: keep the creation-time total with the lines and use it at redemption",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected 400 to be 500 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  },
+  {
+   "id": "t-handoff-9",
+   "test": "handoff expires after T_HANDOFF",
+   "files": [
+    "src/lib/time.ts"
+   ],
+   "mutation": "T_HANDOFF of 9 minutes",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected 540000 to be 600000 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  },
+  {
+   "id": "t-handoff-11",
+   "test": "handoff expires after T_HANDOFF",
+   "files": [
+    "src/lib/time.ts"
+   ],
+   "mutation": "T_HANDOFF of 11 minutes",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected 660000 to be 600000 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  },
+  {
+   "id": "t-handoff-boundary",
+   "test": "handoff expires after T_HANDOFF",
+   "files": [
+    "src/domain/handoffs/redeem.ts"
+   ],
+   "mutation": "boundary: a link is still redeemable at exactly 600,000 ms (> instead of >=)",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected 'redeemed' to be 'expired' // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  },
+  {
+   "id": "t-handoff-unenforced",
+   "test": "handoff expires after T_HANDOFF",
+   "files": [
+    "src/domain/handoffs/redeem.ts"
+   ],
+   "mutation": "remove the expiry check at redemption",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected 'redeemed' to be 'expired' // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  },
+  {
+   "id": "preview-redeemed",
+   "test": "approval preview closes a used, expired or unknown link",
+   "files": [
+    "src/domain/handoffs/redeem.ts"
+   ],
+   "mutation": "the approval page shows a used link as open",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected { Object (kind, outlet, ...) } to deeply equal { kind: 'already_redeemed' }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  },
+  {
+   "id": "preview-expired",
+   "test": "approval preview closes a used, expired or unknown link",
+   "files": [
+    "src/domain/handoffs/redeem.ts"
+   ],
+   "mutation": "the approval page shows an expired link as open",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected { Object (kind, outlet, ...) } to deeply equal { kind: 'expired' }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  },
+  {
+   "id": "preview-price",
+   "test": "approval preview shows names and quantities only",
+   "files": [
+    "src/domain/handoffs/redeem.ts"
+   ],
+   "mutation": "the approval preview carries a unit price",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected '{\"kind\":\"open\",\"outlet\":{\"id\":\"out_du\u2026' not to match /cents|price|total|amount/i",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  },
+  {
+   "id": "mcp-get",
+   "test": "MCP refuses GET and DELETE",
+   "files": [
+    "src/app/mcp/route.ts"
+   ],
+   "mutation": "allow GET",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected 200 to be 405 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  },
+  {
+   "id": "mcp-delete",
+   "test": "MCP refuses GET and DELETE",
+   "files": [
+    "src/app/mcp/route.ts"
+   ],
+   "mutation": "allow DELETE",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected 200 to be 405 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  },
+  {
+   "id": "mcp-origin",
+   "test": "foreign Origin is rejected",
+   "files": [
+    "src/app/mcp/route.ts"
+   ],
+   "mutation": "skip the Origin check",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected 200 to be 403 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  },
+  {
+   "id": "mcp-host",
+   "test": "foreign Host is rejected",
+   "files": [
+    "src/app/mcp/route.ts"
+   ],
+   "mutation": "skip the Host check",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected 200 to be 403 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  },
+  {
+   "id": "mcp-body-cap",
+   "test": "MCP reads at most 16 KiB of body",
+   "files": [
+    "src/app/mcp/route.ts"
+   ],
+   "mutation": "a 32 KiB cap",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected 200 to be 400 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  },
+  {
+   "id": "mcp-fourth-tool",
+   "test": "MCP lists only the three scoped tools",
+   "files": [
+    "src/app/mcp/route.ts"
+   ],
+   "mutation": "register a fourth tool that reads a receipt",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected [ 'create_purchase_request', \u2026(3) ] to deeply equal [ 'create_purchase_request', \u2026(2) ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  },
+  {
+   "id": "revoked-token",
+   "test": "purchase requests need a live agent token",
+   "files": [
+    "src/lib/auth-context.ts"
+   ],
+   "mutation": "accept a revoked agent token",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected 201 to be 401 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  },
+  {
+   "id": "registry-letters",
+   "test": "an MCP client finds the shop, reads the menu and gets a link a buyer redeems",
+   "files": [
+    "src/domain/handoffs/registry.ts"
+   ],
+   "mutation": "match the agent's area as letters instead of whole words",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected [ { \u2026(5) } ] to deeply equal []",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  },
+  {
+   "id": "mcp-create-leak",
+   "test": "an MCP client finds the shop, reads the menu and gets a link a buyer redeems",
+   "files": [
+    "src/app/mcp/route.ts"
+   ],
+   "mutation": "create_purchase_request also returns a purchase id",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected '{\\n  \"notice\": \"Envoi test environmen\u2026' not to match /cents|total|amount|purchaseId|pur_/i",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  },
+  {
+   "id": "log-handoff-url",
+   "test": "no handoff token or agent token reaches the log",
+   "files": [
+    "src/app/mcp/route.ts"
+   ],
+   "mutation": "log the handoff link with the tool outcome",
+   "mutated": "Tests  1 failed | 16 skipped (17)",
+   "error": "AssertionError: expected '{\"at\":\"2026-10-14T02:31:30.639Z\",\"lev\u2026' not to contain 'kezwmzzp7y7ozvhfz3uzj6wvncibotycmyifs\u2026'",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 16 skipped (17)",
+   "proof": true
+  }
+ ]
+}
