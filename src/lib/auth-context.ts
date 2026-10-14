@@ -1,7 +1,7 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { appError, type AppError } from "@/lib/errors";
 import type { Auth } from "@/lib/auth";
-import { agentTokens, merchantMemberships } from "@/lib/db/schema";
+import { agentTokens, merchantMemberships, operatorGrants } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { hashToken } from "@/lib/ids";
 
@@ -109,4 +109,29 @@ export async function requireOutletMembership(auth: Auth, db: Db, headers: Heade
 
 export function isOutletMember(value: OutletMemberPrincipal | AppError): value is OutletMemberPrincipal {
   return "kind" in value && value.kind === "outlet_member";
+}
+
+// The operator (S5): a permanent account holding a live operator_grants row, which only the
+// operator CLI's grant-operator writes. Gate 3's error codes have no operator code, so every other
+// caller, whether an agent credential, no session, an anonymous buyer or a signed-in account without
+// a grant, gets the same 404 not_found and learns nothing about the route.
+export type OperatorPrincipal = { kind: "operator"; userId: string };
+
+const operatorNotFound = () => appError("not_found", "Not found.");
+
+export async function requireOperator(auth: Auth, db: Db, headers: Headers): Promise<OperatorPrincipal | AppError> {
+  if (headers.has("authorization")) return operatorNotFound();
+  const result = await auth.api.getSession({ headers });
+  if (!result || result.user.isAnonymous === true) return operatorNotFound();
+  const [grant] = await db
+    .select({ id: operatorGrants.id })
+    .from(operatorGrants)
+    .where(and(eq(operatorGrants.userId, result.user.id), isNull(operatorGrants.revokedAt)))
+    .limit(1);
+  if (!grant) return operatorNotFound();
+  return { kind: "operator", userId: result.user.id };
+}
+
+export function isOperator(value: OperatorPrincipal | AppError): value is OperatorPrincipal {
+  return "kind" in value && value.kind === "operator";
 }

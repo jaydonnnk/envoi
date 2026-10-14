@@ -210,6 +210,42 @@ export async function approveMembership(db: OperatorDb, input: { email: string; 
   });
 }
 
+export type OperatorGrantResult = { status: "created" | "unchanged"; userId: string; grantId: string };
+
+// Flags a permanent account made with create-merchant as the operator (S5). The operator health
+// view and the S17 operator acts check this row. An anonymous or unknown account is refused, and an
+// account already flagged keeps its grant and nothing changes.
+export async function grantOperator(db: OperatorDb, input: { email: string; evidenceRef?: string | null }, now: Date = new Date()): Promise<OperatorGrantResult> {
+  const email = input.email.trim().toLowerCase();
+  const evidenceRef = input.evidenceRef?.trim() || null;
+  if (evidenceRef !== null && evidenceRef.length > 200) throw new Error("The evidence reference must be at most 200 characters.");
+  return db.transaction(async (tx) => {
+    const [account] = await tx
+      .select({ id: schema.user.id, isAnonymous: schema.user.isAnonymous })
+      .from(schema.user)
+      .innerJoin(schema.account, and(eq(schema.account.userId, schema.user.id), eq(schema.account.providerId, "credential")))
+      .where(eq(schema.user.email, email))
+      .limit(1);
+    if (!account || account.isAnonymous) throw new Error(`No permanent account ${email}; create it with create-merchant first.`);
+    const grantId = newId("opg");
+    const inserted = await tx
+      .insert(schema.operatorGrants)
+      .values({ id: grantId, userId: account.id, evidenceRef, grantedAt: now })
+      .onConflictDoNothing({ target: schema.operatorGrants.userId, where: sql`${schema.operatorGrants.revokedAt} is null` })
+      .returning({ id: schema.operatorGrants.id });
+    if (inserted.length === 0) {
+      const [existing] = await tx
+        .select({ id: schema.operatorGrants.id })
+        .from(schema.operatorGrants)
+        .where(and(eq(schema.operatorGrants.userId, account.id), isNull(schema.operatorGrants.revokedAt)));
+      if (!existing) throw new Error("Operator grant conflict without a grant; inspect it by hand.");
+      return { status: "unchanged", userId: account.id, grantId: existing.id };
+    }
+    await recordAudit(tx, { at: now, actor: "operator", action: "operator_granted", operatorVisible: true, details: { grantId, userId: account.id, hasEvidence: evidenceRef !== null } });
+    return { status: "created", userId: account.id, grantId };
+  });
+}
+
 // Reads one line from the terminal without echoing it. Refuses when stdin is not a terminal, so a
 // password is never piped in from a file or a shell history.
 function promptHidden(prompt: string): Promise<string> {
@@ -247,10 +283,10 @@ function promptHidden(prompt: string): Promise<string> {
   });
 }
 
-const COMMANDS = ["seed-demo-fixture", "assign-paypal-destination", "issue-agent-token", "create-merchant", "approve-membership"];
+const COMMANDS = ["seed-demo-fixture", "assign-paypal-destination", "issue-agent-token", "create-merchant", "approve-membership", "grant-operator"];
 
 const USAGE =
-  "usage: npm run operator -- seed-demo-fixture | assign-paypal-destination <outletId> <sellerMerchantId> | issue-agent-token <label> | create-merchant <email> <name> | approve-membership <email> [evidenceRef]";
+  "usage: npm run operator -- seed-demo-fixture | assign-paypal-destination <outletId> <sellerMerchantId> | issue-agent-token <label> | create-merchant <email> <name> | approve-membership <email> [evidenceRef] | grant-operator <email> [evidenceRef]";
 
 async function run(db: OperatorDb, argv: string[]): Promise<number> {
   const [command, ...args] = argv;
@@ -295,6 +331,15 @@ async function run(db: OperatorDb, argv: string[]): Promise<number> {
       result.status === "created"
         ? `approved membership ${result.membershipId} for account ${result.userId}; its next shop creation binds it`
         : `account ${result.userId} already holds unbound membership ${result.membershipId}; nothing changed`,
+    );
+    return 0;
+  }
+  if (command === "grant-operator" && (args.length === 1 || args.length === 2)) {
+    const result = await grantOperator(db, { email: args[0]!, evidenceRef: args[1] ?? null });
+    console.log(
+      result.status === "created"
+        ? `flagged account ${result.userId} as the operator (grant ${result.grantId}); it can now open /operator/health after signing in`
+        : `account ${result.userId} is already the operator (grant ${result.grantId}); nothing changed`,
     );
     return 0;
   }
