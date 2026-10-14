@@ -1,6 +1,6 @@
 {
- "branch": "envoi/slice-4-text-entry",
- "base_commit": "9d8ca4a",
+ "branch": "envoi/slice-4-text-entry-fixes",
+ "base_commit": "2fb7769",
  "uncommitted_changes": true,
  "method": "Each definition in s4-mutation-defs.json applied alone by exact text replacement, its named test run alone (vitest -t), every touched file restored and compared by SHA-256, then the test rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations; OpenAI is the labeled FIXTURE fake at the provider's fetch boundary (tests/support/fake-openai.ts). A proof also needs the mutated run to fail on an AssertionError.",
  "results": [
@@ -11,11 +11,11 @@
     "src/domain/suggestions/suggest.ts"
    ],
    "mutation": "trust the model's item ids instead of the published menu",
-   "mutated": "Tests  1 failed | 12 skipped (13)",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
    "error": "AssertionError: expected { kind: 'items', \u2026(3) } to deeply equal { kind: 'items', \u2026(3) }",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 12 skipped (13)",
+   "rerun": "Tests  1 passed | 23 skipped (24)",
    "proof": true
   },
   {
@@ -25,11 +25,11 @@
     "src/domain/suggestions/suggest.ts"
    ],
    "mutation": "trust the model's outlet ids instead of the published registry",
-   "mutated": "Tests  1 failed | 12 skipped (13)",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
    "error": "AssertionError: expected { kind: 'outlets', \u2026(1) } to deeply equal { kind: 'outlets', \u2026(1) }",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 12 skipped (13)",
+   "rerun": "Tests  1 passed | 23 skipped (24)",
    "proof": true
   },
   {
@@ -39,11 +39,11 @@
     "src/domain/suggestions/suggest.ts"
    ],
    "mutation": "get_published_menu returns each item's price",
-   "mutated": "Tests  1 failed | 12 skipped (13)",
-   "error": "AssertionError: expected '{\"outlet\":{\"id\":\"out_ybtka2h3hwfutfuc\u2026' not to match /unitSgdCents|price|S\\$|\\b(160|450|22\u2026/i",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
+   "error": "AssertionError: expected '{\"outlet\":{\"id\":\"out_mefebteskuwz55wb\u2026' not to match /unitSgdCents|price|S\\$|\\b(160|450|22\u2026/i",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 12 skipped (13)",
+   "rerun": "Tests  1 passed | 23 skipped (24)",
    "proof": true
   },
   {
@@ -53,11 +53,11 @@
     "src/domain/outlets/search.ts"
    ],
    "mutation": "match only an outlet area that contains the searched text",
-   "mutated": "Tests  1 failed | 12 skipped (13)",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
    "error": "AssertionError: expected '[]' to contain 'Kaya toast set'",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 12 skipped (13)",
+   "rerun": "Tests  1 passed | 23 skipped (24)",
    "proof": true
   },
   {
@@ -67,11 +67,11 @@
     "src/domain/suggestions/suggest.ts"
    ],
    "mutation": "pass the model's area to the search uncleaned",
-   "mutated": "Tests  1 failed | 12 skipped (13)",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
    "error": "AssertionError: expected '[]' to contain 'Lorong Demo Kopi'",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 12 skipped (13)",
+   "rerun": "Tests  1 passed | 23 skipped (24)",
    "proof": true
   },
   {
@@ -81,11 +81,11 @@
     "src/integrations/ai/openai.ts"
    ],
    "mutation": "remove the tool-call counter",
-   "mutated": "Tests  1 failed | 12 skipped (13)",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
    "error": "AssertionError: expected { kind: 'outlets', \u2026(1) } to deeply equal { kind: 'budget_exceeded' }",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 12 skipped (13)",
+   "rerun": "Tests  1 passed | 23 skipped (24)",
    "proof": true
   },
   {
@@ -95,11 +95,11 @@
     "src/domain/suggestions/suggest.ts"
    ],
    "mutation": "default to a fixed area",
-   "mutated": "Tests  1 failed | 12 skipped (13)",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
    "error": "AssertionError: expected { kind: 'outlets', \u2026(1) } to deeply equal { kind: 'clarification', \u2026(2) }",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 12 skipped (13)",
+   "rerun": "Tests  1 passed | 23 skipped (24)",
    "proof": true
   },
   {
@@ -109,11 +109,11 @@
     "src/domain/suggestions/suggest.ts"
    ],
    "mutation": "accept \"near me\" as an area",
-   "mutated": "Tests  1 failed | 12 skipped (13)",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
    "error": "AssertionError: expected { kind: 'no_match' } to deeply equal { kind: 'clarification', \u2026(2) }",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 12 skipped (13)",
+   "rerun": "Tests  1 passed | 23 skipped (24)",
    "proof": true
   },
   {
@@ -123,11 +123,11 @@
     "src/domain/suggestions/suggest.ts"
    ],
    "mutation": "trust the area the model reports",
-   "mutated": "Tests  1 failed | 12 skipped (13)",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
    "error": "AssertionError: expected { kind: 'items', \u2026(3) } to deeply equal { kind: 'clarification', \u2026(2) }",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 12 skipped (13)",
+   "rerun": "Tests  1 passed | 23 skipped (24)",
    "proof": true
   },
   {
@@ -137,11 +137,11 @@
     "src/domain/suggestions/suggest.ts"
    ],
    "mutation": "every outlet counts as in scope",
-   "mutated": "Tests  1 failed | 12 skipped (13)",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
    "error": "AssertionError: expected { kind: 'outlets', \u2026(1) } to deeply equal { kind: 'no_match' }",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 12 skipped (13)",
+   "rerun": "Tests  1 passed | 23 skipped (24)",
    "proof": true
   },
   {
@@ -151,11 +151,11 @@
     "src/app/api/v1/buyer/suggestions/route.ts"
    ],
    "mutation": "a failed model call answers 200 instead of provider_unreachable",
-   "mutated": "Tests  1 failed | 12 skipped (13)",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
    "error": "AssertionError: expected 200 to be 502 // Object.is equality",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 12 skipped (13)",
+   "rerun": "Tests  1 passed | 23 skipped (24)",
    "proof": true
   },
   {
@@ -165,11 +165,11 @@
     "src/app/api/v1/buyer/suggestions/route.ts"
    ],
    "mutation": "skip requireBuyerSession",
-   "mutated": "Tests  1 failed | 12 skipped (13)",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
    "error": "AssertionError: expected 200 to be 401 // Object.is equality",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 12 skipped (13)",
+   "rerun": "Tests  1 passed | 23 skipped (24)",
    "proof": true
   },
   {
@@ -179,25 +179,25 @@
     "src/integrations/ai/openai.ts"
    ],
    "mutation": "T_AI_BUDGET of 60 seconds",
-   "mutated": "Tests  1 failed | 12 skipped (13)",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
    "error": "AssertionError: expected { kind: 'unavailable' } to deeply equal { kind: 'budget_exceeded' }",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 12 skipped (13)",
+   "rerun": "Tests  1 passed | 23 skipped (24)",
    "proof": true
   },
   {
    "id": "ai-budget-early",
-   "test": "a model answering 25 seconds after the request started is not cut off",
+   "test": "a model answering 29.8 seconds after the request started is not cut off",
    "files": [
     "src/integrations/ai/openai.ts"
    ],
    "mutation": "T_AI_BUDGET of 20 seconds",
-   "mutated": "Tests  1 failed | 12 skipped (13)",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
    "error": "AssertionError: expected { kind: 'budget_exceeded' } to deeply equal { kind: 'no_match' }",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 12 skipped (13)",
+   "rerun": "Tests  1 passed | 23 skipped (24)",
    "proof": true
   },
   {
@@ -207,11 +207,11 @@
     "src/lib/ratelimit.ts"
    ],
    "mutation": "remove the per-session window",
-   "mutated": "Tests  1 failed | 2 skipped (3)",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
    "error": "AssertionError: expected { status: 200, code: undefined, \u2026(1) } to deeply equal { status: 429, \u2026(2) }",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "rerun": "Tests  1 passed | 3 skipped (4)",
    "proof": true
   },
   {
@@ -221,11 +221,11 @@
     "src/lib/ratelimit.ts"
    ],
    "mutation": "allow 11 per session",
-   "mutated": "Tests  1 failed | 2 skipped (3)",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
    "error": "AssertionError: expected { status: 200, code: undefined, \u2026(1) } to deeply equal { status: 429, \u2026(2) }",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "rerun": "Tests  1 passed | 3 skipped (4)",
    "proof": true
   },
   {
@@ -235,11 +235,11 @@
     "src/lib/ratelimit.ts"
    ],
    "mutation": "a 9-minute per-session window",
-   "mutated": "Tests  1 failed | 2 skipped (3)",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
    "error": "AssertionError: expected undefined to be 'rate_limited' // Object.is equality",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "rerun": "Tests  1 passed | 3 skipped (4)",
    "proof": true
   },
   {
@@ -249,11 +249,11 @@
     "src/app/api/v1/buyer/suggestions/route.ts"
    ],
    "mutation": "a refused request still calls the model",
-   "mutated": "Tests  1 failed | 2 skipped (3)",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
    "error": "AssertionError: expected [ { \u2026(2) }, { \u2026(2) }, { \u2026(2) }, \u2026(8) ] to have a length of 10 but got 11",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "rerun": "Tests  1 passed | 3 skipped (4)",
    "proof": true
   },
   {
@@ -263,11 +263,11 @@
     "src/lib/ratelimit.ts"
    ],
    "mutation": "remove the global window",
-   "mutated": "Tests  1 failed | 2 skipped (3)",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
    "error": "AssertionError: expected { status: 200, code: undefined, \u2026(1) } to deeply equal { status: 429, \u2026(2) }",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "rerun": "Tests  1 passed | 3 skipped (4)",
    "proof": true
   },
   {
@@ -277,11 +277,11 @@
     "src/lib/ratelimit.ts"
    ],
    "mutation": "allow 101 an hour",
-   "mutated": "Tests  1 failed | 2 skipped (3)",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
    "error": "AssertionError: expected { status: 200, code: undefined, \u2026(1) } to deeply equal { status: 429, \u2026(2) }",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "rerun": "Tests  1 passed | 3 skipped (4)",
    "proof": true
   },
   {
@@ -291,11 +291,11 @@
     "src/lib/ratelimit.ts"
    ],
    "mutation": "a 59-minute global window",
-   "mutated": "Tests  1 failed | 2 skipped (3)",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
    "error": "AssertionError: expected undefined to be 'rate_limited' // Object.is equality",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "rerun": "Tests  1 passed | 3 skipped (4)",
    "proof": true
   },
   {
@@ -305,11 +305,249 @@
     "src/lib/ratelimit.ts"
    ],
    "mutation": "remove the per-bucket advisory lock",
-   "mutated": "Tests  1 failed | 2 skipped (3)",
-   "error": "AssertionError: expected [ { kind: 'admitted' }, \u2026(14) ] to have a length of 10 but got 15",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
+   "error": "AssertionError: expected [ { kind: 'admitted' }, \u2026(12) ] to have a length of 10 but got 13",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "rerun": "Tests  1 passed | 3 skipped (4)",
+   "proof": true
+  },
+  {
+   "id": "ai-budget-31s",
+   "test": "a model still working 30 seconds after the request started yields budget_exceeded",
+   "files": [
+    "src/integrations/ai/openai.ts"
+   ],
+   "mutation": "T_AI_BUDGET of 31 seconds",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
+   "error": "AssertionError: expected { kind: 'unavailable' } to deeply equal { kind: 'budget_exceeded' }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 23 skipped (24)",
+   "proof": true
+  },
+  {
+   "id": "ai-budget-29s",
+   "test": "a model answering 29.8 seconds after the request started is not cut off",
+   "files": [
+    "src/integrations/ai/openai.ts"
+   ],
+   "mutation": "T_AI_BUDGET of 29 seconds",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
+   "error": "AssertionError: expected { kind: 'budget_exceeded' } to deeply equal { kind: 'no_match' }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 23 skipped (24)",
+   "proof": true
+  },
+  {
+   "id": "area-word-text",
+   "test": "a model area the buyer did not write as a word is not trusted",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "accept a model area found anywhere inside the buyer's text",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
+   "error": "AssertionError: expected { kind: 'no_match' } to deeply equal { kind: 'clarification', \u2026(2) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 23 skipped (24)",
+   "proof": true
+  },
+  {
+   "id": "area-word-scope",
+   "test": "an area that is only part of a word matches no shop",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "match an outlet area that merely contains the area's letters",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
+   "error": "AssertionError: expected { kind: 'outlets', \u2026(1) } to deeply equal { kind: 'no_match' }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 23 skipped (24)",
+   "proof": true
+  },
+  {
+   "id": "area-reverse",
+   "test": "an area that names more than the shop's area still matches it",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "match only an outlet area that contains the buyer's whole area",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
+   "error": "AssertionError: expected { kind: 'no_match' } to deeply equal { kind: 'outlets', \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 23 skipped (24)",
+   "proof": true
+  },
+  {
+   "id": "named-outlet",
+   "test": "a shop the buyer names needs no area",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "a shop the buyer names no longer counts as in scope",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
+   "error": "AssertionError: expected { kind: 'clarification', \u2026(2) } to deeply equal { kind: 'outlets', \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 23 skipped (24)",
+   "proof": true
+  },
+  {
+   "id": "items-unavailable",
+   "test": "an item marked unavailable is not suggested",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "suggest an item marked unavailable",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
+   "error": "AssertionError: expected { kind: 'items', \u2026(3) } to match object { kind: 'items', \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 23 skipped (24)",
+   "proof": true
+  },
+  {
+   "id": "items-unpriced",
+   "test": "an item with no price is not suggested",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "suggest an item with no price",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
+   "error": "AssertionError: expected { kind: 'items', \u2026(3) } to match object { kind: 'items', \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 23 skipped (24)",
+   "proof": true
+  },
+  {
+   "id": "model-retries",
+   "test": "a failed model call is not retried",
+   "files": [
+    "src/integrations/ai/openai.ts"
+   ],
+   "mutation": "retry a failed model call once",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
+   "error": "AssertionError: expected [ { \u2026(2) }, { \u2026(2) } ] to have a length of 1 but got 2",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 23 skipped (24)",
+   "proof": true
+  },
+  {
+   "id": "model-store",
+   "test": "OpenAI is asked not to store the request",
+   "files": [
+    "src/integrations/ai/openai.ts"
+   ],
+   "mutation": "let OpenAI store the request",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
+   "error": "AssertionError: expected true to be false // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 23 skipped (24)",
+   "proof": true
+  },
+  {
+   "id": "log-text",
+   "test": "the buyer's text never reaches the log",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "log the buyer's text with each suggestion",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
+   "error": "AssertionError: expected '{\"at\":\"2026-10-14T00:33:49.367Z\",\"lev\u2026' not to contain 'FIXTUREneedle4471'",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 23 skipped (24)",
+   "proof": true
+  },
+  {
+   "id": "text-length",
+   "test": "text longer than 280 characters is refused before any model call",
+   "files": [
+    "src/app/api/v1/buyer/suggestions/route.ts"
+   ],
+   "mutation": "no text length bound",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
+   "error": "AssertionError: expected 200 to be 400 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 23 skipped (24)",
+   "proof": true
+  },
+  {
+   "id": "body-cap",
+   "test": "a body over 4 KiB is refused unread",
+   "files": [
+    "src/app/api/v1/buyer/suggestions/route.ts"
+   ],
+   "mutation": "a 1 MB body cap",
+   "mutated": "Tests  1 failed | 23 skipped (24)",
+   "error": "AssertionError: expected 200 to be 400 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 23 skipped (24)",
+   "proof": true
+  },
+  {
+   "id": "reader-cap",
+   "test": "refuses a body one byte over the cap",
+   "files": [
+    "src/lib/http/bounded-body.ts"
+   ],
+   "mutation": "allow one byte past the cap",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
+   "error": "AssertionError: expected { ok: true, \u2026(1) } to deeply equal { ok: false, reason: 'too_large' }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 3 skipped (4)",
+   "proof": true
+  },
+  {
+   "id": "reader-timeout",
+   "test": "gives up on a body that stops sending",
+   "files": [
+    "src/lib/http/bounded-body.ts"
+   ],
+   "mutation": "no time bound",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
+   "error": "AssertionError: expected 'still reading' to deeply equal { ok: false, reason: 'timeout' }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 3 skipped (4)",
+   "proof": true
+  },
+  {
+   "id": "reader-abort",
+   "test": "stops when the request is aborted",
+   "files": [
+    "src/lib/http/bounded-body.ts"
+   ],
+   "mutation": "ignore the caller's abort",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
+   "error": "AssertionError: expected { ok: false, reason: 'timeout' } to deeply equal { ok: false, reason: 'aborted' }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 3 skipped (4)",
+   "proof": true
+  },
+  {
+   "id": "refused-writes",
+   "test": "a refused suggestion request records nothing",
+   "files": [
+    "src/lib/ratelimit.ts"
+   ],
+   "mutation": "a refused request records a hit",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
+   "error": "AssertionError: expected 12 to be 10 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 3 skipped (4)",
    "proof": true
   }
  ]
