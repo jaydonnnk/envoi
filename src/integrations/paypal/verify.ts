@@ -94,6 +94,8 @@ export async function verifyPayPalWebhookEvent(cfg: PayPalConfig, req: Request):
     transmission_time: header("paypal-transmission-time"),
   };
   if (Object.values(transmission).some((value) => !value)) return { verified: false, reason: "missing_headers" };
+  // A client configured without a webhook registration, as maintenance's is, verifies nothing.
+  if (cfg.webhookId === null) return { verified: false, reason: "verification_unreachable" };
 
   // The event goes back to PayPal exactly as it arrived; re-serializing it could change the bytes
   // the signature covers.

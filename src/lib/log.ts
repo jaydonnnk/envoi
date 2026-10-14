@@ -39,6 +39,8 @@ function threshold(): Level {
   return configured === "debug" || configured === "warn" || configured === "error" ? configured : "info";
 }
 
+export type RedactingLogger = (level: Level, event: string, fields?: LogFields) => void;
+
 export function log(level: Level, event: string, fields: LogFields = {}): void {
   if (ORDER[level] < ORDER[threshold()]) return;
   const safe: Record<string, unknown> = {};

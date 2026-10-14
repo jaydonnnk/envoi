@@ -10,6 +10,7 @@ export type TestDatabase = {
   name: string;
   adminUrl: string; // superuser, for setup and assertions
   webUrl: string; // envoi_web, the role the app runs as
+  maintenanceUrl: string; // envoi_maintenance, the role the maintenance runner uses
   admin: postgres.Sql;
   drop: () => Promise<void>;
 };
@@ -32,10 +33,11 @@ export async function createTestDatabase(label: string, options: { migrate?: boo
   const root = postgres(baseUrl, { max: 1, onnotice: () => {} });
   try {
     await root.unsafe(`CREATE DATABASE "${name}"`);
-    // The web role is cluster-wide; it is created out of band on Neon and here for tests.
-    await root.unsafe(
-      `DO $$ BEGIN CREATE ROLE envoi_web LOGIN; EXCEPTION WHEN duplicate_object OR unique_violation THEN NULL; END $$`,
-    );
+    // The web and maintenance roles are cluster-wide; they are created out of band on Neon and here
+    // for tests.
+    for (const role of ["envoi_web", "envoi_maintenance"]) {
+      await root.unsafe(`DO $$ BEGIN CREATE ROLE ${role} LOGIN; EXCEPTION WHEN duplicate_object OR unique_violation THEN NULL; END $$`);
+    }
   } finally {
     await root.end({ timeout: 5 });
   }
@@ -48,6 +50,7 @@ export async function createTestDatabase(label: string, options: { migrate?: boo
     name,
     adminUrl,
     webUrl: withDatabase(baseUrl, name, "envoi_web"),
+    maintenanceUrl: withDatabase(baseUrl, name, "envoi_maintenance"),
     admin,
     drop: async () => {
       await admin.end({ timeout: 5 });

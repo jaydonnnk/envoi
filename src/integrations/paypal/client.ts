@@ -15,7 +15,8 @@ export type PayPalConfig = {
   clientId: string;
   clientSecret: string;
   partnerAttributionId: string;
-  webhookId: string;
+  // The sandbox app's webhook registration. Null for maintenance, which never verifies a webhook.
+  webhookId: string | null;
   timeoutMs: number;
 };
 
@@ -48,13 +49,15 @@ export function isSandboxApprovalUrl(value: string): boolean {
   }
 }
 
-export function paypalConfigFromEnv(env: WebEnv): PayPalConfig {
+type PayPalEnv = Pick<WebEnv, "PAYPAL_CLIENT_ID" | "PAYPAL_CLIENT_SECRET" | "PAYPAL_PARTNER_ATTRIBUTION_ID"> & { PAYPAL_WEBHOOK_ID?: string };
+
+export function paypalConfigFromEnv(env: PayPalEnv): PayPalConfig {
   return {
     apiBase: PAYPAL_SANDBOX_API_BASE,
     clientId: env.PAYPAL_CLIENT_ID,
     clientSecret: env.PAYPAL_CLIENT_SECRET,
     partnerAttributionId: env.PAYPAL_PARTNER_ATTRIBUTION_ID,
-    webhookId: env.PAYPAL_WEBHOOK_ID,
+    webhookId: env.PAYPAL_WEBHOOK_ID ?? null,
     timeoutMs: 15_000,
   };
 }

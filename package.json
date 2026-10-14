@@ -17,7 +17,9 @@
     "test:integration": "vitest run --project integration",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/lib/db/migrate.ts",
-    "operator": "tsx src/operator/cli.ts"
+    "operator": "tsx src/operator/cli.ts",
+    "runner:build": "tsc -p tsconfig.runner.json",
+    "runner:start": "node --import ./.maintenance-build/src/maintenance/resolve-hook.js ./.maintenance-build/src/maintenance/run.js"
   },
   "dependencies": {
     "@ai-sdk/openai": "4.0.86",

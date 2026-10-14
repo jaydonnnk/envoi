@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": ".maintenance-build",
+    "rootDir": ".",
+    "incremental": false,
+    "lib": ["ES2023"],
+    "plugins": [],
+    "sourceMap": false,
+    "declaration": false
+  },
+  "include": [],
+  "files": ["src/maintenance/run.ts", "src/maintenance/resolve-hook.ts"]
+}

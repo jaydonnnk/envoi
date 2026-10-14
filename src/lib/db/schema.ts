@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex, type AnyPgColumn } from "drizzle-orm/pg-core";
+import { bigint, boolean, check, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex, type AnyPgColumn } from "drizzle-orm/pg-core";
 
 // Every table lives in public. drizzle-orm refuses pgSchema("public"), so the schema pin is the
 // web role's search_path, set per database in migration 0001 (R11 containment).
@@ -314,6 +314,12 @@ export const paymentAttempts = pgTable(
     // the T_PROVIDER_READ_DEBOUNCE window for the status and reconcile paths.
     providerReadDueAt: timestamp("provider_read_due_at", { withTimezone: true }),
     lastProviderReadAt: timestamp("last_provider_read_at", { withTimezone: true }),
+    // Maintenance (S5): a runner's claim on this attempt as due work, held for T_LEASE, so
+    // overlapping runs take disjoint attempts; and how often and when maintenance last checked it.
+    maintenanceClaimOwner: text("maintenance_claim_owner"),
+    maintenanceClaimExpiresAt: timestamp("maintenance_claim_expires_at", { withTimezone: true }),
+    maintenanceChecks: integer("maintenance_checks").notNull().default(0),
+    maintenanceCheckedAt: timestamp("maintenance_checked_at", { withTimezone: true }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -458,4 +464,54 @@ export const purchaseRequests = pgTable(
     index("purchase_requests_purchase_idx").on(t.purchaseId),
     index("purchase_requests_agent_idx").on(t.agentTokenId, t.createdAt),
   ],
+);
+
+// Maintenance runs (S5). The row is the heartbeat: the runner inserts it first and finishes it
+// with its report. The operator health view reads the latest one; no import or payment admission
+// depends on it.
+
+export const MAINTENANCE_TRIGGERS = ["manual", "scheduled"] as const;
+export const MAINTENANCE_RUN_STATUSES = ["running", "ok", "failed"] as const;
+
+export type MaintenanceReportJson = {
+  tasks: { name: string; status: "ok" | "partial" | "failed"; processed: number; reason: string | null }[];
+  operatorVisible: boolean;
+};
+
+export const maintenanceRuns = pgTable(
+  "maintenance_runs",
+  {
+    id: text("id").primaryKey(),
+    trigger: text("trigger").notNull(),
+    status: text("status").notNull(),
+    startedAt: timestamp("started_at", { withTimezone: true }).notNull(),
+    finishedAt: timestamp("finished_at", { withTimezone: true }),
+    // pg_database_size(current_database()): excludes Neon's history and restore storage.
+    databaseSizeBytes: bigint("database_size_bytes", { mode: "number" }),
+    report: jsonb("report").$type<MaintenanceReportJson>(),
+  },
+  (t) => [
+    check("maintenance_runs_trigger_check", sql`${t.trigger} in ('manual', 'scheduled')`),
+    check("maintenance_runs_status_check", sql`${t.status} in ('running', 'ok', 'failed')`),
+    check("maintenance_runs_finished_check", sql`(${t.status} = 'running') = (${t.finishedAt} is null)`),
+    index("maintenance_runs_started_idx").on(t.startedAt),
+  ],
+);
+
+// Operator allowlist (S5; Gate 3 "allowlisted flag on a permanent account"). Only the operator CLI's
+// grant-operator writes it; the web role may only read it, so no web or Better Auth path can make an
+// account an operator. A grant never comes from a property of the user record.
+
+export const operatorGrants = pgTable(
+  "operator_grants",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id),
+    evidenceRef: text("evidence_ref"),
+    grantedAt: timestamp("granted_at", { withTimezone: true }).notNull(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  },
+  (t) => [uniqueIndex("operator_grants_live_user_unique").on(t.userId).where(sql`${t.revokedAt} is null`)],
 );
