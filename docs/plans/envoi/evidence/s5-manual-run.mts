@@ -122,11 +122,11 @@ for (const label of ["manual run 1", "manual run 2"]) {
       },
     },
   );
-  const [run] = await admin<{ id: string; trigger: string; status: string; started_at: Date; finished_at: Date; database_size_bytes: number; report: unknown }[]>`
-    select id, trigger, status, started_at, finished_at, database_size_bytes::int, report from maintenance_runs order by started_at desc limit 1`;
+  const [run] = await admin<{ id: string; trigger: string; status: string; started_at: string; finished_at: string; database_size_bytes: number; report: unknown }[]>`
+    select id, trigger, status, to_json(started_at) #>> '{}' as started_at, to_json(finished_at) #>> '{}' as finished_at, database_size_bytes::int, report from maintenance_runs order by started_at desc limit 1`;
   console.log(`\n[${label}] compiled runner exited ${child.status} after ${Date.now() - started} ms`);
   for (const line of `${child.stdout}${child.stderr}`.trim().split("\n")) console.log(`  log: ${line}`);
-  console.log(`  maintenance_runs: ${run!.id} trigger=${run!.trigger} status=${run!.status} heartbeat(started_at)=${run!.started_at.toISOString()} finished_at=${run!.finished_at.toISOString()} pg_database_size=${run!.database_size_bytes} bytes`);
+  console.log(`  maintenance_runs: ${run!.id} trigger=${run!.trigger} status=${run!.status} heartbeat(started_at)=${run!.started_at} finished_at=${run!.finished_at} pg_database_size=${run!.database_size_bytes} bytes`);
   console.log(`  report: ${JSON.stringify(run!.report)}`);
   console.log(`  uncertain capture now: ${JSON.stringify(await state(uncertain.purchaseId))}; expired review now: ${JSON.stringify(await state(expiredReview.purchaseId))}`);
   console.log(`  expired session present: ${(await admin`select id from session where id = ${expiredSession!.id}`).length === 1}`);
