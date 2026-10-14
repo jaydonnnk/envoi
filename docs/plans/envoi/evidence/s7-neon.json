@@ -1,0 +1,371 @@
+{
+ "note": "READ ONLY transactions on Neon by .maintenance-build/s7-neon-read.mts, before and after migrations 0016 and 0017, 2026-10-14. No neon_auth read.",
+ "before": {
+  "readOnly": {
+   "transaction_read_only": "on"
+  },
+  "migrations": [
+   {
+    "n": 16,
+    "last": "1791963113324"
+   }
+  ],
+  "cols": [],
+  "triggers": [],
+  "grants": [
+   {
+    "table_name": "menu_revisions",
+    "privilege_type": "UPDATE",
+    "column_name": "confirmed_at"
+   },
+   {
+    "table_name": "menu_revisions",
+    "privilege_type": "UPDATE",
+    "column_name": "status"
+   },
+   {
+    "table_name": "menu_revisions",
+    "privilege_type": "UPDATE",
+    "column_name": "version"
+   },
+   {
+    "table_name": "outlets",
+    "privilege_type": "UPDATE",
+    "column_name": "area"
+   },
+   {
+    "table_name": "outlets",
+    "privilege_type": "UPDATE",
+    "column_name": "name"
+   }
+  ],
+  "purchases": [
+   {
+    "state": "paid",
+    "n": 3,
+    "keyed": 0
+   },
+   {
+    "state": "review_expired",
+    "n": 1,
+    "keyed": 0
+   },
+   {
+    "state": "review_open",
+    "n": 5,
+    "keyed": 0
+   },
+   {
+    "state": "uncertain",
+    "n": 2,
+    "keyed": 0
+   },
+   {
+    "state": "unpaid_closed",
+    "n": 2,
+    "keyed": 0
+   }
+  ],
+  "outlets": [
+   {
+    "id": "out_wgoyp6kgg75472b6s772dplgoq",
+    "name": "Lorong Demo Kopi",
+    "is_demo_fixture": true,
+    "published_menu_revision_id": "mrv_ul7mgjlmivuukefojwyxekjm5y",
+    "details_confirmed": false,
+    "enrollment": null,
+    "destination": "dst_hckkx7g6uitqinbglsj54bquc4",
+    "seller_merchant_id": "EQN6264CF9F4Y",
+    "destination_status": "active",
+    "destination_version": 1,
+    "accepted": false
+   },
+   {
+    "id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+    "name": "Test Shop",
+    "is_demo_fixture": true,
+    "published_menu_revision_id": null,
+    "details_confirmed": false,
+    "enrollment": "pending",
+    "destination": null,
+    "seller_merchant_id": null,
+    "destination_status": null,
+    "destination_version": null,
+    "accepted": false
+   }
+  ],
+  "revisions": [
+   {
+    "id": "mrv_ul7mgjlmivuukefojwyxekjm5y",
+    "outlet_id": "out_wgoyp6kgg75472b6s772dplgoq",
+    "status": "confirmed",
+    "version": 1,
+    "published": false,
+    "items": 4,
+    "menu": [
+     {
+      "name": "Kopi O",
+      "cents": 160,
+      "key_is_id": null
+     },
+     {
+      "name": "Kaya toast set",
+      "cents": 450,
+      "key_is_id": null
+     },
+     {
+      "name": "Teh C peng",
+      "cents": 220,
+      "key_is_id": null
+     },
+     {
+      "name": "Soft-boiled eggs (2)",
+      "cents": 200,
+      "key_is_id": null
+     }
+    ]
+   },
+   {
+    "id": "mrv_wl5pn6p3gaq4467x4j5453cx24",
+    "outlet_id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+    "status": "confirmed",
+    "version": 3,
+    "published": false,
+    "items": 3,
+    "menu": [
+     {
+      "name": "Kopi C",
+      "cents": 180,
+      "key_is_id": null
+     },
+     {
+      "name": "Mee siam",
+      "cents": 550,
+      "key_is_id": null
+     },
+     {
+      "name": "Kaya toast set",
+      "cents": 450,
+      "key_is_id": null
+     }
+    ]
+   }
+  ],
+  "maintenanceRuns": {
+   "n": 0
+  },
+  "testShopAttempts": []
+ },
+ "after": {
+  "readOnly": {
+   "transaction_read_only": "on"
+  },
+  "migrations": [
+   {
+    "n": 18,
+    "last": "1791988735049"
+   }
+  ],
+  "cols": [
+   {
+    "table_name": "menu_items",
+    "column_name": "item_key"
+   },
+   {
+    "table_name": "menu_revisions",
+    "column_name": "published_at"
+   },
+   {
+    "table_name": "outlets",
+    "column_name": "details_confirmed_at"
+   },
+   {
+    "table_name": "payment_destinations",
+    "column_name": "accepted_at"
+   },
+   {
+    "table_name": "payment_destinations",
+    "column_name": "accepted_by_user_id"
+   },
+   {
+    "table_name": "purchases",
+    "column_name": "basket_lock_key"
+   }
+  ],
+  "triggers": [
+   "menu_items_item_key_default",
+   "menu_items_published_immutable",
+   "menu_revisions_published_immutable",
+   "merchant_memberships_binding_once",
+   "outlets_publication_guard"
+  ],
+  "grants": [
+   {
+    "table_name": "menu_revisions",
+    "privilege_type": "UPDATE",
+    "column_name": "confirmed_at"
+   },
+   {
+    "table_name": "menu_revisions",
+    "privilege_type": "UPDATE",
+    "column_name": "status"
+   },
+   {
+    "table_name": "menu_revisions",
+    "privilege_type": "UPDATE",
+    "column_name": "version"
+   },
+   {
+    "table_name": "outlets",
+    "privilege_type": "UPDATE",
+    "column_name": "area"
+   },
+   {
+    "table_name": "outlets",
+    "privilege_type": "UPDATE",
+    "column_name": "details_confirmed_at"
+   },
+   {
+    "table_name": "outlets",
+    "privilege_type": "UPDATE",
+    "column_name": "name"
+   },
+   {
+    "table_name": "outlets",
+    "privilege_type": "UPDATE",
+    "column_name": "published_menu_revision_id"
+   },
+   {
+    "table_name": "payment_destinations",
+    "privilege_type": "UPDATE",
+    "column_name": "accepted_at"
+   },
+   {
+    "table_name": "payment_destinations",
+    "privilege_type": "UPDATE",
+    "column_name": "accepted_by_user_id"
+   },
+   {
+    "table_name": "payment_destinations",
+    "privilege_type": "UPDATE",
+    "column_name": "version"
+   }
+  ],
+  "purchases": [
+   {
+    "state": "paid",
+    "n": 3,
+    "keyed": 3
+   },
+   {
+    "state": "review_expired",
+    "n": 1,
+    "keyed": 1
+   },
+   {
+    "state": "review_open",
+    "n": 5,
+    "keyed": 2
+   },
+   {
+    "state": "uncertain",
+    "n": 2,
+    "keyed": 2
+   },
+   {
+    "state": "unpaid_closed",
+    "n": 2,
+    "keyed": 2
+   }
+  ],
+  "outlets": [
+   {
+    "id": "out_wgoyp6kgg75472b6s772dplgoq",
+    "name": "Lorong Demo Kopi",
+    "is_demo_fixture": true,
+    "published_menu_revision_id": "mrv_ul7mgjlmivuukefojwyxekjm5y",
+    "details_confirmed": false,
+    "enrollment": null,
+    "destination": "dst_hckkx7g6uitqinbglsj54bquc4",
+    "seller_merchant_id": "EQN6264CF9F4Y",
+    "destination_status": "active",
+    "destination_version": 1,
+    "accepted": false
+   },
+   {
+    "id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+    "name": "Test Shop",
+    "is_demo_fixture": true,
+    "published_menu_revision_id": null,
+    "details_confirmed": false,
+    "enrollment": "pending",
+    "destination": null,
+    "seller_merchant_id": null,
+    "destination_status": null,
+    "destination_version": null,
+    "accepted": false
+   }
+  ],
+  "revisions": [
+   {
+    "id": "mrv_ul7mgjlmivuukefojwyxekjm5y",
+    "outlet_id": "out_wgoyp6kgg75472b6s772dplgoq",
+    "status": "confirmed",
+    "version": 1,
+    "published": true,
+    "items": 4,
+    "menu": [
+     {
+      "name": "Kopi O",
+      "cents": 160,
+      "key_is_id": true
+     },
+     {
+      "name": "Kaya toast set",
+      "cents": 450,
+      "key_is_id": true
+     },
+     {
+      "name": "Teh C peng",
+      "cents": 220,
+      "key_is_id": true
+     },
+     {
+      "name": "Soft-boiled eggs (2)",
+      "cents": 200,
+      "key_is_id": true
+     }
+    ]
+   },
+   {
+    "id": "mrv_wl5pn6p3gaq4467x4j5453cx24",
+    "outlet_id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+    "status": "confirmed",
+    "version": 3,
+    "published": false,
+    "items": 3,
+    "menu": [
+     {
+      "name": "Kopi C",
+      "cents": 180,
+      "key_is_id": true
+     },
+     {
+      "name": "Mee siam",
+      "cents": 550,
+      "key_is_id": true
+     },
+     {
+      "name": "Kaya toast set",
+      "cents": 450,
+      "key_is_id": true
+     }
+    ]
+   }
+  ],
+  "maintenanceRuns": {
+   "n": 0
+  },
+  "testShopAttempts": []
+ }
+}
