@@ -132,7 +132,7 @@ function PayPalCard({ outlet, onSaved }: { outlet: MerchantOutlet; onSaved: (sav
 
   return (
     <section className="card" aria-labelledby="paypal-heading">
-      <div className="rail-head">
+      <div className="rail-head wrap">
         <h2 id="paypal-heading">3. PayPal sandbox</h2>
         <span className="chip warn">Sandbox: test money only</span>
       </div>
