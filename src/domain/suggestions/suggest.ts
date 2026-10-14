@@ -32,9 +32,16 @@ function usableArea(value: string | null | undefined): string | null {
   return words.length > 0 ? words.join(" ") : null;
 }
 
+// Whole words only: both sides are normalized to words joined by single spaces, so "an" is not
+// found in "tanjong pagar" or in "kaya toast and kopi", and a one-letter area from the model
+// cannot pass for one the buyer wrote.
+function containsWords(haystack: string, needle: string): boolean {
+  return needle.length > 0 && ` ${haystack} `.includes(` ${needle} `);
+}
+
 function inArea(outlet: PublishedOutletSummary, area: string): boolean {
   const outletArea = normalize(outlet.area);
-  return outletArea.includes(area) || area.includes(outletArea);
+  return containsWords(outletArea, area) || containsWords(area, outletArea);
 }
 
 function clarify(missing: SuggestionGap[]): Suggestion {
@@ -68,9 +75,9 @@ async function settle(db: Db, req: SuggestionRequest, proposal: ModelProposal): 
 
   const text = normalize(req.text);
   const proposedArea = usableArea(proposal.area);
-  const area = usableArea(req.area) ?? (proposedArea && text.includes(proposedArea) ? proposedArea : null);
+  const area = usableArea(req.area) ?? (proposedArea && containsWords(text, proposedArea) ? proposedArea : null);
   const published = await listPublishedOutlets(db, 500);
-  const named = new Set(published.filter((outlet) => text.includes(normalize(outlet.name))).map((outlet) => outlet.id));
+  const named = new Set(published.filter((outlet) => containsWords(text, normalize(outlet.name))).map((outlet) => outlet.id));
   if (!area && named.size === 0) return clarify(["area"]);
 
   const inScope = (outlet: PublishedOutletSummary) => named.has(outlet.id) || (area !== null && inArea(outlet, area));

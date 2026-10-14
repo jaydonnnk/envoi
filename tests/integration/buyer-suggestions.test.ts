@@ -4,6 +4,7 @@ import type { Suggestion } from "@/domain/suggestions/types";
 import { createOpenAISuggestionModel } from "@/integrations/ai/openai";
 import type { BuyerPrincipal } from "@/lib/auth-context";
 import { connectWeb } from "@/lib/db/web";
+import { log } from "@/lib/log";
 import { createFakeOpenAI, FIXTURE_AI_ENV, proposal, type FakeOpenAI, type FakeTurn } from "../support/fake-openai";
 import { createPaymentsFixture, jsonPost, type PaymentsFixture } from "../support/payments";
 import { anonymousCookie } from "../support/session";
@@ -191,6 +192,132 @@ describe("buyer text suggestions", () => {
     expect(result.message).toBe("Suggestions are not available right now. Pick a shop from the list instead.");
   });
 
+  it("a model area the buyer did not write as a word is not trusted", async () => {
+    // The FIXTURE model reports a one-letter "area" that occurs inside the buyer's words.
+    script = () => ({ kind: "answer", proposal: proposal({ kind: "items", outletId: fixture.outletId, itemIds: [item("Kopi O").id], area: "o" }) });
+
+    const result = await suggest({ text: "kopi near me" });
+
+    expect(result.suggestion).toEqual({ kind: "clarification", question: "Which area are you in? For example, Tanjong Pagar.", missing: ["area"] });
+  });
+
+  it("an area that is only part of a word matches no shop", async () => {
+    script = () => ({ kind: "answer", proposal: proposal({ kind: "outlets", outletIds: [fixture.outletId] }) });
+
+    const result = await suggest({ text: "kopi", area: "an" });
+
+    expect(result.suggestion).toEqual({ kind: "no_match" });
+  });
+
+  it("an area that names more than the shop's area still matches it", async () => {
+    script = () => ({ kind: "answer", proposal: proposal({ kind: "outlets", outletIds: [fixture.outletId] }) });
+
+    const result = await suggest({ text: "kopi", area: "Tanjong Pagar MRT" });
+
+    expect(result.suggestion).toEqual({ kind: "outlets", matches: [{ id: fixture.outletId, name: "Lorong Demo Kopi", area: "Tanjong Pagar", isDemoFixture: true }] });
+  });
+
+  it("a shop the buyer names needs no area", async () => {
+    script = () => ({ kind: "answer", proposal: proposal({ kind: "outlets", outletIds: [fixture.outletId] }) });
+
+    const result = await suggest({ text: "breakfast at Lorong Demo Kopi" });
+
+    expect(result.suggestion).toEqual({ kind: "outlets", matches: [{ id: fixture.outletId, name: "Lorong Demo Kopi", area: "Tanjong Pagar", isDemoFixture: true }] });
+  });
+
+  it("an item marked unavailable is not suggested", async () => {
+    const kopi = item("Kopi O");
+    const kaya = item("Kaya toast set");
+    script = () => ({ kind: "answer", proposal: proposal({ kind: "items", outletId: fixture.outletId, itemIds: [kopi.id, kaya.id], area: "Tanjong Pagar" }) });
+    await fixture.database.admin`update menu_items set available = false where id = ${kopi.id}`;
+    try {
+      const result = await suggest({ text: "kaya toast and kopi near Tanjong Pagar" });
+
+      expect(result.suggestion).toMatchObject({ kind: "items", matches: [{ id: kaya.id }] });
+      expect(JSON.stringify(result.suggestion)).not.toContain(kopi.id);
+    } finally {
+      await fixture.database.admin`update menu_items set available = true where id = ${kopi.id}`;
+    }
+  });
+
+  it("an item with no price is not suggested", async () => {
+    const teh = item("Teh C peng");
+    const kaya = item("Kaya toast set");
+    script = () => ({ kind: "answer", proposal: proposal({ kind: "items", outletId: fixture.outletId, itemIds: [teh.id, kaya.id], area: "Tanjong Pagar" }) });
+    await fixture.database.admin`update menu_items set unit_sgd_cents = null where id = ${teh.id}`;
+    try {
+      const result = await suggest({ text: "kaya toast and teh near Tanjong Pagar" });
+
+      expect(result.suggestion).toMatchObject({ kind: "items", matches: [{ id: kaya.id }] });
+      expect(JSON.stringify(result.suggestion)).not.toContain(teh.id);
+    } finally {
+      await fixture.database.admin`update menu_items set unit_sgd_cents = 220 where id = ${teh.id}`;
+    }
+  });
+
+  it("a failed model call is not retried", async () => {
+    script = () => ({ kind: "status", status: 500 });
+
+    await suggest({ text: "kopi near Tanjong Pagar" });
+
+    expect(fake.calls).toHaveLength(1);
+  });
+
+  it("OpenAI is asked not to store the request", async () => {
+    script = () => ({ kind: "answer", proposal: proposal({ kind: "no_match" }) });
+
+    await suggest({ text: "kopi near Tanjong Pagar" });
+
+    expect(fake.calls).toHaveLength(1);
+    expect(fake.calls[0]!.body.store).toBe(false);
+  });
+
+  it("the buyer's text never reaches the log", async () => {
+    const needle = "FIXTUREneedle4471";
+    const lines: string[] = [];
+    const capture = (...args: unknown[]) => void lines.push(args.map(String).join(" "));
+    const out = vi.spyOn(console, "log").mockImplementation(capture);
+    const err = vi.spyOn(console, "error").mockImplementation(capture);
+    // Every level reaches the sink here, so nothing is hidden by the fixture's warn threshold.
+    const level = process.env.LOG_LEVEL;
+    process.env.LOG_LEVEL = "debug";
+    try {
+      // Self-test: the captured surface is the logger's real serialized output.
+      log("info", "fixture_probe", { note: needle });
+      expect(lines.join("\n")).toContain(needle);
+      lines.length = 0;
+
+      script = () => ({ kind: "answer", proposal: proposal({ kind: "outlets", outletIds: [fixture.outletId], area: "Tanjong Pagar" }) });
+      await suggest({ text: `${needle} kopi near Tanjong Pagar`, area: `${needle} Tanjong Pagar` });
+      script = () => ({ kind: "status", status: 500 });
+      await suggest({ text: `${needle} kopi near Tanjong Pagar` });
+
+      expect(lines.some((line) => line.includes("ai_suggestion"))).toBe(true);
+      expect(lines.join("\n")).not.toContain(needle);
+    } finally {
+      process.env.LOG_LEVEL = level;
+      out.mockRestore();
+      err.mockRestore();
+    }
+  });
+
+  it("text longer than 280 characters is refused before any model call", async () => {
+    const result = await suggest({ text: "k".repeat(281) });
+
+    expect(result.status).toBe(400);
+    expect(result.code).toBe("validation_failed");
+    expect(fake.calls).toHaveLength(0);
+  });
+
+  it("a body over 4 KiB is refused unread", async () => {
+    const response = await routes.suggestions.POST(jsonPost("/api/v1/buyer/suggestions", cookie, { text: "kopi near Tanjong Pagar", pad: "x".repeat(4_096) }));
+    const envelope = (await response.json()) as { error?: { code: string; details: { reason?: string } } };
+
+    expect(response.status).toBe(400);
+    expect(envelope.error).toMatchObject({ code: "validation_failed", details: { reason: "too_large" } });
+    expect(fake.calls).toHaveLength(0);
+  });
+
   it("suggestions need a buyer session", async () => {
     const result = await suggest({ text: "kopi near Tanjong Pagar" }, "");
 
@@ -211,11 +338,12 @@ describe("buyer text suggestions", () => {
     });
 
     function model(turn: FakeTurn) {
-      // A hung FIXTURE request gives up by itself after 2 seconds, so a budget longer than the
-      // approved one fails this test on its assertion rather than on the test timeout.
+      // A hung FIXTURE request gives up by itself 200 ms after it is sent, so a budget even
+      // 0.2 seconds longer than the approved one fails the next test on its assertion: the
+      // request then fails on its own before the budget aborts it.
       const boundary = createFakeOpenAI(() => turn);
       const bounded: typeof globalThis.fetch = (input, init) => {
-        const signal = AbortSignal.any([init?.signal ?? new AbortController().signal, AbortSignal.timeout(2_000)]);
+        const signal = AbortSignal.any([init?.signal ?? new AbortController().signal, AbortSignal.timeout(200)]);
         return boundary.fetch(input, { ...init, signal });
       };
       return createOpenAISuggestionModel({ apiKey: "fixture-openai-key", model: "FIXTURE-model", fetch: bounded });
@@ -229,8 +357,8 @@ describe("buyer text suggestions", () => {
       expect(result).toEqual({ kind: "budget_exceeded" });
     });
 
-    it("a model answering 25 seconds after the request started is not cut off", async () => {
-      const startedAt = new Date(Date.now() - 25_000);
+    it("a model answering 29.8 seconds after the request started is not cut off", async () => {
+      const startedAt = new Date(Date.now() - 29_800);
 
       const result = await suggestFromText(web.db, principal, { text: "kopi near Tanjong Pagar" }, startedAt, model({ kind: "answer", proposal: proposal({ kind: "no_match" }) }));
 

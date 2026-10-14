@@ -96,6 +96,17 @@ describe("text suggestion rate limits", () => {
     expect(fake.calls).toHaveLength(101);
   });
 
+  it("a refused suggestion request records nothing", async () => {
+    const [cookie] = await sessions(1);
+    for (let i = 0; i < 10; i++) expect((await ask(cookie!)).status).toBe(200);
+
+    expect((await ask(cookie!)).code).toBe("rate_limited");
+    expect((await ask(cookie!)).code).toBe("rate_limited");
+
+    const [row] = await fixture.database.admin<{ n: number }[]>`select count(*)::int as n from rate_limit_hits`;
+    expect(row?.n).toBe(10);
+  });
+
   it("concurrent requests cannot pass the per-session window together", async () => {
     vi.useRealTimers();
     const web = connectWeb(fixture.database.webUrl, 20);

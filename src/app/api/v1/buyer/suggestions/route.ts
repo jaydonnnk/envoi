@@ -5,10 +5,16 @@ import { getAuth } from "@/lib/auth";
 import { isPrincipal, requireBuyerSession } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
 import { appError } from "@/lib/errors";
+import { readCountedBody } from "@/lib/http/bounded-body";
 import { httpErr, httpOk } from "@/lib/http/respond";
 import { admit, SUGGESTION_LIMITS } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
+
+// The body is read counted and time-bounded before it is parsed: 280 characters of text and 80 of
+// area fit well inside 4 KiB even fully escaped, and a slow or oversized body is refused unread.
+const MAX_BODY_BYTES = 4_096;
+const BODY_READ_MS = 5_000;
 
 const body = z.object({
   text: z.string().trim().min(1).max(MAX_TEXT_LENGTH),
@@ -22,8 +28,11 @@ export async function POST(request: Request): Promise<Response> {
   const principal = await requireBuyerSession(getAuth(), request.headers);
   if (!isPrincipal(principal)) return httpErr(principal);
 
-  const parsed = body.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) return httpErr(appError("validation_failed", `Describe what you want in ${MAX_TEXT_LENGTH} characters or fewer.`));
+  const tooLong = appError("validation_failed", `Describe what you want in ${MAX_TEXT_LENGTH} characters or fewer.`);
+  const read = await readCountedBody(request.body, MAX_BODY_BYTES, BODY_READ_MS, request.signal);
+  if (!read.ok) return httpErr({ ...tooLong, details: { reason: read.reason } });
+  const parsed = body.safeParse(parseJson(read.bytes));
+  if (!parsed.success) return httpErr(tooLong);
 
   const db = webDb();
   const admission = await admit(db, "buyer_suggestion", principal.userId, SUGGESTION_LIMITS, now);
@@ -39,4 +48,12 @@ export async function POST(request: Request): Promise<Response> {
     return httpErr(appError("provider_unreachable", "Suggestions are not available right now. Pick a shop from the list instead.", { retryable: true }));
   }
   return httpOk({ suggestion: result });
+}
+
+function parseJson(bytes: Uint8Array): unknown {
+  try {
+    return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+  } catch {
+    return null;
+  }
 }
