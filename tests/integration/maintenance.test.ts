@@ -331,7 +331,7 @@ describe("maintenance runner (fixture PayPal)", () => {
       const { data } = (await response.json()) as { data: { heartbeat: { lastAt: string | null; overdue: boolean }; capacity: { databaseSizeBytes: number | null }; overdueWork: { uncertainPurchases: number } } };
       expect(data.heartbeat.lastAt).not.toBeNull();
       expect(data.heartbeat.overdue).toBe(false);
-      expect(data.capacity.databaseSizeBytes).toBeGreaterThan(0);
+      expect(data.capacity.databaseSizeBytes ?? 0).toBeGreaterThan(0);
       expect(data.overdueWork).toHaveProperty("uncertainPurchases");
     });
 
