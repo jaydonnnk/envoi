@@ -290,10 +290,30 @@ describe("merchant sign-in and manual menu draft", () => {
     const { cookie, outletId } = await merchantWithOutlet("zero-price");
     const draft = await draftOf(outletId, cookie);
     const before = await merchantState();
-    const refused = await putDraft(outletId, cookie, { revisionId: draft.revisionId, version: draft.version, items: [{ name: "Free kopi", portion: null, priceSgdCents: 0, availability: "available" }] });
-    expect(refused.status).toBe(400);
-    expect((await body(refused)).error.code).toBe("validation_failed");
+    // The request schema refuses it with a 400 answer; a route that let it through to the database
+    // would throw instead, which this test reports as a failed assertion.
+    const refused = await putDraft(outletId, cookie, { revisionId: draft.revisionId, version: draft.version, items: [{ name: "Free kopi", portion: null, priceSgdCents: 0, availability: "available" }] }).catch((err: unknown) => err);
+    expect(refused).toBeInstanceOf(Response);
+    expect((refused as Response).status).toBe(400);
+    expect((await body(refused as Response)).error.code).toBe("validation_failed");
     expect(await merchantState()).toEqual(before);
+  });
+
+  it("the database refuses a zero price from the web role", async () => {
+    const web = postgres(fixture.database.webUrl, { max: 1, onnotice: () => {} });
+    try {
+      const { outletId } = await merchantWithOutlet("db-zero-price");
+      const [revision] = await fixture.database.admin<{ id: string }[]>`select id from menu_revisions where outlet_id = ${outletId}`;
+      const insert = (id: string, position: number, cents: number | null) =>
+        web`insert into menu_items (id, menu_revision_id, position, name, unit_sgd_cents, available, portion, source)
+          values (${id}, ${revision!.id}, ${position}, 'FIXTURE kopi', ${cents}, true, null, 'merchant')`.then(() => "inserted", (err: { message: string }) => err.message);
+      // The same insert with a blank price succeeds, so the refusal below is the price check, not a grant.
+      expect(await insert("itm_zero_control", 0, null)).toBe("inserted");
+      expect(await insert("itm_zero_test", 1, 0)).toMatch(/violates check constraint "menu_items_price_check"/);
+      expect(await fixture.database.admin`select id from menu_items where id = 'itm_zero_test'`).toHaveLength(0);
+    } finally {
+      await web.end({ timeout: 5 });
+    }
   });
 
   it("stale draft write is rejected", async () => {
