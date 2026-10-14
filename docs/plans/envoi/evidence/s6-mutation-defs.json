@@ -1,0 +1,308 @@
+[
+ {
+  "id": "outlet-guard-auth-only",
+  "test": "anonymous buyer cannot reach a merchant route",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "check only authentication in requireOutletMembership: any session passes without a membership row",
+  "edits": [
+   {
+    "file": "src/lib/auth-context.ts",
+    "old": "  if (!row) return noMembership();\n  return { kind: \"outlet_member\", userId: session.userId, outletId, membershipId: row.id };",
+    "new": "  return { kind: \"outlet_member\", userId: session.userId, outletId, membershipId: row?.id ?? \"none\" };"
+   }
+  ]
+ },
+ {
+  "id": "account-guard-auth-only",
+  "test": "anonymous buyer cannot reach a merchant route",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "check only authentication in requireMerchantMembership: any session passes without a membership row",
+  "edits": [
+   {
+    "file": "src/lib/auth-context.ts",
+    "old": "  if (!row) return noMembership();\n  return { kind: \"merchant_account\", userId: session.userId };",
+    "new": "  return { kind: \"merchant_account\", userId: session.userId };"
+   }
+  ]
+ },
+ {
+  "id": "agent-header",
+  "test": "an agent token cannot reach a merchant route",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "drop the agent-credential refusal from the merchant guards",
+  "edits": [
+   {
+    "file": "src/lib/auth-context.ts",
+    "old": "  if (headers.has(\"authorization\")) {\n    return appError(\"forbidden_membership\", \"Agent tokens cannot use merchant routes.\"",
+    "new": "  if (false && headers.has(\"authorization\")) {\n    return appError(\"forbidden_membership\", \"Agent tokens cannot use merchant routes.\""
+   }
+  ]
+ },
+ {
+  "id": "link-creates-membership",
+  "test": "linking an anonymous account creates no membership",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "create a membership on link: onLinkAccount inserts an approved membership for the signed-in account, with the web role also granted INSERT so the hook can run",
+  "edits": [
+   {
+    "file": "src/lib/auth.ts",
+    "old": "import { authSchema } from \"@/lib/db/schema\";",
+    "new": "import { authSchema, merchantMemberships } from \"@/lib/db/schema\";"
+   },
+   {
+    "file": "src/lib/auth.ts",
+    "old": "        onLinkAccount: async ({ anonymousUser, newUser }) => {\n",
+    "new": "        onLinkAccount: async ({ anonymousUser, newUser }) => {\n          await options.db.insert(merchantMemberships).values({ id: `mbr_mutation_${Date.now()}`, userId: newUser.user.id, role: \"owner\", isDemo: true, approvedAt: new Date() });\n"
+   },
+   {
+    "file": "drizzle/0011_s6_web_role_grants.sql",
+    "old": "GRANT SELECT ON TABLE public.\"merchant_memberships\" TO envoi_web;",
+    "new": "GRANT SELECT, INSERT ON TABLE public.\"merchant_memberships\" TO envoi_web;"
+   }
+  ]
+ },
+ {
+  "id": "link-default-deletion",
+  "test": "linking preserves purchase ownership",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "leave the default deletion on: disableDeleteAnonymousUser false",
+  "edits": [
+   {
+    "file": "src/lib/auth.ts",
+    "old": "        disableDeleteAnonymousUser: true,",
+    "new": "        disableDeleteAnonymousUser: false,"
+   }
+  ]
+ },
+ {
+  "id": "per-outlet",
+  "test": "membership is per outlet",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "check any membership: requireOutletMembership ignores which outlet the membership is for",
+  "edits": [
+   {
+    "file": "src/lib/auth-context.ts",
+    "old": ".where(and(eq(merchantMemberships.userId, session.userId), eq(merchantMemberships.outletId, outletId), isNull(merchantMemberships.revokedAt)))",
+    "new": ".where(and(eq(merchantMemberships.userId, session.userId), isNull(merchantMemberships.revokedAt)))"
+   }
+  ]
+ },
+ {
+  "id": "revoked-membership",
+  "test": "a revoked membership reaches nothing",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "ignore revocation in requireOutletMembership",
+  "edits": [
+   {
+    "file": "src/lib/auth-context.ts",
+    "old": ".where(and(eq(merchantMemberships.userId, session.userId), eq(merchantMemberships.outletId, outletId), isNull(merchantMemberships.revokedAt)))",
+    "new": ".where(and(eq(merchantMemberships.userId, session.userId), eq(merchantMemberships.outletId, outletId)))"
+   }
+  ]
+ },
+ {
+  "id": "completeness-availability",
+  "test": "incomplete menu blocks confirmation",
+  "test_file": "tests/unit/menu-completeness.test.ts",
+  "mutation": "treat unknown availability as available",
+  "edits": [
+   {
+    "file": "src/domain/menu/draft.ts",
+    "old": "const missingAvailability = items.filter((item) => item.availability === \"unknown\");",
+    "new": "const missingAvailability = items.filter((item) => item.availability === \"unknown\" && false);"
+   }
+  ]
+ },
+ {
+  "id": "completeness-name",
+  "test": "a blank price or a blank name is incomplete and named first",
+  "test_file": "tests/unit/menu-completeness.test.ts",
+  "mutation": "treat a blank name as complete",
+  "edits": [
+   {
+    "file": "src/domain/menu/draft.ts",
+    "old": "const missingName = items.filter((item) => item.name.trim() === \"\");",
+    "new": "const missingName = items.filter((item) => item.name.trim() === \"\" && false);"
+   }
+  ]
+ },
+ {
+  "id": "completeness-price",
+  "test": "a blank price stays blank and blocks confirmation until it is supplied",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "treat a blank price as complete",
+  "edits": [
+   {
+    "file": "src/domain/menu/draft.ts",
+    "old": "const missingPrice = items.filter((item) => item.priceSgdCents === null);",
+    "new": "const missingPrice = items.filter((item) => item.priceSgdCents === null && false);"
+   }
+  ]
+ },
+ {
+  "id": "confirm-checks-completeness",
+  "test": "a blank price stays blank and blocks confirmation until it is supplied",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "confirm without consulting assessMenuCompleteness",
+  "edits": [
+   {
+    "file": "src/domain/menu/confirm.ts",
+    "old": "    if (!completeness.complete) {",
+    "new": "    if (false && !completeness.complete) {"
+   }
+  ]
+ },
+ {
+  "id": "confirm-empty",
+  "test": "an empty menu cannot be confirmed",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "drop the empty-menu refusal",
+  "edits": [
+   {
+    "file": "src/domain/menu/confirm.ts",
+    "old": "    if (rows.length === 0) return appError(",
+    "new": "    if (false && rows.length === 0) return appError("
+   }
+  ]
+ },
+ {
+  "id": "stale-write",
+  "test": "stale draft write is rejected",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "drop the revision check: a write based on any version of the current revision is applied",
+  "edits": [
+   {
+    "file": "src/domain/menu/draft.ts",
+    "old": "if (revision.id !== write.revisionId || revision.version !== write.baseVersion) return revisionConflict(revision);",
+    "new": "if (revision.id !== write.revisionId) return revisionConflict(revision);"
+   }
+  ]
+ },
+ {
+  "id": "stale-confirm",
+  "test": "a confirmation of an older version is rejected",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "drop the version check from confirmation",
+  "edits": [
+   {
+    "file": "src/domain/menu/confirm.ts",
+    "old": "if (revision.id !== confirmation.revisionId || revision.version !== confirmation.version) return revisionConflict(revision);",
+    "new": "if (revision.id !== confirmation.revisionId) return revisionConflict(revision);"
+   }
+  ]
+ },
+ {
+  "id": "edit-invalidates",
+  "test": "editing a confirmed draft invalidates its confirmation",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "keep the confirmation when a confirmed draft is edited",
+  "edits": [
+   {
+    "file": "src/domain/menu/draft.ts",
+    "old": ".set({ version: revision.version + 1, status: \"draft\", confirmedAt: null })",
+    "new": ".set({ version: revision.version + 1 })"
+   }
+  ]
+ },
+ {
+  "id": "one-outlet",
+  "test": "an approved membership creates exactly one outlet",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "create an outlet from any live membership, bound or not",
+  "edits": [
+   {
+    "file": "src/domain/outlets/merchant.ts",
+    "old": ".where(and(eq(merchantMemberships.userId, input.userId), isNull(merchantMemberships.revokedAt), isNull(merchantMemberships.outletId)))\n      .limit(1)\n      .for(\"update\");",
+    "new": ".where(and(eq(merchantMemberships.userId, input.userId), isNull(merchantMemberships.revokedAt)))\n      .limit(1)\n      .for(\"update\");"
+   }
+  ]
+ },
+ {
+  "id": "published-outlet-edit",
+  "test": "a published outlet's details are not edited here",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "edit a published outlet's details",
+  "edits": [
+   {
+    "file": "src/domain/outlets/merchant.ts",
+    "old": "    if (current.publishedMenuRevisionId !== null) {",
+    "new": "    if (false && current.publishedMenuRevisionId !== null) {"
+   }
+  ]
+ },
+ {
+  "id": "draft-invisible",
+  "test": "a confirmed draft stays invisible to buyers",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "list outlets without the published-revision filter",
+  "edits": [
+   {
+    "file": "src/domain/outlets/search.ts",
+    "old": "    .where(isNotNull(outlets.publishedMenuRevisionId))\n    .orderBy(asc(outlets.name), asc(outlets.id))\n    .limit(limit);\n}\n\nexport async function getPublishedMenu",
+    "new": "    .orderBy(asc(outlets.name), asc(outlets.id))\n    .limit(limit);\n}\n\nexport async function getPublishedMenu"
+   }
+  ]
+ },
+ {
+  "id": "signup-disabled",
+  "test": "public signup is refused",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "enable public signup",
+  "edits": [
+   {
+    "file": "src/lib/auth.ts",
+    "old": "emailAndPassword: { enabled: true, disableSignUp: true },",
+    "new": "emailAndPassword: { enabled: true, disableSignUp: false },"
+   }
+  ]
+ },
+ {
+  "id": "zero-price",
+  "test": "a zero price is refused and changes nothing",
+  "test_file": "tests/integration/merchant-draft.test.ts",
+  "mutation": "accept a zero price at both layers: the request schema allows 0 and the menu_items check allows 0",
+  "edits": [
+   {
+    "file": "src/app/api/v1/merchant/outlets/input.ts",
+    "old": "priceSgdCents: z.number().int().min(1)",
+    "new": "priceSgdCents: z.number().int().min(0)"
+   },
+   {
+    "file": "drizzle/0000_init.sql",
+    "old": "CONSTRAINT \"menu_items_price_check\" CHECK (\"menu_items\".\"unit_sgd_cents\" is null or \"menu_items\".\"unit_sgd_cents\" > 0)",
+    "new": "CONSTRAINT \"menu_items_price_check\" CHECK (\"menu_items\".\"unit_sgd_cents\" is null or \"menu_items\".\"unit_sgd_cents\" >= 0)"
+   }
+  ]
+ },
+ {
+  "id": "create-merchant-unchanged",
+  "test": "create-merchant never changes an existing account",
+  "test_file": "tests/integration/merchant-operator.test.ts",
+  "mutation": "reset the password of an existing account on a repeated create-merchant",
+  "edits": [
+   {
+    "file": "src/operator/cli.ts",
+    "old": "      return { status: \"unchanged\", userId: existing.id };\n    }\n    await tx.insert(schema.account)",
+    "new": "      await tx.update(schema.account).set({ password: hash }).where(eq(schema.account.userId, existing.id));\n      return { status: \"unchanged\", userId: existing.id };\n    }\n    await tx.insert(schema.account)"
+   }
+  ]
+ },
+ {
+  "id": "approve-anonymous",
+  "test": "approve-membership refuses an anonymous or unknown account",
+  "test_file": "tests/integration/merchant-operator.test.ts",
+  "mutation": "approve any account by email, including an anonymous buyer",
+  "edits": [
+   {
+    "file": "src/operator/cli.ts",
+    "old": "      .innerJoin(schema.account, and(eq(schema.account.userId, schema.user.id), eq(schema.account.providerId, \"credential\")))\n",
+    "new": ""
+   },
+   {
+    "file": "src/operator/cli.ts",
+    "old": "    if (!account || account.isAnonymous) throw",
+    "new": "    if (!account) throw"
+   }
+  ]
+ }
+]
