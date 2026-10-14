@@ -77,8 +77,8 @@ Updated: 2026-10-14 (Asia/Singapore).
 
 Build order from `04-slices.md`, revised and approved 2026-10-12.
 Slice IDs are stable names, so the list below is in build order rather than numeric order; S12 is retired, merged into S11.
-S1, S2, S3, S4, S13 and S6 are done; every later slice starts only on an explicit authorization that names its slice ID, such as "start S13"; a number in that request is the slice ID, not a build position.
-The application is deployed on Render Free from `main` with the S2 PayPal sandbox payment, S3's recovery, reconcile and verified webhook inbox, S4's text suggestions through OpenAI `gpt-6-luna`, S13's agent handoff over MCP and S6's merchant sign-in with a manual, unpublished menu draft; no other sponsor integration exists.
+S1, S2, S3, S4, S13, S6 and S5 are done; every later slice starts only on an explicit authorization that names its slice ID, such as "start S13"; a number in that request is the slice ID, not a build position.
+The application is deployed on Render Free from `main` with the S2 PayPal sandbox payment, S3's recovery, reconcile and verified webhook inbox, S4's text suggestions through OpenAI `gpt-6-luna`, S13's agent handoff over MCP, S6's merchant sign-in with a manual, unpublished menu draft and S5's operator health view; the S5 maintenance runner runs locally only; no other sponsor integration exists.
 The candidate list in `roadmap.md` remains discussion material and is superseded as a build order by `04-slices.md` once that is approved.
 
 - [x] S1 - Tracer bullet on Render Free: labeled demo shop from Neon to an explicitly unpaid stub receipt; boot check, auth schema pin, R12 latency measurement.
@@ -87,7 +87,7 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [x] S4 - Text entry with AI suggestions and the pre-registered model evaluation; review fixes 2026-10-14.
 - [x] S13 - Agent handoff over MCP, moved to right after S4; done 2026-10-14.
 - [x] S6 - Merchant sign-in and manual menu draft; done 2026-10-14.
-- [ ] S5 - Maintenance runner, manual runs, operator health view behind the operator guard; built after S6, whose sign-in it needs.
+- [x] S5 - Maintenance runner, manual runs, operator health view behind the operator guard; built after S6, whose sign-in it needs; done 2026-10-14.
 - [ ] S7 - Merchant destination and publication, with stale-review invalidation and the PayPal basket lock at review creation and inside `paypal/start`.
 - [ ] S8 - Merchant orders and separate acknowledgment.
 - [ ] S11 - Menu photo import with direct vision, merged from the earlier S11 and S12, with the pre-registered vision evaluation and the real-photo exit decision, followed by the PYUSD go/no-go.
@@ -97,6 +97,68 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [ ] S17 - PYUSD recovery, extra transfers and the operator mismatch and refund acts.
 - [ ] S14 - APIMatic client and docs, account-conditional; third in the cut order.
 - [ ] S15 - Judged release.
+
+### S5 Maintenance runner, manual runs and operator health view, 2026-10-14
+
+- **Branch:** `envoi/slice-5-maintenance`, from `main` at `ab05e22`; commits `099de14` (runner, migrations 0014 and 0015, environment, clocks), `636d0bc` (`requireOperator`, health view, `grant-operator`), `0a2027b` (tests and mutation definitions), `77e2a4d` and `9dbd561` (health-test isolation), `949a557` (manual-run harness), `d014d02` (first mutation results), `662d190` (harness fix), `c85757e` (operator page metadata guard), `9e83feb` (mutation results, 26 of 26), `457831d` (health view layout), then this record.
+- **Authorizations, 2026-10-14:** the user started S5 ("Please proceed with S5 implementation") and granted, by multiple choice, all four S5 actions: create `envoi_maintenance` on Neon, apply the S5 migrations to Neon, commit and push the slice branch, and fast-forward `main` to it and push, which deploys.
+  The user performs `create-merchant` and `grant-operator` for the deployed operator account, typing its password.
+- **User decisions, 2026-10-14, none reopening a gate:**
+  - The operator flag lives in a separate `operator_grants` table, not a column on the Better Auth user.
+  - The runner runs locally only; no run against Neon, so the two uncertain S2 purchases there are not touched.
+  - `.github/workflows/maintenance.yml` is deferred to S15; none of the three S5 conditions for creating it is met.
+- **Built:** `src/maintenance/run.ts`, a finite runner that starts one `maintenance_runs` row (the row is the heartbeat), runs `heartbeat`, `record_capacity`, `reconcile_attempts`, `close_expired_reviews` and `purge_expired_sessions` in that order, each under its own timeout, stops taking work at `T_MAINT_RUN` (120,000 ms) and exits; `src/domain/maintenance/{due,tasks,health}.ts`; `src/lib/db/runner.ts` (application name `envoi-maintenance`); `tsconfig.runner.json` with `runner:build` and `runner:start`; `MAINTENANCE_DATABASE_URL` in `src/env.ts` and `.env.example`.
+  Reconciliation goes through `PayPalReadClient` only, claims due attempts under a lease of `T_LEASE` (300,000 ms) with `maintenance_claim_owner` and `maintenance_claim_expires_at`, and passes no replay, so it can confirm a capture PayPal already made but never send one.
+  `operator_grants` (migration 0014), `requireOperator` in `src/lib/auth-context.ts`, which refuses an agent credential, no session, an anonymous session and a permanent account without a live grant with 404 `not_found`; `GET /api/v1/health/operator` and `/operator/health` behind it, the page answering with the same not-found page as an unknown address; operator `grant-operator`, which flags a permanent account once and repeats as unchanged.
+  The view shows the last heartbeat and whether it is overdue after `T_MAINT_OVERDUE` (5,400,000 ms), the last run's tasks, capacity with its limitation, and overdue work: attempts waiting for a maintenance check and purchases still uncertain, never shown as paid.
+- **Grants (D7), migration 0015:** `envoi_web` gets SELECT on `maintenance_runs` and `operator_grants`.
+  `envoi_maintenance` gets USAGE on `public`; SELECT and INSERT on `maintenance_runs` with `UPDATE (status, finished_at, database_size_bytes, report)`; SELECT on `payment_attempts` and `purchases`; a column UPDATE on `payment_attempts` that excludes `order_id`, `approval_url`, `capture_request_id` and `total_sgd_cents`; `UPDATE (state)` on `purchases`; INSERT on `audit_events`; `SELECT (id, expires_at)` and DELETE on `session`; and `search_path` `public` for its database.
+- **Build-graph check [verified], 2026-10-14, `tests/unit/maintenance-build.test.ts` on the runner compiled by `tsconfig.runner.json`:** 23 runtime modules, none of them `src/integrations/paypal/orders.js`, the capture module, and none naming the `/capture` endpoint; no `better-auth` and no `next`.
+  - Modules: `src/domain/audit/events.js`, `src/domain/maintenance/{due,tasks}.js`, `src/domain/payments/{attempts,state}.js`, `src/domain/purchases/{checkout-key,reconcile,review,state}.js`, `src/env.js`, `src/integrations/paypal/{client,map,orders-read}.js`, `src/lib/db/{runner,schema,web}.js`, `src/lib/{errors,ids,log,money,time}.js`, `src/maintenance/{resolve-hook,run}.js`.
+  - Packages: `drizzle-orm`, `drizzle-orm/pg-core`, `drizzle-orm/postgres-js`, `node:crypto`, `node:module`, `postgres`, `zod`.
+  - A scanner self-test on the same build proves a probe importing the capture module is reported and that the capture module names the endpoint, so the falsifier (R9) did not fire.
+- **Two manual runs [verified], 2026-10-14, labeled manual,** by [`s5-manual-run.mts`](evidence/s5-manual-run.mts) on a disposable local PostgreSQL 18 database, with PayPal the FIXTURE fetch in [`s5-fixture-paypal.mjs`](evidence/s5-fixture-paypal.mjs) and no buyer page open:
+  - Before: the S3 harness's lost capture answer left `pur_me3yuz3djiunhuecix5uok4d4e` `uncertain` with attempt `capture_unknown` (order `FIXTURE-ORDER-E5B3D52F-1`), review `pur_zlqr76nt7qxhyx4xjd6gpchcwq` open past `T_REVIEW` and one session past its expiry.
+  - Manual run 1, `mnt_vwdtmxqrn3c3q4qnmedpzcisgy`: the compiled runner, started as its own process with `envoi_maintenance`, exited 0 after 404 ms; heartbeat (`started_at`) `2026-10-14T16:16:43.393+08:00`, finished `16:16:43.452+08:00`; `pg_database_size` 9,402,047 bytes; every task `ok`, processed 1 each.
+    The uncertain purchase became `paid` with attempt `capture_confirmed` and an audit row `paypal_capture_confirmed` with actor `maintenance`; the review became `review_expired`; the session was purged.
+  - Manual run 2, `mnt_xgf5fytwswgfsxls23clortwze`: exited 0 after 281 ms; heartbeat `2026-10-14T16:16:43.715+08:00`, finished `16:16:43.738+08:00`; `pg_database_size` 9,402,047 bytes; heartbeat and capacity processed 1, the other three tasks 0, so nothing was done twice.
+  - After each run no connection named `envoi-maintenance` was left open.
+    The FIXTURE PayPal call log holds two lines, `FIXTURE token` and `FIXTURE read FIXTURE-ORDER-E5B3D52F-1`, with no capture and no `VIOLATION` or `REFUSED` line.
+  - Capacity limitation, shown on the page: `pg_database_size` covers this database only; Neon's history and restore storage also counts against the project limit and is not included, and the provider figure is not read.
+  - The first attempt of this harness crashed while printing run 1, after the runner had exited 0, because the admin client returns timestamps as text; that database was dropped, the harness fixed in `662d190`, and both runs above repeated from the start.
+- **Screen check [verified], 2026-10-14,** on `next build` and `next start` against the kept manual-run database, with a FIXTURE operator and a FIXTURE merchant without the flag made by the operator functions, their passwords generated in memory and handed once to the browser pane by a 127.0.0.1 helper, never shown:
+  - An anonymous buyer session and the signed-in merchant each got 404 `not_found` from `GET /api/v1/health/operator` and the not-found page at `/operator/health`, at 390px and 1280px.
+  - This check found that the not-found payload still carried the page's static title, "Operator health | Envoi", so an anonymous visitor could tell the route from an unknown address; the metadata now runs the same per-request guard as the page (`c85757e`), and afterwards the anonymous and merchant pages had the title "Envoi" and no "Operator health" anywhere in the payload.
+  - The operator saw the view at 390px and 1280px with the test-environment badge and the sandbox notice and no horizontal scroll; with the database's runs aged two hours and one purchase set `uncertain` (FIXTURE), it showed "Overdue" and listed that purchase under overdue work.
+    It also found 13px mono labels riding above the 16px text beside them, the last heartbeat wrapping beside its label on phones and a date breaking in the overdue list; all three are fixed in `457831d`, and `.row:has(> .mono)` now aligns on the baseline on the receipt and review pages too.
+  - Screens inspected, not saved; the servers were stopped and the disposable databases dropped.
+- **Tests [verified]:** typecheck, lint, 31 unit and 132 integration tests pass locally on PostgreSQL 18; counted from `git diff ab05e22`, S5 adds 4 unit tests in `tests/unit/maintenance-build.test.ts` and `tests/unit/maintenance-clocks.test.ts` and 16 integration tests in `tests/integration/maintenance.test.ts` and `tests/integration/merchant-operator.test.ts`.
+  - Gate 3: `maintenance cannot capture`, `maintenance run is finite`, `overlapping runs claim disjoint work`.
+  - Addition: `only an operator reads the operator health view`.
+  - Beyond the plan: `the build-graph check finds the capture module and endpoint when a runner module loads them`, `maintenance clocks have their approved durations`, `maintenance is overdue only after 90 minutes without a heartbeat`, `maintenance reconciles an uncertain capture with no buyer page open`, `maintenance never replays a capture`, `a run stops taking work at T_MAINT_RUN`, `close_expired_reviews stores what the buyer already reads`, `purge_expired_sessions deletes only expired sessions and keeps their purchases`, `the maintenance role cannot create an attempt, dispatch a capture or change a price`, `an anonymous session is refused even when it holds an operator grant row`, `an agent credential never reaches the operator health view`, `a revoked operator grant reaches nothing`, `the web role cannot grant an operator`, `the operator page is the not-found page for everyone but the operator`, and the two `grant-operator` tests.
+- **Mutations [verified], 26 of 26 on `c85757e` with a clean tree, each alone, failing its named test on an AssertionError, restored byte-identical (SHA-256) and rerun passing;** definitions, runner and results in [`s5-mutation-defs.json`](evidence/s5-mutation-defs.json), [`s5-mutate.py`](evidence/s5-mutate.py) and [`s5-mutations.json`](evidence/s5-mutations.json).
+  - The addition's two guards: `route-guard-dropped` (the route without `requireOperator`) and `guard-any-permanent` (the guard accepting any permanent account).
+  - `operator-metadata-guard` is new with the metadata fix, and `operator-page-guard` now removes the page's own check; the earlier record of 25 on `949a557` stays in Git history.
+  - The rest: `capture-module-in-runner`, `poll-loop`, `heartbeat-skip`, `per-item-deadline`, `claim-lease-predicate`, `reconcile-claims-nothing`, `replay-capture`, `close-reviews-skip`, `purge-expiry-predicate`, `capacity-skip`, the three `maintenance-role-*` mutations, `operator-anonymous`, `operator-agent-header`, `operator-revoked`, `web-role-grants-operator`, `overdue-boundary`, the two clock durations and the two `grant-operator` rules.
+  - The purge mutation's recorded error contains a session row id from a disposable database, not a credential.
+- **Neon [verified], 2026-10-14, every read in an enforced `READ ONLY` transaction:**
+  - Before: 14 migrations; only `envoi_web` (no superuser, createdb or createrole); no S5 table or column; the nine `neon_auth` tables with no `envoi_web` SELECT; purchases `paid` 3, `review_expired` 1, `review_open` 5, `uncertain` 2, `unpaid_closed` 2.
+  - `envoi_maintenance` was created by SQL over TLS, LOGIN, NOSUPERUSER, NOCREATEDB, NOCREATEROLE, NOINHERIT, as `envoi_web` was in S1, its password generated in memory and written only to the ignored `.env.local` as `MAINTENANCE_DATABASE_URL` on the direct host.
+    A first attempt that sent only a SCRAM-SHA-256 verifier was refused by Neon ("Neon only supports being given plaintext passwords") and created nothing.
+  - Migrations 0014 and 0015 were applied with `npm run db:migrate`.
+  - After: 16 migrations; `envoi_maintenance` and `envoi_web`, neither superuser, createdb nor createrole, and `envoi_maintenance` a member of no role, with `search_path=public`; `maintenance_runs` and `operator_grants`; the four `maintenance_*` attempt columns; the grants listed above; the nine `neon_auth` tables with 0 `envoi_web` and 0 `envoi_maintenance` SELECT; purchases unchanged; 0 maintenance runs.
+- **Deviations recorded, no approved decision changed:**
+  - `tsconfig.runner.json` uses bundler resolution with `src/maintenance/resolve-hook.ts` (`node --import`, `module.registerHooks`), not NodeNext, because the shared source uses extensionless `@/` imports that NodeNext would require rewriting everywhere (R9).
+  - `runMaintenance(db, deps, trigger)` instead of `runMaintenance(deps)`; `MaintenanceTask` also has `limit` and a `RunContext` (`runId`, `trigger`); `MaintenanceDeps.solana` is `null` until S17; `PayPalConfig.webhookId` is nullable and verification refuses `null`.
+  - Files beyond Gate 3's list: `src/domain/maintenance/health.ts`, `src/app/operator/health/page.tsx`, `src/maintenance/resolve-hook.ts`, `tests/support/runner-build.ts`, and the evidence harness `s5-manual-run.mts` with `s5-fixture-paypal.mjs`.
+  - A `capture_unknown` attempt whose order shows no capture stays uncertain and writes an operator-visible inconclusive audit row on each run.
+  - **[hypothesis]** values kept as reviewed constants: task timeouts heartbeat 15 s, capacity 15 s, reconcile 75 s, close 20 s, purge 20 s; at most 10 attempts, 100 reviews and 500 sessions per run; the storage share is computed against 10^9 bytes.
+  - `ENV_NAMES` is deduplicated, because maintenance shares names with web.
+- **Known limits:**
+  - No runner runs against Neon, by the user's choice, so the deployed view shows no heartbeat and "Overdue" until a scheduled workflow exists (S15), and the two uncertain S2 purchases stay listed as overdue work.
+  - Neon's provider storage figure is not read; the page states the limitation.
+  - The operator grant has no revoke subcommand; revocation is a `revoked_at` written by hand.
+- **Local housekeeping:** a cleanup pattern of `envoi_t_%` also matched the empty base database `envoi_test`, because `_` is a wildcard in `LIKE`; it was recreated empty, and the integration tests pass from it.
 
 ### S6 Merchant sign-in and manual menu draft, 2026-10-14
 

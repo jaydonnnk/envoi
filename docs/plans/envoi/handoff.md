@@ -52,7 +52,9 @@ Proposed target remains 4 of 5 first-time buyers completing an eligible test-env
 
 ## Next authorized action
 
-**Next action: S5, only when the user authorizes it by its slice ID, such as "start S5", as rule 1 of `04-slices.md` says.**
+**Next action: S7, only when the user authorizes it by its slice ID, such as "start S7", as rule 1 of `04-slices.md` says.**
+S5 is done (2026-10-14): two manual runs of the compiled maintenance runner on a disposable local database turned the S3 harness's uncertain capture into paid through a read-only PayPal FIXTURE, closed an expired review, purged an expired session and exited 0; the build-graph check shows the runner cannot reach the capture module; only an operator flagged with `grant-operator` sees `/operator/health`, and everyone else gets the not-found page; `envoi_maintenance` and migrations 0014 and 0015 are on Neon; 26 of 26 mutations pass; see [`00-status.md`](00-status.md#s5-maintenance-runner-manual-runs-and-operator-health-view-2026-10-14).
+The runner runs locally only, by the user's choice, so the deployed view shows no heartbeat until S15 creates the scheduled workflow.
 S6 is done (2026-10-14): the user made a demo merchant with `create-merchant` and `approve-membership`, signed in on Render at `/merchant/setup` from a browser holding a buyer receipt (warned first; the purchase stays owned by its buyer session, the merchant gains nothing and that browser can no longer open the receipt), created the unpublished outlet "Test Shop", and a blank price blocked confirmation until it was filled and version 3 was confirmed; buyers cannot see the draft or reach any merchant route; its evidence and 25 of 25 mutations are in [`00-status.md`](00-status.md#s6-merchant-sign-in-and-manual-menu-draft-2026-10-14).
 The S6 review fixes (2026-10-14) stop a blank setup page after a failed draft load, prove the zero-price schema and database check separately and refuse an anonymous session on every merchant action; 33 of 33 S6 mutations now pass on the fix commit, and the user confirmed the S6 receipt sentence as a Gate 4 amendment; see [S6 review fixes](00-status.md#s6-review-fixes-2026-10-14).
 The deployed demo merchant account (`usr_o2tys4cx5id37b634ar3nv5dae`) and its outlet "Test Shop" (`out_vrlbnc3zylbrr6g2drovaiqkfu`, unpublished, enrollment pending, menu confirmed at version 3) stay in Neon for S7.
@@ -60,7 +62,7 @@ S13 is done (2026-10-14): in Claude Code, an agent holding a scoped demo token s
 S4 is done (2026-10-14), with its review fixes, see [S4 review fixes](00-status.md#s4-review-fixes-2026-10-14).
 The two S2 purchases that PayPal refused before the seller consented stay `uncertain` for good, by the user's choice on 2026-10-13, and keep locking their basket (1 Kopi O and 1 Kaya toast set) in the browser session that made them.
 The Claude Code agent token stays live in Neon (`agt_ggembpdxft5soezukk2c6remma`, label "Claude Code"); no revoke subcommand exists.
-On "start S5", create `envoi/slice-5-maintenance` from the current `main` tip, confirm it with `git branch --show-current`, and request S5's listed authorizations by name before acting.
+On "start S7", create `envoi/slice-7-publication` from the current `main` tip, confirm it with `git branch --show-current`, and request S7's listed authorizations (migrations, push and deploy) by name before acting; weigh the S6 review's advisory triggers for published revisions and memberships before S7 publishes anything.
 Rerun the checker and its fault harness under [`checks/`](checks/gate4_check.py) after any edit to the gate folder.
 Gate 3 was re-approved on 2026-10-11 with fixes A-M; its record, mirrors and fail-capable checks are in `00-status.md`.
 The four reopening questions were already answered and Gates 1 and 2 are re-approved; do not ask them again or revise either gate.
