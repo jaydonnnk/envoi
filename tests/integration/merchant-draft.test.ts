@@ -114,7 +114,31 @@ describe("merchant sign-in and manual menu draft", () => {
     const { outletId } = await merchantWithOutlet("anon-target");
     const buyer = await anonymousCookie(routes.auth.POST);
     const before = await merchantState();
-    await expectForbidden(await everyMerchantRoute(outletId, buyer));
+    const responses = await everyMerchantRoute(outletId, buyer);
+    for (const response of responses) {
+      expect(response.status).toBe(403);
+      expect((await body(response)).error).toMatchObject({ code: "forbidden_membership", details: { reason: "anonymous_session" } });
+    }
+    expect(await merchantState()).toEqual(before);
+  });
+
+  it("an anonymous session is refused even when it holds membership rows", async () => {
+    const { outletId } = await merchantWithOutlet("anon-rows-target");
+    const buyer = await anonymousCookie(routes.auth.POST);
+    const session = (await (await routes.auth.GET(jsonRequest("GET", "/api/auth/get-session", buyer))).json()) as { user: { id: string; isAnonymous: boolean } };
+    expect(session.user.isAnonymous).toBe(true);
+    // FIXTURE: membership rows no supported path creates for an anonymous user, one bound to the
+    // outlet and one unbound, standing in for a broken data invariant.
+    await fixture.database.admin`
+      insert into merchant_memberships (id, user_id, outlet_id, role, is_demo, approved_at) values
+        ('mbr_anon_bound', ${session.user.id}, ${outletId}, 'owner', true, now()),
+        ('mbr_anon_unbound', ${session.user.id}, null, 'owner', true, now())`;
+    const before = await merchantState();
+    const responses = await everyMerchantRoute(outletId, buyer);
+    for (const response of responses) {
+      expect(response.status).toBe(403);
+      expect((await body(response)).error).toMatchObject({ code: "forbidden_membership", details: { reason: "anonymous_session" } });
+    }
     expect(await merchantState()).toEqual(before);
   });
 

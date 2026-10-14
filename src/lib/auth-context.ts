@@ -59,14 +59,19 @@ export function isAgent(value: AgentPrincipal | AppError): value is AgentPrincip
   return "kind" in value && value.kind === "agent";
 }
 
-// Merchant routes refuse an agent credential and any session without a matching membership row with
-// 403 forbidden_membership; an anonymous buyer holds no membership row, so it is refused the same way.
+// Merchant routes refuse an agent credential, an anonymous session and any session without a
+// matching membership row with 403 forbidden_membership. Gate 2 requires a non-anonymous user on
+// every merchant action, so an anonymous session is refused here before any membership row is read,
+// even one that no supported path would have created.
 async function merchantSession(auth: Auth, headers: Headers): Promise<{ userId: string } | AppError> {
   if (headers.has("authorization")) {
     return appError("forbidden_membership", "Agent tokens cannot use merchant routes.", { details: { reason: "agent_token" } });
   }
   const result = await auth.api.getSession({ headers });
   if (!result) return appError("unauthorized", "Sign in with your merchant account.");
+  if (result.user.isAnonymous === true) {
+    return appError("forbidden_membership", "Sign in with your merchant account.", { details: { reason: "anonymous_session" } });
+  }
   return { userId: result.user.id };
 }
 
