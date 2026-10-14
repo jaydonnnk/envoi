@@ -281,9 +281,10 @@ describe("merchant destination and publication", () => {
 
     it("a published revision refuses every change", async () => {
       const { draft } = await api.publishedShop("revision-immutable");
-      expect(await outcome(web`update menu_revisions set status = 'draft', confirmed_at = null, version = version + 1 where id = ${draft.revisionId}`)).toMatch(/was published and cannot change/);
-      const [revision] = await fixture.database.admin`select status, version from menu_revisions where id = ${draft.revisionId}`;
-      expect(revision).toEqual({ status: "confirmed", version: draft.version });
+      const before = await fixture.database.admin`select status, version, confirmed_at from menu_revisions where id = ${draft.revisionId}`;
+      // Still confirmed, so no check constraint objects: only the trigger can refuse it.
+      expect(await outcome(web`update menu_revisions set version = version + 1, confirmed_at = now() where id = ${draft.revisionId}`)).toMatch(/was published and cannot change/);
+      expect(await fixture.database.admin`select status, version, confirmed_at from menu_revisions where id = ${draft.revisionId}`).toEqual(before);
     });
 
     it("the published pointer names only a confirmed revision of its own outlet", async () => {
