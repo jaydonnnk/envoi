@@ -4,6 +4,7 @@ import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 import { loadLocalEnvFile, migrationEnv } from "@/env";
 import { pgConnection } from "@/lib/db/web";
+import { isEntrypoint } from "@/lib/entrypoint";
 import { redact } from "@/lib/log";
 
 export const MIGRATIONS_FOLDER = fileURLToPath(new URL("../../../drizzle", import.meta.url));
@@ -24,7 +25,7 @@ export async function runMigrations(url: string): Promise<void> {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isEntrypoint(import.meta.url)) {
   loadLocalEnvFile();
   runMigrations(migrationEnv().MIGRATION_DATABASE_URL)
     .then(() => console.log("migrations applied"))

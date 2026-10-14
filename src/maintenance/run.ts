@@ -3,6 +3,7 @@ import { loadLocalEnvFile, maintenanceEnv } from "@/env";
 import { paypalConfigFromEnv } from "@/integrations/paypal/client";
 import { createPayPalReadClient } from "@/integrations/paypal/orders-read";
 import { connectRunner } from "@/lib/db/runner";
+import { isEntrypoint } from "@/lib/entrypoint";
 import { log, redact } from "@/lib/log";
 import { durationMs, systemNow } from "@/lib/time";
 
@@ -33,8 +34,9 @@ export async function main(argv: readonly string[]): Promise<number> {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isEntrypoint(import.meta.url)) {
   // The run never outlives T_MAINT_RUN: if anything still holds the process open by then, it ends.
+  // runMaintenance stops taking work RUN_FINISH_RESERVE_MS earlier, so its report is written first.
   setTimeout(() => {
     log("error", "maintenance_run_killed", { afterMs: durationMs("T_MAINT_RUN") });
     process.exit(1);

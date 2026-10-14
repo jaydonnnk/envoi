@@ -6,6 +6,7 @@ import { recordAudit } from "@/domain/audit/events";
 import { loadLocalEnvFile, migrationEnv } from "@/env";
 import * as schema from "@/lib/db/schema";
 import { pgConnection } from "@/lib/db/web";
+import { isEntrypoint } from "@/lib/entrypoint";
 import { hashToken, newId, newSecretToken } from "@/lib/ids";
 import { redact } from "@/lib/log";
 
@@ -362,7 +363,7 @@ async function main(argv: string[]): Promise<number> {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isEntrypoint(import.meta.url)) {
   main(process.argv.slice(2))
     .then((code) => {
       process.exitCode = code;
