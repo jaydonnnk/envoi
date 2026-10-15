@@ -1,6 +1,6 @@
 {
  "branch": "envoi/slice-11-menu-import",
- "base_commit": "c1ea909",
+ "base_commit": "073887c",
  "uncommitted_changes": false,
  "method": "Each definition in s11-mutation-defs.json applied alone by exact text replacement, its named test run alone (vitest -t), every touched file restored and compared by SHA-256, then the test rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations, as envoi_web; merchant accounts are created by the operator functions with passwords generated in memory per run, and their FIXTURE shops are created through the merchant domain. OpenAI is the labeled FIXTURE fake at the provider's fetch boundary and every photo is generated. A proof also needs the mutated run to fail on an AssertionError.",
  "results": [

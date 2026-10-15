@@ -1,0 +1,154 @@
+{
+ "slice": "S11",
+ "read": "READ ONLY transactions with the migration role through .maintenance-build/s11-neon-read.mts; identifiers, flags and counts only; neon_auth never read",
+ "before": {
+  "at": "2026-10-16, before npm run db:migrate",
+  "readOnly": {
+   "transaction_read_only": "on"
+  },
+  "migrations": {
+   "n": 20
+  },
+  "tables": {
+   "menu_imports": false,
+   "menu_import_admission": false
+  },
+  "singleton": null,
+  "imports": null,
+  "imageColumns": [],
+  "webTable": [],
+  "webUpdateCols": [],
+  "triggers": [
+   {
+    "tgname": "menu_items_item_key_default",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "menu_items_published_immutable",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "menu_revisions_published_immutable",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "merchant_memberships_binding_once",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "outlets_publication_guard",
+    "tgenabled": "O"
+   }
+  ],
+  "states": [
+   {
+    "state": "paid",
+    "n": 4
+   },
+   {
+    "state": "review_expired",
+    "n": 2
+   },
+   {
+    "state": "review_open",
+    "n": 5
+   },
+   {
+    "state": "uncertain",
+    "n": 2
+   },
+   {
+    "state": "unpaid_closed",
+    "n": 4
+   }
+  ]
+ },
+ "migration": "npm run db:migrate printed 'migrations applied' (0020_s11_menu_imports)",
+ "after": {
+  "at": "2026-10-16, after npm run db:migrate",
+  "readOnly": {
+   "transaction_read_only": "on"
+  },
+  "migrations": {
+   "n": 21
+  },
+  "tables": {
+   "menu_imports": true,
+   "menu_import_admission": true
+  },
+  "singleton": [
+   {
+    "id": "global",
+    "never_admitted": true
+   }
+  ],
+  "imports": {
+   "n": 0
+  },
+  "imageColumns": [],
+  "webTable": [
+   {
+    "table_name": "menu_import_admission",
+    "privs": "SELECT"
+   },
+   {
+    "table_name": "menu_imports",
+    "privs": "INSERT,SELECT"
+   }
+  ],
+  "webUpdateCols": [
+   {
+    "table_name": "menu_import_admission",
+    "cols": "last_admitted_at"
+   },
+   {
+    "table_name": "menu_imports",
+    "cols": "actual_usd_micros,closed_at,closed_outcome,input_tokens,latency_ms,model_dispatched_at,output_tokens,peak_rss_bytes,result_fingerprint,rows_blank_price,rows_drafted"
+   }
+  ],
+  "triggers": [
+   {
+    "tgname": "menu_items_item_key_default",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "menu_items_published_immutable",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "menu_revisions_published_immutable",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "merchant_memberships_binding_once",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "outlets_publication_guard",
+    "tgenabled": "O"
+   }
+  ],
+  "states": [
+   {
+    "state": "paid",
+    "n": 4
+   },
+   {
+    "state": "review_expired",
+    "n": 2
+   },
+   {
+    "state": "review_open",
+    "n": 5
+   },
+   {
+    "state": "uncertain",
+    "n": 2
+   },
+   {
+    "state": "unpaid_closed",
+    "n": 4
+   }
+  ]
+ }
+}
