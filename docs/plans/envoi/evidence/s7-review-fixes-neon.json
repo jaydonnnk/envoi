@@ -1,0 +1,505 @@
+{
+ "method": "Neon production, read with .maintenance-build/s7r-neon-probe.mts (git-ignored): one READ ONLY transaction each, identifiers, flags and counts only, never neon_auth. Migration 0018 applied between them with npm run db:migrate on 2026-10-15.",
+ "before": {
+  "readOnly": {
+   "transaction_read_only": "on"
+  },
+  "migrations": {
+   "n": 18
+  },
+  "fns": [
+   {
+    "proname": "envoi_membership_binding_once",
+    "owner": "neondb_owner",
+    "prosecdef": false,
+    "proconfig": null,
+    "acl": null,
+    "rolsuper": false,
+    "rolbypassrls": true,
+    "rolcreaterole": true
+   },
+   {
+    "proname": "envoi_menu_item_key_default",
+    "owner": "neondb_owner",
+    "prosecdef": false,
+    "proconfig": null,
+    "acl": null,
+    "rolsuper": false,
+    "rolbypassrls": true,
+    "rolcreaterole": true
+   },
+   {
+    "proname": "envoi_outlet_publication_guard",
+    "owner": "neondb_owner",
+    "prosecdef": true,
+    "proconfig": [
+     "search_path=public, pg_temp"
+    ],
+    "acl": "{neondb_owner=X/neondb_owner}",
+    "rolsuper": false,
+    "rolbypassrls": true,
+    "rolcreaterole": true
+   },
+   {
+    "proname": "envoi_published_items_immutable",
+    "owner": "neondb_owner",
+    "prosecdef": false,
+    "proconfig": null,
+    "acl": null,
+    "rolsuper": false,
+    "rolbypassrls": true,
+    "rolcreaterole": true
+   },
+   {
+    "proname": "envoi_published_revision_immutable",
+    "owner": "neondb_owner",
+    "prosecdef": false,
+    "proconfig": null,
+    "acl": null,
+    "rolsuper": false,
+    "rolbypassrls": true,
+    "rolcreaterole": true
+   }
+  ],
+  "trg": [
+   {
+    "tgname": "menu_items_item_key_default",
+    "relname": "menu_items",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "menu_items_published_immutable",
+    "relname": "menu_items",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "menu_revisions_published_immutable",
+    "relname": "menu_revisions",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "merchant_memberships_binding_once",
+    "relname": "merchant_memberships",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "outlets_publication_guard",
+    "relname": "outlets",
+    "tgenabled": "O"
+   }
+  ],
+  "webRole": [
+   {
+    "rolname": "envoi_maintenance",
+    "rolsuper": false,
+    "rolbypassrls": false,
+    "rolinherit": false
+   },
+   {
+    "rolname": "envoi_web",
+    "rolsuper": false,
+    "rolbypassrls": false,
+    "rolinherit": true
+   }
+  ],
+  "webTablePrivs": [
+   {
+    "table_name": "enrollments",
+    "privs": "SELECT"
+   },
+   {
+    "table_name": "menu_items",
+    "privs": "DELETE,INSERT,SELECT"
+   },
+   {
+    "table_name": "menu_revisions",
+    "privs": "SELECT"
+   },
+   {
+    "table_name": "merchant_memberships",
+    "privs": "SELECT"
+   },
+   {
+    "table_name": "outlets",
+    "privs": "SELECT"
+   },
+   {
+    "table_name": "payment_destinations",
+    "privs": "SELECT"
+   },
+   {
+    "table_name": "purchases",
+    "privs": "INSERT,SELECT,SELECT"
+   }
+  ],
+  "webItemCols": [
+   {
+    "table_name": "menu_items",
+    "privilege_type": "INSERT",
+    "cols": 9,
+    "item_key": true,
+    "basket_lock_key": false
+   },
+   {
+    "table_name": "menu_items",
+    "privilege_type": "SELECT",
+    "cols": 9,
+    "item_key": true,
+    "basket_lock_key": false
+   },
+   {
+    "table_name": "menu_items",
+    "privilege_type": "UPDATE",
+    "cols": 6,
+    "item_key": false,
+    "basket_lock_key": false
+   },
+   {
+    "table_name": "merchant_memberships",
+    "privilege_type": "SELECT",
+    "cols": 9,
+    "item_key": false,
+    "basket_lock_key": false
+   },
+   {
+    "table_name": "merchant_memberships",
+    "privilege_type": "UPDATE",
+    "cols": 1,
+    "item_key": false,
+    "basket_lock_key": false
+   },
+   {
+    "table_name": "purchases",
+    "privilege_type": "INSERT",
+    "cols": 17,
+    "item_key": false,
+    "basket_lock_key": true
+   },
+   {
+    "table_name": "purchases",
+    "privilege_type": "SELECT",
+    "cols": 17,
+    "item_key": false,
+    "basket_lock_key": true
+   },
+   {
+    "table_name": "purchases",
+    "privilege_type": "UPDATE",
+    "cols": 1,
+    "item_key": false,
+    "basket_lock_key": false
+   }
+  ],
+  "states": [
+   {
+    "state": "paid",
+    "n": 4
+   },
+   {
+    "state": "pending_payment",
+    "n": 2
+   },
+   {
+    "state": "review_expired",
+    "n": 1
+   },
+   {
+    "state": "review_open",
+    "n": 6
+   },
+   {
+    "state": "uncertain",
+    "n": 2
+   },
+   {
+    "state": "unpaid_closed",
+    "n": 2
+   }
+  ],
+  "shop": [
+   {
+    "id": "pur_qhslqa5ms3ycea7ntznashejoy",
+    "state": "paid",
+    "review_passed": true,
+    "keyed": true,
+    "attempt": "capture_confirmed"
+   },
+   {
+    "id": "pur_f3znbc6ctluxd3tvgdcmwvicj4",
+    "state": "pending_payment",
+    "review_passed": true,
+    "keyed": true,
+    "attempt": "order_created"
+   },
+   {
+    "id": "pur_7mmw4zyfpdmh7zoxt6kew27e5e",
+    "state": "review_open",
+    "review_passed": true,
+    "keyed": true,
+    "attempt": null
+   },
+   {
+    "id": "pur_4beph5hewgnfzliwaga6gdpfze",
+    "state": "pending_payment",
+    "review_passed": true,
+    "keyed": true,
+    "attempt": "order_created"
+   }
+  ]
+ },
+ "after": {
+  "readOnly": {
+   "transaction_read_only": "on"
+  },
+  "migrations": {
+   "n": 19
+  },
+  "fns": [
+   {
+    "proname": "envoi_membership_binding_once",
+    "owner": "neondb_owner",
+    "prosecdef": false,
+    "proconfig": [
+     "search_path=public, pg_temp"
+    ],
+    "acl": null,
+    "rolsuper": false,
+    "rolbypassrls": true,
+    "rolcreaterole": true
+   },
+   {
+    "proname": "envoi_menu_item_key_default",
+    "owner": "neondb_owner",
+    "prosecdef": false,
+    "proconfig": [
+     "search_path=public, pg_temp"
+    ],
+    "acl": null,
+    "rolsuper": false,
+    "rolbypassrls": true,
+    "rolcreaterole": true
+   },
+   {
+    "proname": "envoi_outlet_publication_guard",
+    "owner": "neondb_owner",
+    "prosecdef": true,
+    "proconfig": [
+     "search_path=public, pg_temp"
+    ],
+    "acl": "{neondb_owner=X/neondb_owner}",
+    "rolsuper": false,
+    "rolbypassrls": true,
+    "rolcreaterole": true
+   },
+   {
+    "proname": "envoi_published_items_immutable",
+    "owner": "neondb_owner",
+    "prosecdef": false,
+    "proconfig": [
+     "search_path=public, pg_temp"
+    ],
+    "acl": null,
+    "rolsuper": false,
+    "rolbypassrls": true,
+    "rolcreaterole": true
+   },
+   {
+    "proname": "envoi_published_revision_immutable",
+    "owner": "neondb_owner",
+    "prosecdef": false,
+    "proconfig": [
+     "search_path=public, pg_temp"
+    ],
+    "acl": null,
+    "rolsuper": false,
+    "rolbypassrls": true,
+    "rolcreaterole": true
+   }
+  ],
+  "trg": [
+   {
+    "tgname": "menu_items_item_key_default",
+    "relname": "menu_items",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "menu_items_published_immutable",
+    "relname": "menu_items",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "menu_revisions_published_immutable",
+    "relname": "menu_revisions",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "merchant_memberships_binding_once",
+    "relname": "merchant_memberships",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "outlets_publication_guard",
+    "relname": "outlets",
+    "tgenabled": "O"
+   }
+  ],
+  "webRole": [
+   {
+    "rolname": "envoi_maintenance",
+    "rolsuper": false,
+    "rolbypassrls": false,
+    "rolinherit": false
+   },
+   {
+    "rolname": "envoi_web",
+    "rolsuper": false,
+    "rolbypassrls": false,
+    "rolinherit": true
+   }
+  ],
+  "webTablePrivs": [
+   {
+    "table_name": "enrollments",
+    "privs": "SELECT"
+   },
+   {
+    "table_name": "menu_items",
+    "privs": "DELETE,INSERT,SELECT"
+   },
+   {
+    "table_name": "menu_revisions",
+    "privs": "SELECT"
+   },
+   {
+    "table_name": "merchant_memberships",
+    "privs": "SELECT"
+   },
+   {
+    "table_name": "outlets",
+    "privs": "SELECT"
+   },
+   {
+    "table_name": "payment_destinations",
+    "privs": "SELECT"
+   },
+   {
+    "table_name": "purchases",
+    "privs": "INSERT,SELECT,SELECT"
+   }
+  ],
+  "webItemCols": [
+   {
+    "table_name": "menu_items",
+    "privilege_type": "INSERT",
+    "cols": 9,
+    "item_key": true,
+    "basket_lock_key": false
+   },
+   {
+    "table_name": "menu_items",
+    "privilege_type": "SELECT",
+    "cols": 9,
+    "item_key": true,
+    "basket_lock_key": false
+   },
+   {
+    "table_name": "menu_items",
+    "privilege_type": "UPDATE",
+    "cols": 6,
+    "item_key": false,
+    "basket_lock_key": false
+   },
+   {
+    "table_name": "merchant_memberships",
+    "privilege_type": "SELECT",
+    "cols": 9,
+    "item_key": false,
+    "basket_lock_key": false
+   },
+   {
+    "table_name": "merchant_memberships",
+    "privilege_type": "UPDATE",
+    "cols": 1,
+    "item_key": false,
+    "basket_lock_key": false
+   },
+   {
+    "table_name": "purchases",
+    "privilege_type": "INSERT",
+    "cols": 17,
+    "item_key": false,
+    "basket_lock_key": true
+   },
+   {
+    "table_name": "purchases",
+    "privilege_type": "SELECT",
+    "cols": 17,
+    "item_key": false,
+    "basket_lock_key": true
+   },
+   {
+    "table_name": "purchases",
+    "privilege_type": "UPDATE",
+    "cols": 1,
+    "item_key": false,
+    "basket_lock_key": false
+   }
+  ],
+  "states": [
+   {
+    "state": "paid",
+    "n": 4
+   },
+   {
+    "state": "pending_payment",
+    "n": 2
+   },
+   {
+    "state": "review_expired",
+    "n": 1
+   },
+   {
+    "state": "review_open",
+    "n": 6
+   },
+   {
+    "state": "uncertain",
+    "n": 2
+   },
+   {
+    "state": "unpaid_closed",
+    "n": 2
+   }
+  ],
+  "shop": [
+   {
+    "id": "pur_qhslqa5ms3ycea7ntznashejoy",
+    "state": "paid",
+    "review_passed": true,
+    "keyed": true,
+    "attempt": "capture_confirmed"
+   },
+   {
+    "id": "pur_f3znbc6ctluxd3tvgdcmwvicj4",
+    "state": "pending_payment",
+    "review_passed": true,
+    "keyed": true,
+    "attempt": "order_created"
+   },
+   {
+    "id": "pur_7mmw4zyfpdmh7zoxt6kew27e5e",
+    "state": "review_open",
+    "review_passed": true,
+    "keyed": true,
+    "attempt": null
+   },
+   {
+    "id": "pur_4beph5hewgnfzliwaga6gdpfze",
+    "state": "pending_payment",
+    "review_passed": true,
+    "keyed": true,
+    "attempt": "order_created"
+   }
+  ]
+ }
+}

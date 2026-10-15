@@ -1,0 +1,176 @@
+{
+ "branch": "envoi/slice-7-review-fixes",
+ "base_commit": "833f022",
+ "uncommitted_changes": false,
+ "method": "Each definition in s7-review-fixes-mutation-defs.json applied alone by exact text replacement, its named test run alone (vitest -t), every touched file restored and compared by SHA-256, then the test rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations, so a mutation of a migration file reaches the disposable database; merchant and operator accounts are created by the operator functions with passwords generated in memory per run. PayPal is the labeled FIXTURE fake and OpenAI is never called; merchant shops are taken through the real merchant routes and the operator functions. A proof also needs the mutated run to fail on an AssertionError.",
+ "results": [
+  {
+   "id": "m1-redeem-by-stored-id",
+   "test": "a handoff redeemed after republication prices the republished menu",
+   "files": [
+    "src/domain/handoffs/redeem.ts"
+   ],
+   "mutation": "Redeem by the stored item ids only, without finding each item by key on the menu published now.",
+   "mutated": "Tests  1 failed | 2 skipped (3)",
+   "error": "AssertionError: expected undefined to be 'redeemed' // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "proof": true
+  },
+  {
+   "id": "m1-preview-by-stored-id",
+   "test": "a handoff redeemed after republication prices the republished menu",
+   "files": [
+    "src/domain/handoffs/redeem.ts"
+   ],
+   "mutation": "Name the approval preview's items by their stored ids, so an item no longer published still shows its old name.",
+   "mutated": "Tests  1 failed | 2 skipped (3)",
+   "error": "AssertionError: expected { Object (kind, outlet, ...) } to match object { kind: 'open', lines: [ { \u2026(2) } ] }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "proof": true
+  },
+  {
+   "id": "m2-items-search-path",
+   "test": "a temporary table cannot shadow the published-menu guard",
+   "files": [
+    "drizzle/0018_s7_review_trigger_search_path.sql"
+   ],
+   "mutation": "Drop the fixed search path of envoi_published_items_immutable from migration 0018.",
+   "mutated": "Tests  1 failed | 15 skipped (16)",
+   "error": "AssertionError: expected 'ok' to match /belongs to a published revision/",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 15 skipped (16)",
+   "proof": true
+  },
+  {
+   "id": "m3-second-for-update",
+   "test": "two starts of one basket across a republish do not deadlock",
+   "files": [
+    "src/domain/purchases/review.ts"
+   ],
+   "mutation": "Restore the second FOR UPDATE in paypal/start: findBasketLock locks every same-key purchase again, including one created after lockBasket.",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected [ 'fulfilled', 'rejected' ] to deeply equal [ 'fulfilled', 'fulfilled' ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "m4a-lock-basket-for-update",
+   "test": "two PayPal reviews of one basket across a republish cannot both start",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
+   "mutation": "Remove lockBasket's FOR UPDATE, so a start no longer waits for another start of the same basket.",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected { \u2026(2) } to match object { code: 'execution_locked', \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "race-lock-only-at-review",
+   "test": "two PayPal reviews of one basket across a republish cannot both start",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
+   "mutation": "Check the basket lock only at review creation: drop the recheck inside paypal/start (the S7 mutation, rerun on the fixed code).",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected { \u2026(2) } to match object { code: 'execution_locked', \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "m4c-save-locks-outlet",
+   "test": "two first edits of a published menu make one draft",
+   "files": [
+    "src/domain/menu/draft.ts"
+   ],
+   "mutation": "Remove lockOutlet from saveMenuDraft.",
+   "mutated": "Tests  1 failed | 15 skipped (16)",
+   "error": "AssertionError: expected [ 200, 200 ] to deeply equal [ 200, 409 ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 15 skipped (16)",
+   "proof": true
+  },
+  {
+   "id": "m4d-pointer-never-cleared",
+   "test": "a published pointer is never cleared",
+   "files": [
+    "drizzle/0017_s7_publication_guards.sql"
+   ],
+   "mutation": "Let the pointer trigger accept clearing a published pointer.",
+   "mutated": "Tests  1 failed | 15 skipped (16)",
+   "error": "AssertionError: expected 'ok' to match /cannot be unpublished/",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 15 skipped (16)",
+   "proof": true
+  },
+  {
+   "id": "m4e-backfill-sorts-by-key",
+   "test": "the migration backfill computes the application's basket lock key",
+   "files": [
+    "drizzle/0017_s7_publication_guards.sql"
+   ],
+   "mutation": "Drop the backfill's ORDER BY item key, so the lines are joined in their stored order.",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected 'c00d734f81d8f24246ce9f5f35036f3b8c627\u2026' to be '76d64d263c27b020f75a9ac733673dae51450\u2026' // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "m4g-revision-delete",
+   "test": "a published revision is never deleted",
+   "files": [
+    "drizzle/0017_s7_publication_guards.sql"
+   ],
+   "mutation": "Fire menu_revisions_published_immutable on UPDATE only, not DELETE.",
+   "mutated": "Tests  1 failed | 15 skipped (16)",
+   "error": "AssertionError: expected 'ok' to match /was published and cannot change/",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 15 skipped (16)",
+   "proof": true
+  },
+  {
+   "id": "pointer-target-outlet",
+   "test": "the published pointer names only a confirmed revision of its own outlet",
+   "files": [
+    "drizzle/0017_s7_publication_guards.sql"
+   ],
+   "mutation": "Drop only the outlet check of the pointer trigger.",
+   "mutated": "Tests  1 failed | 15 skipped (16)",
+   "error": "AssertionError: expected 'ok' to match /may only publish a confirmed revision\u2026/",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 15 skipped (16)",
+   "proof": true
+  },
+  {
+   "id": "pointer-target-status",
+   "test": "the published pointer names only a confirmed revision of its own outlet",
+   "files": [
+    "drizzle/0017_s7_publication_guards.sql"
+   ],
+   "mutation": "Drop only the status check of the pointer trigger (the check constraint menu_revisions_published_check still refuses, with its own message).",
+   "mutated": "Tests  1 failed | 15 skipped (16)",
+   "error": "AssertionError: expected 'new row for relation \"menu_revisions\"\u2026' to match /may only publish a confirmed revision\u2026/",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 15 skipped (16)",
+   "proof": true
+  }
+ ]
+}
