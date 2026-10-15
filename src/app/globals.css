@@ -140,6 +140,7 @@ footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; 
    from manual entry, which stays available below. */
 .import-panel { border: 1px solid var(--line); border-radius: 10px; background: var(--pale); padding: 16px; margin: 0 0 18px; }
 .import-panel h3 { margin: 0; font-size: 17px; }
+.import-panel > :last-child { margin-bottom: 0; }
 .import-panel .consent p { margin: 10px 0 0; }
 .import-panel details { margin-top: 10px; }
 .import-panel summary { cursor: pointer; color: var(--blue); font-weight: 600; }
