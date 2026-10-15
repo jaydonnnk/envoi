@@ -127,6 +127,13 @@
       "when": 1791988735049,
       "tag": "0017_s7_publication_guards",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1792022622576,
+      "tag": "0018_s7_review_trigger_search_path",
+      "breakpoints": true
     }
   ]
 }
