@@ -65,6 +65,9 @@ export default async function MerchantSetupPage() {
       <p className="lead">Signed in as {session.user.name}. Buyers see only what you publish; drafts stay invisible to them.</p>
       <Workspace initial={initial} initialDraft={draft ? draftJson(draft) : null} />
       <div className="actions">
+        <a className="button secondary" href="/merchant/orders">
+          See orders
+        </a>
         <SignOutButton />
       </div>
     </main>

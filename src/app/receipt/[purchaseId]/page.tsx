@@ -143,6 +143,21 @@ export default async function ReceiptPage({ params }: { params: Promise<{ purcha
           <span className="mono">{purchase.id}</span>
         </div>
       </section>
+      {purchase.view.state === "paid" && (
+        <section className="card acknowledgment" aria-labelledby="acknowledgment-heading">
+          <h2 id="acknowledgment-heading">Shop acknowledgment</h2>
+          {purchase.acknowledgedAt ? (
+            <p>
+              <span className="chip ok">Acknowledged</span> The shop acknowledged this order on {SINGAPORE_TIME.format(purchase.acknowledgedAt)} Singapore time.
+            </p>
+          ) : (
+            <p>
+              <span className="chip">Awaiting the shop</span> The shop has not acknowledged this order yet. Reload this page to see when it does.
+            </p>
+          )}
+          <p className="fine muted">Acknowledgment is separate from payment: it never changes the paid status above.</p>
+        </section>
+      )}
       {purchase.entryPoint !== "fixture_tracer" && <LiveStatus purchaseId={purchase.id} state={purchase.view.state} attemptState={attemptState} canCheck={canCheck} />}
       {canContinue && (
         <div className="actions">
