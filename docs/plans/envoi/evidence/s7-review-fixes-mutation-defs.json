@@ -1,0 +1,163 @@
+[
+ {
+  "id": "m1-redeem-by-stored-id",
+  "test": "a handoff redeemed after republication prices the republished menu",
+  "test_file": "tests/integration/agent-handoff-republication.test.ts",
+  "mutation": "Redeem by the stored item ids only, without finding each item by key on the menu published now.",
+  "edits": [
+   {
+    "file": "src/domain/handoffs/redeem.ts",
+    "old": "      const lines = (await onPublishedMenu(tx, request.outletId, request.lines)).map(({ menuItemId, quantity }) => ({ menuItemId, quantity }));\n",
+    "new": "      const lines = request.lines;\n"
+   }
+  ]
+ },
+ {
+  "id": "m1-preview-by-stored-id",
+  "test": "a handoff redeemed after republication prices the republished menu",
+  "test_file": "tests/integration/agent-handoff-republication.test.ts",
+  "mutation": "Name the approval preview's items by their stored ids, so an item no longer published still shows its old name.",
+  "edits": [
+   {
+    "file": "src/domain/handoffs/redeem.ts",
+    "old": "  const lines = await onPublishedMenu(db, row.request.outletId, row.request.lines);\n",
+    "new": "  const lines = row.request.lines.map((line) => ({ ...line, published: true }));\n"
+   }
+  ]
+ },
+ {
+  "id": "m2-items-search-path",
+  "test": "a temporary table cannot shadow the published-menu guard",
+  "test_file": "tests/integration/merchant-publication.test.ts",
+  "mutation": "Drop the fixed search path of envoi_published_items_immutable from migration 0018.",
+  "edits": [
+   {
+    "file": "drizzle/0018_s7_review_trigger_search_path.sql",
+    "old": "ALTER FUNCTION envoi_published_items_immutable() SET search_path = public, pg_temp;\n--> statement-breakpoint\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "m3-second-for-update",
+  "test": "two starts of one basket across a republish do not deadlock",
+  "test_file": "tests/integration/basket-lock.test.ts",
+  "mutation": "Restore the second FOR UPDATE in paypal/start: findBasketLock locks every same-key purchase again, including one created after lockBasket.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/review.ts",
+    "old": "        input.held === null ? undefined : inArray(purchases.id, [...input.held]),\n",
+    "new": ""
+   },
+   {
+    "file": "src/domain/purchases/review.ts",
+    "old": "  const rows = await query;\n",
+    "new": "  const rows = input.held === null ? await query : await query.for(\"update\");\n"
+   }
+  ]
+ },
+ {
+  "id": "m4a-lock-basket-for-update",
+  "test": "two PayPal reviews of one basket across a republish cannot both start",
+  "test_file": "tests/integration/basket-lock.test.ts",
+  "mutation": "Remove lockBasket's FOR UPDATE, so a start no longer waits for another start of the same basket.",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": ".orderBy(asc(purchases.id)).for(\"update\");\n  return { key",
+    "new": ".orderBy(asc(purchases.id));\n  return { key"
+   }
+  ]
+ },
+ {
+  "id": "race-lock-only-at-review",
+  "test": "two PayPal reviews of one basket across a republish cannot both start",
+  "test_file": "tests/integration/basket-lock.test.ts",
+  "mutation": "Check the basket lock only at review creation: drop the recheck inside paypal/start (the S7 mutation, rerun on the fixed code).",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "        const lock = await findBasketLock(tx, { key: basket.key, exceptPurchaseId: purchaseId, held: basket.held, now: deps.now() });\n        if (lock) return basketLocked(lock);\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "m4c-save-locks-outlet",
+  "test": "two first edits of a published menu make one draft",
+  "test_file": "tests/integration/merchant-publication.test.ts",
+  "mutation": "Remove lockOutlet from saveMenuDraft.",
+  "edits": [
+   {
+    "file": "src/domain/menu/draft.ts",
+    "old": "    if (!(await lockOutlet(tx, write.outletId))) return appError(\"not_found\", \"Shop not found.\");\n    const revision = await currentDraftRevision(tx, write.outletId, true);\n",
+    "new": "    const revision = await currentDraftRevision(tx, write.outletId, true);\n"
+   }
+  ]
+ },
+ {
+  "id": "m4d-pointer-never-cleared",
+  "test": "a published pointer is never cleared",
+  "test_file": "tests/integration/merchant-publication.test.ts",
+  "mutation": "Let the pointer trigger accept clearing a published pointer.",
+  "edits": [
+   {
+    "file": "drizzle/0017_s7_publication_guards.sql",
+    "old": "    RAISE EXCEPTION 'outlet % cannot be unpublished', NEW.id USING ERRCODE = 'check_violation';\n",
+    "new": "    RETURN NEW;\n"
+   }
+  ]
+ },
+ {
+  "id": "m4e-backfill-sorts-by-key",
+  "test": "the migration backfill computes the application's basket lock key",
+  "test_file": "tests/integration/basket-lock.test.ts",
+  "mutation": "Drop the backfill's ORDER BY item key, so the lines are joined in their stored order.",
+  "edits": [
+   {
+    "file": "drizzle/0017_s7_publication_guards.sql",
+    "old": " ORDER BY coalesce(i.\"item_key\", l.value->>'menuItemId') COLLATE \"C\"",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "m4g-revision-delete",
+  "test": "a published revision is never deleted",
+  "test_file": "tests/integration/merchant-publication.test.ts",
+  "mutation": "Fire menu_revisions_published_immutable on UPDATE only, not DELETE.",
+  "edits": [
+   {
+    "file": "drizzle/0017_s7_publication_guards.sql",
+    "old": "BEFORE UPDATE OR DELETE ON \"menu_revisions\"",
+    "new": "BEFORE UPDATE ON \"menu_revisions\""
+   }
+  ]
+ },
+ {
+  "id": "pointer-target-outlet",
+  "test": "the published pointer names only a confirmed revision of its own outlet",
+  "test_file": "tests/integration/merchant-publication.test.ts",
+  "mutation": "Drop only the outlet check of the pointer trigger.",
+  "edits": [
+   {
+    "file": "drizzle/0017_s7_publication_guards.sql",
+    "old": "  IF NOT FOUND OR target.outlet_id <> NEW.id OR target.status <> 'confirmed' THEN\n",
+    "new": "  IF NOT FOUND OR target.status <> 'confirmed' THEN\n"
+   }
+  ]
+ },
+ {
+  "id": "pointer-target-status",
+  "test": "the published pointer names only a confirmed revision of its own outlet",
+  "test_file": "tests/integration/merchant-publication.test.ts",
+  "mutation": "Drop only the status check of the pointer trigger (the check constraint menu_revisions_published_check still refuses, with its own message).",
+  "edits": [
+   {
+    "file": "drizzle/0017_s7_publication_guards.sql",
+    "old": "  IF NOT FOUND OR target.outlet_id <> NEW.id OR target.status <> 'confirmed' THEN\n",
+    "new": "  IF NOT FOUND OR target.outlet_id <> NEW.id THEN\n"
+   }
+  ]
+ }
+]
