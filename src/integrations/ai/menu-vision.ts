@@ -69,7 +69,7 @@ export async function draftMenuFromPhoto(input: {
           role: "user",
           content: [
             { type: "text", text: "Draft the menu in this photo." },
-            { type: "image", image: input.jpeg, mediaType: "image/jpeg", providerOptions: { openai: { imageDetail: "high" } } },
+            { type: "file", data: input.jpeg, mediaType: "image/jpeg", providerOptions: { openai: { imageDetail: "high" } } },
           ],
         },
       ],
