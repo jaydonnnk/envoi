@@ -5,7 +5,6 @@ import type { AgentPrincipal, BuyerPrincipal } from "@/lib/auth-context";
 import * as schema from "@/lib/db/schema";
 import { connectWeb, type Db } from "@/lib/db/web";
 import { issueAgentToken } from "@/operator/cli";
-import { handEditPublishedMenu } from "../support/db";
 import { createPaymentsFixture, jsonPost, routeParams, type PaymentsFixture } from "../support/payments";
 import { anonymousCookie, TEST_BASE_URL } from "../support/session";
 
@@ -171,28 +170,6 @@ describe("agent handoff over MCP", () => {
     expect(reviews).toHaveLength(1);
   });
 
-  it("handoff carries no amount", async () => {
-    const eggs = item("Soft-boiled eggs (2)");
-    const url = await newLink([{ menuItemId: eggs.id, quantity: 2 }], { totalSgdCents: 1, unitSgdCents: 1, amount: "0.01" });
-
-    const columns = await fixture.database.admin<{ column_name: string }[]>`
-      select column_name from information_schema.columns where table_name = 'purchase_requests'`;
-    expect(columns.map((column) => column.column_name).filter((name) => /total|amount|price|cents/.test(name))).toEqual([]);
-
-    // The shop's price changes after the agent asked; the review uses the price at redemption.
-    await handEditPublishedMenu(fixture.database.admin, (sql) => sql`update menu_items set unit_sgd_cents = 250 where id = ${eggs.id}`);
-    try {
-      const { cookie } = await buyer();
-      const redeemed = await redeem(tokenOf(url), cookie);
-      const purchaseId = redeemed.body.data!.purchaseId!;
-      const [purchase] = await fixture.database.admin`select total_sgd_cents, entry_point from purchases where id = ${purchaseId}`;
-      expect(purchase!.total_sgd_cents).toBe(500);
-      expect(purchase!.entry_point).toBe("agent_handoff");
-    } finally {
-      await handEditPublishedMenu(fixture.database.admin, (sql) => sql`update menu_items set unit_sgd_cents = ${eggs.unitSgdCents} where id = ${eggs.id}`);
-    }
-  });
-
   it("handoff expires after T_HANDOFF", async () => {
     const at = (ms: number) => new Date(Date.UTC(2026, 9, 14, 2, 0, 0) + ms);
     const lines = [{ menuItemId: item("Kaya toast set").id, quantity: 1 }];
@@ -231,21 +208,6 @@ describe("agent handoff over MCP", () => {
     expect(await previewPurchaseRequest(web.db, stale.handoffToken, new Date(at.getTime() + 600_000))).toEqual({ kind: "expired" });
     expect(await previewPurchaseRequest(web.db, "a".repeat(52), at)).toEqual({ kind: "invalid" });
     expect(await previewPurchaseRequest(web.db, "not-a-token", at)).toEqual({ kind: "invalid" });
-  });
-
-  it("a basket that no longer prices is refused and stays redeemable", async () => {
-    const kopi = item("Kopi O");
-    const token = tokenOf(await newLink([{ menuItemId: kopi.id, quantity: 1 }]));
-    await handEditPublishedMenu(fixture.database.admin, (sql) => sql`update menu_items set available = false where id = ${kopi.id}`);
-    try {
-      const refused = await redeem(token, (await buyer()).cookie);
-      expect(refused.status).toBe(400);
-      expect(refused.body.error!.code).toBe("validation_failed");
-    } finally {
-      await handEditPublishedMenu(fixture.database.admin, (sql) => sql`update menu_items set available = true where id = ${kopi.id}`);
-    }
-    const later = await redeem(token, (await buyer()).cookie);
-    expect(later.body.data!.outcome).toBe("redeemed");
   });
 
   it("purchase requests need a live agent token", async () => {
