@@ -40,7 +40,7 @@ ALTER TABLE "menu_imports" ADD CONSTRAINT "menu_imports_outlet_id_outlets_id_fk"
 ALTER TABLE "menu_imports" ADD CONSTRAINT "menu_imports_actor_user_id_user_id_fk" FOREIGN KEY ("actor_user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "menu_imports" ADD CONSTRAINT "menu_imports_base_revision_id_menu_revisions_id_fk" FOREIGN KEY ("base_revision_id") REFERENCES "public"."menu_revisions"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "menu_imports_outlet_admitted_idx" ON "menu_imports" USING btree ("outlet_id","admitted_at");--> statement-breakpoint
-CREATE INDEX "menu_imports_admitted_idx" ON "menu_imports" USING btree ("admitted_at");;--> statement-breakpoint
+CREATE INDEX "menu_imports_admitted_idx" ON "menu_imports" USING btree ("admitted_at");--> statement-breakpoint
 INSERT INTO "menu_import_admission" ("id") VALUES ('global');--> statement-breakpoint
 GRANT SELECT, INSERT ON TABLE public."menu_imports" TO envoi_web;--> statement-breakpoint
 GRANT UPDATE ("model_dispatched_at", "closed_at", "closed_outcome", "actual_usd_micros", "input_tokens", "output_tokens", "rows_drafted", "rows_blank_price", "result_fingerprint", "latency_ms", "peak_rss_bytes") ON TABLE public."menu_imports" TO envoi_web;--> statement-breakpoint
