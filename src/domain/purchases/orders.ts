@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { recordAudit } from "@/domain/audit/events";
 import { derivePurchaseView, applyDerivedTransitions, type PaymentAttemptRow, type PurchaseRow, type PurchaseState } from "@/domain/purchases/state";
 import { merchantMemberships, outlets, paymentAttempts, paymentDestinations, purchases, type StoredLine } from "@/lib/db/schema";
@@ -10,7 +10,10 @@ import { appError, type AppError } from "@/lib/errors";
 // abandoned PayPal approval reads unpaid_closed before any maintenance run. Acknowledgment is its own
 // field: it is allowed only on a paid order and never writes the payment state.
 
-const ORDERS_LIMIT = 50;
+// An order is a purchase that reached a payment. A review that never started one moved no money,
+// and any buyer can open many, so listing reviews would push real orders off the page.
+const ORDER_STATES = ["pending_payment", "paid", "uncertain", "unpaid_closed"] as const satisfies readonly PurchaseState[];
+const ORDERS_PAGE = 50;
 
 export type MerchantOrder = {
   id: string;
@@ -37,6 +40,8 @@ export type MerchantOrder = {
 export type OutletOrders = {
   outlet: { id: string; name: string; isDemoFixture: boolean };
   orders: MerchantOrder[];
+  // The id to pass as `before` for the next older page, or null when no older order exists.
+  nextBefore: string | null;
 };
 
 const merchantActor = (userId: string) => `merchant:${userId}`;
@@ -87,29 +92,41 @@ function orderJson({ purchase, sellerMerchantId }: OrderRow, attempt: PaymentAtt
 
 const orderColumns = { purchase: purchases, sellerMerchantId: paymentDestinations.sellerMerchantId };
 
-// The outlet's orders, newest first. The caller has already checked the membership for this outlet.
-// The read is a touch: it stores the transitions the derived view already shows, best effort.
-export async function listOutletOrders(db: Db, outletId: string, now: Date): Promise<OutletOrders | null> {
+// One page of the outlet's orders, newest first, older than the order `before` when it is given, so
+// every order stays reachable however many follow it. The caller has already checked the membership
+// for this outlet. The read is a touch: it stores the transitions the derived view already shows.
+export async function listOutletOrders(db: Db, outletId: string, now: Date, before: string | null = null): Promise<OutletOrders | AppError | null> {
   const [outlet] = await db
     .select({ id: outlets.id, name: outlets.name, isDemoFixture: outlets.isDemoFixture })
     .from(outlets)
     .where(eq(outlets.id, outletId))
     .limit(1);
   if (!outlet) return null;
-  const rows = await db
+  if (before !== null) {
+    const [cursor] = await db
+      .select({ id: purchases.id })
+      .from(purchases)
+      .where(and(eq(purchases.id, before), eq(purchases.outletId, outletId), inArray(purchases.state, [...ORDER_STATES])))
+      .limit(1);
+    if (!cursor) return appError("validation_failed", "That order is not one of this shop's orders.", { details: { reason: "unknown_before" } });
+  }
+  // The cursor is compared in SQL, at the database's own timestamp precision.
+  const older = before === null ? undefined : sql`(${purchases.createdAt}, ${purchases.id}) < (select p.created_at, p.id from ${purchases} p where p.id = ${before})`;
+  const page = await db
     .select(orderColumns)
     .from(purchases)
     .leftJoin(paymentDestinations, eq(paymentDestinations.id, purchases.destinationId))
-    .where(eq(purchases.outletId, outletId))
+    .where(and(eq(purchases.outletId, outletId), inArray(purchases.state, [...ORDER_STATES]), older))
     .orderBy(desc(purchases.createdAt), desc(purchases.id))
-    .limit(ORDERS_LIMIT);
+    .limit(ORDERS_PAGE + 1);
+  const rows = page.slice(0, ORDERS_PAGE);
   const attempts = await latestAttempts(db, rows.map((row) => row.purchase.id));
   const orders = rows.map((row) => orderJson(row, attempts.get(row.purchase.id) ?? null, now));
   for (const order of orders) {
     const stored = rows.find((row) => row.purchase.id === order.id)!.purchase.state;
     if (order.state !== stored) await applyDerivedTransitions(db, order.id, now);
   }
-  return { outlet, orders };
+  return { outlet, orders, nextBefore: page.length > ORDERS_PAGE ? rows.at(-1)!.purchase.id : null };
 }
 
 export type Acknowledgment = { order: MerchantOrder; changed: boolean };

@@ -6,13 +6,14 @@ import type { MerchantOrder, OutletOrders } from "@/domain/purchases/orders";
 import { requestJson } from "@/lib/browser/session";
 import { formatSgd, sgdFromCents } from "@/lib/money";
 import { mayStillBePaid, orderStatus } from "./order-copy";
-import { startOrdersPolling, type PolledOrder } from "./polling";
+import { startOrdersPolling, withNewest, withOlder, type PolledOrder } from "./polling";
 
 const polled = (orders: readonly MerchantOrder[]): PolledOrder[] =>
   orders.map((order) => ({ id: order.id, state: order.state, attemptState: order.payment?.attemptState ?? null, acknowledgedAt: order.acknowledgedAt }));
 
-async function fetchOrders(outletId: string): Promise<OutletOrders | null> {
-  const result = await requestJson<OutletOrders>("GET", `/api/v1/merchant/outlets/${encodeURIComponent(outletId)}/orders`);
+async function fetchOrders(outletId: string, before: string | null = null): Promise<OutletOrders | null> {
+  const query = before === null ? "" : `?before=${encodeURIComponent(before)}`;
+  const result = await requestJson<OutletOrders>("GET", `/api/v1/merchant/outlets/${encodeURIComponent(outletId)}/orders${query}`);
   return result.ok && result.data ? result.data : null;
 }
 
@@ -91,20 +92,27 @@ function OrderCard({ order, onAcknowledged }: { order: MerchantOrder; onAcknowle
   );
 }
 
-// One outlet's orders, kept current within the S3 polling bounds. "Check for new orders" re-reads
-// the list once and starts a fresh bounded polling run.
+// One outlet's orders, kept current within the S3 polling bounds. Polls and "Check for new orders"
+// re-read the newest page; "Show older orders" adds the page before the oldest order shown.
 export function OrdersView({ initial }: { initial: OutletOrders }) {
   const [data, setData] = useState(initial);
+  // Whether the list holds every order back to the oldest. A poll only adds newer orders, and no
+  // order shown is ever dropped, so only loading the last older page completes it.
+  const [complete, setComplete] = useState(initial.nextBefore === null);
   const [run, setRun] = useState(0);
   const [checking, setChecking] = useState(false);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const [olderError, setOlderError] = useState(false);
   const outletId = data.outlet.id;
+
+  const showNewest = (next: OutletOrders) => setData((current) => ({ ...next, orders: withNewest(current.orders, next.orders) }));
 
   useEffect(
     () =>
       startOrdersPolling(polled(data.orders), {
         fetchState: async () => {
           const next = await fetchOrders(outletId);
-          if (next) setData(next);
+          if (next) showNewest(next);
           return next ? polled(next.orders) : null;
         },
         onChange: () => {},
@@ -121,8 +129,18 @@ export function OrdersView({ initial }: { initial: OutletOrders }) {
     setChecking(true);
     const next = await fetchOrders(outletId);
     setChecking(false);
-    if (next) setData(next);
+    if (next) showNewest(next);
     setRun((count) => count + 1);
+  }
+
+  async function showOlder() {
+    setLoadingOlder(true);
+    setOlderError(false);
+    const older = await fetchOrders(outletId, data.orders.at(-1)?.id ?? null);
+    setLoadingOlder(false);
+    if (!older) return setOlderError(true);
+    setData((current) => ({ ...current, orders: withOlder(current.orders, older.orders) }));
+    setComplete(older.nextBefore === null);
   }
 
   const replace = (order: MerchantOrder) => setData((current) => ({ ...current, orders: current.orders.map((each) => (each.id === order.id ? order : each)) }));
@@ -147,10 +165,20 @@ export function OrdersView({ initial }: { initial: OutletOrders }) {
           ))}
         </div>
       )}
+      {olderError && (
+        <p className="error" role="alert">
+          Envoi could not load older orders. Try again.
+        </p>
+      )}
       <div className="actions">
         <button className="button secondary" type="button" onClick={checkNow} disabled={checking}>
           {checking ? "Checking" : "Check for new orders"}
         </button>
+        {!complete && data.orders.length > 0 && (
+          <button className="button secondary" type="button" onClick={showOlder} disabled={loadingOlder}>
+            {loadingOlder ? "Loading" : "Show older orders"}
+          </button>
+        )}
       </div>
     </section>
   );

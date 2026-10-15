@@ -5,6 +5,7 @@ import { listOutletOrders, type OutletOrders } from "@/domain/purchases/orders";
 import { getAuth } from "@/lib/auth";
 import { isMerchantAccount, requireMerchantMembership } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
+import { isAppError } from "@/lib/errors";
 import { OrdersView } from "./orders-view";
 
 export const dynamic = "force-dynamic";
@@ -48,7 +49,7 @@ export default async function MerchantOrdersPage() {
   const shops: OutletOrders[] = [];
   for (const outlet of outlets) {
     const orders = await listOutletOrders(webDb(), outlet.id, now);
-    if (orders) shops.push(orders);
+    if (orders && !isAppError(orders)) shops.push(orders);
   }
 
   return (
