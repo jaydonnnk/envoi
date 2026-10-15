@@ -204,6 +204,31 @@ Measured spend from returned token usage and the list prices: US$0.062 of the US
 - **Found during the run:** the AI SDK logs `AISDK_DEP_IMAGE_CONTENT_PART`, the deprecated `image` content part in `menu-vision.ts`.
   It is now a `file` part with `mediaType: "image/jpeg"`; with a capturing `fetch` and no network, the request body for E3 is byte-identical before and after (SHA256 `dd0afb273c03ee2db4ea77144d419e8b95108ef491361693d4f22c7031851299`, 144,375 bytes), so the evaluated request is unchanged; 267 of 267 tests, typecheck and lint pass.
 
+#### S11 vision evaluation, round 2 pre-registration (R5), 2026-10-15
+
+Written before any round 2 vision call, after round 1 failed, on the user's decision of 2026-10-15: "Option A: pre-register a second round with stronger candidates, same photos and threshold. Check their prices and shutdowns first."
+
+- **Unchanged from round 1:** the six photos, their expected drafts, the automatic scoring, the pass threshold, the choice and bounds rules, the falsifier response, the prompt `menu-vision-prompt-2026-10-15-english` and the provisional bounds of 60,000 input and 16,000 output tokens.
+  The harness is the same [`s11-vision-eval.mts`](evidence/s11-vision-eval.mts), run with `--round=2`, which writes `s11-vision-eval-round2.json`; round 2 adds only these candidates' prices.
+  Since round 1 the photo travels as a `file` content part, whose request body was shown byte-identical to round 1's.
+- **Round 1 stands:** its four candidates are not re-run, and its results are not replaced.
+- **Candidates, chosen by the user 2026-10-15 ("Five plus gpt-5.4") from a list that excluded models whose output price is above US$15 per million tokens:** each is in the key's model listing of 2026-10-15, and its model page lists image input, structured outputs and the Responses API.
+
+  | Model | Input | Output | Shutdown | Default reasoning effort |
+  | --- | --- | --- | --- | --- |
+  | `gpt-4.1-mini` | $0.40 | $1.60 | snapshot `gpt-4.1-mini-2025-04-14`, 14 Jan 2027 | not a reasoning model |
+  | `gpt-5.4-mini` | $0.75 | $4.50 | none published | none |
+  | `gpt-4.1` | $2.00 | $8.00 | snapshot `gpt-4.1-2025-04-14`, 14 Jan 2027 | not a reasoning model |
+  | `gpt-6.1-sol` | $2.00 | $10.00 | none published | medium |
+  | `gpt-5.6-terra` | $2.00 | $12.00 | none published | medium |
+  | `gpt-5.4` | $2.50 | $15.00 | none published | none |
+
+  USD per million tokens, standard tier, read from developers.openai.com `pricing.md`, the deprecations page and each `models/<id>.md` on 2026-10-15.
+  The product call sets no reasoning effort, so each model runs at its default, as it would in production.
+- **Spend limit:** the user raised the evaluation total to US$2 on 2026-10-15 ("Raise to US$2 total"); round 2 may spend the US$1.938 left after round 1, and the harness stops before any call whose worst case could pass it.
+  The builder's estimate [hypothesis] is about US$1.10, from round 1's usage.
+- **Daily ceiling, not changed:** the chosen model's bounds must fit the US$1 a day ceiling; at `gpt-5.4`'s prices the bounds rule may leave only about four imports a day, which is reported, not a pass condition.
+
 ### S8 Merchant orders and separate acknowledgment, 2026-10-15
 
 - **Branch:** `envoi/slice-8-orders`, from `main` at `c07dcee`; commits `f2f7363` (migration 0019, the orders and acknowledge routes, acknowledgment on the buyer read), `9bc1cb0` (merchant orders page, receipt card, shared bounded poller), `1e1e61c` (tests and mutation definitions), `35e4000` (mutation results and the Neon record), then this record.

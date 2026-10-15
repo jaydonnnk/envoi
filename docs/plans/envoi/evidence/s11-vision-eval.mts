@@ -1,6 +1,8 @@
 // Slice S11 vision model evaluation (R5), pre-registered in 00-status.md "S11 vision evaluation, pre-registration".
 // Run from the repository root:
-//   npx tsx --tsconfig tsconfig.json docs/plans/envoi/evidence/s11-vision-eval.mts <spend-limit-usd> <model> [<model> ...]
+//   npx tsx --tsconfig tsconfig.json docs/plans/envoi/evidence/s11-vision-eval.mts [--round=2] <spend-limit-usd> <model> [<model> ...]
+// Round 1 wrote s11-vision-eval.json; --round=2 writes s11-vision-eval-round2.json. Both rounds use
+// the same photos, expected drafts, threshold, scoring and provisional bounds.
 // It reads OPENAI_API_KEY from .env.local and never prints it. Each evaluation photo, from the
 // git-ignored folder .maintenance-build/s11-eval-photos, goes once per candidate through the same
 // path a merchant's photo takes: the browser shrink (simulated with sharp: at most 2,048 pixels per
@@ -217,6 +219,13 @@ export const PRICES: Record<string, { input: number; output: number }> = {
   "gpt-4o-mini": { input: 150_000, output: 600_000 },
   "gpt-5.6-luna": { input: 200_000, output: 1_200_000 },
   "gpt-5.4-nano": { input: 200_000, output: 1_250_000 },
+  // Round 2 candidates, read 2026-10-15.
+  "gpt-4.1-mini": { input: 400_000, output: 1_600_000 },
+  "gpt-5.4-mini": { input: 750_000, output: 4_500_000 },
+  "gpt-4.1": { input: 2_000_000, output: 8_000_000 },
+  "gpt-6.1-sol": { input: 2_000_000, output: 10_000_000 },
+  "gpt-5.6-terra": { input: 2_000_000, output: 12_000_000 },
+  "gpt-5.4": { input: 2_500_000, output: 15_000_000 },
 };
 
 export function norm(text: string): string {
@@ -350,7 +359,9 @@ const median = (xs: number[]) => {
 };
 
 async function main() {
-  const [limitArg, ...models] = process.argv.slice(2);
+  const args = process.argv.slice(2);
+  const round = args[0]?.startsWith("--round=") ? Number(args.shift()!.slice("--round=".length)) : 1;
+  const [limitArg, ...models] = args;
   const limitUsdMicros = Math.round(Number(limitArg) * 1_000_000);
   if (!(limitUsdMicros > 0) || models.length === 0) throw new Error("usage: <spend-limit-usd> <model> [<model> ...]");
   for (const model of models) if (!PRICES[model]) throw new Error(`no recorded price for ${model}`);
@@ -443,8 +454,8 @@ async function main() {
       pass,
     };
   });
-  const out = { ranAt: new Date().toISOString(), promptVersion: MENU_VISION_PROMPT_VERSION, limitUsdMicros, spentUsdMicros, stopped, threshold: THRESHOLD, summary, runs };
-  writeFileSync(join(dirname(fileURLToPath(import.meta.url)), "s11-vision-eval.json"), `${JSON.stringify(out, null, 2)}\n`);
+  const out = { round, ranAt: new Date().toISOString(), promptVersion: MENU_VISION_PROMPT_VERSION, limitUsdMicros, spentUsdMicros, stopped, threshold: THRESHOLD, summary, runs };
+  writeFileSync(join(dirname(fileURLToPath(import.meta.url)), round === 1 ? "s11-vision-eval.json" : `s11-vision-eval-round${round}.json`), `${JSON.stringify(out, null, 2)}\n`);
   console.log(JSON.stringify({ spentUsdMicros, stopped, summary }, null, 2));
 }
 
