@@ -229,6 +229,28 @@ Written before any round 2 vision call, after round 1 failed, on the user's deci
   The builder's estimate [hypothesis] is about US$1.10, from round 1's usage.
 - **Daily ceiling, not changed:** the chosen model's bounds must fit the US$1 a day ceiling; at `gpt-5.4`'s prices the bounds rule may leave only about four imports a day, which is reported, not a pass condition.
 
+#### S11 vision evaluation, round 2 results, 2026-10-15
+
+Run once after the round 2 pre-registration commit (`328feac`); every result and raw output is in [`s11-vision-eval-round2.json`](evidence/s11-vision-eval-round2.json).
+Measured spend: US$0.413, so US$0.475 of the US$2 evaluation total over both rounds.
+
+| Model | Found (of 164) | Correct prices | Wrong filled (E1, E2, E3, E4, E5, E6) | Median | Slowest | Cost of 6 | Result |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `gpt-4.1-mini` | 154 | 118 | 45 (33, 2, 0, 0, 5, 5) | 8.8 s | 12.8 s | US$0.0116 | fail |
+| `gpt-5.4-mini` | 156 | 117 | 42 (34, 1, 0, 0, 1, 6) | 3.8 s | 5.1 s | US$0.0286 | fail |
+| `gpt-4.1` | 153 | 122 | 39 (6, 11, 0, 2, 8, 12) | 6.8 s | 6.9 s | US$0.0539 | fail |
+| `gpt-6.1-sol` | 153 | 148 | 11 (0, 10, 0, 0, 0, 1) | 21.9 s | 29.1 s | US$0.0912 | fail |
+| `gpt-5.6-terra` | 155 | 141 | 18 (10, 1, 0, 2, 2, 3) | 13.6 s | 27.5 s | US$0.1309 | fail |
+| `gpt-5.4` | 157 | 141 | 16 (9, 0, 0, 0, 1, 6) | 9.0 s | 13.6 s | US$0.0965 | fail |
+
+- **By the automatic score, no candidate passes in either round;** the falsifier response stands until the user decides otherwise.
+- **Scorer defect found, reported beside the score:** all ten of `gpt-6.1-sol`'s E2 wrong filled prices are pasta rows whose names and prices are exactly right, but whose portion holds the section's printed subheading "AGLIO OLIO / CREAM", which drops the name-plus-portion similarity under 0.8.
+  Its eleventh is E6's "Ya Kun Gift Pack" at the right S$6.00 for "Ya Kun Elfin Pack".
+  The pre-registered rule did not foresee a section subheading used as a portion.
+- **Disclosed re-score, no new call, not substituted:** letting a row match by its name alone when no other entry of its photo shares that name (E1's size columns still need their portion), applied to every saved output of both rounds, changes one verdict: `gpt-6.1-sol` becomes 163 found, 158 correct and one wrong filled, which passes; every other candidate still fails (`gpt-4.1-mini` 40 wrong filled, the rest unchanged).
+  The script is the git-ignored `.maintenance-build/s11-rescore.mts`.
+- **If `gpt-6.1-sol` were chosen [hypothesis]:** the bounds rule gives 2,000 input and 10,000 output tokens, a reservation of US$0.104 an import, so nine imports a day fit the US$1 ceiling; measured cost per import was US$0.006 to US$0.021.
+
 ### S8 Merchant orders and separate acknowledgment, 2026-10-15
 
 - **Branch:** `envoi/slice-8-orders`, from `main` at `c07dcee`; commits `f2f7363` (migration 0019, the orders and acknowledge routes, acknowledgment on the buyer read), `9bc1cb0` (merchant orders page, receipt card, shared bounded poller), `1e1e61c` (tests and mutation definitions), `35e4000` (mutation results and the Neon record), then this record.
