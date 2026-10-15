@@ -251,6 +251,18 @@ Measured spend: US$0.413, so US$0.475 of the US$2 evaluation total over both rou
   The script is the git-ignored `.maintenance-build/s11-rescore.mts`.
 - **If `gpt-6.1-sol` were chosen [hypothesis]:** the bounds rule gives 2,000 input and 10,000 output tokens, a reservation of US$0.104 an import, so nine imports a day fit the US$1 ceiling; measured cost per import was US$0.006 to US$0.021.
 
+#### S11 vision evaluation, round 3 pre-registration (R5), 2026-10-15
+
+Written before any round 3 vision call, on the user's decision of 2026-10-15: "Option A: fix the scorer, pre-register it, and re-run gpt-6.1-sol on fresh calls (about US$0.09)."
+
+- **Scorer fix, the only rule change:** a draft row whose name, lower-cased with punctuation and parentheticals removed, equals exactly one entry's first reading is matched without its portion, unless the portion is a size (S, M, L, Small, Medium, Large, Regular).
+  It is `scoreDraft`'s `nameOnlyWhenUnique` option in [`s11-vision-eval.mts`](evidence/s11-vision-eval.mts), on for `--round=3` only, so rounds 1 and 2 keep their recorded scores.
+  Checked before any call: perfect drafts still score 164 of 164 with no wrong filled price; a row "Mee Hong Kong" with portion "M" still matches only the M column; with the option off, every saved output of rounds 1 and 2 reproduces its recorded wrong filled count, and with it on, the counts equal the disclosed re-score (`gpt-6.1-sol` 1, `gpt-4.1-mini` 40, every other candidate unchanged).
+- **Unchanged:** the six photos, their expected drafts, the threshold, the choice and bounds rules, the falsifier response, the prompt `menu-vision-prompt-2026-10-15-english` and the provisional bounds.
+- **Candidate:** `gpt-6.1-sol` only, run once per photo on fresh calls; rounds 1 and 2 stand as recorded and are not re-scored as results.
+  Only round 3's own outputs decide whether `gpt-6.1-sol` passes; if it passes, the bounds rule uses round 3's usage.
+- **Spend limit:** the US$1.525 left of the user's US$2 evaluation total; the builder's estimate [hypothesis] is US$0.09.
+
 ### S8 Merchant orders and separate acknowledgment, 2026-10-15
 
 - **Branch:** `envoi/slice-8-orders`, from `main` at `c07dcee`; commits `f2f7363` (migration 0019, the orders and acknowledge routes, acknowledgment on the buyer read), `9bc1cb0` (merchant orders page, receipt card, shared bounded poller), `1e1e61c` (tests and mutation definitions), `35e4000` (mutation results and the Neon record), then this record.

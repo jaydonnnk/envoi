@@ -1,8 +1,9 @@
 // Slice S11 vision model evaluation (R5), pre-registered in 00-status.md "S11 vision evaluation, pre-registration".
 // Run from the repository root:
 //   npx tsx --tsconfig tsconfig.json docs/plans/envoi/evidence/s11-vision-eval.mts [--round=2] <spend-limit-usd> <model> [<model> ...]
-// Round 1 wrote s11-vision-eval.json; --round=2 writes s11-vision-eval-round2.json. Both rounds use
-// the same photos, expected drafts, threshold, scoring and provisional bounds.
+// Round 1 wrote s11-vision-eval.json; --round=N writes s11-vision-eval-roundN.json. Every round uses
+// the same photos, expected drafts, threshold and provisional bounds; round 3 adds the scorer fix
+// in scoreDraft.
 // It reads OPENAI_API_KEY from .env.local and never prints it. Each evaluation photo, from the
 // git-ignored folder .maintenance-build/s11-eval-photos, goes once per candidate through the same
 // path a merchant's photo takes: the browser shrink (simulated with sharp: at most 2,048 pixels per
@@ -283,8 +284,17 @@ type EntryResult = { expected: string; price: string | null; optional: boolean; 
 
 const cents = (price: string) => Math.round(Number(price) * 100);
 
-export function scoreDraft(entries: Entry[], rows: DraftRow[]) {
-  const keyOf = (row: DraftRow) => norm(`${row.name} ${row.portion ?? ""}`);
+// Round 3 scorer fix (pre-registered 2026-10-15): a row whose name equals exactly one entry's first
+// reading, parentheticals dropped, is matched without its portion unless that portion is a size, so a
+// printed section subheading put in the portion cannot hide a right name and price. Size columns
+// (E1) still need their portion.
+const SIZE = /^(s|m|l|small|medium|large|regular)$/i;
+
+export function scoreDraft(entries: Entry[], rows: DraftRow[], options: { nameOnlyWhenUnique?: boolean } = {}) {
+  const baseNames = entries.map((entry) => norm(entry.aliases[0].replace(/\([^)]*\)/g, " ")));
+  const portionOf = (row: DraftRow) =>
+    options.nameOnlyWhenUnique && row.portion && !SIZE.test(row.portion.trim()) && baseNames.filter((n) => n === norm(row.name)).length === 1 ? null : row.portion;
+  const keyOf = (row: DraftRow) => norm(`${row.name} ${portionOf(row) ?? ""}`);
   const used = new Set<number>();
   const matched = new Map<number, number[]>();
   const pairs: { s: number; ei: number; ri: number }[] = [];
@@ -400,7 +410,7 @@ async function main() {
       spentUsdMicros += costUsdMicros;
       const validation = call.kind === "ok" ? validateVisionDraft(call.raw) : null;
       const rows: DraftRow[] = validation?.ok ? validation.items.map((item) => ({ ...item, priceSgdCents: item.priceSgdCents === null ? null : Number(item.priceSgdCents) })) : [];
-      const scored = scoreDraft(photo.entries, rows);
+      const scored = scoreDraft(photo.entries, rows, { nameOnlyWhenUnique: round >= 3 });
       runs.push({
         model,
         photo: photo.id,
