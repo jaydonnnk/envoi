@@ -548,11 +548,6 @@ export const operatorGrants = pgTable(
 // attempt, written by admission and closed once. It holds counts, usage, timings and a fingerprint
 // of the validated result, never an image byte, image hash, URL or file name. Expiry is derived on
 // read from deadline_at; nothing ever writes "expired".
-export const MENU_IMPORT_CLOSED_OUTCOMES = [
-  "completed", "conflict_base_revision", "conflict_confirmed", "membership_revoked",
-  "rejected_upload", "rejected_photo", "model_failed", "model_timeout", "output_invalid", "aborted",
-] as const;
-
 export const menuImports = pgTable(
   "menu_imports",
   {
