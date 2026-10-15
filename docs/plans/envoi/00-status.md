@@ -89,7 +89,7 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [x] S6 - Merchant sign-in and manual menu draft; done 2026-10-14.
 - [x] S5 - Maintenance runner, manual runs, operator health view behind the operator guard; built after S6, whose sign-in it needs; done 2026-10-14.
 - [x] S7 - Merchant destination and publication, with stale-review invalidation and the PayPal basket lock at review creation and inside `paypal/start`; done 2026-10-14.
-- [x] S8 - Merchant orders and separate acknowledgment; done 2026-10-15.
+- [x] S8 - Merchant orders and separate acknowledgment; done 2026-10-15; review fixes the same day.
 - [ ] S11 - Menu photo import with direct vision, merged from the earlier S11 and S12, with the pre-registered vision evaluation and the real-photo exit decision, followed by the PYUSD go/no-go.
 - [ ] S9 - Merchant SGQR decode and identifier mapping.
 - [ ] S10 - Buyer scan or paste; second in the cut order.
@@ -117,6 +117,7 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
   2. The acknowledge path names no outlet, so its single guard is `requireMerchantMembership` and `acknowledgeOrder` scopes the order to the caller's live memberships; an order of another outlet answers `not_found` exactly like a missing one.
   3. The receipt keeps Gate 3's `polling stops at a terminal state`, so an acknowledgment made after the receipt shows Paid appears on reload, and the card says so.
   4. The orders list includes every purchase of the outlet, open and closed reviews too, each labeled not paid, rather than only purchases that reached PayPal.
+     Reversed by the [S8 review fixes](#s8-review-fixes-2026-10-15): the list holds only purchases that reached a payment, paged with `before`.
 - **Tests [verified], 2026-10-15:** typecheck, lint and 207 of 207 tests pass, up from 202.
   Counted from `git diff`, five tests are new: the Gate 4 additions `acknowledgment requires a verified payment` and `acknowledgment never changes payment state`, and beyond the plan `the orders list shows only the outlet's orders, with states derived on read`, `a merchant reaches only its own outlets' orders` (`tests/integration/merchant-orders.test.ts`) and `merchant orders polling stays within the S3 bounds` (`tests/unit/merchant-orders-polling.test.ts`), which asserts the literals 2,000 and 60,000 ms.
   The S6 authorization tests in `tests/integration/merchant-draft.test.ts` now also send both S8 routes and check that no acknowledgment is written.
@@ -136,6 +137,38 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
   One change: `ORDERS_LIMIT` was exported but used only in `orders.ts`, and is now module-private.
   Kept with rationale: `src/app/merchant/orders/polling.ts` imports `isTerminalPurchaseState` from the receipt's polling module, so both views share one terminal set; and `polling-interval` and `polling-limit` also fail S3's receipt polling test, because both views share the one bounded poller, so each consumer's test proves its own use of the bounds.
 - **Not changed:** the two uncertain S2 purchases at "Lorong Demo Kopi" stay as they are (user's choice, 2026-10-13); `postJson` still rejects on a network failure (carried over); `assertSameOrigin` stays with S11, so the S8 write route relies on SameSite=Lax until then.
+
+### S8 review fixes, 2026-10-15
+
+- **Review:** an independent review of S8 on 2026-10-15 gave the verdict ISSUES FOUND: one medium defect (M1), three minor findings (m1-m3) and two low ones (m4, m5); it reproduced S8's 207 of 207 tests and 12 of 12 mutations on `71fb31a` with a clean tree.
+  The user's words: "Give the verdict and if there are medium to major findings / issues, let me know and fix them."
+  M1 and m1-m3 are fixed; m4 and m5 stay as they are.
+- **Branch:** `envoi/slice-8-review-fixes`, from `main` at `71fb31a`; commits `b0525ce` (M1), `3ce1b21` (m1, m2), `aab3459` (tests and mutation definitions), then this record.
+- **Authorizations, 2026-10-15:** the user's words above covered the branch, the edits and local runs; then, in their words: "I authorize: commit the S8 review fixes, record them in 00-status.md, push the branch, fast-forward main and push, which deploys."
+  No migration and no Neon read or write: the fixes change no schema.
+- **M1, a buyer could hide every paid order from the merchant [fixed]:** the orders list held the outlet's 50 newest purchases of any state, with no pagination and no sign of truncation.
+  On a local production build, one anonymous session opened 50 reviews through `POST /api/v1/purchases` in seconds (all 201), and `/merchant/orders` then showed 50 "The buyer is still reviewing" cards and none of the paid, pending and uncertain orders: no "Paid" chip and no "Acknowledge order" button; expired reviews kept counting, so the orders never came back.
+  `listOutletOrders` (`src/domain/purchases/orders.ts`) now lists only purchases that reached a payment (`pending_payment`, `paid`, `uncertain`, `unpaid_closed`), 50 to a page, and `GET /api/v1/merchant/outlets/{id}/orders?before=<order id>` reads the page before that order, compared in SQL at the database's timestamp precision; the answer carries `nextBefore`, and a `before` that is not one of the outlet's orders answers `validation_failed` reason `unknown_before`.
+  The view merges each poll's newest page into the orders shown and never drops one, adds older pages without repeating one, and shows "Show older orders" until it has loaded the oldest page.
+  This reverses S8's recorded deviation 4: a review that never started a payment moved no money and is not an order, as the Gate 1 mockup's "What belongs here" says.
+- **m1, an approved order read as not approved [fixed]:** a `pending_payment` order whose attempt is `externally_approved` said "The buyer has not approved this payment in PayPal."; it now says "The buyer approved in PayPal, but the payment has not been captured. Nothing has been charged yet."
+- **m2, a check nothing runs [fixed]:** "Checking payment" said "Envoi is checking it", but no maintenance run is scheduled before S15 and the merchant view only reads stored state; it now says "PayPal has not confirmed this payment, so it is not paid. Its result is not known yet; do not treat it as paid unless it shows Paid."
+- **m3, the orders read's touch was unproven [fixed]:** removing the store of derived transitions from `listOutletOrders` passed every test; the derived-on-read test now checks the stored purchase and attempt after the read.
+- **m4 and m5, not changed:** showing `captureId` beside an unpaid order and dropping the acknowledgment's `FOR UPDATE` each passed every test, but `captureId` is written only on a confirmed capture, and two racing acknowledgments of one paid order would only add a second audit row.
+- **Review answers with no finding:** the orders read writes each row once, when it first reads it past its deadline, like the four existing read paths; a database check tying acknowledgment to `paid` was not added, because it would make the Gate 4 mutation `ack-writes-state` fail on a database error instead of an AssertionError; a membership revoked during an acknowledgment has the same window as every guard; no order field leaks buyer identity, an approval URL or another outlet; Better Auth's default `SameSite=Lax` cookie stands in for `assertSameOrigin` until S11.
+- **Runner defect found and fixed:** `s8-mutate.py` writes the first edit of a definition before checking the next one, so a definition whose later text no longer matches leaves a file mutated; that happened once to the orders route during this review and was restored by hand.
+  `s8-review-fixes-mutate.py` checks every edit before writing any file; `s8-mutate.py` stays as the record of its run.
+- **Tests [verified], 2026-10-15:** typecheck, lint and 210 of 210 tests pass, up from 207.
+  Counted from `git diff`, three tests are new: `a paid order stays reachable however many orders follow it` (`tests/integration/merchant-orders.test.ts`), `the orders view never drops an order it has shown` (`tests/unit/merchant-orders-polling.test.ts`) and `an unpaid order's status claims nothing that has not happened` (`tests/unit/merchant-order-copy.test.ts`); `the orders list shows only the outlet's orders, with states derived on read` now also checks the stored states.
+- **Mutations [verified], 12 of 12,** by [`s8-review-fixes-mutate.py`](evidence/s8-review-fixes-mutate.py) with [`s8-review-fixes-mutation-defs.json`](evidence/s8-review-fixes-mutation-defs.json), results in [`s8-review-fixes-mutations.json`](evidence/s8-review-fixes-mutations.json), on `aab3459` with a clean tree: each fails its named test on an AssertionError, is restored byte-identical and passes on rerun.
+  They are `orders-list-reviews`, `orders-no-next`, `orders-before-ignored`, `orders-cursor-any-state`, `orders-cursor-any-outlet`, `list-no-touch`, `view-drops-shown`, `view-repeats-older`, `copy-approved-not-approved`, `copy-promises-check`, and `orders-list-any-outlet` and `orders-route-account-guard`, the two S8 definitions whose text the fixes rewrote, redefined on the new code.
+  The other 10 S8 definitions rerun on `aab3459` prove 10 of 10 ([`s8-review-fixes-s8-rerun.json`](evidence/s8-review-fixes-s8-rerun.json)); that run records `uncommitted_changes` true only because the untracked results file above existed.
+- **Local browser check [verified], 2026-10-15,** on `next build` and `next start` at `http://localhost:3100` against a disposable PostgreSQL 18 database, with FIXTURE PayPal credentials, through `.maintenance-build/s8-helper.mts`: with the 50 flood reviews, the page showed the four real orders and one "Acknowledge order"; after the 50 reviews were written as FIXTURE PayPal orders the buyer had not approved, the page showed 50 orders and "Show older orders", one click added the other four, ending with the paid order, the button disappeared and stayed gone while polling ran, and "Acknowledge order" turned that row to "Acknowledged" with "Paid" unchanged.
+  A FIXTURE `externally_approved` attempt read "The buyer approved in PayPal, but the payment has not been captured. Nothing has been charged yet."
+  A defect in the first fix was found there and fixed before commit: polls re-showed "Show older orders" after the list was complete.
+  At 375px and at desktop width there is no horizontal scroll (`scrollWidth` 375 at 375px) and the "Test environment" badge, the demo-fixture and sandbox labels show; screenshots were inspected, not saved.
+- **Render [verified], 2026-10-15, as an anonymous visitor before the fixes:** `/merchant/orders` shows only "Sign in to see your orders" and the "Test environment" badge, and both S8 API routes answer 401 `unauthorized`, also with a foreign `Origin`.
+- **Not changed:** `postJson` still rejects on a network failure (carried over); a poll that read the list before an acknowledgment committed may show the order unacknowledged until the next poll **[hypothesis, not reproduced]**.
 
 ### S7 Merchant destination and publication, 2026-10-14
 

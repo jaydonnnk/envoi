@@ -1,0 +1,176 @@
+{
+ "branch": "envoi/slice-8-review-fixes",
+ "base_commit": "aab3459",
+ "uncommitted_changes": false,
+ "method": "Each definition in s8-review-fixes-mutation-defs.json applied alone by exact text replacement, its named test run alone (vitest -t), every touched file restored and compared by SHA-256, then the test rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations; merchant accounts are created by the operator functions with passwords generated in memory per run, and their FIXTURE shops are published through the real merchant routes. PayPal is the labeled FIXTURE fake at the PayPalWriteClient boundary. A proof also needs the mutated run to fail on an AssertionError.",
+ "results": [
+  {
+   "id": "orders-list-reviews",
+   "test": "a paid order stays reachable however many orders follow it",
+   "files": [
+    "src/domain/purchases/orders.ts"
+   ],
+   "mutation": "List every purchase of the outlet again, reviews that never started a payment included (M1).",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected [ \u2026(50) ] to deeply equal [ \u2026(50) ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "orders-list-any-outlet",
+   "test": "a paid order stays reachable however many orders follow it",
+   "files": [
+    "src/domain/purchases/orders.ts"
+   ],
+   "mutation": "List purchases of every outlet instead of this outlet (the S8 list-any-outlet mutation on the rewritten query).",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected [ \u2026(3) ] to deeply equal [ \u2026(2) ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "orders-no-next",
+   "test": "a paid order stays reachable however many orders follow it",
+   "files": [
+    "src/domain/purchases/orders.ts"
+   ],
+   "mutation": "Never name an older page, so orders past the newest 50 are out of reach (M1).",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected null to be 'pur_ykpa6prjd2foobkji7qg6rt4va' // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "orders-before-ignored",
+   "test": "a paid order stays reachable however many orders follow it",
+   "files": [
+    "src/domain/purchases/orders.ts"
+   ],
+   "mutation": "Ignore before, so every page is the newest page (M1).",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected [ \u2026(50) ] to deeply equal [ \u2026(2) ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "orders-cursor-any-state",
+   "test": "a paid order stays reachable however many orders follow it",
+   "files": [
+    "src/domain/purchases/orders.ts"
+   ],
+   "mutation": "Accept a review that never started a payment as the cursor (M1).",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected 200 to be 400 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "orders-cursor-any-outlet",
+   "test": "a paid order stays reachable however many orders follow it",
+   "files": [
+    "src/domain/purchases/orders.ts"
+   ],
+   "mutation": "Accept another outlet's order as the cursor (M1).",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected 200 to be 400 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "list-no-touch",
+   "test": "the orders list shows only the outlet's orders, with states derived on read",
+   "files": [
+    "src/domain/purchases/orders.ts"
+   ],
+   "mutation": "Show the derived states without storing them (m3).",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected 'pending_payment' to be 'unpaid_closed' // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "orders-route-account-guard",
+   "test": "a merchant reaches only its own outlets' orders",
+   "files": [
+    "src/app/api/v1/merchant/outlets/[id]/orders/route.ts"
+   ],
+   "mutation": "Guard the orders route with any merchant account instead of the outlet's membership (the S8 mutation on the rewritten route).",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected 200 to be 403 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "view-drops-shown",
+   "test": "the orders view never drops an order it has shown",
+   "files": [
+    "src/app/merchant/orders/polling.ts"
+   ],
+   "mutation": "Replace the orders shown with the polled newest page (M1).",
+   "mutated": "Tests  1 failed | 1 skipped (2)",
+   "error": "AssertionError: expected [ { id: 'pur_d', \u2026(3) }, \u2026(2) ] to deeply equal [ { id: 'pur_d', \u2026(3) }, \u2026(3) ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 1 skipped (2)",
+   "proof": true
+  },
+  {
+   "id": "view-repeats-older",
+   "test": "the orders view never drops an order it has shown",
+   "files": [
+    "src/app/merchant/orders/polling.ts"
+   ],
+   "mutation": "Append an older page without removing orders already shown (M1).",
+   "mutated": "Tests  1 failed | 1 skipped (2)",
+   "error": "AssertionError: expected [ { id: 'pur_c', \u2026(3) }, \u2026(4) ] to deeply equal [ { id: 'pur_c', \u2026(3) }, \u2026(3) ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 1 skipped (2)",
+   "proof": true
+  },
+  {
+   "id": "copy-approved-not-approved",
+   "test": "an unpaid order's status claims nothing that has not happened",
+   "files": [
+    "src/app/merchant/orders/order-copy.ts"
+   ],
+   "mutation": "Drop the approved-in-PayPal status, so an approved order reads as not approved (m1).",
+   "mutated": "Tests  1 failed (1)",
+   "error": "AssertionError: expected { chip: 'Not paid yet', \u2026(2) } to deeply equal { chip: 'Not paid yet', \u2026(2) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed (1)",
+   "proof": true
+  },
+  {
+   "id": "copy-promises-check",
+   "test": "an unpaid order's status claims nothing that has not happened",
+   "files": [
+    "src/app/merchant/orders/order-copy.ts"
+   ],
+   "mutation": "Restore the claim that Envoi is checking the payment (m2).",
+   "mutated": "Tests  1 failed (1)",
+   "error": "AssertionError: expected { chip: 'Checking payment', \u2026(2) } to deeply equal { chip: 'Checking payment', \u2026(2) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed (1)",
+   "proof": true
+  }
+ ]
+}
