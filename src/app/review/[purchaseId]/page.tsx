@@ -88,14 +88,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ purchas
             </div>
           </section>
           {payable ? (
-            <section className="card" aria-labelledby="pay-heading">
-              <h2 id="pay-heading">Approve in PayPal</h2>
-              <p className="muted">
-                This review is valid until {SINGAPORE_CLOCK.format(purchase.reviewExpiresAt)} Singapore time. You approve the exact amount in PayPal&apos;s sandbox; Envoi charges nothing before
-                that.
-              </p>
-              <ContinueToPayPal purchaseId={purchase.id} outletId={purchase.outletId} />
-            </section>
+            <ContinueToPayPal purchaseId={purchase.id} outletId={purchase.outletId} validUntil={SINGAPORE_CLOCK.format(purchase.reviewExpiresAt)} />
           ) : (
             <section className="card warning" aria-labelledby="closed-heading">
               <h2 id="closed-heading">{purchase.view.state === "paid" ? "Already paid" : "Payment cannot start here"}</h2>

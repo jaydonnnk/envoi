@@ -222,9 +222,11 @@ function PublishCard({ outlet, onPublished }: { outlet: MerchantOutlet; onPublis
               );
             })}
           </ul>
-          <button className="button full" type="button" onClick={publish} disabled={!ready || busy}>
-            {busy ? "Publishing" : outlet.published ? "Publish this new version" : "Publish shop"}
-          </button>
+          <div className="actions">
+            <button className="button" type="button" onClick={publish} disabled={!ready || busy}>
+              {busy ? "Publishing" : outlet.published ? "Publish this new version" : "Publish shop"}
+            </button>
+          </div>
         </>
       )}
       {outlet.published && (

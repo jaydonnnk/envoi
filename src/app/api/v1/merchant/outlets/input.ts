@@ -39,7 +39,6 @@ export const draftBody = z.object({
 
 export const confirmBody = z.object({ revisionId: id, version: z.number().int().min(1) });
 
-
 // The merchant names the seller id of the connection it selects; only the operator-prepared one is
 // accepted. Nothing else in the body is read.
 export const paypalConnectionBody = z.object({ sellerMerchantId: z.string().trim().min(1).max(64) });

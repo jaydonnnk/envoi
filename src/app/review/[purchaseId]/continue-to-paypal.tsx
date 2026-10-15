@@ -5,11 +5,14 @@ import { postJson } from "@/lib/browser/session";
 
 // Asks the server to create the exact sandbox order, then sends the buyer to PayPal's sandbox
 // approval page. The browser never chooses the amount, payee or link host.
-// A review the shop's republication or connection change closed sends the buyer back to review the
-// basket at the current prices; any other refusal points at the receipt.
-export function ContinueToPayPal({ purchaseId, outletId }: { purchaseId: string; outletId: string }) {
+// A review the shop's republication or connection change closed turns this card into the closed
+// card a reload shows, sending the buyer back to review the basket at the current prices; any other
+// refusal points at the receipt.
+export function ContinueToPayPal({ purchaseId, outletId, validUntil }: { purchaseId: string; outletId: string; validUntil: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<{ message: string; reviewAgain: boolean } | null>(null);
+  const receiptHref = `/receipt/${encodeURIComponent(purchaseId)}`;
+  const reviewAgainHref = `/buy?outlet=${encodeURIComponent(outletId)}`;
 
   async function start() {
     setBusy(true);
@@ -23,21 +26,35 @@ export function ContinueToPayPal({ purchaseId, outletId }: { purchaseId: string;
     setBusy(false);
   }
 
+  if (error?.reviewAgain) {
+    return (
+      <section className="card warning" aria-labelledby="closed-heading">
+        <h2 id="closed-heading">Payment cannot start here</h2>
+        <p role="alert">{error.message}</p>
+        <div className="actions">
+          <a className="button" href={receiptHref}>
+            See the receipt
+          </a>
+          <a className="button secondary" href={reviewAgainHref}>
+            Review the basket again
+          </a>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <>
-      <button className="button full" type="button" onClick={start} disabled={busy || error?.reviewAgain === true}>
+    <section className="card" aria-labelledby="pay-heading">
+      <h2 id="pay-heading">Approve in PayPal</h2>
+      <p className="muted">This review is valid until {validUntil} Singapore time. You approve the exact amount in PayPal&apos;s sandbox; Envoi charges nothing before that.</p>
+      <button className="button full" type="button" onClick={start} disabled={busy}>
         {busy ? "Opening PayPal…" : "Continue to PayPal"}
       </button>
       {error && (
         <p className="error" role="alert">
-          {error.message}{" "}
-          {error.reviewAgain ? (
-            <a href={`/buy?outlet=${encodeURIComponent(outletId)}`}>Review the basket again</a>
-          ) : (
-            <a href={`/receipt/${encodeURIComponent(purchaseId)}`}>See the receipt</a>
-          )}
+          {error.message} <a href={receiptHref}>See the receipt</a>
         </p>
       )}
-    </>
+    </section>
   );
 }
