@@ -77,8 +77,8 @@ Updated: 2026-10-15 (Asia/Singapore).
 
 Build order from `04-slices.md`, revised and approved 2026-10-12.
 Slice IDs are stable names, so the list below is in build order rather than numeric order; S12 is retired, merged into S11.
-S1, S2, S3, S4, S13, S6, S5 and S7 are done; every later slice starts only on an explicit authorization that names its slice ID, such as "start S13"; a number in that request is the slice ID, not a build position.
-The application is deployed on Render Free from `main` with the S2 PayPal sandbox payment, S3's recovery, reconcile and verified webhook inbox, S4's text suggestions through OpenAI `gpt-6-luna`, S13's agent handoff over MCP, S6's merchant sign-in and menu draft, S5's operator health view, and S7's publication, with Test Shop published from the user's demo merchant account; the S5 maintenance runner runs locally only; no other sponsor integration exists.
+S1, S2, S3, S4, S13, S6, S5, S7 and S8 are done; every later slice starts only on an explicit authorization that names its slice ID, such as "start S13"; a number in that request is the slice ID, not a build position.
+The application is deployed on Render Free from `main` with the S2 PayPal sandbox payment, S3's recovery, reconcile and verified webhook inbox, S4's text suggestions through OpenAI `gpt-6-luna`, S13's agent handoff over MCP, S6's merchant sign-in and menu draft, S5's operator health view, S7's publication, with Test Shop published from the user's demo merchant account, and S8's merchant orders and separate acknowledgment; the S5 maintenance runner runs locally only; no other sponsor integration exists.
 The candidate list in `roadmap.md` remains discussion material and is superseded as a build order by `04-slices.md` once that is approved.
 
 - [x] S1 - Tracer bullet on Render Free: labeled demo shop from Neon to an explicitly unpaid stub receipt; boot check, auth schema pin, R12 latency measurement.
@@ -89,7 +89,7 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [x] S6 - Merchant sign-in and manual menu draft; done 2026-10-14.
 - [x] S5 - Maintenance runner, manual runs, operator health view behind the operator guard; built after S6, whose sign-in it needs; done 2026-10-14.
 - [x] S7 - Merchant destination and publication, with stale-review invalidation and the PayPal basket lock at review creation and inside `paypal/start`; done 2026-10-14.
-- [ ] S8 - Merchant orders and separate acknowledgment.
+- [x] S8 - Merchant orders and separate acknowledgment; done 2026-10-15.
 - [ ] S11 - Menu photo import with direct vision, merged from the earlier S11 and S12, with the pre-registered vision evaluation and the real-photo exit decision, followed by the PYUSD go/no-go.
 - [ ] S9 - Merchant SGQR decode and identifier mapping.
 - [ ] S10 - Buyer scan or paste; second in the cut order.
@@ -97,6 +97,45 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [ ] S17 - PYUSD recovery, extra transfers and the operator mismatch and refund acts.
 - [ ] S14 - APIMatic client and docs, account-conditional; third in the cut order.
 - [ ] S15 - Judged release.
+
+### S8 Merchant orders and separate acknowledgment, 2026-10-15
+
+- **Branch:** `envoi/slice-8-orders`, from `main` at `c07dcee`; commits `f2f7363` (migration 0019, the orders and acknowledge routes, acknowledgment on the buyer read), `9bc1cb0` (merchant orders page, receipt card, shared bounded poller), `1e1e61c` (tests and mutation definitions), `35e4000` (mutation results and the Neon record), then this record.
+  `35e4000` was fast-forwarded into `main` and pushed; CI passed on it on both `main` (run 38666573177) and the branch (run 38666568936); Render serves the S8 routes (an unauthenticated `POST /api/v1/merchant/orders/{id}/acknowledge` answers 401 `unauthorized` instead of the catch-all 404).
+- **Authorizations, 2026-10-15:** the user started S8 and granted, in their words: "Start S8. I authorize: apply the S8 migrations to Neon with READ ONLY reads before and after, commit and push envoi/slice-8-orders, and fast-forward main and push, which deploys."
+  The user signed in as the demo merchant on Render and clicked "Acknowledge order" on the paid order themselves.
+- **Built:** `GET /api/v1/merchant/outlets/{id}/orders` (`src/domain/purchases/orders.ts`, `listOutletOrders`), guarded by `requireOutletMembership`, lists the outlet's 50 newest purchases with the state from `derivePurchaseView`, so a never-approved PayPal order past `T_REVIEW` reads `unpaid_closed` with no maintenance run; the read is a touch and stores those transitions, as Gate 3's "next touch" rule says.
+  Capture evidence is shown only beside `paid`.
+  `POST /api/v1/merchant/orders/{id}/acknowledge` (`acknowledgeOrder`) locks the purchase joined to a live membership of the caller for its outlet, refuses anything but stored `paid`, writes only `acknowledged_at` and `acknowledged_by_user_id`, audits `order_acknowledged`, and repeats unchanged.
+  `GET /api/v1/purchases/{id}` gains `acknowledgment`, its own field beside `state`.
+  `/merchant/orders` shows each order's payment chip ("Paid", "Checking payment", "Not paid yet", "Not paid"), a separate "Shop acknowledgment" row, "Acknowledge order" only on a paid unacknowledged order and a disabled "Acknowledge after confirmed payment" on an order that may still be paid; `/merchant/setup` links to it with "See orders".
+  A paid receipt has a "Shop acknowledgment" card, "Awaiting the shop" or "Acknowledged" with the time, which says acknowledgment never changes the paid status.
+  Merchant polling uses the S3 bounds, 2 seconds for at most 60, through `startBoundedPolling` (`src/lib/browser/polling.ts`), now shared with the receipt; it stops once every listed order is terminal, and "Check for new orders" starts a fresh bounded run.
+  Migration 0019 adds the two columns, a check that both are set or neither, an index on `(outlet_id, created_at)` and, under D7, `GRANT UPDATE ("acknowledged_at", "acknowledged_by_user_id")` on `purchases` to the web role.
+- **Decisions where Gate 3 is silent, recorded as deviations, not decision changes:**
+  1. An unpaid acknowledgment answers `validation_failed` with reason `payment_not_verified` and the derived `state`, because Gate 3's `ErrorCode` has no closer code; adding one would reopen Gate 3.
+  2. The acknowledge path names no outlet, so its single guard is `requireMerchantMembership` and `acknowledgeOrder` scopes the order to the caller's live memberships; an order of another outlet answers `not_found` exactly like a missing one.
+  3. The receipt keeps Gate 3's `polling stops at a terminal state`, so an acknowledgment made after the receipt shows Paid appears on reload, and the card says so.
+  4. The orders list includes every purchase of the outlet, open and closed reviews too, each labeled not paid, rather than only purchases that reached PayPal.
+- **Tests [verified], 2026-10-15:** typecheck, lint and 207 of 207 tests pass, up from 202.
+  Counted from `git diff`, five tests are new: the Gate 4 additions `acknowledgment requires a verified payment` and `acknowledgment never changes payment state`, and beyond the plan `the orders list shows only the outlet's orders, with states derived on read`, `a merchant reaches only its own outlets' orders` (`tests/integration/merchant-orders.test.ts`) and `merchant orders polling stays within the S3 bounds` (`tests/unit/merchant-orders-polling.test.ts`), which asserts the literals 2,000 and 60,000 ms.
+  The S6 authorization tests in `tests/integration/merchant-draft.test.ts` now also send both S8 routes and check that no acknowledgment is written.
+- **Mutations [verified], 12 of 12,** by [`s8-mutate.py`](evidence/s8-mutate.py) with [`s8-mutation-defs.json`](evidence/s8-mutation-defs.json), results in [`s8-mutations.json`](evidence/s8-mutations.json), on `1e1e61c` with a clean tree: each fails its named test on an AssertionError, is restored byte-identical and passes on rerun.
+  The Gate 4 mutations are `ack-allows-pending` and `ack-writes-state`; the others are `ack-repeat-rewrites`, `receipt-without-acknowledgment`, `list-any-outlet`, `list-stored-state`, `ack-any-member`, `ack-revoked-member`, `orders-route-account-guard`, `polling-never-done`, `polling-interval` and `polling-limit`.
+- **Local browser check [verified], 2026-10-15,** on `next build` and `next start` at `http://localhost:3100` against a disposable PostgreSQL 18 database, with FIXTURE PayPal credentials and seller `FXTRSELLER2AB`: a merchant published "FIXTURE Orders Kopi" through the real routes; four buyer reviews were opened through the real buyer route, and, because FIXTURE credentials cannot reach PayPal, their outcomes were written as the superuser and labeled FIXTURE (paid, pending inside `T_REVIEW`, uncertain, never approved past `T_REVIEW`).
+  The orders page showed "Paid", "Not paid yet", "Checking payment" and "Not paid: Closed without a payment"; acknowledging each unpaid order from the merchant's browser answered 400 `payment_not_verified`; "Acknowledge order" on the paid one turned its row to "Acknowledged" with the payment chip still "Paid"; the buyer's receipt showed "Paid" and, in its own card, "Acknowledged", and before acknowledgment "Awaiting the shop".
+  Screens at 390px and 1280px carry the "Test environment" badge, the demo-fixture and sandbox labels, and no horizontal scroll (`scrollWidth` 390 at 390px); two defects found there were fixed before commit (a single-column order list at desktop width, now two columns, and a stray divider under the acknowledgment note). Screenshots were inspected, not saved.
+- **Neon [verified], 2026-10-15, every read in a `READ ONLY` transaction,** in [`s8-neon.json`](evidence/s8-neon.json): before, 19 migrations, no acknowledgment columns, web-role `UPDATE` on `purchases` only on `state`; purchases paid 4, pending_payment 2, review_expired 1, review_open 6, uncertain 2, unpaid_closed 2; the five triggers enabled.
+  Migration 0019 was applied with `npm run db:migrate`; after, 20 migrations, both columns, the check, the foreign key and the index, web-role `UPDATE` on `acknowledged_at`, `acknowledged_by_user_id` and `state`, the same purchases and triggers, and no purchase acknowledged; no `neon_auth` read.
+- **Render [verified on Neon], 2026-10-15:** the user signed in as the demo merchant in the browser pane; `/merchant/orders` listed Test Shop's four orders: `pur_qhslqa5ms3ycea7ntznashejoy` "Paid" with capture `1SG19856AA424411S`, `pur_f3znbc6ctluxd3tvgdcmwvicj4` and `pur_4beph5hewgnfzliwaga6gdpfze` "Not paid: Closed without a payment", and `pur_7mmw4zyfpdmh7zoxt6kew27e5e` "Not paid: The review expired before any payment started"; the same widths and labels held.
+  Acknowledging each of the three unpaid orders from that session answered 400 `validation_failed` reason `payment_not_verified`; the user then acknowledged the paid order and its row read "Acknowledged" with "Paid" unchanged.
+  A third READ ONLY read shows `pur_qhslqa5ms3ycea7ntznashejoy` still `paid` with `capture_confirmed` and acknowledged, no other purchase acknowledged, and the list's touch storing the derived states: the two never-approved orders `unpaid_closed` with `abandoned` attempts and the old review `review_expired`.
+- **Render receipt, user-reported, 2026-10-15:** the user opened `https://envoi-helx.onrender.com/receipt/pur_qhslqa5ms3ycea7ntznashejoy` in the browser that paid it and reported that it shows Paid and, in its own card, Acknowledged; Neon's READ ONLY read above backs the stored states it reads.
+- **Gate checks [verified], 2026-10-15:** `python3 -I docs/plans/envoi/checks/gate4_check.py docs/plans/envoi . 5f6ab39` passes and `gate4_prove.py` with a scratch work folder gives 70/70; `03-program-design.md` keeps SHA256 `98e6ac375bb2a99988304eea8eeea37c4a0a44556e6a39768cefd6d20cb5b3ad`.
+- **Post-slice cleanup (architect-reviewer), 2026-10-15:** no orphan, stale fixture, skipped test or scratch file in the tree; every new module, route, style and test is referenced.
+  One change: `ORDERS_LIMIT` was exported but used only in `orders.ts`, and is now module-private.
+  Kept with rationale: `src/app/merchant/orders/polling.ts` imports `isTerminalPurchaseState` from the receipt's polling module, so both views share one terminal set; and `polling-interval` and `polling-limit` also fail S3's receipt polling test, because both views share the one bounded poller, so each consumer's test proves its own use of the bounds.
+- **Not changed:** the two uncertain S2 purchases at "Lorong Demo Kopi" stay as they are (user's choice, 2026-10-13); `postJson` still rejects on a network failure (carried over); `assertSameOrigin` stays with S11, so the S8 write route relies on SameSite=Lax until then.
 
 ### S7 Merchant destination and publication, 2026-10-14
 

@@ -10,7 +10,7 @@ import { appError, type AppError } from "@/lib/errors";
 // abandoned PayPal approval reads unpaid_closed before any maintenance run. Acknowledgment is its own
 // field: it is allowed only on a paid order and never writes the payment state.
 
-export const ORDERS_LIMIT = 50;
+const ORDERS_LIMIT = 50;
 
 export type MerchantOrder = {
   id: string;
