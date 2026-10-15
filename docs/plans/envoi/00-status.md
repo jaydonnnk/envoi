@@ -6,8 +6,11 @@ Updated: 2026-10-15 (Asia/Singapore).
 - Gate 2 - Architecture: **RE-APPROVED 2026-10-11** by the user ("gate 2 approved") after being reopened and revised on 2026-10-10 and revised again after a 2026-10-11 review. Approval covers only the direct vision import and PYUSD amendment in `02-architecture.md`, including the five review changes; the OpenAI/provider pin and all unaffected 2026-10-07 decisions stand. It accepts a proposal, not runtime/account proof. Previously **APPROVED 2026-10-07**.
   **Reopened again and RE-APPROVED 2026-10-11** for two PYUSD double-payment fixes found in the Gate 3 review: the user approved the fixes in advance ("reopen gate 2 and approve the fixes i approve it already").
   Preparation releases the unsigned bytes exactly once and never stores them, and the post-expiry window scan runs for every released attempt and records any extra transfer; see the [record](#gate-2-reopening-for-double-payment-fixes-2026-10-11).
+  **Reopened and RE-APPROVED 2026-10-15** for one change, approved by the user in advance: menu photos are English only, so the consented test photos and the vision falsifier samples no longer require Chinese text; see the [record](#reopening-2026-10-15-english-only-menu-photos).
 - Gate 3 - Program Design: **RE-APPROVED 2026-10-12** by the user a second time, in advance, for one pin change found by the S1 boot check: `typescript@7.0.2` becomes `typescript@6.0.3`, because `typescript-eslint` refuses TypeScript 7 ("for this change gate 3( i pre approve it)").
   No contract or test changes; see the [reopening record](03-program-design.md#reopening-2026-10-12-typescript-pin-after-the-s1-boot-check) and [Version pins](03-program-design.md#version-pins).
+  **Reopened and RE-APPROVED 2026-10-15** for one change, approved by the user in advance: Chinese text accuracy leaves the R5 vision falsifiers; no contract, type, call stack, clock, test name or test count changes; see the [record](#reopening-2026-10-15-english-only-menu-photos) and [Gate 3's section](03-program-design.md#reopening-2026-10-15-english-only-menu-photos).
+  `03-program-design.md` now has SHA256 `0fd07da57b826bf9fa56431da1b11484bc44e56a6ee4846a0bfa715d76c475ac`, pinned in `checks/gate4_check.py`.
   Before that it was **RE-APPROVED 2026-10-12** by the user ("I approve both pls publish the branches and commit all the changes to main so that we can proceed with the first slice") after a reopening the same day for one change only: PayPal start and completion check `PAYMENTS_ENABLED` and refuse with the new error code `payments_disabled` (Gate 4 delta D10); see the [reopening record](#gate-3-reopening-for-the-paypal-kill-switch-2026-10-12).
   Approval accepts that contract as a proposal; it establishes no runtime evidence.
   Before that it was **RE-APPROVED 2026-10-11** by the user ("Yes approve commit the branch and push and merge to main"), after being reopened on 2026-10-10; the revision of the affected import and PYUSD contracts was drafted on 2026-10-11 and revised the same day after the user's review (fixes A-K) and for fixes L and M after Gate 2 was reopened.
@@ -22,12 +25,28 @@ Updated: 2026-10-15 (Asia/Singapore).
   At approval no slice was authorized or started; S1 started on 2026-10-12 under the user's handover prompt and is done (see [S1](#s1-tracer-bullet-on-render-free-2026-10-12)).
   **Amended 2026-10-14** for one S6 acceptance sentence, confirmed by the user ("I also do conirm the receipt rewording ammendment"): the approved "keeps that receipt readable" became "readable with that session; the browser can no longer open it, disclosed before sign-in".
   Its substance stays within Gate 2's accepted "Clearing the buyer session can lose receipt access; disclose" and Gate 3 finding 5; Gate 3 is unchanged and no other gate reopens.
+  **Reopened and RE-APPROVED 2026-10-15** for one change, approved by the user in advance: S11's evaluation photos are English menus, including rotated and small-price text, without Chinese; see the [record](#reopening-2026-10-15-english-only-menu-photos).
   [`04-slices.md`](04-slices.md) now applies the reopened gates: S11 and S12 merge into S11, menu photo import with direct vision; the Zapier check is gone; S13 runs right after S4; PYUSD is added as S16, devnet purchase, and S17, recovery, after S13 and first in the cut order, with scan (S10) and account-conditional S14 following it.
   It applies the Gate 3 [test delta](03-program-design.md#test-delta-for-the-gate-4-revision): all 92 named tests and 231 cases are assigned once each, the 10 removed names nowhere, and 39 named additions, up from 20: 33 cover contracts with no named test in the slice that builds them, four are refinements of this plan and two are pin falsifiers.
   Proposed beyond the user's instructions and flagged for review: S11 moves ahead of S9 and S10, the PayPal basket lock lands in S7 with its `paypal/start` recheck, the R2 storage-exhaustion decision moves from S11 to S15, a second checkpoint on 1 Nov, a PYUSD go/no-go when S11 is done, delta D8, a static "PYUSD unavailable" option from S2, and delta D9's public-route limits.
   An independent review of the draft on 2026-10-12 found four major issues, and all four are fixed in it; see the [review fixes](#gate-4-review-fixes-2026-10-12).
   Its minor findings are fixed or dispositioned; see the [minor review fixes](#gate-4-minor-review-fixes-2026-10-12).
   The user decided delta D10 on 2026-10-12 by reopening Gate 3 for a PayPal check of `PAYMENTS_ENABLED`, re-approved the same day; S2 builds it and names its test.
+
+### Reopening 2026-10-15: English-only menu photos
+
+- **Decision:** during S11, on 2026-10-15, the user decided that menu photo import covers English menus only for this hackathon: "Chnange the approved plan as well. Just english will do for this hackathon."
+  For the evaluation photo with Chinese beside English: "Photo 5 is fine, js ignore the chinese and only extract the english".
+- **Approval, given in advance:** the user wrote "Please write a handoff prompt for the next agent to change the gates(i approve the changes to remove chinese)" on 2026-10-15, following the precedent of the 2026-10-11 advance approval ("reopen gate 2 and approve the fixes i approve it already").
+  It covers removing the Chinese requirement from Gates 2, 3 and 4 only; blur, rotated, small-price and non-SGD requirements stay, and any other gate change needs its own approval.
+- **Changes:** Gate 2 (`02-architecture.md`): the header, the consented test photos in the request-memory menu boundary, R5's extension and the vision falsifier row; Gate 3 (`03-program-design.md`): the header, a [reopening section](03-program-design.md#reopening-2026-10-15-english-only-menu-photos) and R5's falsifier sentence; Gate 4 (`04-slices.md`): the header, the evaluation-photos access row and S11's R5 paragraph.
+  No contract, type, call stack, clock, test name, test count, slice order or cut order changes.
+- **Pins:** `03-program-design.md` SHA256 moves from `98e6ac375bb2a99988304eea8eeea37c4a0a44556e6a39768cefd6d20cb5b3ad` to `0fd07da57b826bf9fa56431da1b11484bc44e56a6ee4846a0bfa715d76c475ac`, and `02-architecture.md`, protected against the base by R10, gains its own pin `938d0a993ff63fdfc416ea77b5df7c628663c52917dbf149332efdedf3bf30a6`; `gate4_prove.py` adds one planted fault for each pin.
+- **Gate 1 unchanged:** `01-product.md` and the mockups never required Chinese.
+- **Mirrors:** `handoff.md`, `roadmap.md`, `stack-recommendation.md` and `research.md`'s carry-forward list now say English menus; dated research findings and this file's 2026-10-10 evidence list stay as written, as history.
+- [x] User reopened Gates 2, 3 and 4 for this change and approved it in advance, 2026-10-15.
+- [x] Gates 2, 3 and 4 revised, pins moved and mirrors updated.
+- [x] Fail-capable documentary checks run; results are in the [S11 record](#s11-menu-photo-import-with-direct-vision-2026-10-15).
 
 ### Reopening 2026-10-10: Zapier removed
 
@@ -97,6 +116,18 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [ ] S17 - PYUSD recovery, extra transfers and the operator mismatch and refund acts.
 - [ ] S14 - APIMatic client and docs, account-conditional; third in the cut order.
 - [ ] S15 - Judged release.
+
+### S11 Menu photo import with direct vision, 2026-10-15
+
+**In progress** on branch `envoi/slice-11-menu-import`, cut from `main` `a9ac81a`; S11 started on the user's authorization of 2026-10-15.
+
+- **Authorizations, 2026-10-15,** answered by multiple choice, granted items verbatim: "Install sharp"; "Commit on S11 branch" (including the spend ceiling and model bounds as reviewed code constants); "Neon migrations" (`npm run db:migrate` with READ ONLY reads before and after); "Push, ff main, deploy".
+  Ceiling: "US$1/day + eval OK" (`dailyCeilingUsdMicros` 1,000,000; evaluation spend up to US$1 in total). Data sharing: "Yes, no opt-in". Real merchant photos: "Add this as a "Good to have", after we build out the slices."
+  Evaluation photos: "Make do with the photos i provided to u", sent to OpenAI with the user's permission ("Yea permission to send them to openai"), English only by the [2026-10-15 reopening](#reopening-2026-10-15-english-only-menu-photos).
+- **Tests [verified], 2026-10-15:** all 17 Gate 3 named S11 tests exist as 57 cases and pass; the full suite is 267 of 267 (210 + 57) on local PostgreSQL 18, with typecheck and lint clean.
+- **Mutations [verified], 57 of 57,** by [`s11-mutate.py`](evidence/s11-mutate.py) with [`s11-mutation-defs.json`](evidence/s11-mutation-defs.json), results in [`s11-mutations.json`](evidence/s11-mutations.json), on `c1ea909` with a clean tree: each fails its named test on an AssertionError, is restored byte-identical and passes on rerun.
+  The first run, on `e50f5ac`, proved 56 of 57: `dispatch-before-call` failed on a TypeError (a null passed to `toMatch`), which is not a proof; `c1ea909` makes that test fail on an assertion.
+- **Gate checks after the English-only reopening [verified], 2026-10-15:** `python3 -I docs/plans/envoi/checks/gate4_check.py docs/plans/envoi . 5f6ab39` passes, and `gate4_prove.py` with a scratch work folder gives 72/72, up from 70 by the two planted faults for the new Gate 2 pin and the moved Gate 3 pin.
 
 ### S8 Merchant orders and separate acknowledgment, 2026-10-15
 
@@ -1207,6 +1238,9 @@ All unaffected risk dispositions stand; the 2026-10-11 Gate 3 revision of the af
   This confirmed the S6 receipt sentence as a Gate 4 amendment: the approved "keeps that receipt readable" became "readable with that session; the browser can no longer open it, disclosed before sign-in", within Gate 2's accepted "Clearing the buyer session can lose receipt access; disclose" and Gate 3 finding 5.
   Gate 3 is unchanged and no other gate reopens.
   It authorized the review fixes and record corrections on a review-fix branch with local runs; it did not authorize committing, pushing, fast-forwarding `main`, deploying or any Neon change.
+- 2026-10-15: during S11 the user decided that menu photos are English only ("Chnange the approved plan as well. Just english will do for this hackathon.") and approved the gate change in advance: "Please write a handoff prompt for the next agent to change the gates(i approve the changes to remove chinese)".
+  This reopened Gates 2, 3 and 4 for removing the Chinese requirement only and re-approved them for it; see the [record](#reopening-2026-10-15-english-only-menu-photos).
+  It authorizes no other gate change.
 
 ### Initial Gate 2 documentary verification, 2026-10-07 (historical, before free-hosting revision)
 

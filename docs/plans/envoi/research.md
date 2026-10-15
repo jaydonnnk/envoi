@@ -371,7 +371,7 @@ Separate `AI_MENU_MODEL` is proposed alongside unchanged `AI_MODEL`/provider/pin
 Phone path is a Phantom Browse link into a fresh wallet-browser review; no cookie sharing, transfer of ownership or broadcast by Envoi.
 PayPal must remain independent.
 
-**[unknown] Carry forward:** model through judging; OpenAI sharing setting and `store: false` effect; Chinese-text draft accuracy; Render latency/decoder RAM and browser shrink on target phones; Phantom token display, chain honoring and blockhash/transfer preservation; phone Browse-link path; user faucet access; RPC shared-IP/history behavior.
+**[unknown] Carry forward:** model through judging; OpenAI sharing setting and `store: false` effect; English small-price and rotated-text draft accuracy (Chinese text dropped from scope on 2026-10-15); Render latency/decoder RAM and browser shrink on target phones; Phantom token display, chain honoring and blockhash/transfer preservation; phone Browse-link path; user faucet access; RPC shared-IP/history behavior.
 R2 narrows to general storage exhaustion; R6 expands to RAM/CPU; image-churn R7 is superseded by mis-sized spend/admission R7a.
 Other approved decisions and risks stand.
 The architecture was re-approved on 2026-10-11; the Gate 3 revision of affected contracts was drafted and re-approved the same day, the Gate 4 draft was revised on 2026-10-12, and no runtime, spend or external-action authority follows from this research.

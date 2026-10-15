@@ -7,6 +7,7 @@ Authorities: [re-approved Gate 1 product](01-product.md), [re-approved Gate 2 ar
 This plan selects and orders runnable slices.
 It changes no approved product or architecture decision.
 Its one contract change, delta D10, is made in Gate 3 itself, which you reopened for it on 2026-10-12.
+**Reopened 2026-10-15 for one change, approved by the user in advance:** S11's menu photos are English only, so its evaluation photos no longer include Chinese text; rotated and small-price text stay. Gates 2 and 3 carry the same change.
 Where a slice needs something Gate 3 did not specify, the gap is named in [Gate 3 deltas](#gate-3-deltas) instead of being decided silently.
 Drafting and revising this plan installed, provisioned, deployed and spent nothing, and it contains no application code.
 
@@ -152,7 +153,7 @@ Each failure could reopen scope, so they belong in the first week even when the 
 | PayPal developer sandbox | S2 | You create a sandbox REST app, a distinct seller sandbox account and a buyer sandbox account, and enter their credentials in `.env.local` and Render. | S2 still runs and is the proof or falsifier of distinct-seller capture. Envoi's own account is never the payee. |
 | OpenAI for text suggestions | S4 | A key with a spend limit you set, plus your authorization for the S4 model evaluation spend. | Text entry keeps manual selection and no AI-suggestion claim is made. |
 | OpenAI for menu vision | S11 | You confirm your organization has no data-sharing opt-in, choose the daily spend ceiling and authorize the S11 vision evaluation spend. At least one candidate model takes image input, supports strict structured output and has no published shutdown before 16 Dec 2026. | Imports stay closed, because they fail closed without a recorded ceiling. Manual entry keeps onboarding usable but is never reported as AI drafting, and Gate 1 menu-import scope reopens. |
-| Evaluation menu photos | S11 | Menu photos you own or have permission to send to OpenAI, including Chinese, rotated and small-price text. | The evaluation cannot run, and no AI-drafting claim is made. |
+| Evaluation menu photos | S11 | English menu photos you own or have permission to send to OpenAI, including rotated and small-price text. | The evaluation cannot run, and no AI-drafting claim is made. |
 | MCP client | S13 | One named client that speaks Streamable HTTP and accepts a custom bearer token. | Gate 2 transport amendment (R10). |
 | Consented SGQR sticker photos | S9 | Authentic stickers photographed with each shop's permission. | Decode results are reported as fixture-only. |
 | Phantom on devnet | S16 | Two Phantom wallets you control, one for the merchant and one for the buyer, on devnet: the desktop extension and the app on each target phone. | PYUSD stays visibly unavailable (R13, R14); PayPal is unaffected. |
@@ -503,7 +504,7 @@ Six of its cases keep names approved on 2026-10-07 and assigned to S12 in the ea
 No additions: Gate 3's 2026-10-11 revision gave every import guard its own case.
 
 **Vision model evaluation (R5).**
-Before the first vision call, the fixture photo set, including Chinese, rotated and small-price text, the expected draft for each photo, the pass threshold and a latency bound are written into `00-status.md`.
+Before the first vision call, the fixture photo set of English menus, including rotated and small-price text, the expected draft for each photo, the pass threshold and a latency bound are written into `00-status.md`.
 Only candidates with image input, strict structured output and no published shutdown before 16 Dec 2026 are run.
 Every result is reported, and the chosen model is recorded as the `AI_MENU_MODEL` value.
 

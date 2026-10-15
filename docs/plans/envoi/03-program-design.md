@@ -2,6 +2,7 @@
 
 **Reopened 2026-10-10; revised 2026-10-11, revised again after the user's review the same day, revised a third time the same day for fixes L and M after Gate 2 was reopened, and RE-APPROVED by the user on 2026-10-11** ("Yes approve commit the branch and push and merge to main").
 **Reopened 2026-10-12 for one change only and RE-APPROVED by the user the same day** ("I approve both pls publish the branches and commit all the changes to main so that we can proceed with the first slice"): PayPal start and completion now check `PAYMENTS_ENABLED` and refuse with a new error code, `payments_disabled`; see [Reopening 2026-10-12](#reopening-2026-10-12-paypal-payments-kill-switch).
+**Reopened 2026-10-15 for one change only, approved by the user in advance:** menu photos are English only, so Chinese text accuracy is no longer an R5 falsifier; see [Reopening 2026-10-15](#reopening-2026-10-15-english-only-menu-photos).
 Approval accepts these contracts as a proposal; it establishes no runtime, account, model, wallet or usability evidence and authorizes no implementation or Gate 4 approval.
 The user removed Zapier because it is paid and reopened Gates 1, 2 and 3.
 Gate 1 was re-approved on 2026-10-10 and Gate 2 on 2026-10-11.
@@ -11,6 +12,13 @@ Every other contract below stays as approved on 2026-10-07.
 See [Revision 2026-10-11](#revision-2026-10-11-direct-vision-and-pyusd), [`00-status.md`](00-status.md#reopening-2026-10-10-zapier-removed) and [`handoff.md`](handoff.md#gate-3-handover-2026-10-11).
 
 Gate 3 program design, 2026-10-07 (Asia/Singapore). **APPROVED by the user 2026-10-07** ("gate 3 is approved"), together with a separate authorization to commit these planning documents and push `main`. Authorities: [approved Gate 1 product](01-product.md) and [approved Gate 2 architecture](02-architecture.md). Approval accepts the contracts below and the disposition of the eight Gate 2 review findings; it establishes no runtime, account, integration or usability evidence, and it does not authorize implementation or Gate 4. A separate, narrowly scoped authorization on the same day covered the R11 flag flip, its redeploy and a read-only schema inspection, all now complete. This document contains contracts only: file map, types and signatures without bodies, call stacks, state transitions, race rules, capacity budgets and named failure tests. No application implementation, no installed application packages and no approved slices exist.
+
+## Reopening 2026-10-15: English-only menu photos
+
+- **Decision:** on 2026-10-15, during S11, the user decided that menu photo import covers English menus only for this hackathon: "Chnange the approved plan as well. Just english will do for this hackathon." For a line printed in English and Chinese: "ignore the chinese and only extract the english".
+- **Change:** Chinese text accuracy leaves the R5 falsifiers in [least confident decisions](#least-confident-decisions); rotated and small-price text accuracy and vision latency stay.
+  No contract, type, call stack, clock, test name or test count changes; the vision prompt's wording is a slice detail under `MENU_VISION_PROMPT_VERSION`.
+- **Approval:** the user reopened Gates 2, 3 and 4 for removing the Chinese requirement only and approved it in advance on 2026-10-15 ("i approve the changes to remove chinese").
 
 ## Reopening 2026-10-12: TypeScript pin after the S1 boot check
 
@@ -2374,7 +2382,7 @@ This revision resolves only what it touches and lists the rest unchanged.
    Gate 2 deferred model choice to a Gate 3 task evaluation, and that evaluation needs an API key and spend that are not authorized.
    The contracts are model-agnostic; the evaluation moves to a named slice with pre-registered criteria, and `AI_MODEL` stays an environment name.
    **Extended 2026-10-11:** `AI_MENU_MODEL` needs its own pre-registered vision evaluation with image and strict-schema support and no published shutdown before 16 Dec 2026.
-   Chinese, rotated and small-price text accuracy and vision latency are falsifiers, and the user has not chosen either model, the daily spend ceiling or the bounds, so imports stay closed until those are recorded.
+   Rotated and small-price text accuracy on English menus and vision latency are falsifiers (Chinese text left them on 2026-10-15), and the user has not chosen either model, the daily spend ceiling or the bounds, so imports stay closed until those are recorded.
 6. **R6 `sharp` is a native dependency on a free ephemeral host.**
    Build time and binary availability on Render Free are unverified.
    If it fails, image normalization must move to a pure-JS decoder with a lower cap, which weakens the metadata-stripping claim and must be disclosed.

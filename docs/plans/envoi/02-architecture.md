@@ -6,6 +6,7 @@ The 2026-10-11 review changed five points: the browser shrinks the menu photo be
 **Reopened again on 2026-10-11 for two PYUSD double-payment fixes found in the Gate 3 review, and RE-APPROVED the same day:** the user approved the fixes in advance ("reopen gate 2 and approve the fixes i approve it already").
 Preparation now releases the unsigned bytes exactly once and never stores them, because a wallet may add different instructions each time it signs ([step 4](#preparation-wallet-broadcast-and-verification)).
 The post-expiry history scan now runs for every released attempt, including a confirmed one, so a second transfer carrying the same reference is recorded and shown instead of going unnoticed ([recovery](#lost-response-recovery-and-rpc)).
+**Reopened 2026-10-15 for one change, approved by the user in advance:** menu photos are English only for this hackathon, so the evaluation and the falsifier samples no longer require Chinese text, and on a line printed in English and another script only the English name is drafted ([consent and evaluation](#request-memory-menu-boundary)).
 Everything else approved on 2026-10-07 stands, including hosting, in-app auth, PayPal recovery, identity-only scan and MCP handoff.
 Gate 1 was re-approved on 2026-10-10; Gate 3 may now revise affected contracts, and Gate 4 waits for Gate 3 re-approval, which the user gave on 2026-10-11.
 See [`00-status.md`](00-status.md#reopening-2026-10-10-zapier-removed) and [`handoff.md`](handoff.md#gate-2-handover-2026-10-10).
@@ -224,7 +225,7 @@ Details:
 
 Before real merchant photos, the user must confirm their OpenAI organization/project has not opted in to data sharing and accept this disclosure.
 Prove on the actual upload/error surfaces that no image is written to disk, database, logs or artifact storage, including an injected base64 needle that the leak scanner detects.
-Begin with explicitly consented test photos, including Chinese text, rotated text, small prices, blur and non-SGD ambiguity.
+Begin with explicitly consented English menu test photos, including rotated text, small prices, blur and non-SGD ambiguity; on a line printed in English and another script, only the English name is drafted (English only since 2026-10-15).
 No zero-retention, physical-erasure or extraction-accuracy claim is established by `store: false`.
 Use a separate proposed `AI_MENU_MODEL` name so vision and text evaluations can choose different models without changing provider or dependency pin.
 The 2026-10-11 re-approval includes that added name; neither model is chosen by this document.
@@ -422,7 +423,7 @@ Residual-risk changes, limited to this amendment:
 - **R2 narrows, does not close:** no image churn/cleanup risk remains, but generic Neon storage exhaustion still blocks purchase, payment evidence, auth and audit writes; there is no proven in-app recovery.
 - **R6 grows, less than first proposed:** `sharp` build/binary compatibility plus decode memory/CPU on 512 MB/0.1 CPU remain unmeasured; the browser shrink bounds server input at 2,048 pixels/side but is not a measurement, and browser decode of large phone photos joins the risk.
 - **R7 image-churn budget closes as superseded:** no source/history byte admission remains; replacement **R7a** is mis-sized daily/in-flight/spend admission, not a demonstrated credit or RAM bound.
-- **R5 extends:** separate text/vision evaluation, Chinese-text/small-price accuracy, request latency and model availability through judging remain open.
+- **R5 extends:** separate text/vision evaluation, small-price accuracy on English menus, request latency and model availability through judging remain open.
 - **PYUSD residuals:** wallet mutation/chain behavior, phone-session continuity, faucet access, mutable mint authorities, RPC shared limits/history completeness and post-broadcast inability to prevent a wrong transfer remain open.
 All other approved residual-risk dispositions, R11 containment and R12 acceptance remain unchanged.
 
@@ -432,7 +433,7 @@ All other approved residual-risk dispositions, R11 containment and R12 acceptanc
 | --- | --- |
 | Distinct seller cannot receive an exact sandbox capture | Actual buyer-approved capture plus provider read matching seller/amount/currency/basket. Stop payment work if permissions/payee coverage fail; revise Gate 2 rather than pay Envoi and call it merchant settlement. |
 | Image retained by Envoi or leaked through SDK errors | Actual request/error/disk/database/log/artifact probes with an injected image/base64 needle; metadata stripping, disconnect, abort, restart and late-result rejection. Stop real-image imports on any leak; `store: false` does not prove upstream erasure. |
-| Vision latency, memory or accuracy fails | Measure on Render Free with cap-sized and consented Chinese/rotated/small-text/blur/non-SGD samples, shrunk by real phone browsers, and concurrent payment traffic; report every result against pre-registered thresholds. Lower caps or revise architecture if needed; manual fallback is not a successful AI import. |
+| Vision latency, memory or accuracy fails | Measure on Render Free with cap-sized and consented English rotated/small-text/blur/non-SGD samples, shrunk by real phone browsers, and concurrent payment traffic; report every result against pre-registered thresholds. Lower caps or revise architecture if needed; manual fallback is not a successful AI import. |
 | Scan identifies the wrong outlet | Authentic approved mappings, unsupported payload rejection and shared-identifier clarification. No uniqueness or automatic accuracy claim from fixtures. Text/manual fallbacks remain visible. |
 | Runtime recovery cannot identify an uncertain charge | Inject lost responses/restarts/duplicate events; converge on the same provider capture or keep blocked/uncertain. No new-charge retry to make the demo finish. |
 | Free recovery or hosting cannot last through judging | Verify Render/Neon/GitHub quotas and zero-spend controls, a finite scheduled run, idle/crash recovery and delayed-job behavior. No reliance on credits, paid fallback or Render's 30-day database. Stop deployment if free capacity is unavailable; amend Gate 2 before changing the topology. [Official rules](https://paypalaihackathon.devpost.com/rules). |

@@ -372,11 +372,14 @@ for f, text in current.items():
             fail("R9", f"{f} current state still reads as unapproved: {l[:90]}")
 
 # R10 protected documents unchanged from the base; 01-product.md may change only its closing status line.
-# 03-program-design.md may instead equal its latest re-approved text, pinned by hash;
+# 02-architecture.md and 03-program-design.md may instead equal their latest re-approved text, pinned by hash;
 # any further edit to it must update this hash on purpose.
 # b24f7986...20688cb4: the PayPal kill-switch reopening, re-approved 2026-10-12.
-# Current: the S1 TypeScript pin reopening, approved in advance by the user on 2026-10-12.
-G3_REOPENING_SHA256 = "98e6ac375bb2a99988304eea8eeea37c4a0a44556e6a39768cefd6d20cb5b3ad"
+# 98e6ac37...76cb5b3ad: the S1 TypeScript pin reopening, approved in advance by the user on 2026-10-12.
+# Current: the English-only menu photo reopening, approved in advance by the user on 2026-10-15.
+G3_REOPENING_SHA256 = "0fd07da57b826bf9fa56431da1b11484bc44e56a6ee4846a0bfa715d76c475ac"
+# 02-architecture.md may likewise equal its English-only reopening text, approved in advance on 2026-10-15.
+G2_REOPENING_SHA256 = "938d0a993ff63fdfc416ea77b5df7c628663c52917dbf149332efdedf3bf30a6"
 for root, _, files in os.walk(folder):
     for name in sorted(files):
         rel = os.path.relpath(os.path.join(root, name), folder)
@@ -385,6 +388,8 @@ for root, _, files in os.walk(folder):
             if data == git_show(f"docs/plans/envoi/{rel}"):
                 continue
             if rel == "03-program-design.md" and hashlib.sha256(data).hexdigest() == G3_REOPENING_SHA256:
+                continue
+            if rel == "02-architecture.md" and hashlib.sha256(data).hexdigest() == G2_REOPENING_SHA256:
                 continue
             fail("R10", f"protected file changed: {rel}")
 b01 = git_show("docs/plans/envoi/01-product.md").decode("utf-8").splitlines()
