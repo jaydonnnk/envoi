@@ -136,6 +136,19 @@ footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; 
 .order-note:last-child { padding-bottom: 0; border-bottom: 0; }
 .card.acknowledgment { margin-top: 18px; }
 
+/* Menu photo import (S11): the notice, the photo kept in this tab and the import actions, set apart
+   from manual entry, which stays available below. */
+.import-panel { border: 1px solid var(--line); border-radius: 10px; background: var(--pale); padding: 16px; margin: 0 0 18px; }
+.import-panel h3 { margin: 0; font-size: 17px; }
+.import-panel .consent p { margin: 10px 0 0; }
+.import-panel details { margin-top: 10px; }
+.import-panel summary { cursor: pointer; color: var(--blue); font-weight: 600; }
+.import-panel input[type="file"] { max-width: 100%; }
+.import-panel .actions { margin-top: 14px; }
+.photo-preview { margin: 14px 0 0; }
+.photo-preview img { display: block; max-width: 100%; max-height: 420px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); }
+.chip.inline { margin-left: 8px; font-weight: 400; vertical-align: 1px; }
+
 @media (max-width: 640px) {
   .top { padding: 14px 16px; }
   .badge { font-size: 10px; }

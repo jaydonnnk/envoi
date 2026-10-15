@@ -7,6 +7,7 @@ import { getAuth } from "@/lib/auth";
 import { isOperator, requireOperator } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
 import { systemNow } from "@/lib/time";
+import { webEnv } from "@/env";
 
 export const dynamic = "force-dynamic";
 
@@ -121,11 +122,73 @@ function OverdueWork({ health }: { health: OperatorHealth }) {
   );
 }
 
+const usd = (micros: number | null) => (micros === null ? "none recorded" : `US$${(micros / 1_000_000).toFixed(4)}`);
+
+function MenuImports({ health }: { health: OperatorHealth }) {
+  const { imports } = health;
+  const open = imports.enabled && imports.boundsReviewed && imports.ceilingUsdMicros !== null;
+  return (
+    <section className="card" aria-labelledby="imports-heading">
+      <div className="rail-head">
+        <h2 id="imports-heading">Menu photo imports</h2>
+        <span className={`chip ${open ? "ok" : "warn"}`}>{open ? "Open" : "Closed"}</span>
+      </div>
+      <div className="row stacked">
+        <span>Vision model</span>
+        <span className="mono">{imports.model ?? "not set"}{imports.model && !imports.boundsReviewed ? " (no reviewed bounds)" : ""}</span>
+      </div>
+      <div className="row">
+        <span>Imports switched on</span>
+        <strong>{imports.enabled ? "Yes" : "No"}</strong>
+      </div>
+      <div className="row">
+        <span>Admitted today (UTC day)</span>
+        <strong>{imports.today.admitted}</strong>
+      </div>
+      {Object.entries(imports.today.outcomes).map(([outcome, count]) => (
+        <div className="row" key={outcome}>
+          <span className="mono">{outcome}</span>
+          <span>{count}</span>
+        </div>
+      ))}
+      <div className="row">
+        <span>Held reservations today, of the daily ceiling</span>
+        <strong className="money">
+          {usd(imports.today.heldUsdMicros)} of {usd(imports.ceilingUsdMicros)}
+        </strong>
+      </div>
+      <div className="row">
+        <span>Recorded spend today</span>
+        <strong className="money">{usd(imports.today.actualUsdMicros)}</strong>
+      </div>
+      <div className="row">
+        <span>Slowest import today</span>
+        <span>{imports.today.maxLatencyMs === null ? "none" : `${(imports.today.maxLatencyMs / 1000).toFixed(1)} s`}</span>
+      </div>
+      <div className="row">
+        <span>Highest process memory after a decode today</span>
+        <span>{imports.today.maxPeakRssBytes === null ? "none" : megabytes(imports.today.maxPeakRssBytes)}</span>
+      </div>
+      {imports.recent.map((row) => (
+        <div className="row stacked" key={row.id}>
+          <span className="mono">{row.id}</span>
+          <span>
+            {row.outcome}, {when(row.admittedAt)}
+            {row.latencyMs === null ? "" : `, ${(row.latencyMs / 1000).toFixed(1)} s`}, reserved {usd(row.reservedUsdMicros)}, spent {usd(row.actualUsdMicros)}
+            {row.peakRssBytes === null ? "" : `, peak ${megabytes(row.peakRssBytes)}`}
+          </span>
+        </div>
+      ))}
+      <p className="fine muted">Peak memory is the process&apos;s highest resident memory so far, read after the decode; Render Free allows 512 MB.</p>
+    </section>
+  );
+}
+
 // The operator health view (S5). Anyone but a flagged operator gets the same not-found page as an
 // unknown address.
 export default async function OperatorHealthPage() {
   if (!(await isOperatorRequest())) notFound();
-  const health = await readOperatorHealth(webDb(), systemNow());
+  const health = await readOperatorHealth(webDb(), systemNow(), { enabled: webEnv().MENU_IMPORTS_ENABLED, model: webEnv().AI_MENU_MODEL ?? null });
   return (
     <main>
       <p className="eyebrow">Operator</p>
@@ -135,6 +198,7 @@ export default async function OperatorHealthPage() {
         <Heartbeat health={health} />
         <Capacity health={health} />
         <OverdueWork health={health} />
+        <MenuImports health={health} />
       </div>
     </main>
   );

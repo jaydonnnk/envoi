@@ -543,3 +543,69 @@ export const operatorGrants = pgTable(
   },
   (t) => [uniqueIndex("operator_grants_live_user_unique").on(t.userId).where(sql`${t.revokedAt} is null`)],
 );
+
+// Menu photo import attempts (S11; Gate 3 "Menu and imports", MenuImportRow). One row per admitted
+// attempt, written by admission and closed once. It holds counts, usage, timings and a fingerprint
+// of the validated result, never an image byte, image hash, URL or file name. Expiry is derived on
+// read from deadline_at; nothing ever writes "expired".
+export const MENU_IMPORT_CLOSED_OUTCOMES = [
+  "completed", "conflict_base_revision", "conflict_confirmed", "membership_revoked",
+  "rejected_upload", "rejected_photo", "model_failed", "model_timeout", "output_invalid", "aborted",
+] as const;
+
+export const menuImports = pgTable(
+  "menu_imports",
+  {
+    id: text("id").primaryKey(),
+    outletId: text("outlet_id")
+      .notNull()
+      .references(() => outlets.id),
+    actorUserId: text("actor_user_id")
+      .notNull()
+      .references(() => user.id),
+    baseRevisionId: text("base_revision_id")
+      .notNull()
+      .references(() => menuRevisions.id),
+    consentVersion: text("consent_version").notNull(),
+    // Digest of the model, its reviewed bounds, the prompt version and the schema version.
+    modelConfigVersion: text("model_config_version").notNull(),
+    admittedAt: timestamp("admitted_at", { withTimezone: true }).notNull(),
+    deadlineAt: timestamp("deadline_at", { withTimezone: true }).notNull(),
+    // Committed before the vision call; a row without it never reached OpenAI.
+    modelDispatchedAt: timestamp("model_dispatched_at", { withTimezone: true }),
+    closedAt: timestamp("closed_at", { withTimezone: true }),
+    closedOutcome: text("closed_outcome"),
+    reservedUsdMicros: bigint("reserved_usd_micros", { mode: "number" }).notNull(),
+    actualUsdMicros: bigint("actual_usd_micros", { mode: "number" }),
+    inputTokens: integer("input_tokens"),
+    outputTokens: integer("output_tokens"),
+    rowsDrafted: integer("rows_drafted"),
+    rowsBlankPrice: integer("rows_blank_price"),
+    // SHA-256 of the validated result, never of the image.
+    resultFingerprint: text("result_fingerprint"),
+    latencyMs: integer("latency_ms"),
+    peakRssBytes: bigint("peak_rss_bytes", { mode: "number" }),
+  },
+  (t) => [
+    check(
+      "menu_imports_outcome_check",
+      sql`${t.closedOutcome} is null or ${t.closedOutcome} in ('completed', 'conflict_base_revision', 'conflict_confirmed', 'membership_revoked', 'rejected_upload', 'rejected_photo', 'model_failed', 'model_timeout', 'output_invalid', 'aborted')`,
+    ),
+    check("menu_imports_closed_check", sql`(${t.closedAt} is null) = (${t.closedOutcome} is null)`),
+    check("menu_imports_reserved_check", sql`${t.reservedUsdMicros} >= 0`),
+    check("menu_imports_deadline_check", sql`${t.deadlineAt} > ${t.admittedAt}`),
+    index("menu_imports_outlet_admitted_idx").on(t.outletId, t.admittedAt),
+    index("menu_imports_admitted_idx").on(t.admittedAt),
+  ],
+);
+
+// The singleton row every import admission locks first (S11), so the in-flight limits, daily caps
+// and the spend ceiling are checked against one consistent view.
+export const menuImportAdmission = pgTable(
+  "menu_import_admission",
+  {
+    id: text("id").primaryKey(),
+    lastAdmittedAt: timestamp("last_admitted_at", { withTimezone: true }),
+  },
+  (t) => [check("menu_import_admission_singleton_check", sql`${t.id} = 'global'`)],
+);

@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 
-export type IdPrefix = "out" | "mrv" | "itm" | "pur" | "dst" | "att" | "aud" | "pev" | "rlh" | "prq" | "agt" | "usr" | "acc" | "mbr" | "enr" | "mnt" | "opg";
+export type IdPrefix = "out" | "mrv" | "itm" | "pur" | "dst" | "att" | "aud" | "pev" | "rlh" | "prq" | "agt" | "usr" | "acc" | "mbr" | "enr" | "mnt" | "opg" | "imp";
 
 // 128 random bits, base32-encoded, so a receipt id cannot be guessed or enumerated.
 const ALPHABET = "abcdefghijklmnopqrstuvwxyz234567";

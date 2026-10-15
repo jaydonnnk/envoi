@@ -6,6 +6,7 @@ import type { MerchantOutlet, MerchantOutlets } from "@/domain/outlets/merchant"
 import type { PublicationCheck } from "@/domain/outlets/publish";
 import { requestJson } from "@/lib/browser/session";
 import { MenuEditor } from "./menu-editor";
+import type { DraftWithImport } from "./menu-import";
 
 function OutletChips({ outlet }: { outlet: MerchantOutlet }) {
   return (
@@ -245,12 +246,12 @@ function PublishCard({ outlet, onPublished }: { outlet: MerchantOutlet; onPublis
 
 // A draft that cannot be loaded, including on a network failure, is null: the menu editor then shows
 // its error with "Try again".
-const fetchDraft = async (outletId: string) => (await requestJson<DraftJson>("GET", `/api/v1/merchant/outlets/${encodeURIComponent(outletId)}/menu-draft`)).data ?? null;
+const fetchDraft = async (outletId: string) => (await requestJson<DraftWithImport>("GET", `/api/v1/merchant/outlets/${encodeURIComponent(outletId)}/menu-draft`)).data ?? null;
 
-export function Workspace({ initial, initialDraft }: { initial: MerchantOutlets; initialDraft: DraftJson | null }) {
+export function Workspace({ initial, initialDraft, importsOpen }: { initial: MerchantOutlets; initialDraft: DraftWithImport | null; importsOpen: boolean }) {
   const [outlets, setOutlets] = useState(initial.outlets);
   const [canCreate, setCanCreate] = useState(initial.canCreateOutlet);
-  const [selected, setSelected] = useState<{ id: string; draft: DraftJson | null } | null>(
+  const [selected, setSelected] = useState<{ id: string; draft: DraftWithImport | null } | null>(
     initial.outlets[0] ? { id: initial.outlets[0].id, draft: initialDraft } : null,
   );
   const [editing, setEditing] = useState(false);
@@ -338,7 +339,14 @@ export function Workspace({ initial, initialDraft }: { initial: MerchantOutlets;
       {outlets.length === 0 && !canCreate && <p className="card">This account has no shop and no approved membership for a new one.</p>}
 
       {outlet && selected && (
-        <MenuEditor key={`${outlet.id}:${editorGeneration}`} outletId={outlet.id} outletPublished={outlet.published} initialDraft={selected.draft} onDraftChange={refreshOutlets} />
+        <MenuEditor
+          key={`${outlet.id}:${editorGeneration}`}
+          outletId={outlet.id}
+          outletPublished={outlet.published}
+          importsOpen={importsOpen}
+          initialDraft={selected.draft}
+          onDraftChange={refreshOutlets}
+        />
       )}
       {outlet && <PayPalCard outlet={outlet} onSaved={updated} />}
       {outlet && <PublishCard outlet={outlet} onPublished={published} />}

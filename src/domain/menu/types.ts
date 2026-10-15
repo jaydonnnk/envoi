@@ -43,3 +43,19 @@ export type MenuItemInput = {
 
 // The same bounds the photo import uses (Gate 3 MENU_IMPORT_LIMITS: 100 rows, 120 characters).
 export const MENU_LIMITS = { maxItems: 100, maxTextChars: 120, maxPriceSgdCents: 100_000 } as const;
+
+// One row a menu photo import suggests (S11). A blank price says why it is blank; it is never zero.
+export type DraftItemSuggestion = {
+  name: string; // "" when unreadable; completeness then blocks confirmation
+  portion: string | null;
+  priceSgdCents: SgdCents | null;
+  priceBasis: "explicit" | "ambiguous" | "blank" | "other_currency" | "duplicate_variant";
+};
+
+// The result of merging suggestions into a draft. `added` holds the new items, in order, with the
+// ids they get; a suggestion that matches an existing item by name and portion adds nothing, so the
+// merchant's own version of that item stands. Suggestions past the menu's item cap are skipped and
+// counted.
+export type DraftMerge =
+  | { applied: true; added: MenuItemDraft[]; addedItemIds: string[]; preservedMerchantEditIds: string[]; skippedForCapacity: number }
+  | { applied: false; reason: "base_revision_changed" | "confirmed_revision" };

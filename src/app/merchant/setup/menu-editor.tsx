@@ -4,9 +4,9 @@ import { useState } from "react";
 import type { DraftJson } from "@/domain/menu/serialize";
 import type { MenuItemDraft } from "@/domain/menu/types";
 import { requestJson } from "@/lib/browser/session";
+import { MenuPhotoImport, type DraftWithImport } from "./menu-import";
 
-
-type Row = { key: string; id?: string; name: string; portion: string; price: string; availability: MenuItemDraft["availability"] };
+type Row = { key: string; id?: string; name: string; portion: string; price: string; availability: MenuItemDraft["availability"]; fromPhoto?: boolean };
 
 const SINGAPORE = new Intl.DateTimeFormat("en-SG", { timeZone: "Asia/Singapore", dateStyle: "medium", timeStyle: "short" });
 
@@ -29,7 +29,15 @@ let nextKey = 0;
 const newKey = () => `new-${++nextKey}`;
 
 function rowsOf(draft: DraftJson): Row[] {
-  return draft.items.map((item) => ({ key: item.id, id: item.id, name: item.name, portion: item.portion ?? "", price: priceText(item.priceSgdCents), availability: item.availability }));
+  return draft.items.map((item) => ({
+    key: item.id,
+    id: item.id,
+    name: item.name,
+    portion: item.portion ?? "",
+    price: priceText(item.priceSgdCents),
+    availability: item.availability,
+    fromPhoto: item.source === "import_suggestion",
+  }));
 }
 
 // The page renders the draft it loaded on the server; the editor reloads it only when asked. When the
@@ -38,16 +46,18 @@ function rowsOf(draft: DraftJson): Row[] {
 export function MenuEditor({
   outletId,
   outletPublished,
+  importsOpen,
   initialDraft,
   onDraftChange,
 }: {
   outletId: string;
   outletPublished: boolean;
-  initialDraft: DraftJson | null;
+  importsOpen: boolean;
+  initialDraft: DraftWithImport | null;
   onDraftChange: () => void;
 }) {
   const url = `/api/v1/merchant/outlets/${encodeURIComponent(outletId)}`;
-  const [draft, setDraft] = useState<DraftJson | null>(initialDraft);
+  const [draft, setDraft] = useState<DraftWithImport | null>(initialDraft);
   const [rows, setRows] = useState<Row[]>(() => (initialDraft ? rowsOf(initialDraft) : []));
   const [dirty, setDirty] = useState(false);
   const [pending, setPending] = useState<"save" | "confirm" | null>(null);
@@ -57,7 +67,7 @@ export function MenuEditor({
   const [attested, setAttested] = useState(false);
 
   async function load() {
-    const result = await requestJson<DraftJson>("GET", `${url}/menu-draft`);
+    const result = await requestJson<DraftWithImport>("GET", `${url}/menu-draft`);
     if (!result.ok || !result.data) {
       setMessage({ tone: "error", text: result.error?.message ?? "The menu draft could not be loaded." });
       return;
@@ -70,8 +80,17 @@ export function MenuEditor({
     setMessage(null);
   }
 
+  function imported(merged: DraftWithImport) {
+    setDraft(merged);
+    setRows(rowsOf(merged));
+    setDirty(false);
+    setConflict(false);
+    setAttested(false);
+    onDraftChange();
+  }
+
   function edit(key: string, patch: Partial<Row>) {
-    setRows((current) => current.map((row) => (row.key === key ? { ...row, ...patch } : row)));
+    setRows((current) => current.map((row) => (row.key === key ? { ...row, ...patch, fromPhoto: false } : row)));
     setDirty(true);
     setAttested(false);
     setMessage(null);
@@ -166,6 +185,8 @@ export function MenuEditor({
         <p className="muted">Changes you save here become a new draft. Buyers keep seeing the published menu until you confirm and publish the new version.</p>
       )}
 
+      <MenuPhotoImport outletId={outletId} open={importsOpen} draft={draft} dirty={dirty} onImported={imported} onReload={load} />
+
       {rows.length === 0 && <p className="muted">No items yet.</p>}
       {parsed.map(({ row, price }, index) => {
         const priceInvalid = "invalid" in price;
@@ -176,7 +197,9 @@ export function MenuEditor({
         return (
           <div className={`draft-item${flagged ? " flagged" : ""}`} role="group" aria-label={`Item ${index + 1}`} key={row.key}>
             <div className="field wide">
-              <label htmlFor={`${row.key}-name`}>Item {index + 1} name</label>
+              <label htmlFor={`${row.key}-name`}>
+                Item {index + 1} name{row.fromPhoto && <span className="chip warn inline">From photo</span>}
+              </label>
               <input id={`${row.key}-name`} value={row.name} maxLength={120} onChange={(event) => edit(row.key, { name: event.target.value })} aria-invalid={nameMissing} />
               {nameMissing && <small className="hint">Name needed</small>}
             </div>

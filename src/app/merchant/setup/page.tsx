@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { importJson, latestImport } from "@/domain/imports/lifecycle";
+import { menuImportsOpen } from "@/domain/imports/request";
 import { getMenuDraft } from "@/domain/menu/draft";
 import { draftJson } from "@/domain/menu/serialize";
 import { listMerchantOutlets } from "@/domain/outlets/merchant";
@@ -58,12 +60,13 @@ export default async function MerchantSetupPage() {
   // The first outlet's draft is read here only because the account holds that outlet's membership.
   const first = initial.outlets[0];
   const draft = first ? await getMenuDraft(webDb(), first.id) : null;
+  const latest = first ? await latestImport(webDb(), first.id, new Date()) : null;
   return (
     <main>
       <p className="eyebrow">Merchant setup</p>
       <h1>Your shop</h1>
       <p className="lead">Signed in as {session.user.name}. Buyers see only what you publish; drafts stay invisible to them.</p>
-      <Workspace initial={initial} initialDraft={draft ? draftJson(draft) : null} />
+      <Workspace initial={initial} importsOpen={menuImportsOpen()} initialDraft={draft ? { ...draftJson(draft), latestImport: latest ? importJson(latest) : null } : null} />
       <div className="actions">
         <a className="button secondary" href="/merchant/orders">
           See orders

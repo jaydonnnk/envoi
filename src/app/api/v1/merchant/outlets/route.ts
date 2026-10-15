@@ -27,5 +27,6 @@ export async function POST(request: Request): Promise<Response> {
 
   const created = await createMerchantOutlet(webDb(), { ...parsed.data, userId: principal.userId, now: new Date() });
   if (isAppError(created)) return httpErr(created);
-  return httpOk({ outlet: created.outlet, draft: draftJson(created.draft) }, { status: 201 });
+  // The same shape GET menu-draft answers: a new shop has had no photo import.
+  return httpOk({ outlet: created.outlet, draft: { ...draftJson(created.draft), latestImport: null } }, { status: 201 });
 }

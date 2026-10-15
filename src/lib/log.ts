@@ -8,7 +8,7 @@ export type SafeErrorRecord = {
   provider: "openai" | "paypal" | "solana_rpc" | "internal";
 };
 
-const ALLOWED_ERROR_NAMES = new Set(["Error", "TypeError", "RangeError", "SyntaxError", "AbortError", "TimeoutError", "PostgresError"]);
+const ALLOWED_ERROR_NAMES = new Set(["Error", "TypeError", "RangeError", "SyntaxError", "AbortError", "TimeoutError", "PostgresError", "AI_APICallError", "AI_NoObjectGeneratedError"]);
 
 export function toSafeErrorRecord(err: unknown, provider: SafeErrorRecord["provider"]): SafeErrorRecord {
   const name = err instanceof Error && ALLOWED_ERROR_NAMES.has(err.name) ? err.name : "Error";

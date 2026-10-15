@@ -1,3 +1,4 @@
+import { importJson, latestImport } from "@/domain/imports/lifecycle";
 import { getMenuDraft, saveMenuDraft } from "@/domain/menu/draft";
 import { draftJson } from "@/domain/menu/serialize";
 import { getAuth } from "@/lib/auth";
@@ -11,14 +12,20 @@ export const dynamic = "force-dynamic";
 
 type Params = { params: Promise<{ id: string }> };
 
-// The member's current menu draft with its version and completeness. Buyers never read it.
+// The member's current menu draft with its version and completeness, and since S11 the outcome of
+// its latest photo import, derived on read in a read-only transaction: an abandoned import reads as
+// expired and nothing is written. Buyers never read it.
 export async function GET(request: Request, { params }: Params): Promise<Response> {
   const principal = await requireOutletMembership(getAuth(), webDb(), request.headers, (await params).id);
   if (!isOutletMember(principal)) return httpErr(principal);
 
-  const draft = await getMenuDraft(webDb(), principal.outletId);
-  if (!draft) return httpErr(appError("not_found", "This shop has no menu draft."));
-  return httpOk(draftJson(draft));
+  const now = new Date();
+  const read = await webDb().transaction(
+    async (tx) => ({ draft: await getMenuDraft(tx, principal.outletId), latest: await latestImport(tx, principal.outletId, now) }),
+    { accessMode: "read only" },
+  );
+  if (!read.draft) return httpErr(appError("not_found", "This shop has no menu draft."));
+  return httpOk({ ...draftJson(read.draft), latestImport: read.latest ? importJson(read.latest) : null });
 }
 
 // Replaces the draft's items when the write names the current revision and version; otherwise

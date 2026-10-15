@@ -5,7 +5,7 @@ import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
 import { newId } from "@/lib/ids";
 import { sgdFromCents } from "@/lib/money";
-import type { MenuCompleteness, MenuDraft, MenuItemDraft, MenuItemInput } from "./types";
+import { MENU_LIMITS, type DraftItemSuggestion, type DraftMerge, type MenuCompleteness, type MenuDraft, type MenuItemDraft, type MenuItemInput } from "./types";
 
 // A menu can be confirmed only when every item has a name, a price and a merchant-chosen
 // availability. Unknown availability is never read as available, and a missing price is never read
@@ -206,4 +206,44 @@ export async function saveMenuDraft(db: Db, write: DraftWrite): Promise<MenuDraf
     });
     return draftOf(saved!, await itemsOf(tx, revision.id));
   });
+}
+
+const itemKeyOf = (item: { name: string; portion: string | null }) => `${item.name.trim().toLowerCase()}\u0000${(item.portion ?? "").trim().toLowerCase()}`;
+
+// Adds import suggestions to a draft without changing any existing item (Gate 3 "non-clobbering
+// suggestion merge"). Pure: the caller writes the result. A suggestion for an item the draft already
+// has, by name and portion, is dropped, so a merchant's corrected name or price is never replaced by
+// what the photo says. Every added item is an unconfirmed import suggestion with unknown
+// availability, which the merchant must choose before confirming.
+export function mergeImportSuggestions(
+  current: readonly MenuItemDraft[],
+  suggestions: readonly DraftItemSuggestion[],
+  baseRevisionId: string,
+  currentRevisionId: string,
+): DraftMerge {
+  if (baseRevisionId !== currentRevisionId) return { applied: false, reason: "base_revision_changed" };
+  const existing = new Map(current.filter((item) => item.name.trim() !== "").map((item) => [itemKeyOf(item), item]));
+  const added: MenuItemDraft[] = [];
+  const preserved = new Set<string>();
+  let skippedForCapacity = 0;
+  for (const suggestion of suggestions) {
+    const match = suggestion.name.trim() === "" ? undefined : existing.get(itemKeyOf(suggestion));
+    if (match) {
+      if (match.source === "merchant") preserved.add(match.id);
+      continue;
+    }
+    if (current.length + added.length >= MENU_LIMITS.maxItems) {
+      skippedForCapacity += 1;
+      continue;
+    }
+    added.push({
+      id: newId("itm"),
+      name: suggestion.name,
+      portion: suggestion.portion,
+      priceSgdCents: suggestion.priceSgdCents,
+      availability: "unknown",
+      source: "import_suggestion",
+    });
+  }
+  return { applied: true, added, addedItemIds: added.map((item) => item.id), preservedMerchantEditIds: [...preserved], skippedForCapacity };
 }

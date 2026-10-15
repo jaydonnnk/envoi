@@ -1,4 +1,5 @@
 import { and, asc, desc, eq, isNotNull, or, sql } from "drizzle-orm";
+import { readImportHealth, type ImportHealth } from "@/domain/imports/health";
 import { maintenanceRuns, paymentAttempts, purchases, type MaintenanceReportJson } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { durationMs } from "@/lib/time";
@@ -30,11 +31,13 @@ export type OperatorHealth = {
   lastRun: { id: string; trigger: string; status: string; startedAt: string; finishedAt: string | null; tasks: MaintenanceReportJson["tasks"] } | null;
   capacity: { databaseSizeBytes: number | null; measuredAt: string | null; limitBytes: number; share: number | null; alert: boolean; limitation: string };
   overdueWork: { dueAttempts: number; uncertainPurchases: number; items: OverdueItem[] };
+  // Since S11. Menu imports never depend on maintenance; they are shown here for the operator only.
+  imports: ImportHealth;
 };
 
 const ITEMS_SHOWN = 20;
 
-export async function readOperatorHealth(db: Pick<Db, "select">, now: Date): Promise<OperatorHealth> {
+export async function readOperatorHealth(db: Pick<Db, "select">, now: Date, importConfig: { enabled: boolean; model: string | null } = { enabled: false, model: null }): Promise<OperatorHealth> {
   const [last] = await db.select().from(maintenanceRuns).orderBy(desc(maintenanceRuns.startedAt)).limit(1);
   const [measured] = await db
     .select({ bytes: maintenanceRuns.databaseSizeBytes, at: maintenanceRuns.startedAt })
@@ -91,6 +94,7 @@ export async function readOperatorHealth(db: Pick<Db, "select">, now: Date): Pro
         since: (row.since ?? row.createdAt).toISOString(),
       })),
     },
+    imports: await readImportHealth(db, now, importConfig),
   };
 }
 

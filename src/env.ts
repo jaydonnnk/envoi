@@ -31,6 +31,12 @@ const webSchema = z.object({
   // AI_MODEL is the model chosen by the pre-registered R5 evaluation recorded in 00-status.md.
   OPENAI_API_KEY: z.string().min(1).optional(),
   AI_MODEL: z.string().min(1).optional(),
+  // Menu photo import (S11). AI_MENU_MODEL is the vision model chosen by the pre-registered R5
+  // evaluation in 00-status.md, never AI_MODEL; it also needs a reviewed bounds entry in
+  // MENU_SPEND_POLICY. MENU_IMPORTS_ENABLED is the import kill switch: unset reads as false, so
+  // imports stay closed until it is stated "true".
+  AI_MENU_MODEL: z.string().min(1).optional(),
+  MENU_IMPORTS_ENABLED: z.enum(["true", "false"]).default("false").transform((value) => value === "true"),
 });
 
 const migrationSchema = z.object({ MIGRATION_DATABASE_URL: postgresUrl });

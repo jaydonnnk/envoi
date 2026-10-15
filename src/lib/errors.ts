@@ -30,7 +30,7 @@ const STATUS: Record<ErrorCode, number> = {
   capture_already_dispatched: 409,
   payment_uncertain: 409,
   payments_disabled: 503,
-  consent_required: 403,
+  consent_required: 409,
   import_rejected: 422,
   import_expired: 409,
   import_base_revision_changed: 409,
