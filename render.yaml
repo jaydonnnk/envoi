@@ -44,3 +44,15 @@ services:
       # Kill switch for new PayPal starts and captures (D10): "true" or "false", entered by hand.
       - key: PAYMENTS_ENABLED
         sync: false
+      # OpenAI (S4 text suggestions, S11 menu photos). The key is entered by hand. AI_MODEL is the
+      # S4 evaluation's choice; AI_MENU_MODEL is the S11 vision evaluation's choice and needs a
+      # reviewed bounds entry in MENU_SPEND_POLICY, or every import is refused.
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: AI_MODEL
+        sync: false
+      - key: AI_MENU_MODEL
+        sync: false
+      # Kill switch for menu photo imports (S11): "true" or "false", entered by hand; unset is false.
+      - key: MENU_IMPORTS_ENABLED
+        sync: false
