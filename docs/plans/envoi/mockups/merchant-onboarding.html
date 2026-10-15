@@ -13,8 +13,8 @@
 </header>
 <main id="main">
   <span class="eyebrow">Merchant / draft setup</span>
-  <h1>Two photos.<br>Your review before publication.</h1>
-  <p class="lead">SGQR helps fill shop identifiers. An AI model reads a separate menu image and drafts items and SGD prices while you wait. You correct and confirm the details, then connect a destination you control.</p>
+  <h1>Your sticker, your menu.<br>Your review before publication.</h1>
+  <p class="lead">SGQR helps fill shop identifiers. You enter your menu items and SGD prices, confirm the details, then connect a destination you control. Drafting a menu from a photo is not part of this release.</p>
   <div class="layout">
     <div class="stack">
       <section class="card" aria-labelledby="shop-heading">
@@ -30,33 +30,24 @@
         <label><input id="shop-confirm" type="checkbox" disabled>I reviewed the shop/outlet details.</label><small>Supply a shop name and outlet before confirming. This declaration cannot verify merchant authorization.</small>
       </section>
       <section class="card" aria-labelledby="menu-heading">
-        <h2 id="menu-heading">2. Separate menu image</h2>
-        <div class="upload">
-          <label for="menu-photo" style="margin-top:0">Menu image</label><input id="menu-photo" type="file" accept="image/*" aria-describedby="menu-photo-note">
-          <small id="menu-photo-note">No image is uploaded or analyzed. All draft values below are fixtures.</small>
-        </div>
-        <details><summary>Before a real image import</summary><p>Your menu photo is sent to an AI model provider to draft items and prices. Envoi does not keep the photo once the draft returns; only this browser tab keeps it for side-by-side review. The provider's own retention can differ. None of this has been tested yet.</p></details>
-        <label for="import-state">Preview an import state (fixtures only)</label>
-        <select id="import-state"><option value="ready">Readable draft</option><option value="unreadable">One unreadable price</option><option value="processing">Drafting in progress</option><option value="failed">Drafting failed or timed out</option><option value="malformed">Unusable extraction output</option><option value="manual">Manual entry</option></select>
-        <small>Changing this preview resets fixture fields. Real import failures must preserve your edits.</small>
-        <p id="import-note" class="status" role="status">Fixture draft only. Review names/prices and supply availability before confirming.</p>
-        <div class="upload" style="padding:18px" aria-label="Fixture source preview"><h3>Fixture source preview</h3><p id="source-preview">Kaya toast S$4.00 · Kopi S$2.00</p><small>Text illustration of a menu, not an extracted image. A real review would show your source image beside the draft.</small></div>
+        <h2 id="menu-heading">2. Your menu</h2>
+        <p class="status" role="note">Menu photo import is not available in this release. Enter each item and its SGD price below; the values shown are fixtures.</p>
         <form id="menu-draft" novalidate>
           <div id="menu-rows">
-            <fieldset style="margin:18px 0;padding:16px;border:1px solid var(--line);border-radius:8px"><legend>Draft item 1</legend>
+            <fieldset style="margin:18px 0;padding:16px;border:1px solid var(--line);border-radius:8px"><legend>Menu item 1</legend>
               <label for="name-1">Item name and portion</label><input id="name-1" class="item-name" value="Kaya toast" maxlength="120">
               <div class="two"><div><label for="price-1">SGD price</label><input id="price-1" class="item-price" value="4.00" inputmode="decimal" placeholder="Unreadable? Leave blank"></div><div><label for="available-1">Availability (your choice)</label><select id="available-1" class="item-availability"><option value="">Choose availability</option><option value="available">Available</option><option value="unavailable">Unavailable</option></select></div></div>
               <button type="button" class="secondary remove-item" style="margin-top:12px">Remove item</button>
             </fieldset>
-            <fieldset style="margin:18px 0;padding:16px;border:1px solid var(--line);border-radius:8px"><legend>Draft item 2</legend>
+            <fieldset style="margin:18px 0;padding:16px;border:1px solid var(--line);border-radius:8px"><legend>Menu item 2</legend>
               <label for="name-2">Item name and portion</label><input id="name-2" class="item-name" value="Kopi" maxlength="120">
               <div class="two"><div><label for="price-2">SGD price</label><input id="price-2" class="item-price" value="2.00" inputmode="decimal" placeholder="Unreadable? Leave blank"></div><div><label for="available-2">Availability (your choice)</label><select id="available-2" class="item-availability"><option value="">Choose availability</option><option value="available">Available</option><option value="unavailable">Unavailable</option></select></div></div>
               <button type="button" class="secondary remove-item" style="margin-top:12px">Remove item</button>
             </fieldset>
           </div>
-          <small>SGD prices only in this proposal. Never guess an unreadable value or replace it with zero. Supply missing portions/details; availability is not inferred from a photo.</small>
-          <div class="actions"><button id="manual-entry" type="button" class="secondary">Enter menu manually</button><button id="add-item" type="button" class="secondary">Add an item</button></div>
-          <label><input id="menu-confirm" type="checkbox" disabled>I corrected and explicitly confirm this complete menu.</label>
+          <small>SGD prices only in this proposal. A missing price stays blank, never zero. Supply portions, details and availability.</small>
+          <div class="actions"><button id="add-item" type="button" class="secondary">Add an item</button></div>
+          <label><input id="menu-confirm" type="checkbox" disabled>I reviewed and explicitly confirm this complete menu.</label>
           <p id="confirmation-note" role="status">Supply availability for every item before confirming. No menu is published here.</p>
         </form>
       </section>
@@ -72,13 +63,12 @@
         <button id="publish" disabled style="width:100%">Publication blocked</button><small style="margin-top:10px">Drafts are invisible to buyers. This mockup cannot authorize, connect or publish.</small>
         <details><summary>Prepared demo merchants</summary><p>The future sandbox demo uses pre-provisioned, allowlisted test recipients and discloses that shortcut. A pasted merchant ID or SGQR image is insufficient.</p></details>
       </section>
-      <section class="card tint"><h2>You control the final menu.</h2><p>AI drafting is proposed assistance. Nothing extracted goes live automatically. Edits require confirmation again; payment changes need fresh buyer approval.</p><a class="button secondary" href="buyer.html">Preview a published fixture</a></section>
+      <section class="card tint"><h2>You control the final menu.</h2><p>Nothing goes live until you confirm it. Edits require confirmation again; payment changes need fresh buyer approval. Menu photo import may come later; it is not part of this release.</p><a class="button secondary" href="buyer.html">Preview a published fixture</a></section>
     </aside>
   </div>
 </main>
 <script>
 const draft=document.getElementById('menu-draft');
-const scenario=document.getElementById('import-state');
 const confirmMenu=document.getElementById('menu-confirm');
 const rowContainer=document.getElementById('menu-rows');
 const note=document.getElementById('confirmation-note');
@@ -90,7 +80,7 @@ function refresh(invalidate=false){
   const shopReady=document.getElementById('shop').value.trim() && document.getElementById('outlet').value.trim();
   document.getElementById('shop-confirm').disabled=!shopReady;
   if(!shopReady) document.getElementById('shop-confirm').checked=false;
-  const complete=scenario.value!=='processing' && rows().length>0 && rows().every(row=>{
+  const complete=rows().length>0 && rows().every(row=>{
     const price=row.querySelector('.item-price').value.trim();
     return row.querySelector('.item-name').value.trim() && /^\d+(\.\d{1,2})?$/.test(price) && Number(price)>0 && row.querySelector('.item-availability').value;
   });
@@ -100,47 +90,20 @@ function refresh(invalidate=false){
   document.getElementById('menu-check').textContent=confirmMenu.checked?'Menu reviewed in this local preview only.':'Menu confirmation still needed.';
   document.getElementById('shop-check').textContent=document.getElementById('shop-confirm').checked?'Shop details reviewed in this preview; authorization is separate.':'Shop/outlet review still needed.';
 }
-function preview(){
-  rowContainer.replaceChildren();
-  for(let i=1;i<=2;i++){
-    const row=firstRowTemplate.cloneNode(true);
-    row.querySelector('legend').textContent='Draft item '+i;
-    row.querySelectorAll('input,select').forEach(field=>{const oldId=field.id;field.id=oldId.replace(/\d+$/,String(i));row.querySelector('label[for="'+oldId+'"]').htmlFor=field.id;});
-    rowContainer.append(row);
-  }
-  nextItem=3;
-  const mode=scenario.value;
-  const hasDraft=mode==='ready'||mode==='unreadable';
-  rows().forEach((row,i)=>{
-    row.querySelector('.item-name').value=hasDraft?['Kaya toast','Kopi'][i]:'';
-    row.querySelector('.item-price').value=hasDraft?(mode==='unreadable'&&i===1?'':['4.00','2.00'][i]):'';
-    row.querySelector('.item-availability').value='';
-  });
-  const messages={ready:'Fixture draft only. Review names/prices and supply availability before confirming.',unreadable:'Kopi price is unreadable. It stays blank; supply it from your menu or exclude the item before publication.',processing:'Drafting in progress example. No entries can be confirmed yet. Manual entry remains available.',failed:'Drafting failed or timed out. No prices were filled. Try another photo in the built app or enter manually.',malformed:'Extraction output was unusable. No entries were accepted. Enter manually or try a new image in the built app.',manual:'Manual entry: supply item names, SGD prices, portions and availability, then review and confirm.'};
-  document.getElementById('import-note').textContent=messages[mode];
-  document.getElementById('source-preview').textContent=mode==='ready'?'Kaya toast S$4.00 · Kopi S$2.00':mode==='unreadable'?'Kaya toast S$4.00 · Kopi [unreadable price]':'No readable source preview for this example.';
-  refresh(true);
-}
-scenario.addEventListener('change',preview);
 draft.addEventListener('submit',event=>event.preventDefault());
 draft.addEventListener('input',event=>refresh(event.target!==confirmMenu));
 draft.addEventListener('change',event=>refresh(event.target!==confirmMenu));
-document.getElementById('manual-entry').addEventListener('click',()=>{scenario.value='manual';preview();});
 document.getElementById('add-item').addEventListener('click',()=>{
   const row=firstRowTemplate.cloneNode(true);const number=nextItem++;
-  row.querySelector('legend').textContent='Draft item '+number;
+  row.querySelector('legend').textContent='Menu item '+number;
   row.querySelectorAll('input,select').forEach(field=>{const oldId=field.id;field.id=oldId.replace(/\d+$/,String(number));field.value='';row.querySelector('label[for="'+oldId+'"]').htmlFor=field.id;});
   rowContainer.append(row);refresh(true);
 });
 rowContainer.addEventListener('click',event=>{if(event.target.matches('.remove-item')){event.target.closest('fieldset').remove();refresh(true);}});
 ['shop','uen','outlet'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{document.getElementById('shop-confirm').checked=false;refresh();}));
 document.getElementById('shop-confirm').addEventListener('change',()=>refresh());
-['photo','menu-photo'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{
-  if(id==='photo') document.getElementById('shop-confirm').checked=false;
-  else {scenario.value='manual';preview();}
-  refresh(id==='menu-photo');
-}));
+document.getElementById('photo').addEventListener('change',()=>{document.getElementById('shop-confirm').checked=false;refresh();});
 refresh();
 </script>
-<footer>Gate 1 proposal · revised 10 October 2026 · Local fixture interactions only. No extraction or integration has been tested.</footer>
+<footer>Gate 1 proposal · revised 16 October 2026 · Local fixture interactions only. No extraction or integration has been tested.</footer>
 </body></html>

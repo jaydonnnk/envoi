@@ -1,10 +1,16 @@
 # Product: Envoi
 
+**Reopened 2026-10-15 for one change, revised and RE-APPROVED by the user on 2026-10-16** ("I approve Gate 1.").
+After three pre-registered vision evaluations found no model accurate enough (see [`00-status.md`](00-status.md#s11-vision-evaluation-round-3-results-2026-10-15)), the user decided on 2026-10-15: "Option A: ship S11 with imports closed and manual entry only, and reopen Gate 1 to move AI menu drafting to good-to-have after the slices."
+- **Menu photo drafting is deferred.** In the hackathon build the merchant enters the menu by hand; no AI model drafts a menu from a photo, and Envoi makes no AI-drafting claim.
+  Menu photo import moves to a "good to have" list after all slices, together with sharpening the import and language additions; it returns only after an evaluation passes and the user approves real merchant photos.
+- Everything else stays as re-approved on 2026-10-10.
+
 **Reopened 2026-10-10, revised and RE-APPROVED by the user the same day** ("I approve gate one").
 The user removed Zapier because it is paid and reopened Gates 1, 2 and 3.
 This revision changes only what the user decided on 2026-10-10:
 
-- **Menu drafting without Zapier.** An AI model reads the separate menu photo and drafts item names and SGD prices while the merchant waits. Envoi does not keep the photo once the draft returns. Manual entry stays the fallback.
+- **Menu drafting without Zapier.** An AI model reads the separate menu photo and drafts item names and SGD prices while the merchant waits. Envoi does not keep the photo once the draft returns. Manual entry stays the fallback. *Deferred on 2026-10-15; see the top of this file.*
 - **PYUSD is in the hackathon plan.** It is built after the PayPal journey, is the first capability cut if time runs short, and stays visibly unavailable until its own test passes. The PayPal journey never depends on it.
 - **The merchant sets the PYUSD rate.** A shop that accepts PYUSD states how much PYUSD it accepts per S$1. Buyers see that rate and the date it was set as the shop's rate, not a market quote. A rate not re-confirmed for 30 days makes PYUSD unavailable at that shop until the merchant confirms one again.
 
@@ -33,7 +39,7 @@ Before making a production impact claim, separately test merchant willingness to
 
 ## Announcement - the blog post before the feature
 
-Envoi helps visitors buy in person from participating Singapore shops using PayPal or a supported wallet they already have. Merchants upload their SGQR sticker and a separate menu photo, correct the drafts, and confirm their outlet, menu and accepted payment destinations before publication. Buyers either describe what they want or point their camera at the shop's SGQR sticker to identify that exact outlet, then review the exact basket, recipient and known or unknown costs. They approve through PayPal or their wallet before payment goes directly to the shop's connected destination. Envoi reports payment honestly and shows the merchant's acknowledgment separately.
+Envoi helps visitors buy in person from participating Singapore shops using PayPal or a supported wallet they already have. Merchants upload their SGQR sticker, correct the drafted shop details, enter their menu, and confirm their outlet, menu and accepted payment destinations before publication. Buyers either describe what they want or point their camera at the shop's SGQR sticker to identify that exact outlet, then review the exact basket, recipient and known or unknown costs. They approve through PayPal or their wallet before payment goes directly to the shop's connected destination. Envoi reports payment honestly and shows the merchant's acknowledgment separately.
 
 ## Scope choices
 
@@ -45,7 +51,7 @@ Envoi helps visitors buy in person from participating Singapore shops using PayP
 
 The recommended prototype includes:
 
-- A merchant uploads **both an SGQR image and a separate menu image**. Supported identifiers actually present in SGQR become a draft for review/correction; it contains no menu and proves no ownership. An AI model drafts item names and SGD prices from the separate menu image while the merchant waits, and Envoi does not keep the image once the draft returns. The merchant corrects the draft, supplies availability and missing details, and explicitly confirms before publication. Manual entry is the fallback when extraction fails or an image is unavailable/unsupported.
+- A merchant uploads **an SGQR image** and **enters the menu**. Supported identifiers actually present in SGQR become a draft for review/correction; it contains no menu and proves no ownership. The merchant enters item names, SGD prices, availability and missing details, and explicitly confirms before publication. Drafting the menu from a photo is deferred to after the slices (decided 2026-10-15).
 - Only an authorized demo merchant with connected test destinations can become discoverable. A photo or a well-formed business identifier does not prove ownership.
 - A buyer uses text to find registered shops and items. Ambiguous requests ask for clarification. Missing location asks for an area; "nearest" needs usable location information.
 - A buyer may instead **scan or paste the shop's SGQR sticker** to identify that exact outlet. A scan needs no location information and no "nearest" judgement, which removes the weakest step in the text path. It resolves only a shop already enrolled; an unenrolled sticker says so plainly and offers text search. A scan identifies the shop and nothing else.
@@ -87,21 +93,21 @@ These are proposed integrations, not completed integrations. Access and technica
 
 ## Merchant journey
 
-**Two separate uploads:** SGQR contains payment information, not a menu. Do not infer prices from a business identifier, shop name or unrelated online listing.
+**The sticker and the menu are separate:** SGQR contains payment information, not a menu. Do not infer prices from a business identifier, shop name or unrelated online listing.
 
 1. Upload the SGQR sticker. Review supported identifiers actually present, correct them, or enter details manually. A UEN may be absent; different outlets may share one. The image does not prove ownership.
 2. Confirm the outlet and authority to represent it. Connect destinations you control. Where one business identifier covers several outlets, record what distinguishes this outlet, so a buyer's scan resolves one location rather than a whole chain. For the hackathon, use disclosed, pre-provisioned and allowlisted test accounts. To accept PYUSD, prove you control the receiving wallet by signing a message in it (Envoi never asks for a private key), and state the PYUSD you accept per S$1; re-confirm that rate at least every 30 days.
-3. Upload a **separate menu image**. Before a real import, see that the photo is sent to the AI model provider to draft the menu, that Envoi does not keep it once the draft returns, and that the provider's own retention may differ.
-4. Review the draft beside the source image, which stays in your browser. Correct every item name and SGD price; provide availability, portions and missing details. Unreadable prices remain blank until you supply them. Try another photo or use manual entry if drafting fails or takes too long.
+3. **Enter the menu**: item names, SGD prices, portions, availability and missing details. Menu photo import is not available in this release, and the setup page says so.
+4. Review every entry. A missing price stays blank, never zero, and blocks confirmation until you supply it.
 5. Explicitly confirm the complete menu and shop details. Drafts remain invisible to buyers. Publication requires merchant authorization, complete confirmed entries and at least one connected accepted destination; it does not require enabling PYUSD.
 6. View payment status and acknowledge an order separately. Later menu edits require confirmation again and fresh buyer approval for affected purchases.
 
-No complete-onboarding speed claim is established. Neither image extraction nor authorization/connection checks have been demonstrated.
+No complete-onboarding speed claim is established. Neither SGQR extraction nor authorization/connection checks have been demonstrated.
 
 ## Failure states to review
 
 - Unreadable sticker or no usable business identifier: manual entry, with no invented extracted value.
-- Menu image unreadable, drafting failed or timed out, or unusable output: keep the draft unpublished, preserve merchant edits, fill in nothing, and offer another photo or manual entry.
+- Menu photo import requested: say it is not available in this release and keep manual entry; never imply a photo was read.
 - Unreadable price, missing availability or ambiguous currency: leave the entry incomplete until the merchant supplies and confirms it.
 - Menu edited after confirmation, unverified merchant authorization or disconnected destination: keep publication blocked.
 - No enrolled shop, multiple matching outlets, unavailable item, or missing location: explain what information is needed; do not guess.
@@ -119,7 +125,7 @@ No complete-onboarding speed claim is established. Neither image extraction nor 
 
 No PayNow execution, delivery, inventory reservations, custody, pooled payments, escrow, unattended purchases, auto-SGD conversion, or guaranteed refunds. Scanning does not make an arbitrary SGQR sticker payable and does not enroll a shop; it only finds one that is already enrolled. Voice, a negotiation conversation, AG Grid, and broad catalogue ingestion are optional. A small merchant view is sufficient.
 
-Separate menu-image import is part of this proposal. Manual entry is its fallback, not a reason to silently drop AI drafting. Live deployment requires separate provider, legal, merchant enrollment and operational checks.
+Menu-image import with AI drafting is deferred, decided by the user on 2026-10-15 after three pre-registered evaluations: it is on the "good to have" list after the slices, together with sharpening the import and language additions. Manual entry is the hackathon path, and no AI-drafting claim is made. Live deployment requires separate provider, legal, merchant enrollment and operational checks.
 
 Negotiation may be added only after the payment paths work: a merchant chooses explicit discount rules, the buyer sees the authorized discount, and changing the resulting price triggers a fresh review. A simpler rule-based offer is acceptable; two talking agents are not a requirement.
 
@@ -127,7 +133,7 @@ Negotiation may be added only after the payment paths work: a merchant chooses e
 
 Each `.html` file in `mockups/` is a plain, throwaway product mockup. The directory is the location convention required by software-factory, not an implementation design. `mockups/review-preview.jpg` is a superseded historical image and not a current screen; review the HTML.
 
-- `mockups/merchant-onboarding.html`: both uploads, editable menu draft, failure/manual states, confirmation and publication blockers, and the PYUSD wallet and rate the merchant accepts.
+- `mockups/merchant-onboarding.html`: the SGQR upload, manual menu entry with photo import shown as not available, confirmation and publication blockers, and the PYUSD wallet and rate the merchant accepts.
 - `mockups/buyer.html`: both buyer entry points — a text request with location clarification, and a scan/paste path with an unenrolled-sticker result — plus the registered outlet and merchant-confirmed published menu.
 - `mockups/review.html`: single-method selection, exact basket, known/unknown costs, external approval handoff, and the PYUSD option priced at the shop's own dated rate.
 - `mockups/receipt.html`: pending/confirmed/failed/canceled/uncertain layouts, honest reference placeholder, separate merchant acknowledgment.
@@ -140,11 +146,11 @@ No mockup uploads an image, extracts data, publishes a shop or performs a paymen
 
 - Buyer and merchant journeys are understandable in the mockups.
 - Both buyer entry points are explicit, and a scan cannot be mistaken for payment authority, for a payment destination, or for enrolling a shop.
-- Both uploads, manual fallback, merchant correction/confirmation and publication blockers are explicit.
-- The menu photo goes to an AI model provider for drafting, Envoi does not keep it, and no AI draft can publish itself.
+- The SGQR upload, manual menu entry, merchant correction/confirmation and publication blockers are explicit.
+- Menu photo import is visibly not available in this release, and no AI drafting is claimed.
 - The PYUSD rate is visibly the shop's own dated rate, and an expired rate or an unproven PYUSD test leaves PayPal working.
 - Scope, audience, cuts, and the proposed measurement are accepted.
 - External approval, single-method payment, honest cost uncertainty, and order acknowledgment are explicit.
 - Seeded merchants and test transactions cannot be mistaken for live adoption or live money.
 
-**Gate 1 approved 2026-10-07, reopened 2026-10-10, revised and re-approved 2026-10-10. Gates 2 and 3, approved 2026-10-07, were also reopened for the Zapier removal and re-approved on 2026-10-11; Gate 3 was reopened again on 2026-10-12 for one PayPal kill-switch check and for the TypeScript pin found by the S1 boot check, and re-approved both times the same day.** The slice plan in `04-slices.md` was revised and approved on 2026-10-12 and amended on 2026-10-14 for one S6 receipt sentence; S1, the tracer bullet, was done on 2026-10-12, S2, the PayPal sandbox happy path, and S3, PayPal recovery, on 2026-10-13, S4, text entry with AI suggestions, on 2026-10-14, S13, agent handoff over MCP, also on 2026-10-14, S6, merchant sign-in and manual menu draft, also on 2026-10-14, with its review fixes the same day, S5, the maintenance runner with manual runs and the operator health view, also on 2026-10-14, S7, merchant destination and publication, also on 2026-10-14, and S8, merchant orders and separate acknowledgment, on 2026-10-15, with its review fixes the same day; no later slice has started. The status text near the top of this file, including the "(2026-10-10)" draft date and the 2026-10-07 approvals, is dated history; this line is the current status. Current source corrections are in `research.md`; `stack-recommendation.md` mirrors the approved architecture proposal and the Gate 3 pins. These approvals do not establish runtime/account or usability evidence. The eight Gate 2 review findings are closed as dispositioned by Gate 3; the residual risks that disposition names remain open.
+**Gate 1 approved 2026-10-07, reopened 2026-10-10, revised and re-approved 2026-10-10, and reopened again on 2026-10-15 to defer menu photo drafting, revised and re-approved on 2026-10-16. Gates 2 and 3, approved 2026-10-07, were also reopened for the Zapier removal and re-approved on 2026-10-11; Gate 3 was reopened again on 2026-10-12 for one PayPal kill-switch check and for the TypeScript pin found by the S1 boot check, and re-approved both times the same day.** The slice plan in `04-slices.md` was revised and approved on 2026-10-12 and amended on 2026-10-14 for one S6 receipt sentence; S1, the tracer bullet, was done on 2026-10-12, S2, the PayPal sandbox happy path, and S3, PayPal recovery, on 2026-10-13, S4, text entry with AI suggestions, on 2026-10-14, S13, agent handoff over MCP, also on 2026-10-14, S6, merchant sign-in and manual menu draft, also on 2026-10-14, with its review fixes the same day, S5, the maintenance runner with manual runs and the operator health view, also on 2026-10-14, S7, merchant destination and publication, also on 2026-10-14, and S8, merchant orders and separate acknowledgment, on 2026-10-15, with its review fixes the same day; S11, menu photo import, started on 2026-10-15 and ships with imports closed after no vision model met its threshold. The status text near the top of this file, including the "(2026-10-10)" draft date and the 2026-10-07 approvals, is dated history; this line is the current status. Current source corrections are in `research.md`; `stack-recommendation.md` mirrors the approved architecture proposal and the Gate 3 pins. These approvals do not establish runtime/account or usability evidence. The eight Gate 2 review findings are closed as dispositioned by Gate 3; the residual risks that disposition names remain open.

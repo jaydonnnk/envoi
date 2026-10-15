@@ -2,7 +2,8 @@
 
 Updated: 2026-10-15 (Asia/Singapore).
 
-- Gate 1 - Product: **RE-APPROVED 2026-10-10** by the user ("I approve gate one") after being reopened and revised the same day to remove Zapier, which the user rejected as paid, and to record the PYUSD decisions; see the [reopening record](#reopening-2026-10-10-zapier-removed). Previously **APPROVED 2026-10-07** by the user after reopening it to add a buyer-side scan entry point. Approval covers product scope and buyer/merchant journeys, including text and scan/paste entry points.
+- Gate 1 - Product: **RE-APPROVED 2026-10-16** by the user ("I approve Gate 1.") after being reopened on 2026-10-15 for one change: menu photo drafting is deferred to "good to have" after the slices, and the merchant enters the menu by hand; see the [record](#reopening-2026-10-15-menu-photo-drafting-deferred).
+  Before that it was **RE-APPROVED 2026-10-10** by the user ("I approve gate one") after being reopened and revised the same day to remove Zapier, which the user rejected as paid, and to record the PYUSD decisions; see the [reopening record](#reopening-2026-10-10-zapier-removed). Previously **APPROVED 2026-10-07** by the user after reopening it to add a buyer-side scan entry point. Approval covers product scope and buyer/merchant journeys, including text and scan/paste entry points.
 - Gate 2 - Architecture: **RE-APPROVED 2026-10-11** by the user ("gate 2 approved") after being reopened and revised on 2026-10-10 and revised again after a 2026-10-11 review. Approval covers only the direct vision import and PYUSD amendment in `02-architecture.md`, including the five review changes; the OpenAI/provider pin and all unaffected 2026-10-07 decisions stand. It accepts a proposal, not runtime/account proof. Previously **APPROVED 2026-10-07**.
   **Reopened again and RE-APPROVED 2026-10-11** for two PYUSD double-payment fixes found in the Gate 3 review: the user approved the fixes in advance ("reopen gate 2 and approve the fixes i approve it already").
   Preparation releases the unsigned bytes exactly once and never stores them, and the post-expiry window scan runs for every released attempt and records any extra transfer; see the [record](#gate-2-reopening-for-double-payment-fixes-2026-10-11).
@@ -32,6 +33,21 @@ Updated: 2026-10-15 (Asia/Singapore).
   An independent review of the draft on 2026-10-12 found four major issues, and all four are fixed in it; see the [review fixes](#gate-4-review-fixes-2026-10-12).
   Its minor findings are fixed or dispositioned; see the [minor review fixes](#gate-4-minor-review-fixes-2026-10-12).
   The user decided delta D10 on 2026-10-12 by reopening Gate 3 for a PayPal check of `PAYMENTS_ENABLED`, re-approved the same day; S2 builds it and names its test.
+
+### Reopening 2026-10-15: menu photo drafting deferred
+
+- **Finding:** three pre-registered vision evaluations (R5) on 2026-10-15 found no model that meets the threshold; most wrong prices came from the rotated and the low-resolution photo; see the [S11 results](#s11-vision-evaluation-round-3-results-2026-10-15).
+  The S11 falsifier in `04-slices.md` names this outcome: manual entry stays, no AI-drafting claim is made, and Gate 1 menu-import scope reopens.
+- **User decision, 2026-10-15:** "Option A: ship S11 with imports closed and manual entry only, and reopen Gate 1 to move AI menu drafting to good-to-have after the slices."
+- **Change, drafted 2026-10-16:** `01-product.md` defers menu photo drafting: the merchant enters the menu by hand, the setup page says photo import is not available in this release, and no AI-drafting claim is made; the announcement, scope, merchant journey steps 3 and 4, the photo failure state, cuts, screens list and acceptance change to match.
+  `mockups/merchant-onboarding.html` replaces the menu image upload and the import-state preview with manual entry and a "not available in this release" note; checked in a browser at 390 px (no horizontal scroll) and 1280 px, with a blank price still blocking confirmation.
+- **Not changed:** Gates 2, 3 and 4 already carry this path through S11's falsifier; the import code built in S11 stays in the application, closed, because `AI_MENU_MODEL` is unset, the bounds list is empty and `MENU_IMPORTS_ENABLED` defaults to false.
+  The "good to have" list holds menu photo import, sharpening it and language additions, after all slices; each returns only through a new evaluation that passes and the user's approval of real merchant photos.
+- **Mirrors:** `handoff.md` and `roadmap.md` mark the deferral; `checks/gate4_check.py` pins the re-approved `01-product.md` (all but its closing status line) and the revised mockup, and `gate4_prove.py` plants one fault for each pin.
+- [x] User reopened Gate 1 for this change, 2026-10-15.
+- [x] `01-product.md`, the mockup and mirrors revised, 2026-10-16.
+- [x] Explicit user re-approval of Gate 1, 2026-10-16 ("I approve Gate 1.").
+- [x] Gate checks [verified], 2026-10-16: `gate4_check.py ... 5f6ab39` passes and `gate4_prove.py` gives 74/74, up from 72 by the two planted faults for the Gate 1 pins.
 
 ### Reopening 2026-10-15: English-only menu photos
 
@@ -1390,6 +1406,10 @@ All unaffected risk dispositions stand; the 2026-10-11 Gate 3 revision of the af
   It authorized the review fixes and record corrections on a review-fix branch with local runs; it did not authorize committing, pushing, fast-forwarding `main`, deploying or any Neon change.
 - 2026-10-15: during S11 the user decided that menu photos are English only ("Chnange the approved plan as well. Just english will do for this hackathon.") and approved the gate change in advance: "Please write a handoff prompt for the next agent to change the gates(i approve the changes to remove chinese)".
   This reopened Gates 2, 3 and 4 for removing the Chinese requirement only and re-approved them for it; see the [record](#reopening-2026-10-15-english-only-menu-photos).
+  It authorizes no other gate change.
+- 2026-10-15: after three failed vision evaluation rounds the user decided "Option A: ship S11 with imports closed and manual entry only, and reopen Gate 1 to move AI menu drafting to good-to-have after the slices."
+  This reopened Gate 1 for that change only; it is not Gate 1 re-approval, and it authorizes shipping S11 with imports closed.
+- 2026-10-16: the user re-approved Gate 1 ("I approve Gate 1."), accepting the deferral of menu photo drafting in `01-product.md` and `mockups/merchant-onboarding.html` as a proposal.
   It authorizes no other gate change.
 
 ### Initial Gate 2 documentary verification, 2026-10-07 (historical, before free-hosting revision)

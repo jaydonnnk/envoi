@@ -380,6 +380,10 @@ for f, text in current.items():
 G3_REOPENING_SHA256 = "0fd07da57b826bf9fa56431da1b11484bc44e56a6ee4846a0bfa715d76c475ac"
 # 02-architecture.md may likewise equal its English-only reopening text, approved in advance on 2026-10-15.
 G2_REOPENING_SHA256 = "938d0a993ff63fdfc416ea77b5df7c628663c52917dbf149332efdedf3bf30a6"
+# Gate 1, re-approved 2026-10-16 after deferring menu photo drafting: the revised mockup, and
+# 01-product.md without its closing status line, which keeps changing as slices finish.
+G1_MOCKUP_SHA256 = {os.path.join("mockups", "merchant-onboarding.html"): "d376e4517de5b7f0c4c892675b0e033111cbac0af1b157519f23078ade16f568"}
+G1_BODY_SHA256 = "ce25854b2a39d4b722715c3936692e3bb7eaca3f01fac6b8bebeb9654a3dff07"
 for root, _, files in os.walk(folder):
     for name in sorted(files):
         rel = os.path.relpath(os.path.join(root, name), folder)
@@ -391,11 +395,14 @@ for root, _, files in os.walk(folder):
                 continue
             if rel == "02-architecture.md" and hashlib.sha256(data).hexdigest() == G2_REOPENING_SHA256:
                 continue
+            if G1_MOCKUP_SHA256.get(rel) == hashlib.sha256(data).hexdigest():
+                continue
             fail("R10", f"protected file changed: {rel}")
 b01 = git_show("docs/plans/envoi/01-product.md").decode("utf-8").splitlines()
 a01 = md["01-product.md"].splitlines()
 changed = [l for l in difflib.unified_diff(b01, a01, lineterm="", n=0) if l[:1] in "+-" and l[:3] not in ("+++", "---")]
-if any(not l[1:].startswith("**Gate 1 approved") for l in changed) or len(changed) > 2:
+g1_body = "\n".join(l for l in a01 if not l.startswith("**Gate 1 approved"))
+if hashlib.sha256(g1_body.encode("utf-8")).hexdigest() != G1_BODY_SHA256 and (any(not l[1:].startswith("**Gate 1 approved") for l in changed) or len(changed) > 2):
     fail("R10", "01-product.md changed beyond its closing status line")
 
 # R11 superseded image and Zapier contracts are absent from the slice plan
