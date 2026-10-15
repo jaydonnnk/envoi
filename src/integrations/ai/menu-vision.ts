@@ -9,11 +9,11 @@ import { log, toSafeErrorRecord, type SafeErrorRecord } from "@/lib/log";
 // no conversation state, no retries, the reviewed output-token bound and an abort signal that joins
 // the request's own signal with the model budget. The photo travels only in this request's memory.
 
-export const MENU_VISION_PROMPT_VERSION = "menu-vision-prompt-2026-10-15";
+export const MENU_VISION_PROMPT_VERSION = "menu-vision-prompt-2026-10-15-english";
 
 const INSTRUCTIONS = `You read a photo of a food or drink menu from a shop in Singapore and list what it offers.
 Return one entry per item or per priced variant, in reading order, at most 100 entries.
-"name": the item name exactly as printed, in its own script (Chinese stays Chinese), or null if you cannot read it.
+"name": the item's English name exactly as printed. When a line prints the name in English and in another script, return only the English part. null if you cannot read an English name.
 "portion": a printed size, portion or variant such as "Large" or "Hot", or null.
 "priceText": only the printed price number for that entry, such as "4.50" or "12", with no currency sign, or null when no price is printed or you cannot read it with certainty. Never estimate, round or compute a price.
 "currency": "sgd_or_unmarked" when the price is marked S$, SGD, $ or not marked; "other" when it is marked in any other currency; null when there is no price.
