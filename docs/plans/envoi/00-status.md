@@ -263,6 +263,22 @@ Written before any round 3 vision call, on the user's decision of 2026-10-15: "O
   Only round 3's own outputs decide whether `gpt-6.1-sol` passes; if it passes, the bounds rule uses round 3's usage.
 - **Spend limit:** the US$1.525 left of the user's US$2 evaluation total; the builder's estimate [hypothesis] is US$0.09.
 
+#### S11 vision evaluation, round 3 results, 2026-10-15
+
+Run once after the round 3 pre-registration commit (`466b118`); every result and raw output is in [`s11-vision-eval-round3.json`](evidence/s11-vision-eval-round3.json).
+Measured spend: US$0.088, so US$0.563 of the US$2 evaluation total over three rounds.
+
+| Model | Found (of 164) | Correct prices | Wrong filled (E1, E2, E3, E4, E5, E6) | Median | Slowest | Cost of 6 | Result |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `gpt-6.1-sol` | 163 | 156 | 5 (1, 0, 0, 0, 0, 4) | 21.6 s | 29.3 s | US$0.0882 | fail |
+
+- **`gpt-6.1-sol` fails** on wrong filled prices (five, limit two); every other condition holds.
+- **Reviewer notes, not substituted:** E1's "Fried Cockles Kway Teow" read as S$4.50 against the expected S$6.50; at the photo's resolution that cell cannot be told apart from S$4.50 (several candidates in rounds 1 and 2 read S$4.50 there too), so the expected draft itself is uncertain for this one cell.
+  E6, the rotated photo, has "Coffee / Tea" read as S$1.40 for S$1.80, a row with no name and S$4.80, "Ya Kun Gift Pack" at the right S$6.00 for "Ya Kun Elfin Pack", and a second "Ya Kun Kaya Cookies" row for the Kaya Pistachio flavour at the right S$2.50.
+  Even setting aside the uncertain cell and the two right-price name errors, two wrong prices remain, both on the rotated photo.
+- **R5 outcome over three rounds:** no candidate passes the pre-registered rule; by it, `AI_MENU_MODEL` stays unset, the bounds list stays empty, imports refuse with `model_bounds_missing`, manual entry stays, no AI-drafting claim is made, and the S11 falsifier reopens Gate 1 menu-import scope.
+  Most remaining errors are on the rotated E6 and the low-resolution E1; on the four clear upright photos `gpt-6.1-sol` filled no wrong price in either round 2 or round 3.
+
 ### S8 Merchant orders and separate acknowledgment, 2026-10-15
 
 - **Branch:** `envoi/slice-8-orders`, from `main` at `c07dcee`; commits `f2f7363` (migration 0019, the orders and acknowledge routes, acknowledgment on the buyer read), `9bc1cb0` (merchant orders page, receipt card, shared bounded poller), `1e1e61c` (tests and mutation definitions), `35e4000` (mutation results and the Neon record), then this record.
