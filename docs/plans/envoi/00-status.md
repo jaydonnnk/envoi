@@ -178,6 +178,32 @@ The harness is [`s11-vision-eval.mts`](evidence/s11-vision-eval.mts); its `PHOTO
 - **Reviewer uncertainty, for the user's check:** E1's cents (".80" against ".00") are read from a low-resolution photo; E5's prices are assigned by row order, because the angle lifts each price tag above its row; E2's "Double Chicken Bratwurst Pasta" and "Cheesy Chicken Chop Pasta" are read as two-line names with one price; E4's "Kaya Peanut Toast" is partly under glare.
 - **Limits of this evaluation [hypothesis]:** six photos, one run each, expected drafts written by the builder, and E6 repeats E4's content; it can show a candidate is unfit, but a pass does not establish accuracy on real merchants' photos, which stay blocked by the exit decision.
 
+#### S11 vision evaluation, results, 2026-10-15
+
+The user checked the expected drafts for E1-E6 on 2026-10-15 ("I checked the expected drafts for E1-E6. They are correct. Run the R5 evaluation.").
+Run once after the pre-registration commit (`9981598`), with prompt `menu-vision-prompt-2026-10-15-english`; every result, including each model's raw output, is in [`s11-vision-eval.json`](evidence/s11-vision-eval.json).
+Measured spend from returned token usage and the list prices: US$0.062 of the US$1 limit.
+
+| Model | Found (of 164) | Correct prices | Wrong filled (E1, E2, E3, E4, E5, E6) | Median | Slowest | Cost of 6 | Result |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `gpt-6-luna` | 161 | 152 | 9 (2, 1, 0, 0, 0, 6) | 21.6 s | 30.9 s | US$0.0074 | fail |
+| `gpt-4o-mini` | 145 | 107 | 44 (11, 13, 0, 2, 4, 14) | 9.9 s | 12.2 s | US$0.0311 | fail |
+| `gpt-5.6-luna` | 158 | 147 | 20 (11, 2, 0, 0, 0, 7) | 16.3 s | 27.0 s | US$0.0147 | fail |
+| `gpt-5.4-nano` | 100 | 71 | 89 (32, 9, 0, 3, 2, 43) | 6.8 s | 10.0 s | US$0.0086 | fail |
+
+- **No candidate passes;** every one fails on wrong filled prices (limit two).
+  Every call returned a valid draft inside the 60-second budget, every median is under 30 seconds and the found and correct shares of `gpt-6-luna` and `gpt-5.6-luna` clear 90%, so wrong filled prices alone decide.
+- **Reviewer notes, not substituted for the score:** `gpt-6-luna`'s nine are two misread E1 prices (Hokkien Mee S$5.90 for S$5.80, Fried Cockles Kway Teow S$4.50 for S$6.50), one E2 two-line name split into a second priced row ("Bratwurst Pasta" S$8.90), and six on the rotated E6: two misread prices, two rows with no name and a price, and two garbled names with the right price ("Milo / Hot Drinks" S$2.00, "Iced Milo / Hot Drinks" S$2.80).
+  A reviewer could dispute the last two as name errors, which still leaves seven.
+  `gpt-5.6-luna`'s twenty are seven E1 S$6.50 prices read as S$4.50, four misread E1 names with the right prices, an invented E2 "Add Truffle Cheese" S$4.50, one E2 split name, and seven on E6.
+- **Pattern [hypothesis]:** on the four clear upright photos (E2-E5), `gpt-6-luna` filled one wrong price in 96 entries and `gpt-5.6-luna` two; the low-resolution E1 and the rotated E6 cause most errors.
+  Envoi's `validateVisionDraft` blanked E2's à-la-carte prices whose names reappear among the unpriced side choices (`duplicate_variant`), as designed; those count as not correct, never as wrong filled.
+- **Observed usage:** the largest input was 1,303 tokens for the three newer models and 37,148 for `gpt-4o-mini`; the largest output was 3,370 tokens (`gpt-6-luna`).
+- **Falsifier response, by the pre-registered rule:** `AI_MENU_MODEL` stays unset and `MENU_SPEND_POLICY.modelBounds` stays empty, so every import is refused with `model_bounds_missing`; manual entry stays and no AI-drafting claim is made.
+  The S11 falsifier reopens Gate 1 menu-import scope; how to proceed is the user's decision.
+- **Found during the run:** the AI SDK logs `AISDK_DEP_IMAGE_CONTENT_PART`, the deprecated `image` content part in `menu-vision.ts`.
+  It is now a `file` part with `mediaType: "image/jpeg"`; with a capturing `fetch` and no network, the request body for E3 is byte-identical before and after (SHA256 `dd0afb273c03ee2db4ea77144d419e8b95108ef491361693d4f22c7031851299`, 144,375 bytes), so the evaluated request is unchanged; 267 of 267 tests, typecheck and lint pass.
+
 ### S8 Merchant orders and separate acknowledgment, 2026-10-15
 
 - **Branch:** `envoi/slice-8-orders`, from `main` at `c07dcee`; commits `f2f7363` (migration 0019, the orders and acknowledge routes, acknowledgment on the buyer read), `9bc1cb0` (merchant orders page, receipt card, shared bounded poller), `1e1e61c` (tests and mutation definitions), `35e4000` (mutation results and the Neon record), then this record.
