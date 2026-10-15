@@ -45,19 +45,28 @@ export type BasketLock = { purchaseId: string; reason: BasketLockReason };
 
 // The first purchase with this basket lock key, other than exceptPurchaseId, for which money can
 // still move (Gate 3 findBasketLock, S7). The key includes the buyer, so only that buyer's purchases
-// match. With lockRows, used inside an execution start, every matching purchase is locked FOR
-// UPDATE in id order before it is judged. A purchase whose derived state differs from its stored one
-// has that transition stored here, best effort; no lock decision waits for it.
+// match. With held, used inside an execution start, only the purchases that start already locked
+// FOR UPDATE, in id order, are judged, and nothing is locked again: a purchase created after those
+// locks cannot get an attempt while they are held, because its own start must take them first, and
+// locking it here would take a row out of id order and could deadlock (S7 review fix M3). A purchase
+// whose derived state differs from its stored one has that transition stored here, best effort; no
+// lock decision waits for it.
 export async function findBasketLock(
   db: Conn,
-  input: { key: BasketLockKey; exceptPurchaseId: string | null; lockRows: boolean; now: Date },
+  input: { key: BasketLockKey; exceptPurchaseId: string | null; held: readonly string[] | null; now: Date },
 ): Promise<BasketLock | null> {
   const query = db
     .select()
     .from(purchases)
-    .where(and(eq(purchases.basketLockKey, input.key), input.exceptPurchaseId === null ? undefined : ne(purchases.id, input.exceptPurchaseId)))
+    .where(
+      and(
+        eq(purchases.basketLockKey, input.key),
+        input.exceptPurchaseId === null ? undefined : ne(purchases.id, input.exceptPurchaseId),
+        input.held === null ? undefined : inArray(purchases.id, [...input.held]),
+      ),
+    )
     .orderBy(asc(purchases.id));
-  const rows = input.lockRows ? await query.for("update") : await query;
+  const rows = await query;
   for (const row of rows) {
     const attempt = await latestAttempt(db, row.id);
     const reason = moneyCanStillMove(
@@ -98,7 +107,7 @@ export async function createReview(conn: Conn, principal: BuyerPrincipal, quote:
   const basketLockKey = computeBasketLockKey({ buyerUserId: principal.userId, outletId: quote.outletId, lines: quote.lockLines });
 
   return conn.transaction(async (tx) => {
-    const lock = await findBasketLock(tx, { key: basketLockKey, exceptPurchaseId: null, lockRows: false, now });
+    const lock = await findBasketLock(tx, { key: basketLockKey, exceptPurchaseId: null, held: null, now });
     if (lock) return { kind: "conflict", error: basketLocked(lock) } as const;
 
     const sameKey = await tx
