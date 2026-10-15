@@ -78,8 +78,11 @@ describe("merchant orders and acknowledgment", () => {
     return { buyer, purchaseId };
   }
 
-  const listOrders = (shop: Shop, cookie = shop.cookie) =>
-    routes.orders.GET(jsonRequest("GET", `/api/v1/merchant/outlets/${shop.outletId}/orders`, cookie), routeParams(shop.outletId));
+  const listOrders = (shop: Shop, cookie = shop.cookie, before: string | null = null) =>
+    routes.orders.GET(
+      jsonRequest("GET", `/api/v1/merchant/outlets/${shop.outletId}/orders${before === null ? "" : `?before=${before}`}`, cookie),
+      routeParams(shop.outletId),
+    );
 
   const acknowledge = (cookie: string, purchaseId: string) =>
     routes.acknowledge.POST(jsonRequest("POST", `/api/v1/merchant/orders/${purchaseId}/acknowledge`, cookie, {}), routeParams(purchaseId));
@@ -173,6 +176,58 @@ describe("merchant orders and acknowledgment", () => {
     const later = (await envelope<OutletOrders>(await listOrders(shop))).data;
     expect(later.orders.find((order) => order.id === started.purchaseId)).toMatchObject({ state: "unpaid_closed", payment: { attemptState: "abandoned" } });
     expect(later.orders.find((order) => order.id === paid.purchaseId)).toMatchObject({ state: "paid" });
+    // The read is a touch: it stored what it showed, with no maintenance run.
+    expect((await purchaseRow(started.purchaseId)).state).toBe("unpaid_closed");
+    expect(await attemptRows(started.purchaseId)).toMatchObject([{ state: "abandoned", outcome_reason: "review_window_passed" }]);
+  });
+
+  it("a paid order stays reachable however many orders follow it", async () => {
+    const { shop } = await api.publishedShop("page-paid");
+    const { shop: other } = await api.publishedShop("page-other");
+    const paid = await buy(shop, "paid");
+    const elsewhere = await buy(other, "started");
+
+    // FIXTURE: one buyer then starts 51 PayPal orders and opens 50 reviews that never start a payment,
+    // each a different basket, as any anonymous session can.
+    const buyer = await anonymousCookie(routes.auth.POST);
+    const items = await publishedItems(fixture.database, shop.outletId);
+    async function open(a: number, b: number): Promise<string> {
+      const lines = [
+        { menuItemId: items[0]!.id, quantity: a },
+        { menuItemId: items[1]!.id, quantity: b },
+      ];
+      const created = await routes.purchases.POST(jsonPost("/api/v1/purchases", buyer, { outletId: shop.outletId, rail: "paypal", lines }));
+      expect(created.status).toBe(201);
+      return (await envelope<{ purchaseId: string }>(created)).data.purchaseId;
+    }
+    const started: string[] = [];
+    for (let n = 0; n < 51; n++) {
+      const purchaseId = await open(1 + (n % 20), 1 + Math.floor(n / 20));
+      fake = createFakePayPal();
+      paypal.client = fake.client;
+      expect((await routes.start.POST(jsonPost(`/api/v1/purchases/${purchaseId}/paypal/start`, buyer), routeParams(purchaseId))).status).toBe(200);
+      started.push(purchaseId);
+    }
+    const reviews: string[] = [];
+    for (let n = 0; n < 50; n++) reviews.push(await open(1 + (n % 20), 10 + Math.floor(n / 20)));
+
+    // The newest page holds the 50 newest orders, none of the reviews, and names the next page.
+    const first = (await envelope<OutletOrders>(await listOrders(shop))).data;
+    expect(first.orders.map((order) => order.id)).toEqual([...started].reverse().slice(0, 50));
+    expect(first.nextBefore).toBe(started[1]);
+
+    // The page before it holds the rest, the paid order last, still acknowledgeable; then no more.
+    const second = (await envelope<OutletOrders>(await listOrders(shop, shop.cookie, first.nextBefore))).data;
+    expect(second.orders.map((order) => order.id)).toEqual([started[0], paid.purchaseId]);
+    expect(second.orders[1]).toMatchObject({ state: "paid", canAcknowledge: true });
+    expect(second.nextBefore).toBeNull();
+
+    // Only one of this shop's orders pages the list: a review or another shop's order is refused.
+    for (const before of [reviews[0]!, elsewhere.purchaseId]) {
+      const refused = await listOrders(shop, shop.cookie, before);
+      expect(refused.status).toBe(400);
+      expect((await envelope(refused)).error).toMatchObject({ code: "validation_failed", details: { reason: "unknown_before" } });
+    }
   });
 
   it("a merchant reaches only its own outlets' orders", async () => {

@@ -1,0 +1,168 @@
+[
+ {
+  "id": "orders-list-reviews",
+  "test": "a paid order stays reachable however many orders follow it",
+  "test_file": "tests/integration/merchant-orders.test.ts",
+  "mutation": "List every purchase of the outlet again, reviews that never started a payment included (M1).",
+  "edits": [
+   {
+    "file": "src/domain/purchases/orders.ts",
+    "old": "    .where(and(eq(purchases.outletId, outletId), inArray(purchases.state, [...ORDER_STATES]), older))\n",
+    "new": "    .where(and(eq(purchases.outletId, outletId), older))\n"
+   }
+  ]
+ },
+ {
+  "id": "orders-list-any-outlet",
+  "test": "a paid order stays reachable however many orders follow it",
+  "test_file": "tests/integration/merchant-orders.test.ts",
+  "mutation": "List purchases of every outlet instead of this outlet (the S8 list-any-outlet mutation on the rewritten query).",
+  "edits": [
+   {
+    "file": "src/domain/purchases/orders.ts",
+    "old": "    .where(and(eq(purchases.outletId, outletId), inArray(purchases.state, [...ORDER_STATES]), older))\n",
+    "new": "    .where(and(eq(purchases.currency, \"SGD\"), inArray(purchases.state, [...ORDER_STATES]), older))\n"
+   }
+  ]
+ },
+ {
+  "id": "orders-no-next",
+  "test": "a paid order stays reachable however many orders follow it",
+  "test_file": "tests/integration/merchant-orders.test.ts",
+  "mutation": "Never name an older page, so orders past the newest 50 are out of reach (M1).",
+  "edits": [
+   {
+    "file": "src/domain/purchases/orders.ts",
+    "old": "  return { outlet, orders, nextBefore: page.length > ORDERS_PAGE ? rows.at(-1)!.purchase.id : null };\n",
+    "new": "  return { outlet, orders, nextBefore: null };\n"
+   }
+  ]
+ },
+ {
+  "id": "orders-before-ignored",
+  "test": "a paid order stays reachable however many orders follow it",
+  "test_file": "tests/integration/merchant-orders.test.ts",
+  "mutation": "Ignore before, so every page is the newest page (M1).",
+  "edits": [
+   {
+    "file": "src/domain/purchases/orders.ts",
+    "old": "  const older = before === null ? undefined : sql`",
+    "new": "  const older = true ? undefined : sql`"
+   }
+  ]
+ },
+ {
+  "id": "orders-cursor-any-state",
+  "test": "a paid order stays reachable however many orders follow it",
+  "test_file": "tests/integration/merchant-orders.test.ts",
+  "mutation": "Accept a review that never started a payment as the cursor (M1).",
+  "edits": [
+   {
+    "file": "src/domain/purchases/orders.ts",
+    "old": "      .where(and(eq(purchases.id, before), eq(purchases.outletId, outletId), inArray(purchases.state, [...ORDER_STATES])))\n",
+    "new": "      .where(and(eq(purchases.id, before), eq(purchases.outletId, outletId)))\n"
+   }
+  ]
+ },
+ {
+  "id": "orders-cursor-any-outlet",
+  "test": "a paid order stays reachable however many orders follow it",
+  "test_file": "tests/integration/merchant-orders.test.ts",
+  "mutation": "Accept another outlet's order as the cursor (M1).",
+  "edits": [
+   {
+    "file": "src/domain/purchases/orders.ts",
+    "old": "      .where(and(eq(purchases.id, before), eq(purchases.outletId, outletId), inArray(purchases.state, [...ORDER_STATES])))\n",
+    "new": "      .where(and(eq(purchases.id, before), inArray(purchases.state, [...ORDER_STATES])))\n"
+   }
+  ]
+ },
+ {
+  "id": "list-no-touch",
+  "test": "the orders list shows only the outlet's orders, with states derived on read",
+  "test_file": "tests/integration/merchant-orders.test.ts",
+  "mutation": "Show the derived states without storing them (m3).",
+  "edits": [
+   {
+    "file": "src/domain/purchases/orders.ts",
+    "old": "    if (order.state !== stored) await applyDerivedTransitions(db, order.id, now);\n",
+    "new": "    void stored;\n"
+   }
+  ]
+ },
+ {
+  "id": "orders-route-account-guard",
+  "test": "a merchant reaches only its own outlets' orders",
+  "test_file": "tests/integration/merchant-orders.test.ts",
+  "mutation": "Guard the orders route with any merchant account instead of the outlet's membership (the S8 mutation on the rewritten route).",
+  "edits": [
+   {
+    "file": "src/app/api/v1/merchant/outlets/[id]/orders/route.ts",
+    "old": "import { isOutletMember, requireOutletMembership } from \"@/lib/auth-context\";\n",
+    "new": "import { isMerchantAccount, requireMerchantMembership } from \"@/lib/auth-context\";\n"
+   },
+   {
+    "file": "src/app/api/v1/merchant/outlets/[id]/orders/route.ts",
+    "old": "  const principal = await requireOutletMembership(getAuth(), webDb(), request.headers, (await params).id);\n  if (!isOutletMember(principal)) return httpErr(principal);\n",
+    "new": "  const principal = await requireMerchantMembership(getAuth(), webDb(), request.headers);\n  if (!isMerchantAccount(principal)) return httpErr(principal);\n"
+   },
+   {
+    "file": "src/app/api/v1/merchant/outlets/[id]/orders/route.ts",
+    "old": "  const orders = await listOutletOrders(webDb(), principal.outletId, new Date(), before);\n",
+    "new": "  const orders = await listOutletOrders(webDb(), (await params).id, new Date(), before);\n"
+   }
+  ]
+ },
+ {
+  "id": "view-drops-shown",
+  "test": "the orders view never drops an order it has shown",
+  "test_file": "tests/unit/merchant-orders-polling.test.ts",
+  "mutation": "Replace the orders shown with the polled newest page (M1).",
+  "edits": [
+   {
+    "file": "src/app/merchant/orders/polling.ts",
+    "old": "  return [...newest, ...shown.filter((order) => !ids.has(order.id))];\n",
+    "new": "  return [...newest];\n"
+   }
+  ]
+ },
+ {
+  "id": "view-repeats-older",
+  "test": "the orders view never drops an order it has shown",
+  "test_file": "tests/unit/merchant-orders-polling.test.ts",
+  "mutation": "Append an older page without removing orders already shown (M1).",
+  "edits": [
+   {
+    "file": "src/app/merchant/orders/polling.ts",
+    "old": "  return [...shown, ...older.filter((order) => !ids.has(order.id))];\n",
+    "new": "  return [...shown, ...older];\n"
+   }
+  ]
+ },
+ {
+  "id": "copy-approved-not-approved",
+  "test": "an unpaid order's status claims nothing that has not happened",
+  "test_file": "tests/unit/merchant-order-copy.test.ts",
+  "mutation": "Drop the approved-in-PayPal status, so an approved order reads as not approved (m1).",
+  "edits": [
+   {
+    "file": "src/app/merchant/orders/order-copy.ts",
+    "old": "      if (order.payment?.attemptState === \"externally_approved\") {\n",
+    "new": "      if (order.payment?.attemptState === \"never\") {\n"
+   }
+  ]
+ },
+ {
+  "id": "copy-promises-check",
+  "test": "an unpaid order's status claims nothing that has not happened",
+  "test_file": "tests/unit/merchant-order-copy.test.ts",
+  "mutation": "Restore the claim that Envoi is checking the payment (m2).",
+  "edits": [
+   {
+    "file": "src/app/merchant/orders/order-copy.ts",
+    "old": "Its result is not known yet; do not treat it as paid unless it shows Paid.\",",
+    "new": "Do not treat it as paid; Envoi is checking it.\","
+   }
+  ]
+ }
+]

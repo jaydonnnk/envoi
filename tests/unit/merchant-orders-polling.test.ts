@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { startOrdersPolling, type PolledOrder } from "@/app/merchant/orders/polling";
+import { startOrdersPolling, withNewest, withOlder, type PolledOrder } from "@/app/merchant/orders/polling";
 
 // S8: the merchant orders view polls within the S3 bounds, asserted as the approved literals.
 describe("merchant orders polling", () => {
@@ -51,5 +51,18 @@ describe("merchant orders polling", () => {
     const settled = poller([], [order("pur_a", "paid", "capture_confirmed", "2026-10-15T01:00:00.000Z"), order("pur_c", "review_expired")]);
     await vi.advanceTimersByTimeAsync(60_000);
     expect(settled.fetches).toEqual([]);
+  });
+
+  it("the orders view never drops an order it has shown", () => {
+    const shown = [order("pur_c", "pending_payment", "order_created"), order("pur_b", "paid", "capture_confirmed"), order("pur_a", "unpaid_closed", "abandoned")];
+
+    // A poll's newest page leads with a new order, updates pur_c and no longer holds pur_a, which a
+    // newer order pushed off it: pur_a stays, after the page, as it was.
+    const newest = [order("pur_d", "pending_payment", "created"), order("pur_c", "paid", "capture_confirmed"), order("pur_b", "paid", "capture_confirmed")];
+    expect(withNewest(shown, newest)).toEqual([newest[0], newest[1], newest[2], shown[2]]);
+
+    // An older page follows every order shown, without repeating one.
+    const older = [order("pur_a", "unpaid_closed", "abandoned"), order("pur_0", "paid", "capture_confirmed")];
+    expect(withOlder(shown, older)).toEqual([...shown, older[1]]);
   });
 });
