@@ -1,0 +1,176 @@
+{
+ "branch": "envoi/slice-8-orders",
+ "base_commit": "1e1e61c",
+ "uncommitted_changes": false,
+ "method": "Each definition in s8-mutation-defs.json applied alone by exact text replacement, its named test run alone (vitest -t), every touched file restored and compared by SHA-256, then the test rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations; merchant accounts are created by the operator functions with passwords generated in memory per run, and their FIXTURE shops are published through the real merchant routes. PayPal is the labeled FIXTURE fake at the PayPalWriteClient boundary. A proof also needs the mutated run to fail on an AssertionError.",
+ "results": [
+  {
+   "id": "ack-allows-pending",
+   "test": "acknowledgment requires a verified payment",
+   "files": [
+    "src/domain/purchases/orders.ts"
+   ],
+   "mutation": "Allow acknowledgment on a pending_payment order (the Gate 4 mutation).",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
+   "error": "AssertionError: expected 200 to be 400 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 3 skipped (4)",
+   "proof": true
+  },
+  {
+   "id": "ack-writes-state",
+   "test": "acknowledgment never changes payment state",
+   "files": [
+    "src/domain/purchases/orders.ts"
+   ],
+   "mutation": "Let acknowledgment write the purchase state, closing the order as it is acknowledged (the Gate 4 mutation).",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
+   "error": "AssertionError: expected { \u2026(12) } to match object { \u2026(3) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 3 skipped (4)",
+   "proof": true
+  },
+  {
+   "id": "ack-repeat-rewrites",
+   "test": "acknowledgment never changes payment state",
+   "files": [
+    "src/domain/purchases/orders.ts"
+   ],
+   "mutation": "Drop the repeat check, so a second acknowledgment rewrites the time and audits again.",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
+   "error": "AssertionError: expected true to be false // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 3 skipped (4)",
+   "proof": true
+  },
+  {
+   "id": "receipt-without-acknowledgment",
+   "test": "acknowledgment never changes payment state",
+   "files": [
+    "src/domain/purchases/serialize.ts"
+   ],
+   "mutation": "Leave the acknowledgment out of the buyer's purchase read.",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
+   "error": "AssertionError: expected null to deeply equal { Object (acknowledgedAt) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 3 skipped (4)",
+   "proof": true
+  },
+  {
+   "id": "list-any-outlet",
+   "test": "the orders list shows only the outlet's orders, with states derived on read",
+   "files": [
+    "src/domain/purchases/orders.ts"
+   ],
+   "mutation": "List purchases of every outlet instead of the member's outlet.",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
+   "error": "AssertionError: expected [ \u2026(3) ] to deeply equal [ \u2026(2) ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 3 skipped (4)",
+   "proof": true
+  },
+  {
+   "id": "list-stored-state",
+   "test": "the orders list shows only the outlet's orders, with states derived on read",
+   "files": [
+    "src/domain/purchases/orders.ts"
+   ],
+   "mutation": "Show the stored state instead of the view derived on read.",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
+   "error": "AssertionError: expected { \u2026(12) } to match object { state: 'unpaid_closed', \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 3 skipped (4)",
+   "proof": true
+  },
+  {
+   "id": "ack-any-member",
+   "test": "a merchant reaches only its own outlets' orders",
+   "files": [
+    "src/domain/purchases/orders.ts"
+   ],
+   "mutation": "Scope acknowledgment to any live membership of the order's outlet, not the caller's.",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
+   "error": "AssertionError: expected 200 to be 404 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 3 skipped (4)",
+   "proof": true
+  },
+  {
+   "id": "ack-revoked-member",
+   "test": "a merchant reaches only its own outlets' orders",
+   "files": [
+    "src/domain/purchases/orders.ts"
+   ],
+   "mutation": "Accept a revoked membership when scoping acknowledgment.",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
+   "error": "AssertionError: expected 200 to be 404 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 3 skipped (4)",
+   "proof": true
+  },
+  {
+   "id": "orders-route-account-guard",
+   "test": "a merchant reaches only its own outlets' orders",
+   "files": [
+    "src/app/api/v1/merchant/outlets/[id]/orders/route.ts"
+   ],
+   "mutation": "Guard the orders route with any merchant account instead of the outlet's membership.",
+   "mutated": "Tests  1 failed | 3 skipped (4)",
+   "error": "AssertionError: expected 200 to be 403 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 3 skipped (4)",
+   "proof": true
+  },
+  {
+   "id": "polling-never-done",
+   "test": "merchant orders polling stays within the S3 bounds",
+   "files": [
+    "src/app/merchant/orders/polling.ts"
+   ],
+   "mutation": "Keep polling after every listed order is terminal.",
+   "mutated": "Tests  1 failed (1)",
+   "error": "AssertionError: expected [ Array(30) ] to deeply equal [ 2000 ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed (1)",
+   "proof": true
+  },
+  {
+   "id": "polling-interval",
+   "test": "merchant orders polling stays within the S3 bounds",
+   "files": [
+    "src/lib/browser/polling.ts"
+   ],
+   "mutation": "Poll every second instead of every 2 seconds.",
+   "mutated": "Tests  1 failed (1)",
+   "error": "AssertionError: expected [ 1000, 2000, 3000, 4000, 5000, \u2026(55) ] to have a length of 30 but got 60",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed (1)",
+   "proof": true
+  },
+  {
+   "id": "polling-limit",
+   "test": "merchant orders polling stays within the S3 bounds",
+   "files": [
+    "src/lib/browser/polling.ts"
+   ],
+   "mutation": "Poll for 120 seconds instead of 60.",
+   "mutated": "Tests  1 failed (1)",
+   "error": "AssertionError: expected [ Array(60) ] to have a length of 30 but got 60",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed (1)",
+   "proof": true
+  }
+ ]
+}

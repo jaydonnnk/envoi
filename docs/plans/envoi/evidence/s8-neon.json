@@ -1,0 +1,216 @@
+{
+ "date": "2026-10-15",
+ "method": "Every read in one READ ONLY transaction (.maintenance-build/s8-neon-read.mts, git-ignored) as the migration role; identifiers, flags and counts only; neon_auth never read. Migration 0019 applied with npm run db:migrate between the two reads.",
+ "before": {
+  "readOnly": {
+   "transaction_read_only": "on"
+  },
+  "migrations": {
+   "n": 19
+  },
+  "ackColumns": [],
+  "constraints": [],
+  "indexes": [],
+  "webPurchaseUpdate": {
+   "cols": "state"
+  },
+  "webPurchaseTable": {
+   "privs": "INSERT,SELECT"
+  },
+  "triggers": [
+   {
+    "tgname": "menu_items_item_key_default",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "menu_items_published_immutable",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "menu_revisions_published_immutable",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "merchant_memberships_binding_once",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "outlets_publication_guard",
+    "tgenabled": "O"
+   }
+  ],
+  "states": [
+   {
+    "state": "paid",
+    "n": 4
+   },
+   {
+    "state": "pending_payment",
+    "n": 2
+   },
+   {
+    "state": "review_expired",
+    "n": 1
+   },
+   {
+    "state": "review_open",
+    "n": 6
+   },
+   {
+    "state": "uncertain",
+    "n": 2
+   },
+   {
+    "state": "unpaid_closed",
+    "n": 2
+   }
+  ],
+  "acknowledged": null,
+  "shop": [
+   {
+    "id": "pur_qhslqa5ms3ycea7ntznashejoy",
+    "state": "paid",
+    "review_passed": true,
+    "attempt": "capture_confirmed"
+   },
+   {
+    "id": "pur_f3znbc6ctluxd3tvgdcmwvicj4",
+    "state": "pending_payment",
+    "review_passed": true,
+    "attempt": "order_created"
+   },
+   {
+    "id": "pur_7mmw4zyfpdmh7zoxt6kew27e5e",
+    "state": "review_open",
+    "review_passed": true,
+    "attempt": null
+   },
+   {
+    "id": "pur_4beph5hewgnfzliwaga6gdpfze",
+    "state": "pending_payment",
+    "review_passed": true,
+    "attempt": "order_created"
+   }
+  ]
+ },
+ "after": {
+  "readOnly": {
+   "transaction_read_only": "on"
+  },
+  "migrations": {
+   "n": 20
+  },
+  "ackColumns": [
+   {
+    "column_name": "acknowledged_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+   },
+   {
+    "column_name": "acknowledged_by_user_id",
+    "data_type": "text",
+    "is_nullable": "YES"
+   }
+  ],
+  "constraints": [
+   {
+    "conname": "purchases_acknowledged_by_user_id_user_id_fk"
+   },
+   {
+    "conname": "purchases_acknowledged_check"
+   }
+  ],
+  "indexes": [
+   {
+    "indexname": "purchases_outlet_created_idx"
+   }
+  ],
+  "webPurchaseUpdate": {
+   "cols": "acknowledged_at,acknowledged_by_user_id,state"
+  },
+  "webPurchaseTable": {
+   "privs": "INSERT,SELECT"
+  },
+  "triggers": [
+   {
+    "tgname": "menu_items_item_key_default",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "menu_items_published_immutable",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "menu_revisions_published_immutable",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "merchant_memberships_binding_once",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "outlets_publication_guard",
+    "tgenabled": "O"
+   }
+  ],
+  "states": [
+   {
+    "state": "paid",
+    "n": 4
+   },
+   {
+    "state": "pending_payment",
+    "n": 2
+   },
+   {
+    "state": "review_expired",
+    "n": 1
+   },
+   {
+    "state": "review_open",
+    "n": 6
+   },
+   {
+    "state": "uncertain",
+    "n": 2
+   },
+   {
+    "state": "unpaid_closed",
+    "n": 2
+   }
+  ],
+  "acknowledged": {
+   "n": 0
+  },
+  "shop": [
+   {
+    "id": "pur_qhslqa5ms3ycea7ntznashejoy",
+    "state": "paid",
+    "review_passed": true,
+    "attempt": "capture_confirmed",
+    "acknowledged": false
+   },
+   {
+    "id": "pur_f3znbc6ctluxd3tvgdcmwvicj4",
+    "state": "pending_payment",
+    "review_passed": true,
+    "attempt": "order_created",
+    "acknowledged": false
+   },
+   {
+    "id": "pur_7mmw4zyfpdmh7zoxt6kew27e5e",
+    "state": "review_open",
+    "review_passed": true,
+    "attempt": null,
+    "acknowledged": false
+   },
+   {
+    "id": "pur_4beph5hewgnfzliwaga6gdpfze",
+    "state": "pending_payment",
+    "review_passed": true,
+    "attempt": "order_created",
+    "acknowledged": false
+   }
+  ]
+ }
+}
