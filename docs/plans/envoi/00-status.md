@@ -143,7 +143,8 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - **Review:** an independent review of S8 on 2026-10-15 gave the verdict ISSUES FOUND: one medium defect (M1), three minor findings (m1-m3) and two low ones (m4, m5); it reproduced S8's 207 of 207 tests and 12 of 12 mutations on `71fb31a` with a clean tree.
   The user's words: "Give the verdict and if there are medium to major findings / issues, let me know and fix them."
   M1 and m1-m3 are fixed; m4 and m5 stay as they are.
-- **Branch:** `envoi/slice-8-review-fixes`, from `main` at `71fb31a`; commits `b0525ce` (M1), `3ce1b21` (m1, m2), `aab3459` (tests and mutation definitions), then this record.
+- **Branch:** `envoi/slice-8-review-fixes`, from `main` at `71fb31a`; commits `b0525ce` (M1), `3ce1b21` (m1, m2), `aab3459` (tests and mutation definitions), `47a7343` (this record), then this line.
+  CI passed on `47a7343` on the branch (run 38702541825); the branch and `main`, fast-forwarded to the commit that adds this line, were pushed, which deploys.
 - **Authorizations, 2026-10-15:** the user's words above covered the branch, the edits and local runs; then, in their words: "I authorize: commit the S8 review fixes, record them in 00-status.md, push the branch, fast-forward main and push, which deploys."
   No migration and no Neon read or write: the fixes change no schema.
 - **M1, a buyer could hide every paid order from the merchant [fixed]:** the orders list held the outlet's 50 newest purchases of any state, with no pagination and no sign of truncation.
