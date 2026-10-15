@@ -1,0 +1,763 @@
+[
+ {
+  "id": "refuse-origin",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "import route rejects a foreign Origin",
+  "mutation": "skip assertSameOrigin",
+  "edits": [
+   {
+    "file": "src/app/api/v1/merchant/outlets/[id]/menu-imports/route.ts",
+    "old": "  const foreign = assertSameOrigin(request);\n  if (foreign) return httpErr(foreign);\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "refuse-disabled",
+  "test_file": "tests/integration/menu-import-disabled.test.ts",
+  "test": "imports refuse while disabled",
+  "mutation": "ignore the MENU_IMPORTS_ENABLED flag",
+  "edits": [
+   {
+    "file": "src/domain/imports/request.ts",
+    "old": "if (!env.MENU_IMPORTS_ENABLED || !env.OPENAI_API_KEY || !env.AI_MENU_MODEL) {",
+    "new": "if (!env.OPENAI_API_KEY || !env.AI_MENU_MODEL) {"
+   }
+  ]
+ },
+ {
+  "id": "refuse-consent",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "stale consent version is refused before admission",
+  "mutation": "skip the consent version comparison",
+  "edits": [
+   {
+    "file": "src/domain/imports/request.ts",
+    "old": "if (request.headers.get(\"envoi-consent-version\") !== MENU_CONSENT_VERSION) {",
+    "new": "if (false) {"
+   }
+  ]
+ },
+ {
+  "id": "refuse-read-before-admission",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "refused admission reads no image bytes",
+  "mutation": "read the body after the consent check but before admission",
+  "edits": [
+   {
+    "file": "src/domain/imports/request.ts",
+    "old": "  const admission = await admitMenuImport(db, {",
+    "new": "  await readCountedBody(request.body, MENU_IMPORT_LIMITS.maxBodyBytes, 30_000, request.signal);\n  const admission = await admitMenuImport(db, {"
+   }
+  ]
+ },
+ {
+  "id": "upload-counted",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "import body is counted, not trusted from Content-Length",
+  "mutation": "read with request.arrayBuffer() and check the size afterwards",
+  "edits": [
+   {
+    "file": "src/domain/imports/request.ts",
+    "old": "const read = await readCountedBody(request.body, MENU_IMPORT_LIMITS.maxBodyBytes, readMs, request.signal);",
+    "new": "const whole = new Uint8Array(await request.arrayBuffer());\n    void readMs;\n    const read = whole.byteLength > MENU_IMPORT_LIMITS.maxBodyBytes ? ({ ok: false, reason: \"too_large\" } as const) : ({ ok: true, bytes: whole } as const);"
+   }
+  ]
+ },
+ {
+  "id": "upload-timer",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "slow upload stops at its read bound",
+  "mutation": "remove the read timer",
+  "edits": [
+   {
+    "file": "src/lib/http/bounded-body.ts",
+    "old": "  const timer = setTimeout(() => stop(\"timeout\"), timeoutMs);",
+    "new": "  const timer = undefined;\n  void timeoutMs;"
+   }
+  ]
+ },
+ {
+  "id": "upload-multipart",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "non-multipart body is refused",
+  "mutation": "accept a raw body",
+  "edits": [
+   {
+    "file": "src/domain/imports/upload.ts",
+    "old": "if (contentType === null || !/^multipart\\/form-data\\s*;/i.test(contentType)) return { ok: false, reason: \"not_multipart\" };",
+    "new": "if (contentType === null || !/^multipart\\/form-data\\s*;/i.test(contentType)) return { ok: true, jpeg: bytes };"
+   }
+  ]
+ },
+ {
+  "id": "upload-part-count",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "second photo part is refused",
+  "mutation": "accept extra parts",
+  "edits": [
+   {
+    "file": "src/domain/imports/upload.ts",
+    "old": "  if (parts.length > 1) return { ok: false, reason: \"part_count\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "upload-part-name",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "body without a photo part is refused",
+  "mutation": "accept a part of any name",
+  "edits": [
+   {
+    "file": "src/domain/imports/upload.ts",
+    "old": "if (!part || part[0] !== \"photo\" || typeof part[1] === \"string\")",
+    "new": "if (!part || typeof part[1] === \"string\")"
+   }
+  ]
+ },
+ {
+  "id": "upload-part-size",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "JPEG over 2 MiB is refused inside a legal body",
+  "mutation": "drop the part-size check, leaving only the body limit",
+  "edits": [
+   {
+    "file": "src/domain/imports/upload.ts",
+    "old": "  if (part[1].size > MENU_IMPORT_LIMITS.maxPhotoBytes) return { ok: false, reason: \"part_too_large\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "photo-format",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "non-JPEG content is refused even when labeled JPEG",
+  "mutation": "skip the decoded-format check",
+  "edits": [
+   {
+    "file": "src/integrations/image/normalize.ts",
+    "old": "  if (header.format !== \"jpeg\") return { ok: false, reason: \"not_jpeg\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "photo-dimensions",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "JPEG over 2,048 pixels per side is refused before decode",
+  "mutation": "drop the header dimension check",
+  "edits": [
+   {
+    "file": "src/integrations/image/normalize.ts",
+    "old": "  if (header.width > limit || header.height > limit) return { ok: false, reason: \"too_many_pixels\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "static-proxy",
+  "test_file": "tests/unit/import-route-static.test.ts",
+  "test": "no proxy matcher covers the import route",
+  "mutation": "give the proxy a catch-all matcher",
+  "edits": [
+   {
+    "file": "src/proxy.ts",
+    "old": "export const config = { matcher: [\"/operator/:path*\"] };",
+    "new": "export const config = { matcher: [\"/operator/:path*\", \"/((?!_next).*)\"] };"
+   }
+  ]
+ },
+ {
+  "id": "static-import-guard",
+  "test_file": "tests/unit/import-route-static.test.ts",
+  "test": "menu-import handler begins with its membership guard",
+  "mutation": "remove the guard from the menu-import handler",
+  "edits": [
+   {
+    "file": "src/app/api/v1/merchant/outlets/[id]/menu-imports/route.ts",
+    "old": "  const principal = await requireOutletMembership(getAuth(), webDb(), request.headers, (await params).id);\n  if (!isOutletMember(principal)) return httpErr(principal);\n  const foreign",
+    "new": "  const principal = { kind: \"outlet_member\", userId: \"\", outletId: (await params).id, membershipId: \"\" } as const;\n  const foreign"
+   }
+  ]
+ },
+ {
+  "id": "static-draft-guard",
+  "test_file": "tests/unit/import-route-static.test.ts",
+  "test": "menu-draft handler begins with its membership guard",
+  "mutation": "remove the guard from the menu-draft handler",
+  "edits": [
+   {
+    "file": "src/app/api/v1/merchant/outlets/[id]/menu-draft/route.ts",
+    "old": "export async function GET(request: Request, { params }: Params): Promise<Response> {\n  const principal = await requireOutletMembership(getAuth(), webDb(), request.headers, (await params).id);\n  if (!isOutletMember(principal)) return httpErr(principal);\n",
+    "new": "export async function GET(request: Request, { params }: Params): Promise<Response> {\n  const principal = { kind: \"outlet_member\", userId: \"\", outletId: (await params).id, membershipId: \"\" } as const;\n"
+   }
+  ]
+ },
+ {
+  "id": "admit-outlet-live",
+  "test_file": "tests/integration/menu-import-admission.test.ts",
+  "test": "second live import for an outlet is refused",
+  "mutation": "drop the outlet in-flight predicate",
+  "edits": [
+   {
+    "file": "src/domain/imports/admission.ts",
+    "old": "    if (outletLive!.n >= limits.outletInFlight) return { ok: false, reason: \"in_flight_outlet\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "admit-global-live",
+  "test_file": "tests/integration/menu-import-admission.test.ts",
+  "test": "second live import anywhere is refused",
+  "mutation": "drop the global in-flight predicate",
+  "edits": [
+   {
+    "file": "src/domain/imports/admission.ts",
+    "old": "    if (globalLive!.n >= limits.globalInFlight) return { ok: false, reason: \"in_flight_global\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "admit-outlet-daily",
+  "test_file": "tests/integration/menu-import-admission.test.ts",
+  "test": "eleventh import for an outlet in a UTC day is refused",
+  "mutation": "drop the outlet daily count",
+  "edits": [
+   {
+    "file": "src/domain/imports/admission.ts",
+    "old": "    if (outletDay!.n >= limits.outletDaily) return { ok: false, reason: \"daily_cap_outlet\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "admit-global-daily",
+  "test_file": "tests/integration/menu-import-admission.test.ts",
+  "test": "fifty-first import in a UTC day is refused",
+  "mutation": "drop the global daily count",
+  "edits": [
+   {
+    "file": "src/domain/imports/admission.ts",
+    "old": "    if (globalDay!.n >= limits.globalDaily) return { ok: false, reason: \"daily_cap_global\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "admit-count-failed",
+  "test_file": "tests/integration/menu-import-admission.test.ts",
+  "test": "failed and aborted attempts count toward daily caps",
+  "mutation": "count only completed attempts",
+  "edits": [
+   {
+    "file": "src/domain/imports/admission.ts",
+    "old": ".where(and(today, eq(menuImports.outletId, input.outletId)));",
+    "new": ".where(and(today, eq(menuImports.outletId, input.outletId), eq(menuImports.closedOutcome, \"completed\")));"
+   }
+  ]
+ },
+ {
+  "id": "admit-utc-day",
+  "test_file": "tests/integration/menu-import-admission.test.ts",
+  "test": "daily caps reset at UTC midnight",
+  "mutation": "compute the day in Asia/Singapore",
+  "edits": [
+   {
+    "file": "src/domain/imports/admission.ts",
+    "old": "    // Every admitted attempt of the UTC day counts, whatever its outcome.\n    const dayStart = utcDayStart(now);",
+    "new": "    // Every admitted attempt of the UTC day counts, whatever its outcome.\n    const dayStart = new Date(utcDayStart(new Date(now.getTime() + 8 * 3_600_000)).getTime() - 8 * 3_600_000);"
+   }
+  ]
+ },
+ {
+  "id": "admit-expired-open",
+  "test_file": "tests/integration/menu-import-admission.test.ts",
+  "test": "an expired open import does not block the next admission",
+  "mutation": "count stored open rows as live",
+  "edits": [
+   {
+    "file": "src/domain/imports/admission.ts",
+    "old": "    // Live means open and before its deadline; an open row past its deadline reads as expired.\n    const live = and(isNull(menuImports.closedAt), gt(menuImports.deadlineAt, now));",
+    "new": "    // Live means open and before its deadline; an open row past its deadline reads as expired.\n    const live = isNull(menuImports.closedAt);"
+   }
+  ]
+ },
+ {
+  "id": "admit-ceiling-unset",
+  "test_file": "tests/integration/menu-import-admission.test.ts",
+  "test": "imports fail closed until a spend ceiling is recorded",
+  "mutation": "treat a null ceiling as unlimited",
+  "edits": [
+   {
+    "file": "src/domain/imports/admission.ts",
+    "old": "    if (policy.dailyCeilingUsdMicros === null) return { ok: false, reason: \"spend_ceiling_unset\" };",
+    "new": "    const ceiling = policy.dailyCeilingUsdMicros ?? Number.MAX_SAFE_INTEGER;"
+   },
+   {
+    "file": "src/domain/imports/admission.ts",
+    "old": "+ reserved > policy.dailyCeilingUsdMicros)",
+    "new": "+ reserved > ceiling)"
+   }
+  ]
+ },
+ {
+  "id": "admit-bounds-missing",
+  "test_file": "tests/integration/menu-import-admission.test.ts",
+  "test": "unreviewed menu model is refused",
+  "mutation": "fall back to default bounds",
+  "edits": [
+   {
+    "file": "src/domain/imports/admission.ts",
+    "old": "    const bounds = boundsFor(policy, input.model);",
+    "new": "    const bounds = boundsFor(policy, input.model) ?? policy.modelBounds[0]!;"
+   }
+  ]
+ },
+ {
+  "id": "admit-ceiling-reached",
+  "test_file": "tests/integration/menu-import-admission.test.ts",
+  "test": "reservation beyond the daily ceiling is refused",
+  "mutation": "compare only recorded actual spend",
+  "edits": [
+   {
+    "file": "src/domain/imports/admission.ts",
+    "old": ".select({ total: sum(menuImports.reservedUsdMicros).mapWith(Number) })",
+    "new": ".select({ total: sum(menuImports.actualUsdMicros).mapWith(Number) })"
+   }
+  ]
+ },
+ {
+  "id": "admit-overrun",
+  "test_file": "tests/integration/menu-import-admission.test.ts",
+  "test": "usage above its reservation stops further imports",
+  "mutation": "ignore recorded usage at admission",
+  "edits": [
+   {
+    "file": "src/domain/imports/admission.ts",
+    "old": "    if (overrun) return { ok: false, reason: \"model_bounds_exceeded\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "admit-release-undispatched",
+  "test_file": "tests/integration/menu-import-admission.test.ts",
+  "test": "an attempt closed before the model call releases its reservation",
+  "mutation": "count every reservation whatever its dispatch mark",
+  "edits": [
+   {
+    "file": "src/domain/imports/admission.ts",
+    "old": "      .where(and(today, or(isNotNull(menuImports.modelDispatchedAt), live)));",
+    "new": "      .where(today);"
+   }
+  ]
+ },
+ {
+  "id": "admit-lock",
+  "test_file": "tests/integration/menu-import-admission.test.ts",
+  "test": "concurrent admissions admit one",
+  "mutation": "remove the singleton row lock",
+  "edits": [
+   {
+    "file": "src/domain/imports/admission.ts",
+    "old": "    await tx.select({ id: menuImportAdmission.id }).from(menuImportAdmission).where(eq(menuImportAdmission.id, \"global\")).for(\"update\");\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "admit-keep-aborted",
+  "test_file": "tests/integration/menu-import-admission.test.ts",
+  "test": "aborted attempt keeps its spend reservation",
+  "mutation": "release a reservation whenever its attempt closes, ignoring the dispatch mark",
+  "edits": [
+   {
+    "file": "src/domain/imports/admission.ts",
+    "old": "      .where(and(today, or(isNotNull(menuImports.modelDispatchedAt), live)));",
+    "new": "      .where(and(today, live));"
+   }
+  ]
+ },
+ {
+  "id": "dispatch-before-call",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "model dispatch is recorded before the call",
+  "mutation": "write the dispatch mark after the call returns",
+  "edits": [
+   {
+    "file": "src/domain/imports/request.ts",
+    "old": "    const { marked } = await markModelDispatched(db, importId, importRuntime.now());",
+    "new": "    const marked = true;"
+   },
+   {
+    "file": "src/domain/imports/request.ts",
+    "old": "    // A dispatched call may be billed even when it failed, so its usage is charged at its bound.",
+    "new": "    await markModelDispatched(db, importId, importRuntime.now());\n    // A dispatched call may be billed even when it failed, so its usage is charged at its bound."
+   }
+  ]
+ },
+ {
+  "id": "vision-store",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "menu vision request sets store false",
+  "mutation": "omit the store provider option",
+  "edits": [
+   {
+    "file": "src/integrations/ai/menu-vision.ts",
+    "old": "providerOptions: { openai: { store: false, strictJsonSchema: true } },",
+    "new": "providerOptions: { openai: { strictJsonSchema: true } },"
+   }
+  ]
+ },
+ {
+  "id": "vision-tools",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "menu vision request carries no tools",
+  "mutation": "register a read tool on the call",
+  "edits": [
+   {
+    "file": "src/integrations/ai/menu-vision.ts",
+    "old": "import { generateText, NoObjectGeneratedError, Output } from \"ai\";",
+    "new": "import { generateText, NoObjectGeneratedError, Output, tool } from \"ai\";"
+   },
+   {
+    "file": "src/integrations/ai/menu-vision.ts",
+    "old": "      output: Output.object({ schema: MenuVisionOutput }),",
+    "new": "      tools: { read_menu: tool({ description: \"FIXTURE mutation\", inputSchema: z.object({}), execute: async () => ({}) }) },\n      output: Output.object({ schema: MenuVisionOutput }),"
+   }
+  ]
+ },
+ {
+  "id": "vision-retries",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "menu vision call is never retried",
+  "mutation": "leave maxRetries at the SDK default",
+  "edits": [
+   {
+    "file": "src/integrations/ai/menu-vision.ts",
+    "old": "      maxRetries: 0,\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "vision-schema",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "menu vision schema is strict with required nullable fields",
+  "mutation": "make priceText optional",
+  "edits": [
+   {
+    "file": "src/integrations/ai/menu-vision.ts",
+    "old": "      priceText: z.string().nullable(),",
+    "new": "      priceText: z.string().nullable().optional(),"
+   }
+  ]
+ },
+ {
+  "id": "vision-token-bound",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "menu vision output is capped at the reviewed token bound",
+  "mutation": "omit maxOutputTokens",
+  "edits": [
+   {
+    "file": "src/integrations/ai/menu-vision.ts",
+    "old": "      maxOutputTokens: input.bounds.maxOutputTokens,\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "vision-model-name",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "menu vision uses AI_MENU_MODEL, not AI_MODEL",
+  "mutation": "read AI_MODEL",
+  "edits": [
+   {
+    "file": "src/domain/imports/request.ts",
+    "old": "      model: env.AI_MENU_MODEL,\n      apiKey: env.OPENAI_API_KEY,",
+    "new": "      model: env.AI_MODEL ?? \"\",\n      apiKey: env.OPENAI_API_KEY,"
+   }
+  ]
+ },
+ {
+  "id": "vision-budget",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "model budget keeps the commit reserve",
+  "mutation": "use a fixed 60-second budget",
+  "edits": [
+   {
+    "file": "src/domain/imports/request.ts",
+    "old": "      budgetMs: menuModelBudgetMs(admittedAt, importRuntime.now()),",
+    "new": "      budgetMs: 60_000,"
+   }
+  ]
+ },
+ {
+  "id": "vision-disconnect",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "client disconnect aborts the model call",
+  "mutation": "stop passing the request signal",
+  "edits": [
+   {
+    "file": "src/integrations/ai/menu-vision.ts",
+    "old": "  const signal = AbortSignal.any([input.signal, budget.signal]);",
+    "new": "  const signal = budget.signal;"
+   }
+  ]
+ },
+ {
+  "id": "photo-metadata",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "re-encoded photo carries no metadata",
+  "mutation": "send the uploaded bytes unchanged",
+  "edits": [
+   {
+    "file": "src/domain/imports/request.ts",
+    "old": "      jpeg: photo.jpeg,",
+    "new": "      jpeg: part.jpeg,"
+   }
+  ]
+ },
+ {
+  "id": "no-disk",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "import writes nothing to disk",
+  "mutation": "spool the upload to a temporary file",
+  "edits": [
+   {
+    "file": "src/domain/imports/request.ts",
+    "old": "    const part = await parseSinglePhotoPart(read.bytes, request.headers.get(\"content-type\"));",
+    "new": "    const part = await parseSinglePhotoPart(read.bytes, request.headers.get(\"content-type\"));\n    if (part.ok) await (await import(\"node:fs/promises\")).writeFile((await import(\"node:path\")).join((await import(\"node:os\")).tmpdir(), \"envoi-upload.jpg\"), part.jpeg);"
+   }
+  ]
+ },
+ {
+  "id": "no-leak",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "image bytes never reach logs, responses or audit",
+  "mutation": "log the whole error object",
+  "edits": [
+   {
+    "file": "src/integrations/ai/menu-vision.ts",
+    "old": "    log(\"warn\", \"menu_vision_failed\", { model: input.model, error });",
+    "new": "    console.error(JSON.stringify({ event: \"menu_vision_failed\", model: input.model, error, raw: err }));"
+   }
+  ]
+ },
+ {
+  "id": "no-image-column",
+  "test_file": "tests/integration/menu-import-admission.test.ts",
+  "test": "import tables have no image column",
+  "mutation": "add an image_sha256 column",
+  "edits": [
+   {
+    "file": "drizzle/0020_s11_menu_imports.sql",
+    "old": "GRANT UPDATE (\"last_admitted_at\") ON TABLE public.\"menu_import_admission\" TO envoi_web;",
+    "new": "GRANT UPDATE (\"last_admitted_at\") ON TABLE public.\"menu_import_admission\" TO envoi_web;--> statement-breakpoint\nALTER TABLE \"menu_imports\" ADD COLUMN \"image_sha256\" text;"
+   }
+  ]
+ },
+ {
+  "id": "derive-expired",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "an abandoned import reads as expired with no write",
+  "mutation": "trust the stored state",
+  "edits": [
+   {
+    "file": "src/domain/imports/lifecycle.ts",
+    "old": "  return now.getTime() >= row.deadlineAt.getTime() ? \"expired\" : \"in_flight\";",
+    "new": "  return \"in_flight\";"
+   }
+  ]
+ },
+ {
+  "id": "reload-outcome",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "test": "draft reload reports the latest import outcome",
+  "mutation": "return the draft without the import outcome",
+  "edits": [
+   {
+    "file": "src/app/api/v1/merchant/outlets/[id]/menu-draft/route.ts",
+    "old": "  return httpOk({ ...draftJson(read.draft), latestImport: read.latest ? importJson(read.latest) : null });",
+    "new": "  return httpOk(draftJson(read.draft));"
+   }
+  ]
+ },
+ {
+  "id": "validate-malformed",
+  "test_file": "tests/unit/vision-draft-validation.test.ts",
+  "test": "malformed result is an error not a repair",
+  "mutation": "coerce schema-violating output to an empty item list",
+  "edits": [
+   {
+    "file": "src/domain/imports/validate-result.ts",
+    "old": "  if (!parsed.success) return { ok: false, reason: \"malformed\" };",
+    "new": "  if (!parsed.success) return { ok: true, items: [], fingerprint: \"\", blankPriceCount: 0 };"
+   }
+  ]
+ },
+ {
+  "id": "validate-blank",
+  "test_file": "tests/unit/vision-draft-validation.test.ts",
+  "test": "blank price stays blank",
+  "mutation": "default a null price to 0",
+  "edits": [
+   {
+    "file": "src/domain/imports/validate-result.ts",
+    "old": "  if (priceText === null) return { priceSgdCents: null, priceBasis: \"blank\" };",
+    "new": "  if (priceText === null) return { priceSgdCents: sgdFromCents(0), priceBasis: \"blank\" };"
+   }
+  ]
+ },
+ {
+  "id": "validate-rows",
+  "test_file": "tests/unit/vision-draft-validation.test.ts",
+  "test": "more than 100 draft rows is refused",
+  "mutation": "drop the row cap",
+  "edits": [
+   {
+    "file": "src/domain/imports/validate-result.ts",
+    "old": "  if (rows.length > MENU_IMPORT_LIMITS.maxRows) return { ok: false, reason: \"too_many_rows\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "validate-text",
+  "test_file": "tests/unit/vision-draft-validation.test.ts",
+  "test": "draft text over 120 characters is refused",
+  "mutation": "drop the text cap",
+  "edits": [
+   {
+    "file": "src/domain/imports/validate-result.ts",
+    "old": "    return { ok: false, reason: \"text_too_long\" };",
+    "new": "    void 0;"
+   }
+  ]
+ },
+ {
+  "id": "validate-size",
+  "test_file": "tests/unit/vision-draft-validation.test.ts",
+  "test": "draft result over 128 KiB is refused",
+  "mutation": "drop the size cap",
+  "edits": [
+   {
+    "file": "src/domain/imports/validate-result.ts",
+    "old": "  if (new TextEncoder().encode(serialized).byteLength > MENU_IMPORT_LIMITS.maxResultBytes) return { ok: false, reason: \"oversize\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "validate-currency",
+  "test_file": "tests/unit/vision-draft-validation.test.ts",
+  "test": "non-SGD price stays blank",
+  "mutation": "accept the printed number",
+  "edits": [
+   {
+    "file": "src/domain/imports/validate-result.ts",
+    "old": "  if (currency === \"other\") return { priceSgdCents: null, priceBasis: \"other_currency\" };",
+    "new": "  if (currency === \"other\") return { priceSgdCents: sgdFromDecimalString(priceText), priceBasis: \"explicit\" };"
+   }
+  ]
+ },
+ {
+  "id": "validate-parse",
+  "test_file": "tests/unit/vision-draft-validation.test.ts",
+  "test": "zero or malformed price text stays blank",
+  "mutation": "parse with parseFloat",
+  "edits": [
+   {
+    "file": "src/domain/imports/validate-result.ts",
+    "old": "  const cents = currency === \"sgd_or_unmarked\" ? sgdFromDecimalString(priceText.trim()) : null;",
+    "new": "  const cents = currency === \"sgd_or_unmarked\" ? Math.round(parseFloat(priceText) * 100) : null;"
+   }
+  ]
+ },
+ {
+  "id": "validate-duplicates",
+  "test_file": "tests/unit/vision-draft-validation.test.ts",
+  "test": "duplicate variants are flagged for the merchant",
+  "mutation": "keep each duplicate row's own price, unflagged",
+  "edits": [
+   {
+    "file": "src/domain/imports/validate-result.ts",
+    "old": "      item.priceSgdCents = null;\n      item.priceBasis = \"duplicate_variant\";\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "commit-late",
+  "test_file": "tests/integration/menu-import-commit.test.ts",
+  "test": "late result is rejected",
+  "mutation": "accept a result after the deadline",
+  "edits": [
+   {
+    "file": "src/domain/imports/lifecycle.ts",
+    "old": "    if (!row || row.closedAt !== null || now.getTime() >= row.deadlineAt.getTime()) return \"late\";",
+    "new": "    if (!row || row.closedAt !== null) return \"late\";"
+   }
+  ]
+ },
+ {
+  "id": "commit-base",
+  "test_file": "tests/integration/menu-import-commit.test.ts",
+  "test": "base revision change is rejected",
+  "mutation": "drop the base revision comparison",
+  "edits": [
+   {
+    "file": "src/domain/imports/lifecycle.ts",
+    "old": "    if (!revision || revision.id !== row.baseRevisionId) {",
+    "new": "    if (!revision) {"
+   },
+   {
+    "file": "src/domain/imports/lifecycle.ts",
+    "old": "draft.items, row.baseRevisionId, revision.id);",
+    "new": "draft.items, revision.id, revision.id);"
+   }
+  ]
+ },
+ {
+  "id": "commit-confirmed",
+  "test_file": "tests/integration/menu-import-commit.test.ts",
+  "test": "confirmed menu is never overwritten",
+  "mutation": "allow the write to a confirmed draft",
+  "edits": [
+   {
+    "file": "src/domain/imports/lifecycle.ts",
+    "old": "    if (!fromPublished && revision.status === \"confirmed\") {",
+    "new": "    if (false) {"
+   }
+  ]
+ },
+ {
+  "id": "commit-membership",
+  "test_file": "tests/integration/menu-import-commit.test.ts",
+  "test": "membership removed during an import merges nothing",
+  "mutation": "drop the membership recheck from commitImport",
+  "edits": [
+   {
+    "file": "src/domain/imports/lifecycle.ts",
+    "old": "    if (!membership) {",
+    "new": "    if (false) {"
+   }
+  ]
+ },
+ {
+  "id": "merge-edits",
+  "test_file": "tests/integration/menu-import-commit.test.ts",
+  "test": "merchant edits survive a merge",
+  "mutation": "add the photo's version of an item the merchant already has instead of keeping the merchant's",
+  "edits": [
+   {
+    "file": "src/domain/menu/draft.ts",
+    "old": "    if (match) {\n      if (match.source === \"merchant\") preserved.add(match.id);\n      continue;\n    }\n",
+    "new": ""
+   }
+  ]
+ }
+]
