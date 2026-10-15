@@ -134,6 +134,13 @@
       "when": 1792022622576,
       "tag": "0018_s7_review_trigger_search_path",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792027411208,
+      "tag": "0019_s8_acknowledgment",
+      "breakpoints": true
     }
   ]
 }

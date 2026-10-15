@@ -198,6 +198,8 @@ export type OwnPurchase = {
   sellerMerchantId: string | null;
   attempt: PaymentAttemptRow | null;
   view: PurchaseView;
+  // The shop's acknowledgment (S8), separate from the payment state and only ever on a paid order.
+  acknowledgedAt: Date | null;
 };
 
 // Owner predicate: a purchase is readable only by the session that created it. Anything else is
@@ -229,6 +231,7 @@ export async function getOwnPurchase(db: Conn, principal: BuyerPrincipal, purcha
     sellerMerchantId: row.sellerMerchantId,
     attempt,
     view: derivePurchaseView(purchase, attempt, now),
+    acknowledgedAt: purchase.acknowledgedAt,
   };
 }
 

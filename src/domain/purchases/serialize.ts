@@ -27,5 +27,7 @@ export function purchaseJson(purchase: OwnPurchase) {
           captureVerifiedAt: purchase.view.state === "paid" ? (attempt.captureVerifiedAt?.toISOString() ?? null) : null,
         }
       : null,
+    // Its own field: acknowledgment never changes or implies the payment state above.
+    acknowledgment: purchase.acknowledgedAt ? { acknowledgedAt: purchase.acknowledgedAt.toISOString() } : null,
   };
 }

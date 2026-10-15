@@ -274,6 +274,10 @@ export const purchases = pgTable(
     // quantities, without rail, destination or menu revision. Immutable like the lines it hashes.
     basketLockKey: text("basket_lock_key"),
     supersedesPurchaseId: text("supersedes_purchase_id").references((): AnyPgColumn => purchases.id),
+    // The merchant's acknowledgment (S8), its own field beside the payment state: it never changes
+    // or implies that state, and only a paid purchase can be acknowledged.
+    acknowledgedAt: timestamp("acknowledged_at", { withTimezone: true }),
+    acknowledgedByUserId: text("acknowledged_by_user_id").references(() => user.id),
   },
   (t) => [
     check(
@@ -288,7 +292,9 @@ export const purchases = pgTable(
       "purchases_binding_check",
       sql`${t.entryPoint} = 'fixture_tracer' or (${t.rail} is not null and ${t.destinationId} is not null and ${t.destinationVersion} is not null and ${t.checkoutKey} is not null)`,
     ),
+    check("purchases_acknowledged_check", sql`(${t.acknowledgedAt} is null) = (${t.acknowledgedByUserId} is null)`),
     index("purchases_buyer_idx").on(t.buyerUserId),
+    index("purchases_outlet_created_idx").on(t.outletId, t.createdAt),
     index("purchases_basket_lock_key_idx").on(t.basketLockKey),
     // One open review per buyer and checkout key (Gate 3 Races: two tabs create the same basket).
     uniqueIndex("purchases_one_open_review").on(t.buyerUserId, t.checkoutKey).where(sql`${t.state} = 'review_open'`),
