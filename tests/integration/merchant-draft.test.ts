@@ -33,6 +33,8 @@ describe("merchant sign-in and manual menu draft", () => {
     confirm: typeof import("@/app/api/v1/merchant/outlets/[id]/confirm/route");
     destination: typeof import("@/app/api/v1/merchant/outlets/[id]/destinations/paypal/route");
     publish: typeof import("@/app/api/v1/merchant/outlets/[id]/publish/route");
+    orders: typeof import("@/app/api/v1/merchant/outlets/[id]/orders/route");
+    acknowledge: typeof import("@/app/api/v1/merchant/orders/[id]/acknowledge/route");
     purchases: typeof import("@/app/api/v1/purchases/route");
     purchase: typeof import("@/app/api/v1/purchases/[id]/route");
     publicOutlets: typeof import("@/app/api/v1/outlets/route");
@@ -49,6 +51,8 @@ describe("merchant sign-in and manual menu draft", () => {
       confirm: await import("@/app/api/v1/merchant/outlets/[id]/confirm/route"),
       destination: await import("@/app/api/v1/merchant/outlets/[id]/destinations/paypal/route"),
       publish: await import("@/app/api/v1/merchant/outlets/[id]/publish/route"),
+      orders: await import("@/app/api/v1/merchant/outlets/[id]/orders/route"),
+      acknowledge: await import("@/app/api/v1/merchant/orders/[id]/acknowledge/route"),
       purchases: await import("@/app/api/v1/purchases/route"),
       purchase: await import("@/app/api/v1/purchases/[id]/route"),
       publicOutlets: await import("@/app/api/v1/outlets/route"),
@@ -100,6 +104,9 @@ describe("merchant sign-in and manual menu draft", () => {
       // S7
       await routes.destination.PUT(jsonRequest("PUT", `/api/v1/merchant/outlets/${outletId}/destinations/paypal`, cookie, { sellerMerchantId: "FXTRSELLER2AB" }, headers), routeParams(outletId)),
       await routes.publish.POST(jsonRequest("POST", `/api/v1/merchant/outlets/${outletId}/publish`, cookie, { revisionId: draft.id, version: draft.version }, headers), routeParams(outletId)),
+      // S8
+      await routes.orders.GET(jsonRequest("GET", `/api/v1/merchant/outlets/${outletId}/orders`, cookie, undefined, headers), routeParams(outletId)),
+      await routes.acknowledge.POST(jsonRequest("POST", "/api/v1/merchant/orders/pur_fixtureprobe/acknowledge", cookie, {}, headers), routeParams("pur_fixtureprobe")),
     ];
   }
 
@@ -108,7 +115,8 @@ describe("merchant sign-in and manual menu draft", () => {
       (select count(*)::int from merchant_memberships) as memberships,
       (select json_agg(json_build_object('id', id, 'name', name, 'area', area) order by id) from outlets) as outlet_rows,
       (select json_agg(json_build_object('id', id, 'version', version, 'status', status) order by id) from menu_revisions) as revisions,
-      (select count(*)::int from menu_items) as items`;
+      (select count(*)::int from menu_items) as items,
+      (select count(*)::int from purchases where acknowledged_at is not null) as acknowledged`;
 
   async function expectForbidden(responses: Response[]) {
     for (const response of responses) {

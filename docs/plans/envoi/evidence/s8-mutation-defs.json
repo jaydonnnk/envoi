@@ -1,0 +1,163 @@
+[
+ {
+  "id": "ack-allows-pending",
+  "test": "acknowledgment requires a verified payment",
+  "test_file": "tests/integration/merchant-orders.test.ts",
+  "mutation": "Allow acknowledgment on a pending_payment order (the Gate 4 mutation).",
+  "edits": [
+   {
+    "file": "src/domain/purchases/orders.ts",
+    "old": "    if (row.purchase.state !== \"paid\") {\n",
+    "new": "    if (row.purchase.state !== \"paid\" && row.purchase.state !== \"pending_payment\") {\n"
+   }
+  ]
+ },
+ {
+  "id": "ack-writes-state",
+  "test": "acknowledgment never changes payment state",
+  "test_file": "tests/integration/merchant-orders.test.ts",
+  "mutation": "Let acknowledgment write the purchase state, closing the order as it is acknowledged (the Gate 4 mutation).",
+  "edits": [
+   {
+    "file": "src/domain/purchases/orders.ts",
+    "old": "      .set({ acknowledgedAt: input.now, acknowledgedByUserId: input.userId })\n",
+    "new": "      .set({ acknowledgedAt: input.now, acknowledgedByUserId: input.userId, state: \"unpaid_closed\" })\n"
+   }
+  ]
+ },
+ {
+  "id": "ack-repeat-rewrites",
+  "test": "acknowledgment never changes payment state",
+  "test_file": "tests/integration/merchant-orders.test.ts",
+  "mutation": "Drop the repeat check, so a second acknowledgment rewrites the time and audits again.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/orders.ts",
+    "old": "    if (row.purchase.acknowledgedAt !== null) return { order, changed: false };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "receipt-without-acknowledgment",
+  "test": "acknowledgment never changes payment state",
+  "test_file": "tests/integration/merchant-orders.test.ts",
+  "mutation": "Leave the acknowledgment out of the buyer's purchase read.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/serialize.ts",
+    "old": "    acknowledgment: purchase.acknowledgedAt ? { acknowledgedAt: purchase.acknowledgedAt.toISOString() } : null,\n",
+    "new": "    acknowledgment: null,\n"
+   }
+  ]
+ },
+ {
+  "id": "list-any-outlet",
+  "test": "the orders list shows only the outlet's orders, with states derived on read",
+  "test_file": "tests/integration/merchant-orders.test.ts",
+  "mutation": "List purchases of every outlet instead of the member's outlet.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/orders.ts",
+    "old": "    .where(eq(purchases.outletId, outletId))\n",
+    "new": "    .where(eq(purchases.currency, \"SGD\"))\n"
+   }
+  ]
+ },
+ {
+  "id": "list-stored-state",
+  "test": "the orders list shows only the outlet's orders, with states derived on read",
+  "test_file": "tests/integration/merchant-orders.test.ts",
+  "mutation": "Show the stored state instead of the view derived on read.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/orders.ts",
+    "old": "    state: view.state,\n",
+    "new": "    state: purchase.state as PurchaseState,\n"
+   }
+  ]
+ },
+ {
+  "id": "ack-any-member",
+  "test": "a merchant reaches only its own outlets' orders",
+  "test_file": "tests/integration/merchant-orders.test.ts",
+  "mutation": "Scope acknowledgment to any live membership of the order's outlet, not the caller's.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/orders.ts",
+    "old": "and(eq(merchantMemberships.outletId, purchases.outletId), eq(merchantMemberships.userId, input.userId), isNull(merchantMemberships.revokedAt))",
+    "new": "and(eq(merchantMemberships.outletId, purchases.outletId), isNull(merchantMemberships.revokedAt))"
+   }
+  ]
+ },
+ {
+  "id": "ack-revoked-member",
+  "test": "a merchant reaches only its own outlets' orders",
+  "test_file": "tests/integration/merchant-orders.test.ts",
+  "mutation": "Accept a revoked membership when scoping acknowledgment.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/orders.ts",
+    "old": "and(eq(merchantMemberships.outletId, purchases.outletId), eq(merchantMemberships.userId, input.userId), isNull(merchantMemberships.revokedAt))",
+    "new": "and(eq(merchantMemberships.outletId, purchases.outletId), eq(merchantMemberships.userId, input.userId))"
+   }
+  ]
+ },
+ {
+  "id": "orders-route-account-guard",
+  "test": "a merchant reaches only its own outlets' orders",
+  "test_file": "tests/integration/merchant-orders.test.ts",
+  "mutation": "Guard the orders route with any merchant account instead of the outlet's membership.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/merchant/outlets/[id]/orders/route.ts",
+    "old": "import { isOutletMember, requireOutletMembership } from \"@/lib/auth-context\";\n",
+    "new": "import { isMerchantAccount, requireMerchantMembership } from \"@/lib/auth-context\";\n"
+   },
+   {
+    "file": "src/app/api/v1/merchant/outlets/[id]/orders/route.ts",
+    "old": "  const principal = await requireOutletMembership(getAuth(), webDb(), request.headers, (await params).id);\n  if (!isOutletMember(principal)) return httpErr(principal);\n\n  const orders = await listOutletOrders(webDb(), principal.outletId, new Date());\n",
+    "new": "  const principal = await requireMerchantMembership(getAuth(), webDb(), request.headers);\n  if (!isMerchantAccount(principal)) return httpErr(principal);\n\n  const orders = await listOutletOrders(webDb(), (await params).id, new Date());\n"
+   }
+  ]
+ },
+ {
+  "id": "polling-never-done",
+  "test": "merchant orders polling stays within the S3 bounds",
+  "test_file": "tests/unit/merchant-orders-polling.test.ts",
+  "mutation": "Keep polling after every listed order is terminal.",
+  "edits": [
+   {
+    "file": "src/app/merchant/orders/polling.ts",
+    "old": "isDone: (orders) => orders.every((order) => isTerminalPurchaseState(order.state))",
+    "new": "isDone: () => false"
+   }
+  ]
+ },
+ {
+  "id": "polling-interval",
+  "test": "merchant orders polling stays within the S3 bounds",
+  "test_file": "tests/unit/merchant-orders-polling.test.ts",
+  "mutation": "Poll every second instead of every 2 seconds.",
+  "edits": [
+   {
+    "file": "src/lib/browser/polling.ts",
+    "old": "export const POLL_INTERVAL_MS = 2_000;\n",
+    "new": "export const POLL_INTERVAL_MS = 1_000;\n"
+   }
+  ]
+ },
+ {
+  "id": "polling-limit",
+  "test": "merchant orders polling stays within the S3 bounds",
+  "test_file": "tests/unit/merchant-orders-polling.test.ts",
+  "mutation": "Poll for 120 seconds instead of 60.",
+  "edits": [
+   {
+    "file": "src/lib/browser/polling.ts",
+    "old": "export const POLL_LIMIT_MS = 60_000;\n",
+    "new": "export const POLL_LIMIT_MS = 120_000;\n"
+   }
+  ]
+ }
+]
