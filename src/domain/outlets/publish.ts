@@ -31,8 +31,10 @@ export function missingPreconditions(facts: PublicationFacts): PublicationCheck[
 
 type Conn = Pick<Db, "select">;
 
-// With lock, inside the publish transaction: the outlet is already locked by the caller, the draft
-// revision is locked FOR UPDATE and the destination FOR SHARE, so neither changes before the switch.
+// With lock, inside the publish transaction: the outlet is already locked by the caller and the draft
+// revision is locked FOR UPDATE, so it cannot change before the switch. The destination is read
+// without a lock: no path changes its status or clears its acceptance, and an acceptance that
+// commits after this read only makes this publication refuse, changing nothing.
 async function publicationFacts(db: Conn, outletId: string, lock: boolean): Promise<PublicationFacts | null> {
   const [outlet] = await db.select({ detailsConfirmedAt: outlets.detailsConfirmedAt }).from(outlets).where(eq(outlets.id, outletId));
   if (!outlet) return null;
@@ -51,7 +53,7 @@ async function publicationFacts(db: Conn, outletId: string, lock: boolean): Prom
         isNotNull(paymentDestinations.acceptedAt),
       ),
     );
-  const [destination] = lock ? await destinationQuery.for("share") : await destinationQuery;
+  const [destination] = await destinationQuery;
   return {
     enrollmentApproved: enrollment !== undefined,
     detailsConfirmed: outlet.detailsConfirmedAt !== null,

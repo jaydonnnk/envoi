@@ -8,6 +8,7 @@ import { createFakePayPal, type FakePayPal } from "../support/fake-paypal";
 import { createPaymentsFixture, FIXTURE_SELLER, jsonPost, routeParams, type PaymentsFixture } from "../support/payments";
 import { envelope, loadMerchantRoutes, publishedItems, shopApi, type MerchantRoutes, type PublicationCheck } from "../support/publication";
 import { anonymousCookie } from "../support/session";
+import { waitFor } from "../support/wait";
 
 const paypal = vi.hoisted(() => ({ client: null as PayPalWriteClient | null }));
 vi.mock("@/integrations/paypal/orders", async (importOriginal) => ({
@@ -122,6 +123,27 @@ describe("merchant destination and publication", () => {
     // The new revision keeps each item's key, so the same items are the same basket after republication.
     const keys = await fixture.database.admin<{ itemKey: string }[]>`select item_key as "itemKey" from menu_items where menu_revision_id = ${draft.revisionId} order by position`;
     expect(keys.map((row) => row.itemKey)).toEqual(before.map((item) => item.itemKey));
+  });
+
+  it("two first edits of a published menu make one draft", async () => {
+    const { shop } = await api.publishedShop("edit-concurrent");
+    const published = await api.getDraft(shop);
+    const priced = (cents: number) => published.items.map((item) => ({ id: item.id, name: item.name, priceSgdCents: cents }));
+    const admin = fixture.database.admin;
+    const lockWaiters = async () =>
+      (await admin<{ n: number }[]>`select count(*)::int as n from pg_stat_activity where datname = ${fixture.database.name} and wait_event_type = 'Lock'`)[0]!.n;
+
+    // Both saves start from the published menu while no draft exists. Each is held either at its
+    // insert of the new revision, which this table lock blocks, or behind the other's outlet lock.
+    let saves!: Promise<(Response | null)[]>;
+    await admin.begin(async (sql) => {
+      await sql`lock table menu_revisions in share mode`;
+      saves = Promise.all([answer(api.putDraft(shop, published, priced(200))), answer(api.putDraft(shop, published, priced(210)))]);
+      await waitFor(async () => (await lockWaiters()) >= 2, 10_000, "both saves to wait");
+    });
+    expect((await saves).map((response) => response?.status ?? null).sort()).toEqual([200, 409]);
+    const drafts = await admin`select id from menu_revisions where outlet_id = ${shop.outletId} and published_at is null`;
+    expect(drafts).toHaveLength(1);
   });
 
   it("republication invalidates an open review at execution", async () => {
@@ -297,6 +319,39 @@ describe("merchant destination and publication", () => {
       expect(await outcome(web`update outlets set published_menu_revision_id = ${unconfirmed.draft.revisionId} where id = ${unconfirmed.shop.outletId}`)).toMatch(refused);
       expect(await pointerOf(shop.outletId)).toBe(pointer);
       expect(await pointerOf(unconfirmed.shop.outletId)).toBeNull();
+    });
+
+    it("a temporary table cannot shadow the published-menu guard", async () => {
+      const { shop } = await api.publishedShop("temp-shadow");
+      const before = await publishedItems(fixture.database, shop.outletId);
+      // The web role holds TEMP on the database, and pg_temp comes first in its search path.
+      await web`create temp table menu_revisions (id text, published_at timestamptz)`;
+      try {
+        expect(await outcome(web`update menu_items set unit_sgd_cents = 1 where id = ${before[0]!.id}`)).toMatch(/belongs to a published revision/);
+      } finally {
+        await web`drop table pg_temp.menu_revisions`;
+      }
+      expect(await publishedItems(fixture.database, shop.outletId)).toEqual(before);
+    });
+
+    it("a published pointer is never cleared", async () => {
+      const { shop } = await api.publishedShop("pointer-clear");
+      const pointer = await pointerOf(shop.outletId);
+      expect(await outcome(web`update outlets set published_menu_revision_id = null where id = ${shop.outletId}`)).toMatch(/cannot be unpublished/);
+      expect(await pointerOf(shop.outletId)).toBe(pointer);
+    });
+
+    it("a published revision is never deleted", async () => {
+      // Only the table owner may delete a revision, and a revision with items is also held by their
+      // foreign key, so this published revision has none: only the trigger can refuse its deletion.
+      const { shop, draft } = await api.publishedShop("revision-delete");
+      const admin = fixture.database.admin;
+      const empty = `mrv_guard_delete_${shop.outletId}`;
+      await admin`insert into menu_revisions (id, outlet_id, status, version, confirmed_at) values (${empty}, ${shop.outletId}, 'confirmed', 1, now())`;
+      await admin`update outlets set published_menu_revision_id = ${empty} where id = ${shop.outletId}`;
+      await admin`update outlets set published_menu_revision_id = ${draft.revisionId} where id = ${shop.outletId}`;
+      expect(await outcome(admin`delete from menu_revisions where id = ${empty}`)).toMatch(/was published and cannot change/);
+      expect(await admin`select published_at is not null as published from menu_revisions where id = ${empty}`).toEqual([{ published: true }]);
     });
 
     it("a bound membership is never rebound", async () => {

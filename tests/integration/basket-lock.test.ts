@@ -19,6 +19,13 @@ vi.mock("@/integrations/paypal/orders", async (importOriginal) => ({
   paypalWriteClient: () => paypal.client,
 }));
 
+// Purchase ids are random; a test that needs two purchases in a known id order queues them here.
+const purchaseIds = vi.hoisted(() => ({ next: [] as string[] }));
+vi.mock("@/lib/ids", async (importOriginal) => {
+  const real = await importOriginal<typeof import("@/lib/ids")>();
+  return { ...real, newId: (prefix: Parameters<typeof real.newId>[0]) => (prefix === "pur" && purchaseIds.next.length > 0 ? purchaseIds.next.shift()! : real.newId(prefix)) };
+});
+
 // S7: the PayPal half of the basket lock across a republished menu. The lock key leaves out the menu
 // revision, so the same items on the republished menu are the same basket; it holds exactly while
 // money can still move, derived on read, with no maintenance run. Real route handlers run as
@@ -183,19 +190,77 @@ describe("PayPal basket lock across republication", () => {
     }
   });
 
+  it("two starts of one basket across a republish do not deadlock", async () => {
+    freshFake();
+    const { shop } = await api.publishedShop("lock-deadlock");
+    const buyer = await anonymousCookie(routes.auth.POST);
+    const principal = await principalOf(buyer);
+    // P1's id sorts above P2's, so P2's start locks its own row first and then waits on P1's.
+    const p1Id = `pur_${"z".repeat(26)}`;
+    const p2Id = `pur_${"a".repeat(26)}`;
+    purchaseIds.next.push(p1Id);
+    expect((await openReview(buyer, shop)).body.data.purchaseId).toBe(p1Id);
+
+    const web = connectWeb(fixture.database.webUrl, 4);
+    const deps = { db: web.db, paypal: fake.client, now: () => new Date(), appBaseUrl: TEST_BASE_URL };
+    const admin = fixture.database.admin;
+    const waitingOnLock = async () =>
+      (await admin`select count(*)::int as n from pg_stat_activity where datname = ${fixture.database.name} and wait_event_type = 'Lock'`)[0]!.n > 0;
+
+    let p1Held!: () => void;
+    const p1InBarrier = new Promise<void>((resolve) => (p1Held = resolve));
+    try {
+      // P1 holds after its locks and eligibility check, before it judges the basket lock, until P2's
+      // start waits on P1's row.
+      const first = startPayPal(deps, principal, p1Id, {
+        afterExistingAttemptRead: async () => {
+          p1Held();
+          await waitFor(waitingOnLock, 10_000, "P2's start to wait on P1's row");
+        },
+      });
+      await p1InBarrier;
+
+      await api.republish(shop, raisePrice);
+      purchaseIds.next.push(p2Id);
+      expect((await openReview(buyer, shop)).body.data.purchaseId).toBe(p2Id);
+      const second = startPayPal(deps, principal, p2Id);
+
+      const settled = await Promise.allSettled([first, second]);
+      expect(settled.map((result) => result.status)).toEqual(["fulfilled", "fulfilled"]);
+      const [r1, r2] = settled.map((result) => (result as PromiseFulfilledResult<StartResult | AppError>).value);
+      expect(r1).not.toHaveProperty("code");
+      expect(r2).toMatchObject({ code: "execution_locked", details: { purchaseId: p1Id } });
+      const attempts = await admin`select purchase_id from payment_attempts where purchase_id in (${p1Id}, ${p2Id})`;
+      expect(attempts).toEqual([{ purchase_id: p1Id }]);
+      expect(fake.writes()).toHaveLength(1);
+    } finally {
+      purchaseIds.next.length = 0;
+      await web.close();
+    }
+  });
+
   it("the migration backfill computes the application's basket lock key", async () => {
     freshFake();
     const { shop } = await api.publishedShop("lock-backfill");
     // On a republished menu each item's id differs from its key, so the backfill must join for it.
-    await api.republish(shop, raisePrice);
+    // The first menu's ids are its keys: republished in descending key order, the items lie in that
+    // order, and the lines below are stored in it too, so only the backfill's own sort by key gives
+    // the application's form, whichever order the join returns them in.
+    await api.republish(shop, (items) => raisePrice([...items].sort((a, b) => (a.id < b.id ? 1 : -1))));
     const buyer = await anonymousCookie(routes.auth.POST);
-    const review = await openReview(buyer, shop);
-    const purchaseId = review.body.data.purchaseId;
+    const descending = [...(await publishedItems(fixture.database, shop.outletId))].sort((a, b) => (a.itemKey < b.itemKey ? 1 : -1));
+    const response = await routes.purchases.POST(
+      jsonPost("/api/v1/purchases", buyer, { outletId: shop.outletId, rail: "paypal", lines: descending.map((item) => ({ menuItemId: item.id, quantity: 1 })) }),
+    );
+    expect(response.status).toBe(201);
+    const purchaseId = (await envelope<{ purchaseId: string }>(response)).data.purchaseId;
     const [row] = await fixture.database.admin<{ key: string; buyer: string; lines: { menuItemId: string; quantity: number }[] }[]>`
       select basket_lock_key as key, buyer_user_id as buyer, lines from purchases where id = ${purchaseId}`;
     const items = await publishedItems(fixture.database, shop.outletId);
     const keyOf = new Map(items.map((item) => [item.id, item.itemKey]));
     expect(items.every((item) => item.id !== item.itemKey)).toBe(true);
+    expect(row!.lines.map((line) => keyOf.get(line.menuItemId))).toEqual(descending.map((item) => item.itemKey));
+    expect(items.map((item) => item.itemKey)).toEqual(descending.map((item) => item.itemKey));
     expect(row!.key).toBe(
       computeBasketLockKey({ buyerUserId: row!.buyer, outletId: shop.outletId, lines: row!.lines.map((line) => ({ itemKey: keyOf.get(line.menuItemId)!, quantity: line.quantity })) }),
     );
