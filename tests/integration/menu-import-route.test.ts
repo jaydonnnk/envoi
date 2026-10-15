@@ -386,7 +386,8 @@ describe("model dispatch is recorded before the call", () => {
     };
     const result = await send(target, photoBody(await solidJpeg()));
     expect(result.status).toBe(200);
-    expect(seenBySecondConnection).toMatch(/^\d{4}-\d{2}-\d{2} /);
+    expect(seenBySecondConnection).not.toBeNull();
+    expect(String(seenBySecondConnection)).toMatch(/^\d{4}-\d{2}-\d{2} /);
   });
 });
 
