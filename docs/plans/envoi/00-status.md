@@ -129,6 +129,55 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
   The first run, on `e50f5ac`, proved 56 of 57: `dispatch-before-call` failed on a TypeError (a null passed to `toMatch`), which is not a proof; `c1ea909` makes that test fail on an assertion.
 - **Gate checks after the English-only reopening [verified], 2026-10-15:** `python3 -I docs/plans/envoi/checks/gate4_check.py docs/plans/envoi . 5f6ab39` passes, and `gate4_prove.py` with a scratch work folder gives 72/72, up from 70 by the two planted faults for the new Gate 2 pin and the moved Gate 3 pin.
 
+#### S11 vision evaluation, pre-registration (R5)
+
+Written on 2026-10-15 before any vision call, as `04-slices.md` S11 requires.
+The harness is [`s11-vision-eval.mts`](evidence/s11-vision-eval.mts); its `PHOTOS` list is the table below, generated from it.
+
+- **What runs:** each photo goes once per candidate through the path a merchant's photo takes: the browser shrink, simulated with `sharp` (at most 2,048 pixels per side, the first JPEG quality of 0.9 to 0.5 that fits 2 MiB), the product's `normalizeMenuJpeg`, `draftMenuFromPhoto` with prompt `menu-vision-prompt-2026-10-15-english` and the 60-second `T_MENU_MODEL` budget, then `validateVisionDraft`.
+  The evaluation uses provisional bounds of 60,000 input and 16,000 output tokens, so usage is observed rather than cut short.
+- **Photos:** six English menu photos in the git-ignored `.maintenance-build/s11-eval-photos/`, never committed and never shown on the site.
+  They are screenshots of third-party photos from Google Images results that the user pasted on 2026-10-15, cropped to the menu; the user gave permission to send them to OpenAI ("Yea permission to send them to openai").
+  Shop names in them are not used anywhere in Envoi.
+- **Expected drafts:** one entry per printed price cell; prices in S$, "blank" means the merchant must see a blank; "M" and "L" are size columns.
+
+  | Photo | Challenge | Required entries | Expected draft |
+  | --- | --- | --- | --- |
+  | E1 | small printed prices in three size columns; the first column's label is hidden; '-' where a size has no price; add-ons | 37 | Mee Hong Kong 5.80; Mee Hong Kong M 12; Mee Hong Kong L 16; Kway Teow Hong Kong (Hor Fun) 5.80; Kway Teow Hong Kong (Hor Fun) M 12; Kway Teow Hong Kong (Hor Fun) L 16; Bee Hoon Hong Kong 5.80; Bee Hoon Hong Kong M 12; Bee Hoon Hong Kong L 16; Hokkien Mee (Kicap & Basah) 5.80; Hokkien Mee (Kicap & Basah) M 12; Hokkien Mee (Kicap & Basah) L 16; Mee Goreng 6.50; Mee Goreng M 13; Mee Goreng L 18; Fried Kway Teow (Black) 6.50; Fried Kway Teow (Black) M 13; Fried Kway Teow (Black) L 18; Hong Kong Fried Noodle 6.50; Hong Kong Fried Noodle M 13; Hong Kong Fried Noodle L 18; Crispy Noodle 6.50; Crispy Noodle M 13; Crispy Noodle L 18; Prawn Mee 6.50; Prawn Mee M 13; Prawn Mee L 18; Fried Bee Hoon Singapore Style (No Spicy) 6.50; Fried Bee Hoon Singapore Style (No Spicy) M 13; Fried Bee Hoon Singapore Style (No Spicy) L 18; Beef Mee Hong Kong 8.80; Beef Mee Hong Kong M 17; Beef Mee Hong Kong L 23; Beef Mee Soup 8.80; Mee/Bee Hoon/Kway Teow Soup 5.80; Tom Yam Mee Soup 8.80; Fried Cockles Kway Teow 6.50. Optional: With Egg Additional 1.20; Take away Box additional Small 0.30; Take away Box additional Large 1.00 |
+  | E2 | dense lightbox in four sections; two-line names; dish captions beside photos; side choices without prices | 36 | Chicken Wing (Min 2 Pcs) 1.50; Cheesy Chicken Finger 6.00; Fries 3.50; Cheese Fries 4.50; Wasabi Mayo Fries 5.50; Mentaiko Fries 5.00; Truffle Fries 7.00; Coleslaw 3.50; Mac N Cheese 3.50; Sunny Side Up 1.20; Mushroom Soup 3.50; Onion Ring (10pcs) 4.50; Butter Rice 2.00; Add Nacho Cheese 1.20; Add Bratwurst 4.50; Value Meal 3.60; Salmon Pasta 11.50; Grilled Chicken Pasta 7.70; Mushroom Pasta 7.00; Prawn Pasta 8.00; Double Chicken Bratwurst Pasta 8.90; Mushroom & Prawn Pasta 11.90; XL Chicken Cutlet Pasta 8.90; Breaded Dory Pasta 8.50; Breaded Seabass Pasta 11.50; Cheesy Chicken Chop Pasta 8.90; Grilled Chicken Chop 7.70; Prime Ribeye Steak 16.50; Double Up Chicken Chop 12.30; Cheesy Chicken Chop 8.90; XL Chicken Cutlet 8.90; Breaded Dory 8.50; Breaded Seabass 11.50; Lime Herb Butter Salmon 11.50; Salmon & Chicken Combo 16.00; Double Chicken Bratwurst 8.90. Optional: Onion Ring (5pcs) blank; Saute Garlic Mushroom blank |
+  | E3 | set prices beside stick counts that are not prices; a large price; a GST note | 6 | Set A 31.20; Set B 49; Set C 78; Set D 116; Set E 156; Set F 223 |
+  | E4 | lamination glare over one name; shared rows such as 'Coffee / Tea'; merchandise sizes; photo captions with prices | 31 | Kaya Toast with Butter 2.40; Butter Sugar Toast 2.40; French Toast with Kaya 2.00; Kaya Peanut Toast 2.40; Steamed Bread (Kaya Butter / Kaya Peanut) 2.40; Set A - Kaya Toast with Butter set 4.80; Set B - Butter Sugar Toast set 4.80; Set C - French Toast set 4.50; Set D - Kaya Peanut Toast set 4.80; Set E - Steamed Bread set (Kaya Butter / Kaya Peanut) 4.80; Coffee / Tea 1.80; Coffee-O / Tea-O 1.60; Coffee-C / Tea-C 2.00; Milo / Horlicks 2.00; Chinese Tea 1.80; Iced Coffee / Tea 2.60; Iced Milo / Horlicks 2.80; Iced Lemon Tea 2.60; Barley 2.60; Canned Drinks 2.00; Lime juice 2.60; Packet Juice/Milk 1.50; Bottled Water 2.00; Ya Kun Kaya Jar 290g 4.80; Ya Kun Kaya Jar Single Gift Pack 5.80; Ya Kun Elfin Pack (75g x 2) 6.00; Ya Kun Kaya Cookies (80g) 2.50; Ya Kun Coffee Powder 250g 6.00; Ya Kun Coffee Powder 500g 10.00; Soft-Boiled Eggs (2 eggs) 1.80; Kaya Butter Crackers 2.00 |
+  | E5 | angled photo whose price tags sit above their rows; Chinese beside English, English names only; a camera date stamp | 23 | Mussels In Cream w Rice 10.00; Bouillabaisse (Fish Stew) w Rice 11.00; Mixed Grill (Fish, Chicken, Sausage, Fried Egg & Fries) 15.90; Margherita Pizza 10.00; Hawaiian Pizza 12.00; Mushroom and Ham Pizza 13.90; Pepperoni Pizza 13.90; Chicken Pizza 13.90; Ham Carbonara 8.90; Chicken Aglio Olio 8.90; Clams in Tomato Sauce 9.00; Sizzling Chicken Cheese Burger 12.00; Sizzling Beef Cheese Burger 12.90; Striploin w Pepper Sauce 14.90; Salmon Filet w Lemon Sauce 14.90; Boneless Chicken Leg w Mushroom Sauce 10.00; Chicken Burger 9.00; Beef Burger 9.90; Double Beef Burger 12.90; Crispy Mid-Wings (5pcs) 7.00; Chicken Nuggets (6pcs) 5.00; French Fries 5.00; Truffle Fries 7.00 |
+  | E6 | E4 turned 90 degrees in its pixels | 31 | the same as E4 |
+
+- **Scoring, automatic:** a draft row matches an entry when its name and portion, lower-cased with punctuation and any leading item code removed, reach a Dice bigram similarity of at least 0.8 with an accepted reading (parentheticals may be dropped), best pairs first, one row per entry.
+  A shared row such as "Coffee / Tea" also counts when the model lists each part with its own row; a "Set A" entry also accepts a reading that starts with it.
+  An entry is **found** when matched; its price outcome is **correct** when every matched row's price after Envoi's validation equals the expected price, or is blank where blank is expected.
+  A **wrong filled price** is any filled price that differs from its entry's expected price, including a filled price on a row that matches no entry; optional entries are never counted as missed, but their wrong prices count.
+  The automatic score decides; any match the reviewer disputes is reported beside it, not substituted.
+- **Pass threshold, per candidate over all six photos (164 required entries):** every call returns a valid draft; at least 90% of required entries found; at least 90% of found entries with the correct price outcome; at most two wrong filled prices; median latency at most 30 seconds and every call inside the 60-second budget.
+- **Choice among passing candidates:** fewest wrong filled prices; then most correct price outcomes; then lowest measured cost; then lowest median latency.
+  The chosen model becomes `AI_MENU_MODEL`.
+- **Bounds rule:** for the chosen model, `maxInputTokens` is 1.5 times its largest observed input, and `maxOutputTokens` is 1.5 times the larger of its largest observed output and its largest observed output per returned row times 100 (the row cap), each rounded up to the next 1,000.
+  The prices are the list prices below; the bounds are committed in `MENU_SPEND_POLICY.modelBounds`.
+- **Falsifier response:** if no candidate passes, `AI_MENU_MODEL` stays unset and the bounds list stays empty, so every import is refused with `model_bounds_missing`; manual entry stays, no AI-drafting claim is made, and Gate 1 menu-import scope reopens.
+- **Candidates, fixed 2026-10-15 before the first vision call:** from the key's model listing (`GET /v1/models`; no model was called), the four lowest-priced models whose model pages list image input and structured outputs and that have no published shutdown before 16 Dec 2026:
+
+  | Model | Input | Output | Shutdown |
+  | --- | --- | --- | --- |
+  | `gpt-6-luna` | $0.10 | $0.50 | none published |
+  | `gpt-4o-mini` | $0.15 | $0.60 | 14 Jan 2027 |
+  | `gpt-5.6-luna` | $0.20 | $1.20 | none published |
+  | `gpt-5.4-nano` | $0.20 | $1.25 | 1 Apr 2027 |
+
+  USD per million tokens, standard tier, read from developers.openai.com `pricing.md`, the deprecations page and each `models/<id>.md` on 2026-10-15.
+  Excluded: the `gpt-5`, `gpt-5-mini`, `gpt-5-nano` and `o3` snapshots (shutdown 11 Dec 2026), `o4-mini` and `gpt-4.1-nano` (23 Oct 2026).
+  Image input and strict structured output through the Responses API are [vendor claim]; the evaluation shows whether they work through the product's call.
+- **Spend limit:** US$1 in total for the evaluation (the user's "US$1/day + eval OK"); the harness stops before any call whose worst case could pass it.
+- **Data sharing:** the user confirmed on 2026-10-15 that their OpenAI organization has no data-sharing opt-in ("Yes, no opt-in").
+- **Reviewer uncertainty, for the user's check:** E1's cents (".80" against ".00") are read from a low-resolution photo; E5's prices are assigned by row order, because the angle lifts each price tag above its row; E2's "Double Chicken Bratwurst Pasta" and "Cheesy Chicken Chop Pasta" are read as two-line names with one price; E4's "Kaya Peanut Toast" is partly under glare.
+- **Limits of this evaluation [hypothesis]:** six photos, one run each, expected drafts written by the builder, and E6 repeats E4's content; it can show a candidate is unfit, but a pass does not establish accuracy on real merchants' photos, which stay blocked by the exit decision.
+
 ### S8 Merchant orders and separate acknowledgment, 2026-10-15
 
 - **Branch:** `envoi/slice-8-orders`, from `main` at `c07dcee`; commits `f2f7363` (migration 0019, the orders and acknowledge routes, acknowledgment on the buyer read), `9bc1cb0` (merchant orders page, receipt card, shared bounded poller), `1e1e61c` (tests and mutation definitions), `35e4000` (mutation results and the Neon record), then this record.
