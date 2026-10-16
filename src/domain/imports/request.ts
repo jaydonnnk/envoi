@@ -8,6 +8,7 @@ import {
   actualUsdMicros,
   boundsFor,
   type AdmissionLimits,
+  type ImportRejection,
   type ImportUsage,
   type MenuModelBounds,
   type MenuSpendPolicy,
@@ -52,6 +53,11 @@ const peakRssBytes = () => process.resourceUsage().maxRSS * 1024;
 const refused = (importId: string, code: AppError["code"], message: string, outcome: string, reason?: string, retryable = false) =>
   httpErr(appError(code, message, { retryable, details: { importId, outcome, ...(reason ? { reason } : {}) } }));
 
+// Only a refusal that a later attempt can pass is retryable: a live import ends by its deadline, and
+// the daily caps and the spend ceiling reset at UTC midnight. A missing ceiling or bounds entry, or
+// usage above a reservation, holds until a reviewed code change.
+const RETRYABLE_REJECTIONS: ReadonlySet<ImportRejection> = new Set(["in_flight_outlet", "in_flight_global", "daily_cap_outlet", "daily_cap_global", "spend_ceiling_reached"]);
+
 const TIMEOUT_COPY =
   "Drafting took too long, so Envoi stopped waiting and did not apply a late result. Envoi did not store your photo; OpenAI's retention rules still apply. Your existing edits are unchanged. Try a clearer or closer photo, or enter the menu manually.";
 
@@ -82,7 +88,7 @@ export function commitRefusal(importId: string, outcome: Extract<ImportCommit, {
 export async function runMenuImport(db: Db, request: Request, principal: OutletMemberPrincipal): Promise<Response> {
   const env = webEnv();
   if (!env.MENU_IMPORTS_ENABLED || !env.OPENAI_API_KEY || !env.AI_MENU_MODEL) {
-    return httpErr(appError("admission_rejected", "Menu photo import is turned off. You can still enter your menu by hand.", { details: { reason: "imports_disabled" } }));
+    return httpErr(appError("admission_rejected", "Menu photo import is not available in this release. You can still enter your menu by hand.", { details: { reason: "imports_disabled" } }));
   }
   if (request.headers.get("envoi-consent-version") !== MENU_CONSENT_VERSION) {
     return httpErr(appError("consent_required", "Read and accept the current photo notice before importing.", { details: { consentVersion: MENU_CONSENT_VERSION } }));
@@ -101,9 +107,11 @@ export async function runMenuImport(db: Db, request: Request, principal: OutletM
     now: importRuntime.now(),
   });
   if (!admission.ok) {
-    return httpErr(
-      appError("admission_rejected", "A photo import cannot start right now. You can still enter your menu by hand.", { retryable: true, details: { reason: admission.reason } }),
-    );
+    const retryable = RETRYABLE_REJECTIONS.has(admission.reason);
+    const message = retryable
+      ? "A photo import cannot start right now. You can still enter your menu by hand."
+      : "Menu photo import is not available in this release. You can still enter your menu by hand.";
+    return httpErr(appError("admission_rejected", message, { retryable, details: { reason: admission.reason } }));
   }
   const { importId, admittedAt } = admission;
   const bounds = boundsFor(importRuntime.policy, env.AI_MENU_MODEL) as MenuModelBounds;

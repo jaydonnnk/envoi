@@ -82,15 +82,13 @@ export function MenuPhotoImport({
     if (photo) URL.revokeObjectURL(photo.original);
   }, [photo]);
 
+  // Gate 1, re-approved 2026-10-16: the setup page says photo import is not available in this
+  // release, as the onboarding mockup's note does, and claims no AI drafting.
   if (!open) {
     return (
-      <div className="import-panel">
-        <div className="rail-head wrap">
-          <h3>Draft from a menu photo</h3>
-          <span className="chip">Not available yet</span>
-        </div>
-        <p className="muted">Photo import is switched off on this Envoi demo, so no photo is sent anywhere. Enter your menu by hand below.</p>
-      </div>
+      <p className="status" role="note">
+        Menu photo import is not available in this release. Enter each item and its SGD price below.
+      </p>
     );
   }
 
