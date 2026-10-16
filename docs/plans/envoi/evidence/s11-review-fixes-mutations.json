@@ -1,9 +1,23 @@
 {
  "branch": "envoi/slice-11-review-fixes",
- "base_commit": "028520e",
+ "base_commit": "3d65f25",
  "uncommitted_changes": false,
  "method": "Each definition in s11-review-fixes-mutation-defs.json applied alone by exact text replacement, its named test run alone (vitest -t), every touched file restored and compared by SHA-256, then the test rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations, as envoi_web; merchant accounts are created by the operator functions with passwords generated in memory per run, and their FIXTURE shops are created through the merchant domain. OpenAI is the labeled FIXTURE fake at the provider's fetch boundary and every photo is generated. A proof also needs the mutated run to fail on an AssertionError.",
  "results": [
+  {
+   "id": "origin-missing",
+   "test": "import route rejects a request with no Origin",
+   "files": [
+    "src/lib/http/origin.ts"
+   ],
+   "mutation": "Let assertSameOrigin accept a request with no Origin; the test fails.",
+   "mutated": "Tests  1 failed | 26 skipped (27)",
+   "error": "AssertionError: expected 200 to be 403 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 26 skipped (27)",
+   "proof": true
+  },
   {
    "id": "retryable-always",
    "test": "only a refusal a later attempt can pass is retryable",
@@ -11,11 +25,11 @@
     "src/domain/imports/request.ts"
    ],
    "mutation": "Mark every admission refusal retryable, as before the fix; the test fails.",
-   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "mutated": "Tests  1 failed | 26 skipped (27)",
    "error": "AssertionError: expected { code: 'admission_rejected', \u2026(3) } to match object { code: 'admission_rejected', \u2026(2) }",
    "fails_on_assertion": true,
    "restored_identical": true,
-   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "rerun": "Tests  1 passed | 26 skipped (27)",
    "proof": true
   },
   {
