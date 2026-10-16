@@ -77,6 +77,7 @@ Reopen Product/Architecture/Program Design for changed live capabilities before 
 
 Planning windows, not duration estimates: 6-11 Oct gates and early evidence setup; 12-25 Oct core journeys, payment proofs, PayPal recovery (S3) and the MCP handoff (S13); 26 Oct-1 Nov menu import, scan, PYUSD purchase and recovery (S16, S17) and SDK work; 2-8 Nov rehearsal and submission assets; 9-12 Nov correction buffer.
 The Gate 4 draft places a **[hypothesis]** PYUSD go/no-go when S11 is done, or on 28 Oct at the latest.
+The user took it on 2026-10-16: go; see [`00-status.md`](00-status.md#pyusd-access-checks-2026-10-16).
 Target submission before 12 Nov evening SGT; official cutoff is 13 Nov 04:00 SGT.
 Gate approval delays and runtime failures can change these windows.
 

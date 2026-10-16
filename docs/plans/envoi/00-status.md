@@ -128,10 +128,35 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [x] S11 - Menu photo import with direct vision, merged from the earlier S11 and S12, with the pre-registered vision evaluation and the real-photo exit decision, followed by the PYUSD go/no-go; done 2026-10-16, shipped with imports closed; review fixes 2026-10-16.
 - [x] S9 - Merchant SGQR decode and identifier mapping; started 2026-10-16 on `envoi/slice-9-sgqr-merchant`, before the PYUSD go/no-go by the user's choice; done 2026-10-16, decode results fixture-only.
 - [ ] S10 - Buyer scan or paste; second in the cut order.
-- [ ] S16 - PYUSD devnet purchase; first in the cut order, together with S17.
+- [ ] S16 - PYUSD devnet purchase; first in the cut order, together with S17; kept by the user's go on 2026-10-16.
 - [ ] S17 - PYUSD recovery, extra transfers and the operator mismatch and refund acts.
 - [ ] S14 - APIMatic client and docs, account-conditional; third in the cut order.
 - [ ] S15 - Judged release.
+
+### PYUSD access checks, 2026-10-16
+
+**PYUSD go/no-go: go, taken by the user on 2026-10-16:** "pyusd is a go !".
+S16 and S17 stay in the build order after S10 and stay item 1 of the cut order; S16 starts only on an authorization naming it.
+The go was taken with the phone part of "Phantom on devnet" not passed (below); `04-slices.md` already handles that inside S16: a failed phone path keeps phone PYUSD unavailable (R14), and PayPal is unaffected.
+These checks are access evidence only; they prove nothing about Envoi's own PYUSD transaction, which does not exist yet (R13 and R14 remain S16's to test).
+
+- **Wallets [user-reported, 2026-10-16]:** two Phantom accounts the user controls, Testnet Mode on with Solana Devnet chosen.
+  Merchant ("Envoi Merchant") `6CZs2FrxDdWySqTDdfbCbTQUpWPfaLnTmnkBn1W2PF6z`; buyer ("Envoi Buyer") `89CbH6RAXRfNFpRNDGdyzThBUyccySPqPA5QVkLa38mv`.
+  Both public addresses are kept in the ignored `.env.local` as `ENVOI_MERCHANT` and `ENVOI_BUYER`; nothing in the application reads them, and they are not in `src/env.ts` or `.env.example`.
+- **Phantom on devnet: desktop passed, phone not passed.**
+  Desktop [user-reported]: the buyer account on the Chrome desktop extension showed the devnet PYUSD and sent it.
+  Phone [user-reported]: on the user's iPhone (model not stated) Phantom "didnt work"; what failed is [unknown].
+  The iPhone's Manage Tokens listed the token as "PayPal USD" with a verified badge and the ticker "ONYX" (the mint's own metadata says "PYUSD"), and its Send search for "pay" showed "No Assets" [user screenshots].
+  No other target phone has been checked [unknown].
+- **Devnet funds: passed [verified by devnet RPC reads, 2026-10-16, slots about 511591067-511621395].**
+  - Mint `CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM`: owner Token-2022 (`TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb`), 6 decimals, metadata name "PayPal USD", symbol "PYUSD", transfer fee 0 bps with maximum 0; this matches the Gate 2 pin.
+  - `cxTue9W4hBAdEsBG5DtHPDmQqffzEgYZWXgHZJmpkwVkFVWhXo2WhEgSVFsH7Wr57jR3bDANRyEJsf69k9HztYq`, 2026-10-16T04:31:42Z, finalized: the Solana faucet airdropped 5 SOL to the buyer.
+  - `JEk2a4hi8avbyUBr1GeHBTRN8PPUa2KHc1Sd2cEaRTvXqiFmngoWyKbxDgiEew2M46RRXbXCyw9jVpKhBRzmmNk`, 2026-10-16T04:35:24Z, finalized: 100 PYUSD to the buyer from faucet wallet `9dkA9kUzzDrCpdNofv7jX4ZeWmcNTpA5eAVxikpytBUv`; the user names the faucet as the Google Cloud Web3 Faucet, PayPal's documented route [user-reported].
+  - `5tAv7wDey6Z3QKCVci2dT5EfkQabk3U6axhnS5X29WAiUwnL5VgQGTxNJd5dBWVV9rgzyx7d9gg6VbQzncSszkAE`, 2026-10-16T05:07:31Z, finalized: the buyer sent 1 PYUSD to the merchant from the desktop extension.
+    Its instructions are two ComputeBudget instructions, an associated-token-account create and a Token-2022 `transferChecked`; it created the merchant's PYUSD token account `4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14` (Token-2022, immutable owner, rent 1,600,200 lamports paid by the buyer); fee 80,001 lamports.
+  - Balances re-read at slot about 511621390: merchant 0 SOL, its PYUSD account holding 1; buyer 4.998319799 SOL, its PYUSD account `7PwsUNDMHskHT2eEEoaAy7Fb8d5rsymc1iJafEzMGgGZ` holding 99.
+- **Open for S16 [unknown]:** what Phantom's signing prompt shows for an Envoi-prepared devnet PYUSD transfer (name, ticker, amount, any permanent-delegate warning); whether Phantom keeps the prepared blockhash, transfer and memo while adding only ComputeBudget or Lighthouse instructions (R13); why Phantom failed on the iPhone and whether any phone completes the Browse-link path (R14).
+- **[hypothesis]:** the merchant wallet holds 0 SOL; S16 does not need it, but an S17 act the merchant signs would need devnet SOL first.
 
 ### S9 Merchant SGQR decode and mapping, 2026-10-16
 
@@ -143,6 +168,7 @@ S9 depends on S7, which is done.
   They do not cover any change to Test Shop, the demo merchant account or the two uncertain S2 purchases, any OpenAI call, or any gate reopening.
 - **Schedule deviation, approved by the user on 2026-10-16:** `04-slices.md` takes the PYUSD go/no-go before S9 starts; the two PYUSD access checks, Phantom on devnet and devnet funds, had not run, and the user chose to start S9 first and run the checks in parallel: "Yea start the handoff for s9 first while i do this in parallel".
   The go/no-go stays the user's decision, taken when the checks finish and by 28 Oct at the latest; S9 does not depend on it.
+  Taken on 2026-10-16: go; see [PYUSD access checks](#pyusd-access-checks-2026-10-16).
 - **Open:** consented SGQR sticker photos [unknown, none obtained yet]; without them the decode results are reported as fixture-only.
 - **Built:** `src/domain/sgqr/decode.ts` (`decodeEmvcoTlv`, Gate 3's types unchanged) and `validate.ts` (`mappableIdentifier`); `barcode-detector@3.2.2` installed exactly, with its ZXing wasm (`zxing-wasm` 3.1.3) served from this site at `/vendor/zxing_reader-3.1.3.wasm`, never the library's default CDN, and a unit test pinning the file to the package's own SHA-256; `src/app/merchant/setup/sgqr-sticker.tsx` in the shop details card, file selection only, so `Permissions-Policy: camera=()` is unchanged; migration `0021_s9_outlet_identifiers.sql`; the submission through `PATCH /api/v1/merchant/outlets/{id}`; `approve-identifier` in `src/operator/cli.ts`; the QR payload rule in `src/lib/log.ts`.
 - **Decisions made in S9, recorded as refinements, not decision changes; the user may challenge any of them:**
