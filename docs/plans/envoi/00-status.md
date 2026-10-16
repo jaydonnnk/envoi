@@ -1,6 +1,6 @@
 # Status: Envoi
 
-Updated: 2026-10-15 (Asia/Singapore).
+Updated: 2026-10-16 (Asia/Singapore).
 
 - Gate 1 - Product: **RE-APPROVED 2026-10-16** by the user ("I approve Gate 1.") after being reopened on 2026-10-15 for one change: menu photo drafting is deferred to "good to have" after the slices, and the merchant enters the menu by hand; see the [record](#reopening-2026-10-15-menu-photo-drafting-deferred).
   Before that it was **RE-APPROVED 2026-10-10** by the user ("I approve gate one") after being reopened and revised the same day to remove Zapier, which the user rejected as paid, and to record the PYUSD decisions; see the [reopening record](#reopening-2026-10-10-zapier-removed). Previously **APPROVED 2026-10-07** by the user after reopening it to add a buyer-side scan entry point. Approval covers product scope and buyer/merchant journeys, including text and scan/paste entry points.
@@ -125,7 +125,7 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [x] S5 - Maintenance runner, manual runs, operator health view behind the operator guard; built after S6, whose sign-in it needs; done 2026-10-14.
 - [x] S7 - Merchant destination and publication, with stale-review invalidation and the PayPal basket lock at review creation and inside `paypal/start`; done 2026-10-14.
 - [x] S8 - Merchant orders and separate acknowledgment; done 2026-10-15; review fixes the same day.
-- [x] S11 - Menu photo import with direct vision, merged from the earlier S11 and S12, with the pre-registered vision evaluation and the real-photo exit decision, followed by the PYUSD go/no-go; done 2026-10-16, shipped with imports closed.
+- [x] S11 - Menu photo import with direct vision, merged from the earlier S11 and S12, with the pre-registered vision evaluation and the real-photo exit decision, followed by the PYUSD go/no-go; done 2026-10-16, shipped with imports closed; review fixes 2026-10-16, not yet pushed.
 - [ ] S9 - Merchant SGQR decode and identifier mapping.
 - [ ] S10 - Buyer scan or paste; second in the cut order.
 - [ ] S16 - PYUSD devnet purchase; first in the cut order, together with S17.
@@ -309,6 +309,36 @@ Measured spend: US$0.088, so US$0.563 of the US$2 evaluation total over three ro
   Even setting aside the uncertain cell and the two right-price name errors, two wrong prices remain, both on the rotated photo.
 - **R5 outcome over three rounds:** no candidate passes the pre-registered rule; by it, `AI_MENU_MODEL` stays unset, the bounds list stays empty, imports refuse with `model_bounds_missing`, manual entry stays, no AI-drafting claim is made, and the S11 falsifier reopens Gate 1 menu-import scope.
   Most remaining errors are on the rotated E6 and the low-resolution E1; on the four clear upright photos `gpt-6.1-sol` filled no wrong price in either round 2 or round 3.
+
+### S11 review fixes, 2026-10-16
+
+- **Review:** an independent, adversarial review of S11 on 2026-10-16 gave the verdict PASS WITH MINOR: no runtime defect was reproduced, and seven findings were coverage gaps, copy and records.
+  The user's words: "provide me with a copy paste handoff prompt that reviews s11 thoroughly and unbiasedly, if all passes or if there are stuff that needs to be fixed, do those first. Then let me know and ill approve to start slice 9."
+- **Branch:** `envoi/slice-11-review-fixes`, from `main` at `3ae101d`; commits `62bc007` (copy and retryable), `028520e` (tests and mutation definitions), then this record.
+  Nothing is pushed: push, fast-forwarding `main` and the deploy wait for the user's go-ahead. No migration and no Neon write.
+- **Reproduced first [verified], on `3ae101d` with a clean tree:** typecheck, lint and 267 of 267 tests; `s11-mutate.py` 57 of 57; the 17 named tests and 57 cases match `04-slices.md` and Gate 3 one for one; the R5 numbers of all three rounds recompute exactly from each run's saved raw output with the harness's own `validateVisionDraft` and `scoreDraft` (66 runs, no mismatch, spend US$0.5626), and each round's results end after its pre-registration commit.
+  Neon, in a `READ ONLY` transaction: 21 migrations, `menu_imports` empty, the `global` admission row never admitted, the web-role grants and purchase counts as the S11 record states, five triggers enabled.
+  `gate4_check.py ... 5f6ab39` passes and `gate4_prove.py` gives 74/74.
+- **End to end [verified], on a local `next build` and `next start` at `http://localhost:3100` with FIXTURE settings and a disposable database:** an import request declaring a 2 MiB body and sending 1 KiB of it was answered while the body was still incomplete, with 429 `admission_rejected` (imports closed), 403 `forbidden_origin` for a foreign and for a missing `Origin`, and 401 without a session, in Gate 3's guard order.
+  An unauthenticated POST to the import route loaded `sharp-darwin-arm64-0.35.5.node` and `libvips-cpp` into the server process, which no request before it had (`lsof`), so the S11 reading of Render's 401 as proof that `sharp` loads is sound; decode memory on Render stays unmeasured.
+- **F1, closed copy contradicted the re-approved Gate 1 [fixed]:** the setup page said "Not available yet" and "Photo import is switched off on this Envoi demo"; Gate 1 says the page states that menu photo import is not available in this release.
+  The page now shows the mockup's note, "Menu photo import is not available in this release. Enter each item and its SGD price below.", and the `imports_disabled` refusal says the same.
+- **F2, every admission refusal said retryable [fixed]:** `model_bounds_missing`, which keeps imports closed until a reviewed code change, answered `retryable: true`; now only `in_flight_outlet`, `in_flight_global`, `daily_cap_outlet`, `daily_cap_global` and `spend_ceiling_reached` are retryable.
+- **F3, the missing-`Origin` refusal is untested [open, needs the user's go-ahead]:** letting `assertSameOrigin` accept a request with no `Origin` passed all 80 import and unit tests; the behaviour is correct today (403 end to end, above).
+  It touches authorization, so the test is shown to the user before it is added.
+- **F4, the dispatch mark and failure close bounds were untested [fixed]:** removing `markModelDispatched`'s deadline or closed predicate, or `closeImportFailed`'s deadline check, passed every test; a new test proves each.
+- **F5, three validation bounds were untested [fixed]:** the S$1,000 price cap on imported prices, dropping rows whose every field is null, and the 120-character bound on a portion.
+- **F6, the published-menu import path was untested [fixed]:** S11's recorded deviation (an import on a published menu without a draft adds to a new draft) had no test: refusing it, or giving carried items new item keys, passed every test; a new test proves the new draft, the kept item keys and the unchanged published revision.
+  The deviation itself changes Gate 3's "base revision current and unconfirmed" rule; it stays recorded, not reopened, because imports are closed and deferred, and it needs a Gate 3 decision before imports return.
+- **F7, the merge's 100-item cap was untested [fixed]:** dropping it passed all 267 tests; a new test proves 99 items plus three suggestions add one and skip two.
+- **Records:** the S11 section names `1a0a594` as the merge into `main` and that commit's CI runs; `main` then moved to `3ae101d` (`40cb8a6`, an unused constant, and the S11 record), whose CI passed on the branch (run 38769185327) and on `main` (run 38769594194).
+- **Tests [verified]:** typecheck, lint and 273 of 273 tests pass, up from 267, three times in a row.
+  New: `only a refusal a later attempt can pass is retryable` (`tests/integration/menu-import-route.test.ts`), `the closed import panel says photo import is not available in this release` (`tests/unit/menu-import-closed.test.ts`), `a price above the menu cap stays blank and an empty row is dropped` (`tests/unit/vision-draft-validation.test.ts`), and `the dispatch mark and a failure close write only while the attempt is open and before its deadline`, `an import on a published menu adds to a new draft and keeps the published items' keys` and `an import never grows a menu past 100 items` (`tests/integration/menu-import-review-fixes.test.ts`); the Gate 3 case `draft text over 120 characters is refused` now also checks a portion.
+  One full run before those three, right after the mutation runs, reported 4 failed and 1 skipped and took about ten minutes; its failing names were not kept, three later runs passed 273 of 273 in about 11 seconds, and a leftover disposable database `envoi_t_admission-race_8f94eb53` was found and dropped. It is recorded as an unexplained flaky run [unknown], not as a pass.
+- **Mutations [verified], 11 of 11,** by [`s11-review-fixes-mutate.py`](evidence/s11-review-fixes-mutate.py) with [`s11-review-fixes-mutation-defs.json`](evidence/s11-review-fixes-mutation-defs.json), results in [`s11-review-fixes-mutations.json`](evidence/s11-review-fixes-mutations.json), on `028520e` with a clean tree: `retryable-always`, `closed-copy`, `portion-length`, `price-cap`, `keep-empty-rows`, `dispatch-after-deadline`, `dispatch-when-closed`, `close-after-deadline`, `published-base-refused`, `published-item-keys` and `merge-capacity`, each failing its named test on an AssertionError, restored byte-identical and passing on rerun.
+  The 57 S11 definitions rerun on `028520e` prove 57 of 57 ([`s11-review-fixes-s11-rerun.json`](evidence/s11-review-fixes-s11-rerun.json)); that run records `uncommitted_changes` true only because the untracked results file above existed.
+- **Local browser check [verified], 2026-10-16,** on a rebuilt `next build` at `http://localhost:3100`: `/merchant/setup` shows the new note with the amber status rule and the manual editor, and `/operator/health` shows the closed import figures, at 390px and 1280px, with the "Test environment" badge and the demo-fixture and sandbox labels and no horizontal scroll; the disposable database was dropped after.
+- **Not changed:** Render was probed only as an anonymous visitor (GET 405, POST 401); a hostile progressive JPEG's decode time is bounded only by `limitInputPixels` and one decode at a time, not by the request deadline [unknown, not tested]; the import-write test watches `TMPDIR` and the `node:fs` write calls, so a native write elsewhere would not be seen.
 
 ### S8 Merchant orders and separate acknowledgment, 2026-10-15
 

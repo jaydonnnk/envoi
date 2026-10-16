@@ -1,0 +1,162 @@
+{
+ "branch": "envoi/slice-11-review-fixes",
+ "base_commit": "028520e",
+ "uncommitted_changes": false,
+ "method": "Each definition in s11-review-fixes-mutation-defs.json applied alone by exact text replacement, its named test run alone (vitest -t), every touched file restored and compared by SHA-256, then the test rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations, as envoi_web; merchant accounts are created by the operator functions with passwords generated in memory per run, and their FIXTURE shops are created through the merchant domain. OpenAI is the labeled FIXTURE fake at the provider's fetch boundary and every photo is generated. A proof also needs the mutated run to fail on an AssertionError.",
+ "results": [
+  {
+   "id": "retryable-always",
+   "test": "only a refusal a later attempt can pass is retryable",
+   "files": [
+    "src/domain/imports/request.ts"
+   ],
+   "mutation": "Mark every admission refusal retryable, as before the fix; the test fails.",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected { code: 'admission_rejected', \u2026(3) } to match object { code: 'admission_rejected', \u2026(2) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "closed-copy",
+   "test": "the closed import panel says photo import is not available in this release",
+   "files": [
+    "src/app/merchant/setup/menu-import.tsx"
+   ],
+   "mutation": "Restore the closed panel's pre-fix copy; the test fails.",
+   "mutated": "Tests  1 failed (1)",
+   "error": "AssertionError: expected '<p class=\"status\" role=\"note\">Photo i\u2026' to contain 'Menu photo import is not available in\u2026'",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed (1)",
+   "proof": true
+  },
+  {
+   "id": "portion-length",
+   "test": "draft text over 120 characters is refused",
+   "files": [
+    "src/domain/imports/validate-result.ts"
+   ],
+   "mutation": "Check only the name's length, not the portion's; the test fails.",
+   "mutated": "Tests  1 failed | 8 skipped (9)",
+   "error": "AssertionError: expected { ok: true, items: [ { \u2026(4) } ], \u2026(2) } to deeply equal { ok: false, reason: 'text_too_long' }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 8 skipped (9)",
+   "proof": true
+  },
+  {
+   "id": "price-cap",
+   "test": "a price above the menu cap stays blank and an empty row is dropped",
+   "files": [
+    "src/domain/imports/validate-result.ts"
+   ],
+   "mutation": "Drop the menu price cap from imported prices; the test fails.",
+   "mutated": "Tests  1 failed | 8 skipped (9)",
+   "error": "AssertionError: expected [ [ 100000, 'explicit' ], \u2026(1) ] to deeply equal [ [ 100000, 'explicit' ], \u2026(1) ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 8 skipped (9)",
+   "proof": true
+  },
+  {
+   "id": "keep-empty-rows",
+   "test": "a price above the menu cap stays blank and an empty row is dropped",
+   "files": [
+    "src/domain/imports/validate-result.ts"
+   ],
+   "mutation": "Keep rows whose every field is null; the test fails.",
+   "mutated": "Tests  1 failed | 8 skipped (9)",
+   "error": "AssertionError: expected [ '', 'Teh', '' ] to deeply equal [ 'Teh' ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 8 skipped (9)",
+   "proof": true
+  },
+  {
+   "id": "dispatch-after-deadline",
+   "test": "the dispatch mark and a failure close write only while the attempt is open and before its deadline",
+   "files": [
+    "src/domain/imports/lifecycle.ts"
+   ],
+   "mutation": "Let the dispatch mark write at or after the deadline; the test fails.",
+   "mutated": "Tests  1 failed | 2 skipped (3)",
+   "error": "AssertionError: expected { marked: true } to deeply equal { marked: false }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "proof": true
+  },
+  {
+   "id": "dispatch-when-closed",
+   "test": "the dispatch mark and a failure close write only while the attempt is open and before its deadline",
+   "files": [
+    "src/domain/imports/lifecycle.ts"
+   ],
+   "mutation": "Let the dispatch mark write on a closed attempt; the test fails.",
+   "mutated": "Tests  1 failed | 2 skipped (3)",
+   "error": "AssertionError: expected { marked: true } to deeply equal { marked: false }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "proof": true
+  },
+  {
+   "id": "close-after-deadline",
+   "test": "the dispatch mark and a failure close write only while the attempt is open and before its deadline",
+   "files": [
+    "src/domain/imports/lifecycle.ts"
+   ],
+   "mutation": "Let a failure close write at or after the deadline; the test fails.",
+   "mutated": "Tests  1 failed | 2 skipped (3)",
+   "error": "AssertionError: expected { closed: true } to deeply equal { closed: false }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "proof": true
+  },
+  {
+   "id": "published-base-refused",
+   "test": "an import on a published menu adds to a new draft and keeps the published items' keys",
+   "files": [
+    "src/domain/imports/lifecycle.ts"
+   ],
+   "mutation": "Refuse an import whose base is the published menu as conflict_confirmed; the test fails.",
+   "mutated": "Tests  1 failed | 2 skipped (3)",
+   "error": "AssertionError: expected false to be true // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "proof": true
+  },
+  {
+   "id": "published-item-keys",
+   "test": "an import on a published menu adds to a new draft and keeps the published items' keys",
+   "files": [
+    "src/domain/imports/lifecycle.ts"
+   ],
+   "mutation": "Give the carried published items new item keys; the test fails.",
+   "mutated": "Tests  1 failed | 2 skipped (3)",
+   "error": "AssertionError: expected [ Array(2) ] to deeply equal [ Array(2) ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "proof": true
+  },
+  {
+   "id": "merge-capacity",
+   "test": "an import never grows a menu past 100 items",
+   "files": [
+    "src/domain/menu/draft.ts"
+   ],
+   "mutation": "Drop the merge's 100-item capacity check; the test fails.",
+   "mutated": "Tests  1 failed | 2 skipped (3)",
+   "error": "AssertionError: expected [ \u2026(3) ] to have a length of 1 but got 3",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "proof": true
+  }
+ ]
+}

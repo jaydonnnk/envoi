@@ -1,0 +1,806 @@
+{
+ "branch": "envoi/slice-11-review-fixes",
+ "base_commit": "028520e",
+ "uncommitted_changes": true,
+ "method": "Each definition in s11-mutation-defs.json applied alone by exact text replacement, its named test run alone (vitest -t), every touched file restored and compared by SHA-256, then the test rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations, as envoi_web; merchant accounts are created by the operator functions with passwords generated in memory per run, and their FIXTURE shops are created through the merchant domain. OpenAI is the labeled FIXTURE fake at the provider's fetch boundary and every photo is generated. A proof also needs the mutated run to fail on an AssertionError.",
+ "results": [
+  {
+   "id": "refuse-origin",
+   "test": "import route rejects a foreign Origin",
+   "files": [
+    "src/app/api/v1/merchant/outlets/[id]/menu-imports/route.ts"
+   ],
+   "mutation": "skip assertSameOrigin",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected 200 to be 403 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "refuse-disabled",
+   "test": "imports refuse while disabled",
+   "files": [
+    "src/domain/imports/request.ts"
+   ],
+   "mutation": "ignore the MENU_IMPORTS_ENABLED flag",
+   "mutated": "Tests  1 failed (1)",
+   "error": "AssertionError: expected 502 to be 429 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed (1)",
+   "proof": true
+  },
+  {
+   "id": "refuse-consent",
+   "test": "stale consent version is refused before admission",
+   "files": [
+    "src/domain/imports/request.ts"
+   ],
+   "mutation": "skip the consent version comparison",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected 200 to be 409 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "refuse-read-before-admission",
+   "test": "refused admission reads no image bytes",
+   "files": [
+    "src/domain/imports/request.ts"
+   ],
+   "mutation": "read the body after the consent check but before admission",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected 2 to be +0 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "upload-counted",
+   "test": "import body is counted, not trusted from Content-Length",
+   "files": [
+    "src/domain/imports/request.ts"
+   ],
+   "mutation": "read with request.arrayBuffer() and check the size afterwards",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected 3145728 to be less than or equal to 2686976",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "upload-timer",
+   "test": "slow upload stops at its read bound",
+   "files": [
+    "src/lib/http/bounded-body.ts"
+   ],
+   "mutation": "remove the read timer",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected 'still waiting' not to be 'still waiting' // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "upload-multipart",
+   "test": "non-multipart body is refused",
+   "files": [
+    "src/domain/imports/upload.ts"
+   ],
+   "mutation": "accept a raw body",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected 502 to be 422 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "upload-part-count",
+   "test": "second photo part is refused",
+   "files": [
+    "src/domain/imports/upload.ts"
+   ],
+   "mutation": "accept extra parts",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected 502 to be 422 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "upload-part-name",
+   "test": "body without a photo part is refused",
+   "files": [
+    "src/domain/imports/upload.ts"
+   ],
+   "mutation": "accept a part of any name",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected 502 to be 422 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "upload-part-size",
+   "test": "JPEG over 2 MiB is refused inside a legal body",
+   "files": [
+    "src/domain/imports/upload.ts"
+   ],
+   "mutation": "drop the part-size check, leaving only the body limit",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected 502 to be 422 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "photo-format",
+   "test": "non-JPEG content is refused even when labeled JPEG",
+   "files": [
+    "src/integrations/image/normalize.ts"
+   ],
+   "mutation": "skip the decoded-format check",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected 502 to be 422 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "photo-dimensions",
+   "test": "JPEG over 2,048 pixels per side is refused before decode",
+   "files": [
+    "src/integrations/image/normalize.ts"
+   ],
+   "mutation": "drop the header dimension check",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected 502 to be 422 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "static-proxy",
+   "test": "no proxy matcher covers the import route",
+   "files": [
+    "src/proxy.ts"
+   ],
+   "mutation": "give the proxy a catch-all matcher",
+   "mutated": "Tests  1 failed | 2 skipped (3)",
+   "error": "AssertionError: src/proxy.ts matcher /((?!_next).*): expected true to be false // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "proof": true
+  },
+  {
+   "id": "static-import-guard",
+   "test": "menu-import handler begins with its membership guard",
+   "files": [
+    "src/app/api/v1/merchant/outlets/[id]/menu-imports/route.ts"
+   ],
+   "mutation": "remove the guard from the menu-import handler",
+   "mutated": "Tests  1 failed | 2 skipped (3)",
+   "error": "AssertionError: expected 'const principal = { kind: \"outlet_mem\u2026' to match /^const principal = await requireOutle\u2026/",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "proof": true
+  },
+  {
+   "id": "static-draft-guard",
+   "test": "menu-draft handler begins with its membership guard",
+   "files": [
+    "src/app/api/v1/merchant/outlets/[id]/menu-draft/route.ts"
+   ],
+   "mutation": "remove the guard from the menu-draft handler",
+   "mutated": "Tests  1 failed | 2 skipped (3)",
+   "error": "AssertionError: expected 'const principal = { kind: \"outlet_mem\u2026' to match /^const principal = await requireOutle\u2026/",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 2 skipped (3)",
+   "proof": true
+  },
+  {
+   "id": "admit-outlet-live",
+   "test": "second live import for an outlet is refused",
+   "files": [
+    "src/domain/imports/admission.ts"
+   ],
+   "mutation": "drop the outlet in-flight predicate",
+   "mutated": "Tests  1 failed | 14 skipped (15)",
+   "error": "AssertionError: expected { ok: true, \u2026(4) } to deeply equal { ok: false, \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 14 skipped (15)",
+   "proof": true
+  },
+  {
+   "id": "admit-global-live",
+   "test": "second live import anywhere is refused",
+   "files": [
+    "src/domain/imports/admission.ts"
+   ],
+   "mutation": "drop the global in-flight predicate",
+   "mutated": "Tests  1 failed | 14 skipped (15)",
+   "error": "AssertionError: expected { ok: true, \u2026(4) } to deeply equal { ok: false, \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 14 skipped (15)",
+   "proof": true
+  },
+  {
+   "id": "admit-outlet-daily",
+   "test": "eleventh import for an outlet in a UTC day is refused",
+   "files": [
+    "src/domain/imports/admission.ts"
+   ],
+   "mutation": "drop the outlet daily count",
+   "mutated": "Tests  1 failed | 14 skipped (15)",
+   "error": "AssertionError: expected { ok: true, \u2026(4) } to deeply equal { ok: false, \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 14 skipped (15)",
+   "proof": true
+  },
+  {
+   "id": "admit-global-daily",
+   "test": "fifty-first import in a UTC day is refused",
+   "files": [
+    "src/domain/imports/admission.ts"
+   ],
+   "mutation": "drop the global daily count",
+   "mutated": "Tests  1 failed | 14 skipped (15)",
+   "error": "AssertionError: expected { ok: true, \u2026(4) } to deeply equal { ok: false, \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 14 skipped (15)",
+   "proof": true
+  },
+  {
+   "id": "admit-count-failed",
+   "test": "failed and aborted attempts count toward daily caps",
+   "files": [
+    "src/domain/imports/admission.ts"
+   ],
+   "mutation": "count only completed attempts",
+   "mutated": "Tests  1 failed | 14 skipped (15)",
+   "error": "AssertionError: expected { ok: true, \u2026(4) } to deeply equal { ok: false, \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 14 skipped (15)",
+   "proof": true
+  },
+  {
+   "id": "admit-utc-day",
+   "test": "daily caps reset at UTC midnight",
+   "files": [
+    "src/domain/imports/admission.ts"
+   ],
+   "mutation": "compute the day in Asia/Singapore",
+   "mutated": "Tests  1 failed | 14 skipped (15)",
+   "error": "AssertionError: expected false to be true // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 14 skipped (15)",
+   "proof": true
+  },
+  {
+   "id": "admit-expired-open",
+   "test": "an expired open import does not block the next admission",
+   "files": [
+    "src/domain/imports/admission.ts"
+   ],
+   "mutation": "count stored open rows as live",
+   "mutated": "Tests  1 failed | 14 skipped (15)",
+   "error": "AssertionError: expected { ok: false, \u2026(1) } to match object { ok: true }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 14 skipped (15)",
+   "proof": true
+  },
+  {
+   "id": "admit-ceiling-unset",
+   "test": "imports fail closed until a spend ceiling is recorded",
+   "files": [
+    "src/domain/imports/admission.ts"
+   ],
+   "mutation": "treat a null ceiling as unlimited",
+   "mutated": "Tests  1 failed | 14 skipped (15)",
+   "error": "AssertionError: expected { ok: true, \u2026(4) } to deeply equal { ok: false, \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 14 skipped (15)",
+   "proof": true
+  },
+  {
+   "id": "admit-bounds-missing",
+   "test": "unreviewed menu model is refused",
+   "files": [
+    "src/domain/imports/admission.ts"
+   ],
+   "mutation": "fall back to default bounds",
+   "mutated": "Tests  1 failed | 14 skipped (15)",
+   "error": "AssertionError: expected { ok: true, \u2026(4) } to deeply equal { ok: false, \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 14 skipped (15)",
+   "proof": true
+  },
+  {
+   "id": "admit-ceiling-reached",
+   "test": "reservation beyond the daily ceiling is refused",
+   "files": [
+    "src/domain/imports/admission.ts"
+   ],
+   "mutation": "compare only recorded actual spend",
+   "mutated": "Tests  1 failed | 14 skipped (15)",
+   "error": "AssertionError: expected { ok: true, \u2026(4) } to deeply equal { ok: false, \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 14 skipped (15)",
+   "proof": true
+  },
+  {
+   "id": "admit-overrun",
+   "test": "usage above its reservation stops further imports",
+   "files": [
+    "src/domain/imports/admission.ts"
+   ],
+   "mutation": "ignore recorded usage at admission",
+   "mutated": "Tests  1 failed | 14 skipped (15)",
+   "error": "AssertionError: expected { ok: true, \u2026(4) } to deeply equal { ok: false, \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 14 skipped (15)",
+   "proof": true
+  },
+  {
+   "id": "admit-release-undispatched",
+   "test": "an attempt closed before the model call releases its reservation",
+   "files": [
+    "src/domain/imports/admission.ts"
+   ],
+   "mutation": "count every reservation whatever its dispatch mark",
+   "mutated": "Tests  1 failed | 14 skipped (15)",
+   "error": "AssertionError: expected { ok: false, \u2026(1) } to match object { ok: true, reservedUsdMicros: 5000 }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 14 skipped (15)",
+   "proof": true
+  },
+  {
+   "id": "admit-lock",
+   "test": "concurrent admissions admit one",
+   "files": [
+    "src/domain/imports/admission.ts"
+   ],
+   "mutation": "remove the singleton row lock",
+   "mutated": "Tests  1 failed | 14 skipped (15)",
+   "error": "AssertionError: expected [ { ok: true, \u2026(4) }, \u2026(7) ] to have a length of 1 but got 8",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 14 skipped (15)",
+   "proof": true
+  },
+  {
+   "id": "admit-keep-aborted",
+   "test": "aborted attempt keeps its spend reservation",
+   "files": [
+    "src/domain/imports/admission.ts"
+   ],
+   "mutation": "release a reservation whenever its attempt closes, ignoring the dispatch mark",
+   "mutated": "Tests  1 failed | 14 skipped (15)",
+   "error": "AssertionError: expected { ok: true, \u2026(4) } to deeply equal { ok: false, \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 14 skipped (15)",
+   "proof": true
+  },
+  {
+   "id": "dispatch-before-call",
+   "test": "model dispatch is recorded before the call",
+   "files": [
+    "src/domain/imports/request.ts"
+   ],
+   "mutation": "write the dispatch mark after the call returns",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected null not to be null",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "vision-store",
+   "test": "menu vision request sets store false",
+   "files": [
+    "src/integrations/ai/menu-vision.ts"
+   ],
+   "mutation": "omit the store provider option",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected undefined to be false // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "vision-tools",
+   "test": "menu vision request carries no tools",
+   "files": [
+    "src/integrations/ai/menu-vision.ts"
+   ],
+   "mutation": "register a read tool on the call",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected [ 'model', 'input', \u2026(5) ] to not include 'tools'",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "vision-retries",
+   "test": "menu vision call is never retried",
+   "files": [
+    "src/integrations/ai/menu-vision.ts"
+   ],
+   "mutation": "leave maxRetries at the SDK default",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected [ { \u2026(3) }, { \u2026(3) }, { \u2026(3) } ] to have a length of 1 but got 3",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "vision-schema",
+   "test": "menu vision schema is strict with required nullable fields",
+   "files": [
+    "src/integrations/ai/menu-vision.ts"
+   ],
+   "mutation": "make priceText optional",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected [ 'currency', 'name', 'portion' ] to deeply equal [ 'currency', 'name', 'portion', \u2026(1) ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "vision-token-bound",
+   "test": "menu vision output is capped at the reviewed token bound",
+   "files": [
+    "src/integrations/ai/menu-vision.ts"
+   ],
+   "mutation": "omit maxOutputTokens",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected undefined to be 2000 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "vision-model-name",
+   "test": "menu vision uses AI_MENU_MODEL, not AI_MODEL",
+   "files": [
+    "src/domain/imports/request.ts"
+   ],
+   "mutation": "read AI_MODEL",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected 'FIXTURE-text-model' to be 'FIXTURE-vision-model' // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "vision-budget",
+   "test": "model budget keeps the commit reserve",
+   "files": [
+    "src/domain/imports/request.ts"
+   ],
+   "mutation": "use a fixed 60-second budget",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected [ 60000 ] to deeply equal [ 45000 ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "vision-disconnect",
+   "test": "client disconnect aborts the model call",
+   "files": [
+    "src/integrations/ai/menu-vision.ts"
+   ],
+   "mutation": "stop passing the request signal",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected 'still waiting' not to be 'still waiting' // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "photo-metadata",
+   "test": "re-encoded photo carries no metadata",
+   "files": [
+    "src/domain/imports/request.ts"
+   ],
+   "mutation": "send the uploaded bytes unchanged",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected [ 40, 20 ] to deeply equal [ 20, 40 ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "no-disk",
+   "test": "import writes nothing to disk",
+   "files": [
+    "src/domain/imports/request.ts"
+   ],
+   "mutation": "spool the upload to a temporary file",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected [ 'envoi-upload.jpg' ] to deeply equal []",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "no-leak",
+   "test": "image bytes never reach logs, responses or audit",
+   "files": [
+    "src/integrations/ai/menu-vision.ts"
+   ],
+   "mutation": "log the whole error object",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: logs: expected true to be false // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "no-image-column",
+   "test": "import tables have no image column",
+   "files": [
+    "drizzle/0020_s11_menu_imports.sql"
+   ],
+   "mutation": "add an image_sha256 column",
+   "mutated": "Tests  1 failed | 14 skipped (15)",
+   "error": "AssertionError: expected [ Array(1) ] to deeply equal []",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 14 skipped (15)",
+   "proof": true
+  },
+  {
+   "id": "derive-expired",
+   "test": "an abandoned import reads as expired with no write",
+   "files": [
+    "src/domain/imports/lifecycle.ts"
+   ],
+   "mutation": "trust the stored state",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected { id: 'imp_fixtureabandoned', \u2026(5) } to match object { id: 'imp_fixtureabandoned', \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "reload-outcome",
+   "test": "draft reload reports the latest import outcome",
+   "files": [
+    "src/app/api/v1/merchant/outlets/[id]/menu-draft/route.ts"
+   ],
+   "mutation": "return the draft without the import outcome",
+   "mutated": "Tests  1 failed | 25 skipped (26)",
+   "error": "AssertionError: expected undefined to match object { outcome: 'completed', \u2026(2) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 25 skipped (26)",
+   "proof": true
+  },
+  {
+   "id": "validate-malformed",
+   "test": "malformed result is an error not a repair",
+   "files": [
+    "src/domain/imports/validate-result.ts"
+   ],
+   "mutation": "coerce schema-violating output to an empty item list",
+   "mutated": "Tests  1 failed | 8 skipped (9)",
+   "error": "AssertionError: expected { ok: true, items: [], \u2026(2) } to deeply equal { ok: false, reason: 'malformed' }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 8 skipped (9)",
+   "proof": true
+  },
+  {
+   "id": "validate-blank",
+   "test": "blank price stays blank",
+   "files": [
+    "src/domain/imports/validate-result.ts"
+   ],
+   "mutation": "default a null price to 0",
+   "mutated": "Tests  1 failed | 8 skipped (9)",
+   "error": "AssertionError: expected [ [ null, 'ambiguous' ], \u2026(1) ] to deeply equal [ [ null, 'ambiguous' ], \u2026(1) ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 8 skipped (9)",
+   "proof": true
+  },
+  {
+   "id": "validate-rows",
+   "test": "more than 100 draft rows is refused",
+   "files": [
+    "src/domain/imports/validate-result.ts"
+   ],
+   "mutation": "drop the row cap",
+   "mutated": "Tests  1 failed | 8 skipped (9)",
+   "error": "AssertionError: expected { ok: true, \u2026(3) } to deeply equal { ok: false, reason: 'too_many_rows' }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 8 skipped (9)",
+   "proof": true
+  },
+  {
+   "id": "validate-text",
+   "test": "draft text over 120 characters is refused",
+   "files": [
+    "src/domain/imports/validate-result.ts"
+   ],
+   "mutation": "drop the text cap",
+   "mutated": "Tests  1 failed | 8 skipped (9)",
+   "error": "AssertionError: expected { ok: true, items: [ { \u2026(4) } ], \u2026(2) } to deeply equal { ok: false, reason: 'text_too_long' }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 8 skipped (9)",
+   "proof": true
+  },
+  {
+   "id": "validate-size",
+   "test": "draft result over 128 KiB is refused",
+   "files": [
+    "src/domain/imports/validate-result.ts"
+   ],
+   "mutation": "drop the size cap",
+   "mutated": "Tests  1 failed | 8 skipped (9)",
+   "error": "AssertionError: expected { ok: true, \u2026(3) } to deeply equal { ok: false, reason: 'oversize' }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 8 skipped (9)",
+   "proof": true
+  },
+  {
+   "id": "validate-currency",
+   "test": "non-SGD price stays blank",
+   "files": [
+    "src/domain/imports/validate-result.ts"
+   ],
+   "mutation": "accept the printed number",
+   "mutated": "Tests  1 failed | 8 skipped (9)",
+   "error": "AssertionError: expected { name: 'Nasi lemak', \u2026(3) } to match object { priceSgdCents: null, \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 8 skipped (9)",
+   "proof": true
+  },
+  {
+   "id": "validate-parse",
+   "test": "zero or malformed price text stays blank",
+   "files": [
+    "src/domain/imports/validate-result.ts"
+   ],
+   "mutation": "parse with parseFloat",
+   "mutated": "Tests  1 failed | 8 skipped (9)",
+   "error": "AssertionError: expected [ [ null, 'ambiguous' ], \u2026(3) ] to deeply equal [ [ null, 'ambiguous' ], \u2026(3) ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 8 skipped (9)",
+   "proof": true
+  },
+  {
+   "id": "validate-duplicates",
+   "test": "duplicate variants are flagged for the merchant",
+   "files": [
+    "src/domain/imports/validate-result.ts"
+   ],
+   "mutation": "keep each duplicate row's own price, unflagged",
+   "mutated": "Tests  1 failed | 8 skipped (9)",
+   "error": "AssertionError: expected [ [ 160, 'explicit' ], \u2026(2) ] to deeply equal [ [ null, 'duplicate_variant' ], \u2026(2) ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 8 skipped (9)",
+   "proof": true
+  },
+  {
+   "id": "commit-late",
+   "test": "late result is rejected",
+   "files": [
+    "src/domain/imports/lifecycle.ts"
+   ],
+   "mutation": "accept a result after the deadline",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected { committed: true, \u2026(2) } to deeply equal { Object (committed, outcome) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "commit-base",
+   "test": "base revision change is rejected",
+   "files": [
+    "src/domain/imports/lifecycle.ts"
+   ],
+   "mutation": "drop the base revision comparison",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected { committed: true, \u2026(2) } to deeply equal { committed: false, \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "commit-confirmed",
+   "test": "confirmed menu is never overwritten",
+   "files": [
+    "src/domain/imports/lifecycle.ts"
+   ],
+   "mutation": "allow the write to a confirmed draft",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected { committed: true, \u2026(2) } to deeply equal { committed: false, \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "commit-membership",
+   "test": "membership removed during an import merges nothing",
+   "files": [
+    "src/domain/imports/lifecycle.ts"
+   ],
+   "mutation": "drop the membership recheck from commitImport",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected { committed: true, \u2026(2) } to deeply equal { committed: false, \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  },
+  {
+   "id": "merge-edits",
+   "test": "merchant edits survive a merge",
+   "files": [
+    "src/domain/menu/draft.ts"
+   ],
+   "mutation": "add the photo's version of an item the merchant already has instead of keeping the merchant's",
+   "mutated": "Tests  1 failed | 4 skipped (5)",
+   "error": "AssertionError: expected true to be false // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 4 skipped (5)",
+   "proof": true
+  }
+ ]
+}
