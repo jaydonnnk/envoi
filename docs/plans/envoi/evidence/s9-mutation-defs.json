@@ -1,0 +1,197 @@
+[
+ {
+  "id": "unrecognized-dropped",
+  "test": "unrecognized tags are surfaced not guessed",
+  "test_file": "tests/unit/sgqr-decode.test.ts",
+  "mutation": "Drop every tag the decoder does not recognize instead of listing it; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/sgqr/decode.ts",
+    "old": "    else unrecognized.push(tag);",
+    "new": "    else void tag;"
+   }
+  ]
+ },
+ {
+  "id": "redaction-removed",
+  "test": "raw QR payload is not logged",
+  "test_file": "tests/integration/sgqr-identifiers.test.ts",
+  "mutation": "Remove the QR payload redaction from the logger; the test fails.",
+  "edits": [
+   {
+    "file": "src/lib/log.ts",
+    "old": "  [/(?<![0-9])000201[\\s\\S]*/g, \"[redacted-qr]\"],\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "proxy-allowed",
+  "test": "personal proxy is not published as a business identifier",
+  "test_file": "tests/integration/sgqr-identifiers.test.ts",
+  "mutation": "Allow a proxy mapping: a personal PayNow proxy becomes a mappable identifier; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/sgqr/validate.ts",
+    "old": "    return { reason: \"personal_proxy\", message: \"A PayNow mobile number or other personal proxy cannot be published as a business identifier. Enter the shop's UEN instead.\" };",
+    "new": "    return { scheme: \"paynow_uen\", identifier: normalizeIdentifier(field.identifier) };"
+   }
+  ]
+ },
+ {
+  "id": "scheme-check",
+  "test": "the database refuses a mapping that is not a business UEN",
+  "test_file": "tests/integration/sgqr-identifiers.test.ts",
+  "mutation": "Let the scheme check admit paynow_proxy; the test fails.",
+  "edits": [
+   {
+    "file": "drizzle/0021_s9_outlet_identifiers.sql",
+    "old": "CHECK (\"outlet_identifiers\".\"scheme\" = 'paynow_uen')",
+    "new": "CHECK (\"outlet_identifiers\".\"scheme\" in ('paynow_uen', 'paynow_proxy'))"
+   }
+  ]
+ },
+ {
+  "id": "checksum-assumed",
+  "test": "checksum validity is computed, not assumed",
+  "test_file": "tests/unit/sgqr-decode.test.ts",
+  "mutation": "Report every checksum as valid; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/sgqr/decode.ts",
+    "old": "checksumValid: checksumValid(payload, tags) };",
+    "new": "checksumValid: true };"
+   }
+  ]
+ },
+ {
+  "id": "partial-decode",
+  "test": "a payload that is not EMVCo decodes to nothing",
+  "test_file": "tests/unit/sgqr-decode.test.ts",
+  "mutation": "Keep the tags parsed before a length overrun instead of refusing the payload; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/sgqr/decode.ts",
+    "old": "    if (length === 0 || value.length !== length) return null;",
+    "new": "    if (length === 0 || value.length !== length) break;"
+   }
+  ]
+ },
+ {
+  "id": "proxy-type-ignored",
+  "test": "a PayNow mobile number decodes as a proxy, not a UEN",
+  "test_file": "tests/unit/sgqr-decode.test.ts",
+  "mutation": "Read every PayNow proxy as a UEN, ignoring its proxy type; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/sgqr/decode.ts",
+    "old": "  return proxyType === PAYNOW_PROXY_UEN\n",
+    "new": "  return proxyType !== undefined\n"
+   }
+  ]
+ },
+ {
+  "id": "uen-format-skipped",
+  "test": "a malformed UEN is refused",
+  "test_file": "tests/unit/sgqr-decode.test.ts",
+  "mutation": "Skip the UEN format check; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/sgqr/validate.ts",
+    "old": "  if (identifier.length > UEN_MAX_CHARS || !UEN.test(identifier)) {",
+    "new": "  if (identifier.length > UEN_MAX_CHARS) {"
+   }
+  ]
+ },
+ {
+  "id": "server-checksum-trusted",
+  "test": "a sticker submission records the server's decode, not the browser's",
+  "test_file": "tests/integration/sgqr-identifiers.test.ts",
+  "mutation": "Record every submitted sticker's checksum as valid instead of the server's decode; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/outlets/merchant.ts",
+    "old": "    checksumValid = decoded.checksumValid;",
+    "new": "    checksumValid = true;"
+   }
+  ]
+ },
+ {
+  "id": "source-always-sticker",
+  "test": "a sticker submission records the server's decode, not the browser's",
+  "test_file": "tests/integration/sgqr-identifiers.test.ts",
+  "mutation": "Record every sticker submission as taken from the sticker, even a corrected UEN; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/outlets/merchant.ts",
+    "old": "    source = onSticker ? \"sticker\" : \"corrected\";",
+    "new": "    source = \"sticker\";"
+   }
+  ]
+ },
+ {
+  "id": "duplicate-allowed",
+  "test": "a repeated identifier is not submitted twice",
+  "test_file": "tests/integration/sgqr-identifiers.test.ts",
+  "mutation": "Make the outlet, scheme and identifier index non-unique; the test fails.",
+  "edits": [
+   {
+    "file": "drizzle/0021_s9_outlet_identifiers.sql",
+    "old": "CREATE UNIQUE INDEX \"outlet_identifiers_outlet_identifier_unique\"",
+    "new": "CREATE INDEX \"outlet_identifiers_outlet_identifier_unique\""
+   }
+  ]
+ },
+ {
+  "id": "identifier-limit",
+  "test": "a shop submits at most five identifiers",
+  "test_file": "tests/integration/sgqr-identifiers.test.ts",
+  "mutation": "Remove the five-identifier limit; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/outlets/merchant.ts",
+    "old": "    if (count >= OUTLET_LIMITS.maxIdentifiers) {",
+    "new": "    if (count > 100) {"
+   }
+  ]
+ },
+ {
+  "id": "web-insert-approved",
+  "test": "only the operator approves an identifier mapping",
+  "test_file": "tests/integration/sgqr-identifiers.test.ts",
+  "mutation": "Grant the web role INSERT on every column, including approved_at; the test fails.",
+  "edits": [
+   {
+    "file": "drizzle/0021_s9_outlet_identifiers.sql",
+    "old": "GRANT INSERT (\"id\", \"outlet_id\", \"scheme\", \"identifier\", \"distinguisher\", \"source\", \"checksum_valid\", \"submitted_by_user_id\", \"submitted_at\") ON TABLE",
+    "new": "GRANT INSERT ON TABLE"
+   }
+  ]
+ },
+ {
+  "id": "web-update-approved",
+  "test": "only the operator approves an identifier mapping",
+  "test_file": "tests/integration/sgqr-identifiers.test.ts",
+  "mutation": "Grant the web role UPDATE on the table; the test fails.",
+  "edits": [
+   {
+    "file": "drizzle/0021_s9_outlet_identifiers.sql",
+    "old": "GRANT SELECT ON TABLE public.\"outlet_identifiers\" TO envoi_web;",
+    "new": "GRANT SELECT, UPDATE ON TABLE public.\"outlet_identifiers\" TO envoi_web;"
+   }
+  ]
+ },
+ {
+  "id": "mixed-body",
+  "test": "a body mixing shop details and an identifier is refused whole",
+  "test_file": "tests/integration/sgqr-identifiers.test.ts",
+  "mutation": "Let the identifier body ignore unknown keys, so shop details beside an identifier are dropped silently; the test fails.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/merchant/outlets/input.ts",
+    "old": "      .strict(),\n  })\n  .strict();",
+    "new": "      .strict(),\n  });"
+   }
+  ]
+ }
+]
