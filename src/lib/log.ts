@@ -1,5 +1,6 @@
 // Redacting logger. Errors are logged only as allowlisted SafeErrorRecords, never as error objects,
-// and free-text fields pass through redact() before reaching a sink.
+// and free-text fields pass through redact() before reaching a sink, which removes connection
+// strings, bearer values, data URLs, long base64 and QR payloads.
 
 export type SafeErrorRecord = {
   name: string;
@@ -23,6 +24,9 @@ const REDACTIONS: ReadonlyArray<[RegExp, string]> = [
   [/\bBearer\s+[A-Za-z0-9._~+/=-]+/gi, "Bearer [redacted]"],
   [/data:[a-z]+\/[a-z0-9.+-]+;base64,[A-Za-z0-9+/=]+/gi, "data:[redacted]"],
   [/[A-Za-z0-9+/]{200,}={0,2}/g, "[redacted-base64]"],
+  // S9: an EMVCo QR payload opens with its payload format indicator, 000201. Everything from there to
+  // the end of the value is the payload or what follows it, so all of it goes.
+  [/(?<![0-9])000201[\s\S]*/g, "[redacted-qr]"],
 ];
 
 export function redact(text: string): string {

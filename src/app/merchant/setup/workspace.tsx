@@ -7,6 +7,7 @@ import type { PublicationCheck } from "@/domain/outlets/publish";
 import { requestJson } from "@/lib/browser/session";
 import { MenuEditor } from "./menu-editor";
 import type { DraftWithImport } from "./menu-import";
+import { SgqrSticker } from "./sgqr-sticker";
 
 function OutletChips({ outlet }: { outlet: MerchantOutlet }) {
   return (
@@ -325,6 +326,7 @@ export function Workspace({ initial, initialDraft, importsOpen }: { initial: Mer
               {!outlet.published && !outlet.detailsConfirmed && <ConfirmDetails key={`${outlet.name}|${outlet.area}`} outlet={outlet} onSaved={updated} />}
             </>
           )}
+          <SgqrSticker key={outlet.id} outlet={outlet} onSaved={replace} />
         </section>
       )}
 

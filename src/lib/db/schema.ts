@@ -199,6 +199,42 @@ export const enrollments = pgTable(
   ],
 );
 
+// Outlet identifier mappings (S9). The merchant submits one through the outlet edit route; it stays
+// pending until the operator CLI's approve-identifier sets approved_at, which the web role can
+// neither insert nor update (migration 0021). Only a business UEN can be stored: a personal PayNow
+// proxy is refused before the write and by the scheme check. The QR payload itself is never stored;
+// source and checksum_valid record what the server decoded from it.
+export const outletIdentifiers = pgTable(
+  "outlet_identifiers",
+  {
+    id: text("id").primaryKey(),
+    outletId: text("outlet_id")
+      .notNull()
+      .references(() => outlets.id),
+    scheme: text("scheme").notNull(),
+    identifier: text("identifier").notNull(),
+    // What tells this outlet apart from others that share the identifier, in the merchant's words.
+    distinguisher: text("distinguisher").notNull(),
+    // sticker: the identifier is one the server decoded from the submitted sticker; corrected: a
+    // sticker was decoded but the merchant changed the identifier; manual: no sticker was submitted.
+    source: text("source").notNull(),
+    checksumValid: boolean("checksum_valid"),
+    submittedByUserId: text("submitted_by_user_id")
+      .notNull()
+      .references(() => user.id),
+    submittedAt: timestamp("submitted_at", { withTimezone: true }).notNull(),
+    approvedAt: timestamp("approved_at", { withTimezone: true }),
+    evidenceRef: text("evidence_ref"),
+  },
+  (t) => [
+    check("outlet_identifiers_scheme_check", sql`${t.scheme} = 'paynow_uen'`),
+    check("outlet_identifiers_source_check", sql`${t.source} in ('sticker', 'corrected', 'manual')`),
+    check("outlet_identifiers_checksum_check", sql`(${t.source} = 'manual') = (${t.checksumValid} is null)`),
+    uniqueIndex("outlet_identifiers_outlet_identifier_unique").on(t.outletId, t.scheme, t.identifier),
+    index("outlet_identifiers_identifier_idx").on(t.scheme, t.identifier),
+  ],
+);
+
 // Payment destinations. Written only by the operator CLI, which creates one per outlet and rail and
 // never replaces it (D1). The seller id is verified data, not a secret.
 

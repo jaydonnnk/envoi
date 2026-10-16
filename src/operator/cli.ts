@@ -236,6 +236,64 @@ export async function approveEnrollment(db: OperatorDb, input: { outletId: strin
   });
 }
 
+export type PendingIdentifier = {
+  identifierId: string;
+  outletId: string;
+  outletName: string;
+  identifier: string;
+  distinguisher: string;
+  source: string;
+  checksumValid: boolean | null;
+};
+
+// The mappings merchants submitted that the operator has not approved (S9), oldest first, so the
+// operator can compare each with the evidence before approving it.
+export async function pendingIdentifiers(db: OperatorDb): Promise<PendingIdentifier[]> {
+  return db
+    .select({
+      identifierId: schema.outletIdentifiers.id,
+      outletId: schema.outletIdentifiers.outletId,
+      outletName: schema.outlets.name,
+      identifier: schema.outletIdentifiers.identifier,
+      distinguisher: schema.outletIdentifiers.distinguisher,
+      source: schema.outletIdentifiers.source,
+      checksumValid: schema.outletIdentifiers.checksumValid,
+    })
+    .from(schema.outletIdentifiers)
+    .innerJoin(schema.outlets, eq(schema.outlets.id, schema.outletIdentifiers.outletId))
+    .where(isNull(schema.outletIdentifiers.approvedAt))
+    .orderBy(schema.outletIdentifiers.submittedAt, schema.outletIdentifiers.id);
+}
+
+export type IdentifierResult = { status: "approved" | "unchanged"; identifierId: string; outletId: string };
+
+// Approves one submitted identifier mapping (S9): the operator checked out of band that this
+// business identifier belongs to this outlet. Only this act approves one; the web role can neither
+// insert nor update approved_at. An approved mapping stays approved and nothing changes.
+export async function approveIdentifier(db: OperatorDb, input: { identifierId: string; evidenceRef?: string | null }, now: Date = new Date()): Promise<IdentifierResult> {
+  const evidenceRef = input.evidenceRef?.trim() || null;
+  if (evidenceRef !== null && evidenceRef.length > 200) throw new Error("The evidence reference must be at most 200 characters.");
+  return db.transaction(async (tx) => {
+    const [row] = await tx
+      .select({ id: schema.outletIdentifiers.id, outletId: schema.outletIdentifiers.outletId, approvedAt: schema.outletIdentifiers.approvedAt })
+      .from(schema.outletIdentifiers)
+      .where(eq(schema.outletIdentifiers.id, input.identifierId))
+      .for("update");
+    if (!row) throw new Error(`No submitted identifier ${input.identifierId}; run approve-identifier with no arguments to list the pending ones.`);
+    if (row.approvedAt !== null) return { status: "unchanged", identifierId: row.id, outletId: row.outletId };
+    await tx.update(schema.outletIdentifiers).set({ approvedAt: now, evidenceRef }).where(eq(schema.outletIdentifiers.id, row.id));
+    await recordAudit(tx, {
+      at: now,
+      actor: "operator",
+      action: "identifier_approved",
+      outletId: row.outletId,
+      operatorVisible: true,
+      details: { identifierId: row.id, hasEvidence: evidenceRef !== null },
+    });
+    return { status: "approved", identifierId: row.id, outletId: row.outletId };
+  });
+}
+
 export type OperatorGrantResult = { status: "created" | "unchanged"; userId: string; grantId: string };
 
 // Flags a permanent account made with create-merchant as the operator (S5). The operator health
@@ -309,10 +367,10 @@ function promptHidden(prompt: string): Promise<string> {
   });
 }
 
-const COMMANDS = ["seed-demo-fixture", "assign-paypal-destination", "issue-agent-token", "create-merchant", "approve-membership", "approve-enrollment", "grant-operator"];
+const COMMANDS = ["seed-demo-fixture", "assign-paypal-destination", "issue-agent-token", "create-merchant", "approve-membership", "approve-enrollment", "approve-identifier", "grant-operator"];
 
 const USAGE =
-  "usage: npm run operator -- seed-demo-fixture | assign-paypal-destination <outletId> <sellerMerchantId> | issue-agent-token <label> | create-merchant <email> <name> | approve-membership <email> [evidenceRef] | approve-enrollment <outletId> [evidenceRef] | grant-operator <email> [evidenceRef]";
+  "usage: npm run operator -- seed-demo-fixture | assign-paypal-destination <outletId> <sellerMerchantId> | issue-agent-token <label> | create-merchant <email> <name> | approve-membership <email> [evidenceRef] | approve-enrollment <outletId> [evidenceRef] | approve-identifier [identifierId [evidenceRef]] | grant-operator <email> [evidenceRef]";
 
 async function run(db: OperatorDb, argv: string[]): Promise<number> {
   const [command, ...args] = argv;
@@ -366,6 +424,24 @@ async function run(db: OperatorDb, argv: string[]): Promise<number> {
       result.status === "approved"
         ? `approved enrollment ${result.enrollmentId} of outlet ${result.outletId}; its merchant can publish once the other checks hold`
         : `enrollment ${result.enrollmentId} of outlet ${result.outletId} is already approved; nothing changed`,
+    );
+    return 0;
+  }
+  if (command === "approve-identifier" && args.length === 0) {
+    const pending = await pendingIdentifiers(db);
+    if (pending.length === 0) console.log("no identifier mapping is waiting for approval");
+    for (const row of pending) {
+      const checksum = row.checksumValid === null ? "no sticker" : row.checksumValid ? "checksum valid" : "checksum INVALID";
+      console.log(`${row.identifierId}  outlet ${row.outletId} (${row.outletName})  UEN ${row.identifier}  "${row.distinguisher}"  ${row.source}, ${checksum}`);
+    }
+    return 0;
+  }
+  if (command === "approve-identifier" && (args.length === 1 || args.length === 2)) {
+    const result = await approveIdentifier(db, { identifierId: args[0]!, evidenceRef: args[1] ?? null });
+    console.log(
+      result.status === "approved"
+        ? `approved identifier mapping ${result.identifierId} for outlet ${result.outletId}`
+        : `identifier mapping ${result.identifierId} for outlet ${result.outletId} is already approved; nothing changed`,
     );
     return 0;
   }

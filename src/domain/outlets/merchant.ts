@@ -4,7 +4,9 @@ import { getMenuDraft } from "@/domain/menu/draft";
 import type { MenuDraft } from "@/domain/menu/types";
 import { getPayPalConnection, type PayPalConnection } from "@/domain/outlets/destination";
 import { publicationStatus, type PublicationStatus } from "@/domain/outlets/publish";
-import { enrollments, merchantMemberships, outlets } from "@/lib/db/schema";
+import { decodeEmvcoTlv, type SupportedScheme } from "@/domain/sgqr/decode";
+import { isMappable, mappableIdentifier } from "@/domain/sgqr/validate";
+import { enrollments, merchantMemberships, outletIdentifiers, outlets } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
 import { newId } from "@/lib/ids";
@@ -12,7 +14,19 @@ import { newId } from "@/lib/ids";
 // Merchant-side outlet drafts (Gate 2 "POST /merchant/outlets, PATCH /merchant/outlets/{id}").
 // An outlet created here is unpublished: buyers read only outlets with a published revision.
 
-export const OUTLET_LIMITS = { maxTextChars: 80 } as const;
+export const OUTLET_LIMITS = { maxTextChars: 80, maxIdentifiers: 5 } as const;
+
+// S9: a business identifier the merchant submitted for this outlet, and whether the operator has
+// approved the mapping. Only an approved mapping can identify the outlet to a buyer's scan (S10).
+export type OutletIdentifier = {
+  id: string;
+  scheme: "paynow_uen";
+  identifier: string;
+  distinguisher: string;
+  source: "sticker" | "corrected" | "manual";
+  checksumValid: boolean | null;
+  approved: boolean;
+};
 
 export type MerchantOutlet = {
   id: string;
@@ -25,6 +39,7 @@ export type MerchantOutlet = {
   detailsConfirmed: boolean;
   paypal: PayPalConnection | null;
   publication: PublicationStatus;
+  identifiers: OutletIdentifier[];
 };
 
 export type MerchantOutlets = { outlets: MerchantOutlet[]; canCreateOutlet: boolean };
@@ -51,6 +66,30 @@ type OutletRow = {
   enrollment: string | null;
 };
 
+async function listIdentifiers(db: Pick<Db, "select">, outletId: string): Promise<OutletIdentifier[]> {
+  const rows = await db
+    .select({
+      id: outletIdentifiers.id,
+      identifier: outletIdentifiers.identifier,
+      distinguisher: outletIdentifiers.distinguisher,
+      source: outletIdentifiers.source,
+      checksumValid: outletIdentifiers.checksumValid,
+      approvedAt: outletIdentifiers.approvedAt,
+    })
+    .from(outletIdentifiers)
+    .where(eq(outletIdentifiers.outletId, outletId))
+    .orderBy(asc(outletIdentifiers.submittedAt), asc(outletIdentifiers.id));
+  return rows.map((row) => ({
+    id: row.id,
+    scheme: "paynow_uen",
+    identifier: row.identifier,
+    distinguisher: row.distinguisher,
+    source: row.source === "sticker" || row.source === "corrected" ? row.source : "manual",
+    checksumValid: row.checksumValid,
+    approved: row.approvedAt !== null,
+  }));
+}
+
 async function toMerchantOutlet(db: Pick<Db, "select">, row: OutletRow): Promise<MerchantOutlet> {
   const publication = await publicationStatus(db, row.id);
   if (!publication) throw new Error("an outlet read in this transaction has no publication status");
@@ -64,6 +103,7 @@ async function toMerchantOutlet(db: Pick<Db, "select">, row: OutletRow): Promise
     detailsConfirmed: row.detailsConfirmedAt !== null,
     paypal: await getPayPalConnection(db, row.id),
     publication,
+    identifiers: await listIdentifiers(db, row.id),
   };
 }
 
@@ -172,5 +212,65 @@ export async function updateMerchantOutlet(db: Db, input: OutletUpdate & { outle
     const outlet = await describeOutlet(tx, input.outletId);
     if (!outlet) throw new Error("the outlet vanished in its own transaction");
     return outlet;
+  });
+}
+
+// S9: the identifier the merchant reviewed, with the sticker payload when one was decoded. The payload
+// is decoded again here, so the stored source and checksum are the server's, never the browser's
+// claim, and it lives only in this request's memory: it is never stored, logged or audited.
+export type IdentifierSubmission = { scheme: SupportedScheme; identifier: string; distinguisher: string; payload: string | null };
+
+const identifierRefused = (reason: string, message: string) => appError("validation_failed", message, { details: { reason } });
+
+// Records a pending mapping for the outlet. A personal PayNow proxy or a malformed UEN is refused
+// before any write. A published outlet may submit one too: a pending mapping changes nothing a buyer
+// sees, and only the operator approves it.
+export async function submitOutletIdentifier(db: Db, input: IdentifierSubmission & { outletId: string; userId: string; now: Date }): Promise<MerchantOutlet | AppError> {
+  const mappable = mappableIdentifier(input);
+  if (!isMappable(mappable)) return identifierRefused(mappable.reason, mappable.message);
+
+  let source: OutletIdentifier["source"] = "manual";
+  let checksumValid: boolean | null = null;
+  if (input.payload !== null) {
+    const decoded = decodeEmvcoTlv(input.payload);
+    if (decoded.kind === "not_emvco") return identifierRefused("not_emvco", "That QR code is not an SGQR payment code. Enter the UEN by hand instead.");
+    checksumValid = decoded.checksumValid;
+    const onSticker = decoded.recognized.some((field) => {
+      const candidate = mappableIdentifier(field);
+      return isMappable(candidate) && candidate.identifier === mappable.identifier;
+    });
+    source = onSticker ? "sticker" : "corrected";
+  }
+
+  return db.transaction(async (tx) => {
+    // The outlet row lock serializes submissions, so two at once cannot pass the count together.
+    const [outlet] = await tx.select({ id: outlets.id }).from(outlets).where(eq(outlets.id, input.outletId)).for("update");
+    if (!outlet) return appError("not_found", "Shop not found.");
+    const [{ count }] = await tx.select({ count: sql<number>`count(*)::int` }).from(outletIdentifiers).where(eq(outletIdentifiers.outletId, input.outletId)) as [{ count: number }];
+    if (count >= OUTLET_LIMITS.maxIdentifiers) {
+      return identifierRefused("identifier_limit", `A shop can submit at most ${OUTLET_LIMITS.maxIdentifiers} identifiers. Ask the Envoi operator about the ones already submitted.`);
+    }
+
+    const id = newId("oid");
+    // The web role may insert only these columns (migration 0021); approved_at stays null. The
+    // unique index on outlet, scheme and identifier turns a repeat into no row.
+    const inserted = await tx.execute(sql`
+      insert into outlet_identifiers (id, outlet_id, scheme, identifier, distinguisher, source, checksum_valid, submitted_by_user_id, submitted_at)
+      values (${id}, ${input.outletId}, ${mappable.scheme}, ${mappable.identifier}, ${input.distinguisher}, ${source}, ${checksumValid}, ${input.userId}, ${input.now.toISOString()})
+      on conflict do nothing
+      returning id`);
+    if (inserted.length === 0) return identifierRefused("identifier_exists", "This shop already submitted that UEN.");
+
+    await recordAudit(tx, {
+      at: input.now,
+      actor: merchantActor(input.userId),
+      action: "identifier_submitted",
+      outletId: input.outletId,
+      operatorVisible: true,
+      details: { identifierId: id, source, checksumValid },
+    });
+    const described = await describeOutlet(tx, input.outletId);
+    if (!described) throw new Error("the outlet vanished in its own transaction");
+    return described;
   });
 }
