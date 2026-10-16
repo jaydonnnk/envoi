@@ -511,3 +511,21 @@ describe("admission refusals say whether a retry can pass", () => {
     expect(fake.calls).toHaveLength(0);
   });
 });
+
+// S11 review fixes: a request with no Origin is refused like a foreign one, before admission and
+// before any body byte; every browser sends Origin on a POST, so only a non-browser client omits it.
+describe("a missing Origin is refused", () => {
+  it("import route rejects a request with no Origin", async () => {
+    const target = await shop("missing-origin");
+    const body = countedStream(photoBody(await solidJpeg()));
+    const request = importRequest(target.outletId, target.cookie, body.stream, { baseRevisionId: target.revisionId });
+    request.headers.delete("origin");
+    expect(request.headers.has("origin")).toBe(false);
+    const response = await routes.imports.POST(request, routeParams(target.outletId));
+    expect(response.status).toBe(403);
+    expect(((await response.json()) as Envelope).error).toMatchObject({ code: "forbidden_origin", details: { reason: "missing" } });
+    expect(await attempts(target.outletId)).toEqual([]);
+    expect(body.pulls()).toBe(0);
+    expect(fake.calls).toHaveLength(0);
+  });
+});

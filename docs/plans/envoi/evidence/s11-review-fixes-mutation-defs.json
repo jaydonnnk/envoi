@@ -1,5 +1,18 @@
 [
  {
+  "id": "origin-missing",
+  "test": "import route rejects a request with no Origin",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "mutation": "Let assertSameOrigin accept a request with no Origin; the test fails.",
+  "edits": [
+   {
+    "file": "src/lib/http/origin.ts",
+    "old": "if (origin !== null && origin === new URL",
+    "new": "if (origin === null || origin === new URL"
+   }
+  ]
+ },
+ {
   "id": "retryable-always",
   "test": "only a refusal a later attempt can pass is retryable",
   "test_file": "tests/integration/menu-import-route.test.ts",
