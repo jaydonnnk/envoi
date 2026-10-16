@@ -126,12 +126,24 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [x] S7 - Merchant destination and publication, with stale-review invalidation and the PayPal basket lock at review creation and inside `paypal/start`; done 2026-10-14.
 - [x] S8 - Merchant orders and separate acknowledgment; done 2026-10-15; review fixes the same day.
 - [x] S11 - Menu photo import with direct vision, merged from the earlier S11 and S12, with the pre-registered vision evaluation and the real-photo exit decision, followed by the PYUSD go/no-go; done 2026-10-16, shipped with imports closed; review fixes 2026-10-16.
-- [ ] S9 - Merchant SGQR decode and identifier mapping.
+- [ ] S9 - Merchant SGQR decode and identifier mapping; started 2026-10-16 on `envoi/slice-9-sgqr-merchant`, before the PYUSD go/no-go by the user's choice.
 - [ ] S10 - Buyer scan or paste; second in the cut order.
 - [ ] S16 - PYUSD devnet purchase; first in the cut order, together with S17.
 - [ ] S17 - PYUSD recovery, extra transfers and the operator mismatch and refund acts.
 - [ ] S14 - APIMatic client and docs, account-conditional; third in the cut order.
 - [ ] S15 - Judged release.
+
+### S9 Merchant SGQR decode and mapping, 2026-10-16
+
+**Started 2026-10-16; in progress.** Branch `envoi/slice-9-sgqr-merchant`, cut from `main` at `0d56b98` (the S11 review fixes) and confirmed with `git branch --show-current`.
+S9 depends on S7, which is done.
+
+- **Start, in the user's words, 2026-10-16:** "Then start S9."
+- **Authorizations, 2026-10-16,** answered by multiple choice, granted items verbatim: "Install barcode-detector" (`barcode-detector@3.2.2`, the Gate 3 pin); "Migrations local + Neon" (the additive `outlet_identifiers` migration on disposable local databases, then `npm run db:migrate` on Neon with `READ ONLY` reads before and after); "Push, ff main, deploy"; "approve-identifier on Neon" (the operator act for a mapping the user names).
+  They do not cover any change to Test Shop, the demo merchant account or the two uncertain S2 purchases, any OpenAI call, or any gate reopening.
+- **Schedule deviation, approved by the user on 2026-10-16:** `04-slices.md` takes the PYUSD go/no-go before S9 starts; the two PYUSD access checks, Phantom on devnet and devnet funds, had not run, and the user chose to start S9 first and run the checks in parallel: "Yea start the handoff for s9 first while i do this in parallel".
+  The go/no-go stays the user's decision, taken when the checks finish and by 28 Oct at the latest; S9 does not depend on it.
+- **Open:** consented SGQR sticker photos [unknown, none obtained yet]; without them the decode results are reported as fixture-only.
 
 ### S11 Menu photo import with direct vision, 2026-10-15
 
@@ -338,6 +350,7 @@ Measured spend: US$0.088, so US$0.563 of the US$2 evaluation total over three ro
   One full run before those three, right after the mutation runs, reported 4 failed and 1 skipped and took about ten minutes; its failing names were not kept, three later runs passed 273 of 273 in about 11 seconds, and a leftover disposable database `envoi_t_admission-race_8f94eb53` was found and dropped. It is recorded as an unexplained flaky run [unknown], not as a pass.
 - **Mutations [verified], 12 of 12,** by [`s11-review-fixes-mutate.py`](evidence/s11-review-fixes-mutate.py) with [`s11-review-fixes-mutation-defs.json`](evidence/s11-review-fixes-mutation-defs.json), results in [`s11-review-fixes-mutations.json`](evidence/s11-review-fixes-mutations.json), on `3d65f25` with a clean tree: `origin-missing`, `retryable-always`, `closed-copy`, `portion-length`, `price-cap`, `keep-empty-rows`, `dispatch-after-deadline`, `dispatch-when-closed`, `close-after-deadline`, `published-base-refused`, `published-item-keys` and `merge-capacity`, each failing its named test on an AssertionError, restored byte-identical and passing on rerun.
   The 57 S11 definitions rerun on `028520e` prove 57 of 57 ([`s11-review-fixes-s11-rerun.json`](evidence/s11-review-fixes-s11-rerun.json)); that run records `uncommitted_changes` true only because the untracked results file above existed.
+- **Pushed [verified], 2026-10-16:** the branch and `main`, fast-forwarded to `0d56b98`, were pushed (checked with `git ls-remote`), which deploys; CI passed on the branch (run 38834310822) and on `main` (run 38834314683); afterwards Render answered the import route with 405 on GET and 401 on an anonymous POST, and whether the deploy of `0d56b98` was live then is [unknown], as Render has no version endpoint.
 - **Local browser check [verified], 2026-10-16,** on a rebuilt `next build` at `http://localhost:3100`: `/merchant/setup` shows the new note with the amber status rule and the manual editor, and `/operator/health` shows the closed import figures, at 390px and 1280px, with the "Test environment" badge and the demo-fixture and sandbox labels and no horizontal scroll; the disposable database was dropped after.
 - **Not changed:** Render was probed only as an anonymous visitor (GET 405, POST 401); a hostile progressive JPEG's decode time is bounded only by `limitInputPixels` and one decode at a time, not by the request deadline [unknown, not tested]; the import-write test watches `TMPDIR` and the `node:fs` write calls, so a native write elsewhere would not be seen.
 
