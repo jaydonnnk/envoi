@@ -1,4 +1,4 @@
-import type { SgqrField, SupportedScheme } from "./decode";
+import type { SupportedScheme } from "./decode";
 
 // Which decoded or typed identifiers may become an outlet mapping (Gate 2 merchant flow: unsupported
 // and personal proxies do not become published business identifiers). A valid format proves no
@@ -15,9 +15,9 @@ export type MappingRefusal = { reason: "personal_proxy" | "uen_format"; message:
 // none of these.
 const UEN = /^(?:\d{8}[A-Z]|(?:18|19|20)\d{7}[A-Z]|[RST]\d{2}[A-Z]{2}\d{4}[A-Z])(?:[A-Z0-9]{1,3})?$/;
 
-export const UEN_MAX_CHARS = 13;
+const UEN_MAX_CHARS = 13;
 
-export function normalizeIdentifier(identifier: string): string {
+function normalizeIdentifier(identifier: string): string {
   return identifier.trim().toUpperCase();
 }
 
@@ -34,9 +34,4 @@ export function mappableIdentifier(field: { scheme: SupportedScheme; identifier:
 
 export function isMappable(result: MappableIdentifier | MappingRefusal): result is MappableIdentifier {
   return "identifier" in result;
-}
-
-// The sticker's fields a merchant may pick as the mapping: business UENs only.
-export function mappableFields(fields: readonly SgqrField[]): SgqrField[] {
-  return fields.filter((field) => isMappable(mappableIdentifier(field)));
 }
