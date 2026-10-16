@@ -489,3 +489,25 @@ describe("draft reload reports the latest import outcome", () => {
     );
   });
 });
+
+// S11 review fixes: every admission refusal said retryable, even one that holds until a reviewed
+// code change, such as the empty bounds list that keeps imports closed in this release.
+describe("admission refusals say whether a retry can pass", () => {
+  it("only a refusal a later attempt can pass is retryable", async () => {
+    importRuntime.policy = fixturePolicy(1_000_000, []);
+    const closed = await shop("no-bounds");
+    const refused = await send(closed, countedStream(photoBody(await solidJpeg())).stream);
+    expect(refused.status).toBe(429);
+    expect(refused.body.error).toMatchObject({ code: "admission_rejected", retryable: false, details: { reason: "model_bounds_missing" } });
+    expect(refused.body.error?.message).toBe("Menu photo import is not available in this release. You can still enter your menu by hand.");
+
+    importRuntime.policy = fixturePolicy();
+    const busy = await shop("busy");
+    // FIXTURE: a live import already open for this outlet.
+    await fixture.database.admin`insert into menu_imports (id, outlet_id, actor_user_id, base_revision_id, consent_version, model_config_version, admitted_at, deadline_at, reserved_usd_micros)
+      values ('imp_fixturebusy', ${busy.outletId}, ${busy.merchant.userId}, ${busy.revisionId}, 'FIXTURE', 'FIXTURE', now(), now() + interval '90 seconds', 5000)`;
+    const later = await send(busy, countedStream(photoBody(await solidJpeg())).stream);
+    expect(later.body.error).toMatchObject({ code: "admission_rejected", retryable: true, details: { reason: "in_flight_outlet" } });
+    expect(fake.calls).toHaveLength(0);
+  });
+});

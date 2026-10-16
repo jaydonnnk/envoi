@@ -42,6 +42,9 @@ describe("vision draft validation", () => {
   it("draft text over 120 characters is refused", () => {
     expect(validateVisionDraft({ items: [row("K".repeat(121), "1.00")] })).toEqual({ ok: false, reason: "text_too_long" });
     expect(ok({ items: [row("K".repeat(120), "1.00")] }).items).toHaveLength(1);
+    // S11 review fixes: the bound holds for a portion as well as a name.
+    expect(validateVisionDraft({ items: [row("Kopi", "1.00", { portion: "P".repeat(121) })] })).toEqual({ ok: false, reason: "text_too_long" });
+    expect(ok({ items: [row("Kopi", "1.00", { portion: "P".repeat(120) })] }).items).toHaveLength(1);
   });
 
   it("draft result over 128 KiB is refused", () => {
@@ -75,5 +78,22 @@ describe("vision draft validation", () => {
       [null, "duplicate_variant"],
       [210, "explicit"],
     ]);
+  });
+});
+
+// S11 review fixes: two bounds of the draft that no Gate 3 case reached.
+describe("vision draft validation, review fixes", () => {
+  it("a price above the menu cap stays blank and an empty row is dropped", () => {
+    // The menu editor refuses a price above S$1,000, so an imported one is never filled above it.
+    const priced = ok({ items: [row("Kopi", "1000"), row("Crab", "1000.01")] });
+    expect(priced.items.map((item) => [item.priceSgdCents, item.priceBasis])).toEqual([
+      [100_000, "explicit"],
+      [null, "ambiguous"],
+    ]);
+    // A row whose every field is null is dropped, not kept as a nameless blank item.
+    const kept = ok({ items: [row(null, null), row("Teh", "1.60"), row(null, null)] });
+    expect(kept.items.map((item) => item.name)).toEqual(["Teh"]);
+    expect(kept.blankPriceCount).toBe(0);
+    expect(validateVisionDraft({ items: [row(null, null)] })).toEqual({ ok: false, reason: "empty" });
   });
 });

@@ -1,0 +1,145 @@
+[
+ {
+  "id": "retryable-always",
+  "test": "only a refusal a later attempt can pass is retryable",
+  "test_file": "tests/integration/menu-import-route.test.ts",
+  "mutation": "Mark every admission refusal retryable, as before the fix; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/imports/request.ts",
+    "old": "const retryable = RETRYABLE_REJECTIONS.has(admission.reason);",
+    "new": "const retryable = true;"
+   }
+  ]
+ },
+ {
+  "id": "closed-copy",
+  "test": "the closed import panel says photo import is not available in this release",
+  "test_file": "tests/unit/menu-import-closed.test.ts",
+  "mutation": "Restore the closed panel's pre-fix copy; the test fails.",
+  "edits": [
+   {
+    "file": "src/app/merchant/setup/menu-import.tsx",
+    "old": "Menu photo import is not available in this release. Enter each item and its SGD price below.",
+    "new": "Photo import is switched off on this Envoi demo, so no photo is sent anywhere. Enter your menu by hand below."
+   }
+  ]
+ },
+ {
+  "id": "portion-length",
+  "test": "draft text over 120 characters is refused",
+  "test_file": "tests/unit/vision-draft-validation.test.ts",
+  "mutation": "Check only the name's length, not the portion's; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/imports/validate-result.ts",
+    "old": " || (row.portion ?? \"\").length > MENU_IMPORT_LIMITS.maxTextChars)",
+    "new": ")"
+   }
+  ]
+ },
+ {
+  "id": "price-cap",
+  "test": "a price above the menu cap stays blank and an empty row is dropped",
+  "test_file": "tests/unit/vision-draft-validation.test.ts",
+  "mutation": "Drop the menu price cap from imported prices; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/imports/validate-result.ts",
+    "old": "cents <= 0 || cents > MENU_LIMITS.maxPriceSgdCents",
+    "new": "cents <= 0"
+   }
+  ]
+ },
+ {
+  "id": "keep-empty-rows",
+  "test": "a price above the menu cap stays blank and an empty row is dropped",
+  "test_file": "tests/unit/vision-draft-validation.test.ts",
+  "mutation": "Keep rows whose every field is null; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/imports/validate-result.ts",
+    "old": "const kept = rows.filter((row) => row.name !== null || row.portion !== null || row.priceText !== null || row.currency !== null);",
+    "new": "const kept = rows;"
+   }
+  ]
+ },
+ {
+  "id": "dispatch-after-deadline",
+  "test": "the dispatch mark and a failure close write only while the attempt is open and before its deadline",
+  "test_file": "tests/integration/menu-import-review-fixes.test.ts",
+  "mutation": "Let the dispatch mark write at or after the deadline; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/imports/lifecycle.ts",
+    "old": "isNull(menuImports.modelDispatchedAt), gt(menuImports.deadlineAt, now))",
+    "new": "isNull(menuImports.modelDispatchedAt))"
+   }
+  ]
+ },
+ {
+  "id": "dispatch-when-closed",
+  "test": "the dispatch mark and a failure close write only while the attempt is open and before its deadline",
+  "test_file": "tests/integration/menu-import-review-fixes.test.ts",
+  "mutation": "Let the dispatch mark write on a closed attempt; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/imports/lifecycle.ts",
+    "old": "and(eq(menuImports.id, importId), isNull(menuImports.closedAt), isNull(menuImports.modelDispatchedAt)",
+    "new": "and(eq(menuImports.id, importId), isNull(menuImports.modelDispatchedAt)"
+   }
+  ]
+ },
+ {
+  "id": "close-after-deadline",
+  "test": "the dispatch mark and a failure close write only while the attempt is open and before its deadline",
+  "test_file": "tests/integration/menu-import-review-fixes.test.ts",
+  "mutation": "Let a failure close write at or after the deadline; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/imports/lifecycle.ts",
+    "old": "if (!row || row.closedAt !== null || now.getTime() >= row.deadlineAt.getTime()) return false;",
+    "new": "if (!row || row.closedAt !== null) return false;"
+   }
+  ]
+ },
+ {
+  "id": "published-base-refused",
+  "test": "an import on a published menu adds to a new draft and keeps the published items' keys",
+  "test_file": "tests/integration/menu-import-review-fixes.test.ts",
+  "mutation": "Refuse an import whose base is the published menu as conflict_confirmed; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/imports/lifecycle.ts",
+    "old": "if (!fromPublished && revision.status === \"confirmed\") {",
+    "new": "if (revision.status === \"confirmed\") {"
+   }
+  ]
+ },
+ {
+  "id": "published-item-keys",
+  "test": "an import on a published menu adds to a new draft and keeps the published items' keys",
+  "test_file": "tests/integration/menu-import-review-fixes.test.ts",
+  "mutation": "Give the carried published items new item keys; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/imports/lifecycle.ts",
+    "old": "await tx.insert(menuItems).values({ ...rest, id: newId(\"itm\"), menuRevisionId: targetId, position });",
+    "new": "await tx.insert(menuItems).values({ ...rest, id: newId(\"itm\"), itemKey: newId(\"itm\"), menuRevisionId: targetId, position });"
+   }
+  ]
+ },
+ {
+  "id": "merge-capacity",
+  "test": "an import never grows a menu past 100 items",
+  "test_file": "tests/integration/menu-import-review-fixes.test.ts",
+  "mutation": "Drop the merge's 100-item capacity check; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/menu/draft.ts",
+    "old": "if (current.length + added.length >= MENU_LIMITS.maxItems) {",
+    "new": "if (false) {"
+   }
+  ]
+ }
+]
