@@ -1,0 +1,218 @@
+{
+ "branch": "envoi/slice-9-sgqr-merchant",
+ "base_commit": "2de4431",
+ "uncommitted_changes": false,
+ "method": "Each definition in s9-mutation-defs.json applied alone by exact text replacement, its named test run alone (vitest -t), every touched file restored and compared by SHA-256, then the test rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations, as envoi_web; merchant accounts are created by the operator functions with passwords generated in memory per run, and their FIXTURE shops are created through the merchant routes. Every SGQR payload is a FIXTURE built tag by tag; none is an authentic sticker. A migration mutation takes effect because each test file migrates a fresh disposable database. A proof also needs the mutated run to fail on an AssertionError.",
+ "results": [
+  {
+   "id": "unrecognized-dropped",
+   "test": "unrecognized tags are surfaced not guessed",
+   "files": [
+    "src/domain/sgqr/decode.ts"
+   ],
+   "mutation": "Drop every tag the decoder does not recognize instead of listing it; the test fails.",
+   "mutated": "Tests  1 failed | 5 skipped (6)",
+   "error": "AssertionError: expected [] to deeply equal [ \u2026(4) ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 5 skipped (6)",
+   "proof": true
+  },
+  {
+   "id": "redaction-removed",
+   "test": "raw QR payload is not logged",
+   "files": [
+    "src/lib/log.ts"
+   ],
+   "mutation": "Remove the QR payload redaction from the logger; the test fails.",
+   "mutated": "Tests  1 failed | 9 skipped (10)",
+   "error": "AssertionError: logs: expected true to be false // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 9 skipped (10)",
+   "proof": true
+  },
+  {
+   "id": "proxy-allowed",
+   "test": "personal proxy is not published as a business identifier",
+   "files": [
+    "src/domain/sgqr/validate.ts"
+   ],
+   "mutation": "Allow a proxy mapping: a personal PayNow proxy becomes a mappable identifier; the test fails.",
+   "mutated": "Tests  1 failed | 9 skipped (10)",
+   "error": "AssertionError: expected 200 to be 400 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 9 skipped (10)",
+   "proof": true
+  },
+  {
+   "id": "scheme-check",
+   "test": "the database refuses a mapping that is not a business UEN",
+   "files": [
+    "drizzle/0021_s9_outlet_identifiers.sql"
+   ],
+   "mutation": "Let the scheme check admit paynow_proxy; the test fails.",
+   "mutated": "Tests  1 failed | 9 skipped (10)",
+   "error": "AssertionError: expected 'inserted' to be '23514 outlet_identifiers_scheme_check' // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 9 skipped (10)",
+   "proof": true
+  },
+  {
+   "id": "checksum-assumed",
+   "test": "checksum validity is computed, not assumed",
+   "files": [
+    "src/domain/sgqr/decode.ts"
+   ],
+   "mutation": "Report every checksum as valid; the test fails.",
+   "mutated": "Tests  1 failed | 5 skipped (6)",
+   "error": "AssertionError: expected true to be false // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 5 skipped (6)",
+   "proof": true
+  },
+  {
+   "id": "partial-decode",
+   "test": "a payload that is not EMVCo decodes to nothing",
+   "files": [
+    "src/domain/sgqr/decode.ts"
+   ],
+   "mutation": "Keep the tags parsed before a length overrun instead of refusing the payload; the test fails.",
+   "mutated": "Tests  1 failed | 5 skipped (6)",
+   "error": "AssertionError: \"00020101021126370009SG.PAYNOW010120210T2\": expected { kind: 'decoded', \u2026(3) } to deeply equal { kind: 'not_emvco' }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 5 skipped (6)",
+   "proof": true
+  },
+  {
+   "id": "proxy-type-ignored",
+   "test": "a PayNow mobile number decodes as a proxy, not a UEN",
+   "files": [
+    "src/domain/sgqr/decode.ts"
+   ],
+   "mutation": "Read every PayNow proxy as a UEN, ignoring its proxy type; the test fails.",
+   "mutated": "Tests  1 failed | 5 skipped (6)",
+   "error": "AssertionError: expected [ { scheme: 'paynow_uen', \u2026(2) } ] to deeply equal [ { scheme: 'paynow_proxy', \u2026(2) } ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 5 skipped (6)",
+   "proof": true
+  },
+  {
+   "id": "uen-format-skipped",
+   "test": "a malformed UEN is refused",
+   "files": [
+    "src/domain/sgqr/validate.ts"
+   ],
+   "mutation": "Skip the UEN format check; the test fails.",
+   "mutated": "Tests  1 failed | 5 skipped (6)",
+   "error": "AssertionError: S1234567D: expected { scheme: 'paynow_uen', \u2026(1) } to match object { reason: 'uen_format' }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 5 skipped (6)",
+   "proof": true
+  },
+  {
+   "id": "server-checksum-trusted",
+   "test": "a sticker submission records the server's decode, not the browser's",
+   "files": [
+    "src/domain/outlets/merchant.ts"
+   ],
+   "mutation": "Record every submitted sticker's checksum as valid instead of the server's decode; the test fails.",
+   "mutated": "Tests  1 failed | 9 skipped (10)",
+   "error": "AssertionError: expected [ \u2026(4) ] to deeply equal [ \u2026(4) ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 9 skipped (10)",
+   "proof": true
+  },
+  {
+   "id": "source-always-sticker",
+   "test": "a sticker submission records the server's decode, not the browser's",
+   "files": [
+    "src/domain/outlets/merchant.ts"
+   ],
+   "mutation": "Record every sticker submission as taken from the sticker, even a corrected UEN; the test fails.",
+   "mutated": "Tests  1 failed | 9 skipped (10)",
+   "error": "AssertionError: expected [ \u2026(4) ] to deeply equal [ \u2026(4) ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 9 skipped (10)",
+   "proof": true
+  },
+  {
+   "id": "duplicate-allowed",
+   "test": "a repeated identifier is not submitted twice",
+   "files": [
+    "drizzle/0021_s9_outlet_identifiers.sql"
+   ],
+   "mutation": "Make the outlet, scheme and identifier index non-unique; the test fails.",
+   "mutated": "Tests  1 failed | 9 skipped (10)",
+   "error": "AssertionError: expected 200 to be 400 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 9 skipped (10)",
+   "proof": true
+  },
+  {
+   "id": "identifier-limit",
+   "test": "a shop submits at most five identifiers",
+   "files": [
+    "src/domain/outlets/merchant.ts"
+   ],
+   "mutation": "Remove the five-identifier limit; the test fails.",
+   "mutated": "Tests  1 failed | 9 skipped (10)",
+   "error": "AssertionError: expected undefined to match object { code: 'validation_failed', \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 9 skipped (10)",
+   "proof": true
+  },
+  {
+   "id": "web-insert-approved",
+   "test": "only the operator approves an identifier mapping",
+   "files": [
+    "drizzle/0021_s9_outlet_identifiers.sql"
+   ],
+   "mutation": "Grant the web role INSERT on every column, including approved_at; the test fails.",
+   "mutated": "Tests  1 failed | 9 skipped (10)",
+   "error": "AssertionError: expected 'inserted' to be '42501' // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 9 skipped (10)",
+   "proof": true
+  },
+  {
+   "id": "web-update-approved",
+   "test": "only the operator approves an identifier mapping",
+   "files": [
+    "drizzle/0021_s9_outlet_identifiers.sql"
+   ],
+   "mutation": "Grant the web role UPDATE on the table; the test fails.",
+   "mutated": "Tests  1 failed | 9 skipped (10)",
+   "error": "AssertionError: expected 'updated' to be '42501' // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 9 skipped (10)",
+   "proof": true
+  },
+  {
+   "id": "mixed-body",
+   "test": "a body mixing shop details and an identifier is refused whole",
+   "files": [
+    "src/app/api/v1/merchant/outlets/input.ts"
+   ],
+   "mutation": "Let the identifier body ignore unknown keys, so shop details beside an identifier are dropped silently; the test fails.",
+   "mutated": "Tests  1 failed | 9 skipped (10)",
+   "error": "AssertionError: expected 200 to be 400 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 9 skipped (10)",
+   "proof": true
+  }
+ ]
+}
