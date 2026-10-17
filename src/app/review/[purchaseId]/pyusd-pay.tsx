@@ -31,7 +31,7 @@ export type PyusdPayProps = {
   amount: string;
   validUntil: string;
   // Rendering without a browser (tests, and the first paint) can pass what the browser would report.
-  environment?: { userAgent: string; wallets: StandardWallet[] };
+  environment?: { userAgent: string; maxTouchPoints?: number; wallets: StandardWallet[] };
 };
 
 export function PyusdPayView({
@@ -117,7 +117,7 @@ export function PyusdPay({ purchaseId, outletId, lines, appBaseUrl, amount, vali
     const refresh = () => {
       const found = devnetWallets(registry, "solana:signAndSendTransaction");
       setWallets(found);
-      setMode(choosePayMode({ userAgent: navigator.userAgent, wallets: found }));
+      setMode(choosePayMode({ userAgent: navigator.userAgent, maxTouchPoints: navigator.maxTouchPoints, wallets: found }));
     };
     refresh();
     // Extensions can register after the page loads.

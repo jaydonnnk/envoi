@@ -113,6 +113,15 @@ describe("PYUSD wallet and receipt standalone tests", () => {
     expect(view({ mode: choosePayMode({ userAgent: IPHONE, wallets: [wallet] }), wallets: [wallet] })).toContain("<button");
   });
 
+  // S16 review fixes, F11: not a Gate 3 named test.
+  it("an iPad without a wallet gets the Phantom link, not the desktop note", () => {
+    // iPadOS Safari's default user agent, which names a Mac.
+    const IPAD = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15";
+    expect(choosePayMode({ userAgent: IPAD, maxTouchPoints: 5, wallets: [] })).toBe("phantom_link");
+    // Fixture self-check: the same user agent on a Mac, which has no touch points, keeps the desktop note.
+    expect(choosePayMode({ userAgent: IPAD, maxTouchPoints: 0, wallets: [] })).toBe("need_wallet");
+  });
+
   it("PYUSD receipt says transferred and finalized on devnet", () => {
     const signature = "5FXTRsignatureFixture1111111111111111111111111111111111111111111111111111111111111111";
     const recipient = fixtureKey(3);

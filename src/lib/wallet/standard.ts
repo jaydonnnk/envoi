@@ -77,15 +77,16 @@ export async function signMessageOnce(wallet: StandardWallet, account: StandardA
 }
 
 // A phone or tablet browser, where a wallet usually lives in its own app rather than as an extension.
-export function isPhoneBrowser(userAgent: string): boolean {
-  return /Android|iPhone|iPad|iPod|Mobile/i.test(userAgent);
+// iPadOS Safari reports a Mac user agent, so a "Macintosh" with more than one touch point is an iPad.
+export function isPhoneBrowser(userAgent: string, maxTouchPoints = 0): boolean {
+  return /Android|iPhone|iPad|iPod|Mobile/i.test(userAgent) || (/Macintosh/.test(userAgent) && maxTouchPoints > 1);
 }
 
 export type PayMode = "pay" | "phantom_link" | "need_wallet";
 
 // A phone with no devnet wallet gets the Phantom link and never a pay button; a desktop with none
 // gets an explanation and no pay button.
-export function choosePayMode(input: { userAgent: string; wallets: readonly StandardWallet[] }): PayMode {
+export function choosePayMode(input: { userAgent: string; maxTouchPoints?: number; wallets: readonly StandardWallet[] }): PayMode {
   if (input.wallets.length > 0) return "pay";
-  return isPhoneBrowser(input.userAgent) ? "phantom_link" : "need_wallet";
+  return isPhoneBrowser(input.userAgent, input.maxTouchPoints) ? "phantom_link" : "need_wallet";
 }
