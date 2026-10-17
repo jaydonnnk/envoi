@@ -1,0 +1,564 @@
+{
+ "note": "S16 real devnet proof run, 2026-10-18 (Asia/Singapore; 2026-10-17 UTC). Devnet test tokens only. Transactions read from https://api.devnet.solana.com with read-only getSignatureStatuses and getTransaction; Neon rows read in a READ ONLY transaction. The user signed every wallet act in Phantom; no key, phrase or unsigned bytes are recorded.",
+ "signatureStatuses": {
+  "context": {
+   "apiVersion": "4.4.0-beta.0",
+   "slot": 512134439
+  },
+  "value": [
+   {
+    "confirmationStatus": "finalized",
+    "confirmations": null,
+    "err": null,
+    "slot": 512132636,
+    "status": {
+     "Ok": null
+    }
+   },
+   {
+    "confirmationStatus": "finalized",
+    "confirmations": null,
+    "err": null,
+    "slot": 512133468,
+    "status": {
+     "Ok": null
+    }
+   }
+  ]
+ },
+ "transactions": {
+  "2AcWTpJWtiLKBNS36vL9UyTV9goYMbR4tajb8aDVvnmNAwHbJvYeJA65oZbdDnx2EiptJVT1gwYbPZRnXGkw7cUM": {
+   "slot": 512132636,
+   "version": 0,
+   "err": null,
+   "feeLamports": 80000,
+   "recentBlockhash": "kFAcGb96SJKoSqG9aWpCr1tNkFgnwkKrpzvxiuu29RU",
+   "accountKeys": [
+    {
+     "pubkey": "89CbH6RAXRfNFpRNDGdyzThBUyccySPqPA5QVkLa38mv",
+     "signer": true,
+     "writable": true
+    },
+    {
+     "pubkey": "7PwsUNDMHskHT2eEEoaAy7Fb8d5rsymc1iJafEzMGgGZ",
+     "signer": false,
+     "writable": true
+    },
+    {
+     "pubkey": "4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14",
+     "signer": false,
+     "writable": true
+    },
+    {
+     "pubkey": "ComputeBudget111111111111111111111111111111",
+     "signer": false,
+     "writable": false
+    },
+    {
+     "pubkey": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
+     "signer": false,
+     "writable": false
+    },
+    {
+     "pubkey": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+     "signer": false,
+     "writable": false
+    },
+    {
+     "pubkey": "CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM",
+     "signer": false,
+     "writable": false
+    }
+   ],
+   "instructions": [
+    {
+     "programId": "ComputeBudget111111111111111111111111111111",
+     "program": null,
+     "parsed": null,
+     "data": "3qi1MbrtkR83"
+    },
+    {
+     "programId": "ComputeBudget111111111111111111111111111111",
+     "program": null,
+     "parsed": null,
+     "data": "Fj2Eoy"
+    },
+    {
+     "programId": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
+     "program": "spl-memo",
+     "parsed": "WKtTviMKkFYrF8FZY4k68D",
+     "data": null
+    },
+    {
+     "programId": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+     "program": "spl-token",
+     "parsed": {
+      "info": {
+       "authority": "89CbH6RAXRfNFpRNDGdyzThBUyccySPqPA5QVkLa38mv",
+       "destination": "4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14",
+       "mint": "CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM",
+       "source": "7PwsUNDMHskHT2eEEoaAy7Fb8d5rsymc1iJafEzMGgGZ",
+       "tokenAmount": {
+        "amount": "1800000",
+        "decimals": 6,
+        "uiAmount": 1.8,
+        "uiAmountString": "1.8"
+       }
+      },
+      "type": "transferChecked"
+     },
+     "data": null
+    }
+   ],
+   "computeBudgetDecoded": [
+    {
+     "discriminator": 3,
+     "name": "SetComputeUnitPrice",
+     "microLamports": 375000
+    },
+    {
+     "discriminator": 2,
+     "name": "SetComputeUnitLimit",
+     "units": 200000
+    }
+   ],
+   "innerInstructions": [],
+   "preTokenBalances": [
+    {
+     "owner": "89CbH6RAXRfNFpRNDGdyzThBUyccySPqPA5QVkLa38mv",
+     "mint": "CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM",
+     "amount": "99000000"
+    },
+    {
+     "owner": "6CZs2FrxDdWySqTDdfbCbTQUpWPfaLnTmnkBn1W2PF6z",
+     "mint": "CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM",
+     "amount": "101000000"
+    }
+   ],
+   "postTokenBalances": [
+    {
+     "owner": "89CbH6RAXRfNFpRNDGdyzThBUyccySPqPA5QVkLa38mv",
+     "mint": "CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM",
+     "amount": "97200000"
+    },
+    {
+     "owner": "6CZs2FrxDdWySqTDdfbCbTQUpWPfaLnTmnkBn1W2PF6z",
+     "mint": "CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM",
+     "amount": "102800000"
+    }
+   ]
+  },
+  "2RAZudPogRpLjmjir4D8qTF5sGRsQLcP1MH31sDNDqHgpWFYkqVSH65QJuKjUVQzTHhSGxiBjx22eHX27KrNAUnr": {
+   "slot": 512133468,
+   "version": 0,
+   "err": null,
+   "feeLamports": 80000,
+   "recentBlockhash": "3NQon3opzWJQSPWXjnmP3Cs6cBUz4QzjirixmbTfTJob",
+   "accountKeys": [
+    {
+     "pubkey": "89CbH6RAXRfNFpRNDGdyzThBUyccySPqPA5QVkLa38mv",
+     "signer": true,
+     "writable": true
+    },
+    {
+     "pubkey": "7PwsUNDMHskHT2eEEoaAy7Fb8d5rsymc1iJafEzMGgGZ",
+     "signer": false,
+     "writable": true
+    },
+    {
+     "pubkey": "4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14",
+     "signer": false,
+     "writable": true
+    },
+    {
+     "pubkey": "ComputeBudget111111111111111111111111111111",
+     "signer": false,
+     "writable": false
+    },
+    {
+     "pubkey": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
+     "signer": false,
+     "writable": false
+    },
+    {
+     "pubkey": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+     "signer": false,
+     "writable": false
+    },
+    {
+     "pubkey": "CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM",
+     "signer": false,
+     "writable": false
+    }
+   ],
+   "instructions": [
+    {
+     "programId": "ComputeBudget111111111111111111111111111111",
+     "program": null,
+     "parsed": null,
+     "data": "3qi1MbrtkR83"
+    },
+    {
+     "programId": "ComputeBudget111111111111111111111111111111",
+     "program": null,
+     "parsed": null,
+     "data": "Fj2Eoy"
+    },
+    {
+     "programId": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
+     "program": "spl-memo",
+     "parsed": "3Y9LaXsrH3YZeUZwgJwCqv",
+     "data": null
+    },
+    {
+     "programId": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+     "program": "spl-token",
+     "parsed": {
+      "info": {
+       "authority": "89CbH6RAXRfNFpRNDGdyzThBUyccySPqPA5QVkLa38mv",
+       "destination": "4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14",
+       "mint": "CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM",
+       "source": "7PwsUNDMHskHT2eEEoaAy7Fb8d5rsymc1iJafEzMGgGZ",
+       "tokenAmount": {
+        "amount": "1800000",
+        "decimals": 6,
+        "uiAmount": 1.8,
+        "uiAmountString": "1.8"
+       }
+      },
+      "type": "transferChecked"
+     },
+     "data": null
+    }
+   ],
+   "computeBudgetDecoded": [
+    {
+     "discriminator": 3,
+     "name": "SetComputeUnitPrice",
+     "microLamports": 375000
+    },
+    {
+     "discriminator": 2,
+     "name": "SetComputeUnitLimit",
+     "units": 200000
+    }
+   ],
+   "innerInstructions": [],
+   "preTokenBalances": [
+    {
+     "owner": "89CbH6RAXRfNFpRNDGdyzThBUyccySPqPA5QVkLa38mv",
+     "mint": "CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM",
+     "amount": "97200000"
+    },
+    {
+     "owner": "6CZs2FrxDdWySqTDdfbCbTQUpWPfaLnTmnkBn1W2PF6z",
+     "mint": "CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM",
+     "amount": "102800000"
+    }
+   ],
+   "postTokenBalances": [
+    {
+     "owner": "89CbH6RAXRfNFpRNDGdyzThBUyccySPqPA5QVkLa38mv",
+     "mint": "CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM",
+     "amount": "95400000"
+    },
+    {
+     "owner": "6CZs2FrxDdWySqTDdfbCbTQUpWPfaLnTmnkBn1W2PF6z",
+     "mint": "CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM",
+     "amount": "104600000"
+    }
+   ]
+  }
+ },
+ "neon": {
+  "destinations": [
+   {
+    "id": "dst_5gpv6bizkhhjopo4agycr4g6yi",
+    "rail": "paypal",
+    "environment": "sandbox",
+    "status": "active",
+    "version": 2,
+    "wallet_address": null,
+    "token_account": null,
+    "key_verified_at": null
+   },
+   {
+    "id": "dst_mt4ht7ih2py2vvdkbzyjuo5fhy",
+    "rail": "pyusd",
+    "environment": "devnet",
+    "status": "active",
+    "version": 2,
+    "wallet_address": "6CZs2FrxDdWySqTDdfbCbTQUpWPfaLnTmnkBn1W2PF6z",
+    "token_account": "4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14",
+    "key_verified_at": "2026-10-17T16:20:45.510Z"
+   }
+  ],
+  "rates": [
+   {
+    "id": "rat_vgiz44m3iky7ykamgra264rtgu",
+    "atomic_per_sgd": "1000000",
+    "confirmed_at": "2026-10-17T16:16:02.786Z"
+   },
+   {
+    "id": "rat_67poyu4qoy6mbqrtt36dxli5b4",
+    "atomic_per_sgd": "1000000",
+    "confirmed_at": "2026-10-17T16:16:06.611Z"
+   },
+   {
+    "id": "rat_pfaadi5fspair5diaog5b5qd7a",
+    "atomic_per_sgd": "1000000",
+    "confirmed_at": "2026-10-17T16:23:21.106Z"
+   }
+  ],
+  "challenges": [
+   {
+    "id": "wch_qinbcuvxtjk57h2uorvpps3xre",
+    "wallet": "6CZs2FrxDdWySqTDdfbCbTQUpWPfaLnTmnkBn1W2PF6z",
+    "issued_at": "2026-10-17T16:15:30.959Z",
+    "expires_at": "2026-10-17T16:20:30.959Z",
+    "consumed_at": "2026-10-17T16:15:34.285Z"
+   },
+   {
+    "id": "wch_rywqrv7qsfwqw54pwmmvhxcpzm",
+    "wallet": "6CZs2FrxDdWySqTDdfbCbTQUpWPfaLnTmnkBn1W2PF6z",
+    "issued_at": "2026-10-17T16:20:39.192Z",
+    "expires_at": "2026-10-17T16:25:39.192Z",
+    "consumed_at": "2026-10-17T16:20:45.510Z"
+   },
+   {
+    "id": "wch_vzu5odnu4afyzjift25woehqqa",
+    "wallet": "6CZs2FrxDdWySqTDdfbCbTQUpWPfaLnTmnkBn1W2PF6z",
+    "issued_at": "2026-10-17T16:20:47.150Z",
+    "expires_at": "2026-10-17T16:25:47.150Z",
+    "consumed_at": null
+   }
+  ],
+  "audits": [
+   {
+    "at": "2026-10-17T16:15:34.285Z",
+    "action": "pyusd_wallet_verified",
+    "details": {
+     "proves": "key_control_only",
+     "wallet": "6CZs2FrxDdWySqTDdfbCbTQUpWPfaLnTmnkBn1W2PF6z",
+     "version": 1,
+     "challengeId": "wch_qinbcuvxtjk57h2uorvpps3xre",
+     "environment": "devnet",
+     "tokenAccount": "4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14",
+     "destinationId": "dst_mt4ht7ih2py2vvdkbzyjuo5fhy"
+    }
+   },
+   {
+    "at": "2026-10-17T16:16:02.786Z",
+    "action": "pyusd_rate_confirmed",
+    "details": {
+     "pyusdPerSgd": "1.000000",
+     "rateVersionId": "rat_vgiz44m3iky7ykamgra264rtgu"
+    }
+   },
+   {
+    "at": "2026-10-17T16:16:06.611Z",
+    "action": "pyusd_rate_confirmed",
+    "details": {
+     "pyusdPerSgd": "1.000000",
+     "rateVersionId": "rat_67poyu4qoy6mbqrtt36dxli5b4"
+    }
+   },
+   {
+    "at": "2026-10-17T16:20:45.510Z",
+    "action": "pyusd_wallet_verified",
+    "details": {
+     "proves": "key_control_only",
+     "wallet": "6CZs2FrxDdWySqTDdfbCbTQUpWPfaLnTmnkBn1W2PF6z",
+     "version": 2,
+     "challengeId": "wch_rywqrv7qsfwqw54pwmmvhxcpzm",
+     "environment": "devnet",
+     "tokenAccount": "4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14",
+     "destinationId": "dst_mt4ht7ih2py2vvdkbzyjuo5fhy"
+    }
+   },
+   {
+    "at": "2026-10-17T16:23:21.106Z",
+    "action": "pyusd_rate_confirmed",
+    "details": {
+     "pyusdPerSgd": "1.000000",
+     "rateVersionId": "rat_pfaadi5fspair5diaog5b5qd7a"
+    }
+   },
+   {
+    "at": "2026-10-17T16:23:35.695Z",
+    "action": "pyusd_attempt_prepared",
+    "details": {
+     "reference": "WKtTviMKkFYrF8FZY4k68D",
+     "atomicAmount": "1800000",
+     "messageFingerprint": "a793573876179c60eb13a9fa6e6930d622de532f5ac5fba7df3a16cfc1f26c94",
+     "lastValidBlockHeight": "499348224"
+    }
+   },
+   {
+    "at": "2026-10-17T16:23:40.987Z",
+    "action": "pyusd_hint_received",
+    "details": {
+     "signature": "2AcWTpJWtiLKBNS36vL9UyTV9goYMbR4tajb8aDVvnmNAwHbJvYeJA65oZbdDnx2EiptJVT1gwYbPZRnXGkw7cUM"
+    }
+   },
+   {
+    "at": "2026-10-17T16:23:42.329Z",
+    "action": "pyusd_transfer_confirmed",
+    "details": {
+     "slot": "512132636",
+     "signature": "2AcWTpJWtiLKBNS36vL9UyTV9goYMbR4tajb8aDVvnmNAwHbJvYeJA65oZbdDnx2EiptJVT1gwYbPZRnXGkw7cUM",
+     "destination": "4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14",
+     "atomicAmount": "1800000"
+    }
+   },
+   {
+    "at": "2026-10-17T16:26:53.920Z",
+    "action": "pyusd_attempt_prepared",
+    "details": {
+     "reference": "3Y9LaXsrH3YZeUZwgJwCqv",
+     "atomicAmount": "1800000",
+     "messageFingerprint": "39b3d8d8a23dfeb9fb2fa8140ef716fdb3bc7d9f8e4dcf8823f56fa9b0d7d658",
+     "lastValidBlockHeight": "499349053"
+    }
+   },
+   {
+    "at": "2026-10-17T16:26:58.642Z",
+    "action": "pyusd_hint_received",
+    "details": {
+     "signature": "2RAZudPogRpLjmjir4D8qTF5sGRsQLcP1MH31sDNDqHgpWFYkqVSH65QJuKjUVQzTHhSGxiBjx22eHX27KrNAUnr"
+    }
+   }
+  ],
+  "purchases": [
+   {
+    "id": "pur_cicdlggqrhgi7hhg5vxvmo7kp4",
+    "state": "review_expired",
+    "rail": "pyusd",
+    "total_sgd_cents": 180,
+    "pyusd_atomic_amount": "1800000",
+    "created_at": "2026-10-17T16:16:58.448Z",
+    "attempt_state": null,
+    "pyusd_buyer_wallet": null,
+    "pyusd_reference": null,
+    "pyusd_finalized_signature": null,
+    "pyusd_hints": null,
+    "pyusd_last_valid_block_height": null,
+    "attempt_at": null
+   },
+   {
+    "id": "pur_bi3om6wno6f6t4vbilkswfut3y",
+    "state": "paid",
+    "rail": "pyusd",
+    "total_sgd_cents": 180,
+    "pyusd_atomic_amount": "1800000",
+    "created_at": "2026-10-17T16:23:28.578Z",
+    "attempt_state": "confirmed",
+    "pyusd_buyer_wallet": "89CbH6RAXRfNFpRNDGdyzThBUyccySPqPA5QVkLa38mv",
+    "pyusd_reference": "WKtTviMKkFYrF8FZY4k68D",
+    "pyusd_finalized_signature": "2AcWTpJWtiLKBNS36vL9UyTV9goYMbR4tajb8aDVvnmNAwHbJvYeJA65oZbdDnx2EiptJVT1gwYbPZRnXGkw7cUM",
+    "pyusd_hints": [
+     {
+      "decision": "confirmed",
+      "signature": "2AcWTpJWtiLKBNS36vL9UyTV9goYMbR4tajb8aDVvnmNAwHbJvYeJA65oZbdDnx2EiptJVT1gwYbPZRnXGkw7cUM",
+      "receivedAt": "2026-10-17T16:23:40.987Z"
+     }
+    ],
+    "pyusd_last_valid_block_height": "499348224",
+    "attempt_at": "2026-10-17T16:23:35.695Z"
+   },
+   {
+    "id": "pur_e4pj6g4x7ylsxtcqqxi6f4m66y",
+    "state": "review_open",
+    "rail": "pyusd",
+    "total_sgd_cents": 180,
+    "pyusd_atomic_amount": "1800000",
+    "created_at": "2026-10-17T16:26:17.851Z",
+    "attempt_state": null,
+    "pyusd_buyer_wallet": null,
+    "pyusd_reference": null,
+    "pyusd_finalized_signature": null,
+    "pyusd_hints": null,
+    "pyusd_last_valid_block_height": null,
+    "attempt_at": null
+   },
+   {
+    "id": "pur_b6bf45fmxlulegnn26a4pl5zkq",
+    "state": "pending_payment",
+    "rail": "pyusd",
+    "total_sgd_cents": 180,
+    "pyusd_atomic_amount": "1800000",
+    "created_at": "2026-10-17T16:26:44.865Z",
+    "attempt_state": "prepared",
+    "pyusd_buyer_wallet": "89CbH6RAXRfNFpRNDGdyzThBUyccySPqPA5QVkLa38mv",
+    "pyusd_reference": "3Y9LaXsrH3YZeUZwgJwCqv",
+    "pyusd_finalized_signature": null,
+    "pyusd_hints": [
+     {
+      "decision": "not_found",
+      "signature": "2RAZudPogRpLjmjir4D8qTF5sGRsQLcP1MH31sDNDqHgpWFYkqVSH65QJuKjUVQzTHhSGxiBjx22eHX27KrNAUnr",
+      "receivedAt": "2026-10-17T16:26:58.642Z"
+     }
+    ],
+    "pyusd_last_valid_block_height": "499349053",
+    "attempt_at": "2026-10-17T16:26:53.920Z"
+   }
+  ],
+  "limiterCalls": [
+   {
+    "method": "getBlockHeight",
+    "n": 1,
+    "first": "2026-10-17T16:26:59.040Z",
+    "last": "2026-10-17T16:26:59.040Z"
+   },
+   {
+    "method": "getEpochInfo",
+    "n": 2,
+    "first": "2026-10-17T16:26:53.555Z",
+    "last": "2026-10-17T16:26:58.924Z"
+   },
+   {
+    "method": "getGenesisHash",
+    "n": 2,
+    "first": "2026-10-17T16:26:53.303Z",
+    "last": "2026-10-17T16:26:58.692Z"
+   },
+   {
+    "method": "getLatestBlockhash",
+    "n": 1,
+    "first": "2026-10-17T16:26:53.761Z",
+    "last": "2026-10-17T16:26:53.761Z"
+   },
+   {
+    "method": "getMultipleAccounts",
+    "n": 3,
+    "first": "2026-10-17T16:26:53.473Z",
+    "last": "2026-10-17T16:26:58.839Z"
+   },
+   {
+    "method": "getTransaction",
+    "n": 1,
+    "first": "2026-10-17T16:26:59.125Z",
+    "last": "2026-10-17T16:26:59.125Z"
+   }
+  ],
+  "limiterSlots": [
+   {
+    "slot": 0,
+    "held": false,
+    "lease_expires_at": null
+   },
+   {
+    "slot": 1,
+    "held": false,
+    "lease_expires_at": null
+   }
+  ],
+  "backoff": [
+   {
+    "id": "global",
+    "until": null,
+    "consecutive": 0
+   }
+  ]
+ }
+}
