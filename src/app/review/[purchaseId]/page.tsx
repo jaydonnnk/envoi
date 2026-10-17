@@ -3,12 +3,11 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { SINGAPORE_CLOCK } from "@/app/purchase-copy";
 import { outletRails } from "@/domain/outlets/destination";
-import { pyusdAvailability } from "@/domain/pyusd/identity";
-import { formatPyusdAtomic, formatPyusdPerSgd, isRateExpired, latestPyusdRate } from "@/domain/pyusd/rate";
+import { outletPyusdAvailability } from "@/app/pyusd-availability";
+import { formatPyusdAtomic, formatPyusdPerSgd } from "@/domain/pyusd/rate";
 import { getOwnPurchase, type OwnPurchase } from "@/domain/purchases/review";
 import { applyDerivedTransitions } from "@/domain/purchases/state";
 import { webEnv } from "@/env";
-import { webSolanaClient } from "@/integrations/solana/rpc";
 import { getAuth } from "@/lib/auth";
 import { isPrincipal, requireBuyerSession } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
@@ -26,14 +25,7 @@ const linesOf = (purchase: OwnPurchase) => purchase.lines.map((line) => ({ menuI
 // rate younger than 30 days, and the RPC reports the pinned devnet identity. It streams in after the
 // rest of the page, so an unreachable RPC never delays the PayPal journey.
 async function PyusdOption({ purchase, open }: { purchase: OwnPurchase; open: boolean }) {
-  const db = webDb();
-  const rails = await outletRails(db, purchase.outletId);
-  const rate = await latestPyusdRate(db, purchase.outletId);
-  const now = new Date();
-  const availability = await pyusdAvailability(
-    { enabled: webEnv().PYUSD_ENABLED, hasWallet: rails.pyusd, rate: rate ? { expired: isRateExpired(rate, now) } : null },
-    webSolanaClient,
-  );
+  const { availability, rate } = await outletPyusdAvailability(purchase.outletId);
   return (
     <div className={`rail ${availability.available ? "choice" : "unavailable"}`} aria-disabled={!availability.available}>
       <span className="rail-head">

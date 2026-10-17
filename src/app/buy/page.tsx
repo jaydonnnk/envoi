@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { outletPyusdAvailability } from "@/app/pyusd-availability";
 import { outletRails } from "@/domain/outlets/destination";
 import { getPublishedMenu, listPublishedOutlets } from "@/domain/outlets/search";
 import { textSuggestionsEnabled } from "@/integrations/ai/openai";
@@ -37,6 +39,35 @@ function preselectedLine(entry: string): { id: string; quantity: number } {
   return { id, quantity: Number.isInteger(parsed) && parsed >= 1 && parsed <= 20 ? parsed : 1 };
 }
 
+// A shop whose only payment method is PYUSD (S16) says up front whether it can be paid now, with
+// the reason when not, because no PayPal journey exists to fall back on.
+async function PyusdOnlyStatus({ outletId }: { outletId: string }) {
+  const { availability } = await outletPyusdAvailability(outletId);
+  return (
+    <div className={`rail ${availability.available ? "choice" : "unavailable"}`} aria-disabled={!availability.available}>
+      <span className="rail-head">
+        <strong>PYUSD on Solana devnet, test tokens</strong>
+        <span className="chip">{availability.available ? "Available" : "Unavailable"}</span>
+      </span>
+      <small>
+        {availability.available
+          ? "This shop takes only PYUSD devnet test tokens on Envoi."
+          : `${availability.message} This shop takes no other payment method on Envoi, so it cannot be paid here until PYUSD is available again.`}
+      </small>
+    </div>
+  );
+}
+
+const PyusdOnlyPending = () => (
+  <div className="rail unavailable" aria-disabled="true">
+    <span className="rail-head">
+      <strong>PYUSD on Solana devnet, test tokens</strong>
+      <span className="chip">Checking</span>
+    </span>
+    <small>Checking whether this shop can take PYUSD…</small>
+  </div>
+);
+
 export default async function BuyPage({ searchParams }: { searchParams: Promise<BuySearchParams> }) {
   const { outletId, preselected, menu, shops, rail, dbMs, serverMs } = await loadBuyData(searchParams);
   const textEnabled = textSuggestionsEnabled();
@@ -53,6 +84,11 @@ export default async function BuyPage({ searchParams }: { searchParams: Promise<
         </p>
         <section className="card" aria-labelledby="menu-heading">
           <h2 id="menu-heading">Choose items</h2>
+          {rail === "pyusd" && (
+            <Suspense fallback={<PyusdOnlyPending />}>
+              <PyusdOnlyStatus outletId={menu.outlet.id} />
+            </Suspense>
+          )}
           <BasketForm outletId={menu.outlet.id} items={menu.items} preselected={preselected} rail={rail} />
         </section>
       </main>
