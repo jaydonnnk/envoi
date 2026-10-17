@@ -45,9 +45,10 @@ type Routes = {
   submitted: typeof import("@/app/api/v1/purchases/[id]/pyusd/submitted/route");
   reconcile: typeof import("@/app/api/v1/purchases/[id]/reconcile/route");
   cancel: typeof import("@/app/api/v1/purchases/[id]/cancel/route");
+  rate: typeof import("@/app/api/v1/merchant/outlets/[id]/pyusd-rate/route");
 };
 
-type PyusdShop = { outletId: string; itemId: string; unitSgdCents: number; merchant: TestWallet; tokenAccount: Address; rateVersionId: string; memberUserId: string };
+type PyusdShop = { outletId: string; itemId: string; unitSgdCents: number; merchant: TestWallet; tokenAccount: Address; rateVersionId: string; memberUserId: string; memberCookie: string };
 type Review = { cookie: string; purchaseId: string; buyer: TestWallet; amount: bigint };
 type AttemptRow = {
   id: string;
@@ -78,6 +79,7 @@ describe("PYUSD purchase", () => {
       submitted: await import("@/app/api/v1/purchases/[id]/pyusd/submitted/route"),
       reconcile: await import("@/app/api/v1/purchases/[id]/reconcile/route"),
       cancel: await import("@/app/api/v1/purchases/[id]/cancel/route"),
+      rate: await import("@/app/api/v1/merchant/outlets/[id]/pyusd-rate/route"),
     };
   });
 
@@ -109,7 +111,7 @@ describe("PYUSD purchase", () => {
     const merchant = await testWallet();
     const tokenAccount = await fundWallet(chain, merchant.address, 0n);
     const { rateVersionId } = await seedPyusdDestination(database, shop.outletId, { wallet: merchant.address, tokenAccount, atomicPerSgd: RATE, confirmedAt: rateAt });
-    return { outletId: shop.outletId, itemId: item!.id, unitSgdCents: item!.unitSgdCents, merchant, tokenAccount, rateVersionId, memberUserId: shop.merchant.userId };
+    return { outletId: shop.outletId, itemId: item!.id, unitSgdCents: item!.unitSgdCents, merchant, tokenAccount, rateVersionId, memberUserId: shop.merchant.userId, memberCookie: shop.cookie };
   }
 
   const reviewRequest = (cookie: string, shop: PyusdShop, rail: "pyusd" | "paypal" = "pyusd") =>
@@ -386,7 +388,16 @@ describe("PYUSD purchase", () => {
       const review = await pyusdReview(shop);
       const { attemptId } = await prepared(review);
       const before = await attemptOf(review.purchaseId);
-      await seedPyusdRate(database, shop.outletId, shop.memberUserId, RATE * 2n, new Date());
+      // The shop's member sets a new rate through the real rate route.
+      const changed = await routes.rate.PUT(
+        new Request(`${TEST_BASE_URL}/api/v1/merchant/outlets/${shop.outletId}/pyusd-rate`, {
+          method: "PUT",
+          headers: { cookie: shop.memberCookie, "content-type": "application/json", origin: TEST_BASE_URL },
+          body: JSON.stringify({ pyusdPerSgd: "1.484230" }),
+        }),
+        routeParams(shop.outletId),
+      );
+      expect(changed.status).toBe(200);
       const after = await attemptOf(review.purchaseId);
       expect(after.atomicAmount).toBe(before.atomicAmount);
       const signature = fixtureSignature(11);

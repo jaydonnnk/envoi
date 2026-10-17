@@ -212,7 +212,13 @@ describe("PYUSD across rails", () => {
       fail(chain);
       // The app boots afresh with the failing devnet RPC configured: every module loads again.
       vi.resetModules();
-      const r = await routes();
+      const loaded = await routes().then(
+        (value) => ({ ok: true as const, value }),
+        (error: unknown) => ({ ok: false as const, error }),
+      );
+      expect(loaded.ok, `${reason}: the app modules load`).toBe(true);
+      if (!loaded.ok) return;
+      const r = loaded.value;
       const availability = await pyusdAvailability({ enabled: true, hasWallet: true, rate: { expired: false } }, (await import("@/integrations/solana/rpc")).webSolanaClient);
       expect(availability, reason).toMatchObject({ available: false, reason });
 

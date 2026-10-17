@@ -1,0 +1,1564 @@
+[
+ {
+  "id": "identity-genesis",
+  "test": "wrong genesis hash disables PYUSD",
+  "test_file": "tests/unit/pyusd-rules.test.ts",
+  "mutation": "Skip the genesis comparison.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/identity.ts",
+    "old": "  if (genesis.value !== PYUSD_DEVNET.genesisHash) return { ok: false, reason: \"genesis_mismatch\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "identity-mint-program",
+  "test": "mint under another token program disables PYUSD",
+  "test_file": "tests/unit/pyusd-rules.test.ts",
+  "mutation": "Skip the mint owner-program check.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/identity.ts",
+    "old": "if (!mint || mint.programAddress !== PYUSD_DEVNET.tokenProgram) return { ok: false, reason: \"mint_program_mismatch\" };",
+    "new": "if (!mint) return { ok: false, reason: \"mint_program_mismatch\" };"
+   }
+  ]
+ },
+ {
+  "id": "identity-decimals",
+  "test": "mint with other decimals disables PYUSD",
+  "test_file": "tests/unit/pyusd-rules.test.ts",
+  "mutation": "Skip the decimals check.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/identity.ts",
+    "old": "  if (decodeMintAccount(mint).decimals !== PYUSD_DEVNET.decimals) return { ok: false, reason: \"mint_decimals_mismatch\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "rate-ceil",
+  "test": "PYUSD amount rounds up to the next atomic unit",
+  "test_file": "tests/unit/pyusd-rules.test.ts",
+  "mutation": "Use floor division.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/rate.ts",
+    "old": "return (product + 99n) / 100n;",
+    "new": "return product / 100n;"
+   }
+  ]
+ },
+ {
+  "id": "rate-exact",
+  "test": "rate arithmetic is exact at its bounds",
+  "test_file": "tests/unit/pyusd-rules.test.ts",
+  "mutation": "Multiply as JavaScript numbers.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/rate.ts",
+    "old": "const product = BigInt(sgdCents) * atomicPerSgd;",
+    "new": "const product = BigInt(sgdCents * Number(atomicPerSgd));"
+   }
+  ]
+ },
+ {
+  "id": "rate-plain-decimal",
+  "test": "rate text must be a plain decimal with at most six places",
+  "test_file": "tests/unit/pyusd-rules.test.ts",
+  "mutation": "Parse with Number() and round.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/rate.ts",
+    "old": "  const match = PLAIN_DECIMAL.exec(text);\n  if (!match) return { ok: false, reason: \"not_plain_six_place_decimal\" };\n  const [, whole, fraction = \"\"] = match;\n  const atomicPerSgd = BigInt(whole!) * 1_000_000n + BigInt(fraction.padEnd(6, \"0\"));\n",
+    "new": "  void PLAIN_DECIMAL;\n  const parsedNumber = Number(text);\n  if (!Number.isFinite(parsedNumber)) return { ok: false, reason: \"not_plain_six_place_decimal\" };\n  const atomicPerSgd = BigInt(Math.round(parsedNumber * 1_000_000));\n"
+   }
+  ]
+ },
+ {
+  "id": "rate-bounds",
+  "test": "rate outside its bounds is refused",
+  "test_file": "tests/unit/pyusd-rules.test.ts",
+  "mutation": "Drop the bounds check.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/rate.ts",
+    "old": "  if (atomicPerSgd < PYUSD_RATE_BOUNDS.minAtomicPerSgd || atomicPerSgd > PYUSD_RATE_BOUNDS.maxAtomicPerSgd) return { ok: false, reason: \"out_of_bounds\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "mint-bps",
+  "test": "non-zero transfer fee rate refuses preparation",
+  "test_file": "tests/unit/pyusd-rules.test.ts",
+  "mutation": "Skip the basis-point check.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/mint.ts",
+    "old": "  if (current.basisPoints !== 0) return { ok: false, reason: \"fee_rate_nonzero\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "mint-max-fee",
+  "test": "non-zero maximum fee refuses preparation",
+  "test_file": "tests/unit/pyusd-rules.test.ts",
+  "mutation": "Skip the maximum-fee check.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/mint.ts",
+    "old": "  if (current.maximumFee !== 0n) return { ok: false, reason: \"max_fee_nonzero\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "mint-next-epoch",
+  "test": "non-zero fee in the next epoch refuses preparation",
+  "test_file": "tests/unit/pyusd-rules.test.ts",
+  "mutation": "Check only the current epoch.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/mint.ts",
+    "old": "  if (next.basisPoints !== 0 || next.maximumFee !== 0n) return { ok: false, reason: \"fee_next_epoch_nonzero\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "mint-hook",
+  "test": "active transfer hook refuses preparation",
+  "test_file": "tests/unit/pyusd-rules.test.ts",
+  "mutation": "Ignore the hook program.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/mint.ts",
+    "old": "  if (hook && hook.programId !== null) return { ok: false, reason: \"transfer_hook_active\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "mint-unknown-extension",
+  "test": "unreviewed mint extension refuses preparation",
+  "test_file": "tests/unit/pyusd-rules.test.ts",
+  "mutation": "Ignore unknown extensions.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/mint.ts",
+    "old": "    if (!REVIEWED.has(extension.kind)) return { ok: false, reason: \"unreviewed_extension\" };\n",
+    "new": "    void extension;\n"
+   }
+  ]
+ },
+ {
+  "id": "settings-mint-override",
+  "test": "only two settings configure the PYUSD rail",
+  "test_file": "tests/unit/pyusd-rules.test.ts",
+  "mutation": "Add an optional mint override to the web settings.",
+  "edits": [
+   {
+    "file": "src/env.ts",
+    "old": "  PYUSD_ENABLED: z.enum([\"true\", \"false\"]).default(\"false\").transform((value) => value === \"true\"),\n});",
+    "new": "  PYUSD_ENABLED: z.enum([\"true\", \"false\"]).default(\"false\").transform((value) => value === \"true\"),\n  PYUSD_MINT: z.string().optional(),\n});"
+   }
+  ]
+ },
+ {
+  "id": "checkout-rate-version",
+  "test": "a changed PYUSD rate is a new checkout",
+  "test_file": "tests/unit/pyusd-rules.test.ts",
+  "mutation": "Leave the rate version out of the hash.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/checkout-key.ts",
+    "old": "    lines,\n    input.pyusdRateVersionId,\n  ]);",
+    "new": "    lines,\n  ]);"
+   }
+  ]
+ },
+ {
+  "id": "mismatch-to-confirmed",
+  "test": "a PYUSD mismatch can close only unpaid",
+  "test_file": "tests/unit/pyusd-rules.test.ts",
+  "mutation": "Allow mismatch -> confirmed.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/state.ts",
+    "old": "  mismatch: [\"closed_unpaid\"],",
+    "new": "  mismatch: [\"closed_unpaid\", \"confirmed\"],"
+   }
+  ]
+ },
+ {
+  "id": "boundary-paypal-imports-solana",
+  "test": "PayPal code imports no Solana module",
+  "test_file": "tests/unit/pyusd-boundary.test.ts",
+  "mutation": "Import a Solana helper into a PayPal module.",
+  "edits": [
+   {
+    "file": "src/integrations/paypal/orders.ts",
+    "old": "import type { PayPalOrder } from \"@/domain/purchases/reconcile\";\n",
+    "new": "import type { PayPalOrder } from \"@/domain/purchases/reconcile\";\nimport \"@/integrations/solana/rpc\";\n"
+   }
+  ]
+ },
+ {
+  "id": "boundary-send-transaction",
+  "test": "server never sends a transaction",
+  "test_file": "tests/unit/pyusd-boundary.test.ts",
+  "mutation": "Add a sendTransaction call to the RPC client.",
+  "edits": [
+   {
+    "file": "src/integrations/solana/rpc.ts",
+    "old": "    getGenesisHash: () => call(\"getGenesisHash\", [], z.string()),\n",
+    "new": "    getGenesisHash: () => call(\"getGenesisHash\", [], z.string()),\n    sendTransaction: (wire: string) => call(\"sendTransaction\", [wire, { encoding: \"base64\" }], z.string()),\n"
+   }
+  ]
+ },
+ {
+  "id": "boundary-guard-challenge",
+  "test": "wallet challenge handler begins with its membership guard",
+  "test_file": "tests/unit/pyusd-boundary.test.ts",
+  "mutation": "Remove the guard from the challenge handler.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/merchant/outlets/[id]/destinations/pyusd/challenge/route.ts",
+    "old": "  const principal = await requireOutletMembership(getAuth(), webDb(), request.headers, (await params).id);\n",
+    "new": "  const principal = { outletId: (await params).id } as never;\n"
+   }
+  ]
+ },
+ {
+  "id": "boundary-guard-proof",
+  "test": "wallet proof handler begins with its membership guard",
+  "test_file": "tests/unit/pyusd-boundary.test.ts",
+  "mutation": "Remove the guard from the proof handler.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/merchant/outlets/[id]/destinations/pyusd/route.ts",
+    "old": "  const principal = await requireOutletMembership(getAuth(), webDb(), request.headers, (await params).id);\n",
+    "new": "  const principal = { outletId: (await params).id } as never;\n"
+   }
+  ]
+ },
+ {
+  "id": "boundary-guard-rate",
+  "test": "rate handler begins with its membership guard",
+  "test_file": "tests/unit/pyusd-boundary.test.ts",
+  "mutation": "Remove the guard from the rate handler.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/merchant/outlets/[id]/pyusd-rate/route.ts",
+    "old": "  const principal = await requireOutletMembership(getAuth(), webDb(), request.headers, (await params).id);\n",
+    "new": "  const principal = { outletId: (await params).id } as never;\n"
+   }
+  ]
+ },
+ {
+  "id": "boundary-guard-prepare",
+  "test": "preparation handler begins with its buyer guard",
+  "test_file": "tests/unit/pyusd-boundary.test.ts",
+  "mutation": "Remove the guard from the preparation handler.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/purchases/[id]/pyusd/prepare/route.ts",
+    "old": "  const principal = await requireBuyerSession(getAuth(), request.headers);\n",
+    "new": "  const principal = {} as never;\n"
+   }
+  ]
+ },
+ {
+  "id": "boundary-guard-submitted",
+  "test": "signature hint handler begins with its buyer guard",
+  "test_file": "tests/unit/pyusd-boundary.test.ts",
+  "mutation": "Remove the guard from the hint handler.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/purchases/[id]/pyusd/submitted/route.ts",
+    "old": "  const principal = await requireBuyerSession(getAuth(), request.headers);\n",
+    "new": "  const principal = {} as never;\n"
+   }
+  ]
+ },
+ {
+  "id": "verify-allowlist-accepted",
+  "test": "ComputeBudget and Lighthouse assertions are accepted",
+  "test_file": "tests/unit/pyusd-verify.test.ts",
+  "mutation": "Reject every instruction beyond the two prepared ones.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "    else if (program === PYUSD_DEVNET.computeBudgetProgram) continue;\n    else if (program === PYUSD_DEVNET.lighthouseProgram) {\n      if (!LIGHTHOUSE_ASSERTIONS.has(ix.data[0] ?? -1)) return uncertain(\"lighthouse_not_assertion\");\n    } else return uncertain(\"outer_instruction_not_allowlisted\");",
+    "new": "    else return uncertain(\"outer_instruction_not_allowlisted\");"
+   }
+  ]
+ },
+ {
+  "id": "verify-err",
+  "test": "failed transaction is never paid",
+  "test_file": "tests/unit/pyusd-verify.test.ts",
+  "mutation": "Ignore meta.err.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "  if (tx.meta.err !== null) return { decision: \"failed_landing\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "verify-blockhash",
+  "test": "other blockhash leaves the transfer uncertain",
+  "test_file": "tests/unit/pyusd-verify.test.ts",
+  "mutation": "Skip the blockhash comparison.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "  if (tx.recentBlockhash !== attempt.blockhash) return uncertain(\"blockhash_mismatch\");\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "verify-signers",
+  "test": "second signer leaves the transfer uncertain",
+  "test_file": "tests/unit/pyusd-verify.test.ts",
+  "mutation": "Skip the signer count.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "  if (tx.numRequiredSignatures !== 1) return uncertain(\"extra_signer\");\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "verify-fee-payer",
+  "test": "another fee payer leaves the transfer uncertain",
+  "test_file": "tests/unit/pyusd-verify.test.ts",
+  "mutation": "Skip the fee-payer comparison.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "  if (keys[0] !== attempt.buyerWallet) return uncertain(\"fee_payer_mismatch\");\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "verify-transfer-count",
+  "test": "zero or two TransferChecked leave the transfer uncertain",
+  "test_file": "tests/unit/pyusd-verify.test.ts",
+  "mutation": "Use the first transfer found.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "if (transfers.length !== 1) return uncertain(\"transfer_count\");",
+    "new": "if (transfers.length === 0) return uncertain(\"transfer_count\");"
+   }
+  ]
+ },
+ {
+  "id": "verify-mint",
+  "test": "transfer of another mint is not paid",
+  "test_file": "tests/unit/pyusd-verify.test.ts",
+  "mutation": "Skip the mint comparison.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "  if (keys[mintIndex] !== PYUSD_DEVNET.mint) return uncertain(\"mint_mismatch\");\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "verify-decimals",
+  "test": "transfer with other decimals is not paid",
+  "test_file": "tests/unit/pyusd-verify.test.ts",
+  "mutation": "Skip the decimals comparison.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "  if (transfer.data[9] !== PYUSD_DEVNET.decimals) return uncertain(\"decimals_mismatch\");\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "verify-source",
+  "test": "transfer from another source is not paid",
+  "test_file": "tests/unit/pyusd-verify.test.ts",
+  "mutation": "Skip the source comparison.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "  if (keys[sourceIndex] !== attempt.sourceTokenAccount) return uncertain(\"source_mismatch\");\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "verify-destination",
+  "test": "transfer to another destination is not paid",
+  "test_file": "tests/unit/pyusd-verify.test.ts",
+  "mutation": "Skip the destination comparison.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "  if (keys[destinationIndex] !== attempt.destinationTokenAccount) return uncertain(\"destination_mismatch\");\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "verify-amount",
+  "test": "amount off by one atomic unit is not paid",
+  "test_file": "tests/unit/pyusd-verify.test.ts",
+  "mutation": "Accept any amount at least the expected one.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "if (readU64LE(transfer.data, 1) !== attempt.atomicAmount)",
+    "new": "if (readU64LE(transfer.data, 1) < attempt.atomicAmount)"
+   }
+  ]
+ },
+ {
+  "id": "verify-memo-count",
+  "test": "duplicate memo leaves the transfer uncertain",
+  "test_file": "tests/unit/pyusd-verify.test.ts",
+  "mutation": "Accept any memo count.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "  if (memos !== 1) return uncertain(\"memo_count\");\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "verify-memo-content",
+  "test": "memo without the reference is not ours",
+  "test_file": "tests/unit/pyusd-verify.test.ts",
+  "mutation": "Skip the memo content comparison.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "memoText(ix.data) === attempt.reference",
+    "new": "memoText(ix.data) !== null"
+   }
+  ]
+ },
+ {
+  "id": "verify-fee-execution",
+  "test": "fee at the execution epoch must be zero",
+  "test_file": "tests/unit/pyusd-verify.test.ts",
+  "mutation": "Skip the execution-epoch fee check.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "  if (feeAtExecution.basisPoints !== 0 || feeAtExecution.maximumFee !== 0n) return uncertain(\"fee_nonzero_at_execution\");\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "verify-balance-delta",
+  "test": "destination delta must equal the amount",
+  "test_file": "tests/unit/pyusd-verify.test.ts",
+  "mutation": "Skip the balance-delta check.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "  if (post === undefined || post - pre !== attempt.atomicAmount) return uncertain(\"balance_delta_mismatch\");\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "verify-metadata",
+  "test": "incomplete metadata leaves the transfer uncertain",
+  "test_file": "tests/unit/pyusd-verify.test.ts",
+  "mutation": "Treat missing metadata as empty.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "if (!tx.meta || tx.meta.preTokenBalances === null || tx.meta.postTokenBalances === null || tx.inner === null) return uncertain(\"metadata_incomplete\");",
+    "new": "if (!tx.meta) return uncertain(\"metadata_incomplete\");"
+   },
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "  for (const ix of tx.inner) {",
+    "new": "  for (const ix of tx.inner ?? []) {"
+   },
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "const post = balanceOf(tx.meta.postTokenBalances);\n  const pre = balanceOf(tx.meta.preTokenBalances) ?? 0n;",
+    "new": "const post = balanceOf(tx.meta.postTokenBalances ?? []);\n  const pre = balanceOf(tx.meta.preTokenBalances ?? []) ?? 0n;"
+   }
+  ]
+ },
+ {
+  "id": "verify-outer-program",
+  "test": "an added non-allowlisted instruction leaves the transfer uncertain",
+  "test_file": "tests/unit/pyusd-verify.test.ts",
+  "mutation": "Allow any outer program.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "    } else return uncertain(\"outer_instruction_not_allowlisted\");",
+    "new": "    }"
+   }
+  ]
+ },
+ {
+  "id": "verify-outer-lighthouse",
+  "test": "outer Lighthouse memory instruction is not allowlisted",
+  "test_file": "tests/unit/pyusd-verify.test.ts",
+  "mutation": "Allow every outer Lighthouse instruction.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "      if (!LIGHTHOUSE_ASSERTIONS.has(ix.data[0] ?? -1)) return uncertain(\"lighthouse_not_assertion\");\n    } else return uncertain(\"outer_instruction_not_allowlisted\");",
+    "new": "    } else return uncertain(\"outer_instruction_not_allowlisted\");"
+   }
+  ]
+ },
+ {
+  "id": "verify-inner-lighthouse",
+  "test": "inner Lighthouse memory instruction is not allowlisted",
+  "test_file": "tests/unit/pyusd-verify.test.ts",
+  "mutation": "Allow every inner Lighthouse instruction.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "      if (!LIGHTHOUSE_ASSERTIONS.has(ix.data[0] ?? -1)) return uncertain(\"lighthouse_not_assertion\");\n    } else return uncertain(\"inner_program_not_allowlisted\");",
+    "new": "    } else return uncertain(\"inner_program_not_allowlisted\");"
+   }
+  ]
+ },
+ {
+  "id": "verify-inner-program",
+  "test": "inner instruction from another program leaves the transfer uncertain",
+  "test_file": "tests/unit/pyusd-verify.test.ts",
+  "mutation": "Skip the inner program check.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "    } else return uncertain(\"inner_program_not_allowlisted\");",
+    "new": "    }"
+   }
+  ]
+ },
+ {
+  "id": "verify-inner-token-kind",
+  "test": "inner instruction that moves tokens or changes authority leaves it uncertain",
+  "test_file": "tests/unit/pyusd-verify.test.ts",
+  "mutation": "Allow any inner Token-2022 instruction.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "      if (!TOKEN_INNER_READ_ONLY.has(ix.data[0] ?? -1)) return uncertain(\"inner_instruction_not_allowlisted\");\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "verify-account-keys",
+  "test": "unresolvable account keys leave the transfer uncertain",
+  "test_file": "tests/unit/pyusd-verify.test.ts",
+  "mutation": "Resolve static keys only.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "  if (tx.version === \"unsupported\" || tx.accountKeys === null) return uncertain(\"account_keys_unresolved\");\n  const keys = tx.accountKeys;",
+    "new": "  const keys = tx.staticAccountKeys;"
+   }
+  ]
+ },
+ {
+  "id": "transport-confirmed-blockhash",
+  "test": "preparation uses a confirmed blockhash",
+  "test_file": "tests/unit/pyusd-transport.test.ts",
+  "mutation": "Request a finalized blockhash.",
+  "edits": [
+   {
+    "file": "src/integrations/solana/rpc.ts",
+    "old": "\"getLatestBlockhash\",\n        [{ commitment: \"confirmed\" }],",
+    "new": "\"getLatestBlockhash\",\n        [{ commitment: \"finalized\" }],"
+   }
+  ]
+ },
+ {
+  "id": "transport-finalized-reads",
+  "test": "verification reads at finalized commitment",
+  "test_file": "tests/unit/pyusd-transport.test.ts",
+  "mutation": "Read at confirmed.",
+  "edits": [
+   {
+    "file": "src/integrations/solana/rpc.ts",
+    "old": "[signature, { encoding: \"json\", commitment: \"finalized\", maxSupportedTransactionVersion: 0 }]",
+    "new": "[signature, { encoding: \"json\", commitment: \"confirmed\", maxSupportedTransactionVersion: 0 }]"
+   }
+  ]
+ },
+ {
+  "id": "transport-size-cap",
+  "test": "oversized RPC response is refused",
+  "test_file": "tests/unit/pyusd-transport.test.ts",
+  "mutation": "Read the response unbounded.",
+  "edits": [
+   {
+    "file": "src/integrations/solana/rpc.ts",
+    "old": "readCountedBody(response.body, RPC_BUDGET.maxResponseBytes, remaining, controller.signal)",
+    "new": "readCountedBody(response.body, Number.MAX_SAFE_INTEGER, remaining, controller.signal)"
+   }
+  ]
+ },
+ {
+  "id": "transport-timeout",
+  "test": "RPC call stops at its timeout",
+  "test_file": "tests/unit/pyusd-transport.test.ts",
+  "mutation": "Remove the call timeout.",
+  "edits": [
+   {
+    "file": "src/integrations/solana/rpc.ts",
+    "old": "const timer = setTimeout(() => controller.abort(), RPC_BUDGET.callTimeoutMs);",
+    "new": "const timer = setTimeout(() => {}, RPC_BUDGET.callTimeoutMs);"
+   }
+  ]
+ },
+ {
+  "id": "prepared-compute-budget",
+  "test": "prepared transaction is exactly a memo and one TransferChecked",
+  "test_file": "tests/unit/pyusd-transport.test.ts",
+  "mutation": "Add a compute-unit price instruction.",
+  "edits": [
+   {
+    "file": "src/integrations/solana/build.ts",
+    "old": "(m) => appendTransactionMessageInstructions([memo, transfer], m),",
+    "new": "(m) => appendTransactionMessageInstructions([{ programAddress: PYUSD_DEVNET.computeBudgetProgram, data: new Uint8Array([3, 1, 0, 0, 0, 0, 0, 0, 0]) }, memo, transfer], m),"
+   }
+  ]
+ },
+ {
+  "id": "merchant-challenge-enabled",
+  "test": "wallet challenge refuses while the rail is disabled",
+  "test_file": "tests/integration/pyusd-merchant.test.ts",
+  "mutation": "Remove requirePyusdEnabled from the challenge route.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/merchant/outlets/[id]/destinations/pyusd/challenge/route.ts",
+    "old": "  const disabled = requirePyusdEnabled(webEnv());\n  if (disabled) return httpErr(disabled);\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "merchant-proof-enabled",
+  "test": "wallet proof refuses while the rail is disabled",
+  "test_file": "tests/integration/pyusd-merchant.test.ts",
+  "mutation": "Remove requirePyusdEnabled from the proof route.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/merchant/outlets/[id]/destinations/pyusd/route.ts",
+    "old": "  const disabled = requirePyusdEnabled(webEnv());\n  if (disabled) return httpErr(disabled);\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "merchant-rate-enabled",
+  "test": "rate change refuses while the rail is disabled",
+  "test_file": "tests/integration/pyusd-merchant.test.ts",
+  "mutation": "Remove requirePyusdEnabled from the rate route.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/merchant/outlets/[id]/pyusd-rate/route.ts",
+    "old": "  const disabled = requirePyusdEnabled(webEnv());\n  if (disabled) return httpErr(disabled);\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "merchant-challenge-origin",
+  "test": "wallet challenge rejects a foreign Origin",
+  "test_file": "tests/integration/pyusd-merchant.test.ts",
+  "mutation": "Remove assertSameOrigin from the challenge route.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/merchant/outlets/[id]/destinations/pyusd/challenge/route.ts",
+    "old": "  const foreign = assertSameOrigin(request);\n  if (foreign) return httpErr(foreign);\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "merchant-proof-origin",
+  "test": "wallet proof rejects a foreign Origin",
+  "test_file": "tests/integration/pyusd-merchant.test.ts",
+  "mutation": "Remove assertSameOrigin from the proof route.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/merchant/outlets/[id]/destinations/pyusd/route.ts",
+    "old": "  const foreign = assertSameOrigin(request);\n  if (foreign) return httpErr(foreign);\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "merchant-rate-origin",
+  "test": "rate change rejects a foreign Origin",
+  "test_file": "tests/integration/pyusd-merchant.test.ts",
+  "mutation": "Remove assertSameOrigin from the rate route.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/merchant/outlets/[id]/pyusd-rate/route.ts",
+    "old": "  const foreign = assertSameOrigin(request);\n  if (foreign) return httpErr(foreign);\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "merchant-proof-identity",
+  "test": "wallet proof refuses on an identity mismatch",
+  "test_file": "tests/integration/pyusd-merchant.test.ts",
+  "mutation": "Skip the identity check in the proof route.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/challenge.ts",
+    "old": "  const identity = await checkPyusdIdentity(rpc);\n  if (!identity.ok) return { ok: false, reason: \"rail_unavailable\", identity: identity.reason };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "merchant-challenge-host",
+  "test": "wallet challenge names Envoi's configured domain and devnet",
+  "test_file": "tests/integration/pyusd-merchant.test.ts",
+  "mutation": "Build the domain from the Host header.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/merchant/outlets/[id]/destinations/pyusd/challenge/route.ts",
+    "old": "parsed.data.walletAddress, webEnv().APP_BASE_URL, new Date()",
+    "new": "parsed.data.walletAddress, `http://${request.headers.get(\"host\")}`, new Date()"
+   }
+  ]
+ },
+ {
+  "id": "merchant-challenge-limit",
+  "test": "wallet challenges are rate limited per outlet",
+  "test_file": "tests/integration/pyusd-merchant.test.ts",
+  "mutation": "Remove the challenge limiter.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/challenge.ts",
+    "old": "const admission = await admit(db, \"wallet_challenge\", principal.outletId, WALLET_CHALLENGE_LIMITS, now);",
+    "new": "const admission = { kind: \"admitted\" } as { kind: string };\n  void admit;\n  void WALLET_CHALLENGE_LIMITS;"
+   }
+  ]
+ },
+ {
+  "id": "merchant-signature",
+  "test": "invalid wallet signature is refused",
+  "test_file": "tests/integration/pyusd-merchant.test.ts",
+  "mutation": "Skip Ed25519 verification.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/challenge.ts",
+    "old": "  if (!(await signatureVerifies(wallet, challenge.message, input.signature))) return { ok: false, reason: \"signature_invalid\" };\n",
+    "new": "  void signatureVerifies;\n"
+   }
+  ]
+ },
+ {
+  "id": "merchant-expiry",
+  "test": "wallet challenge expires after five minutes",
+  "test_file": "tests/integration/pyusd-merchant.test.ts",
+  "mutation": "Skip the expiry check.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/challenge.ts",
+    "old": "  if (now.getTime() >= challenge.expiresAt.getTime()) return { ok: false, reason: \"challenge_expired\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "merchant-other-outlet",
+  "test": "wallet challenge for another outlet is refused",
+  "test_file": "tests/integration/pyusd-merchant.test.ts",
+  "mutation": "Ignore the challenge's outlet.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/challenge.ts",
+    "old": "  if (challenge.outletId !== principal.outletId) return { ok: false, reason: \"challenge_other_outlet\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "merchant-token-from-body",
+  "test": "merchant token account is derived, never supplied",
+  "test_file": "tests/integration/pyusd-merchant.test.ts",
+  "mutation": "Accept a token account from the body.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/input.ts",
+    "old": "export const walletProofBody = z.object({ challengeId: z.string().min(1).max(64), signature: base58Signature });",
+    "new": "export const walletProofBody = z.object({ challengeId: z.string().min(1).max(64), signature: base58Signature, tokenAccount: z.string().optional() });"
+   },
+   {
+    "file": "src/app/api/v1/merchant/outlets/[id]/destinations/pyusd/route.ts",
+    "old": "{ challengeId: parsed.data.challengeId, signature: signatureBytes(parsed.data.signature)! }",
+    "new": "{ challengeId: parsed.data.challengeId, signature: signatureBytes(parsed.data.signature)!, tokenAccount: parsed.data.tokenAccount } as never"
+   },
+   {
+    "file": "src/domain/pyusd/challenge.ts",
+    "old": "  const account = await checkPyusdTokenAccount(rpc!, wallet);\n",
+    "new": "  const supplied = (input as { tokenAccount?: Address }).tokenAccount;\n  const account = supplied ? { ok: true as const, address: supplied, amount: 0n } : await checkPyusdTokenAccount(rpc!, wallet);\n"
+   }
+  ]
+ },
+ {
+  "id": "merchant-account-exists",
+  "test": "missing merchant token account is refused",
+  "test_file": "tests/integration/pyusd-merchant.test.ts",
+  "mutation": "Skip the existence check.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/identity.ts",
+    "old": "  if (!account) return { ok: false, reason: \"missing\", address };\n",
+    "new": "  if (!account) return { ok: true, address, amount: 0n };\n"
+   }
+  ]
+ },
+ {
+  "id": "merchant-account-program",
+  "test": "merchant token account under another program is refused",
+  "test_file": "tests/integration/pyusd-merchant.test.ts",
+  "mutation": "Skip the program-owner check on the token account.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/identity.ts",
+    "old": "  if (account.programAddress !== PYUSD_DEVNET.tokenProgram) return { ok: false, reason: \"not_token_2022_account\", address };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "merchant-account-frozen",
+  "test": "frozen merchant token account is refused",
+  "test_file": "tests/integration/pyusd-merchant.test.ts",
+  "mutation": "Skip the frozen-state check.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/identity.ts",
+    "old": "  if (token.frozen) return { ok: false, reason: \"frozen\", address };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "merchant-no-enrollment",
+  "test": "wallet proof creates no membership or enrollment",
+  "test_file": "tests/integration/pyusd-merchant.test.ts",
+  "mutation": "Approve the enrollment on proof. envoi_web holds no UPDATE on enrollments, so the mutation also grants it in migration 0022; the grant alone would change nothing.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/challenge.ts",
+    "old": "      details: { challengeId: challenge.id, destinationId, version, wallet, tokenAccount: account.address, environment: \"devnet\", proves: \"key_control_only\" },\n    });\n",
+    "new": "      details: { challengeId: challenge.id, destinationId, version, wallet, tokenAccount: account.address, environment: \"devnet\", proves: \"key_control_only\" },\n    });\n    await tx.execute(sql`update enrollments set status = 'approved', approved_at = now() where outlet_id = ${principal.outletId}`);\n"
+   },
+   {
+    "file": "drizzle/0022_s16_pyusd.sql",
+    "old": "GRANT UPDATE (\"pyusd_hints\", \"pyusd_finalized_signature\", \"pyusd_verified_at\") ON TABLE public.\"payment_attempts\" TO envoi_web;",
+    "new": "GRANT UPDATE (\"pyusd_hints\", \"pyusd_finalized_signature\", \"pyusd_verified_at\") ON TABLE public.\"payment_attempts\" TO envoi_web;--> statement-breakpoint\nGRANT UPDATE (\"status\", \"approved_at\") ON TABLE public.\"enrollments\" TO envoi_web;"
+   }
+  ]
+ },
+ {
+  "id": "proof-saved-bytes",
+  "test": "wallet proof verifies the saved challenge bytes",
+  "test_file": "tests/integration/pyusd-merchant.test.ts",
+  "mutation": "Verify against message text taken from the request.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/input.ts",
+    "old": "export const walletProofBody = z.object({ challengeId: z.string().min(1).max(64), signature: base58Signature });",
+    "new": "export const walletProofBody = z.object({ challengeId: z.string().min(1).max(64), signature: base58Signature, message: z.string().optional() });"
+   },
+   {
+    "file": "src/app/api/v1/merchant/outlets/[id]/destinations/pyusd/route.ts",
+    "old": "{ challengeId: parsed.data.challengeId, signature: signatureBytes(parsed.data.signature)! }",
+    "new": "{ challengeId: parsed.data.challengeId, signature: signatureBytes(parsed.data.signature)!, message: parsed.data.message } as never"
+   },
+   {
+    "file": "src/domain/pyusd/challenge.ts",
+    "old": "signatureVerifies(wallet, challenge.message, input.signature)",
+    "new": "signatureVerifies(wallet, (input as { message?: string }).message ? new TextEncoder().encode((input as { message?: string }).message) : challenge.message, input.signature)"
+   }
+  ]
+ },
+ {
+  "id": "proof-single-use",
+  "test": "wallet challenge is single-use",
+  "test_file": "tests/integration/pyusd-merchant.test.ts",
+  "mutation": "Drop the consumed_at IS NULL predicate.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/challenge.ts",
+    "old": "and(eq(walletChallenges.id, challenge.id), isNull(walletChallenges.consumedAt), gt(walletChallenges.expiresAt, now))",
+    "new": "and(eq(walletChallenges.id, challenge.id), gt(walletChallenges.expiresAt, now))"
+   }
+  ]
+ },
+ {
+  "id": "publish-disabled-rail",
+  "test": "a PYUSD-only shop cannot publish while PYUSD is disabled",
+  "test_file": "tests/integration/pyusd-merchant.test.ts",
+  "mutation": "Count a disabled rail's destination as active.",
+  "edits": [
+   {
+    "file": "src/domain/outlets/publish.ts",
+    "old": "!(facts.pyusdVerified && facts.pyusdEnabled)",
+    "new": "!facts.pyusdVerified"
+   }
+  ]
+ },
+ {
+  "id": "pricing-enabled",
+  "test": "PYUSD pricing refuses while the rail is disabled",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Remove requirePyusdEnabled from PYUSD pricing.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/price.ts",
+    "old": "    const disabled = requirePyusdEnabled(webEnv());\n    if (disabled) return refuse(disabled);\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "pricing-rate-age",
+  "test": "rate older than 30 days makes PYUSD unavailable",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Skip the age check at pricing.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/price.ts",
+    "old": "    if (isRateExpired(rate, input.now)) {",
+    "new": "    if (isRateExpired(rate, input.now) && false) {"
+   }
+  ]
+ },
+ {
+  "id": "prep-enabled",
+  "test": "preparation refuses while the rail is disabled",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Remove requirePyusdEnabled from preparation.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/purchases/[id]/pyusd/prepare/route.ts",
+    "old": "  const disabled = requirePyusdEnabled(webEnv());\n  if (disabled) return httpErr(disabled);\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "prep-origin",
+  "test": "preparation rejects a foreign Origin",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Remove assertSameOrigin from preparation.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/purchases/[id]/pyusd/prepare/route.ts",
+    "old": "  const foreign = assertSameOrigin(request);\n  if (foreign) return httpErr(foreign);\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "prep-owner",
+  "test": "preparation requires the owning buyer",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Drop the owner predicate on preparation.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "    .where(and(eq(purchases.id, purchaseId), eq(purchases.buyerUserId, principal.userId)));\n  if (!own)",
+    "new": "    .where(eq(purchases.id, purchaseId));\n  if (!own)"
+   },
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "    .where(and(eq(purchases.id, purchaseId), eq(purchases.buyerUserId, principal.userId)))\n    .limit(1);",
+    "new": "    .where(eq(purchases.id, purchaseId))\n    .limit(1);"
+   },
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "        .where(and(eq(purchases.id, purchaseId), eq(purchases.buyerUserId, principal.userId)))\n        .for(\"update\");",
+    "new": "        .where(eq(purchases.id, purchaseId))\n        .for(\"update\");"
+   }
+  ]
+ },
+ {
+  "id": "prep-kill-switch",
+  "test": "payments kill switch refuses PYUSD preparation",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Skip the kill-switch check in PYUSD eligibility.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "  if (!webEnv().PAYMENTS_ENABLED) {",
+    "new": "  if (!webEnv().PAYMENTS_ENABLED && false) {"
+   }
+  ]
+ },
+ {
+  "id": "prep-review-window",
+  "test": "stale review cannot prepare PYUSD",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Skip the T_REVIEW check in PYUSD eligibility.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "  if (now.getTime() >= purchase.reviewExpiresAt.getTime()) return notEligible(appError(\"review_expired\", \"This review has expired. Review the basket again to pay.\"));\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "prep-identity",
+  "test": "preparation refuses on an identity mismatch",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Skip the identity check in preparation.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "  const identity = await checkPyusdIdentity(deps.rpc);\n  if (!identity.ok) return unavailable(identity.reason);\n",
+    "new": "  const identity = { ok: true as const, epoch: 700n };\n"
+   }
+  ]
+ },
+ {
+  "id": "prep-mint",
+  "test": "preparation refuses an ineligible mint",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Skip assessMintForTransfer in preparation.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "  const mint = assessMintForTransfer(decodeMintAccount(mintRead.value[0]), identity.epoch);\n  if (!mint.ok) return unavailable(mint.reason);\n",
+    "new": "  void assessMintForTransfer;\n  void decodeMintAccount;\n  const mint = { ok: true as const, fee: { preparedEpoch: identity.epoch, older: { epoch: 0n, basisPoints: 0, maximumFee: 0n }, newer: { epoch: 0n, basisPoints: 0, maximumFee: 0n } } };\n"
+   }
+  ]
+ },
+ {
+  "id": "prep-rate-version",
+  "test": "rate change invalidates an unexecuted PYUSD review at preparation",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Skip the rate-version recheck.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "  if (!rate || rate.versionId !== purchase.pyusdRateVersionId) {",
+    "new": "  if (!rate) {"
+   }
+  ]
+ },
+ {
+  "id": "prep-rate-age",
+  "test": "rate expiry between review and preparation refuses preparation",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Check the age only at pricing.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "  if (isRateExpired(rate, now)) {",
+    "new": "  if (isRateExpired(rate, now) && false) {"
+   }
+  ]
+ },
+ {
+  "id": "prep-buyer-balance",
+  "test": "buyer without enough PYUSD cannot prepare",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Skip the buyer balance check.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "  if (balance < atomicAmount) return unavailable(\"buyer_insufficient\"",
+    "new": "  if (balance < 0n) return unavailable(\"buyer_insufficient\""
+   }
+  ]
+ },
+ {
+  "id": "prep-buyer-frozen",
+  "test": "frozen buyer token account cannot prepare",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Skip the buyer frozen check.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "  if (!buyer.ok && buyer.reason === \"frozen\") return unavailable(\"buyer_account_frozen\"",
+    "new": "  if (false) return unavailable(\"buyer_account_frozen\""
+   }
+  ]
+ },
+ {
+  "id": "prep-merchant-recheck",
+  "test": "merchant token account is rechecked at preparation",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Skip the merchant account check in preparation.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "  const merchant = await checkPyusdTokenAccount(rpc, pre.destination.wallet);\n",
+    "new": "  const merchant = { ok: true as const, address: pre.destination.tokenAccount, reason: \"rpc_unavailable\" };\n"
+   }
+  ]
+ },
+ {
+  "id": "prep-bytes-after-commit",
+  "test": "no unsigned bytes leave before the attempt is saved",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Build and return the bytes before the commit.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "      await hooks.beforeAttemptSaved?.();\n",
+    "new": "      await hooks.beforeAttemptSaved?.();\n      if (attemptId) return { kind: \"prepared\", attemptId, transactionBase64: built.wireBase64, chain: \"solana:devnet\" };\n"
+   }
+  ]
+ },
+ {
+  "id": "prep-release-once",
+  "test": "a prepared purchase never releases bytes again",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Return the transaction again for an existing attempt.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "  if (existing) return { kind: \"locked\", attemptId: existing.id, state: existing.state as PyusdAttemptState };\n",
+    "new": ""
+   },
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "      if (raced) return { kind: \"locked\", attemptId: raced.id, state: raced.state as PyusdAttemptState };",
+    "new": "      if (raced) return { kind: \"prepared\", attemptId: raced.id, transactionBase64: built.wireBase64, chain: \"solana:devnet\" };"
+   },
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "    return { kind: \"locked\", attemptId: raced.id, state: raced.state as PyusdAttemptState };\n  }\n  if (outcome) return outcome;",
+    "new": "    return { kind: \"prepared\", attemptId: raced.id, transactionBase64: built.wireBase64, chain: \"solana:devnet\" };\n  }\n  if (outcome) return outcome;"
+   }
+  ]
+ },
+ {
+  "id": "prep-bytes-stored",
+  "test": "released transaction bytes are never stored",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Save the wire bytes on the attempt.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "        pyusdHints: [],\n",
+    "new": "        pyusdHints: [],\n        outcomeReason: built.wireBase64,\n"
+   }
+  ]
+ },
+ {
+  "id": "constraint-reference",
+  "test": "memo reference is unique per attempt",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Drop the reference unique index.",
+  "edits": [
+   {
+    "file": "drizzle/0022_s16_pyusd.sql",
+    "old": "ALTER TABLE \"payment_attempts\" ADD CONSTRAINT \"payment_attempts_pyusd_reference_unique\" UNIQUE(\"pyusd_reference\");--> statement-breakpoint\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "constraint-signature",
+  "test": "a finalized signature binds to one attempt",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Drop the signature unique index.",
+  "edits": [
+   {
+    "file": "drizzle/0022_s16_pyusd.sql",
+    "old": "ALTER TABLE \"payment_attempts\" ADD CONSTRAINT \"payment_attempts_pyusd_finalized_signature_unique\" UNIQUE(\"pyusd_finalized_signature\");--> statement-breakpoint\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "rate-change-reprices",
+  "test": "rate change never alters a prepared attempt",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Re-price open attempts on a rate change. envoi_web holds no UPDATE on pyusd_atomic_amount, so the mutation also grants it in migration 0022.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/rate.ts",
+    "old": "    await recordAudit(tx, {\n      at: now,\n      actor: `merchant:${principal.userId}`,\n      action: \"pyusd_rate_confirmed\",",
+    "new": "    await tx.execute(sql`update payment_attempts set pyusd_atomic_amount = pyusd_atomic_amount + 1 where rail = 'pyusd' and state = 'prepared'`);\n    await recordAudit(tx, {\n      at: now,\n      actor: `merchant:${principal.userId}`,\n      action: \"pyusd_rate_confirmed\","
+   },
+   {
+    "file": "src/domain/pyusd/rate.ts",
+    "old": "import { and, desc, eq } from \"drizzle-orm\";",
+    "new": "import { and, desc, eq, sql } from \"drizzle-orm\";"
+   },
+   {
+    "file": "drizzle/0022_s16_pyusd.sql",
+    "old": "GRANT UPDATE (\"pyusd_hints\", \"pyusd_finalized_signature\", \"pyusd_verified_at\") ON TABLE public.\"payment_attempts\" TO envoi_web;",
+    "new": "GRANT UPDATE (\"pyusd_hints\", \"pyusd_finalized_signature\", \"pyusd_verified_at\", \"pyusd_atomic_amount\") ON TABLE public.\"payment_attempts\" TO envoi_web;"
+   }
+  ]
+ },
+ {
+  "id": "cancel-closes-unpaid",
+  "test": "cancel after PYUSD preparation reports checking",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Allow unpaid_closed.",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "        return appError(\"payment_uncertain\", \"We are checking this PYUSD payment on Solana devnet. Do not pay again.\");\n",
+    "new": "        await transitionPurchase(tx, purchaseId, [\"pending_payment\"], \"unpaid_closed\", \"buyer_canceled\");\n        return { view: { state: \"unpaid_closed\", paypalAttempt: null, pyusdAttempt: attempt.state as PyusdAttemptState } };\n"
+   }
+  ]
+ },
+ {
+  "id": "hint-origin",
+  "test": "signature hint rejects a foreign Origin",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Remove assertSameOrigin from the hint route.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/purchases/[id]/pyusd/submitted/route.ts",
+    "old": "  const foreign = assertSameOrigin(request);\n  if (foreign) return httpErr(foreign);\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "hint-owner",
+  "test": "signature hint requires the owning buyer",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Drop the owner predicate on the hint route.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "eq(paymentAttempts.rail, \"pyusd\"), eq(purchases.buyerUserId, principal.userId)));\n  if (!row) return appError(\"not_found\"",
+    "new": "eq(paymentAttempts.rail, \"pyusd\")));\n  if (!row) return appError(\"not_found\""
+   }
+  ]
+ },
+ {
+  "id": "hint-marks-paid",
+  "test": "submitted signature is only a hint",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Mark the purchase paid on the hint.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "      await recordAudit(db, { at: now, actor, action: \"pyusd_hint_received\"",
+    "new": "      await transitionPurchase(db, purchaseId, [\"pending_payment\"], \"paid\", \"pyusd_confirmed\");\n      await recordAudit(db, { at: now, actor, action: \"pyusd_hint_received\""
+   }
+  ]
+ },
+ {
+  "id": "hint-debounce",
+  "test": "user-triggered PYUSD reads are debounced",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Skip the debounce.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "  if (!(await claimRead(db, attemptId, deps.now()))) return \"debounced\";\n",
+    "new": "  await claimRead(db, attemptId, deps.now());\n"
+   }
+  ]
+ },
+ {
+  "id": "hint-failed-as-mismatch",
+  "test": "a failed landing leaves the attempt prepared",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Treat a failed landing as a mismatch.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "  const result = verifyPyusdTransfer(read.value, attempt, feeAtEpoch(attempt.fee, epochOfSlot(schedule.value, read.value.slot)), now);\n",
+    "new": "  const verified = verifyPyusdTransfer(read.value, attempt, feeAtEpoch(attempt.fee, epochOfSlot(schedule.value, read.value.slot)), now);\n  const result: VerificationResult = verified.decision === \"failed_landing\" ? { decision: \"uncertain\", reason: \"metadata_incomplete\" } : verified;\n"
+   }
+  ]
+ },
+ {
+  "id": "hint-later-unread",
+  "test": "a later hint is verified when the first is not ours",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Audit every hint after the first without reading it.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "    if (decision === \"not_ours\" || decision === \"failed_landing\") continue;\n",
+    "new": "    if (decision === \"not_ours\" || decision === \"failed_landing\") return null;\n"
+   }
+  ]
+ },
+ {
+  "id": "hint-cap",
+  "test": "hints beyond the per-attempt cap are not read",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Drop the hint cap.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "    if (attempt.pyusdHints.length >= PYUSD_HINT_CAP) {",
+    "new": "    if (attempt.pyusdHints.length >= PYUSD_HINT_CAP && false) {"
+   }
+  ]
+ },
+ {
+  "id": "hint-flag-gated",
+  "test": "disabled rail still reconciles prepared attempts",
+  "test_file": "tests/integration/pyusd-purchase.test.ts",
+  "mutation": "Gate hint verification and reconcile on the flag.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "  const [row] = await db.select().from(paymentAttempts).where(and(eq(paymentAttempts.id, attemptId), eq(paymentAttempts.rail, \"pyusd\")));\n",
+    "new": "  if (!webEnv().PYUSD_ENABLED) return \"nothing_to_read\";\n  const [row] = await db.select().from(paymentAttempts).where(and(eq(paymentAttempts.id, attemptId), eq(paymentAttempts.rail, \"pyusd\")));\n"
+   }
+  ]
+ },
+ {
+  "id": "lock-keyed-by-rail",
+  "test": "an unresolved payment blocks the same basket on the other rail",
+  "test_file": "tests/integration/pyusd-cross-rail.test.ts",
+  "mutation": "Key the lock by rail.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/review.ts",
+    "old": "computeBasketLockKey({ buyerUserId: principal.userId, outletId: quote.outletId, lines: quote.lockLines })",
+    "new": "computeBasketLockKey({ buyerUserId: `${principal.userId}:${quote.rail}`, outletId: quote.outletId, lines: quote.lockLines })"
+   }
+  ]
+ },
+ {
+  "id": "lock-any-pending",
+  "test": "an abandoned PayPal order does not lock its basket",
+  "test_file": "tests/integration/pyusd-cross-rail.test.ts",
+  "mutation": "Lock on any pending_payment purchase.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/state.ts",
+    "old": "  if (view.purchaseState === \"uncertain\") return \"purchase_uncertain\";\n",
+    "new": "  if (view.purchaseState === \"pending_payment\") return \"paypal_review_window\";\n  if (view.purchaseState === \"uncertain\") return \"purchase_uncertain\";\n"
+   }
+  ]
+ },
+ {
+  "id": "lock-only-at-review",
+  "test": "two open reviews of one basket cannot both start payment",
+  "test_file": "tests/integration/pyusd-cross-rail.test.ts",
+  "mutation": "Check the basket lock only at review creation (drop the recheck in both execution starts).",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "        if (lock) return basketLocked(lock);\n",
+    "new": "        void lock;\n"
+   },
+   {
+    "file": "src/domain/pyusd/attempts.ts",
+    "old": "        if (lock) return refused(basketLocked(lock));\n",
+    "new": "        void lock;\n"
+   }
+  ]
+ },
+ {
+  "id": "lock-without-row-locks",
+  "test": "two open reviews of one basket cannot both start payment",
+  "test_file": "tests/integration/pyusd-cross-rail.test.ts",
+  "mutation": "Check the basket lock without first locking the buyer's same-basket purchases.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/review.ts",
+    "old": ".orderBy(asc(purchases.id)).for(\"update\");",
+    "new": ".orderBy(asc(purchases.id));"
+   }
+  ]
+ },
+ {
+  "id": "boot-throws",
+  "test": "PYUSD failure leaves PayPal working",
+  "test_file": "tests/integration/pyusd-cross-rail.test.ts",
+  "mutation": "Initialize PYUSD at boot and throw on failure.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/purchases/route.ts",
+    "old": "export const dynamic = \"force-dynamic\";\n",
+    "new": "export const dynamic = \"force-dynamic\";\n\nconst bootIdentity = await (await import(\"@/domain/pyusd/identity\")).checkPyusdIdentity((await import(\"@/integrations/solana/rpc\")).webSolanaClient());\nif (!bootIdentity.ok) throw new Error(`PYUSD failed at boot: ${bootIdentity.reason}`);\n"
+   }
+  ]
+ },
+ {
+  "id": "limiter-shared-window",
+  "test": "RPC calls stop at 20 per 10 seconds across web and runner",
+  "test_file": "tests/integration/pyusd-limiter.test.ts",
+  "mutation": "Count per process.",
+  "edits": [
+   {
+    "file": "src/integrations/solana/limiter.ts",
+    "old": "export function createDatabaseRpcLimiter(db: Db, now: Now, random: () => number = Math.random): RpcLimiter {\n  return {",
+    "new": "export function createDatabaseRpcLimiter(db: Db, now: Now, random: () => number = Math.random): RpcLimiter {\n  const local: number[] = [];\n  return {"
+   },
+   {
+    "file": "src/integrations/solana/limiter.ts",
+    "old": "        if ((all?.n ?? 0) >= RPC_BUDGET.globalPerWindow) return { ok: false, retryAfterMs: durationMs(\"T_RPC_WINDOW\"), reason: \"global\" };",
+    "new": "        void all;\n        if (local.filter((t) => t > windowStart.getTime()).length >= RPC_BUDGET.globalPerWindow) return { ok: false, retryAfterMs: durationMs(\"T_RPC_WINDOW\"), reason: \"global\" };"
+   },
+   {
+    "file": "src/integrations/solana/limiter.ts",
+    "old": "        await tx.insert(rpcLimiterCalls).values({ id: newId(\"rpc\"), method, at });\n",
+    "new": "        await tx.insert(rpcLimiterCalls).values({ id: newId(\"rpc\"), method, at });\n        local.push(at.getTime());\n"
+   }
+  ]
+ },
+ {
+  "id": "limiter-per-method",
+  "test": "one RPC method stops at 10 per 10 seconds",
+  "test_file": "tests/integration/pyusd-limiter.test.ts",
+  "mutation": "Drop the per-method count.",
+  "edits": [
+   {
+    "file": "src/integrations/solana/limiter.ts",
+    "old": "        if ((same?.n ?? 0) >= RPC_BUDGET.perMethodPerWindow) return { ok: false, retryAfterMs: durationMs(\"T_RPC_WINDOW\"), reason: \"method\" };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "limiter-slots",
+  "test": "at most two RPC requests run at once",
+  "test_file": "tests/integration/pyusd-limiter.test.ts",
+  "mutation": "Drop the slot rows.",
+  "edits": [
+   {
+    "file": "src/integrations/solana/limiter.ts",
+    "old": "        if (!free) return { ok: false, retryAfterMs: 1_000, reason: \"concurrency\" };\n",
+    "new": "        if (!free) return { ok: true, slot: -1 };\n"
+   }
+  ]
+ },
+ {
+  "id": "limiter-backoff",
+  "test": "RPC 429 backs off every caller",
+  "test_file": "tests/integration/pyusd-limiter.test.ts",
+  "mutation": "Retry immediately.",
+  "edits": [
+   {
+    "file": "src/integrations/solana/limiter.ts",
+    "old": "        const delay = Math.max(RPC_BUDGET.backoffBaseMs, Math.floor(random() * cap));",
+    "new": "        void cap;\n        const delay = 0;"
+   }
+  ]
+ },
+ {
+  "id": "limiter-lease",
+  "test": "abandoned RPC slot is reclaimed after its lease",
+  "test_file": "tests/integration/pyusd-limiter.test.ts",
+  "mutation": "Never expire slot leases.",
+  "edits": [
+   {
+    "file": "src/integrations/solana/limiter.ts",
+    "old": ".where(or(isNull(rpcLimiterSlots.holder), lte(rpcLimiterSlots.leaseExpiresAt, at)))",
+    "new": ".where(isNull(rpcLimiterSlots.holder))"
+   }
+  ]
+ },
+ {
+  "id": "wallet-devnet-chain",
+  "test": "wallet is asked for solana:devnet",
+  "test_file": "tests/unit/pyusd-wallet.test.ts",
+  "mutation": "Omit the chain.",
+  "edits": [
+   {
+    "file": "src/lib/wallet/standard.ts",
+    "old": "signAndSendTransaction({ account, chain: DEVNET_CHAIN, transaction: bytes })",
+    "new": "signAndSendTransaction({ account, transaction: bytes } as never)"
+   }
+  ]
+ },
+ {
+  "id": "wallet-capability-filter",
+  "test": "wallet without devnet sign-and-send is not offered",
+  "test_file": "tests/unit/pyusd-wallet.test.ts",
+  "mutation": "Skip the capability filter.",
+  "edits": [
+   {
+    "file": "src/lib/wallet/standard.ts",
+    "old": "return registry.get().filter((wallet) => wallet.chains.includes(DEVNET_CHAIN) && feature in wallet.features);",
+    "new": "void feature;\n  return registry.get();"
+   }
+  ]
+ },
+ {
+  "id": "wallet-link-purchase-id",
+  "test": "Phantom link carries only public outlet and item ids",
+  "test_file": "tests/unit/pyusd-wallet.test.ts",
+  "mutation": "Add the purchase id to the link.",
+  "edits": [
+   {
+    "file": "src/lib/wallet/phantom-browse.ts",
+    "old": "  target.searchParams.set(\"outlet\", outletId);\n",
+    "new": "  target.searchParams.set(\"outlet\", outletId);\n  target.searchParams.set(\"purchase\", \"pur_fixture_leak\");\n"
+   }
+  ]
+ },
+ {
+  "id": "wallet-one-shot",
+  "test": "the wallet is asked once per released transaction",
+  "test_file": "tests/unit/pyusd-wallet.test.ts",
+  "mutation": "Keep the bytes after the wallet call.",
+  "edits": [
+   {
+    "file": "src/lib/wallet/standard.ts",
+    "old": "      const out = held;\n      held = null;\n      return out;",
+    "new": "      return held;"
+   }
+  ]
+ },
+ {
+  "id": "phone-pay-button",
+  "test": "phone without a wallet gets the Phantom link, not a pay button",
+  "test_file": "tests/unit/pyusd-wallet.test.ts",
+  "mutation": "Show the pay button whenever PYUSD is selected.",
+  "edits": [
+   {
+    "file": "src/lib/wallet/standard.ts",
+    "old": "  if (input.wallets.length > 0) return \"pay\";\n  return isPhoneBrowser(input.userAgent) ? \"phantom_link\" : \"need_wallet\";",
+    "new": "  void isPhoneBrowser;\n  void input;\n  return \"pay\";"
+   }
+  ]
+ },
+ {
+  "id": "receipt-received",
+  "test": "PYUSD receipt says transferred and finalized on devnet",
+  "test_file": "tests/unit/pyusd-wallet.test.ts",
+  "mutation": "Change the copy to \"received\".",
+  "edits": [
+   {
+    "file": "src/app/receipt/[purchaseId]/pyusd-receipt.tsx",
+    "old": "export const PYUSD_PAID_LINE = \"Transferred and finalized on Solana devnet\";",
+    "new": "export const PYUSD_PAID_LINE = \"Received and finalized on Solana devnet\";"
+   }
+  ]
+ }
+]
