@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { recordAudit } from "@/domain/audit/events";
 import type { OutletMemberPrincipal } from "@/lib/auth-context";
 import { pyusdRates } from "@/lib/db/schema";
@@ -62,11 +62,6 @@ export async function latestPyusdRate(db: Pick<Db, "select">, outletId: string):
     .where(eq(pyusdRates.outletId, outletId))
     .orderBy(desc(pyusdRates.confirmedAt), desc(pyusdRates.id))
     .limit(1);
-  return row ? { versionId: row.id, outletId: row.outletId, atomicPerSgd: row.atomicPerSgd, confirmedAt: row.confirmedAt } : null;
-}
-
-export async function pyusdRateVersion(db: Pick<Db, "select">, outletId: string, versionId: string): Promise<PyusdRate | null> {
-  const [row] = await db.select().from(pyusdRates).where(and(eq(pyusdRates.id, versionId), eq(pyusdRates.outletId, outletId)));
   return row ? { versionId: row.id, outletId: row.outletId, atomicPerSgd: row.atomicPerSgd, confirmedAt: row.confirmedAt } : null;
 }
 

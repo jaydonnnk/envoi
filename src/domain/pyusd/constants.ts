@@ -44,6 +44,3 @@ export const PYUSD_PROOFS = {
 
 // Signature hints stored per attempt; later ones are audited only.
 export const PYUSD_HINT_CAP = 3;
-
-// Atomic units in one PYUSD.
-export const PYUSD_ATOMIC_PER_TOKEN = 1_000_000n;
