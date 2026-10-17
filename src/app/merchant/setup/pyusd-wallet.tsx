@@ -2,7 +2,7 @@
 
 import { getBase64Encoder } from "@solana/kit";
 import { useEffect, useState } from "react";
-import type { MerchantOutlet } from "@/domain/outlets/merchant";
+import type { MerchantOutlet, PyusdSetup } from "@/domain/outlets/merchant";
 import { requestJson } from "@/lib/browser/session";
 import { browserWalletRegistry, connectDevnetAccount, devnetWallets, signMessageOnce, type StandardWallet } from "@/lib/wallet/standard";
 
@@ -17,12 +17,21 @@ type Saved = { outlet: MerchantOutlet };
 
 const SINGAPORE_DATE = new Intl.DateTimeFormat("en-SG", { dateStyle: "medium", timeZone: "Asia/Singapore" });
 
+// The rate button. Every save is a new dated rate version, which invalidates the shop's open PYUSD
+// reviews, so an unchanged rate already confirmed today in Singapore offers nothing to press.
+export function rateButton(rate: PyusdSetup["rate"], input: string, now: Date): { label: string; disabled: boolean } {
+  if (!rate || input.trim() !== rate.pyusdPerSgd) return { label: "Save rate", disabled: input.trim() === "" };
+  if (!rate.expired && SINGAPORE_DATE.format(new Date(rate.confirmedAt)) === SINGAPORE_DATE.format(now)) return { label: "Confirmed today", disabled: true };
+  return { label: "Confirm this rate today", disabled: false };
+}
+
 export function PyusdWalletCard({ outlet, onSaved }: { outlet: MerchantOutlet; onSaved: (saved: Saved) => void }) {
   const { pyusd } = outlet;
   const [wallets, setWallets] = useState<StandardWallet[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [rate, setRate] = useState(pyusd.rate?.pyusdPerSgd ?? "");
+  const button = rateButton(pyusd.rate, rate, new Date());
 
   useEffect(() => {
     const registry = browserWalletRegistry();
@@ -124,13 +133,13 @@ export function PyusdWalletCard({ outlet, onSaved }: { outlet: MerchantOutlet; o
         <p className="muted">No rate yet. Buyers cannot pick PYUSD until you set one.</p>
       )}
       {pyusd.enabled && (
-        <form className="actions" onSubmit={(event) => void saveRate(event)}>
+        <form className="actions rate-form" onSubmit={(event) => void saveRate(event)}>
           <label>
             PYUSD per S$1
             <input name="pyusdPerSgd" inputMode="decimal" autoComplete="off" value={rate} onChange={(event) => setRate(event.target.value)} placeholder="0.742115" />
           </label>
-          <button className="button" type="submit" disabled={busy !== null || rate.trim() === ""}>
-            {pyusd.rate && rate.trim() === pyusd.rate.pyusdPerSgd ? "Confirm this rate today" : "Save rate"}
+          <button className="button" type="submit" disabled={busy !== null || button.disabled}>
+            {button.label}
           </button>
         </form>
       )}

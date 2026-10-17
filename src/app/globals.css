@@ -75,6 +75,9 @@ small { font-size: 13px; display: block; }
 .status.ok { border-left-color: var(--green); }
 /* The wallet buttons end their block with the same gap as a status, before the next heading. */
 .actions.wallet-actions { margin-bottom: 18px; }
+/* The rate button keeps its own height and sits level with the input, not stretched to the label. */
+.actions.rate-form { align-items: flex-end; }
+.actions.rate-form label { margin-bottom: 0; }
 
 .layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr); gap: 18px; align-items: start; }
 .rail { display: block; border: 2px solid var(--blue); border-radius: 8px; padding: 14px; margin: 0 0 12px; }
