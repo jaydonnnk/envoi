@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
-import { and, asc, eq, inArray, isNull, lte, or, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { buyerActor, recordAudit } from "@/domain/audit/events";
 import { canTransitionAttempt, isPreCapture, TERMINAL_ATTEMPT_STATES, type AttemptState } from "@/domain/payments/state";
+import { pyusdAttemptLocks, type PyusdAttemptState } from "@/domain/pyusd/state";
 import type { PricedLine } from "@/domain/purchases/price";
 import {
   CREATE_REPLAY_REFUSED,
@@ -13,8 +14,7 @@ import {
   type ExpectedPurchase,
   type PayPalOrder,
 } from "@/domain/purchases/reconcile";
-import type { BasketLockKey } from "@/domain/purchases/checkout-key";
-import { assertPaymentEligible, basketLocked, findBasketLock, getOwnPurchase, latestAttempt, type OwnPurchase } from "@/domain/purchases/review";
+import { assertPaymentEligible, basketLocked, findBasketLock, getOwnPurchase, latestAttempt, lockSameBasket, type OwnPurchase } from "@/domain/purchases/review";
 import {
   canTransitionPurchase,
   derivePurchaseView,
@@ -53,6 +53,13 @@ export type FlowHooks = {
 };
 
 class SlotTaken extends Error {}
+
+// PayPal attempt and destination rows always carry their PayPal fields (the payment_attempts and
+// payment_destinations rail checks); a missing one is a programming error, never a runtime outcome.
+function paypalField(value: string | null, name: string): string {
+  if (value === null) throw new Error(`a PayPal row has no ${name}`);
+  return value;
+}
 
 function isUniqueViolation(err: unknown): boolean {
   for (let current: unknown = err; current; current = (current as { cause?: unknown }).cause) {
@@ -127,13 +134,13 @@ function createOrderFor(deps: PayPalDeps, purchase: LockedPurchase, attempt: Pay
       purchaseId: purchase.id,
       attemptId: attempt.id,
       correlationId: purchase.id,
-      payeeMerchantId: attempt.payeeMerchantId,
+      payeeMerchantId: paypalField(attempt.payeeMerchantId, "payee"),
       lines: purchase.lines.map((line) => ({ name: line.name, quantity: line.quantity, unitSgdCents: line.unitSgdCents })),
       totalSgdCents: purchase.totalSgdCents,
       returnUrl: `${deps.appBaseUrl}/paypal/return?${query}`,
       cancelUrl: `${deps.appBaseUrl}/paypal/cancel?${query}`,
     },
-    attempt.createRequestId,
+    paypalField(attempt.createRequestId, "create request id"),
   );
 }
 
@@ -191,7 +198,7 @@ async function recoverCreate(tx: Tx, deps: PayPalDeps, purchase: LockedPurchase,
   if (decision === "safe_to_recreate") {
     const now = deps.now();
     await transitionAttempt(tx, current.id, ["create_unknown"], "abandoned", now, { outcomeReason: "create_recreated" });
-    const next = await claimSlot(tx, { purchaseId: purchase.id, payeeMerchantId: current.payeeMerchantId, totalSgdCents: purchase.totalSgdCents, now });
+    const next = await claimSlot(tx, { purchaseId: purchase.id, payeeMerchantId: paypalField(current.payeeMerchantId, "payee"), totalSgdCents: purchase.totalSgdCents, now });
     await recordAudit(tx, { at: now, actor: "system", action: "paypal_create_recreated", purchaseId: purchase.id, attemptId: next.id, operatorVisible: true, details: { replaces: current.id } });
     return createAndRecord(tx, deps, purchase, next);
   }
@@ -199,24 +206,10 @@ async function recoverCreate(tx: Tx, deps: PayPalDeps, purchase: LockedPurchase,
   return decision === "replay_same_key" ? createUnconfirmed() : appError("payment_uncertain", "We are still confirming the PayPal order for this review. Do not pay again.");
 }
 
-// Locks every purchase of this buyer with the same basket lock key, this one included, in id order
-// (Gate 3 paypal/start, S7), and returns the key with the ids it holds. Two starts of one basket, on
-// any review of it, then serialize here: the second waits, and its basket-lock check sees the first
-// one's attempt. A purchase without a key, a fixture tracer row, locks only itself.
-async function lockBasket(tx: Tx, principal: BuyerPrincipal, purchaseId: string): Promise<{ key: BasketLockKey; held: string[] } | null> {
-  const [own] = await tx
-    .select({ key: purchases.basketLockKey })
-    .from(purchases)
-    .where(and(eq(purchases.id, purchaseId), eq(purchases.buyerUserId, principal.userId)));
-  if (!own?.key) return null;
-  const held = await tx.select({ id: purchases.id }).from(purchases).where(eq(purchases.basketLockKey, own.key)).orderBy(asc(purchases.id)).for("update");
-  return { key: own.key as BasketLockKey, held: held.map((row) => row.id) };
-}
-
 export async function startPayPal(deps: PayPalDeps, principal: BuyerPrincipal, purchaseId: string, hooks: FlowHooks = {}): Promise<StartResult | AppError> {
   try {
     return await deps.db.transaction(async (tx): Promise<StartResult | AppError> => {
-      const basket = await lockBasket(tx, principal, purchaseId);
+      const basket = await lockSameBasket(tx, principal, purchaseId);
       // The purchase row lock serializes starts of one review: a second start waits here, then
       // finds the first start's attempt and returns the same approval link. It also serializes
       // create replays, so one key is never in flight twice.
@@ -260,7 +253,7 @@ export async function startPayPal(deps: PayPalDeps, principal: BuyerPrincipal, p
       if (!destination) return appError("review_invalidated", "The shop changed how it is paid since you reviewed. Nothing was charged.");
 
       const now = deps.now();
-      const attempt = await claimSlot(tx, { purchaseId, payeeMerchantId: destination.sellerMerchantId, totalSgdCents: locked.totalSgdCents, now });
+      const attempt = await claimSlot(tx, { purchaseId, payeeMerchantId: paypalField(destination.sellerMerchantId, "seller"), totalSgdCents: locked.totalSgdCents, now });
       await transitionPurchase(tx, purchaseId, ["review_open"], "pending_payment", "paypal_start");
       await recordAudit(tx, { at: now, actor: buyerActor(principal.userId), action: "paypal_attempt_created", purchaseId, attemptId: attempt.id, operatorVisible: false });
       return createAndRecord(tx, deps, locked, attempt);
@@ -319,7 +312,7 @@ function expectedPurchase(purchase: PurchaseFacts, attempt: PaymentAttemptRow): 
   return {
     purchaseId: purchase.id,
     outletId: purchase.outletId,
-    payeeId: attempt.payeeMerchantId,
+    payeeId: paypalField(attempt.payeeMerchantId, "payee"),
     totalSgdCents: sgdFromCents(purchase.totalSgdCents),
     currency: "SGD",
     lines,
@@ -331,7 +324,7 @@ export type CompleteResult = { status: "paid" | "uncertain" | "in_flight" | "awa
 
 async function currentView(db: Db, principal: BuyerPrincipal, purchaseId: string, now: Date): Promise<PurchaseView> {
   const purchase = await getOwnPurchase(db, principal, purchaseId, now);
-  return purchase ? purchase.view : { state: "uncertain", paypalAttempt: null };
+  return purchase ? purchase.view : { state: "uncertain", paypalAttempt: null, pyusdAttempt: null };
 }
 
 async function recordOutcome(db: Db, purchase: OwnPurchase, attempt: PaymentAttemptRow, decision: CaptureDecision | { decision: "no_evidence"; reason: string }, now: Date): Promise<void> {
@@ -453,13 +446,21 @@ export async function cancelPurchase(deps: Pick<PayPalDeps, "db" | "now">, princ
       return { view };
     }
     if (view.state === "paid") return appError("validation_failed", "This purchase is already paid.");
+    // A prepared PYUSD transfer left the server and can still land until its block-height bound, so
+    // cancel never closes it: the buyer sees "checking payment" and recovery decides (S16).
+    if (attempt?.rail === "pyusd") {
+      if (pyusdAttemptLocks(attempt.state as PyusdAttemptState)) {
+        return appError("payment_uncertain", "We are checking this PYUSD payment on Solana devnet. Do not pay again.");
+      }
+      return { view };
+    }
     if (attempt && !(TERMINAL_ATTEMPT_STATES as readonly string[]).includes(attempt.state)) {
       const state = attempt.state as AttemptState;
       if (!isPreCapture(state)) return appError("payment_uncertain", "PayPal may already be completing this payment. Check the receipt; do not pay again.");
       await transitionAttempt(tx, attempt.id, [state], "abandoned", now, { outcomeReason: "buyer_canceled" });
       await transitionPurchase(tx, purchaseId, ["pending_payment"], "unpaid_closed", "buyer_canceled");
       await recordAudit(tx, { at: now, actor: buyerActor(principal.userId), action: "paypal_canceled", purchaseId, attemptId: attempt.id, operatorVisible: false });
-      return { view: { state: "unpaid_closed", paypalAttempt: "abandoned" } };
+      return { view: { state: "unpaid_closed", paypalAttempt: "abandoned", pyusdAttempt: null } };
     }
     if (view.state === "review_open") return appError("validation_failed", "No payment was started. This review closes on its own.");
     return { view };

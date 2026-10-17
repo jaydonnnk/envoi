@@ -21,6 +21,7 @@ export type PayPalConnection = {
 type DestinationRow = typeof paymentDestinations.$inferSelect;
 
 function toConnection(row: DestinationRow): PayPalConnection {
+  if (row.sellerMerchantId === null) throw new Error("a PayPal destination has no seller id");
   return {
     destinationId: row.id,
     sellerMerchantId: row.sellerMerchantId,
@@ -80,4 +81,15 @@ export async function acceptPayPalConnection(db: Db, input: AcceptInput): Promis
     });
     return toConnection(accepted!);
   });
+}
+
+// Which rails an outlet has an active destination for (S16). PayPal needs the operator-prepared
+// seller; PYUSD a verified devnet wallet. Whether PYUSD can be used now also depends on the enable
+// flag, the shop's rate and the devnet identity, which pyusdAvailability decides.
+export async function outletRails(db: Pick<Db, "select">, outletId: string): Promise<{ paypal: boolean; pyusd: boolean }> {
+  const rows = await db
+    .select({ rail: paymentDestinations.rail })
+    .from(paymentDestinations)
+    .where(and(eq(paymentDestinations.outletId, outletId), eq(paymentDestinations.status, "active")));
+  return { paypal: rows.some((row) => row.rail === "paypal"), pyusd: rows.some((row) => row.rail === "pyusd") };
 }

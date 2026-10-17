@@ -1,6 +1,7 @@
 import { and, eq, isNotNull } from "drizzle-orm";
 import { recordAudit } from "@/domain/audit/events";
 import { currentDraftRevision, lockOutlet, revisionConflict } from "@/domain/menu/draft";
+import { webEnv } from "@/env";
 import { enrollments, menuRevisions, outlets, paymentDestinations } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
@@ -17,6 +18,10 @@ export type PublicationFacts = {
   detailsConfirmed: boolean;
   draft: typeof menuRevisions.$inferSelect | null; // the unpublished revision that would be published
   destinationAccepted: boolean; // an active PayPal sandbox destination the merchant accepted
+  // S16: a PYUSD devnet destination with verified key control. It counts toward publication only
+  // while PYUSD_ENABLED is true, so a PYUSD-only shop cannot publish while the rail is off.
+  pyusdVerified: boolean;
+  pyusdEnabled: boolean;
 };
 
 // Each precondition blocks on its own.
@@ -25,7 +30,7 @@ export function missingPreconditions(facts: PublicationFacts): PublicationCheck[
   if (!facts.enrollmentApproved) missing.push("enrollment");
   if (!facts.detailsConfirmed) missing.push("outlet_details");
   if (facts.draft?.status !== "confirmed") missing.push("menu_confirmation");
-  if (!facts.destinationAccepted) missing.push("destination");
+  if (!facts.destinationAccepted && !(facts.pyusdVerified && facts.pyusdEnabled)) missing.push("destination");
   return missing;
 }
 
@@ -54,11 +59,24 @@ async function publicationFacts(db: Conn, outletId: string, lock: boolean): Prom
       ),
     );
   const [destination] = await destinationQuery;
+  const [pyusd] = await db
+    .select({ id: paymentDestinations.id })
+    .from(paymentDestinations)
+    .where(
+      and(
+        eq(paymentDestinations.outletId, outletId),
+        eq(paymentDestinations.rail, "pyusd"),
+        eq(paymentDestinations.status, "active"),
+        isNotNull(paymentDestinations.keyVerifiedAt),
+      ),
+    );
   return {
     enrollmentApproved: enrollment !== undefined,
     detailsConfirmed: outlet.detailsConfirmedAt !== null,
     draft: await currentDraftRevision(db, outletId, lock),
     destinationAccepted: destination !== undefined,
+    pyusdVerified: pyusd !== undefined,
+    pyusdEnabled: webEnv().PYUSD_ENABLED,
   };
 }
 
@@ -75,7 +93,7 @@ const CHECK_COPY: Record<PublicationCheck, string> = {
   enrollment: "the Envoi operator has not approved this shop's enrollment",
   outlet_details: "confirm the shop details",
   menu_confirmation: "confirm the menu",
-  destination: "use the PayPal sandbox connection",
+  destination: "use the PayPal sandbox connection, or connect a PYUSD devnet wallet while PYUSD is switched on",
 };
 
 export type PublishInput = { outletId: string; revisionId: string; version: number; actorUserId: string; now: Date };

@@ -1,6 +1,7 @@
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { recordAudit } from "@/domain/audit/events";
 import { derivePurchaseView, applyDerivedTransitions, type PaymentAttemptRow, type PurchaseRow, type PurchaseState } from "@/domain/purchases/state";
+import { formatPyusdAtomic } from "@/domain/pyusd/rate";
 import { merchantMemberships, outlets, paymentAttempts, paymentDestinations, purchases, type StoredLine } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
@@ -25,6 +26,15 @@ export type MerchantOrder = {
   currency: string;
   state: PurchaseState;
   recipient: { environment: "sandbox"; sellerMerchantId: string } | null;
+  // PYUSD (S16): the devnet amount and recipient account, and the verified finalized signature only
+  // beside a paid order.
+  pyusd: {
+    environment: "devnet";
+    amount: string;
+    recipientTokenAccount: string | null;
+    attemptState: string | null;
+    signature: string | null;
+  } | null;
   payment: {
     environment: "sandbox";
     attemptState: string | null;
@@ -46,7 +56,7 @@ export type OutletOrders = {
 
 const merchantActor = (userId: string) => `merchant:${userId}`;
 
-type OrderRow = { purchase: PurchaseRow; sellerMerchantId: string | null };
+type OrderRow = { purchase: PurchaseRow; sellerMerchantId: string | null; tokenAccount: string | null };
 
 // The latest attempt of each purchase, as `latestAttempt` picks it for one.
 async function latestAttempts(db: Pick<Db, "select">, purchaseIds: string[]): Promise<Map<string, PaymentAttemptRow>> {
@@ -61,7 +71,7 @@ async function latestAttempts(db: Pick<Db, "select">, purchaseIds: string[]): Pr
   return latest;
 }
 
-function orderJson({ purchase, sellerMerchantId }: OrderRow, attempt: PaymentAttemptRow | null, now: Date): MerchantOrder {
+function orderJson({ purchase, sellerMerchantId, tokenAccount }: OrderRow, attempt: PaymentAttemptRow | null, now: Date): MerchantOrder {
   const view = derivePurchaseView(purchase, attempt, now);
   const paid = view.state === "paid";
   return {
@@ -74,7 +84,17 @@ function orderJson({ purchase, sellerMerchantId }: OrderRow, attempt: PaymentAtt
     currency: purchase.currency,
     state: view.state,
     recipient: sellerMerchantId ? { environment: "sandbox", sellerMerchantId } : null,
-    payment: attempt
+    pyusd:
+      purchase.rail === "pyusd" && purchase.pyusdAtomicAmount !== null
+        ? {
+            environment: "devnet",
+            amount: formatPyusdAtomic(purchase.pyusdAtomicAmount),
+            recipientTokenAccount: attempt?.rail === "pyusd" ? attempt.pyusdDestinationTokenAccount : tokenAccount,
+            attemptState: view.pyusdAttempt,
+            signature: paid && attempt?.rail === "pyusd" ? attempt.pyusdFinalizedSignature : null,
+          }
+        : null,
+    payment: attempt && attempt.rail !== "pyusd"
       ? {
           environment: "sandbox",
           attemptState: view.paypalAttempt,
@@ -90,7 +110,7 @@ function orderJson({ purchase, sellerMerchantId }: OrderRow, attempt: PaymentAtt
   };
 }
 
-const orderColumns = { purchase: purchases, sellerMerchantId: paymentDestinations.sellerMerchantId };
+const orderColumns = { purchase: purchases, sellerMerchantId: paymentDestinations.sellerMerchantId, tokenAccount: paymentDestinations.tokenAccount };
 
 // One page of the outlet's orders, newest first, older than the order `before` when it is given, so
 // every order stays reachable however many follow it. The caller has already checked the membership
@@ -171,6 +191,6 @@ export async function acknowledgeOrder(db: Db, input: { purchaseId: string; user
       outletId: row.purchase.outletId,
       operatorVisible: false,
     });
-    return { order: orderJson({ purchase: updated!, sellerMerchantId: row.sellerMerchantId }, attempt, input.now), changed: true };
+    return { order: orderJson({ purchase: updated!, sellerMerchantId: row.sellerMerchantId, tokenAccount: row.tokenAccount }, attempt, input.now), changed: true };
   });
 }

@@ -91,7 +91,7 @@ export async function assignPayPalDestination(db: OperatorDb, outletId: string, 
         .select()
         .from(schema.paymentDestinations)
         .where(and(eq(schema.paymentDestinations.outletId, outletId), eq(schema.paymentDestinations.rail, "paypal")));
-      if (!existing) throw new Error("Destination conflict without a destination; inspect it by hand.");
+      if (!existing?.sellerMerchantId) throw new Error("Destination conflict without a destination; inspect it by hand.");
       return { status: "unchanged", outletId, destinationId: existing.id, sellerMerchantId: existing.sellerMerchantId, version: existing.version };
     }
     await recordAudit(tx, {

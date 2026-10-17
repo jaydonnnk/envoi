@@ -6,7 +6,9 @@ import { getPayPalConnection, type PayPalConnection } from "@/domain/outlets/des
 import { publicationStatus, type PublicationStatus } from "@/domain/outlets/publish";
 import { decodeEmvcoTlv, type SupportedScheme } from "@/domain/sgqr/decode";
 import { isMappable, mappableIdentifier } from "@/domain/sgqr/validate";
-import { enrollments, merchantMemberships, outletIdentifiers, outlets } from "@/lib/db/schema";
+import { formatPyusdPerSgd, isRateExpired, latestPyusdRate } from "@/domain/pyusd/rate";
+import { webEnv } from "@/env";
+import { enrollments, merchantMemberships, outletIdentifiers, outlets, paymentDestinations } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
 import { newId } from "@/lib/ids";
@@ -40,7 +42,32 @@ export type MerchantOutlet = {
   paypal: PayPalConnection | null;
   publication: PublicationStatus;
   identifiers: OutletIdentifier[];
+  pyusd: PyusdSetup;
 };
+
+// S16: the outlet's PYUSD devnet setup as its merchant sees it. The wallet proves key control only;
+// the rail is usable only while PYUSD_ENABLED is true and the enrollment is approved.
+export type PyusdSetup = {
+  enabled: boolean;
+  wallet: { address: string; tokenAccount: string; verifiedAt: string; version: number } | null;
+  rate: { pyusdPerSgd: string; confirmedAt: string; expired: boolean } | null;
+};
+
+async function pyusdSetup(db: Pick<Db, "select">, outletId: string, now: Date): Promise<PyusdSetup> {
+  const [wallet] = await db
+    .select()
+    .from(paymentDestinations)
+    .where(and(eq(paymentDestinations.outletId, outletId), eq(paymentDestinations.rail, "pyusd")));
+  const rate = await latestPyusdRate(db, outletId);
+  return {
+    enabled: webEnv().PYUSD_ENABLED,
+    wallet:
+      wallet?.walletAddress && wallet.tokenAccount && wallet.keyVerifiedAt
+        ? { address: wallet.walletAddress, tokenAccount: wallet.tokenAccount, verifiedAt: wallet.keyVerifiedAt.toISOString(), version: wallet.version }
+        : null,
+    rate: rate ? { pyusdPerSgd: formatPyusdPerSgd(rate.atomicPerSgd), confirmedAt: rate.confirmedAt.toISOString(), expired: isRateExpired(rate, now) } : null,
+  };
+}
 
 export type MerchantOutlets = { outlets: MerchantOutlet[]; canCreateOutlet: boolean };
 
@@ -104,6 +131,7 @@ async function toMerchantOutlet(db: Pick<Db, "select">, row: OutletRow): Promise
     paypal: await getPayPalConnection(db, row.id),
     publication,
     identifiers: await listIdentifiers(db, row.id),
+    pyusd: await pyusdSetup(db, row.id, new Date()),
   };
 }
 

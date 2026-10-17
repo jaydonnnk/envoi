@@ -1,5 +1,8 @@
 import { and, eq, inArray } from "drizzle-orm";
 import { getPublishedMenu } from "@/domain/outlets/search";
+import { requirePyusdEnabled } from "@/domain/pyusd/identity";
+import { isRateExpired, latestPyusdRate, pyusdAtomicFor } from "@/domain/pyusd/rate";
+import { webEnv } from "@/env";
 import { isValidQuantity, MAX_QUANTITY, type BasketLockLine, type PurchaseLine, type RailId } from "@/domain/purchases/checkout-key";
 import { menuItems, paymentDestinations } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
@@ -34,9 +37,12 @@ export type PriceQuote =
       destinationVersion: number;
       provenance: CostProvenance;
       pricedAt: Date;
-      pyusd: null;
+      // PYUSD only: the shop's rate version and the total rounded up to the next atomic unit.
+      pyusd: PyusdQuote | null;
     }
   | { ok: false; error: AppError };
+
+export type PyusdQuote = { rateVersionId: string; atomicPerSgd: bigint; rateConfirmedAt: Date; atomicAmount: bigint };
 
 export const MAX_LINES = 20;
 
@@ -46,12 +52,19 @@ const PAYPAL_PROVENANCE: CostProvenance = {
   fx: { known: false },
 };
 
+const PYUSD_PROVENANCE: CostProvenance = {
+  payerFee: { amountSgdCents: null, payer: "unknown", basis: "Network fees are paid in devnet SOL by your wallet. Funding and off-ramp costs are unknown.", quotedAt: null },
+  merchantFee: { amountSgdCents: null, basis: "The shop receives PYUSD devnet test tokens, not SGD. Any conversion costs are not quoted." },
+  fx: { known: false },
+};
+
 const refuse = (error: AppError): PriceQuote => ({ ok: false, error });
 
 export async function priceBasket(db: Pick<Db, "select">, input: { outletId: string; lines: readonly PurchaseLine[]; rail: RailId; now: Date }): Promise<PriceQuote> {
-  // Only PayPal exists before S16 (D8): the same answer Gate 3 gives while PYUSD is switched off.
-  if (input.rail !== "paypal") {
-    return refuse(appError("pyusd_unavailable", "PYUSD has not passed its tests yet.", { details: { reason: "rail_disabled" } }));
+  // PYUSD pricing runs only while the rail is switched on (S16; D8's answer before then).
+  if (input.rail === "pyusd") {
+    const disabled = requirePyusdEnabled(webEnv());
+    if (disabled) return refuse(disabled);
   }
   if (input.lines.length === 0 || input.lines.length > MAX_LINES) {
     return refuse(appError("validation_failed", `Choose between 1 and ${MAX_LINES} items.`, { details: { reason: "line_count" } }));
@@ -99,25 +112,38 @@ export async function priceBasket(db: Pick<Db, "select">, input: { outletId: str
   const [destination] = await db
     .select({ id: paymentDestinations.id, version: paymentDestinations.version })
     .from(paymentDestinations)
-    .where(and(eq(paymentDestinations.outletId, menu.outlet.id), eq(paymentDestinations.rail, "paypal"), eq(paymentDestinations.status, "active")))
+    .where(and(eq(paymentDestinations.outletId, menu.outlet.id), eq(paymentDestinations.rail, input.rail), eq(paymentDestinations.status, "active")))
     .limit(1);
   if (!destination) {
-    return refuse(appError("validation_failed", "This shop has no PayPal sandbox seller connected yet.", { details: { reason: "no_destination" } }));
+    return input.rail === "paypal"
+      ? refuse(appError("validation_failed", "This shop has no PayPal sandbox seller connected yet.", { details: { reason: "no_destination" } }))
+      : refuse(appError("pyusd_unavailable", "This shop has not connected a PYUSD devnet wallet.", { details: { reason: "no_destination" } }));
+  }
+  const totalSgdCents = sumSgd(lines.map((line) => line.lineSgdCents));
+
+  let pyusd: PyusdQuote | null = null;
+  if (input.rail === "pyusd") {
+    const rate = await latestPyusdRate(db, menu.outlet.id);
+    if (!rate) return refuse(appError("pyusd_unavailable", "This shop has not set a PYUSD rate.", { details: { reason: "no_rate" } }));
+    if (isRateExpired(rate, input.now)) {
+      return refuse(appError("rate_expired", "This shop's PYUSD rate is more than 30 days old, so PYUSD is unavailable here until the shop confirms it again.", { details: { reason: "rate_expired" } }));
+    }
+    pyusd = { rateVersionId: rate.versionId, atomicPerSgd: rate.atomicPerSgd, rateConfirmedAt: rate.confirmedAt, atomicAmount: pyusdAtomicFor(totalSgdCents, rate.atomicPerSgd) };
   }
 
   return {
     ok: true,
     outletId: menu.outlet.id,
-    rail: "paypal",
+    rail: input.rail,
     lines,
     lockLines,
-    totalSgdCents: sumSgd(lines.map((line) => line.lineSgdCents)),
+    totalSgdCents,
     currency: "SGD",
     menuRevisionId: menu.menuRevisionId,
     destinationId: destination.id,
     destinationVersion: destination.version,
-    provenance: PAYPAL_PROVENANCE,
+    provenance: input.rail === "pyusd" ? PYUSD_PROVENANCE : PAYPAL_PROVENANCE,
     pricedAt: input.now,
-    pyusd: null,
+    pyusd,
   };
 }

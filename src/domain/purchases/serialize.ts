@@ -1,3 +1,4 @@
+import { formatPyusdAtomic, formatPyusdPerSgd } from "@/domain/pyusd/rate";
 import type { OwnPurchase } from "@/domain/purchases/review";
 
 // The buyer-facing JSON of a purchase. The state is the derived view, never a stored state that
@@ -18,7 +19,22 @@ export function purchaseJson(purchase: OwnPurchase) {
     reviewExpiresAt: purchase.reviewExpiresAt.toISOString(),
     createdAt: purchase.createdAt.toISOString(),
     recipient: purchase.sellerMerchantId ? { environment: "sandbox", sellerMerchantId: purchase.sellerMerchantId } : null,
-    payment: attempt
+    // PYUSD (S16): the shop's rate and its date, the rounded-up amount in devnet test tokens, the
+    // recipient account, and, once paid, the finalized signature that was verified.
+    pyusd: purchase.pyusd
+      ? {
+          environment: "devnet",
+          pyusdPerSgd: formatPyusdPerSgd(purchase.pyusd.atomicPerSgd),
+          rateConfirmedAt: purchase.pyusd.rateConfirmedAt.toISOString(),
+          amount: formatPyusdAtomic(purchase.pyusd.atomicAmount),
+          recipientWallet: purchase.pyusd.wallet,
+          recipientTokenAccount: purchase.pyusd.tokenAccount,
+          attemptState: purchase.view.pyusdAttempt,
+          signature: purchase.view.state === "paid" && attempt?.rail === "pyusd" ? attempt.pyusdFinalizedSignature : null,
+          verifiedAt: purchase.view.state === "paid" && attempt?.rail === "pyusd" ? (attempt.pyusdVerifiedAt?.toISOString() ?? null) : null,
+        }
+      : null,
+    payment: attempt && attempt.rail !== "pyusd"
       ? {
           environment: "sandbox",
           attemptState: purchase.view.paypalAttempt,

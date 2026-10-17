@@ -4,19 +4,18 @@ import { computeBasketLockKey, computeCheckoutKey, type BasketLockKey } from "@/
 import type { PriceQuote } from "@/domain/purchases/price";
 import {
   derivePurchaseView,
+  lockViewOf,
   moneyCanStillMove,
   storeDerivedTransitions,
   transitionPurchase,
   type BasketLockReason,
   type PaymentAttemptRow,
   type PurchaseRow,
-  type PurchaseState,
   type PurchaseView,
 } from "@/domain/purchases/state";
-import type { AttemptState } from "@/domain/payments/state";
 import { webEnv } from "@/env";
 import type { BuyerPrincipal } from "@/lib/auth-context";
-import { outlets, paymentAttempts, paymentDestinations, purchases, type StoredLine } from "@/lib/db/schema";
+import { outlets, paymentAttempts, paymentDestinations, purchases, pyusdRates, type StoredLine } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
 import { newId } from "@/lib/ids";
@@ -69,14 +68,25 @@ export async function findBasketLock(
   const rows = await query;
   for (const row of rows) {
     const attempt = await latestAttempt(db, row.id);
-    const reason = moneyCanStillMove(
-      { purchaseState: row.state as PurchaseState, reviewExpiresAt: row.reviewExpiresAt, paypalAttempt: (attempt?.state ?? null) as AttemptState | null },
-      input.now,
-    );
+    const reason = moneyCanStillMove(lockViewOf(row, attempt), input.now);
     if (reason) return { purchaseId: row.id, reason };
     if (derivePurchaseView(row, attempt, input.now).state !== row.state) await storeDerivedTransitions(db, row.id, input.now);
   }
   return null;
+}
+
+// Locks every purchase of this buyer with the same basket lock key, this one included, in id order
+// (Gate 3 paypal/start, S7; and the second pyusd/prepare transaction, S16), and returns the key with the ids it holds. Two starts of one basket, on
+// any review of it, then serialize here: the second waits, and its basket-lock check sees the first
+// one's attempt. A purchase without a key, a fixture tracer row, locks only itself.
+export async function lockSameBasket(tx: Tx, principal: BuyerPrincipal, purchaseId: string): Promise<{ key: BasketLockKey; held: string[] } | null> {
+  const [own] = await tx
+    .select({ key: purchases.basketLockKey })
+    .from(purchases)
+    .where(and(eq(purchases.id, purchaseId), eq(purchases.buyerUserId, principal.userId)));
+  if (!own?.key) return null;
+  const held = await tx.select({ id: purchases.id }).from(purchases).where(eq(purchases.basketLockKey, own.key)).orderBy(asc(purchases.id)).for("update");
+  return { key: own.key as BasketLockKey, held: held.map((row) => row.id) };
 }
 
 export const basketLocked = (lock: BasketLock): AppError =>
@@ -101,7 +111,7 @@ export async function createReview(conn: Conn, principal: BuyerPrincipal, quote:
     rail: quote.rail,
     currency: quote.currency,
     lines: quote.lines.map((line) => ({ menuItemId: line.menuItemId, quantity: line.quantity })),
-    pyusdRateVersionId: null,
+    pyusdRateVersionId: quote.pyusd?.rateVersionId ?? null,
   });
 
   const basketLockKey = computeBasketLockKey({ buyerUserId: principal.userId, outletId: quote.outletId, lines: quote.lockLines });
@@ -155,6 +165,8 @@ export async function createReview(conn: Conn, principal: BuyerPrincipal, quote:
         checkoutKey,
         basketLockKey,
         supersedesPurchaseId: replaces?.id ?? null,
+        pyusdRateVersionId: quote.pyusd?.rateVersionId ?? null,
+        pyusdAtomicAmount: quote.pyusd?.atomicAmount ?? null,
       })
       .onConflictDoNothing({ target: [purchases.buyerUserId, purchases.checkoutKey], where: sql`state = 'review_open'` })
       .returning({ id: purchases.id });
@@ -176,7 +188,7 @@ export async function createReview(conn: Conn, principal: BuyerPrincipal, quote:
       purchaseId,
       outletId: quote.outletId,
       operatorVisible: false,
-      details: { totalSgdCents: quote.totalSgdCents, rail: quote.rail, supersedes: replaces?.id ?? null, entryPoint },
+      details: { totalSgdCents: quote.totalSgdCents, rail: quote.rail, supersedes: replaces?.id ?? null, entryPoint, pyusdRateVersionId: quote.pyusd?.rateVersionId ?? null },
     });
     return { kind: "created", purchaseId, expiresAt } as const;
   });
@@ -196,6 +208,16 @@ export type OwnPurchase = {
   reviewExpiresAt: Date;
   createdAt: Date;
   sellerMerchantId: string | null;
+  // PYUSD reviews (S16): the merchant's verified devnet wallet and token account, and the shop's rate
+  // version and rounded-up amount this review was priced at.
+  pyusd: {
+    wallet: string | null;
+    tokenAccount: string | null;
+    rateVersionId: string;
+    atomicPerSgd: bigint;
+    rateConfirmedAt: Date;
+    atomicAmount: bigint;
+  } | null;
   attempt: PaymentAttemptRow | null;
   view: PurchaseView;
   // The shop's acknowledgment (S8), separate from the payment state and only ever on a paid order.
@@ -206,10 +228,19 @@ export type OwnPurchase = {
 // indistinguishable from a missing purchase. The returned view is derived on read.
 export async function getOwnPurchase(db: Conn, principal: BuyerPrincipal, purchaseId: string, now: Date = new Date()): Promise<OwnPurchase | null> {
   const [row] = await db
-    .select({ purchase: purchases, outletName: outlets.name, outletIsDemoFixture: outlets.isDemoFixture, sellerMerchantId: paymentDestinations.sellerMerchantId })
+    .select({
+      purchase: purchases,
+      outletName: outlets.name,
+      outletIsDemoFixture: outlets.isDemoFixture,
+      sellerMerchantId: paymentDestinations.sellerMerchantId,
+      walletAddress: paymentDestinations.walletAddress,
+      tokenAccount: paymentDestinations.tokenAccount,
+      rate: pyusdRates,
+    })
     .from(purchases)
     .innerJoin(outlets, eq(outlets.id, purchases.outletId))
     .leftJoin(paymentDestinations, eq(paymentDestinations.id, purchases.destinationId))
+    .leftJoin(pyusdRates, eq(pyusdRates.id, purchases.pyusdRateVersionId))
     .where(and(eq(purchases.id, purchaseId), eq(purchases.buyerUserId, principal.userId)))
     .limit(1);
   if (!row) return null;
@@ -229,6 +260,17 @@ export async function getOwnPurchase(db: Conn, principal: BuyerPrincipal, purcha
     reviewExpiresAt: purchase.reviewExpiresAt,
     createdAt: purchase.createdAt,
     sellerMerchantId: row.sellerMerchantId,
+    pyusd:
+      purchase.rail === "pyusd" && row.rate && purchase.pyusdAtomicAmount !== null
+        ? {
+            wallet: row.walletAddress,
+            tokenAccount: row.tokenAccount,
+            rateVersionId: row.rate.id,
+            atomicPerSgd: row.rate.atomicPerSgd,
+            rateConfirmedAt: row.rate.confirmedAt,
+            atomicAmount: purchase.pyusdAtomicAmount,
+          }
+        : null,
     attempt,
     view: derivePurchaseView(purchase, attempt, now),
     acknowledgedAt: purchase.acknowledgedAt,
@@ -257,7 +299,7 @@ export async function assertPaymentEligible(db: Conn, purchaseId: string, princi
   const { purchase, destination } = row;
 
   if (purchase.rail !== "paypal") {
-    return refuse(appError("pyusd_unavailable", "PYUSD has not passed its tests yet.", { details: { reason: "rail_disabled" } }));
+    return refuse(appError("validation_failed", "This review is for PYUSD. Pay it with a devnet wallet, or review the basket again for PayPal.", { details: { reason: "other_rail" } }));
   }
   if (now.getTime() >= purchase.reviewExpiresAt.getTime()) {
     return refuse(appError("review_expired", "This review has expired. Review the basket again to pay."));
