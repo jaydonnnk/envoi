@@ -147,6 +147,51 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [ ] S14 - APIMatic client and docs, account-conditional; third in the cut order.
 - [ ] S15 - Judged release.
 
+### S16 review fixes, 2026-10-18
+
+- **Review:** an independent, adversarial review of S16 on 2026-10-18 gave the verdict ISSUES FOUND, with no blocker and no major finding: six medium (F1-F6) and five minor (F7-F11).
+  The user asked for it in these words: "Write the copy paste handoff prompt for review of slice 16, and if all is good, then slice 17. make sure to include what was done for slice 16(key points only). Agent is to be unbiased, honest in their review. And not to use empty tests."
+- **Authorization, 2026-10-18:** "Fix every finding except F2 (S17's) and F3 (needs a phone test), including the F5 CI build-and-scan step, on envoi/slice-16-review-fixes."
+  It covers the branch and the fixes; no commit, push, merge, deploy, Neon write or Render change.
+- **Branch:** `envoi/slice-16-review-fixes`, from `main` at `115f5d9`, confirmed with `git branch --show-current`.
+- **Re-verified by the review [verified]:** typecheck and lint clean and 428 of 428 tests on `115f5d9`; all 28 named S16 tests and 113 cases exist exactly once against Gate 3's tables; R13 recomputed from the two landed devnet transactions and the Neon attempts (READ ONLY): each kept the stored blockhash, the buyer as fee payer, the memo equal to the reference and one Token-2022 `TransferChecked` of 1,800,000 units with 6 decimals of the pinned mint to `4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14`, and Phantom added only `SetComputeUnitPrice` 375,000 and `SetComputeUnitLimit` 200,000.
+  The real webpack build has no send method name in `.next/server` or `.next/static`.
+  A real local preparation against devnet (read-only) released bytes that a scanner did not find, as base64, base64url, hex or base58 of the whole transaction or its message, in the server log, any later response, any table or any evidence file; a planted copy was found on every surface first.
+  The Gate 3 deviations S16 recorded were judged refinements, not decision changes; S17 must still replace `decideRecoveryStep`'s `done` for `confirmed` and `expired_scanning` and claim by `T_LEASE`.
+- **F1, the S16 mutation set did not run at `115f5d9` [fixed]:** the cleanup `b00c7ff` changed `rate.ts`'s import, so `rate-change-reprices` no longer matched and `s16-mutate.py` stopped at definition 89 with `AssertionError: ('rate-change-reprices', 'src/domain/pyusd/rate.ts', 0)`.
+  The definition now matches the current import; with it, the 114 definitions proved 114 of 114 in a git archive of `115f5d9` (88 before the stop, the other 26 after the correction).
+  On the fix tree the 114 definitions proved 114 of 114 again, without rewriting `s16-mutations.json`; F11's change had made `phone-pay-button` stale the same way, so it was updated too, and it now also fails the new iPad test, which shares its fault.
+  Definitions of earlier slices also no longer apply to today's tree (S3 7 edits, S6 3, S7 3, S7 review fixes 1, S8 2, S13 2): each records a run on its own commit, so that is history, not a defect.
+- **F2, the phone payment stays checking [S17's, not changed]:** on Neon, `last_provider_read_at` of `pur_b6bf45fmxlulegnn26a4pl5zkq` is `16:26:58.661Z`, so Envoi read its hint exactly once.
+  Reproduced locally [verified]: a FIXTURE attempt copying that attempt's public fields, with its real devnet signature already read once as `not_found`, stayed "Checking payment" until the open receipt read devnet again 30.5 seconds later and showed Paid.
+  So the receipt converges while it stays open; on the iPhone it most likely stopped polling because the page left the foreground [hypothesis].
+  S17's maintenance read is the recovery path, and it is to be proposed for this attempt, not assumed.
+- **F3, the Phantom Browse link [open, needs a phone test]:** the doubly encoded `%253A` is correct when Phantom decodes the target once; a reader that decodes the whole link before splitting at the first `?` would open bare `/buy`, which matches "the basket was not kept" [hypothesis].
+  Changing the link form is a Gate 3 change; R14 stays [unknown].
+- **F4, the S16 web-role grants had no test of their own [fixed]:** new `tests/integration/pyusd-grants.test.ts`, five tests run as `envoi_web` on statements that match no row, so only the privilege check can refuse them, each beside a positive control on granted columns: `the web role cannot re-price a PYUSD attempt`, `the web role cannot write a PayPal seller into a destination`, `the web role cannot approve an enrollment`, `the web role cannot change a dated PYUSD rate` and `the web role cannot rewrite a wallet challenge`.
+- **F5, the send-name check ran only on an esbuild proxy [fixed]:** new `scripts/scan-build.ts` scans the real `next build` output, refusing an output without the Solana RPC client; CI now runs `npm run build` and the scan after the integration tests, by the user's instruction.
+  Its tests, `tests/unit/build-scan.test.ts`: `finds a send method name in the server output`, `finds a send method name in the browser output` and `ignores source maps and reports a clean build as clean`.
+  A build with no environment settings, as CI has, succeeds; the scan passes on it with 195 files.
+  Gate 4 delta D4 says CI stays limited to typecheck, lint, unit and integration jobs; the build step is the user's instruction, and whether D4's wording changes is the user's call.
+- **F6, stale records [fixed]:** the S16 record said the last commits were not pushed; it now records the push of `main` to `115f5d9` and that its authorization is not recorded.
+- **F7, the concurrent-proof test failed only by a thrown error [fixed]:** a thrown handler is now counted as the 500 Next.js would answer, and the test asserts both statuses are 200, so removing the retry fails on an AssertionError.
+  The retry itself is correct: the losing transaction, its challenge consumption included, rolls back and the retry runs in a fresh one.
+- **F8, one flaky overlap [cause unknown, diagnosis added]:** in 1 of 40 runs, `prep-enabled` also failed `preparation requires the owning buyer`; 39 other runs were clean.
+  Both mutation runners now record every other failing row's first error line (`other_errors`), so a recurrence can be diagnosed.
+- **F9, the rate button stretched to 82px at desktop width [fixed]:** the rate form aligns its button to the input's bottom edge (`.actions.rate-form`).
+- **F10, an unchanged rate confirmed today invited a second confirmation [fixed]:** the button reads "Confirmed today" and is disabled while the saved rate was confirmed on the same Singapore day and the field is unchanged; a re-confirmation is a new rate version that invalidates the shop's open PYUSD reviews.
+  Test: `a rate confirmed today offers no second confirmation` (`tests/unit/pyusd-rate-form.test.ts`).
+- **F11, an iPad got the desktop note instead of the Phantom link [fixed]:** a Mac user agent with more than one touch point counts as a tablet.
+  Test: `an iPad without a wallet gets the Phantom link, not the desktop note` (`tests/unit/pyusd-wallet.test.ts`); not checked on a real iPad [unknown].
+- **Mutations [verified], 12 of 12,** by [`s16-review-fixes-mutate.py`](evidence/s16-review-fixes-mutate.py) with [`s16-review-fixes-mutation-defs.json`](evidence/s16-review-fixes-mutation-defs.json), results in [`s16-review-fixes-mutations.json`](evidence/s16-review-fixes-mutations.json), on the uncommitted fix tree on `115f5d9`: six widen-a-grant definitions with no code change, three scanner definitions, the retry, the rate label and the touch points, each failing its named test on an AssertionError, restored byte-identical and passing on rerun.
+  `scan-server-root` also fails the source-map test, which shares its fixture; recorded, as standalone tests may share a fault.
+  F9 is CSS and has no automated test; it was measured in the browser below, with and without the rule.
+- **Tests [verified]:** typecheck and lint clean; 438 of 438 tests in 62 files, up from 428; `git diff --check` clean; `gate4_check.py` PASS with base `main`, `gate4_prove.py` 76/76, `03-program-design.md` SHA256 unchanged.
+- **Local browser check [verified], 2026-10-18,** on `npm run build` (webpack) and `next start` at http://localhost:3100 with FIXTURE settings and a disposable database, dropped after: at 1280px the rate button is 46px with its bottom level with the input (82px without the rule on `115f5d9`, 76px with the rule removed on the fix tree) and reads "Confirmed today", disabled, for a rate seeded today; editing the field turns it into an enabled "Save rate"; at 390px it wraps below the input at 46px with no horizontal scroll.
+  The first build of the fix showed the button 6px below the input, from the label's bottom margin, which is now zero inside the rate form.
+  `scripts/scan-build.ts` passes on each build (195 files).
+- **Not established:** a real phone or iPad, Render's logs, and whether Phantom's signing screen names the token [unknown].
+
 ### S16 PYUSD devnet purchase, 2026-10-17 to 2026-10-18
 
 Branch: `envoi/slice-16-pyusd-purchase`, from `main` at `83ea9de`.
@@ -187,10 +232,12 @@ Evidence that stays open is labeled below: R14's Browse-link query [unknown, the
   - **R17 [partly verified]:** at 16:26 UTC the limiter rows held 10 calls in the last window (`getBlockHeight` 1, `getEpochInfo` 2, `getGenesisHash` 2, `getLatestBlockhash` 1, `getMultipleAccounts` 3, `getTransaction` 1), both slots free and the backoff `consecutive 0`, so no 429 reached the shared backoff; counts from earlier windows were pruned, and Render's logs were not read [unknown].
   - **`PYUSD_ENABLED` off [verified 2026-10-18]:** after the user removed it on Render, a PYUSD review at Test Shop was refused with `pyusd_unavailable` reason `rail_disabled` and the PayPal review showed "PYUSD is switched off in this test environment."; the two proof purchases and the locked phone purchase remain on Neon as test-token records.
   - Checker maintenance: the two proof signatures are exempt from R8 by their SHA256, after a check that neither has a keypair's layout.
-- **Post-slice cleanup (architect-reviewer), 2026-10-18 [verified]:** every file S16 added has an importer or is a route, test or evidence file, so there are no orphans; two exports had no use anywhere, `pyusdRateVersion` in `src/domain/pyusd/rate.ts` and `PYUSD_ATOMIC_PER_TOKEN` in `src/domain/pyusd/constants.ts`, and both are deleted, with no mutation definition touching them.
+- **Post-slice cleanup (architect-reviewer), 2026-10-18 [verified]:** every file S16 added has an importer or is a route, test or evidence file, so there are no orphans; two exports had no use anywhere, `pyusdRateVersion` in `src/domain/pyusd/rate.ts` and `PYUSD_ATOMIC_PER_TOKEN` in `src/domain/pyusd/constants.ts`, and both are deleted.
+  Correction from the [S16 review](#s16-review-fixes-2026-10-18), F1: no mutation targets either export, but the cleanup also changed `rate.ts`'s `drizzle-orm` import, which the definition `rate-change-reprices` matched, so the S16 definitions did not apply at `115f5d9` until that definition was updated.
   Other exports used only inside their own file stay, since removing the keyword changes nothing; FIXTURE helpers and proof scripts live in the ignored `.maintenance-build/`, and the disposable local database and the FIXTURE login file were deleted after the browser pass.
   After the cleanup: typecheck and lint clean, 428 of 428 tests in 59 files, `git diff --check` clean; `gate4_check.py` PASS with base `main`, `gate4_prove.py` 76/76, `03-program-design.md` SHA256 unchanged.
-  On the branch only, not pushed: `ff92bda` (wallet-button spacing on merchant setup), the cleanup and these records.
+  When this record was written, `ff92bda` (wallet-button spacing on merchant setup), the cleanup and these records were on the branch only.
+  Correction from the [S16 review](#s16-review-fixes-2026-10-18), F6: the reflog shows `main` fast-forwarded to `115f5d9` and pushed at 02:02 SGT on 2026-10-18; CI passed on the branch (run 39056348761) and on `main` (run 39056356436), and Render serves it (its stylesheet carries the `wallet-actions` rule); no authorization for that push is recorded [unknown].
 - **Pins [verified]:** `@solana/kit@8.4.0`, `@solana-program/token-2022@0.19.0`, `@solana-program/memo@0.15.0`, `@wallet-standard/app@1.1.1` and `@solana/wallet-standard-features@1.5.0`, exact in `package.json`.
   Boot check finding: as first installed, the token-2022 peer `@solana/sysvars` resolved to a second copy, 8.5.0 at the root beside Kit's nested 8.4.0.
   `package.json` now carries `"overrides": { "@solana/sysvars": "8.4.0" }`, and `npm ls @solana/sysvars` shows one 8.4.0 copy.
