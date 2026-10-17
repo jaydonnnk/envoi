@@ -180,3 +180,10 @@ footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; 
 .sgqr form { margin-top: 18px; }
 .sgqr .status { margin-top: 14px; }
 .sgqr details .row { justify-content: flex-start; }
+.scan-entry { margin-top: 18px; }
+.viewfinder { margin: 4px 0 14px; border-radius: 10px; overflow: hidden; background: #0f1a26; aspect-ratio: 4 / 3; max-width: 480px; }
+.viewfinder video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.viewfinder[hidden] { display: none; }
+.scan > .card, .scan-outcome > .card { margin: 0 0 18px; }
+.scan .card > .status:last-child { margin-bottom: 0; }
+.scan .card > .status + .fine { margin-top: 0; }

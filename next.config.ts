@@ -7,6 +7,11 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
 ];
 
+// The buyer scan page is the one page that may ask for the camera, and only for this site's own
+// document (S10). Microphone and geolocation stay off there too.
+const SCAN_PAGE_PATH = "/buy/scan";
+const scanPageHeaders = [{ key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=()" }];
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   // next dev would otherwise append its own block to AGENTS.md, which holds this repository's
@@ -15,7 +20,12 @@ const nextConfig: NextConfig = {
   // The framework image optimizer stays unused (Gate 3, Files).
   images: { unoptimized: true },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    // When two entries set the same header for a path, the later one wins, so the scan page's entry
+    // comes last.
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      { source: SCAN_PAGE_PATH, headers: scanPageHeaders },
+    ];
   },
 };
 

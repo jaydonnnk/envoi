@@ -65,8 +65,16 @@ export default async function BuyPage({ searchParams }: { searchParams: Promise<
     <main data-server-ms={serverMs} data-db-ms={dbMs}>
       <p className="eyebrow">Buy</p>
       <h1>Find a participating shop</h1>
-      <p className="lead">{textEnabled ? "Tell Envoi what you want, or pick a shop to see its menu." : "Pick a shop to see its menu."}</p>
+      <p className="lead">{textEnabled ? "Tell Envoi what you want, scan the shop's sticker, or pick a shop to see its menu." : "Scan the shop's sticker, or pick a shop to see its menu."}</p>
       {textEnabled && <TextSuggest manualListId={MANUAL_LIST_ID} />}
+      <section className="card scan-entry" aria-labelledby="scan-heading">
+        <h2 id="scan-heading">Or scan the sticker</h2>
+        <p className="muted">Standing at the counter? Scan the shop&apos;s SGQR sticker to open that exact outlet. No area needed.</p>
+        {/* A plain link, so the scan page loads as its own document with the camera permission. */}
+        <a className="button full" href="/buy/scan">
+          Scan
+        </a>
+      </section>
       <div className="stack shops" id={MANUAL_LIST_ID}>
         {textEnabled && <h2 className="list-heading">Or pick a shop</h2>}
         {shops.length === 0 && <p className="card">No shop is on Envoi yet.</p>}

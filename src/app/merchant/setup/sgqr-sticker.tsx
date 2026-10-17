@@ -4,15 +4,13 @@ import { useState } from "react";
 import type { MerchantOutlet, OutletIdentifier } from "@/domain/outlets/merchant";
 import { decodeEmvcoTlv, type SgqrDecode, type SgqrField } from "@/domain/sgqr/decode";
 import { isMappable, mappableIdentifier } from "@/domain/sgqr/validate";
+import { qrDetector } from "@/lib/browser/qr";
 import { requestJson } from "@/lib/browser/session";
 
 // S9: the merchant selects a photo of their SGQR sticker and it is decoded here, in the browser.
 // The image never leaves the browser. The decoded text is sent only with a submission, so the
 // server can check it again, and is never stored or logged. File selection only: the camera stays
-// off for this site (Permissions-Policy).
-
-// The ZXing decoder is served from this site, never a CDN; tests pin the file to the package's hash.
-export const ZXING_WASM_PATH = "/vendor/zxing_reader-3.1.3.wasm";
+// off on this page (Permissions-Policy allows it on the buyer scan page alone).
 
 type Reading =
   | { kind: "idle" }
@@ -22,11 +20,10 @@ type Reading =
   | { kind: "decoded"; payload: string; decode: Extract<SgqrDecode, { kind: "decoded" }> };
 
 async function readQr(file: File): Promise<string | null> {
-  const { BarcodeDetector, prepareZXingModule } = await import("barcode-detector/ponyfill");
-  prepareZXingModule({ overrides: { locateFile: (path: string, prefix: string) => (path.endsWith(".wasm") ? ZXING_WASM_PATH : prefix + path) } });
+  const detector = await qrDetector();
   const bitmap = await createImageBitmap(file);
   try {
-    const found = await new BarcodeDetector({ formats: ["qr_code"] }).detect(bitmap);
+    const found = await detector.detect(bitmap);
     return found[0]?.rawValue ?? null;
   } finally {
     bitmap.close();

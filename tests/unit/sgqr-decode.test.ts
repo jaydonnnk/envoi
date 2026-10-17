@@ -74,7 +74,7 @@ describe("browser decoder", () => {
     const { createHash } = await import("node:crypto");
     const { readFileSync } = await import("node:fs");
     const { ZXING_WASM_SHA256, ZXING_WASM_VERSION } = await import("barcode-detector/ponyfill");
-    const { ZXING_WASM_PATH } = await import("@/app/merchant/setup/sgqr-sticker");
+    const { ZXING_WASM_PATH } = await import("@/lib/browser/qr");
     expect(ZXING_WASM_PATH).toBe(`/vendor/zxing_reader-${ZXING_WASM_VERSION}.wasm`);
     const served = readFileSync(new URL(`../../public${ZXING_WASM_PATH}`, import.meta.url));
     expect(createHash("sha256").update(served).digest("hex")).toBe(ZXING_WASM_SHA256);
