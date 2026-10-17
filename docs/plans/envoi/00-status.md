@@ -141,11 +141,47 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [x] S8 - Merchant orders and separate acknowledgment; done 2026-10-15; review fixes the same day.
 - [x] S11 - Menu photo import with direct vision, merged from the earlier S11 and S12, with the pre-registered vision evaluation and the real-photo exit decision, followed by the PYUSD go/no-go; done 2026-10-16, shipped with imports closed; review fixes 2026-10-16.
 - [x] S9 - Merchant SGQR decode and identifier mapping; started 2026-10-16 on `envoi/slice-9-sgqr-merchant`, before the PYUSD go/no-go by the user's choice; done 2026-10-16, decode results fixture-only.
-- [x] S10 - Buyer scan or paste; second in the cut order; started 2026-10-17 on `envoi/slice-10-scan`; done 2026-10-17, results fixture-only.
+- [x] S10 - Buyer scan or paste; second in the cut order; started 2026-10-17 on `envoi/slice-10-scan`; done 2026-10-17, results fixture-only; review fixes 2026-10-17, not yet merged.
 - [ ] S16 - PYUSD devnet purchase; first in the cut order, together with S17; kept by the user's go on 2026-10-16.
 - [ ] S17 - PYUSD recovery, extra transfers and the operator mismatch and refund acts.
 - [ ] S14 - APIMatic client and docs, account-conditional; third in the cut order.
 - [ ] S15 - Judged release.
+
+### S10 review fixes, 2026-10-17
+
+- **Review:** an independent, adversarial review of S10 on 2026-10-17 gave the verdict ISSUES FOUND, with no blocker and no major finding: one plan-wide medium finding (F1) and seven minor ones (F2-F8).
+  The user asked for it in these words: "give a copy paste prompt for a s10 review and then slice 16 if alls good. Be unbiased, honest and thooruguh."
+- **Authorization, 2026-10-17:** after seeing the findings, the user wrote: "Fix the but do not make major changes to the code or logic. Then let me know".
+  The fixes are small and change no resolution rule, route, schema or contract; F1 and F5 are recorded, not changed.
+- **Branch:** `envoi/slice-10-review-fixes`, from `main` at `ccb3b7f`, confirmed with `git branch --show-current`.
+  Not committed, pushed or merged as of this record; those wait for the user's authorization by name.
+- **Reproduced first [verified], on `ccb3b7f`:** typecheck, lint and 302 of 302 tests; the 12 S10 mutations prove 12 of 12 in an isolated copy of the tree; `gate4_check.py` passes and `gate4_prove.py` gives 76/76; CI passed on `99c422d` on `main` (run 39004637119) and the branch (run 39004632148).
+  The rewritten `unenrolled-auto-outlet` mutation is sound: it inserts what the web role can insert, and fails on the count assertion.
+  Refinement 3 is not a decision change: migration 0017 requires a published revision to be confirmed and makes it immutable.
+  Neon, in a `READ ONLY` transaction: 22 migrations, `outlet_identifiers` empty, two published outlets, purchase states as the S9 record states.
+  Render, as an anonymous visitor: `/buy/scan` 200 with `camera=(self)`, `/buy` and `/merchant/setup` with `camera=()`, the wasm 200 `application/wasm`, an anonymous resolve 401.
+  The browser pane now blocks the camera itself, so a real `NotAllowedError` showed "Camera access is off" with the paste field focused; a pasted sticker then resolved and "Search for a shop" opened text search.
+- **F1, no automated end-to-end test anywhere [recorded, plan-wide]:** Gate 3 pins `@playwright/test` 1.63.0 and lists `tests/e2e/**`, but no slice has installed it since S1; every slice's end-to-end check, S10's included, is a manual browser run.
+  This needs a plan-wide decision before S15, either accepting manual browser evidence formally or adding local Playwright journeys; it is not an S10 defect.
+- **F2, three S10 guards were unproven [fixed]:** raising the 4 KiB body bound, dropping `DISTINCT ON` or dropping the bound of 20 candidates each passed all 11 tests.
+  New tests: `the request body is bounded at 4 KiB`, `one outlet carrying two mapped identifiers is one candidate` and `a shared identifier lists at most 20 outlets, by name` (`tests/integration/sgqr-resolve.test.ts`).
+- **F3, a 21st outlet sharing an identifier was hidden silently [fixed]:** a probe with 21 outlets showed 20 and hid one with no sign; "Which outlet?" now ends with "Not listed? Search for it by name below.", above the text search card. No type or rule changes.
+- **F4, a checksum-mismatched sticker can be mapped but never scanned [fixed, copy only]:** S9's warning on such a sticker now also says that a buyer who scans a code that fails the check is told Envoi cannot identify the shop and is sent to search by name.
+  Not covered by a test: the warning renders only after a decoded photo, behind merchant sign-in; checked by reading the diff and the typecheck.
+- **F5, Gate 3's Files row still places resolution in `validate.ts` [recorded]:** refinement 10 stands; the row is corrected at the next Gate 3 reopening, because `03-program-design.md` is pinned by SHA256.
+- **F6, scan screen polish [fixed]:** the "Starting the camera" card's bottom gap matched its top (19px each, was larger at the bottom); a camera scan clears an earlier paste so the outcome is not shown beside an unrelated code; "Turn the camera off" stops a scanning camera; the outcome blocks inside the one `aria-live` region no longer carry their own `role`, so nothing is announced twice (screen reader not tested).
+  New tests: `which outlet points to text search for an outlet that is not listed` and `a scan result adds no live region of its own` (`tests/unit/scan-result.test.ts`), which render the exported `ScanResult`.
+- **F7, the camera never turned itself off [fixed]:** the scan loop now stops the camera when the page is hidden or after 60 seconds without a code, and shows "The camera is off" with "Scan again".
+- **F8, the "All shops" eyebrow link was a 73x14 px tap target [fixed]:** it is now 73x29 px, with no layout shift (the heading below stays at the same position), on every page with an eyebrow link.
+- **Tests [verified]:** typecheck, lint and 307 of 307 tests pass twice in a row, up from 302; `git diff --check` is clean.
+- **Mutations [verified], 5 of 5,** by [`s10-review-fixes-mutate.py`](evidence/s10-review-fixes-mutate.py) with [`s10-review-fixes-mutation-defs.json`](evidence/s10-review-fixes-mutation-defs.json), results in [`s10-review-fixes-mutations.json`](evidence/s10-review-fixes-mutations.json): `body-bound-raised`, `distinct-dropped`, `candidate-limit-dropped`, `not-listed-copy-removed` and `result-role-restored`, each failing its named test on an AssertionError, restored byte-identical and passing on rerun.
+  They ran on the uncommitted fix tree on `ccb3b7f` (recorded `uncommitted_changes` true); the spacing rule under the scanning hint was added after the run and touches no mutated text.
+  The 12 S10 definitions rerun on the fix tree prove 12 of 12; that run did not rewrite `s10-mutations.json`.
+  F6's paste clearing and camera button, F7 and F8 have no automated test: they live in browser state that the unit tests cannot render, and were checked in the browser below.
+- **Local browser check [verified], 2026-10-17,** on a local `next build` and `next start` at `http://localhost:3100` with FIXTURE settings and a disposable database, dropped after, at 390px and 1280px with no horizontal scroll and the "Test environment" badge, demo-fixture and sandbox labels visible.
+  A synthetic FIXTURE canvas stream stood in for the camera: "Turn the camera off", a hidden page (simulated by overriding `document.visibilityState`) and about a minute without a code each ended the track and showed "Scan again"; scanning a FIXTURE shared sticker cleared an earlier paste and showed "Which outlet?" with the new line; the outcome region held no nested `role`.
+  The check found one more fault and fixed it before the last build: "Turn the camera off" touched the hint above it (0px), now 14px.
+- **Not established:** a real phone camera, iOS Safari's camera and back-navigation behaviour, and a screen-reader pass [unknown].
 
 ### S10 Buyer scan or paste, 2026-10-17
 

@@ -56,6 +56,7 @@ Proposed target remains 4 of 5 first-time buyers completing an eligible test-env
 **Next action: S10 is done on 2026-10-17, with results fixture-only ([record](00-status.md#s10-buyer-scan-or-paste-2026-10-17)); S16 starts only on the user's authorization naming it.**
 A buyer taps Scan on `/buy`, and `/buy/scan` resolves a scanned or pasted sticker to one outlet, "Which outlet?", "This shop is not on Envoi" or "Envoi cannot identify a shop from this code", with paste and text search when the camera is denied or missing.
 Neon has no approved identifier mapping, so an enrolled-sticker demo on Render needs the user to submit a mapping and name it for approval.
+The S10 review fixes (2026-10-17, branch `envoi/slice-10-review-fixes`, not yet committed or merged) prove three unproven resolver bounds, point an unlisted outlet to text search, let the camera be turned off and turn it off when the page is hidden or idle for a minute; 5 of 5 new mutations and 12 of 12 S10 mutations pass; see [`00-status.md`](00-status.md#s10-review-fixes-2026-10-17).
 S9 is done (2026-10-16), with decode results fixture-only ([record](00-status.md#s9-merchant-sgqr-decode-and-mapping-2026-10-16)).
 The PYUSD go/no-go is taken: go, on 2026-10-16.
 The user took it on 2026-10-16 ("pyusd is a go !"), so S16 and S17 stay in the build order after S10 and stay item 1 of the cut order; see [PYUSD access checks](00-status.md#pyusd-access-checks-2026-10-16).
