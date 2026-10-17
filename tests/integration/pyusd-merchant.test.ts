@@ -344,7 +344,8 @@ describe("PYUSD merchant routes", () => {
         })
         .catch(() => undefined);
       await held;
-      const responses = Promise.all(proofs.map((proof) => submitProof(shop, proof)));
+      // A handler that throws is what Next.js answers with a 500, so a throw is counted as one.
+      const responses = Promise.all(proofs.map((proof) => submitProof(shop, proof).catch(() => Response.json({ ok: false, error: { code: "internal" } }, { status: 500 }))));
       const deadline = Date.now() + 10_000;
       for (;;) {
         const [waiting] = await database.admin<{ n: number }[]>`
@@ -355,7 +356,9 @@ describe("PYUSD merchant routes", () => {
       }
       release();
       await barrier;
-      const answers = await Promise.all((await responses).map((response) => envelope(response)));
+      const settled = await responses;
+      expect(settled.map((response) => response.status)).toEqual([200, 200]);
+      const answers = await Promise.all(settled.map((response) => envelope(response)));
       expect(answers.map((answer) => answer.ok)).toEqual([true, true]);
       const rows = await pyusdDestinations(shop);
       expect(rows).toHaveLength(1);
