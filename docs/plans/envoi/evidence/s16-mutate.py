@@ -82,6 +82,8 @@ def main():
             "error": own["error"],
             "fails_on_assertion": on_assertion,
             "other_failing_rows": [t for t in failed if t != m["test"]],
+            # Each other failing row's first error line, so an unexpected overlap can be diagnosed (S16 review F8).
+            "other_errors": {t: mutated[t]["error"] for t in failed if t != m["test"]},
             "same_group_others": same_group_others,
             "restored_identical": identical,
             "rerun_all_passed": rerun_passed,

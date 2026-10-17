@@ -1,0 +1,254 @@
+{
+ "branch": "envoi/slice-16-review-fixes",
+ "base_commit": "115f5d9",
+ "uncommitted_changes": true,
+ "method": "Each definition in s16-review-fixes-mutation-defs.json applied alone by exact text replacement, its whole test file run with the vitest JSON reporter, every touched file restored and compared by SHA-256, then the whole file rerun. A proof needs the named row to fail on an AssertionError, no other row of its group to fail (for a Gate 3 group row; a standalone test's other failures are recorded), a byte-identical restore and an all-passing rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations, as envoi_web, with DATABASE_URL removed; Solana RPC is a FIXTURE faked at the bounded transport, wallets are key pairs made in the run, PayPal is the FIXTURE fake at the PayPalWriteClient boundary, and every landed transaction is synthetic. The six grant definitions only widen a grant in migration 0022, with no code change, so each proves the grant itself is the barrier; the other definitions change code only.",
+ "results": [
+  {
+   "id": "grant-atomic-amount",
+   "test": "the web role cannot re-price a PYUSD attempt",
+   "kind": "standalone",
+   "group": "PYUSD web-role grants",
+   "files": [
+    "drizzle/0022_s16_pyusd.sql"
+   ],
+   "mutation": "Widen the web role's attempt UPDATE grant to pyusd_atomic_amount.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'ok' to be '42501' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "grant-seller-insert",
+   "test": "the web role cannot write a PayPal seller into a destination",
+   "kind": "standalone",
+   "group": "PYUSD web-role grants",
+   "files": [
+    "drizzle/0022_s16_pyusd.sql"
+   ],
+   "mutation": "Widen the web role's destination INSERT grant to seller_merchant_id.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'ok' to be '42501' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "grant-seller-update",
+   "test": "the web role cannot write a PayPal seller into a destination",
+   "kind": "standalone",
+   "group": "PYUSD web-role grants",
+   "files": [
+    "drizzle/0022_s16_pyusd.sql"
+   ],
+   "mutation": "Widen the web role's destination UPDATE grant to seller_merchant_id.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'ok' to be '42501' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "grant-enrollment-update",
+   "test": "the web role cannot approve an enrollment",
+   "kind": "standalone",
+   "group": "PYUSD web-role grants",
+   "files": [
+    "drizzle/0022_s16_pyusd.sql"
+   ],
+   "mutation": "Grant the web role UPDATE on the enrollment status in migration 0022.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'ok' to be '42501' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "grant-rate-update",
+   "test": "the web role cannot change a dated PYUSD rate",
+   "kind": "standalone",
+   "group": "PYUSD web-role grants",
+   "files": [
+    "drizzle/0022_s16_pyusd.sql"
+   ],
+   "mutation": "Grant the web role UPDATE on pyusd_rates.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'ok' to be '42501' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "grant-challenge-rewrite",
+   "test": "the web role cannot rewrite a wallet challenge",
+   "kind": "standalone",
+   "group": "PYUSD web-role grants",
+   "files": [
+    "drizzle/0022_s16_pyusd.sql"
+   ],
+   "mutation": "Widen the web role's challenge UPDATE grant to the wallet and the message.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'ok' to be '42501' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "scan-browser-root",
+   "test": "finds a send method name in the browser output",
+   "kind": "standalone",
+   "group": "built output scan for Solana send methods",
+   "files": [
+    "scripts/scan-build.ts"
+   ],
+   "mutation": "Scan only the server output.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ { \u2026(2) } ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "scan-server-root",
+   "test": "finds a send method name in the server output",
+   "kind": "standalone",
+   "group": "built output scan for Solana send methods",
+   "files": [
+    "scripts/scan-build.ts"
+   ],
+   "mutation": "Scan only the browser output.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ { \u2026(2) } ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "ignores source maps and reports a clean build as clean"
+   ],
+   "other_errors": {
+    "ignores source maps and reports a clean build as clean": "AssertionError: expected { files: +0, reachedRpc: false, \u2026(1) } to deeply equal { Object (files, reachedRpc, ...) }"
+   },
+   "same_group_others": [
+    "ignores source maps and reports a clean build as clean"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "scan-source-maps",
+   "test": "ignores source maps and reports a clean build as clean",
+   "kind": "standalone",
+   "group": "built output scan for Solana send methods",
+   "files": [
+    "scripts/scan-build.ts"
+   ],
+   "mutation": "Scan source maps as shipped code.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { files: 2, reachedRpc: true, \u2026(1) } to deeply equal { Object (files, reachedRpc, ...) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "proof-race-retry",
+   "test": "two concurrent first proofs from two challenges both record a destination",
+   "kind": "standalone",
+   "group": "PYUSD merchant routes > PYUSD wallet proof standalone tests",
+   "files": [
+    "src/domain/pyusd/challenge.ts"
+   ],
+   "mutation": "Remove the one retry after the unique violation.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 500, 200 ] to deeply equal [ 200, 200 ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 21,
+   "proof": true
+  },
+  {
+   "id": "rate-confirmed-today",
+   "test": "a rate confirmed today offers no second confirmation",
+   "kind": "standalone",
+   "group": "PYUSD rate form",
+   "files": [
+    "src/app/merchant/setup/pyusd-wallet.tsx"
+   ],
+   "mutation": "Offer the confirmation again for a rate confirmed today.",
+   "own_row": "failed",
+   "error": "AssertionError: expected '<button class=\"button\" type=\"submit\">\u2026' to contain '>Confirmed today<'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 1,
+   "proof": true
+  },
+  {
+   "id": "ipad-touch-points",
+   "test": "an iPad without a wallet gets the Phantom link, not the desktop note",
+   "kind": "standalone",
+   "group": "PYUSD wallet and receipt standalone tests",
+   "files": [
+    "src/lib/wallet/standard.ts"
+   ],
+   "mutation": "Ignore the touch points of a Mac user agent.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'need_wallet' to be 'phantom_link' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  }
+ ]
+}

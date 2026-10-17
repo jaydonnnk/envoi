@@ -1,0 +1,170 @@
+[
+ {
+  "id": "grant-atomic-amount",
+  "test": "the web role cannot re-price a PYUSD attempt",
+  "test_file": "tests/integration/pyusd-grants.test.ts",
+  "kind": "standalone",
+  "mutation": "Widen the web role's attempt UPDATE grant to pyusd_atomic_amount.",
+  "edits": [
+   {
+    "file": "drizzle/0022_s16_pyusd.sql",
+    "old": "GRANT UPDATE (\"pyusd_hints\", \"pyusd_finalized_signature\", \"pyusd_verified_at\") ON TABLE public.\"payment_attempts\" TO envoi_web;",
+    "new": "GRANT UPDATE (\"pyusd_hints\", \"pyusd_finalized_signature\", \"pyusd_verified_at\", \"pyusd_atomic_amount\") ON TABLE public.\"payment_attempts\" TO envoi_web;"
+   }
+  ]
+ },
+ {
+  "id": "grant-seller-insert",
+  "test": "the web role cannot write a PayPal seller into a destination",
+  "test_file": "tests/integration/pyusd-grants.test.ts",
+  "kind": "standalone",
+  "mutation": "Widen the web role's destination INSERT grant to seller_merchant_id.",
+  "edits": [
+   {
+    "file": "drizzle/0022_s16_pyusd.sql",
+    "old": "GRANT INSERT (\"id\", \"outlet_id\", \"rail\", \"environment\", \"status\", \"version\", \"wallet_address\", \"token_account\", \"key_verified_at\", \"key_verified_by_user_id\", \"created_at\") ON TABLE public.\"payment_destinations\" TO envoi_web;",
+    "new": "GRANT INSERT (\"id\", \"outlet_id\", \"rail\", \"environment\", \"status\", \"version\", \"wallet_address\", \"token_account\", \"key_verified_at\", \"key_verified_by_user_id\", \"created_at\", \"seller_merchant_id\") ON TABLE public.\"payment_destinations\" TO envoi_web;"
+   }
+  ]
+ },
+ {
+  "id": "grant-seller-update",
+  "test": "the web role cannot write a PayPal seller into a destination",
+  "test_file": "tests/integration/pyusd-grants.test.ts",
+  "kind": "standalone",
+  "mutation": "Widen the web role's destination UPDATE grant to seller_merchant_id.",
+  "edits": [
+   {
+    "file": "drizzle/0022_s16_pyusd.sql",
+    "old": "GRANT UPDATE (\"wallet_address\", \"token_account\", \"key_verified_at\", \"key_verified_by_user_id\") ON TABLE public.\"payment_destinations\" TO envoi_web;",
+    "new": "GRANT UPDATE (\"wallet_address\", \"token_account\", \"key_verified_at\", \"key_verified_by_user_id\", \"seller_merchant_id\") ON TABLE public.\"payment_destinations\" TO envoi_web;"
+   }
+  ]
+ },
+ {
+  "id": "grant-enrollment-update",
+  "test": "the web role cannot approve an enrollment",
+  "test_file": "tests/integration/pyusd-grants.test.ts",
+  "kind": "standalone",
+  "mutation": "Grant the web role UPDATE on the enrollment status in migration 0022.",
+  "edits": [
+   {
+    "file": "drizzle/0022_s16_pyusd.sql",
+    "old": "GRANT UPDATE (\"pyusd_hints\", \"pyusd_finalized_signature\", \"pyusd_verified_at\") ON TABLE public.\"payment_attempts\" TO envoi_web;",
+    "new": "GRANT UPDATE (\"pyusd_hints\", \"pyusd_finalized_signature\", \"pyusd_verified_at\") ON TABLE public.\"payment_attempts\" TO envoi_web;--> statement-breakpoint\nGRANT UPDATE (\"status\", \"approved_at\") ON TABLE public.\"enrollments\" TO envoi_web;"
+   }
+  ]
+ },
+ {
+  "id": "grant-rate-update",
+  "test": "the web role cannot change a dated PYUSD rate",
+  "test_file": "tests/integration/pyusd-grants.test.ts",
+  "kind": "standalone",
+  "mutation": "Grant the web role UPDATE on pyusd_rates.",
+  "edits": [
+   {
+    "file": "drizzle/0022_s16_pyusd.sql",
+    "old": "GRANT SELECT, INSERT ON TABLE public.\"pyusd_rates\" TO envoi_web;",
+    "new": "GRANT SELECT, INSERT, UPDATE ON TABLE public.\"pyusd_rates\" TO envoi_web;"
+   }
+  ]
+ },
+ {
+  "id": "grant-challenge-rewrite",
+  "test": "the web role cannot rewrite a wallet challenge",
+  "test_file": "tests/integration/pyusd-grants.test.ts",
+  "kind": "standalone",
+  "mutation": "Widen the web role's challenge UPDATE grant to the wallet and the message.",
+  "edits": [
+   {
+    "file": "drizzle/0022_s16_pyusd.sql",
+    "old": "GRANT UPDATE (\"consumed_at\") ON TABLE public.\"wallet_challenges\" TO envoi_web;",
+    "new": "GRANT UPDATE (\"consumed_at\", \"wallet\", \"message\") ON TABLE public.\"wallet_challenges\" TO envoi_web;"
+   }
+  ]
+ },
+ {
+  "id": "scan-browser-root",
+  "test": "finds a send method name in the browser output",
+  "test_file": "tests/unit/build-scan.test.ts",
+  "kind": "standalone",
+  "mutation": "Scan only the server output.",
+  "edits": [
+   {
+    "file": "scripts/scan-build.ts",
+    "old": "export const BUILD_ROOTS = [\"server\", \"static\"];",
+    "new": "export const BUILD_ROOTS = [\"server\"];"
+   }
+  ]
+ },
+ {
+  "id": "scan-server-root",
+  "test": "finds a send method name in the server output",
+  "test_file": "tests/unit/build-scan.test.ts",
+  "kind": "standalone",
+  "mutation": "Scan only the browser output.",
+  "edits": [
+   {
+    "file": "scripts/scan-build.ts",
+    "old": "export const BUILD_ROOTS = [\"server\", \"static\"];",
+    "new": "export const BUILD_ROOTS = [\"static\"];"
+   }
+  ]
+ },
+ {
+  "id": "scan-source-maps",
+  "test": "ignores source maps and reports a clean build as clean",
+  "test_file": "tests/unit/build-scan.test.ts",
+  "kind": "standalone",
+  "mutation": "Scan source maps as shipped code.",
+  "edits": [
+   {
+    "file": "scripts/scan-build.ts",
+    "old": "return /\\.(c|m)?js$/.test(entry.name) ? [path] : [];",
+    "new": "return /\\.(c|m)?js(\\.map)?$/.test(entry.name) ? [path] : [];"
+   }
+  ]
+ },
+ {
+  "id": "proof-race-retry",
+  "test": "two concurrent first proofs from two challenges both record a destination",
+  "test_file": "tests/integration/pyusd-merchant.test.ts",
+  "kind": "standalone",
+  "mutation": "Remove the one retry after the unique violation.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/challenge.ts",
+    "old": "      if (tries > 0 || !isUniqueViolation(err)) throw err;",
+    "new": "      void tries;\n      void isUniqueViolation;\n      throw err;"
+   }
+  ]
+ },
+ {
+  "id": "rate-confirmed-today",
+  "test": "a rate confirmed today offers no second confirmation",
+  "test_file": "tests/unit/pyusd-rate-form.test.ts",
+  "kind": "standalone",
+  "mutation": "Offer the confirmation again for a rate confirmed today.",
+  "edits": [
+   {
+    "file": "src/app/merchant/setup/pyusd-wallet.tsx",
+    "old": "  if (!rate.expired && SINGAPORE_DATE.format(new Date(rate.confirmedAt)) === SINGAPORE_DATE.format(now)) return { label: \"Confirmed today\", disabled: true };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "ipad-touch-points",
+  "test": "an iPad without a wallet gets the Phantom link, not the desktop note",
+  "test_file": "tests/unit/pyusd-wallet.test.ts",
+  "kind": "standalone",
+  "mutation": "Ignore the touch points of a Mac user agent.",
+  "edits": [
+   {
+    "file": "src/lib/wallet/standard.ts",
+    "old": " || (/Macintosh/.test(userAgent) && maxTouchPoints > 1)",
+    "new": " || (/Macintosh/.test(userAgent) && maxTouchPoints > 1 && false)"
+   }
+  ]
+ }
+]

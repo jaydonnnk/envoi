@@ -1304,8 +1304,8 @@
    },
    {
     "file": "src/domain/pyusd/rate.ts",
-    "old": "import { and, desc, eq } from \"drizzle-orm\";",
-    "new": "import { and, desc, eq, sql } from \"drizzle-orm\";"
+    "old": "import { desc, eq } from \"drizzle-orm\";",
+    "new": "import { desc, eq, sql } from \"drizzle-orm\";"
    },
    {
     "file": "drizzle/0022_s16_pyusd.sql",
@@ -1660,7 +1660,7 @@
   "edits": [
    {
     "file": "src/lib/wallet/standard.ts",
-    "old": "  if (input.wallets.length > 0) return \"pay\";\n  return isPhoneBrowser(input.userAgent) ? \"phantom_link\" : \"need_wallet\";",
+    "old": "  if (input.wallets.length > 0) return \"pay\";\n  return isPhoneBrowser(input.userAgent, input.maxTouchPoints) ? \"phantom_link\" : \"need_wallet\";",
     "new": "  void isPhoneBrowser;\n  void input;\n  return \"pay\";"
    }
   ],
