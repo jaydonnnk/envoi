@@ -53,7 +53,11 @@ Proposed target remains 4 of 5 first-time buyers completing an eligible test-env
 
 ## Next authorized action
 
-**Next action: S9 is done on 2026-10-16, with decode results fixture-only ([record](00-status.md#s9-merchant-sgqr-decode-and-mapping-2026-10-16)); S10 starts only on the user's authorization naming it. The PYUSD go/no-go is taken: go, on 2026-10-16.**
+**Next action: S10 is done on 2026-10-17, with results fixture-only ([record](00-status.md#s10-buyer-scan-or-paste-2026-10-17)); S16 starts only on the user's authorization naming it.**
+A buyer taps Scan on `/buy`, and `/buy/scan` resolves a scanned or pasted sticker to one outlet, "Which outlet?", "This shop is not on Envoi" or "Envoi cannot identify a shop from this code", with paste and text search when the camera is denied or missing.
+Neon has no approved identifier mapping, so an enrolled-sticker demo on Render needs the user to submit a mapping and name it for approval.
+S9 is done (2026-10-16), with decode results fixture-only ([record](00-status.md#s9-merchant-sgqr-decode-and-mapping-2026-10-16)).
+The PYUSD go/no-go is taken: go, on 2026-10-16.
 The user took it on 2026-10-16 ("pyusd is a go !"), so S16 and S17 stay in the build order after S10 and stay item 1 of the cut order; see [PYUSD access checks](00-status.md#pyusd-access-checks-2026-10-16).
 Devnet funds passed [verified by devnet RPC]: the buyer holds devnet SOL and 99 test PYUSD from the Google Cloud Web3 Faucet [user-reported], and a 1 PYUSD send created the merchant's PYUSD token account.
 Phantom on devnet passed on the Chrome desktop extension only; Phantom on the user's iPhone did not work [user-reported, cause unknown], so the phone path (R14) is unproven and phone PYUSD stays unavailable unless S16 proves it.
@@ -73,7 +77,7 @@ S13 is done (2026-10-14): in Claude Code, an agent holding a scoped demo token s
 S4 is done (2026-10-14), with its review fixes, see [S4 review fixes](00-status.md#s4-review-fixes-2026-10-14).
 The two S2 purchases that PayPal refused before the seller consented stay `uncertain` for good, by the user's choice on 2026-10-13, and keep locking their basket (1 Kopi O and 1 Kaya toast set) in the browser session that made them.
 The Claude Code agent token stays live in Neon (`agt_ggembpdxft5soezukk2c6remma`, label "Claude Code"); no revoke subcommand exists.
-On "start S9", create `envoi/slice-9-<slug>` from the current `main` tip, confirm it with `git branch --show-current`, and request S9's listed authorizations in `04-slices.md` by name before acting.
+On "start S16", create `envoi/slice-16-<slug>` from the current `main` tip, confirm it with `git branch --show-current`, and request S16's listed authorizations in `04-slices.md` by name before acting.
 The 25 Oct checkpoint is met: S1-S4, S13, S6, S5, S7 and S8 are all done, so no cut applies before S11.
 Rerun the checker and its fault harness under [`checks/`](checks/gate4_check.py) after any edit to the gate folder.
 Gate 3 was re-approved on 2026-10-11 with fixes A-M; its record, mirrors and fail-capable checks are in `00-status.md`.
