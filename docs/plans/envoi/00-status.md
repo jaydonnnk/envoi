@@ -108,6 +108,20 @@ Updated: 2026-10-17 (Asia/Singapore).
 - **Gate 1 unchanged:** its rule "Provider/chain result uncertain: checking payment; no blind retry or immediate switch to the other method" already covers fix L, and no refund is promised.
 - **Gate 3** carries the matching contracts and tests as fixes L and M; "publish gate 3" was recorded as authority to publish this work in Git, and Gate 3 was then re-approved separately on 2026-10-11.
 
+### Gate checker repair, 2026-10-17
+
+Checker maintenance only: no gate document's decision or count wording changed, so no gate reopens.
+
+- **R14 with base `main` [verified]:** R14's revision claims ("grow from 20 to 39", "19 with the revision") and R15's core placement read the earlier draft from the base ref, which was the pre-revision plan only while `main` was `5f6ab39`.
+  Once the revision merged, base `main` held 39 additions, so the claims failed; every record since 2026-10-15 ran with base `5f6ab39` and passed.
+  `gate4_check.py` now pins that draft as `DRAFT_BASE` (`5f6ab39`), and R7 and R10 still use the base ref.
+- **R8 since `5bce416` [verified]:** the three devnet transaction signatures in [PYUSD access checks](#pyusd-access-checks-2026-10-16) have the 88-character base58 shape of a Solana secret key.
+  On 2026-10-17 devnet `getSignatureStatuses` read all three as finalized, and none has a keypair's layout; R8 now exempts each by the SHA256 of its exact value, and any other value of that shape still fails.
+- **Fault harness [verified]:** two `gate4_prove.py` faults matched the unticked S9 and S10 checklist lines and crashed once S9 was ticked (`bbe20c8`); they now find the lines whatever their state.
+  Two faults are added: the additions baseline restated as 39, which fails R14 only through the pin, and one exempt signature altered by one character, which fails R8.
+- **Gate checks [verified], 2026-10-17:** `gate4_check.py` passes with base `main` and with `5f6ab39`, `gate4_prove.py` gives 76/76 with each, and `03-program-design.md` keeps SHA256 `0fd07da57b826bf9fa56431da1b11484bc44e56a6ee4846a0bfa715d76c475ac`.
+  Reverting the pin fails R14 on the pristine folder, an empty exemption fails R8, and exempting the pattern wholesale lets the altered signature pass.
+
 ## Slices
 
 Build order from `04-slices.md`, revised and approved 2026-10-12.

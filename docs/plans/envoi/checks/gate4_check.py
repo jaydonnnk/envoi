@@ -4,6 +4,8 @@ Usage, from the repository root:
     python3 -I docs/plans/envoi/checks/gate4_check.py docs/plans/envoi . main
 
 Arguments: the gate folder (which may be a scratch copy), the repository root and the base ref.
+R7 reads its added lines and R10 its unchanged files against the base ref; R14's revision counts and R15's core
+placement read the slice plan before the 2026-10-12 revision from the pinned DRAFT_BASE, so any base ref works.
 Each rule reports under its own id, so a planted fault can be shown to fail only its own rule.
 gate4_prove.py in this folder plants those faults.
 
@@ -13,6 +15,7 @@ What the rules do not check:
 - whether a slice's tests can run on the code built by then, beyond Gate 3's unit placement (R15);
 - stale approval wording outside the current-state parts R9 scans, or phrased outside its pattern;
 - counts stated anywhere other than the curated claims of R14;
+- whether a value R8 exempts as a public devnet transaction signature is one: it is exempt by its exact SHA256 anywhere;
 - whether the latest Gate 3 reopening text is right: R10 only pins its approved SHA256;
 - any runtime, account, model, wallet or usability fact.
 """
@@ -26,8 +29,8 @@ def fail(rule, msg):
     fails.setdefault(rule, []).append(msg)
 
 
-def git_show(path):
-    r = subprocess.run(["git", "-C", repo, "show", f"{base}:{path}"], capture_output=True)
+def git_show(path, ref=None):
+    r = subprocess.run(["git", "-C", repo, "show", f"{ref or base}:{path}"], capture_output=True)
     return r.stdout if r.returncode == 0 else None
 
 
@@ -166,7 +169,9 @@ s4 = md["04-slices.md"]
 section_list, assigned, additions = parse_slices(s4)
 sections = [s for s, _ in section_list]
 titles = dict(section_list)
-b04 = git_show("docs/plans/envoi/04-slices.md")
+# The earlier draft is the slice plan at 5f6ab39, the base of the 2026-10-12 revision, with its 20 named additions.
+DRAFT_BASE = "5f6ab39414bc9b006baed454ac885f1c4fe0772e"
+b04 = git_show("docs/plans/envoi/04-slices.md", DRAFT_BASE)
 base_sections, base_assigned, base_additions = parse_slices(b04.decode("utf-8")) if b04 else ([], [], [])
 
 # R2 every Gate 3 named test assigned exactly once, with its own case count
@@ -313,10 +318,17 @@ NEEDLES = [
     "[" + ",".join(["12"] * 64) + "]",
     "2" * 88,
 ]
+# Public Solana devnet transaction signatures in 00-status.md, "PYUSD access checks, 2026-10-16": a signature has the
+# 64-byte base58 shape of a secret key, so each is exempt by the SHA256 of its exact value. On 2026-10-17 devnet RPC
+# getSignatureStatuses read all three as finalized, and none has a keypair's layout (its last 32 bytes the public key).
+PUBLIC_SIGNATURES = {"a2a696c194b441f6af62eba24ff6d340f35342cffbfdd1d1b5ff3d9f3f696a82",
+                     "0f3f8bfbc247c9ef2b68a4d7a388133bf23c95a34806fca7813b2ea117413306",
+                     "72edc599d3a7b3a48ef93aceb1a13f07eb16a83e15b45d23147e22597f96cc8f"}
 
 
 def scan(lines):
-    return [(p, l) for l in lines for p in PATTERNS if re.search(p, l)]
+    return [(p, l) for l in lines for p in PATTERNS
+            if any(hashlib.sha256(m.group(0).encode("utf-8")).hexdigest() not in PUBLIC_SIGNATURES for m in re.finditer(p, l))]
 
 
 for n, needle in enumerate(NEEDLES):

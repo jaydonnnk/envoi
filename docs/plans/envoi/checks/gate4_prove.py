@@ -45,6 +45,15 @@ def move_s9(d):
     open(p, "w", encoding="utf-8").write(s)
 
 
+def swap_checklist(d, a, b):
+    p = os.path.join(d, "00-status.md")
+    s = open(p, encoding="utf-8").read()
+    la, lb = (re.search(rf"^- \[[ x]\] {sl} - .*$", s, flags=re.M).group(0) for sl in (a, b))
+    s = s.replace(la + "\n" + lb + "\n", lb + "\n" + la + "\n", 1)
+    assert lb + "\n" + la + "\n" in s, (a, b)
+    open(p, "w", encoding="utf-8").write(s)
+
+
 def append(d, rel, text):
     with open(os.path.join(d, rel), "a", encoding="utf-8") as f:
         f.write(text)
@@ -68,8 +77,7 @@ fault(["R4"], "duplicate addition", lambda d: sub(d, "04-slices.md", "| `foreign
 fault(["R4"], "addition count", lambda d: sub(d, "04-slices.md", "| 5 | S13 | 3 | 3 | 2 |", "| 5 | S13 | 3 | 3 | 3 |"))
 fault(["R4"], "empty mutation", lambda d: sub(d, "04-slices.md", "| Allow `GET`; the test fails. |", "| |"))
 fault(["R5"], "removed name revived", lambda d: sub(d, "04-slices.md", "- Voice, AG Grid and catalogue breadth.", "- Voice, AG Grid and catalogue breadth, and `guessed token is denied`."))
-fault(["R6"], "checklist order", lambda d: sub(d, "00-status.md", "- [ ] S9 - Merchant SGQR decode and identifier mapping.\n- [ ] S10 - Buyer scan or paste; second in the cut order.\n",
-                                              "- [ ] S10 - Buyer scan or paste; second in the cut order.\n- [ ] S9 - Merchant SGQR decode and identifier mapping.\n"))
+fault(["R6"], "checklist order", lambda d: swap_checklist(d, "S9", "S10"))
 fault(["R6"], "dependency built later", lambda d: sub(d, "04-slices.md", "then text. | S4, S9 |", "then text. | S4, S16 |"))
 fault(["R6"], "section order", move_s9)
 fault(["R7"], "em dash", lambda d: sub(d, "roadmap.md", "None of these candidates authorizes implementation.", "None of these candidates authorizes implementation \u2014 none."))
@@ -97,7 +105,7 @@ fault(["R14"], "review 8: wrong additions baseline in 00-status", lambda d: sub(
 
 # Faults for the rules added after the review
 fault(["R13"], "handoff cut order contradicts 04", lambda d: sub(d, "handoff.md", "the cut order PYUSD, scan, S14", "the cut order scan, PYUSD, S14"))
-fault(["R13"], "checklist cut rank contradicts 04", lambda d: sub(d, "00-status.md", "- [ ] S10 - Buyer scan or paste; second in the cut order.", "- [ ] S10 - Buyer scan or paste; third in the cut order."))
+fault(["R13"], "checklist cut rank contradicts 04", lambda d: sub(d, "00-status.md", "S10 - Buyer scan or paste; second in the cut order", "S10 - Buyer scan or paste; third in the cut order"))
 fault(["R14"], "handoff build order contradicts 04", lambda d: sub(d, "handoff.md", "S1, S2, S3, S4, S13, S6, S5, S7, S8,", "S1, S2, S3, S4, S13, S5, S6, S7, S8,"))
 fault(["R14"], "checkpoint list contradicts build order", lambda d: sub(d, "04-slices.md", "(S1-S4, S13, S6, S5, S7 and S8)", "(S1-S4, S13 and S5-S8)"))
 fault(["R14"], "roadmap delta count", lambda d: sub(d, "roadmap.md", "21 cases added", "22 cases added"))
@@ -143,6 +151,9 @@ fault(["R9"], "stale draft wording in roadmap", lambda d: sub(d, "roadmap.md", "
 fault(["R9"], "stale draft wording in the 01-product closing line", lambda d: sub(d, "01-product.md", "The slice plan in `04-slices.md` was revised and approved on 2026-10-12", "The slice plan is an unapproved draft in `04-slices.md`"))
 fault(["R9"], "handoff still awaits the Gate 4 question", lambda d: sub(d, "handoff.md", "## Next authorized action\n", "## Next authorized action\n\nThis awaits `Approve Gate 4, or what should change?`.\n"))
 fault(["R8"], "literal secret in a checker source", lambda d: append(d, os.path.join("checks", "gate4_check.py"), "# " + NPG + "\n"))
+# Faults for the 2026-10-17 checker fixes: the pinned earlier draft and the exempt devnet signatures
+fault(["R14"], "additions baseline restated as the current count", lambda d: sub(d, "00-status.md", "39 named additions, up from 20", "39 named additions, up from 39"))
+fault(["R8"], "exempt devnet signature altered by one character", lambda d: sub(d, "00-status.md", "`cxTue9W4hB", "`cxTue9W4hC"))
 
 results = []
 got, out = run(checker, copy("pristine"))
