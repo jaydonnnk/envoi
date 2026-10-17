@@ -1,0 +1,176 @@
+{
+ "branch": "envoi/slice-10-scan",
+ "base_commit": "6ad55e2",
+ "uncommitted_changes": false,
+ "method": "Each definition in s10-mutation-defs.json applied alone by exact text replacement, its named test run alone (vitest -t), every touched file restored and compared by SHA-256, then the test rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations, as envoi_web; merchant accounts are created by the operator functions with passwords generated in memory per run, and their FIXTURE shops are created through the merchant routes. Every SGQR payload is a FIXTURE built tag by tag; none is an authentic sticker. S10 adds no migration; the camera policy unit test reads next.config.ts directly. A proof also needs the mutated run to fail on an AssertionError.",
+ "results": [
+  {
+   "id": "unenrolled-auto-outlet",
+   "test": "unenrolled sticker yields no purchase",
+   "files": [
+    "src/domain/sgqr/resolve.ts"
+   ],
+   "mutation": "Auto-create an outlet, as the web role's merchant outlet creation does, when a sticker matches nothing; the test fails.",
+   "mutated": "Tests  1 failed | 10 skipped (11)",
+   "error": "AssertionError: expected { outlets: 2, enrollments: +0, \u2026(4) } to deeply equal { outlets: 1, enrollments: +0, \u2026(4) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 10 skipped (11)",
+   "proof": true
+  },
+  {
+   "id": "shared-first-match",
+   "test": "shared identifier asks which outlet",
+   "files": [
+    "src/domain/sgqr/resolve.ts"
+   ],
+   "mutation": "Pick the first match when several outlets share the identifier; the test fails.",
+   "mutated": "Tests  1 failed | 10 skipped (11)",
+   "error": "AssertionError: expected { kind: 'single', outlet: { \u2026(4) } } to deeply equal { kind: 'ambiguous', \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 10 skipped (11)",
+   "proof": true
+  },
+  {
+   "id": "grant-rail-payee",
+   "test": "scan grants no destination and no rail",
+   "files": [
+    "src/domain/sgqr/resolve.ts"
+   ],
+   "mutation": "Add a rail and a payee to a single-outlet resolution; the test fails.",
+   "mutated": "Tests  1 failed | 10 skipped (11)",
+   "error": "AssertionError: expected { kind: 'single', \u2026(3) } to deeply equal { kind: 'single', outlet: { \u2026(4) } }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 10 skipped (11)",
+   "proof": true
+  },
+  {
+   "id": "pending-counts",
+   "test": "a pending mapping does not resolve",
+   "files": [
+    "src/domain/sgqr/resolve.ts"
+   ],
+   "mutation": "Count a mapping the operator has not approved; the test fails.",
+   "mutated": "Tests  1 failed | 10 skipped (11)",
+   "error": "AssertionError: expected { kind: 'single', outlet: { \u2026(4) } } to deeply equal { kind: 'no_match' }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 10 skipped (11)",
+   "proof": true
+  },
+  {
+   "id": "unpublished-counts",
+   "test": "an unpublished outlet does not resolve",
+   "files": [
+    "src/domain/sgqr/resolve.ts"
+   ],
+   "mutation": "Count an outlet that is not published; the test fails.",
+   "mutated": "Tests  1 failed | 10 skipped (11)",
+   "error": "AssertionError: expected { kind: 'single', outlet: { \u2026(4) } } to deeply equal { kind: 'no_match' }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 10 skipped (11)",
+   "proof": true
+  },
+  {
+   "id": "proxy-counts",
+   "test": "a personal proxy does not resolve, even when it reads like a UEN",
+   "files": [
+    "src/domain/sgqr/resolve.ts"
+   ],
+   "mutation": "Treat every PayNow proxy as a business UEN when resolving; the test fails.",
+   "mutated": "Tests  1 failed | 10 skipped (11)",
+   "error": "AssertionError: expected { kind: 'single', outlet: { \u2026(4) } } to deeply equal { kind: 'unsupported_payload', \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 10 skipped (11)",
+   "proof": true
+  },
+  {
+   "id": "checksum-ignored",
+   "test": "a misread sticker does not resolve",
+   "files": [
+    "src/domain/sgqr/resolve.ts"
+   ],
+   "mutation": "Resolve a sticker whose checksum does not match; the test fails.",
+   "mutated": "Tests  1 failed | 10 skipped (11)",
+   "error": "AssertionError: expected { kind: 'single', outlet: { \u2026(4) } } to deeply equal { kind: 'unsupported_payload', \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 10 skipped (11)",
+   "proof": true
+  },
+  {
+   "id": "unsupported-as-no-match",
+   "test": "a code with no business identifier is unsupported, not unenrolled",
+   "files": [
+    "src/domain/sgqr/resolve.ts"
+   ],
+   "mutation": "Answer no_match for an SGQR with no business identifier; the test fails.",
+   "mutated": "Tests  1 failed | 10 skipped (11)",
+   "error": "AssertionError: expected { kind: 'no_match' } to deeply equal { kind: 'unsupported_payload', \u2026(1) }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 10 skipped (11)",
+   "proof": true
+  },
+  {
+   "id": "payload-unbounded",
+   "test": "the sticker contents are bounded",
+   "files": [
+    "src/app/api/v1/outlets/resolve-sgqr/route.ts"
+   ],
+   "mutation": "Remove the 512-character bound on the pasted contents; the test fails.",
+   "mutated": "Tests  1 failed | 10 skipped (11)",
+   "error": "AssertionError: oversize: expected 200 to be 400 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 10 skipped (11)",
+   "proof": true
+  },
+  {
+   "id": "session-guard-removed",
+   "test": "a buyer session is required",
+   "files": [
+    "src/app/api/v1/outlets/resolve-sgqr/route.ts"
+   ],
+   "mutation": "Remove the requireBuyerSession guard from the route; the test fails.",
+   "mutated": "Tests  1 failed | 10 skipped (11)",
+   "error": "AssertionError: expected 200 to be 401 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 10 skipped (11)",
+   "proof": true
+  },
+  {
+   "id": "payload-echoed",
+   "test": "raw QR payload is not logged by the scan route",
+   "files": [
+    "src/app/api/v1/outlets/resolve-sgqr/route.ts"
+   ],
+   "mutation": "Echo the sticker contents in the route's response; the test fails.",
+   "mutated": "Tests  1 failed | 10 skipped (11)",
+   "error": "AssertionError: resolved response: expected true to be false // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 10 skipped (11)",
+   "proof": true
+  },
+  {
+   "id": "camera-site-wide",
+   "test": "only the scan page may use the camera",
+   "files": [
+    "next.config.ts"
+   ],
+   "mutation": "Allow the camera on every route instead of the scan page only; the test fails.",
+   "mutated": "Tests  1 failed (1)",
+   "error": "AssertionError: expected [ { source: '/:path*', \u2026(1) } ] to deeply equal [ { source: '/buy/scan', \u2026(1) } ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed (1)",
+   "proof": true
+  }
+ ]
+}
