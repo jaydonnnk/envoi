@@ -141,7 +141,7 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [x] S8 - Merchant orders and separate acknowledgment; done 2026-10-15; review fixes the same day.
 - [x] S11 - Menu photo import with direct vision, merged from the earlier S11 and S12, with the pre-registered vision evaluation and the real-photo exit decision, followed by the PYUSD go/no-go; done 2026-10-16, shipped with imports closed; review fixes 2026-10-16.
 - [x] S9 - Merchant SGQR decode and identifier mapping; started 2026-10-16 on `envoi/slice-9-sgqr-merchant`, before the PYUSD go/no-go by the user's choice; done 2026-10-16, decode results fixture-only.
-- [x] S10 - Buyer scan or paste; second in the cut order; started 2026-10-17 on `envoi/slice-10-scan`; done 2026-10-17, results fixture-only; review fixes 2026-10-17, not yet merged.
+- [x] S10 - Buyer scan or paste; second in the cut order; started 2026-10-17 on `envoi/slice-10-scan`; done 2026-10-17, results fixture-only; review fixes 2026-10-17.
 - [ ] S16 - PYUSD devnet purchase; first in the cut order, together with S17; kept by the user's go on 2026-10-16.
 - [ ] S17 - PYUSD recovery, extra transfers and the operator mismatch and refund acts.
 - [ ] S14 - APIMatic client and docs, account-conditional; third in the cut order.
@@ -154,7 +154,8 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - **Authorization, 2026-10-17:** after seeing the findings, the user wrote: "Fix the but do not make major changes to the code or logic. Then let me know".
   The fixes are small and change no resolution rule, route, schema or contract; F1 and F5 are recorded, not changed.
 - **Branch:** `envoi/slice-10-review-fixes`, from `main` at `ccb3b7f`, confirmed with `git branch --show-current`.
-  Not committed, pushed or merged as of this record; those wait for the user's authorization by name.
+  Commits `cfbe276` (scan screen fixes and camera auto-off), `821a036` (tests and mutation definitions), `838b22f` (this record), then this record's update.
+- **Authorization to ship, 2026-10-17, in the user's words:** "Commit the S10 review fixes on envoi/slice-10-review-fixes, push the branch, fast-forward main and push to deploy."
 - **Reproduced first [verified], on `ccb3b7f`:** typecheck, lint and 302 of 302 tests; the 12 S10 mutations prove 12 of 12 in an isolated copy of the tree; `gate4_check.py` passes and `gate4_prove.py` gives 76/76; CI passed on `99c422d` on `main` (run 39004637119) and the branch (run 39004632148).
   The rewritten `unenrolled-auto-outlet` mutation is sound: it inserts what the web role can insert, and fails on the count assertion.
   Refinement 3 is not a decision change: migration 0017 requires a published revision to be confirmed and makes it immutable.
@@ -181,6 +182,8 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - **Local browser check [verified], 2026-10-17,** on a local `next build` and `next start` at `http://localhost:3100` with FIXTURE settings and a disposable database, dropped after, at 390px and 1280px with no horizontal scroll and the "Test environment" badge, demo-fixture and sandbox labels visible.
   A synthetic FIXTURE canvas stream stood in for the camera: "Turn the camera off", a hidden page (simulated by overriding `document.visibilityState`) and about a minute without a code each ended the track and showed "Scan again"; scanning a FIXTURE shared sticker cleared an earlier paste and showed "Which outlet?" with the new line; the outcome region held no nested `role`.
   The check found one more fault and fixed it before the last build: "Turn the camera off" touched the hint above it (0px), now 14px.
+- **Pushed [verified], 2026-10-17:** the branch and `main`, fast-forwarded to `838b22f`, were pushed (checked with `git ls-remote`), which deploys; CI passed on the branch (run 39008725934) and on `main` (run 39008729147).
+  At 06:10Z Render served `/buy/scan` 200 with `camera=(self)` and a page script containing "Turn the camera off", and answered an anonymous resolve 401 `unauthorized`.
 - **Not established:** a real phone camera, iOS Safari's camera and back-navigation behaviour, and a screen-reader pass [unknown].
 
 ### S10 Buyer scan or paste, 2026-10-17
