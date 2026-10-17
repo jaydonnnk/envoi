@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { getBase58Decoder, getPublicKeyFromAddress, verifySignature, type Address, type SignatureBytes } from "@solana/kit";
-import { and, eq, gt, isNull } from "drizzle-orm";
+import { and, eq, gt, isNull, sql } from "drizzle-orm";
 import { recordAudit } from "@/domain/audit/events";
 import { checkPyusdIdentity, checkPyusdTokenAccount, type PyusdIdentity } from "@/domain/pyusd/identity";
 import type { SolanaReadClient } from "@/integrations/solana/rpc";
@@ -168,19 +168,12 @@ export async function verifyWalletProof(
     } else {
       destinationId = newId("dst");
       version = 1;
-      await tx.insert(paymentDestinations).values({
-        id: destinationId,
-        outletId: principal.outletId,
-        rail: "pyusd",
-        environment: "devnet",
-        status: "active",
-        version,
-        walletAddress: wallet,
-        tokenAccount: account.address,
-        keyVerifiedAt: now,
-        keyVerifiedByUserId: principal.userId,
-        createdAt: now,
-      });
+      // Names only the PYUSD columns: the web role holds INSERT on exactly these, so it can never write
+      // a PayPal seller id or acceptance (migration 0022). A query-builder insert would list every
+      // column, the PayPal ones as DEFAULT, which that grant refuses.
+      await tx.execute(sql`
+        insert into payment_destinations (id, outlet_id, rail, environment, status, version, wallet_address, token_account, key_verified_at, key_verified_by_user_id, created_at)
+        values (${destinationId}, ${principal.outletId}, 'pyusd', 'devnet', 'active', ${version}, ${wallet}, ${account.address}, ${now.toISOString()}, ${principal.userId}, ${now.toISOString()})`);
     }
     await recordAudit(tx, {
       at: now,
