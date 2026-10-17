@@ -1,0 +1,350 @@
+{
+ "note": "S16 READ ONLY Neon reads on 2026-10-17, before and after migration 0022 applied with npm run db:migrate; identifiers, flags and counts only; neon_auth never read.",
+ "before": {
+  "readOnly": {
+   "transaction_read_only": "on"
+  },
+  "migrations": {
+   "n": 22
+  },
+  "tables": {
+   "wallet_challenges": false,
+   "pyusd_rates": false,
+   "rpc_limiter_calls": false,
+   "rpc_limiter_slots": false,
+   "rpc_limiter_backoff": false
+  },
+  "pyusdColumns": [],
+  "destinations": [
+   {
+    "rail": "paypal",
+    "environment": "sandbox",
+    "status": "active",
+    "n": 2,
+    "no_seller": 0
+   }
+  ],
+  "attempts": [
+   {
+    "state": "abandoned",
+    "n": 4,
+    "missing_paypal_fields": 0
+   },
+   {
+    "state": "capture_confirmed",
+    "n": 4,
+    "missing_paypal_fields": 0
+   },
+   {
+    "state": "capture_unknown",
+    "n": 2,
+    "missing_paypal_fields": 0
+   }
+  ],
+  "purchaseRails": [
+   {
+    "rail": "null",
+    "n": 3
+   },
+   {
+    "rail": "paypal",
+    "n": 14
+   }
+  ],
+  "buckets": [
+   {
+    "bucket": "buyer_suggestion",
+    "n": 3
+   }
+  ],
+  "limiterRows": null,
+  "webTable": [],
+  "webColumns": [
+   {
+    "table_name": "payment_attempts",
+    "privilege_type": "INSERT",
+    "n": 24
+   },
+   {
+    "table_name": "payment_attempts",
+    "privilege_type": "UPDATE",
+    "n": 13
+   },
+   {
+    "table_name": "payment_destinations",
+    "privilege_type": "UPDATE",
+    "n": 3
+   }
+  ],
+  "triggers": [
+   {
+    "tgname": "menu_items_item_key_default",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "menu_items_published_immutable",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "menu_revisions_published_immutable",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "merchant_memberships_binding_once",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "outlets_publication_guard",
+    "tgenabled": "O"
+   }
+  ],
+  "states": [
+   {
+    "state": "paid",
+    "n": 4
+   },
+   {
+    "state": "review_expired",
+    "n": 2
+   },
+   {
+    "state": "review_open",
+    "n": 5
+   },
+   {
+    "state": "uncertain",
+    "n": 2
+   },
+   {
+    "state": "unpaid_closed",
+    "n": 4
+   }
+  ],
+  "testShop": [
+   {
+    "id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+    "published": true,
+    "rail": "paypal",
+    "status": "active",
+    "seller_merchant_id": "EQN6264CF9F4Y",
+    "version": 2
+   }
+  ],
+  "outlets": [
+   {
+    "n": 2,
+    "published": 2
+   }
+  ]
+ },
+ "after": {
+  "readOnly": {
+   "transaction_read_only": "on"
+  },
+  "migrations": {
+   "n": 23
+  },
+  "tables": {
+   "wallet_challenges": true,
+   "pyusd_rates": true,
+   "rpc_limiter_calls": true,
+   "rpc_limiter_slots": true,
+   "rpc_limiter_backoff": true
+  },
+  "pyusdColumns": [
+   {
+    "table_name": "payment_attempts",
+    "n": 15
+   },
+   {
+    "table_name": "payment_destinations",
+    "n": 4
+   },
+   {
+    "table_name": "purchases",
+    "n": 2
+   }
+  ],
+  "destinations": [
+   {
+    "rail": "paypal",
+    "environment": "sandbox",
+    "status": "active",
+    "n": 2,
+    "no_seller": 0
+   }
+  ],
+  "attempts": [
+   {
+    "state": "abandoned",
+    "n": 4,
+    "missing_paypal_fields": 0
+   },
+   {
+    "state": "capture_confirmed",
+    "n": 4,
+    "missing_paypal_fields": 0
+   },
+   {
+    "state": "capture_unknown",
+    "n": 2,
+    "missing_paypal_fields": 0
+   }
+  ],
+  "purchaseRails": [
+   {
+    "rail": "null",
+    "n": 3
+   },
+   {
+    "rail": "paypal",
+    "n": 14
+   }
+  ],
+  "buckets": [
+   {
+    "bucket": "buyer_suggestion",
+    "n": 3
+   }
+  ],
+  "limiterRows": {
+   "slots": [
+    {
+     "slot": 0
+    },
+    {
+     "slot": 1
+    }
+   ],
+   "backoff": [
+    {
+     "id": "global"
+    }
+   ]
+  },
+  "webTable": [
+   {
+    "table_name": "pyusd_rates",
+    "privs": "INSERT,SELECT"
+   },
+   {
+    "table_name": "rpc_limiter_backoff",
+    "privs": "SELECT"
+   },
+   {
+    "table_name": "rpc_limiter_calls",
+    "privs": "DELETE,INSERT,SELECT"
+   },
+   {
+    "table_name": "rpc_limiter_slots",
+    "privs": "SELECT"
+   },
+   {
+    "table_name": "wallet_challenges",
+    "privs": "INSERT,SELECT"
+   }
+  ],
+  "webColumns": [
+   {
+    "table_name": "payment_attempts",
+    "privilege_type": "INSERT",
+    "n": 39
+   },
+   {
+    "table_name": "payment_attempts",
+    "privilege_type": "UPDATE",
+    "n": 16
+   },
+   {
+    "table_name": "payment_destinations",
+    "privilege_type": "INSERT",
+    "n": 11
+   },
+   {
+    "table_name": "payment_destinations",
+    "privilege_type": "UPDATE",
+    "n": 7
+   },
+   {
+    "table_name": "rpc_limiter_backoff",
+    "privilege_type": "UPDATE",
+    "n": 2
+   },
+   {
+    "table_name": "rpc_limiter_slots",
+    "privilege_type": "UPDATE",
+    "n": 2
+   },
+   {
+    "table_name": "wallet_challenges",
+    "privilege_type": "INSERT",
+    "n": 9
+   },
+   {
+    "table_name": "wallet_challenges",
+    "privilege_type": "UPDATE",
+    "n": 1
+   }
+  ],
+  "triggers": [
+   {
+    "tgname": "menu_items_item_key_default",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "menu_items_published_immutable",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "menu_revisions_published_immutable",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "merchant_memberships_binding_once",
+    "tgenabled": "O"
+   },
+   {
+    "tgname": "outlets_publication_guard",
+    "tgenabled": "O"
+   }
+  ],
+  "states": [
+   {
+    "state": "paid",
+    "n": 4
+   },
+   {
+    "state": "review_expired",
+    "n": 2
+   },
+   {
+    "state": "review_open",
+    "n": 5
+   },
+   {
+    "state": "uncertain",
+    "n": 2
+   },
+   {
+    "state": "unpaid_closed",
+    "n": 4
+   }
+  ],
+  "testShop": [
+   {
+    "id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+    "published": true,
+    "rail": "paypal",
+    "status": "active",
+    "seller_merchant_id": "EQN6264CF9F4Y",
+    "version": 2
+   }
+  ],
+  "outlets": [
+   {
+    "n": 2,
+    "published": 2
+   }
+  ]
+ }
+}
