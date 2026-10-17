@@ -185,7 +185,10 @@ S16 is not done and is not ticked; this section records work and decisions so fa
 - **Real `next build` [verified 2026-10-17, Turbopack, FIXTURE settings]:** it builds the browser and Node bundles with every S16 route.
   **Open finding:** the built server output contains 12 `sendTransaction` identifiers, all in three copies of one `@solana-program/token-2022` chunk, from `@solana/program-client-core`'s `addSelfPlanAndSendFunctions`, which calls `.sendTransaction` on a client the caller supplies.
   There is no quoted `sendTransaction`, `sendRawTransaction` or `requestAirdrop` method string, and `SolanaReadClient` has no send member; the browser output has none of the three names.
-  The static row `server never sends a transaction` passes on its esbuild tree-shaken bundle but would fail on this real bundle as Gate 3 words it, so it is not yet proof of that row; the decision is pending with the user.
+  The static row `server never sends a transaction` passed on its esbuild tree-shaken bundle but would have failed on that real bundle as Gate 3 words it.
+  **Decided by the user on 2026-10-17** ("Build with webpack"): `package.json` `build` is now `next build --webpack`, which Render runs through `npm run build`; no gate document changes, because none names a bundler.
+  **Real webpack build [verified 2026-10-17, FIXTURE settings]:** zero `sendTransaction`, `sendRawTransaction` or `requestAirdrop` names in `.next/server` and `.next/static` outside source maps, while the RPC module and the browser wallet feature are present; full suite 426 of 426 after the change.
+  The CI test still scans its esbuild bundle as a proxy; the real-build scan is evidence recorded per build, not a CI check, and every earlier slice's screens must be re-checked under webpack in the S16 browser pass.
 
 ### S10 review fixes, 2026-10-17
 
