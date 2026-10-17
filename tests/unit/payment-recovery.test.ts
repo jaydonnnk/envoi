@@ -33,7 +33,7 @@ describe("capture_unknown", () => {
     // Not even once the review window has long passed: it still reads uncertain, never closed.
     const purchase = { state: "uncertain", reviewExpiresAt: new Date("2026-10-13T00:00:00Z") } as PurchaseRow;
     const attempt = { state: "capture_unknown" } as PaymentAttemptRow;
-    expect(derivePurchaseView(purchase, attempt, new Date("2026-10-14T00:00:00Z"))).toEqual({ state: "uncertain", paypalAttempt: "capture_unknown" });
+    expect(derivePurchaseView(purchase, attempt, new Date("2026-10-14T00:00:00Z"))).toEqual({ state: "uncertain", paypalAttempt: "capture_unknown", pyusdAttempt: null });
   });
 });
 

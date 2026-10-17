@@ -142,10 +142,32 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [x] S11 - Menu photo import with direct vision, merged from the earlier S11 and S12, with the pre-registered vision evaluation and the real-photo exit decision, followed by the PYUSD go/no-go; done 2026-10-16, shipped with imports closed; review fixes 2026-10-16.
 - [x] S9 - Merchant SGQR decode and identifier mapping; started 2026-10-16 on `envoi/slice-9-sgqr-merchant`, before the PYUSD go/no-go by the user's choice; done 2026-10-16, decode results fixture-only.
 - [x] S10 - Buyer scan or paste; second in the cut order; started 2026-10-17 on `envoi/slice-10-scan`; done 2026-10-17, results fixture-only; review fixes 2026-10-17.
-- [ ] S16 - PYUSD devnet purchase; first in the cut order, together with S17; kept by the user's go on 2026-10-16.
+- [ ] S16 - PYUSD devnet purchase; first in the cut order, together with S17; kept by the user's go on 2026-10-16; started 2026-10-17 on `envoi/slice-16-pyusd-purchase`, in progress.
 - [ ] S17 - PYUSD recovery, extra transfers and the operator mismatch and refund acts.
 - [ ] S14 - APIMatic client and docs, account-conditional; third in the cut order.
 - [ ] S15 - Judged release.
+
+### S16 PYUSD devnet purchase, in progress since 2026-10-17
+
+Branch: `envoi/slice-16-pyusd-purchase`, from `main` at `83ea9de`.
+S16 is not done and is not ticked; this section records work and decisions so far, and its evidence is incomplete.
+
+- **Authorization, the user's words on 2026-10-17:** "Start S16. I understand the Phantom check passed on desktop only and phone PYUSD stays unavailable unless S16 proves it. Install the five PYUSD pins. Read-only devnet RPC reads on https://api.devnet.solana.com are approved. End-to-end checks stay manual browser runs."
+  It covers the branch, the pin install, read-only RPC reads against that URL, local work, disposable local databases and manual browser checks.
+  Commits on the branch were authorized separately on 2026-10-17 ("Yes, commit"), with no push.
+  Still to request by name: push; fast-forward of `main` and push, which deploys; the S16 migration on Neon; each `PYUSD_ENABLED` change and `SOLANA_RPC_URL` on Render; any Neon write or operator act.
+- **Pins [verified]:** `@solana/kit@8.4.0`, `@solana-program/token-2022@0.19.0`, `@solana-program/memo@0.15.0`, `@wallet-standard/app@1.1.1` and `@solana/wallet-standard-features@1.5.0`, exact in `package.json`.
+  Boot check finding: as first installed, the token-2022 peer `@solana/sysvars` resolved to a second copy, 8.5.0 at the root beside Kit's nested 8.4.0.
+  `package.json` now carries `"overrides": { "@solana/sysvars": "8.4.0" }`, and `npm ls @solana/sysvars` shows one 8.4.0 copy.
+  **Decided by the user on 2026-10-17: a refinement, not a Gate 3 decision change** ("Refinement"); no pin changed, and `03-program-design.md` keeps its SHA256.
+- **Decided by the user on 2026-10-17, group `rate parsing, bounds and conversion`, case `rate arithmetic is exact at its bounds`** ("Larger total"): at the real basket maximum, 20 lines of 20 at S$1,000, the product 4 x 10^14 is exact as a JavaScript number, so Gate 3's mutation "multiply as JavaScript numbers" cannot fail there.
+  The case uses the largest total `pyusdAtomicFor` accepts, a safe-integer multiple of 100 cents, and this is recorded as a reinterpretation of "largest allowed basket total".
+- **Decided by the user on 2026-10-17, RPC backoff** ("Keep 1 s floor"): after a 429 the shared backoff is a random delay up to the exponential cap but never below `backoffBaseMs` (1 s), so every caller always pauses; recorded as a refinement of Gate 3's "full jitter".
+- **Read-only devnet read, 2026-10-17 12:09 UTC [verified]**, through `createSolanaReadClient` against `https://api.devnet.solana.com`, saved in the ignored `.maintenance-build/s16-devnet-read.json`: `checkPyusdIdentity` passed at epoch 1185; the mint decodes with 6 decimals and exactly the eight reviewed extensions; the transfer fee schedules are zero for this and the next epoch; the transfer hook program is unset; `assessMintForTransfer` is eligible; and the Lighthouse program account is executable under the upgradeable loader.
+  This is the one-off Lighthouse recheck S16 owes `research.md`, still to be copied there.
+- **Review fixes to the previous session's uncommitted work, 2026-10-17:** `tests/unit/pyusd-transport.test.ts` had never run and failed on its own wrong expected amount byte (`0x7b` for `0x1b`); `wallet_challenges.message` is `bytea`, the exact signed bytes as Gate 3's `WalletChallenge.message` says, instead of text; and wallet discovery listens for late Wallet Standard registrations instead of one 600 ms retry.
+- **Baseline after those fixes [verified]:** typecheck and lint clean; 361 of 361 tests in 54 files, run with `TEST_DATABASE_URL` on the local PostgreSQL and `DATABASE_URL` unset.
+  No S16 mutation has run yet, and most S16 Gate 3 tests are not written yet.
 
 ### S10 review fixes, 2026-10-17
 

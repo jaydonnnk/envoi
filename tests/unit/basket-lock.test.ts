@@ -39,6 +39,7 @@ describe("money can still move", () => {
     purchaseState,
     reviewExpiresAt,
     paypalAttempt,
+    pyusdAttempt: null,
   });
 
   it("holds while a capture was dispatched or its outcome is unknown, whatever the time", () => {
