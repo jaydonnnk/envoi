@@ -1,8 +1,8 @@
 import type { Address } from "@solana/kit";
 import { and, eq, isNull, lte, or, sql } from "drizzle-orm";
 import { buyerActor, recordAudit } from "@/domain/audit/events";
-import { PYUSD_DEVNET, PYUSD_HINT_CAP, PYUSD_PROOFS } from "@/domain/pyusd/constants";
-import { associatedPyusdAccount, checkPyusdIdentity, checkPyusdTokenAccount } from "@/domain/pyusd/identity";
+import { PYUSD_HINT_CAP, PYUSD_PROOFS } from "@/domain/pyusd/constants";
+import { checkPyusdIdentity, checkPyusdTokenAccounts, type TokenAccountCheck } from "@/domain/pyusd/identity";
 import { assessMintForTransfer, epochOfSlot, feeAtEpoch } from "@/domain/pyusd/mint";
 import { isRateExpired, latestPyusdRate } from "@/domain/pyusd/rate";
 import { decideRecoveryStep } from "@/domain/pyusd/recovery";
@@ -154,19 +154,17 @@ export async function preparePyusdPayment(deps: PyusdDeps, principal: BuyerPrinc
   const identity = await checkPyusdIdentity(deps.rpc);
   if (!identity.ok) return unavailable(identity.reason);
   const rpc = deps.rpc!;
-  const mintRead = await rpc.getAccounts([PYUSD_DEVNET.mint], "finalized");
-  if (mintRead.kind !== "ok") return unavailable("rpc_unavailable");
-  if (!mintRead.value[0]) return unavailable("mint_unreadable");
-  const mint = assessMintForTransfer(decodeMintAccount(mintRead.value[0]), identity.epoch);
+  // The finalized mint the identity check read; preparation never reads it twice.
+  const mint = assessMintForTransfer(decodeMintAccount(identity.mint), identity.epoch);
   if (!mint.ok) return unavailable(mint.reason);
 
-  // The merchant's account can change after the proof, so it is checked again.
-  const merchant = await checkPyusdTokenAccount(rpc, pre.destination.wallet);
+  // The merchant's account can change after the proof, so it is checked again, in the same read as
+  // the buyer's.
+  const [merchant, buyer] = (await checkPyusdTokenAccounts(rpc, [pre.destination.wallet, buyerWallet])) as [TokenAccountCheck, TokenAccountCheck];
   if (!merchant.ok) return unavailable(merchant.reason === "rpc_unavailable" ? "rpc_unavailable" : `merchant_account_${merchant.reason}`, "The shop's PYUSD devnet account cannot receive payments right now. Nothing was charged.");
   if (merchant.address !== pre.destination.tokenAccount) return unavailable("merchant_account_changed");
 
-  const source = await associatedPyusdAccount(buyerWallet);
-  const buyer = await checkPyusdTokenAccount(rpc, buyerWallet);
+  const source = buyer.address;
   if (!buyer.ok && buyer.reason === "rpc_unavailable") return unavailable("rpc_unavailable");
   if (!buyer.ok && buyer.reason === "frozen") return unavailable("buyer_account_frozen", "Your PYUSD devnet account is frozen, so it cannot pay. Nothing was charged.");
   if (!buyer.ok && buyer.reason === "not_token_2022_account") return unavailable("buyer_account_invalid", "Your wallet's PYUSD account is not a devnet PYUSD account. Nothing was charged.");

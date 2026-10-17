@@ -1,5 +1,5 @@
 import { findAssociatedTokenPda } from "@solana-program/token-2022";
-import type { Address } from "@solana/kit";
+import type { Address, EncodedAccount } from "@solana/kit";
 import { PYUSD_DEVNET } from "@/domain/pyusd/constants";
 import type { WebEnv } from "@/env";
 import { decodeMintAccount, decodeTokenAccount } from "@/integrations/solana/decode";
@@ -10,9 +10,11 @@ import { appError, type AppError } from "@/lib/errors";
 // checkPyusdIdentity is exactly Gate 2's condition: the RPC's genesis hash, the mint's owner program
 // and its decimals match the reviewed constants. PYUSD_ENABLED is checked separately, so recovery
 // still reads while new PYUSD actions are off. A failure disables only PYUSD, never PayPal or the app.
+// A passing check returns the finalized mint account it read, so preparation assesses that same read
+// instead of reading the mint again (Gate 3's budget of about 4 reads per preparation).
 
 export type PyusdIdentity =
-  | { ok: true; epoch: bigint }
+  | { ok: true; epoch: bigint; mint: EncodedAccount }
   | { ok: false; reason: "rpc_unconfigured" | "rpc_unavailable" | "genesis_mismatch" | "mint_program_mismatch" | "mint_decimals_mismatch" };
 
 export async function checkPyusdIdentity(rpc: SolanaReadClient | null): Promise<PyusdIdentity> {
@@ -29,7 +31,7 @@ export async function checkPyusdIdentity(rpc: SolanaReadClient | null): Promise<
 
   const epoch = await rpc.getEpochInfo();
   if (epoch.kind !== "ok") return { ok: false, reason: "rpc_unavailable" };
-  return { ok: true, epoch: epoch.value.epoch };
+  return { ok: true, epoch: epoch.value.epoch, mint };
 }
 
 // Guards PYUSD pricing, challenge, proof, rate and preparation only; never reads, hints or reconcile.
@@ -51,10 +53,22 @@ export type TokenAccountCheck =
 
 // The derived account exists, belongs to Token-2022 for the pinned mint and owner, and is not frozen.
 export async function checkPyusdTokenAccount(rpc: SolanaReadClient, owner: Address): Promise<TokenAccountCheck> {
-  const address = await associatedPyusdAccount(owner);
-  const accounts = await rpc.getAccounts([address], "confirmed");
-  if (accounts.kind !== "ok") return { ok: false, reason: "rpc_unavailable", address };
-  const account = accounts.value[0];
+  const [check] = await checkPyusdTokenAccounts(rpc, [owner]);
+  return check!;
+}
+
+// The same check for several owners in one confirmed read, one result per owner in order.
+export async function checkPyusdTokenAccounts(rpc: SolanaReadClient, owners: readonly Address[]): Promise<TokenAccountCheck[]> {
+  const addresses = await Promise.all(owners.map(associatedPyusdAccount));
+  const accounts = await rpc.getAccounts(addresses, "confirmed");
+  return owners.map((owner, i) => {
+    const address = addresses[i]!;
+    if (accounts.kind !== "ok") return { ok: false, reason: "rpc_unavailable", address };
+    return assessPyusdTokenAccount(owner, address, accounts.value[i] ?? null);
+  });
+}
+
+function assessPyusdTokenAccount(owner: Address, address: Address, account: EncodedAccount | null): TokenAccountCheck {
   if (!account) return { ok: false, reason: "missing", address };
   if (account.programAddress !== PYUSD_DEVNET.tokenProgram) return { ok: false, reason: "not_token_2022_account", address };
   const token = decodeTokenAccount(account);

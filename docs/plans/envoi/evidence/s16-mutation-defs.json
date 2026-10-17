@@ -1122,7 +1122,7 @@
    {
     "file": "src/domain/pyusd/attempts.ts",
     "old": "  const identity = await checkPyusdIdentity(deps.rpc);\n  if (!identity.ok) return unavailable(identity.reason);\n",
-    "new": "  const identity = { ok: true as const, epoch: 700n };\n"
+    "new": "  const unchecked = await deps.rpc!.getAccounts([\"CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM\" as Address], \"finalized\");\n  const identity = { ok: true as const, epoch: 700n, mint: unchecked.kind === \"ok\" ? unchecked.value[0]! : (null as never) };\n"
    }
   ],
   "kind": "group_row"
@@ -1135,7 +1135,7 @@
   "edits": [
    {
     "file": "src/domain/pyusd/attempts.ts",
-    "old": "  const mint = assessMintForTransfer(decodeMintAccount(mintRead.value[0]), identity.epoch);\n  if (!mint.ok) return unavailable(mint.reason);\n",
+    "old": "  const mint = assessMintForTransfer(decodeMintAccount(identity.mint), identity.epoch);\n  if (!mint.ok) return unavailable(mint.reason);\n",
     "new": "  void assessMintForTransfer;\n  void decodeMintAccount;\n  const mint = { ok: true as const, fee: { preparedEpoch: identity.epoch, older: { epoch: 0n, basisPoints: 0, maximumFee: 0n }, newer: { epoch: 0n, basisPoints: 0, maximumFee: 0n } } };\n"
    }
   ],
@@ -1205,8 +1205,8 @@
   "edits": [
    {
     "file": "src/domain/pyusd/attempts.ts",
-    "old": "  const merchant = await checkPyusdTokenAccount(rpc, pre.destination.wallet);\n",
-    "new": "  const merchant = { ok: true as const, address: pre.destination.tokenAccount, reason: \"rpc_unavailable\" };\n"
+    "old": "  const [merchant, buyer] = (await checkPyusdTokenAccounts(rpc, [pre.destination.wallet, buyerWallet])) as [TokenAccountCheck, TokenAccountCheck];\n",
+    "new": "  const [, buyer] = (await checkPyusdTokenAccounts(rpc, [pre.destination.wallet, buyerWallet])) as [TokenAccountCheck, TokenAccountCheck];\n  const merchant = { ok: true as const, address: pre.destination.tokenAccount, reason: \"rpc_unavailable\" };\n"
    }
   ],
   "kind": "group_row"

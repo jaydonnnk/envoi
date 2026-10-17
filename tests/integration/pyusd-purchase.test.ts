@@ -502,6 +502,17 @@ describe("PYUSD purchase", () => {
     });
   });
 
+  // Not a Gate 3 guard: the R17 read budget, "about 4 reads per preparation". The identity check's
+  // finalized mint read is reused, and both token accounts are read together.
+  it("one preparation makes five RPC reads and reads the mint once", async () => {
+    const review = await pyusdReview(await pyusdShop("read-budget"));
+    chain.calls.length = 0;
+    await prepared(review);
+    expect(chain.calls.map((call) => call.method)).toEqual(["getGenesisHash", "getMultipleAccounts", "getEpochInfo", "getMultipleAccounts", "getLatestBlockhash"]);
+    const accountReads = chain.calls.filter((call) => call.method === "getMultipleAccounts").map((call) => (call.params[0] as string[]).length);
+    expect(accountReads).toEqual([1, 2]);
+  });
+
   it("FIXTURE self-check: the buyer's source is its derived PYUSD account", async () => {
     const review = await pyusdReview(await pyusdShop("self-check"));
     await prepared(review);

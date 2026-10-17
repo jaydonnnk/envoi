@@ -17,7 +17,7 @@ import { webEnvFor } from "../support/session";
 
 describe("PYUSD identity check", () => {
   it("the fixture devnet passes (fixture self-check)", async () => {
-    expect(await checkPyusdIdentity(fakeSolanaClient(createFakeChain()))).toEqual({ ok: true, epoch: 700n });
+    expect(await checkPyusdIdentity(fakeSolanaClient(createFakeChain()))).toMatchObject({ ok: true, epoch: 700n, mint: { address: PYUSD_DEVNET.mint } });
   });
 
   it("wrong genesis hash disables PYUSD", async () => {
