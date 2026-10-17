@@ -2,7 +2,8 @@ import type { SupportedScheme } from "./decode";
 
 // Which decoded or typed identifiers may become an outlet mapping (Gate 2 merchant flow: unsupported
 // and personal proxies do not become published business identifiers). A valid format proves no
-// ownership; the operator approves every mapping. S10 adds the resolution of approved mappings here.
+// ownership; the operator approves every mapping. The buyer's resolution of approved mappings
+// (S10) uses the same rule, in resolve.ts.
 
 export type MappableIdentifier = { scheme: "paynow_uen"; identifier: string };
 
