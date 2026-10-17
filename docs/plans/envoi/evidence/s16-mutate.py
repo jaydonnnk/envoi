@@ -5,8 +5,8 @@
 # whole test file runs under each mutation with vitest's JSON reporter, so every failing row is
 # recorded: the Gate 3 batching rule needs one mutation to fail exactly its own row of a group.
 # Every touched file is then restored and its SHA-256 compared with the original, and the file runs
-# again. A proof needs: the named row failing on an AssertionError, no other row of the same group
-# failing, a byte-identical restore, and a passing rerun of the whole file. Results go to
+# again. A proof needs: the named row failing on an AssertionError, for a Gate 3 group row no other
+# row of the same group failing, a byte-identical restore, and a passing rerun of the whole file. Results go to
 # s16-mutations.json beside this file.
 # Needs Node on PATH and the local test PostgreSQL the integration tests use (TEST_DATABASE_URL);
 # DATABASE_URL is removed from the environment so nothing can reach Neon.
@@ -67,10 +67,14 @@ def main():
         same_group_others = sorted(title for title in failed if title != m["test"] and (mutated or {})[title]["group"] == own["group"])
         on_assertion = own["status"] == "failed" and own["error"].startswith("AssertionError")
         rerun_passed = rerun is not None and len(rerun) > 0 and all(row["status"] == "passed" for row in rerun.values())
-        proof = on_assertion and not same_group_others and identical and rerun_passed
+        # Gate 3's batching rule binds group rows: one mutation must fail exactly its own row. A
+        # standalone test may share a fault with another standalone test; that is recorded, not refused.
+        group_clean = m["kind"] == "standalone" or not same_group_others
+        proof = on_assertion and group_clean and identical and rerun_passed
         result = {
             "id": m["id"],
             "test": m["test"],
+            "kind": m["kind"],
             "group": own["group"],
             "files": sorted({e["file"] for e in m["edits"]}),
             "mutation": m["mutation"],
@@ -97,7 +101,7 @@ if __name__ == "__main__":
             "branch": git("branch", "--show-current"),
             "base_commit": git("rev-parse", "--short", "HEAD"),
             "uncommitted_changes": bool(git("status", "--porcelain")),
-            "method": "Each definition in s16-mutation-defs.json applied alone by exact text replacement, its whole test file run with the vitest JSON reporter, every touched file restored and compared by SHA-256, then the whole file rerun. A proof needs the named row to fail on an AssertionError, no other row of its group to fail, a byte-identical restore and an all-passing rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations, as envoi_web, with DATABASE_URL removed; Solana RPC is a FIXTURE faked at the bounded transport, wallets are key pairs made in the run, PayPal is the FIXTURE fake at the PayPalWriteClient boundary, and every landed transaction is synthetic. Two definitions widen a grant in migration 0022 together with the code change, because envoi_web's privileges independently refuse the mutated write; that is recorded per definition.",
+            "method": "Each definition in s16-mutation-defs.json applied alone by exact text replacement, its whole test file run with the vitest JSON reporter, every touched file restored and compared by SHA-256, then the whole file rerun. A proof needs the named row to fail on an AssertionError, no other row of its group to fail (for a Gate 3 group row; a standalone test's other failures are recorded), a byte-identical restore and an all-passing rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations, as envoi_web, with DATABASE_URL removed; Solana RPC is a FIXTURE faked at the bounded transport, wallets are key pairs made in the run, PayPal is the FIXTURE fake at the PayPalWriteClient boundary, and every landed transaction is synthetic. Two definitions widen a grant in migration 0022 together with the code change, because envoi_web's privileges independently refuse the mutated write; that is recorded per definition.",
             "results": out,
         }
         json.dump(record, open(os.path.join(HERE, "s16-mutations.json"), "w"), indent=1)

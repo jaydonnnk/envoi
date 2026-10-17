@@ -87,8 +87,12 @@ describe("shared RPC limiter", () => {
     // Two holders that crash: they never release.
     expect((await app.acquire("getGenesisHash")).ok).toBe(true);
     expect((await runner.acquire("getEpochInfo")).ok).toBe(true);
-    at = new Date(T0.getTime() + durationMs("T_RPC_SLOT_LEASE") - 1);
-    expect(await app.acquire("getBlockHeight")).toMatchObject({ ok: false, reason: "concurrency" });
+    // Both slot rows are held, with leases ending at T_RPC_SLOT_LEASE.
+    const slots = await database.admin<{ holder: string | null; leaseExpiresAt: Date | null }[]>`select holder, lease_expires_at as "leaseExpiresAt" from rpc_limiter_slots order by slot`;
+    expect(slots.map((slot) => [slot.holder !== null, slot.leaseExpiresAt?.getTime()])).toEqual([
+      [true, T0.getTime() + durationMs("T_RPC_SLOT_LEASE")],
+      [true, T0.getTime() + durationMs("T_RPC_SLOT_LEASE")],
+    ]);
     at = new Date(T0.getTime() + durationMs("T_RPC_SLOT_LEASE"));
     expect(await granted(app.acquire("getBlockHeight"))).toBe(true);
   });

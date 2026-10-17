@@ -10,7 +10,8 @@
     "old": "  if (genesis.value !== PYUSD_DEVNET.genesisHash) return { ok: false, reason: \"genesis_mismatch\" };\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "identity-mint-program",
@@ -23,7 +24,8 @@
     "old": "if (!mint || mint.programAddress !== PYUSD_DEVNET.tokenProgram) return { ok: false, reason: \"mint_program_mismatch\" };",
     "new": "if (!mint) return { ok: false, reason: \"mint_program_mismatch\" };"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "identity-decimals",
@@ -36,7 +38,8 @@
     "old": "  if (decodeMintAccount(mint).decimals !== PYUSD_DEVNET.decimals) return { ok: false, reason: \"mint_decimals_mismatch\" };\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "rate-ceil",
@@ -49,7 +52,8 @@
     "old": "return (product + 99n) / 100n;",
     "new": "return product / 100n;"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "rate-exact",
@@ -62,7 +66,8 @@
     "old": "const product = BigInt(sgdCents) * atomicPerSgd;",
     "new": "const product = BigInt(sgdCents * Number(atomicPerSgd));"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "rate-plain-decimal",
@@ -75,7 +80,8 @@
     "old": "  const match = PLAIN_DECIMAL.exec(text);\n  if (!match) return { ok: false, reason: \"not_plain_six_place_decimal\" };\n  const [, whole, fraction = \"\"] = match;\n  const atomicPerSgd = BigInt(whole!) * 1_000_000n + BigInt(fraction.padEnd(6, \"0\"));\n",
     "new": "  void PLAIN_DECIMAL;\n  const parsedNumber = Number(text);\n  if (!Number.isFinite(parsedNumber)) return { ok: false, reason: \"not_plain_six_place_decimal\" };\n  const atomicPerSgd = BigInt(Math.round(parsedNumber * 1_000_000));\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "rate-bounds",
@@ -88,7 +94,8 @@
     "old": "  if (atomicPerSgd < PYUSD_RATE_BOUNDS.minAtomicPerSgd || atomicPerSgd > PYUSD_RATE_BOUNDS.maxAtomicPerSgd) return { ok: false, reason: \"out_of_bounds\" };\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "mint-bps",
@@ -101,7 +108,8 @@
     "old": "  if (current.basisPoints !== 0) return { ok: false, reason: \"fee_rate_nonzero\" };\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "mint-max-fee",
@@ -114,7 +122,8 @@
     "old": "  if (current.maximumFee !== 0n) return { ok: false, reason: \"max_fee_nonzero\" };\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "mint-next-epoch",
@@ -127,7 +136,8 @@
     "old": "  if (next.basisPoints !== 0 || next.maximumFee !== 0n) return { ok: false, reason: \"fee_next_epoch_nonzero\" };\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "mint-hook",
@@ -140,7 +150,8 @@
     "old": "  if (hook && hook.programId !== null) return { ok: false, reason: \"transfer_hook_active\" };\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "mint-unknown-extension",
@@ -153,7 +164,8 @@
     "old": "    if (!REVIEWED.has(extension.kind)) return { ok: false, reason: \"unreviewed_extension\" };\n",
     "new": "    void extension;\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "settings-mint-override",
@@ -166,7 +178,8 @@
     "old": "  PYUSD_ENABLED: z.enum([\"true\", \"false\"]).default(\"false\").transform((value) => value === \"true\"),\n});",
     "new": "  PYUSD_ENABLED: z.enum([\"true\", \"false\"]).default(\"false\").transform((value) => value === \"true\"),\n  PYUSD_MINT: z.string().optional(),\n});"
    }
-  ]
+  ],
+  "kind": "standalone"
  },
  {
   "id": "checkout-rate-version",
@@ -179,7 +192,8 @@
     "old": "    lines,\n    input.pyusdRateVersionId,\n  ]);",
     "new": "    lines,\n  ]);"
    }
-  ]
+  ],
+  "kind": "standalone"
  },
  {
   "id": "mismatch-to-confirmed",
@@ -192,7 +206,8 @@
     "old": "  mismatch: [\"closed_unpaid\"],",
     "new": "  mismatch: [\"closed_unpaid\", \"confirmed\"],"
    }
-  ]
+  ],
+  "kind": "standalone"
  },
  {
   "id": "boundary-paypal-imports-solana",
@@ -205,7 +220,8 @@
     "old": "import type { PayPalOrder } from \"@/domain/purchases/reconcile\";\n",
     "new": "import type { PayPalOrder } from \"@/domain/purchases/reconcile\";\nimport \"@/integrations/solana/rpc\";\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "boundary-send-transaction",
@@ -218,7 +234,8 @@
     "old": "    getGenesisHash: () => call(\"getGenesisHash\", [], z.string()),\n",
     "new": "    getGenesisHash: () => call(\"getGenesisHash\", [], z.string()),\n    sendTransaction: (wire: string) => call(\"sendTransaction\", [wire, { encoding: \"base64\" }], z.string()),\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "boundary-guard-challenge",
@@ -231,7 +248,8 @@
     "old": "  const principal = await requireOutletMembership(getAuth(), webDb(), request.headers, (await params).id);\n",
     "new": "  const principal = { outletId: (await params).id } as never;\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "boundary-guard-proof",
@@ -244,7 +262,8 @@
     "old": "  const principal = await requireOutletMembership(getAuth(), webDb(), request.headers, (await params).id);\n",
     "new": "  const principal = { outletId: (await params).id } as never;\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "boundary-guard-rate",
@@ -257,7 +276,8 @@
     "old": "  const principal = await requireOutletMembership(getAuth(), webDb(), request.headers, (await params).id);\n",
     "new": "  const principal = { outletId: (await params).id } as never;\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "boundary-guard-prepare",
@@ -270,7 +290,8 @@
     "old": "  const principal = await requireBuyerSession(getAuth(), request.headers);\n",
     "new": "  const principal = {} as never;\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "boundary-guard-submitted",
@@ -283,20 +304,27 @@
     "old": "  const principal = await requireBuyerSession(getAuth(), request.headers);\n",
     "new": "  const principal = {} as never;\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "verify-allowlist-accepted",
   "test": "ComputeBudget and Lighthouse assertions are accepted",
   "test_file": "tests/unit/pyusd-verify.test.ts",
-  "mutation": "Reject every instruction beyond the two prepared ones.",
+  "mutation": "Reject every instruction beyond the two prepared ones: ComputeBudget and Lighthouse assertions are refused as not allowlisted. Narrowed so a Lighthouse memory instruction still reads lighthouse_not_assertion, which is its own row's guard.",
   "edits": [
    {
     "file": "src/domain/pyusd/verify.ts",
-    "old": "    else if (program === PYUSD_DEVNET.computeBudgetProgram) continue;\n    else if (program === PYUSD_DEVNET.lighthouseProgram) {\n      if (!LIGHTHOUSE_ASSERTIONS.has(ix.data[0] ?? -1)) return uncertain(\"lighthouse_not_assertion\");\n    } else return uncertain(\"outer_instruction_not_allowlisted\");",
-    "new": "    else return uncertain(\"outer_instruction_not_allowlisted\");"
+    "old": "transfers.push(ix);\n    else if (program === PYUSD_DEVNET.computeBudgetProgram) continue;",
+    "new": "transfers.push(ix);\n    else if (program === PYUSD_DEVNET.computeBudgetProgram) return uncertain(\"outer_instruction_not_allowlisted\");"
+   },
+   {
+    "file": "src/domain/pyusd/verify.ts",
+    "old": "      if (!LIGHTHOUSE_ASSERTIONS.has(ix.data[0] ?? -1)) return uncertain(\"lighthouse_not_assertion\");\n    } else return uncertain(\"outer_instruction_not_allowlisted\");",
+    "new": "      if (!LIGHTHOUSE_ASSERTIONS.has(ix.data[0] ?? -1)) return uncertain(\"lighthouse_not_assertion\");\n      return uncertain(\"outer_instruction_not_allowlisted\");\n    } else return uncertain(\"outer_instruction_not_allowlisted\");"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "verify-err",
@@ -309,7 +337,8 @@
     "old": "  if (tx.meta.err !== null) return { decision: \"failed_landing\" };\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "verify-blockhash",
@@ -322,7 +351,8 @@
     "old": "  if (tx.recentBlockhash !== attempt.blockhash) return uncertain(\"blockhash_mismatch\");\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "verify-signers",
@@ -335,7 +365,8 @@
     "old": "  if (tx.numRequiredSignatures !== 1) return uncertain(\"extra_signer\");\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "verify-fee-payer",
@@ -348,7 +379,8 @@
     "old": "  if (keys[0] !== attempt.buyerWallet) return uncertain(\"fee_payer_mismatch\");\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "verify-transfer-count",
@@ -361,7 +393,8 @@
     "old": "if (transfers.length !== 1) return uncertain(\"transfer_count\");",
     "new": "if (transfers.length === 0) return uncertain(\"transfer_count\");"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "verify-mint",
@@ -374,7 +407,8 @@
     "old": "  if (keys[mintIndex] !== PYUSD_DEVNET.mint) return uncertain(\"mint_mismatch\");\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "verify-decimals",
@@ -387,7 +421,8 @@
     "old": "  if (transfer.data[9] !== PYUSD_DEVNET.decimals) return uncertain(\"decimals_mismatch\");\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "verify-source",
@@ -400,7 +435,8 @@
     "old": "  if (keys[sourceIndex] !== attempt.sourceTokenAccount) return uncertain(\"source_mismatch\");\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "verify-destination",
@@ -413,7 +449,8 @@
     "old": "  if (keys[destinationIndex] !== attempt.destinationTokenAccount) return uncertain(\"destination_mismatch\");\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "verify-amount",
@@ -426,7 +463,8 @@
     "old": "if (readU64LE(transfer.data, 1) !== attempt.atomicAmount)",
     "new": "if (readU64LE(transfer.data, 1) < attempt.atomicAmount)"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "verify-memo-count",
@@ -439,7 +477,8 @@
     "old": "  if (memos !== 1) return uncertain(\"memo_count\");\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "verify-memo-content",
@@ -452,7 +491,8 @@
     "old": "memoText(ix.data) === attempt.reference",
     "new": "memoText(ix.data) !== null"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "verify-fee-execution",
@@ -465,7 +505,8 @@
     "old": "  if (feeAtExecution.basisPoints !== 0 || feeAtExecution.maximumFee !== 0n) return uncertain(\"fee_nonzero_at_execution\");\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "verify-balance-delta",
@@ -478,7 +519,8 @@
     "old": "  if (post === undefined || post - pre !== attempt.atomicAmount) return uncertain(\"balance_delta_mismatch\");\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "verify-metadata",
@@ -501,7 +543,8 @@
     "old": "const post = balanceOf(tx.meta.postTokenBalances);\n  const pre = balanceOf(tx.meta.preTokenBalances) ?? 0n;",
     "new": "const post = balanceOf(tx.meta.postTokenBalances ?? []);\n  const pre = balanceOf(tx.meta.preTokenBalances ?? []) ?? 0n;"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "verify-outer-program",
@@ -514,7 +557,8 @@
     "old": "    } else return uncertain(\"outer_instruction_not_allowlisted\");",
     "new": "    }"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "verify-outer-lighthouse",
@@ -527,7 +571,8 @@
     "old": "      if (!LIGHTHOUSE_ASSERTIONS.has(ix.data[0] ?? -1)) return uncertain(\"lighthouse_not_assertion\");\n    } else return uncertain(\"outer_instruction_not_allowlisted\");",
     "new": "    } else return uncertain(\"outer_instruction_not_allowlisted\");"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "verify-inner-lighthouse",
@@ -540,7 +585,8 @@
     "old": "      if (!LIGHTHOUSE_ASSERTIONS.has(ix.data[0] ?? -1)) return uncertain(\"lighthouse_not_assertion\");\n    } else return uncertain(\"inner_program_not_allowlisted\");",
     "new": "    } else return uncertain(\"inner_program_not_allowlisted\");"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "verify-inner-program",
@@ -553,7 +599,8 @@
     "old": "    } else return uncertain(\"inner_program_not_allowlisted\");",
     "new": "    }"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "verify-inner-token-kind",
@@ -566,7 +613,8 @@
     "old": "      if (!TOKEN_INNER_READ_ONLY.has(ix.data[0] ?? -1)) return uncertain(\"inner_instruction_not_allowlisted\");\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "verify-account-keys",
@@ -579,7 +627,8 @@
     "old": "  if (tx.version === \"unsupported\" || tx.accountKeys === null) return uncertain(\"account_keys_unresolved\");\n  const keys = tx.accountKeys;",
     "new": "  const keys = tx.staticAccountKeys;"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "transport-confirmed-blockhash",
@@ -592,7 +641,8 @@
     "old": "\"getLatestBlockhash\",\n        [{ commitment: \"confirmed\" }],",
     "new": "\"getLatestBlockhash\",\n        [{ commitment: \"finalized\" }],"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "transport-finalized-reads",
@@ -605,7 +655,8 @@
     "old": "[signature, { encoding: \"json\", commitment: \"finalized\", maxSupportedTransactionVersion: 0 }]",
     "new": "[signature, { encoding: \"json\", commitment: \"confirmed\", maxSupportedTransactionVersion: 0 }]"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "transport-size-cap",
@@ -618,7 +669,8 @@
     "old": "readCountedBody(response.body, RPC_BUDGET.maxResponseBytes, remaining, controller.signal)",
     "new": "readCountedBody(response.body, Number.MAX_SAFE_INTEGER, remaining, controller.signal)"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "transport-timeout",
@@ -631,7 +683,8 @@
     "old": "const timer = setTimeout(() => controller.abort(), RPC_BUDGET.callTimeoutMs);",
     "new": "const timer = setTimeout(() => {}, RPC_BUDGET.callTimeoutMs);"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "prepared-compute-budget",
@@ -644,7 +697,8 @@
     "old": "(m) => appendTransactionMessageInstructions([memo, transfer], m),",
     "new": "(m) => appendTransactionMessageInstructions([{ programAddress: PYUSD_DEVNET.computeBudgetProgram, data: new Uint8Array([3, 1, 0, 0, 0, 0, 0, 0, 0]) }, memo, transfer], m),"
    }
-  ]
+  ],
+  "kind": "standalone"
  },
  {
   "id": "merchant-challenge-enabled",
@@ -657,7 +711,8 @@
     "old": "  const disabled = requirePyusdEnabled(webEnv());\n  if (disabled) return httpErr(disabled);\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "merchant-proof-enabled",
@@ -670,7 +725,8 @@
     "old": "  const disabled = requirePyusdEnabled(webEnv());\n  if (disabled) return httpErr(disabled);\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "merchant-rate-enabled",
@@ -683,7 +739,8 @@
     "old": "  const disabled = requirePyusdEnabled(webEnv());\n  if (disabled) return httpErr(disabled);\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "merchant-challenge-origin",
@@ -696,7 +753,8 @@
     "old": "  const foreign = assertSameOrigin(request);\n  if (foreign) return httpErr(foreign);\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "merchant-proof-origin",
@@ -709,7 +767,8 @@
     "old": "  const foreign = assertSameOrigin(request);\n  if (foreign) return httpErr(foreign);\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "merchant-rate-origin",
@@ -722,7 +781,8 @@
     "old": "  const foreign = assertSameOrigin(request);\n  if (foreign) return httpErr(foreign);\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "merchant-proof-identity",
@@ -735,7 +795,8 @@
     "old": "  const identity = await checkPyusdIdentity(rpc);\n  if (!identity.ok) return { ok: false, reason: \"rail_unavailable\", identity: identity.reason };\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "merchant-challenge-host",
@@ -748,7 +809,8 @@
     "old": "parsed.data.walletAddress, webEnv().APP_BASE_URL, new Date()",
     "new": "parsed.data.walletAddress, `http://${request.headers.get(\"host\")}`, new Date()"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "merchant-challenge-limit",
@@ -761,7 +823,8 @@
     "old": "const admission = await admit(db, \"wallet_challenge\", principal.outletId, WALLET_CHALLENGE_LIMITS, now);",
     "new": "const admission = { kind: \"admitted\" } as { kind: string };\n  void admit;\n  void WALLET_CHALLENGE_LIMITS;"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "merchant-signature",
@@ -774,7 +837,8 @@
     "old": "  if (!(await signatureVerifies(wallet, challenge.message, input.signature))) return { ok: false, reason: \"signature_invalid\" };\n",
     "new": "  void signatureVerifies;\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "merchant-expiry",
@@ -787,7 +851,8 @@
     "old": "  if (now.getTime() >= challenge.expiresAt.getTime()) return { ok: false, reason: \"challenge_expired\" };\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "merchant-other-outlet",
@@ -800,7 +865,8 @@
     "old": "  if (challenge.outletId !== principal.outletId) return { ok: false, reason: \"challenge_other_outlet\" };\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "merchant-token-from-body",
@@ -823,7 +889,8 @@
     "old": "  const account = await checkPyusdTokenAccount(rpc!, wallet);\n",
     "new": "  const supplied = (input as { tokenAccount?: Address }).tokenAccount;\n  const account = supplied ? { ok: true as const, address: supplied, amount: 0n } : await checkPyusdTokenAccount(rpc!, wallet);\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "merchant-account-exists",
@@ -836,7 +903,8 @@
     "old": "  if (!account) return { ok: false, reason: \"missing\", address };\n",
     "new": "  if (!account) return { ok: true, address, amount: 0n };\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "merchant-account-program",
@@ -849,7 +917,8 @@
     "old": "  if (account.programAddress !== PYUSD_DEVNET.tokenProgram) return { ok: false, reason: \"not_token_2022_account\", address };\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "merchant-account-frozen",
@@ -862,7 +931,8 @@
     "old": "  if (token.frozen) return { ok: false, reason: \"frozen\", address };\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "merchant-no-enrollment",
@@ -880,7 +950,8 @@
     "old": "GRANT UPDATE (\"pyusd_hints\", \"pyusd_finalized_signature\", \"pyusd_verified_at\") ON TABLE public.\"payment_attempts\" TO envoi_web;",
     "new": "GRANT UPDATE (\"pyusd_hints\", \"pyusd_finalized_signature\", \"pyusd_verified_at\") ON TABLE public.\"payment_attempts\" TO envoi_web;--> statement-breakpoint\nGRANT UPDATE (\"status\", \"approved_at\") ON TABLE public.\"enrollments\" TO envoi_web;"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "proof-saved-bytes",
@@ -903,7 +974,8 @@
     "old": "signatureVerifies(wallet, challenge.message, input.signature)",
     "new": "signatureVerifies(wallet, (input as { message?: string }).message ? new TextEncoder().encode((input as { message?: string }).message) : challenge.message, input.signature)"
    }
-  ]
+  ],
+  "kind": "standalone"
  },
  {
   "id": "proof-single-use",
@@ -916,7 +988,8 @@
     "old": "and(eq(walletChallenges.id, challenge.id), isNull(walletChallenges.consumedAt), gt(walletChallenges.expiresAt, now))",
     "new": "and(eq(walletChallenges.id, challenge.id), gt(walletChallenges.expiresAt, now))"
    }
-  ]
+  ],
+  "kind": "standalone"
  },
  {
   "id": "publish-disabled-rail",
@@ -929,7 +1002,8 @@
     "old": "!(facts.pyusdVerified && facts.pyusdEnabled)",
     "new": "!facts.pyusdVerified"
    }
-  ]
+  ],
+  "kind": "standalone"
  },
  {
   "id": "pricing-enabled",
@@ -942,7 +1016,8 @@
     "old": "    const disabled = requirePyusdEnabled(webEnv());\n    if (disabled) return refuse(disabled);\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "pricing-rate-age",
@@ -955,7 +1030,8 @@
     "old": "    if (isRateExpired(rate, input.now)) {",
     "new": "    if (isRateExpired(rate, input.now) && false) {"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "prep-enabled",
@@ -968,7 +1044,8 @@
     "old": "  const disabled = requirePyusdEnabled(webEnv());\n  if (disabled) return httpErr(disabled);\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "prep-origin",
@@ -981,7 +1058,8 @@
     "old": "  const foreign = assertSameOrigin(request);\n  if (foreign) return httpErr(foreign);\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "prep-owner",
@@ -1004,7 +1082,8 @@
     "old": "        .where(and(eq(purchases.id, purchaseId), eq(purchases.buyerUserId, principal.userId)))\n        .for(\"update\");",
     "new": "        .where(eq(purchases.id, purchaseId))\n        .for(\"update\");"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "prep-kill-switch",
@@ -1017,7 +1096,8 @@
     "old": "  if (!webEnv().PAYMENTS_ENABLED) {",
     "new": "  if (!webEnv().PAYMENTS_ENABLED && false) {"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "prep-review-window",
@@ -1030,7 +1110,8 @@
     "old": "  if (now.getTime() >= purchase.reviewExpiresAt.getTime()) return notEligible(appError(\"review_expired\", \"This review has expired. Review the basket again to pay.\"));\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "prep-identity",
@@ -1043,7 +1124,8 @@
     "old": "  const identity = await checkPyusdIdentity(deps.rpc);\n  if (!identity.ok) return unavailable(identity.reason);\n",
     "new": "  const identity = { ok: true as const, epoch: 700n };\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "prep-mint",
@@ -1056,7 +1138,8 @@
     "old": "  const mint = assessMintForTransfer(decodeMintAccount(mintRead.value[0]), identity.epoch);\n  if (!mint.ok) return unavailable(mint.reason);\n",
     "new": "  void assessMintForTransfer;\n  void decodeMintAccount;\n  const mint = { ok: true as const, fee: { preparedEpoch: identity.epoch, older: { epoch: 0n, basisPoints: 0, maximumFee: 0n }, newer: { epoch: 0n, basisPoints: 0, maximumFee: 0n } } };\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "prep-rate-version",
@@ -1069,7 +1152,8 @@
     "old": "  if (!rate || rate.versionId !== purchase.pyusdRateVersionId) {",
     "new": "  if (!rate) {"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "prep-rate-age",
@@ -1082,7 +1166,8 @@
     "old": "  if (isRateExpired(rate, now)) {",
     "new": "  if (isRateExpired(rate, now) && false) {"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "prep-buyer-balance",
@@ -1095,7 +1180,8 @@
     "old": "  if (balance < atomicAmount) return unavailable(\"buyer_insufficient\"",
     "new": "  if (balance < 0n) return unavailable(\"buyer_insufficient\""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "prep-buyer-frozen",
@@ -1108,7 +1194,8 @@
     "old": "  if (!buyer.ok && buyer.reason === \"frozen\") return unavailable(\"buyer_account_frozen\"",
     "new": "  if (false) return unavailable(\"buyer_account_frozen\""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "prep-merchant-recheck",
@@ -1121,20 +1208,22 @@
     "old": "  const merchant = await checkPyusdTokenAccount(rpc, pre.destination.wallet);\n",
     "new": "  const merchant = { ok: true as const, address: pre.destination.tokenAccount, reason: \"rpc_unavailable\" };\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "prep-bytes-after-commit",
   "test": "no unsigned bytes leave before the attempt is saved",
   "test_file": "tests/integration/pyusd-purchase.test.ts",
-  "mutation": "Build and return the bytes before the commit.",
+  "mutation": "Build and return the bytes before the commit: when the transaction saving the attempt fails, the bytes are returned anyway. Narrowed to the failing save, so a successful preparation is unchanged.",
   "edits": [
    {
     "file": "src/domain/pyusd/attempts.ts",
-    "old": "      await hooks.beforeAttemptSaved?.();\n",
-    "new": "      await hooks.beforeAttemptSaved?.();\n      if (attemptId) return { kind: \"prepared\", attemptId, transactionBase64: built.wireBase64, chain: \"solana:devnet\" };\n"
+    "old": "  } catch (err) {\n    if (!isUniqueViolation(err)) throw err;\n    const raced = await pyusdAttemptOf(db, purchaseId);",
+    "new": "  } catch (err) {\n    if (!isUniqueViolation(err)) return { kind: \"prepared\", attemptId, transactionBase64: built.wireBase64, chain: \"solana:devnet\" };\n    const raced = await pyusdAttemptOf(db, purchaseId);"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "prep-release-once",
@@ -1157,7 +1246,8 @@
     "old": "    return { kind: \"locked\", attemptId: raced.id, state: raced.state as PyusdAttemptState };\n  }\n  if (outcome) return outcome;",
     "new": "    return { kind: \"prepared\", attemptId: raced.id, transactionBase64: built.wireBase64, chain: \"solana:devnet\" };\n  }\n  if (outcome) return outcome;"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "prep-bytes-stored",
@@ -1170,7 +1260,8 @@
     "old": "        pyusdHints: [],\n",
     "new": "        pyusdHints: [],\n        outcomeReason: built.wireBase64,\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "constraint-reference",
@@ -1183,7 +1274,8 @@
     "old": "ALTER TABLE \"payment_attempts\" ADD CONSTRAINT \"payment_attempts_pyusd_reference_unique\" UNIQUE(\"pyusd_reference\");--> statement-breakpoint\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "constraint-signature",
@@ -1196,7 +1288,8 @@
     "old": "ALTER TABLE \"payment_attempts\" ADD CONSTRAINT \"payment_attempts_pyusd_finalized_signature_unique\" UNIQUE(\"pyusd_finalized_signature\");--> statement-breakpoint\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "rate-change-reprices",
@@ -1219,7 +1312,8 @@
     "old": "GRANT UPDATE (\"pyusd_hints\", \"pyusd_finalized_signature\", \"pyusd_verified_at\") ON TABLE public.\"payment_attempts\" TO envoi_web;",
     "new": "GRANT UPDATE (\"pyusd_hints\", \"pyusd_finalized_signature\", \"pyusd_verified_at\", \"pyusd_atomic_amount\") ON TABLE public.\"payment_attempts\" TO envoi_web;"
    }
-  ]
+  ],
+  "kind": "standalone"
  },
  {
   "id": "cancel-closes-unpaid",
@@ -1232,7 +1326,8 @@
     "old": "        return appError(\"payment_uncertain\", \"We are checking this PYUSD payment on Solana devnet. Do not pay again.\");\n",
     "new": "        await transitionPurchase(tx, purchaseId, [\"pending_payment\"], \"unpaid_closed\", \"buyer_canceled\");\n        return { view: { state: \"unpaid_closed\", paypalAttempt: null, pyusdAttempt: attempt.state as PyusdAttemptState } };\n"
    }
-  ]
+  ],
+  "kind": "standalone"
  },
  {
   "id": "hint-origin",
@@ -1245,7 +1340,8 @@
     "old": "  const foreign = assertSameOrigin(request);\n  if (foreign) return httpErr(foreign);\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "hint-owner",
@@ -1258,20 +1354,22 @@
     "old": "eq(paymentAttempts.rail, \"pyusd\"), eq(purchases.buyerUserId, principal.userId)));\n  if (!row) return appError(\"not_found\"",
     "new": "eq(paymentAttempts.rail, \"pyusd\")));\n  if (!row) return appError(\"not_found\""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "hint-marks-paid",
   "test": "submitted signature is only a hint",
   "test_file": "tests/integration/pyusd-purchase.test.ts",
-  "mutation": "Mark the purchase paid on the hint.",
+  "mutation": "Mark the purchase paid on the hint: a hint the finalized read cannot find yet is taken as payment. Narrowed to the unverified hint, so a found transaction is still decided by verification.",
   "edits": [
    {
     "file": "src/domain/pyusd/attempts.ts",
-    "old": "      await recordAudit(db, { at: now, actor, action: \"pyusd_hint_received\"",
-    "new": "      await transitionPurchase(db, purchaseId, [\"pending_payment\"], \"paid\", \"pyusd_confirmed\");\n      await recordAudit(db, { at: now, actor, action: \"pyusd_hint_received\""
+    "old": "    await decideHint(db, attemptId, hint.index, hint.signature, \"not_found\");\n",
+    "new": "    await decideHint(db, attemptId, hint.index, hint.signature, \"not_found\");\n    await transitionPurchase(db, attempt.purchaseId, [\"pending_payment\"], \"paid\", \"pyusd_confirmed\");\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "hint-debounce",
@@ -1284,7 +1382,8 @@
     "old": "  if (!(await claimRead(db, attemptId, deps.now()))) return \"debounced\";\n",
     "new": "  await claimRead(db, attemptId, deps.now());\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "hint-failed-as-mismatch",
@@ -1297,7 +1396,8 @@
     "old": "  const result = verifyPyusdTransfer(read.value, attempt, feeAtEpoch(attempt.fee, epochOfSlot(schedule.value, read.value.slot)), now);\n",
     "new": "  const verified = verifyPyusdTransfer(read.value, attempt, feeAtEpoch(attempt.fee, epochOfSlot(schedule.value, read.value.slot)), now);\n  const result: VerificationResult = verified.decision === \"failed_landing\" ? { decision: \"uncertain\", reason: \"metadata_incomplete\" } : verified;\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "hint-later-unread",
@@ -1310,7 +1410,8 @@
     "old": "    if (decision === \"not_ours\" || decision === \"failed_landing\") continue;\n",
     "new": "    if (decision === \"not_ours\" || decision === \"failed_landing\") return null;\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "hint-cap",
@@ -1323,7 +1424,8 @@
     "old": "    if (attempt.pyusdHints.length >= PYUSD_HINT_CAP) {",
     "new": "    if (attempt.pyusdHints.length >= PYUSD_HINT_CAP && false) {"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "hint-flag-gated",
@@ -1336,7 +1438,8 @@
     "old": "  const [row] = await db.select().from(paymentAttempts).where(and(eq(paymentAttempts.id, attemptId), eq(paymentAttempts.rail, \"pyusd\")));\n",
     "new": "  if (!webEnv().PYUSD_ENABLED) return \"nothing_to_read\";\n  const [row] = await db.select().from(paymentAttempts).where(and(eq(paymentAttempts.id, attemptId), eq(paymentAttempts.rail, \"pyusd\")));\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "lock-keyed-by-rail",
@@ -1349,7 +1452,8 @@
     "old": "computeBasketLockKey({ buyerUserId: principal.userId, outletId: quote.outletId, lines: quote.lockLines })",
     "new": "computeBasketLockKey({ buyerUserId: `${principal.userId}:${quote.rail}`, outletId: quote.outletId, lines: quote.lockLines })"
    }
-  ]
+  ],
+  "kind": "standalone"
  },
  {
   "id": "lock-any-pending",
@@ -1362,7 +1466,8 @@
     "old": "  if (view.purchaseState === \"uncertain\") return \"purchase_uncertain\";\n",
     "new": "  if (view.purchaseState === \"pending_payment\") return \"paypal_review_window\";\n  if (view.purchaseState === \"uncertain\") return \"purchase_uncertain\";\n"
    }
-  ]
+  ],
+  "kind": "standalone"
  },
  {
   "id": "lock-only-at-review",
@@ -1380,7 +1485,8 @@
     "old": "        if (lock) return refused(basketLocked(lock));\n",
     "new": "        void lock;\n"
    }
-  ]
+  ],
+  "kind": "standalone"
  },
  {
   "id": "lock-without-row-locks",
@@ -1393,7 +1499,8 @@
     "old": ".orderBy(asc(purchases.id)).for(\"update\");",
     "new": ".orderBy(asc(purchases.id));"
    }
-  ]
+  ],
+  "kind": "standalone"
  },
  {
   "id": "boot-throws",
@@ -1406,7 +1513,8 @@
     "old": "export const dynamic = \"force-dynamic\";\n",
     "new": "export const dynamic = \"force-dynamic\";\n\nconst bootIdentity = await (await import(\"@/domain/pyusd/identity\")).checkPyusdIdentity((await import(\"@/integrations/solana/rpc\")).webSolanaClient());\nif (!bootIdentity.ok) throw new Error(`PYUSD failed at boot: ${bootIdentity.reason}`);\n"
    }
-  ]
+  ],
+  "kind": "standalone"
  },
  {
   "id": "limiter-shared-window",
@@ -1429,7 +1537,8 @@
     "old": "        await tx.insert(rpcLimiterCalls).values({ id: newId(\"rpc\"), method, at });\n",
     "new": "        await tx.insert(rpcLimiterCalls).values({ id: newId(\"rpc\"), method, at });\n        local.push(at.getTime());\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "limiter-per-method",
@@ -1442,7 +1551,8 @@
     "old": "        if ((same?.n ?? 0) >= RPC_BUDGET.perMethodPerWindow) return { ok: false, retryAfterMs: durationMs(\"T_RPC_WINDOW\"), reason: \"method\" };\n",
     "new": ""
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "limiter-slots",
@@ -1455,7 +1565,8 @@
     "old": "        if (!free) return { ok: false, retryAfterMs: 1_000, reason: \"concurrency\" };\n",
     "new": "        if (!free) return { ok: true, slot: -1 };\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "limiter-backoff",
@@ -1468,7 +1579,8 @@
     "old": "        const delay = Math.max(RPC_BUDGET.backoffBaseMs, Math.floor(random() * cap));",
     "new": "        void cap;\n        const delay = 0;"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "limiter-lease",
@@ -1481,7 +1593,8 @@
     "old": ".where(or(isNull(rpcLimiterSlots.holder), lte(rpcLimiterSlots.leaseExpiresAt, at)))",
     "new": ".where(isNull(rpcLimiterSlots.holder))"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "wallet-devnet-chain",
@@ -1494,7 +1607,8 @@
     "old": "signAndSendTransaction({ account, chain: DEVNET_CHAIN, transaction: bytes })",
     "new": "signAndSendTransaction({ account, transaction: bytes } as never)"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "wallet-capability-filter",
@@ -1507,7 +1621,8 @@
     "old": "return registry.get().filter((wallet) => wallet.chains.includes(DEVNET_CHAIN) && feature in wallet.features);",
     "new": "void feature;\n  return registry.get();"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "wallet-link-purchase-id",
@@ -1520,7 +1635,8 @@
     "old": "  target.searchParams.set(\"outlet\", outletId);\n",
     "new": "  target.searchParams.set(\"outlet\", outletId);\n  target.searchParams.set(\"purchase\", \"pur_fixture_leak\");\n"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "wallet-one-shot",
@@ -1533,7 +1649,8 @@
     "old": "      const out = held;\n      held = null;\n      return out;",
     "new": "      return held;"
    }
-  ]
+  ],
+  "kind": "group_row"
  },
  {
   "id": "phone-pay-button",
@@ -1546,7 +1663,8 @@
     "old": "  if (input.wallets.length > 0) return \"pay\";\n  return isPhoneBrowser(input.userAgent) ? \"phantom_link\" : \"need_wallet\";",
     "new": "  void isPhoneBrowser;\n  void input;\n  return \"pay\";"
    }
-  ]
+  ],
+  "kind": "standalone"
  },
  {
   "id": "receipt-received",
@@ -1559,6 +1677,7 @@
     "old": "export const PYUSD_PAID_LINE = \"Transferred and finalized on Solana devnet\";",
     "new": "export const PYUSD_PAID_LINE = \"Received and finalized on Solana devnet\";"
    }
-  ]
+  ],
+  "kind": "standalone"
  }
 ]

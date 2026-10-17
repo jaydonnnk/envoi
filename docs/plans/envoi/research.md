@@ -413,3 +413,17 @@ No package was installed, no OpenAI call was made, and no wallet, faucet, airdro
 6. **[hypothesis] Consequences for Gate 3.**
    Pin the non-upgradeable memo program and allowlist only it; identify Lighthouse assertions by discriminators 2 to 17 as reviewed constants; call the vision model through `generateText` with an `output` setting; add no Lighthouse SDK, chains package or compute-budget client.
    None of this changes a Gate 2 decision.
+
+## S16 devnet reads, 2026-10-17
+
+One read-only run against `https://api.devnet.solana.com` at 2026-10-17 12:09 UTC, under the user's S16 authorization for read-only devnet RPC reads, through S16's own `createSolanaReadClient` with no limiter.
+No send, airdrop or signing method was called.
+
+1. **[verified] Lighthouse recheck, the one-off read S16 owes.**
+   `getMultipleAccounts` at `finalized` returned `L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95` as executable, owned by `BPFLoaderUpgradeab1e11111111111111111111111`, with 36 bytes of program-account data.
+   As in the Gate 3 revision read, this proves the program exists on devnet today and says nothing about a future upgrade or a devnet reset.
+2. **[verified] Devnet identity and mint, read the way the rail reads them.**
+   `checkPyusdIdentity` passed: the genesis hash matched the pinned devnet value, the mint `CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM` is owned by Token-2022 and reports 6 decimals, and the epoch was 1185.
+   The kit 8.4.0 and token-2022 0.19.0 decoders read exactly the eight reviewed extensions: `MintCloseAuthority`, `PermanentDelegate`, `TransferFeeConfig`, `ConfidentialTransferMint`, `ConfidentialTransferFee`, `TransferHook`, `MetadataPointer` and `TokenMetadata`.
+   Both transfer fee schedules were zero basis points and zero maximum fee from epoch 644, the transfer hook program was unset, and `assessMintForTransfer` returned eligible.
+3. **[unknown]** Whether Phantom on devnet honors `solana:devnet`, shows this mint and keeps the prepared blockhash, transfer and memo (R13); that needs a real payment, read back from the landed transaction.

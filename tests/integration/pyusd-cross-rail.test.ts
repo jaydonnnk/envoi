@@ -148,12 +148,15 @@ describe("PYUSD across rails", () => {
     const [attempt] = await database.admin<{ state: string }[]>`select state from payment_attempts where purchase_id = ${purchaseId}`;
     expect(attempt!.state).toBe("order_created");
 
-    // The buyer never approves at PayPal; T_REVIEW passes with no maintenance run.
+    // The buyer never approves at PayPal; T_REVIEW passes with no maintenance run. The new reviews come
+    // first, while the abandoned purchase is still stored as pending_payment.
     freeze(new Date(T0.getTime() + durationMs("T_REVIEW")));
-    const read = await r.purchase.GET(new Request(`${TEST_BASE_URL}/api/v1/purchases/${purchaseId}`, { headers: { cookie: buyer } }), routeParams(purchaseId));
-    expect(await envelope(read)).toMatchObject({ ok: true, data: { state: "unpaid_closed", payment: { attemptState: "abandoned" } } });
+    const [stored] = await database.admin<{ state: string }[]>`select state from purchases where id = ${purchaseId}`;
+    expect(stored!.state).toBe("pending_payment");
     expect((await review(buyer, shop, "pyusd")).status).toBe(201);
     expect((await review(buyer, shop, "paypal")).status).toBe(201);
+    const read = await r.purchase.GET(new Request(`${TEST_BASE_URL}/api/v1/purchases/${purchaseId}`, { headers: { cookie: buyer } }), routeParams(purchaseId));
+    expect(await envelope(read)).toMatchObject({ ok: true, data: { state: "unpaid_closed", payment: { attemptState: "abandoned" } } });
   });
 
   it("two open reviews of one basket cannot both start payment", async () => {

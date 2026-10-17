@@ -50,7 +50,8 @@ describe("rate parsing, bounds and conversion", () => {
     // 100, so the exact product is divisible by 100 and rounding cannot decide it) at the maximum rate.
     const cents = Number.MAX_SAFE_INTEGER - (Number.MAX_SAFE_INTEGER % 100);
     expect(pyusdAtomicFor(sgdFromCents(cents), 10_000_000n)).toBe((BigInt(cents) * 10_000_000n) / 100n);
-    expect(pyusdAtomicFor(sgdFromCents(1), 1n)).toBe(1n);
+    // The smallest rate on a total whose product is also divisible by 100.
+    expect(pyusdAtomicFor(sgdFromCents(100), 1n)).toBe(1n);
   });
 
   it("rate text must be a plain decimal with at most six places", () => {
