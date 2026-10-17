@@ -56,7 +56,7 @@ export default async function MerchantOrdersPage() {
     <main>
       <p className="eyebrow">Merchant orders</p>
       <h1>See the payment. Acknowledge the order.</h1>
-      <p className="lead">A buyer&apos;s payment and your acknowledgment are different facts. Only a payment PayPal sandbox confirmed shows as paid, and you can acknowledge only a paid order.</p>
+      <p className="lead">A buyer&apos;s payment and your acknowledgment are different facts. Only a payment that PayPal sandbox confirmed, or that Envoi verified as finalized on Solana devnet, shows as paid, and you can acknowledge only a paid order.</p>
       {shops.length === 0 && (
         <section className="card">
           <h2>No shop yet</h2>

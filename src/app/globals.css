@@ -57,6 +57,10 @@ small { font-size: 13px; display: block; }
 .row > .mono { white-space: nowrap; }
 /* The 13px mono text shares a baseline with the 16px text beside it instead of riding high. */
 .row:has(> .mono) { align-items: baseline; }
+/* A Solana address or signature (32 to 88 characters) never fits beside its label, so it always gets
+   its own line and may break anywhere. */
+.row.address { flex-direction: column; gap: 2px; }
+.row.address > .mono { white-space: normal; }
 
 .button { font: 600 15px "Segoe UI", system-ui, Arial, sans-serif; border: 1px solid var(--blue); border-radius: 7px; background: var(--blue); color: #fff; padding: 13px 18px; display: inline-block; text-decoration: none; cursor: pointer; text-align: center; }
 .button.secondary { color: var(--ink); background: var(--paper); border-color: #8da3bb; }

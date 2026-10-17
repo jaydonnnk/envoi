@@ -72,13 +72,13 @@ export function PyusdReceiptDetails({ pyusd, paid }: { pyusd: PyusdReceipt; paid
         </span>
       </div>
       {pyusd.recipientTokenAccount && (
-        <div className="row stacked">
+        <div className="row address">
           <span className="muted">Recipient (shop&apos;s devnet PYUSD account)</span>
           <span className="mono">{pyusd.recipientTokenAccount}</span>
         </div>
       )}
       {paid && pyusd.signature && (
-        <div className="row stacked">
+        <div className="row address">
           <span className="muted">Devnet transaction signature</span>
           <a className="mono" href={explorerTransactionUrl(pyusd.signature)} rel="noreferrer" target="_blank">
             {pyusd.signature}

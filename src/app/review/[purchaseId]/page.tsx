@@ -123,7 +123,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ purchas
           <section className="card" aria-labelledby="recipient-heading">
             <h2 id="recipient-heading">Paid to</h2>
             {pyusd ? (
-              <div className="row stacked">
+              <div className="row address">
                 <span>
                   {purchase.outletName}&apos;s PYUSD devnet account
                   <small>The shop&apos;s own devnet wallet, verified by a signed challenge. Envoi never holds the tokens or any key.</small>
@@ -172,7 +172,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ purchas
                   )}
                 </div>
                 <div className="row">
-                  <span className="muted">Network fee</span>
+                  <span className="muted nowrap">Network fee</span>
                   <span>Paid by your wallet in devnet SOL</span>
                 </div>
                 <div className="row">

@@ -66,7 +66,7 @@ function OrderCard({ order, onAcknowledged }: { order: MerchantOrder; onAcknowle
             <span className="muted">Amount</span>
             <span className="money">{order.pyusd.amount} PYUSD</span>
           </div>
-          <div className="row stacked">
+          <div className={paid && order.pyusd.signature ? "row address" : "row stacked"}>
             <span className="muted">Finalized devnet transfer</span>
             {paid && order.pyusd.signature ? <span className="mono">{order.pyusd.signature}</span> : <span>None, not paid</span>}
           </div>
@@ -171,6 +171,7 @@ export function OrdersView({ initial }: { initial: OutletOrders }) {
         <span className="chips">
           {data.outlet.isDemoFixture && <span className="chip warn">Demo fixture</span>}
           <span className="chip warn">Sandbox: test money only</span>
+          {data.orders.some((order) => order.pyusd) && <span className="chip warn">Devnet: test tokens only</span>}
         </span>
       </div>
       {data.orders.length === 0 ? (
