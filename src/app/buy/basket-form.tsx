@@ -14,10 +14,25 @@ function sgd(cents: number): string {
 
 // The browser sends item ids and quantities only. The server prices them from the published menu
 // on the next page; the subtotal here is a preview of the same menu prices.
-export function BasketForm({ outletId, items, preselected = [] }: { outletId: string; items: BasketItem[]; preselected?: string[] }) {
+export function BasketForm({
+  outletId,
+  items,
+  preselected = [],
+  rail = "paypal",
+}: {
+  outletId: string;
+  items: BasketItem[];
+  preselected?: { id: string; quantity: number }[];
+  rail?: "paypal" | "pyusd";
+}) {
   const router = useRouter();
   const [quantities, setQuantities] = useState<Record<string, number>>(() =>
-    Object.fromEntries(items.filter((item) => preselected.includes(item.id) && item.unitSgdCents !== null && item.available !== false).map((item) => [item.id, 1])),
+    Object.fromEntries(
+      preselected.flatMap((line) => {
+        const item = items.find((candidate) => candidate.id === line.id);
+        return item && item.unitSgdCents !== null && item.available !== false ? [[item.id, line.quantity]] : [];
+      }),
+    ),
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +51,7 @@ export function BasketForm({ outletId, items, preselected = [] }: { outletId: st
       await ensureBuyerSession();
       const result = await postJson<{ purchaseId: string }>("/api/v1/purchases", {
         outletId,
-        rail: "paypal",
+        rail,
         lines: chosen.map((item) => ({ menuItemId: item.id, quantity: quantities[item.id] })),
       });
       if (!result.ok || !result.data) throw new Error(result.error?.message ?? "The review could not be created. Try again.");

@@ -56,10 +56,27 @@ function OrderCard({ order, onAcknowledged }: { order: MerchantOrder; onAcknowle
           <span>PayPal sandbox, test money</span>
         </div>
       )}
-      <div className="row stacked">
-        <span className="muted">PayPal sandbox capture</span>
-        {paid && order.payment?.captureId ? <span className="mono">{order.payment.captureId}</span> : <span>None, not paid</span>}
-      </div>
+      {order.pyusd ? (
+        <>
+          <div className="row">
+            <span className="muted">Method</span>
+            <span>PYUSD on Solana devnet, test tokens</span>
+          </div>
+          <div className="row">
+            <span className="muted">Amount</span>
+            <span className="money">{order.pyusd.amount} PYUSD</span>
+          </div>
+          <div className="row stacked">
+            <span className="muted">Finalized devnet transfer</span>
+            {paid && order.pyusd.signature ? <span className="mono">{order.pyusd.signature}</span> : <span>None, not paid</span>}
+          </div>
+        </>
+      ) : (
+        <div className="row stacked">
+          <span className="muted">PayPal sandbox capture</span>
+          {paid && order.payment?.captureId ? <span className="mono">{order.payment.captureId}</span> : <span>None, not paid</span>}
+        </div>
+      )}
       <div className="row stacked">
         <span className="muted">Envoi reference</span>
         <span className="mono">{order.id}</span>

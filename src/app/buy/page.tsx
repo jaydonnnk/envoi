@@ -1,3 +1,4 @@
+import { outletRails } from "@/domain/outlets/destination";
 import { getPublishedMenu, listPublishedOutlets } from "@/domain/outlets/search";
 import { textSuggestionsEnabled } from "@/integrations/ai/openai";
 import { webDb } from "@/lib/db/web";
@@ -17,18 +18,27 @@ async function loadBuyData(searchParams: Promise<BuySearchParams>) {
   const started = performance.now();
   const { outlet, items } = await searchParams;
   const outletId = typeof outlet === "string" ? outlet : undefined;
-  // Items a text suggestion picked start at quantity 1. Only ids on this outlet's published menu
-  // count; BasketForm ignores any other id.
-  const preselected = typeof items === "string" ? items.split(",").slice(0, 20) : [];
+  // Items a text suggestion picked start at quantity 1; the Phantom Browse link (S16) names each as
+  // "id:quantity". Only ids on this outlet's published menu count; BasketForm ignores any other id,
+  // and a quantity outside 1..20 reads as 1.
+  const preselected = typeof items === "string" ? items.split(",").slice(0, 20).map(preselectedLine) : [];
   const dbStarted = performance.now();
   const menu = outletId ? await getPublishedMenu(webDb(), outletId) : null;
   const shops = menu ? [] : await listPublishedOutlets(webDb());
+  // A shop with only a PYUSD wallet is reviewed on PYUSD; every other shop starts on PayPal.
+  const rails = menu ? await outletRails(webDb(), menu.outlet.id) : null;
   const dbMs = Math.round(performance.now() - dbStarted);
-  return { outletId, preselected, menu, shops, dbMs, serverMs: Math.round(performance.now() - started) };
+  return { outletId, preselected, menu, shops, rail: rails && !rails.paypal && rails.pyusd ? ("pyusd" as const) : ("paypal" as const), dbMs, serverMs: Math.round(performance.now() - started) };
+}
+
+function preselectedLine(entry: string): { id: string; quantity: number } {
+  const [id = "", quantity] = entry.split(":");
+  const parsed = Number(quantity);
+  return { id, quantity: Number.isInteger(parsed) && parsed >= 1 && parsed <= 20 ? parsed : 1 };
 }
 
 export default async function BuyPage({ searchParams }: { searchParams: Promise<BuySearchParams> }) {
-  const { outletId, preselected, menu, shops, dbMs, serverMs } = await loadBuyData(searchParams);
+  const { outletId, preselected, menu, shops, rail, dbMs, serverMs } = await loadBuyData(searchParams);
   const textEnabled = textSuggestionsEnabled();
 
   if (menu) {
@@ -43,7 +53,7 @@ export default async function BuyPage({ searchParams }: { searchParams: Promise<
         </p>
         <section className="card" aria-labelledby="menu-heading">
           <h2 id="menu-heading">Choose items</h2>
-          <BasketForm outletId={menu.outlet.id} items={menu.items} preselected={preselected} />
+          <BasketForm outletId={menu.outlet.id} items={menu.items} preselected={preselected} rail={rail} />
         </section>
       </main>
     );

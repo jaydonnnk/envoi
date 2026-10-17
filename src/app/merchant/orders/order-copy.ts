@@ -11,8 +11,26 @@ const CHECKING: OrderStatus = {
   body: "PayPal has not confirmed this payment, so it is not paid. Its result is not known yet; do not treat it as paid unless it shows Paid.",
 };
 
-// Only a verified capture reads as paid. Every other state says plainly that it is not.
+const PYUSD_CHECKING: OrderStatus = {
+  chip: "Checking payment",
+  tone: "warn",
+  body: "The buyer's wallet may have sent PYUSD devnet test tokens, but Envoi has not verified a finalized transfer, so it is not paid. Do not treat it as paid unless it shows Paid.",
+};
+
+// Only a verified capture or a verified finalized PYUSD transfer reads as paid. Every other state
+// says plainly that it is not.
 export function orderStatus(order: MerchantOrder): OrderStatus {
+  if (order.rail === "pyusd") {
+    switch (order.state) {
+      case "paid":
+        return { chip: "Paid", tone: "ok", body: "Transferred and finalized on Solana devnet to your PYUSD devnet account. Devnet test tokens only; this is not SGD." };
+      case "pending_payment":
+      case "uncertain":
+        return PYUSD_CHECKING;
+      default:
+        break;
+    }
+  }
   switch (order.state) {
     case "paid":
       return { chip: "Paid", tone: "ok", body: "PayPal sandbox confirmed this capture to your sandbox seller. Test money only." };

@@ -7,7 +7,11 @@ import { getAuth } from "@/lib/auth";
 import { isPrincipal, requireBuyerSession } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
 import { formatSgd, sgdFromCents } from "@/lib/money";
+import { formatPyusdAtomic, formatPyusdPerSgd } from "@/domain/pyusd/rate";
 import { LiveStatus } from "./live-status";
+import { PyusdReceiptDetails, pyusdReceiptStatus } from "./pyusd-receipt";
+
+const SINGAPORE_DATE = new Intl.DateTimeFormat("en-SG", { dateStyle: "medium", timeZone: "Asia/Singapore" });
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +33,7 @@ function statusOf(purchase: OwnPurchase): Status {
     return { title: "No payment was attempted", chip: "Not paid", tone: "warn", body: "This is a tracer receipt. Envoi sent nothing to any payment provider, and no money moved." };
   }
   const deadline = SINGAPORE_CLOCK.format(purchase.reviewExpiresAt);
+  if (purchase.rail === "pyusd") return pyusdReceiptStatus(purchase.view.state, deadline);
   switch (purchase.view.state) {
     case "paid":
       return { title: "Paid", chip: "Paid", tone: "ok", body: "PayPal sandbox confirmed this capture to the shop's sandbox seller. Test money only: no real money moved." };
@@ -79,11 +84,17 @@ export default async function ReceiptPage({ params }: { params: Promise<{ purcha
   if (purchase.view.state !== purchase.state) await applyDerivedTransitions(webDb(), purchase.id, now);
 
   const status = statusOf(purchase);
+  const pyusd = purchase.rail === "pyusd" ? purchase.pyusd : null;
+  const pyusdPaid = pyusd !== null && purchase.view.state === "paid" && purchase.attempt?.rail === "pyusd" && purchase.attempt.pyusdFinalizedSignature !== null;
   const paid = purchase.view.state === "paid" && purchase.attempt?.captureId;
-  const attemptState = purchase.view.paypalAttempt;
+  const attemptState = purchase.rail === "pyusd" ? purchase.view.pyusdAttempt : purchase.view.paypalAttempt;
   const canContinue =
-    purchase.view.state === "review_open" || (purchase.view.state === "pending_payment" && (attemptState === "order_created" || attemptState === "create_unknown"));
-  const canCheck = purchase.view.state === "uncertain" || (purchase.view.state === "pending_payment" && attemptState !== null && CAPTURE_IN_FLIGHT.has(attemptState));
+    purchase.view.state === "review_open" ||
+    (purchase.rail !== "pyusd" && purchase.view.state === "pending_payment" && (attemptState === "order_created" || attemptState === "create_unknown"));
+  // A prepared PYUSD attempt is checked against devnet; a PayPal one only once a capture may have been sent.
+  const canCheck =
+    purchase.view.state === "uncertain" ||
+    (purchase.view.state === "pending_payment" && attemptState !== null && (purchase.rail === "pyusd" ? attemptState === "prepared" : CAPTURE_IN_FLIGHT.has(attemptState)));
 
   return (
     <main>
@@ -115,6 +126,18 @@ export default async function ReceiptPage({ params }: { params: Promise<{ purcha
             <span className="muted">Method</span>
             <span>PayPal sandbox, test money</span>
           </div>
+        )}
+        {pyusd && (
+          <PyusdReceiptDetails
+            paid={pyusdPaid}
+            pyusd={{
+              amount: formatPyusdAtomic(pyusd.atomicAmount),
+              pyusdPerSgd: formatPyusdPerSgd(pyusd.atomicPerSgd),
+              rateDate: SINGAPORE_DATE.format(pyusd.rateConfirmedAt),
+              recipientTokenAccount: purchase.attempt?.rail === "pyusd" ? purchase.attempt.pyusdDestinationTokenAccount : pyusd.tokenAccount,
+              signature: pyusdPaid ? (purchase.attempt?.pyusdFinalizedSignature ?? null) : null,
+            }}
+          />
         )}
         {purchase.sellerMerchantId && (
           <div className="row stacked">
@@ -158,7 +181,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ purcha
           <p className="fine muted">Acknowledgment is separate from payment: it never changes the paid status above.</p>
         </section>
       )}
-      {purchase.entryPoint !== "fixture_tracer" && <LiveStatus purchaseId={purchase.id} state={purchase.view.state} attemptState={attemptState} canCheck={canCheck} />}
+      {purchase.entryPoint !== "fixture_tracer" && <LiveStatus purchaseId={purchase.id} rail={purchase.rail === "pyusd" ? "pyusd" : "paypal"} state={purchase.view.state} attemptState={attemptState} canCheck={canCheck} />}
       {canContinue && (
         <div className="actions">
           <a className="button" href={`/review/${encodeURIComponent(purchase.id)}`}>

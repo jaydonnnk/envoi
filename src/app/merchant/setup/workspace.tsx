@@ -7,6 +7,7 @@ import type { PublicationCheck } from "@/domain/outlets/publish";
 import { requestJson } from "@/lib/browser/session";
 import { MenuEditor } from "./menu-editor";
 import type { DraftWithImport } from "./menu-import";
+import { PyusdWalletCard } from "./pyusd-wallet";
 import { SgqrSticker } from "./sgqr-sticker";
 
 function OutletChips({ outlet }: { outlet: MerchantOutlet }) {
@@ -172,7 +173,7 @@ const CHECKS: { check: PublicationCheck; label: string }[] = [
   { check: "enrollment", label: "Enrollment approved by the Envoi operator" },
   { check: "outlet_details", label: "Shop details confirmed" },
   { check: "menu_confirmation", label: "Menu confirmed" },
-  { check: "destination", label: "PayPal sandbox connection in use" },
+  { check: "destination", label: "PayPal sandbox connection in use, or a verified PYUSD devnet wallet while PYUSD is on" },
 ];
 
 function PublishCard({ outlet, onPublished }: { outlet: MerchantOutlet; onPublished: (saved: Saved) => void }) {
@@ -351,6 +352,7 @@ export function Workspace({ initial, initialDraft, importsOpen }: { initial: Mer
         />
       )}
       {outlet && <PayPalCard outlet={outlet} onSaved={updated} />}
+      {outlet && <PyusdWalletCard key={outlet.id} outlet={outlet} onSaved={updated} />}
       {outlet && <PublishCard outlet={outlet} onPublished={published} />}
     </div>
   );
