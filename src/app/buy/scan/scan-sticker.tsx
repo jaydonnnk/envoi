@@ -8,6 +8,8 @@ import { qrDetector } from "@/lib/browser/qr";
 import { ensureBuyerSession, postJson } from "@/lib/browser/session";
 
 const SCAN_INTERVAL_MS = 250;
+// A camera left scanning, for example on a counter, turns itself off; "Scan again" restarts it.
+const SCAN_IDLE_MS = 60_000;
 
 type Camera =
   | { kind: "starting" }
@@ -85,12 +87,21 @@ export function ScanSticker() {
         setCamera({ kind: "unavailable" });
         return;
       }
+      const startedAt = Date.now();
       while (live()) {
+        // A hidden page or an idle minute releases the camera instead of decoding unseen frames.
+        if (document.visibilityState === "hidden" || Date.now() - startedAt > SCAN_IDLE_MS) {
+          stopCamera();
+          setCamera({ kind: "stopped" });
+          return;
+        }
         const found = await detector.detect(video).catch(() => []);
         const payload = found[0]?.rawValue;
         if (payload && live()) {
           stopCamera();
           setCamera({ kind: "stopped" });
+          // The outcome is this sticker's, so an earlier paste no longer sits beside it.
+          setPasted("");
           void resolve(payload);
           return;
         }
@@ -125,6 +136,11 @@ export function ScanSticker() {
     return stopCamera;
   }, [startCamera, stopCamera]);
 
+  function turnCameraOff() {
+    stopCamera();
+    setCamera({ kind: "stopped" });
+  }
+
   function retryCamera() {
     stopCamera();
     setCamera({ kind: "starting" });
@@ -154,6 +170,11 @@ export function ScanSticker() {
         </div>
         {camera.kind === "starting" && <p className="muted">Starting the camera. Allow camera access if your browser asks.</p>}
         {camera.kind === "scanning" && <p className="muted fine">Hold the sticker inside the frame. The picture stays on this device.</p>}
+        {camera.kind === "scanning" && (
+          <button className="button secondary" type="button" onClick={turnCameraOff}>
+            Turn the camera off
+          </button>
+        )}
         {camera.kind === "stopped" && <p className="muted">The camera is off.</p>}
         {(camera.kind === "denied" || camera.kind === "unavailable") && (
           <div className="status" role="status">
@@ -188,18 +209,17 @@ export function ScanSticker() {
         </form>
       </section>
 
-      {/* Takes no space while empty, so the cards keep one even gap. */}
+      {/* Takes no space while empty, so the cards keep one even gap. The one live region for every
+          outcome: the blocks inside carry no role of their own, so nothing is announced twice. */}
       <div className="scan-outcome" aria-live="polite">
         {outcome.kind === "checking" && (
           <section className="card">
-            <p className="muted" role="status">
-              Checking the sticker
-            </p>
+            <p className="muted">Checking the sticker</p>
           </section>
         )}
         {outcome.kind === "opening" && (
           <section className="card">
-            <div className="status ok" role="status">
+            <div className="status ok">
               <strong>Opening {outcome.outlet.name}</strong>
               <small>
                 {outcome.outlet.area} <DemoChip outlet={outcome.outlet} />
@@ -207,10 +227,10 @@ export function ScanSticker() {
             </div>
           </section>
         )}
-        {outcome.kind === "resolved" && <Result resolution={outcome.resolution} />}
+        {outcome.kind === "resolved" && <ScanResult resolution={outcome.resolution} />}
         {outcome.kind === "failed" && (
           <section className="card">
-            <div className="status" role="alert">
+            <div className="status">
               <strong>Could not check this code</strong>
               <small>{outcome.message}</small>
             </div>
@@ -231,7 +251,7 @@ export function ScanSticker() {
   );
 }
 
-function Result({ resolution }: { resolution: Exclude<SgqrResolution, { kind: "single" }> }) {
+export function ScanResult({ resolution }: { resolution: Exclude<SgqrResolution, { kind: "single" }> }) {
   if (resolution.kind === "ambiguous") {
     return (
       <section className="card" aria-labelledby="which-heading">
@@ -249,13 +269,14 @@ function Result({ resolution }: { resolution: Exclude<SgqrResolution, { kind: "s
             </a>
           ))}
         </div>
+        <p className="muted fine">Not listed? Search for it by name below.</p>
       </section>
     );
   }
   if (resolution.kind === "no_match") {
     return (
       <section className="card">
-        <div className="status" role="status">
+        <div className="status">
           <strong>This shop is not on Envoi</strong>
           <small>Nothing can be bought through Envoi with this sticker, and scanning it does not add the shop. Search by name instead.</small>
         </div>
@@ -267,7 +288,7 @@ function Result({ resolution }: { resolution: Exclude<SgqrResolution, { kind: "s
   }
   return (
     <section className="card">
-      <div className="status" role="status">
+      <div className="status">
         <strong>Envoi cannot identify a shop from this code</strong>
         <small>It is not a shop&apos;s SGQR sticker, or it was misread. Scan or paste it again, or search by name.</small>
       </div>

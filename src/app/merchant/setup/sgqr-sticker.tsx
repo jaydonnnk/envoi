@@ -156,7 +156,7 @@ export function SgqrSticker({ outlet, onSaved }: { outlet: MerchantOutlet; onSav
           <p className="chips">
             <span className={`chip ${reading.decode.checksumValid ? "ok" : "warn"}`}>{checksumLabel(reading.decode.checksumValid)}</span>
           </p>
-          {!reading.decode.checksumValid && <p className="hint">The code may be damaged or misread. Check every value against the sticker.</p>}
+          {!reading.decode.checksumValid && <p className="hint">The code may be damaged or misread. Check every value against the sticker. A buyer who scans a code that fails this check is told Envoi cannot identify the shop and is sent to search by name.</p>}
           {reading.decode.recognized.length === 0 ? (
             <p className="muted">No PayNow identifier was found on this sticker. Enter the UEN by hand if it has one.</p>
           ) : (

@@ -33,6 +33,8 @@ header { background: var(--paper); border-bottom: 1px solid var(--line); }
 
 main { max-width: 960px; margin: auto; padding: 28px 24px 56px; }
 .eyebrow { color: var(--blue); font-weight: 600; }
+/* A back link in the eyebrow keeps its line height but gets a tap target at least 24px tall. */
+.eyebrow a { display: inline-block; padding: 6px 0; margin: -6px 0; }
 .lead { font-size: 18px; color: var(--muted); max-width: 640px; }
 .stack { display: grid; gap: 18px; }
 .card { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 22px; min-width: 0; }
@@ -187,3 +189,5 @@ footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; 
 .scan > .card, .scan-outcome > .card { margin: 0 0 18px; }
 .scan .card > .status:last-child { margin-bottom: 0; }
 .scan .card > .status + .fine { margin-top: 0; }
+.scan .card > p:last-child { margin-bottom: 0; }
+.scan .card > .fine + .button { margin-top: 14px; }
