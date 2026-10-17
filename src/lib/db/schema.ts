@@ -1,11 +1,18 @@
 import { sql } from "drizzle-orm";
-import { bigint, boolean, check, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex, type AnyPgColumn } from "drizzle-orm/pg-core";
+import { bigint, boolean, check, customType, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex, type AnyPgColumn } from "drizzle-orm/pg-core";
 
 // Every table lives in public. drizzle-orm refuses pgSchema("public"), so the schema pin is the
 // web role's search_path, set per database in migration 0001 (R11 containment).
 
 const createdAt = () => timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
 const updatedAt = () => timestamp("updated_at", { withTimezone: true }).notNull().defaultNow();
+
+// Raw bytes, read back as a Uint8Array exactly as written.
+const bytea = customType<{ data: Uint8Array; driverData: Uint8Array }>({
+  dataType: () => "bytea",
+  toDriver: (value) => Buffer.from(value),
+  fromDriver: (value) => new Uint8Array(value),
+});
 
 // Better Auth tables: library-owned users, accounts, durable sessions and the anonymous-user marker.
 
@@ -235,8 +242,10 @@ export const outletIdentifiers = pgTable(
   ],
 );
 
-// Payment destinations. Written only by the operator CLI, which creates one per outlet and rail and
-// never replaces it (D1). The seller id is verified data, not a secret.
+// Payment destinations. A PayPal row is written only by the operator CLI, which creates one per
+// outlet and never replaces it (D1); the seller id is verified data, not a secret. A PYUSD row (S16)
+// is written by the outlet's merchant through a verified wallet proof: it records key control of the
+// wallet and the derived Token-2022 account for the pinned devnet mint, never a pasted account.
 
 export const paymentDestinations = pgTable(
   "payment_destinations",
@@ -247,19 +256,32 @@ export const paymentDestinations = pgTable(
       .references(() => outlets.id),
     rail: text("rail").notNull(),
     environment: text("environment").notNull(),
-    sellerMerchantId: text("seller_merchant_id").notNull(),
+    // PayPal only.
+    sellerMerchantId: text("seller_merchant_id"),
     status: text("status").notNull(),
     version: integer("version").notNull().default(1),
     // The outlet's merchant selected this operator-prepared connection (S7). Acceptance raises the
     // version, so a review pinned to the earlier version is invalidated at execution.
     acceptedAt: timestamp("accepted_at", { withTimezone: true }),
     acceptedByUserId: text("accepted_by_user_id").references(() => user.id),
+    // PYUSD only (S16): the wallet whose key signed the saved challenge, its derived associated
+    // Token-2022 account for the pinned mint, and when and by whom the proof was verified. Each new
+    // proof raises the version, so a review pinned to the earlier version fails at preparation.
+    walletAddress: text("wallet_address"),
+    tokenAccount: text("token_account"),
+    keyVerifiedAt: timestamp("key_verified_at", { withTimezone: true }),
+    keyVerifiedByUserId: text("key_verified_by_user_id").references(() => user.id),
     createdAt: createdAt(),
   },
   (t) => [
     check("payment_destinations_accepted_check", sql`(${t.acceptedAt} is null) = (${t.acceptedByUserId} is null)`),
-    check("payment_destinations_rail_check", sql`${t.rail} in ('paypal')`),
-    check("payment_destinations_environment_check", sql`${t.environment} = 'sandbox'`),
+    check("payment_destinations_rail_check", sql`${t.rail} in ('paypal', 'pyusd')`),
+    check("payment_destinations_environment_check", sql`${t.environment} in ('sandbox', 'devnet')`),
+    // PayPal: a sandbox seller and no wallet. PYUSD: devnet, a verified wallet and account, no seller.
+    check(
+      "payment_destinations_rail_fields_check",
+      sql`(${t.rail} = 'paypal' and ${t.environment} = 'sandbox' and ${t.sellerMerchantId} is not null and ${t.walletAddress} is null and ${t.tokenAccount} is null and ${t.keyVerifiedAt} is null) or (${t.rail} = 'pyusd' and ${t.environment} = 'devnet' and ${t.sellerMerchantId} is null and ${t.walletAddress} is not null and ${t.tokenAccount} is not null and ${t.keyVerifiedAt} is not null and ${t.keyVerifiedByUserId} is not null and ${t.acceptedAt} is null)`,
+    ),
     check("payment_destinations_status_check", sql`${t.status} in ('active', 'disconnected')`),
     check("payment_destinations_version_check", sql`${t.version} > 0`),
     uniqueIndex("payment_destinations_outlet_rail_unique").on(t.outletId, t.rail),
@@ -314,6 +336,10 @@ export const purchases = pgTable(
     // or implies that state, and only a paid purchase can be acknowledged.
     acknowledgedAt: timestamp("acknowledged_at", { withTimezone: true }),
     acknowledgedByUserId: text("acknowledged_by_user_id").references(() => user.id),
+    // A PYUSD review (S16) is priced at one rate version of the shop and pins it with the rounded-up
+    // atomic amount; a changed rate is a new checkout, never a changed review.
+    pyusdRateVersionId: text("pyusd_rate_version_id").references((): AnyPgColumn => pyusdRates.id),
+    pyusdAtomicAmount: bigint("pyusd_atomic_amount", { mode: "bigint" }),
   },
   (t) => [
     check(
@@ -329,6 +355,10 @@ export const purchases = pgTable(
       sql`${t.entryPoint} = 'fixture_tracer' or (${t.rail} is not null and ${t.destinationId} is not null and ${t.destinationVersion} is not null and ${t.checkoutKey} is not null)`,
     ),
     check("purchases_acknowledged_check", sql`(${t.acknowledgedAt} is null) = (${t.acknowledgedByUserId} is null)`),
+    check(
+      "purchases_pyusd_price_check",
+      sql`(${t.rail} = 'pyusd' and ${t.pyusdRateVersionId} is not null and ${t.pyusdAtomicAmount} > 0) or (${t.rail} is distinct from 'pyusd' and ${t.pyusdRateVersionId} is null and ${t.pyusdAtomicAmount} is null)`,
+    ),
     index("purchases_buyer_idx").on(t.buyerUserId),
     index("purchases_outlet_created_idx").on(t.outletId, t.createdAt),
     index("purchases_basket_lock_key_idx").on(t.basketLockKey),
@@ -352,6 +382,19 @@ export const ATTEMPT_STATES = [
   "abandoned",
 ] as const;
 
+// PYUSD attempts (S16; Gate 3 "PYUSD attempt") share this table with rail 'pyusd': one per purchase,
+// saved and locked before the unsigned transfer leaves the server, and never given the bytes.
+export const PYUSD_ATTEMPT_STATES = ["prepared", "confirmed", "mismatch", "expired_scanning", "held_no_match", "closed_unpaid"] as const;
+
+// One signature hint a buyer's browser posted, and what a finalized read decided about it.
+export type StoredSignatureHint = { signature: string; receivedAt: string; decision: "unread" | "not_found" | "not_ours" | "failed_landing" | "confirmed" | "uncertain" };
+// The mint's transfer-fee schedules read at preparation, as decimal strings.
+export type StoredFeeEvidence = {
+  preparedEpoch: string;
+  older: { epoch: string; basisPoints: number; maximumFee: string };
+  newer: { epoch: string; basisPoints: number; maximumFee: string };
+};
+
 export const paymentAttempts = pgTable(
   "payment_attempts",
   {
@@ -359,12 +402,13 @@ export const paymentAttempts = pgTable(
     purchaseId: text("purchase_id")
       .notNull()
       .references(() => purchases.id),
+    rail: text("rail").notNull().default("paypal"),
     state: text("state").notNull(),
-    // Snapshot of what the order must carry, taken from the purchase and its destination.
-    payeeMerchantId: text("payee_merchant_id").notNull(),
+    // Snapshot of what the order must carry, taken from the purchase and its destination. PayPal only.
+    payeeMerchantId: text("payee_merchant_id"),
     totalSgdCents: integer("total_sgd_cents").notNull(),
     currency: text("currency").notNull(),
-    createRequestId: text("create_request_id").notNull().unique(),
+    createRequestId: text("create_request_id").unique(),
     orderId: text("order_id").unique(),
     approvalUrl: text("approval_url"),
     captureRequestId: text("capture_request_id").unique(),
@@ -384,14 +428,41 @@ export const paymentAttempts = pgTable(
     maintenanceClaimExpiresAt: timestamp("maintenance_claim_expires_at", { withTimezone: true }),
     maintenanceChecks: integer("maintenance_checks").notNull().default(0),
     maintenanceCheckedAt: timestamp("maintenance_checked_at", { withTimezone: true }),
+    // PYUSD evidence (S16), all fixed at preparation except the hints, the bound signature and its
+    // verification time. The unsigned transaction bytes are never stored: only their fingerprint.
+    pyusdBuyerWallet: text("pyusd_buyer_wallet"),
+    pyusdSourceTokenAccount: text("pyusd_source_token_account"),
+    pyusdDestinationTokenAccount: text("pyusd_destination_token_account"),
+    pyusdAtomicAmount: bigint("pyusd_atomic_amount", { mode: "bigint" }),
+    pyusdRateVersionId: text("pyusd_rate_version_id").references((): AnyPgColumn => pyusdRates.id),
+    pyusdReference: text("pyusd_reference").unique(),
+    pyusdMessageFingerprint: text("pyusd_message_fingerprint"),
+    pyusdBlockhash: text("pyusd_blockhash"),
+    pyusdLastValidBlockHeight: bigint("pyusd_last_valid_block_height", { mode: "bigint" }),
+    pyusdPreparationSlot: bigint("pyusd_preparation_slot", { mode: "bigint" }),
+    pyusdFee: jsonb("pyusd_fee").$type<StoredFeeEvidence>(),
+    pyusdHints: jsonb("pyusd_hints").$type<StoredSignatureHint[]>().notNull().default(sql`'[]'::jsonb`),
+    pyusdFinalizedSignature: text("pyusd_finalized_signature").unique(),
+    pyusdVerifiedAt: timestamp("pyusd_verified_at", { withTimezone: true }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
   (t) => [
+    check("payment_attempts_rail_check", sql`${t.rail} in ('paypal', 'pyusd')`),
     check(
       "payment_attempts_state_check",
-      sql`${t.state} in ('created', 'order_created', 'externally_approved', 'capture_dispatched', 'capture_confirmed', 'capture_failed', 'create_unknown', 'capture_unknown', 'abandoned')`,
+      sql`(${t.rail} = 'paypal' and ${t.state} in ('created', 'order_created', 'externally_approved', 'capture_dispatched', 'capture_confirmed', 'capture_failed', 'create_unknown', 'capture_unknown', 'abandoned')) or (${t.rail} = 'pyusd' and ${t.state} in ('prepared', 'confirmed', 'mismatch', 'expired_scanning', 'held_no_match', 'closed_unpaid'))`,
     ),
+    check("payment_attempts_paypal_fields_check", sql`${t.rail} <> 'paypal' or (${t.payeeMerchantId} is not null and ${t.createRequestId} is not null)`),
+    check(
+      "payment_attempts_pyusd_fields_check",
+      sql`${t.rail} <> 'pyusd' or (${t.payeeMerchantId} is null and ${t.createRequestId} is null and ${t.pyusdBuyerWallet} is not null and ${t.pyusdSourceTokenAccount} is not null and ${t.pyusdDestinationTokenAccount} is not null and ${t.pyusdAtomicAmount} > 0 and ${t.pyusdRateVersionId} is not null and ${t.pyusdReference} is not null and ${t.pyusdMessageFingerprint} is not null and ${t.pyusdBlockhash} is not null and ${t.pyusdLastValidBlockHeight} is not null and ${t.pyusdPreparationSlot} is not null and ${t.pyusdFee} is not null)`,
+    ),
+    check("payment_attempts_pyusd_confirmed_check", sql`${t.state} <> 'confirmed' or (${t.pyusdFinalizedSignature} is not null and ${t.pyusdVerifiedAt} is not null)`),
+    check("payment_attempts_pyusd_hints_check", sql`jsonb_typeof(${t.pyusdHints}) = 'array' and jsonb_array_length(${t.pyusdHints}) <= 3`),
+    // One PYUSD attempt per purchase, ever: its bytes are released once, and a lost response leaves
+    // the attempt locked until recovery, never a second preparation.
+    uniqueIndex("payment_attempts_one_pyusd").on(t.purchaseId).where(sql`${t.rail} = 'pyusd'`),
     check("payment_attempts_currency_check", sql`${t.currency} = 'SGD'`),
     check("payment_attempts_total_check", sql`${t.totalSgdCents} > 0`),
     // A capture is never dispatched without its request id persisted first.
@@ -458,7 +529,7 @@ export const auditEvents = pgTable(
 // nothing. Admission prunes rows older than the bucket's longest window, so the table stays small
 // without a maintenance task.
 
-export const RATE_LIMIT_BUCKETS = ["buyer_suggestion"] as const;
+export const RATE_LIMIT_BUCKETS = ["buyer_suggestion", "wallet_challenge"] as const;
 
 export const rateLimitHits = pgTable(
   "rate_limit_hits",
@@ -469,7 +540,7 @@ export const rateLimitHits = pgTable(
     at: timestamp("at", { withTimezone: true }).notNull(),
   },
   (t) => [
-    check("rate_limit_hits_bucket_check", sql`${t.bucket} in ('buyer_suggestion')`),
+    check("rate_limit_hits_bucket_check", sql`${t.bucket} in ('buyer_suggestion', 'wallet_challenge')`),
     index("rate_limit_hits_bucket_at_idx").on(t.bucket, t.at),
     index("rate_limit_hits_subject_idx").on(t.bucket, t.subject, t.at),
   ],
@@ -639,4 +710,83 @@ export const menuImportAdmission = pgTable(
     lastAdmittedAt: timestamp("last_admitted_at", { withTimezone: true }),
   },
   (t) => [check("menu_import_admission_singleton_check", sql`${t.id} = 'global'`)],
+);
+
+// PYUSD rates (S16; Gate 2 "Identity, destination and rate"). Append-only: each set or re-confirmation
+// of a shop's rate is a new immutable version, the newest one is the shop's rate, and its age is
+// computed on read. atomic_per_sgd is PYUSD atomic units (10^-6 PYUSD) per S$1.
+export const pyusdRates = pgTable(
+  "pyusd_rates",
+  {
+    id: text("id").primaryKey(),
+    outletId: text("outlet_id")
+      .notNull()
+      .references(() => outlets.id),
+    atomicPerSgd: bigint("atomic_per_sgd", { mode: "bigint" }).notNull(),
+    confirmedAt: timestamp("confirmed_at", { withTimezone: true }).notNull(),
+    confirmedByUserId: text("confirmed_by_user_id")
+      .notNull()
+      .references(() => user.id),
+  },
+  (t) => [
+    check("pyusd_rates_bounds_check", sql`${t.atomicPerSgd} between 1 and 10000000`),
+    index("pyusd_rates_outlet_confirmed_idx").on(t.outletId, t.confirmedAt),
+  ],
+);
+
+// Wallet challenges (S16). The exact UTF-8 bytes the merchant's wallet signs are saved verbatim; the
+// proof verifies the signature against these bytes and the saved wallet, never against request
+// input, and consumes the challenge once, in the transaction that records the destination.
+export const walletChallenges = pgTable(
+  "wallet_challenges",
+  {
+    id: text("id").primaryKey(),
+    outletId: text("outlet_id")
+      .notNull()
+      .references(() => outlets.id),
+    memberUserId: text("member_user_id")
+      .notNull()
+      .references(() => user.id),
+    wallet: text("wallet").notNull(),
+    // The exact UTF-8 bytes the wallet signs, saved verbatim (Gate 3 WalletChallenge.message).
+    message: bytea("message").notNull(),
+    nonceHash: text("nonce_hash").notNull().unique(),
+    issuedAt: timestamp("issued_at", { withTimezone: true }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    consumedAt: timestamp("consumed_at", { withTimezone: true }),
+  },
+  (t) => [check("wallet_challenges_expiry_check", sql`${t.expiresAt} > ${t.issuedAt}`), index("wallet_challenges_outlet_idx").on(t.outletId, t.issuedAt)],
+);
+
+// The shared Solana RPC limiter (S16; Gate 3 RPC_BUDGET), shared by the web app and, from S17, the
+// runner. One row per admitted call, pruned on admission; two concurrency slot rows held by lease;
+// and one backoff row that a 429 sets for every caller.
+export const rpcLimiterCalls = pgTable(
+  "rpc_limiter_calls",
+  {
+    id: text("id").primaryKey(),
+    method: text("method").notNull(),
+    at: timestamp("at", { withTimezone: true }).notNull(),
+  },
+  (t) => [index("rpc_limiter_calls_at_idx").on(t.at), index("rpc_limiter_calls_method_at_idx").on(t.method, t.at)],
+);
+
+export const rpcLimiterSlots = pgTable(
+  "rpc_limiter_slots",
+  {
+    slot: integer("slot").primaryKey(),
+    holder: text("holder"),
+    leaseExpiresAt: timestamp("lease_expires_at", { withTimezone: true }),
+  },
+  (t) => [check("rpc_limiter_slots_range_check", sql`${t.slot} in (0, 1)`), check("rpc_limiter_slots_lease_check", sql`(${t.holder} is null) = (${t.leaseExpiresAt} is null)`)],
+);
+
+export const rpcLimiterBackoff = pgTable(
+  "rpc_limiter_backoff",
+  {
+    id: text("id").primaryKey(),
+    until: timestamp("until", { withTimezone: true }),
+    consecutive: integer("consecutive").notNull().default(0),
+  },
+  (t) => [check("rpc_limiter_backoff_singleton_check", sql`${t.id} = 'global'`)],
 );

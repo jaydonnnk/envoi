@@ -37,7 +37,24 @@ const webSchema = z.object({
   // imports stay closed until it is stated "true".
   AI_MENU_MODEL: z.string().min(1).optional(),
   MENU_IMPORTS_ENABLED: z.enum(["true", "false"]).default("false").transform((value) => value === "true"),
+  // PYUSD on Solana devnet (S16). These are the rail's only two settings: the cluster, genesis hash,
+  // mint, token program and decimals are reviewed code constants in src/domain/pyusd/constants.ts,
+  // and any other PYUSD_ or SOLANA_ name refuses to boot. The RPC URL is checked against the pinned
+  // devnet identity before every use, so a mainnet URL only makes PYUSD unavailable. PYUSD_ENABLED
+  // unset reads as false, and it guards new PYUSD actions only, never recovery reads.
+  SOLANA_RPC_URL: z.url().optional(),
+  PYUSD_ENABLED: z.enum(["true", "false"]).default("false").transform((value) => value === "true"),
 });
+
+// The PYUSD rail is configured by exactly the names in webSchema; a mint, cluster or program override
+// stated in the environment is refused rather than ignored, so nobody believes it took effect.
+const RAIL_NAME = /^(PYUSD|SOLANA)_/;
+const webShape = new Set(Object.keys(webSchema.shape));
+
+function refuseUnknownRailNames(source: NodeJS.ProcessEnv): void {
+  const unknown = Object.keys(source).filter((name) => RAIL_NAME.test(name) && !webShape.has(name) && source[name] !== undefined);
+  if (unknown.length > 0) throw new Error(`Invalid web configuration: ${unknown.map((name) => `${name}: not a setting; the PYUSD rail reads only SOLANA_RPC_URL and PYUSD_ENABLED`).join("; ")}`);
+}
 
 const migrationSchema = z.object({ MIGRATION_DATABASE_URL: postgresUrl });
 
@@ -83,8 +100,14 @@ function parse<T>(schema: z.ZodType<T>, source: NodeJS.ProcessEnv, scope: string
 let webCache: WebEnv | undefined;
 
 export function webEnv(source: NodeJS.ProcessEnv = process.env): WebEnv {
-  if (source !== process.env) return parse(webSchema, source, "web");
-  webCache ??= parse(webSchema, source, "web");
+  if (source !== process.env) {
+    refuseUnknownRailNames(source);
+    return parse(webSchema, source, "web");
+  }
+  if (!webCache) {
+    refuseUnknownRailNames(source);
+    webCache = parse(webSchema, source, "web");
+  }
   return webCache;
 }
 

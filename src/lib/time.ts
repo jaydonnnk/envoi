@@ -1,7 +1,8 @@
 // Named clocks (Gate 3, Named clocks). Later slices add their durations here.
 export type ClockName =
   | "T_REVIEW" | "T_LEASE" | "T_PROVIDER_READ_DEBOUNCE" | "T_HANDOFF" | "T_MAINT_RUN" | "T_MAINT_OVERDUE"
-  | "T_MENU_REQUEST" | "T_MENU_UPLOAD_READ" | "T_MENU_MODEL";
+  | "T_MENU_REQUEST" | "T_MENU_UPLOAD_READ" | "T_MENU_MODEL"
+  | "T_WALLET_CHALLENGE" | "T_RATE_AGE" | "T_RPC_WINDOW" | "T_RPC_CALL" | "T_RPC_SLOT_LEASE";
 
 const DURATION_MS: Record<ClockName, number> = {
   T_REVIEW: 5 * 60_000,
@@ -21,6 +22,16 @@ const DURATION_MS: Record<ClockName, number> = {
   T_MENU_UPLOAD_READ: 30_000,
   // From the vision call's start, and never past the commit reserve (menuModelBudgetMs).
   T_MENU_MODEL: 60_000,
+  // From wallet challenge issue (S16): the proof transaction refuses the challenge at this deadline.
+  T_WALLET_CHALLENGE: 5 * 60_000,
+  // From a PYUSD rate's confirmation, computed on read: past it PYUSD is unavailable at that shop and
+  // open PYUSD reviews cannot prepare; a prepared attempt is unaffected.
+  T_RATE_AGE: 30 * 24 * 60 * 60_000,
+  // The shared RPC limiter's counting window, one RPC call's bound, and a concurrency slot's lease,
+  // after which a slot left by a crash is reclaimable.
+  T_RPC_WINDOW: 10_000,
+  T_RPC_CALL: 10_000,
+  T_RPC_SLOT_LEASE: 15_000,
 };
 
 export type Now = () => Date;
