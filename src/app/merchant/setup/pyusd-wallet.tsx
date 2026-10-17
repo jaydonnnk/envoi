@@ -102,7 +102,7 @@ export function PyusdWalletCard({ outlet, onSaved }: { outlet: MerchantOutlet; o
         (wallets.length === 0 ? (
           <p className="muted">No Solana devnet wallet found in this browser. Install Phantom, turn on Testnet Mode, choose Solana Devnet and reload.</p>
         ) : (
-          <div className="actions">
+          <div className="actions wallet-actions">
             {wallets.map((wallet) => (
               <button className="button secondary" type="button" key={wallet.name} onClick={() => void prove(wallet)} disabled={busy !== null}>
                 {pyusd.wallet ? `Connect another wallet with ${wallet.name}` : `Connect ${wallet.name} by signing a message`}

@@ -73,6 +73,8 @@ small { font-size: 13px; display: block; }
 .chip.ok { color: var(--green); background: #e6f4ed; border-color: #a8cfbf; }
 .status { border-left: 4px solid var(--amber); padding-left: 14px; margin: 4px 0 18px; }
 .status.ok { border-left-color: var(--green); }
+/* The wallet buttons end their block with the same gap as a status, before the next heading. */
+.actions.wallet-actions { margin-bottom: 18px; }
 
 .layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr); gap: 18px; align-items: start; }
 .rail { display: block; border: 2px solid var(--blue); border-radius: 8px; padding: 14px; margin: 0 0 12px; }
