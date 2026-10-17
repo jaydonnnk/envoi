@@ -1,0 +1,67 @@
+[
+ {
+  "id": "body-bound-raised",
+  "test": "the request body is bounded at 4 KiB",
+  "test_file": "tests/integration/sgqr-resolve.test.ts",
+  "mutation": "Raise the 4 KiB request body bound to 4 MB; the test fails.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/outlets/resolve-sgqr/route.ts",
+    "old": "const MAX_BODY_BYTES = 4_096;",
+    "new": "const MAX_BODY_BYTES = 4_096_000;"
+   }
+  ]
+ },
+ {
+  "id": "distinct-dropped",
+  "test": "one outlet carrying two mapped identifiers is one candidate",
+  "test_file": "tests/integration/sgqr-resolve.test.ts",
+  "mutation": "Select every matching identifier row instead of one row per outlet; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/sgqr/resolve.ts",
+    "old": "    .selectDistinctOn([outlets.name, outlets.id], {",
+    "new": "    .select({"
+   }
+  ]
+ },
+ {
+  "id": "candidate-limit-dropped",
+  "test": "a shared identifier lists at most 20 outlets, by name",
+  "test_file": "tests/integration/sgqr-resolve.test.ts",
+  "mutation": "Drop the bound of 20 candidates; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/sgqr/resolve.ts",
+    "old": "    .limit(MAX_CANDIDATES);",
+    "new": "    ;"
+   }
+  ]
+ },
+ {
+  "id": "not-listed-copy-removed",
+  "test": "which outlet points to text search for an outlet that is not listed",
+  "test_file": "tests/unit/scan-result.test.ts",
+  "mutation": "Remove the line that sends an unlisted outlet to text search; the test fails.",
+  "edits": [
+   {
+    "file": "src/app/buy/scan/scan-sticker.tsx",
+    "old": "        <p className=\"muted fine\">Not listed? Search for it by name below.</p>\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "result-role-restored",
+  "test": "a scan result adds no live region of its own",
+  "test_file": "tests/unit/scan-result.test.ts",
+  "mutation": "Give the not-on-Envoi result its own role=\"status\" inside the live region again; the test fails.",
+  "edits": [
+   {
+    "file": "src/app/buy/scan/scan-sticker.tsx",
+    "old": "        <div className=\"status\">\n          <strong>This shop is not on Envoi</strong>",
+    "new": "        <div className=\"status\" role=\"status\">\n          <strong>This shop is not on Envoi</strong>"
+   }
+  ]
+ }
+]

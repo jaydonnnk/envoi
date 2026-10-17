@@ -1,0 +1,78 @@
+{
+ "branch": "envoi/slice-10-review-fixes",
+ "base_commit": "ccb3b7f",
+ "uncommitted_changes": true,
+ "method": "Each definition in s10-review-fixes-mutation-defs.json applied alone by exact text replacement, its named test run alone (vitest -t), every touched file restored and compared by SHA-256, then the test rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations, as envoi_web; merchant accounts are created by the operator functions with passwords generated in memory per run, and their FIXTURE shops are created through the merchant routes. Every SGQR payload is a FIXTURE built tag by tag; none is an authentic sticker. The review fixes add no migration; the scan result unit test renders the result component to static markup. A proof also needs the mutated run to fail on an AssertionError.",
+ "results": [
+  {
+   "id": "body-bound-raised",
+   "test": "the request body is bounded at 4 KiB",
+   "files": [
+    "src/app/api/v1/outlets/resolve-sgqr/route.ts"
+   ],
+   "mutation": "Raise the 4 KiB request body bound to 4 MB; the test fails.",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected 200 to be 400 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "distinct-dropped",
+   "test": "one outlet carrying two mapped identifiers is one candidate",
+   "files": [
+    "src/domain/sgqr/resolve.ts"
+   ],
+   "mutation": "Select every matching identifier row instead of one row per outlet; the test fails.",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected { kind: 'ambiguous', \u2026(1) } to deeply equal { kind: 'single', outlet: { \u2026(4) } }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "candidate-limit-dropped",
+   "test": "a shared identifier lists at most 20 outlets, by name",
+   "files": [
+    "src/domain/sgqr/resolve.ts"
+   ],
+   "mutation": "Drop the bound of 20 candidates; the test fails.",
+   "mutated": "Tests  1 failed | 13 skipped (14)",
+   "error": "AssertionError: expected [ \u2026(21) ] to deeply equal [ \u2026(20) ]",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 13 skipped (14)",
+   "proof": true
+  },
+  {
+   "id": "not-listed-copy-removed",
+   "test": "which outlet points to text search for an outlet that is not listed",
+   "files": [
+    "src/app/buy/scan/scan-sticker.tsx"
+   ],
+   "mutation": "Remove the line that sends an unlisted outlet to text search; the test fails.",
+   "mutated": "Tests  1 failed | 1 skipped (2)",
+   "error": "AssertionError: expected '<section class=\"card\" aria-labelledby\u2026' to contain 'Not listed? Search for it by name bel\u2026'",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 1 skipped (2)",
+   "proof": true
+  },
+  {
+   "id": "result-role-restored",
+   "test": "a scan result adds no live region of its own",
+   "files": [
+    "src/app/buy/scan/scan-sticker.tsx"
+   ],
+   "mutation": "Give the not-on-Envoi result its own role=\"status\" inside the live region again; the test fails.",
+   "mutated": "Tests  1 failed | 1 skipped (2)",
+   "error": "AssertionError: no_match: expected '<section class=\"card\"><div class=\"sta\u2026' not to match /role=|aria-live/",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 1 skipped (2)",
+   "proof": true
+  }
+ ]
+}

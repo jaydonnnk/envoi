@@ -195,6 +195,52 @@ describe("buyer SGQR resolution", () => {
     expect(notJson.status).toBe(400);
   });
 
+  // S10 review fixes (F2): the request body bound of refinement 7, measured in bytes before any
+  // parsing. The same valid sticker passes under the bound and is refused unread over it.
+  it("the request body is bounded at 4 KiB", async () => {
+    const sticker = stickerFor(freshUen());
+    const post = (padding: number) =>
+      resolveRoute.POST(
+        new Request(`${TEST_BASE_URL}/api/v1/outlets/resolve-sgqr`, {
+          method: "POST",
+          headers: { cookie: buyer, "content-type": "application/json" },
+          body: `{"payload":${JSON.stringify(sticker)}${" ".repeat(padding)}}`,
+        }),
+      );
+    expect((await post(3_000)).status).toBe(200);
+    const oversize = await post(4_200);
+    expect(oversize.status).toBe(400);
+    expect((await envelope(oversize)).error).toMatchObject({ code: "validation_failed", details: { reason: "too_large" } });
+  });
+
+  // S10 review fixes (F2): a sticker that carries two identifiers mapped to the same outlet names
+  // that outlet once, so the buyer is not asked to choose between it and itself.
+  it("one outlet carrying two mapped identifiers is one candidate", async () => {
+    const [first, second] = [freshUen(), freshUen()];
+    const { shop } = await api.publishedShop("two-identifiers");
+    await mapIdentifier(shop, first, "FIXTURE counter A");
+    await mapIdentifier(shop, second, "FIXTURE counter B");
+    const sticker = sgqrPayload([payNowTemplate("2", first, "26"), payNowTemplate("2", second, "27")]);
+    expect(await resolve(sticker)).toEqual({ kind: "single", outlet: await summaryOf(shop) });
+  });
+
+  // S10 review fixes (F2): the candidate list of refinement 3 stays bounded at 20, the first 20 by
+  // name then id. The scan screen points to text search for an outlet that is not listed.
+  it("a shared identifier lists at most 20 outlets, by name", async () => {
+    const shared = freshUen();
+    const shops: Awaited<ReturnType<typeof summaryOf>>[] = [];
+    for (let index = 0; index < 21; index += 1) {
+      const { shop } = await api.publishedShop(`bound-${String(index).padStart(2, "0")}`);
+      await mapIdentifier(shop, shared, `FIXTURE stall ${index}`);
+      shops.push(await summaryOf(shop));
+    }
+    const byName = (a: { name: string; id: string }, b: { name: string; id: string }) => (a.name === b.name ? (a.id < b.id ? -1 : 1) : a.name < b.name ? -1 : 1);
+    const expected = [...shops].sort(byName).slice(0, 20).map((shop) => shop.id);
+    const resolution = (await resolve(stickerFor(shared))) as { kind: string; candidates: { id: string }[] };
+    expect(resolution.kind).toBe("ambiguous");
+    expect(resolution.candidates.map((candidate) => candidate.id)).toEqual(expected);
+  }, 120_000);
+
   it("a buyer session is required", async () => {
     const response = await resolveRaw({ payload: stickerFor(freshUen()) }, null);
     expect(response.status).toBe(401);
