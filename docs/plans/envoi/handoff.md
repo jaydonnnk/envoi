@@ -53,7 +53,7 @@ Proposed target remains 4 of 5 first-time buyers completing an eligible test-env
 
 ## Next authorized action
 
-**Next action: S16 is done on 2026-10-18 ([record](00-status.md#s16-pyusd-devnet-purchase-2026-10-17-to-2026-10-18)); its review fixes are committed on `envoi/slice-16-review-fixes`, not pushed ([record](00-status.md#s16-review-fixes-2026-10-18)), and pushing and merging them need the user's authorization; S17 starts only on the user's authorization naming it.**
+**Next action: S16 is done on 2026-10-18 ([record](00-status.md#s16-pyusd-devnet-purchase-2026-10-17-to-2026-10-18)); its review fixes are on `main` at `91e86f6` and deployed ([record](00-status.md#s16-review-fixes-2026-10-18)); S17 starts only on the user's authorization naming it.**
 S16 adds the PYUSD devnet rail: Test Shop's merchant proved key control of a Phantom devnet wallet, set a dated rate, and one desktop Chrome payment of 1.8 PYUSD devnet test tokens was verified finalized and shown paid; Phantom kept the prepared blockhash, memo and transfer and added only two ComputeBudget instructions (R13 passes).
 `PYUSD_ENABLED` is unset on Render again [verified 2026-10-18]; it stays off outside recorded proof runs until S17 passes, and PYUSD opens to testers only on the user's authorization after S17.
 One phone payment (`pur_b6bf45fmxlulegnn26a4pl5zkq`) is finalized on devnet but stays `pending_payment` with its attempt `prepared` and basket locked on Neon, because its only read came before finalization and its buyer session is gone; the S16 review showed locally that an open receipt would have turned it paid 30 seconds later, so the phone page most likely stopped polling [hypothesis]; S17's `reconcile_pyusd_attempts` is its recovery path.

@@ -192,6 +192,10 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - **Local browser check [verified], 2026-10-18,** on `npm run build` (webpack) and `next start` at http://localhost:3100 with FIXTURE settings and a disposable database, dropped after: at 1280px the rate button is 46px with its bottom level with the input (82px without the rule on `115f5d9`, 76px with the rule removed on the fix tree) and reads "Confirmed today", disabled, for a rate seeded today; editing the field turns it into an enabled "Save rate"; at 390px it wraps below the input at 46px with no horizontal scroll.
   The first build of the fix showed the button 6px below the input, from the label's bottom margin, which is now zero inside the rate form.
   `scripts/scan-build.ts` passes on each build (195 files).
+- **Authorization to ship, 2026-10-18, in the user's words:** "push and merge".
+- **Pushed [verified], 2026-10-18:** the branch and `main`, fast-forwarded from `115f5d9` to `91e86f6`, were pushed and match on `git ls-remote`; CI passed on the branch (run 39074779746) and on `main` (run 39074782689), whose new steps built with webpack and scanned the output ("scan-build: no send method name in 195 built files.").
+  At 22:26Z Render served the new stylesheet (`.actions.rate-form`) and `/buy` answered 200; `PYUSD_ENABLED` was not touched.
+  This record's update is pushed after it.
 - **Not established:** a real phone or iPad, Render's logs, and whether Phantom's signing screen names the token [unknown].
 
 ### S16 PYUSD devnet purchase, 2026-10-17 to 2026-10-18
