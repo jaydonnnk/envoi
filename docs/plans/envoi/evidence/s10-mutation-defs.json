@@ -1,0 +1,163 @@
+[
+ {
+  "id": "unenrolled-auto-outlet",
+  "test": "unenrolled sticker yields no purchase",
+  "test_file": "tests/integration/sgqr-resolve.test.ts",
+  "mutation": "Auto-create an outlet, as the web role's merchant outlet creation does, when a sticker matches nothing; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/sgqr/resolve.ts",
+    "old": "import { and, asc, eq, inArray, isNotNull } from \"drizzle-orm\";",
+    "new": "import { and, asc, eq, inArray, isNotNull, sql } from \"drizzle-orm\";"
+   },
+   {
+    "file": "src/domain/sgqr/resolve.ts",
+    "old": "  if (!first) return { kind: \"no_match\" };",
+    "new": "  if (!first) {\n    await db.execute(sql`insert into outlets (id, name, area, is_demo_fixture) values (${`out_auto_${Date.now()}`}, 'FIXTURE auto', 'FIXTURE auto', false)`);\n    return { kind: \"no_match\" };\n  }"
+   }
+  ]
+ },
+ {
+  "id": "shared-first-match",
+  "test": "shared identifier asks which outlet",
+  "test_file": "tests/integration/sgqr-resolve.test.ts",
+  "mutation": "Pick the first match when several outlets share the identifier; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/sgqr/resolve.ts",
+    "old": "  return { kind: \"ambiguous\", candidates: rows };",
+    "new": "  return { kind: \"single\", outlet: { id: first.id, name: first.name, area: first.area, isDemoFixture: first.isDemoFixture } };"
+   }
+  ]
+ },
+ {
+  "id": "grant-rail-payee",
+  "test": "scan grants no destination and no rail",
+  "test_file": "tests/integration/sgqr-resolve.test.ts",
+  "mutation": "Add a rail and a payee to a single-outlet resolution; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/sgqr/resolve.ts",
+    "old": "  if (rows.length === 1) return { kind: \"single\", outlet: { id: first.id, name: first.name, area: first.area, isDemoFixture: first.isDemoFixture } };",
+    "new": "  if (rows.length === 1) return { kind: \"single\", outlet: { id: first.id, name: first.name, area: first.area, isDemoFixture: first.isDemoFixture }, rail: \"paypal\", payee: first.id } as SgqrResolution;"
+   }
+  ]
+ },
+ {
+  "id": "pending-counts",
+  "test": "a pending mapping does not resolve",
+  "test_file": "tests/integration/sgqr-resolve.test.ts",
+  "mutation": "Count a mapping the operator has not approved; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/sgqr/resolve.ts",
+    "old": "        isNotNull(outletIdentifiers.approvedAt),\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "unpublished-counts",
+  "test": "an unpublished outlet does not resolve",
+  "test_file": "tests/integration/sgqr-resolve.test.ts",
+  "mutation": "Count an outlet that is not published; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/sgqr/resolve.ts",
+    "old": "        isNotNull(outlets.publishedMenuRevisionId),\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "proxy-counts",
+  "test": "a personal proxy does not resolve, even when it reads like a UEN",
+  "test_file": "tests/integration/sgqr-resolve.test.ts",
+  "mutation": "Treat every PayNow proxy as a business UEN when resolving; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/sgqr/resolve.ts",
+    "old": "decoded.recognized.map(mappableIdentifier)",
+    "new": "decoded.recognized.map((field) => mappableIdentifier({ ...field, scheme: \"paynow_uen\" }))"
+   }
+  ]
+ },
+ {
+  "id": "checksum-ignored",
+  "test": "a misread sticker does not resolve",
+  "test_file": "tests/integration/sgqr-resolve.test.ts",
+  "mutation": "Resolve a sticker whose checksum does not match; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/sgqr/resolve.ts",
+    "old": "  if (!decoded.checksumValid) return { kind: \"unsupported_payload\", unrecognizedCount: decoded.unrecognized.length };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "unsupported-as-no-match",
+  "test": "a code with no business identifier is unsupported, not unenrolled",
+  "test_file": "tests/integration/sgqr-resolve.test.ts",
+  "mutation": "Answer no_match for an SGQR with no business identifier; the test fails.",
+  "edits": [
+   {
+    "file": "src/domain/sgqr/resolve.ts",
+    "old": "  if (identifiers.length === 0) return { kind: \"unsupported_payload\", unrecognizedCount: decoded.unrecognized.length };",
+    "new": "  if (identifiers.length === 0) return { kind: \"no_match\" };"
+   }
+  ]
+ },
+ {
+  "id": "payload-unbounded",
+  "test": "the sticker contents are bounded",
+  "test_file": "tests/integration/sgqr-resolve.test.ts",
+  "mutation": "Remove the 512-character bound on the pasted contents; the test fails.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/outlets/resolve-sgqr/route.ts",
+    "old": ".min(1).max(SGQR_MAX_PAYLOAD_CHARS)",
+    "new": ".min(1)"
+   }
+  ]
+ },
+ {
+  "id": "session-guard-removed",
+  "test": "a buyer session is required",
+  "test_file": "tests/integration/sgqr-resolve.test.ts",
+  "mutation": "Remove the requireBuyerSession guard from the route; the test fails.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/outlets/resolve-sgqr/route.ts",
+    "old": "  const principal = await requireBuyerSession(getAuth(), request.headers);\n  if (!isPrincipal(principal)) return httpErr(principal);\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "payload-echoed",
+  "test": "raw QR payload is not logged by the scan route",
+  "test_file": "tests/integration/sgqr-resolve.test.ts",
+  "mutation": "Echo the sticker contents in the route's response; the test fails.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/outlets/resolve-sgqr/route.ts",
+    "old": "  return httpOk({ resolution });",
+    "new": "  return httpOk({ resolution, payload: parsed.data.payload });"
+   }
+  ]
+ },
+ {
+  "id": "camera-site-wide",
+  "test": "only the scan page may use the camera",
+  "test_file": "tests/unit/camera-policy.test.ts",
+  "mutation": "Allow the camera on every route instead of the scan page only; the test fails.",
+  "edits": [
+   {
+    "file": "next.config.ts",
+    "old": "      { source: SCAN_PAGE_PATH, headers: scanPageHeaders },",
+    "new": "      { source: \"/:path*\", headers: scanPageHeaders },"
+   }
+  ]
+ }
+]
