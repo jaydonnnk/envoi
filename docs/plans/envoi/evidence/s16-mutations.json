@@ -1,0 +1,2189 @@
+{
+ "branch": "envoi/slice-16-pyusd-purchase",
+ "base_commit": "91605ae",
+ "uncommitted_changes": false,
+ "method": "Each definition in s16-mutation-defs.json applied alone by exact text replacement, its whole test file run with the vitest JSON reporter, every touched file restored and compared by SHA-256, then the whole file rerun. A proof needs the named row to fail on an AssertionError, no other row of its group to fail (for a Gate 3 group row; a standalone test's other failures are recorded), a byte-identical restore and an all-passing rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations, as envoi_web, with DATABASE_URL removed; Solana RPC is a FIXTURE faked at the bounded transport, wallets are key pairs made in the run, PayPal is the FIXTURE fake at the PayPalWriteClient boundary, and every landed transaction is synthetic. Two definitions widen a grant in migration 0022 together with the code change, because envoi_web's privileges independently refuse the mutated write; that is recorded per definition.",
+ "results": [
+  {
+   "id": "identity-genesis",
+   "test": "wrong genesis hash disables PYUSD",
+   "kind": "group_row",
+   "group": "PYUSD identity check",
+   "files": [
+    "src/domain/pyusd/identity.ts"
+   ],
+   "mutation": "Skip the genesis comparison.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, epoch: 700n } to deeply equal { ok: false, \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "identity-mint-program",
+   "test": "mint under another token program disables PYUSD",
+   "kind": "group_row",
+   "group": "PYUSD identity check",
+   "files": [
+    "src/domain/pyusd/identity.ts"
+   ],
+   "mutation": "Skip the mint owner-program check.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, epoch: 700n } to deeply equal { ok: false, \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "identity-decimals",
+   "test": "mint with other decimals disables PYUSD",
+   "kind": "group_row",
+   "group": "PYUSD identity check",
+   "files": [
+    "src/domain/pyusd/identity.ts"
+   ],
+   "mutation": "Skip the decimals check.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, epoch: 700n } to deeply equal { ok: false, \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "rate-ceil",
+   "test": "PYUSD amount rounds up to the next atomic unit",
+   "kind": "group_row",
+   "group": "rate parsing, bounds and conversion",
+   "files": [
+    "src/domain/pyusd/rate.ts"
+   ],
+   "mutation": "Use floor division.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 2597402n to be 2597403n // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "rate-exact",
+   "test": "rate arithmetic is exact at its bounds",
+   "kind": "group_row",
+   "group": "rate parsing, bounds and conversion",
+   "files": [
+    "src/domain/pyusd/rate.ts"
+   ],
+   "mutation": "Multiply as JavaScript numbers.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 900719925474089972532n to be 900719925474090000000n // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "rate-plain-decimal",
+   "test": "rate text must be a plain decimal with at most six places",
+   "kind": "group_row",
+   "group": "rate parsing, bounds and conversion",
+   "files": [
+    "src/domain/pyusd/rate.ts"
+   ],
+   "mutation": "Parse with Number() and round.",
+   "own_row": "failed",
+   "error": "AssertionError: -1: expected { ok: false, reason: 'out_of_bounds' } to deeply equal { ok: false, \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "rate-bounds",
+   "test": "rate outside its bounds is refused",
+   "kind": "group_row",
+   "group": "rate parsing, bounds and conversion",
+   "files": [
+    "src/domain/pyusd/rate.ts"
+   ],
+   "mutation": "Drop the bounds check.",
+   "own_row": "failed",
+   "error": "AssertionError: 0: expected { ok: true, atomicPerSgd: 0n } to deeply equal { ok: false, reason: 'out_of_bounds' }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "mint-bps",
+   "test": "non-zero transfer fee rate refuses preparation",
+   "kind": "group_row",
+   "group": "mint eligibility for a transfer",
+   "files": [
+    "src/domain/pyusd/mint.ts"
+   ],
+   "mutation": "Skip the basis-point check.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: false, \u2026(1) } to deeply equal { ok: false, \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "mint-max-fee",
+   "test": "non-zero maximum fee refuses preparation",
+   "kind": "group_row",
+   "group": "mint eligibility for a transfer",
+   "files": [
+    "src/domain/pyusd/mint.ts"
+   ],
+   "mutation": "Skip the maximum-fee check.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: false, \u2026(1) } to deeply equal { Object (ok, reason) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "mint-next-epoch",
+   "test": "non-zero fee in the next epoch refuses preparation",
+   "kind": "group_row",
+   "group": "mint eligibility for a transfer",
+   "files": [
+    "src/domain/pyusd/mint.ts"
+   ],
+   "mutation": "Check only the current epoch.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, fee: { \u2026(3) } } to deeply equal { ok: false, \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "mint-hook",
+   "test": "active transfer hook refuses preparation",
+   "kind": "group_row",
+   "group": "mint eligibility for a transfer",
+   "files": [
+    "src/domain/pyusd/mint.ts"
+   ],
+   "mutation": "Ignore the hook program.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, fee: { \u2026(3) } } to deeply equal { ok: false, \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "mint-unknown-extension",
+   "test": "unreviewed mint extension refuses preparation",
+   "kind": "group_row",
+   "group": "mint eligibility for a transfer",
+   "files": [
+    "src/domain/pyusd/mint.ts"
+   ],
+   "mutation": "Ignore unknown extensions.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, fee: { \u2026(3) } } to deeply equal { ok: false, \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "settings-mint-override",
+   "test": "only two settings configure the PYUSD rail",
+   "kind": "standalone",
+   "group": "PYUSD standalone rules",
+   "files": [
+    "src/env.ts"
+   ],
+   "mutation": "Add an optional mint override to the web settings.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [Function] to throw an error",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "checkout-rate-version",
+   "test": "a changed PYUSD rate is a new checkout",
+   "kind": "standalone",
+   "group": "PYUSD standalone rules",
+   "files": [
+    "src/domain/purchases/checkout-key.ts"
+   ],
+   "mutation": "Leave the rate version out of the hash.",
+   "own_row": "failed",
+   "error": "AssertionError: expected '4838637bfbda2f4d427cf651444c2bb131c12\u2026' not to be '4838637bfbda2f4d427cf651444c2bb131c12\u2026' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "mismatch-to-confirmed",
+   "test": "a PYUSD mismatch can close only unpaid",
+   "kind": "standalone",
+   "group": "PYUSD standalone rules",
+   "files": [
+    "src/domain/pyusd/state.ts"
+   ],
+   "mutation": "Allow mismatch -> confirmed.",
+   "own_row": "failed",
+   "error": "AssertionError: expected true to be false // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "boundary-paypal-imports-solana",
+   "test": "PayPal code imports no Solana module",
+   "kind": "group_row",
+   "group": "PYUSD static boundary checks",
+   "files": [
+    "src/integrations/paypal/orders.ts"
+   ],
+   "mutation": "Import a Solana helper into a PayPal module.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ '@solana-program/token-2022', \u2026(4) ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 9,
+   "proof": true
+  },
+  {
+   "id": "boundary-send-transaction",
+   "test": "server never sends a transaction",
+   "kind": "group_row",
+   "group": "PYUSD static boundary checks",
+   "files": [
+    "src/integrations/solana/rpc.ts"
+   ],
+   "mutation": "Add a sendTransaction call to the RPC client.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'sendTransaction', \u2026(9) ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 9,
+   "proof": true
+  },
+  {
+   "id": "boundary-guard-challenge",
+   "test": "wallet challenge handler begins with its membership guard",
+   "kind": "group_row",
+   "group": "PYUSD static boundary checks",
+   "files": [
+    "src/app/api/v1/merchant/outlets/[id]/destinations/pyusd/challenge/route.ts"
+   ],
+   "mutation": "Remove the guard from the challenge handler.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'const principal = { outletId: (await \u2026' to match /^const principal = await requireOutle\u2026/",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 9,
+   "proof": true
+  },
+  {
+   "id": "boundary-guard-proof",
+   "test": "wallet proof handler begins with its membership guard",
+   "kind": "group_row",
+   "group": "PYUSD static boundary checks",
+   "files": [
+    "src/app/api/v1/merchant/outlets/[id]/destinations/pyusd/route.ts"
+   ],
+   "mutation": "Remove the guard from the proof handler.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'const principal = { outletId: (await \u2026' to match /^const principal = await requireOutle\u2026/",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 9,
+   "proof": true
+  },
+  {
+   "id": "boundary-guard-rate",
+   "test": "rate handler begins with its membership guard",
+   "kind": "group_row",
+   "group": "PYUSD static boundary checks",
+   "files": [
+    "src/app/api/v1/merchant/outlets/[id]/pyusd-rate/route.ts"
+   ],
+   "mutation": "Remove the guard from the rate handler.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'const principal = { outletId: (await \u2026' to match /^const principal = await requireOutle\u2026/",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 9,
+   "proof": true
+  },
+  {
+   "id": "boundary-guard-prepare",
+   "test": "preparation handler begins with its buyer guard",
+   "kind": "group_row",
+   "group": "PYUSD static boundary checks",
+   "files": [
+    "src/app/api/v1/purchases/[id]/pyusd/prepare/route.ts"
+   ],
+   "mutation": "Remove the guard from the preparation handler.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'const principal = {} as never;' to match /^const principal = await requireBuyer\u2026/",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 9,
+   "proof": true
+  },
+  {
+   "id": "boundary-guard-submitted",
+   "test": "signature hint handler begins with its buyer guard",
+   "kind": "group_row",
+   "group": "PYUSD static boundary checks",
+   "files": [
+    "src/app/api/v1/purchases/[id]/pyusd/submitted/route.ts"
+   ],
+   "mutation": "Remove the guard from the hint handler.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'const principal = {} as never;' to match /^const principal = await requireBuyer\u2026/",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 9,
+   "proof": true
+  },
+  {
+   "id": "verify-allowlist-accepted",
+   "test": "ComputeBudget and Lighthouse assertions are accepted",
+   "kind": "group_row",
+   "group": "PYUSD verification by meaning",
+   "files": [
+    "src/domain/pyusd/verify.ts"
+   ],
+   "mutation": "Reject every instruction beyond the two prepared ones: ComputeBudget and Lighthouse assertions are refused as not allowlisted. Narrowed so a Lighthouse memory instruction still reads lighthouse_not_assertion, which is its own row's guard.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'uncertain' to be 'confirmed' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 23,
+   "proof": true
+  },
+  {
+   "id": "verify-err",
+   "test": "failed transaction is never paid",
+   "kind": "group_row",
+   "group": "PYUSD verification by meaning",
+   "files": [
+    "src/domain/pyusd/verify.ts"
+   ],
+   "mutation": "Ignore meta.err.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { decision: 'confirmed', \u2026(1) } to deeply equal { decision: 'failed_landing' }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 23,
+   "proof": true
+  },
+  {
+   "id": "verify-blockhash",
+   "test": "other blockhash leaves the transfer uncertain",
+   "kind": "group_row",
+   "group": "PYUSD verification by meaning",
+   "files": [
+    "src/domain/pyusd/verify.ts"
+   ],
+   "mutation": "Skip the blockhash comparison.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { decision: 'confirmed', \u2026(1) } to deeply equal { decision: 'uncertain', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 23,
+   "proof": true
+  },
+  {
+   "id": "verify-signers",
+   "test": "second signer leaves the transfer uncertain",
+   "kind": "group_row",
+   "group": "PYUSD verification by meaning",
+   "files": [
+    "src/domain/pyusd/verify.ts"
+   ],
+   "mutation": "Skip the signer count.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { decision: 'confirmed', \u2026(1) } to deeply equal { decision: 'uncertain', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 23,
+   "proof": true
+  },
+  {
+   "id": "verify-fee-payer",
+   "test": "another fee payer leaves the transfer uncertain",
+   "kind": "group_row",
+   "group": "PYUSD verification by meaning",
+   "files": [
+    "src/domain/pyusd/verify.ts"
+   ],
+   "mutation": "Skip the fee-payer comparison.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { decision: 'confirmed', \u2026(1) } to deeply equal { decision: 'uncertain', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 23,
+   "proof": true
+  },
+  {
+   "id": "verify-transfer-count",
+   "test": "zero or two TransferChecked leave the transfer uncertain",
+   "kind": "group_row",
+   "group": "PYUSD verification by meaning",
+   "files": [
+    "src/domain/pyusd/verify.ts"
+   ],
+   "mutation": "Use the first transfer found.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { decision: 'confirmed', \u2026(1) } to deeply equal { decision: 'uncertain', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 23,
+   "proof": true
+  },
+  {
+   "id": "verify-mint",
+   "test": "transfer of another mint is not paid",
+   "kind": "group_row",
+   "group": "PYUSD verification by meaning",
+   "files": [
+    "src/domain/pyusd/verify.ts"
+   ],
+   "mutation": "Skip the mint comparison.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { decision: 'confirmed', \u2026(1) } to deeply equal { decision: 'uncertain', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 23,
+   "proof": true
+  },
+  {
+   "id": "verify-decimals",
+   "test": "transfer with other decimals is not paid",
+   "kind": "group_row",
+   "group": "PYUSD verification by meaning",
+   "files": [
+    "src/domain/pyusd/verify.ts"
+   ],
+   "mutation": "Skip the decimals comparison.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { decision: 'confirmed', \u2026(1) } to deeply equal { decision: 'uncertain', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 23,
+   "proof": true
+  },
+  {
+   "id": "verify-source",
+   "test": "transfer from another source is not paid",
+   "kind": "group_row",
+   "group": "PYUSD verification by meaning",
+   "files": [
+    "src/domain/pyusd/verify.ts"
+   ],
+   "mutation": "Skip the source comparison.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { decision: 'confirmed', \u2026(1) } to deeply equal { decision: 'uncertain', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 23,
+   "proof": true
+  },
+  {
+   "id": "verify-destination",
+   "test": "transfer to another destination is not paid",
+   "kind": "group_row",
+   "group": "PYUSD verification by meaning",
+   "files": [
+    "src/domain/pyusd/verify.ts"
+   ],
+   "mutation": "Skip the destination comparison.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { decision: 'uncertain', \u2026(1) } to deeply equal { decision: 'uncertain', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 23,
+   "proof": true
+  },
+  {
+   "id": "verify-amount",
+   "test": "amount off by one atomic unit is not paid",
+   "kind": "group_row",
+   "group": "PYUSD verification by meaning",
+   "files": [
+    "src/domain/pyusd/verify.ts"
+   ],
+   "mutation": "Accept any amount at least the expected one.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { decision: 'confirmed', \u2026(1) } to deeply equal { decision: 'uncertain', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 23,
+   "proof": true
+  },
+  {
+   "id": "verify-memo-count",
+   "test": "duplicate memo leaves the transfer uncertain",
+   "kind": "group_row",
+   "group": "PYUSD verification by meaning",
+   "files": [
+    "src/domain/pyusd/verify.ts"
+   ],
+   "mutation": "Accept any memo count.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { decision: 'confirmed', \u2026(1) } to deeply equal { decision: 'uncertain', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 23,
+   "proof": true
+  },
+  {
+   "id": "verify-memo-content",
+   "test": "memo without the reference is not ours",
+   "kind": "group_row",
+   "group": "PYUSD verification by meaning",
+   "files": [
+    "src/domain/pyusd/verify.ts"
+   ],
+   "mutation": "Skip the memo content comparison.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { decision: 'confirmed', \u2026(1) } to deeply equal { decision: 'not_ours' }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 23,
+   "proof": true
+  },
+  {
+   "id": "verify-fee-execution",
+   "test": "fee at the execution epoch must be zero",
+   "kind": "group_row",
+   "group": "PYUSD verification by meaning",
+   "files": [
+    "src/domain/pyusd/verify.ts"
+   ],
+   "mutation": "Skip the execution-epoch fee check.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { decision: 'confirmed', \u2026(1) } to deeply equal { decision: 'uncertain', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 23,
+   "proof": true
+  },
+  {
+   "id": "verify-balance-delta",
+   "test": "destination delta must equal the amount",
+   "kind": "group_row",
+   "group": "PYUSD verification by meaning",
+   "files": [
+    "src/domain/pyusd/verify.ts"
+   ],
+   "mutation": "Skip the balance-delta check.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { decision: 'confirmed', \u2026(1) } to deeply equal { decision: 'uncertain', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 23,
+   "proof": true
+  },
+  {
+   "id": "verify-metadata",
+   "test": "incomplete metadata leaves the transfer uncertain",
+   "kind": "group_row",
+   "group": "PYUSD verification by meaning",
+   "files": [
+    "src/domain/pyusd/verify.ts"
+   ],
+   "mutation": "Treat missing metadata as empty.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { decision: 'uncertain', \u2026(1) } to deeply equal { decision: 'uncertain', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 23,
+   "proof": true
+  },
+  {
+   "id": "verify-outer-program",
+   "test": "an added non-allowlisted instruction leaves the transfer uncertain",
+   "kind": "group_row",
+   "group": "PYUSD verification by meaning",
+   "files": [
+    "src/domain/pyusd/verify.ts"
+   ],
+   "mutation": "Allow any outer program.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { decision: 'confirmed', \u2026(1) } to deeply equal { decision: 'uncertain', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 23,
+   "proof": true
+  },
+  {
+   "id": "verify-outer-lighthouse",
+   "test": "outer Lighthouse memory instruction is not allowlisted",
+   "kind": "group_row",
+   "group": "PYUSD verification by meaning",
+   "files": [
+    "src/domain/pyusd/verify.ts"
+   ],
+   "mutation": "Allow every outer Lighthouse instruction.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { decision: 'confirmed', \u2026(1) } to deeply equal { decision: 'uncertain', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 23,
+   "proof": true
+  },
+  {
+   "id": "verify-inner-lighthouse",
+   "test": "inner Lighthouse memory instruction is not allowlisted",
+   "kind": "group_row",
+   "group": "PYUSD verification by meaning",
+   "files": [
+    "src/domain/pyusd/verify.ts"
+   ],
+   "mutation": "Allow every inner Lighthouse instruction.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { decision: 'confirmed', \u2026(1) } to deeply equal { decision: 'uncertain', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 23,
+   "proof": true
+  },
+  {
+   "id": "verify-inner-program",
+   "test": "inner instruction from another program leaves the transfer uncertain",
+   "kind": "group_row",
+   "group": "PYUSD verification by meaning",
+   "files": [
+    "src/domain/pyusd/verify.ts"
+   ],
+   "mutation": "Skip the inner program check.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { decision: 'confirmed', \u2026(1) } to deeply equal { decision: 'uncertain', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 23,
+   "proof": true
+  },
+  {
+   "id": "verify-inner-token-kind",
+   "test": "inner instruction that moves tokens or changes authority leaves it uncertain",
+   "kind": "group_row",
+   "group": "PYUSD verification by meaning",
+   "files": [
+    "src/domain/pyusd/verify.ts"
+   ],
+   "mutation": "Allow any inner Token-2022 instruction.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { decision: 'confirmed', \u2026(1) } to deeply equal { decision: 'uncertain', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 23,
+   "proof": true
+  },
+  {
+   "id": "verify-account-keys",
+   "test": "unresolvable account keys leave the transfer uncertain",
+   "kind": "group_row",
+   "group": "PYUSD verification by meaning",
+   "files": [
+    "src/domain/pyusd/verify.ts"
+   ],
+   "mutation": "Resolve static keys only.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { decision: 'confirmed', \u2026(1) } to deeply equal { decision: 'uncertain', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 23,
+   "proof": true
+  },
+  {
+   "id": "transport-confirmed-blockhash",
+   "test": "preparation uses a confirmed blockhash",
+   "kind": "group_row",
+   "group": "bounded RPC transport",
+   "files": [
+    "src/integrations/solana/rpc.ts"
+   ],
+   "mutation": "Request a finalized blockhash.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ [ 'getLatestBlockhash', \u2026(1) ] ] to deeply equal [ [ 'getLatestBlockhash', \u2026(1) ] ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "transport-finalized-reads",
+   "test": "verification reads at finalized commitment",
+   "kind": "group_row",
+   "group": "bounded RPC transport",
+   "files": [
+    "src/integrations/solana/rpc.ts"
+   ],
+   "mutation": "Read at confirmed.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ \u2026(2) ] to deeply equal [ \u2026(2) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "transport-size-cap",
+   "test": "oversized RPC response is refused",
+   "kind": "group_row",
+   "group": "bounded RPC transport",
+   "files": [
+    "src/integrations/solana/rpc.ts"
+   ],
+   "mutation": "Read the response unbounded.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { kind: 'ok', \u2026(1) } to deeply equal { kind: 'too_large' }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "transport-timeout",
+   "test": "RPC call stops at its timeout",
+   "kind": "group_row",
+   "group": "bounded RPC transport",
+   "files": [
+    "src/integrations/solana/rpc.ts"
+   ],
+   "mutation": "Remove the call timeout.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'pending' to deeply equal { kind: 'unavailable' }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "prepared-compute-budget",
+   "test": "prepared transaction is exactly a memo and one TransferChecked",
+   "kind": "standalone",
+   "group": "prepared transaction",
+   "files": [
+    "src/integrations/solana/build.ts"
+   ],
+   "mutation": "Add a compute-unit price instruction.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { numSignerAccounts: 1, \u2026(2) } to deeply equal { numSignerAccounts: 1, \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "merchant-challenge-enabled",
+   "test": "wallet challenge refuses while the rail is disabled",
+   "kind": "group_row",
+   "group": "PYUSD merchant routes > merchant PYUSD routes",
+   "files": [
+    "src/app/api/v1/merchant/outlets/[id]/destinations/pyusd/challenge/route.ts"
+   ],
+   "mutation": "Remove requirePyusdEnabled from the challenge route.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, data: { \u2026(4) } } to match object { ok: false, error: { \u2026(2) } }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 20,
+   "proof": true
+  },
+  {
+   "id": "merchant-proof-enabled",
+   "test": "wallet proof refuses while the rail is disabled",
+   "kind": "group_row",
+   "group": "PYUSD merchant routes > merchant PYUSD routes",
+   "files": [
+    "src/app/api/v1/merchant/outlets/[id]/destinations/pyusd/route.ts"
+   ],
+   "mutation": "Remove requirePyusdEnabled from the proof route.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, \u2026(1) } to match object { ok: false, error: { \u2026(2) } }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 20,
+   "proof": true
+  },
+  {
+   "id": "merchant-rate-enabled",
+   "test": "rate change refuses while the rail is disabled",
+   "kind": "group_row",
+   "group": "PYUSD merchant routes > merchant PYUSD routes",
+   "files": [
+    "src/app/api/v1/merchant/outlets/[id]/pyusd-rate/route.ts"
+   ],
+   "mutation": "Remove requirePyusdEnabled from the rate route.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, \u2026(1) } to match object { ok: false, error: { \u2026(2) } }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 20,
+   "proof": true
+  },
+  {
+   "id": "merchant-challenge-origin",
+   "test": "wallet challenge rejects a foreign Origin",
+   "kind": "group_row",
+   "group": "PYUSD merchant routes > merchant PYUSD routes",
+   "files": [
+    "src/app/api/v1/merchant/outlets/[id]/destinations/pyusd/challenge/route.ts"
+   ],
+   "mutation": "Remove assertSameOrigin from the challenge route.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 201 to be 403 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 20,
+   "proof": true
+  },
+  {
+   "id": "merchant-proof-origin",
+   "test": "wallet proof rejects a foreign Origin",
+   "kind": "group_row",
+   "group": "PYUSD merchant routes > merchant PYUSD routes",
+   "files": [
+    "src/app/api/v1/merchant/outlets/[id]/destinations/pyusd/route.ts"
+   ],
+   "mutation": "Remove assertSameOrigin from the proof route.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 200 to be 403 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 20,
+   "proof": true
+  },
+  {
+   "id": "merchant-rate-origin",
+   "test": "rate change rejects a foreign Origin",
+   "kind": "group_row",
+   "group": "PYUSD merchant routes > merchant PYUSD routes",
+   "files": [
+    "src/app/api/v1/merchant/outlets/[id]/pyusd-rate/route.ts"
+   ],
+   "mutation": "Remove assertSameOrigin from the rate route.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 200 to be 403 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 20,
+   "proof": true
+  },
+  {
+   "id": "merchant-proof-identity",
+   "test": "wallet proof refuses on an identity mismatch",
+   "kind": "group_row",
+   "group": "PYUSD merchant routes > merchant PYUSD routes",
+   "files": [
+    "src/domain/pyusd/challenge.ts"
+   ],
+   "mutation": "Skip the identity check in the proof route.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, \u2026(1) } to match object { ok: false, error: { \u2026(2) } }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 20,
+   "proof": true
+  },
+  {
+   "id": "merchant-challenge-host",
+   "test": "wallet challenge names Envoi's configured domain and devnet",
+   "kind": "group_row",
+   "group": "PYUSD merchant routes > merchant PYUSD routes",
+   "files": [
+    "src/app/api/v1/merchant/outlets/[id]/destinations/pyusd/challenge/route.ts"
+   ],
+   "mutation": "Build the domain from the Host header.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'attacker.example wants you to sign in\u2026' to be 'localhost:3000 wants you to sign in w\u2026' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 20,
+   "proof": true
+  },
+  {
+   "id": "merchant-challenge-limit",
+   "test": "wallet challenges are rate limited per outlet",
+   "kind": "group_row",
+   "group": "PYUSD merchant routes > merchant PYUSD routes",
+   "files": [
+    "src/domain/pyusd/challenge.ts"
+   ],
+   "mutation": "Remove the challenge limiter.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, data: { \u2026(4) } } to match object { ok: false, \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 20,
+   "proof": true
+  },
+  {
+   "id": "merchant-signature",
+   "test": "invalid wallet signature is refused",
+   "kind": "group_row",
+   "group": "PYUSD merchant routes > merchant PYUSD routes",
+   "files": [
+    "src/domain/pyusd/challenge.ts"
+   ],
+   "mutation": "Skip Ed25519 verification.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, \u2026(1) } to match object { ok: false, error: { \u2026(2) } }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "wallet proof verifies the saved challenge bytes"
+   ],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 20,
+   "proof": true
+  },
+  {
+   "id": "merchant-expiry",
+   "test": "wallet challenge expires after five minutes",
+   "kind": "group_row",
+   "group": "PYUSD merchant routes > merchant PYUSD routes",
+   "files": [
+    "src/domain/pyusd/challenge.ts"
+   ],
+   "mutation": "Skip the expiry check.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: false, error: { \u2026(4) } } to match object { ok: false, error: { \u2026(2) } }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 20,
+   "proof": true
+  },
+  {
+   "id": "merchant-other-outlet",
+   "test": "wallet challenge for another outlet is refused",
+   "kind": "group_row",
+   "group": "PYUSD merchant routes > merchant PYUSD routes",
+   "files": [
+    "src/domain/pyusd/challenge.ts"
+   ],
+   "mutation": "Ignore the challenge's outlet.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, \u2026(1) } to match object { ok: false, error: { \u2026(2) } }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 20,
+   "proof": true
+  },
+  {
+   "id": "merchant-token-from-body",
+   "test": "merchant token account is derived, never supplied",
+   "kind": "group_row",
+   "group": "PYUSD merchant routes > merchant PYUSD routes",
+   "files": [
+    "src/app/api/v1/merchant/outlets/[id]/destinations/pyusd/route.ts",
+    "src/domain/pyusd/challenge.ts",
+    "src/domain/pyusd/input.ts"
+   ],
+   "mutation": "Accept a token account from the body.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ { \u2026(3) } ] to deeply equal [ { \u2026(3) } ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 20,
+   "proof": true
+  },
+  {
+   "id": "merchant-account-exists",
+   "test": "missing merchant token account is refused",
+   "kind": "group_row",
+   "group": "PYUSD merchant routes > merchant PYUSD routes",
+   "files": [
+    "src/domain/pyusd/identity.ts"
+   ],
+   "mutation": "Skip the existence check.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, \u2026(1) } to match object { ok: false, error: { \u2026(2) } }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 20,
+   "proof": true
+  },
+  {
+   "id": "merchant-account-program",
+   "test": "merchant token account under another program is refused",
+   "kind": "group_row",
+   "group": "PYUSD merchant routes > merchant PYUSD routes",
+   "files": [
+    "src/domain/pyusd/identity.ts"
+   ],
+   "mutation": "Skip the program-owner check on the token account.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, \u2026(1) } to match object { ok: false, error: { \u2026(2) } }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 20,
+   "proof": true
+  },
+  {
+   "id": "merchant-account-frozen",
+   "test": "frozen merchant token account is refused",
+   "kind": "group_row",
+   "group": "PYUSD merchant routes > merchant PYUSD routes",
+   "files": [
+    "src/domain/pyusd/identity.ts"
+   ],
+   "mutation": "Skip the frozen-state check.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, \u2026(1) } to match object { ok: false, error: { \u2026(2) } }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 20,
+   "proof": true
+  },
+  {
+   "id": "merchant-no-enrollment",
+   "test": "wallet proof creates no membership or enrollment",
+   "kind": "group_row",
+   "group": "PYUSD merchant routes > merchant PYUSD routes",
+   "files": [
+    "drizzle/0022_s16_pyusd.sql",
+    "src/domain/pyusd/challenge.ts"
+   ],
+   "mutation": "Approve the enrollment on proof. envoi_web holds no UPDATE on enrollments, so the mutation also grants it in migration 0022; the grant alone would change nothing.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { memberships: [ { \u2026(4) } ], \u2026(1) } to deeply equal { memberships: [ { \u2026(4) } ], \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 20,
+   "proof": true
+  },
+  {
+   "id": "proof-saved-bytes",
+   "test": "wallet proof verifies the saved challenge bytes",
+   "kind": "standalone",
+   "group": "PYUSD merchant routes > PYUSD wallet proof standalone tests",
+   "files": [
+    "src/app/api/v1/merchant/outlets/[id]/destinations/pyusd/route.ts",
+    "src/domain/pyusd/challenge.ts",
+    "src/domain/pyusd/input.ts"
+   ],
+   "mutation": "Verify against message text taken from the request.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, \u2026(1) } to match object { ok: false, error: { \u2026(2) } }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 20,
+   "proof": true
+  },
+  {
+   "id": "proof-single-use",
+   "test": "wallet challenge is single-use",
+   "kind": "standalone",
+   "group": "PYUSD merchant routes > PYUSD wallet proof standalone tests",
+   "files": [
+    "src/domain/pyusd/challenge.ts"
+   ],
+   "mutation": "Drop the consumed_at IS NULL predicate.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ { ok: true, data: { \u2026(1) } }, \u2026(1) ] to have a length of 1 but got 2",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 20,
+   "proof": true
+  },
+  {
+   "id": "publish-disabled-rail",
+   "test": "a PYUSD-only shop cannot publish while PYUSD is disabled",
+   "kind": "standalone",
+   "group": "PYUSD merchant routes > PYUSD wallet proof standalone tests",
+   "files": [
+    "src/domain/outlets/publish.ts"
+   ],
+   "mutation": "Count a disabled rail's destination as active.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, data: { \u2026(2) } } to match object { ok: false, error: { \u2026(2) } }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 20,
+   "proof": true
+  },
+  {
+   "id": "pricing-enabled",
+   "test": "PYUSD pricing refuses while the rail is disabled",
+   "kind": "group_row",
+   "group": "PYUSD purchase > PYUSD pricing",
+   "files": [
+    "src/domain/purchases/price.ts"
+   ],
+   "mutation": "Remove requirePyusdEnabled from PYUSD pricing.",
+   "own_row": "failed",
+   "error": "AssertionError: expected undefined to match object { code: 'pyusd_unavailable', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "pricing-rate-age",
+   "test": "rate older than 30 days makes PYUSD unavailable",
+   "kind": "group_row",
+   "group": "PYUSD purchase > PYUSD pricing",
+   "files": [
+    "src/domain/purchases/price.ts"
+   ],
+   "mutation": "Skip the age check at pricing.",
+   "own_row": "failed",
+   "error": "AssertionError: expected undefined to match object { code: 'rate_expired', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "prep-enabled",
+   "test": "preparation refuses while the rail is disabled",
+   "kind": "group_row",
+   "group": "PYUSD purchase > PYUSD preparation",
+   "files": [
+    "src/app/api/v1/purchases/[id]/pyusd/prepare/route.ts"
+   ],
+   "mutation": "Remove requirePyusdEnabled from preparation.",
+   "own_row": "failed",
+   "error": "AssertionError: expected undefined to match object { code: 'pyusd_unavailable', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "prep-origin",
+   "test": "preparation rejects a foreign Origin",
+   "kind": "group_row",
+   "group": "PYUSD purchase > PYUSD preparation",
+   "files": [
+    "src/app/api/v1/purchases/[id]/pyusd/prepare/route.ts"
+   ],
+   "mutation": "Remove assertSameOrigin from preparation.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 201 to be 403 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "prep-owner",
+   "test": "preparation requires the owning buyer",
+   "kind": "group_row",
+   "group": "PYUSD purchase > PYUSD preparation",
+   "files": [
+    "src/domain/pyusd/attempts.ts"
+   ],
+   "mutation": "Drop the owner predicate on preparation.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 201 to be 404 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "prep-kill-switch",
+   "test": "payments kill switch refuses PYUSD preparation",
+   "kind": "group_row",
+   "group": "PYUSD purchase > PYUSD preparation",
+   "files": [
+    "src/domain/pyusd/attempts.ts"
+   ],
+   "mutation": "Skip the kill-switch check in PYUSD eligibility.",
+   "own_row": "failed",
+   "error": "AssertionError: expected undefined to match object { code: 'pyusd_unavailable', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "prep-review-window",
+   "test": "stale review cannot prepare PYUSD",
+   "kind": "group_row",
+   "group": "PYUSD purchase > PYUSD preparation",
+   "files": [
+    "src/domain/pyusd/attempts.ts"
+   ],
+   "mutation": "Skip the T_REVIEW check in PYUSD eligibility.",
+   "own_row": "failed",
+   "error": "AssertionError: expected undefined to match object { code: 'review_expired' }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "prep-identity",
+   "test": "preparation refuses on an identity mismatch",
+   "kind": "group_row",
+   "group": "PYUSD purchase > PYUSD preparation",
+   "files": [
+    "src/domain/pyusd/attempts.ts"
+   ],
+   "mutation": "Skip the identity check in preparation.",
+   "own_row": "failed",
+   "error": "AssertionError: expected undefined to match object { code: 'pyusd_unavailable', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "prep-mint",
+   "test": "preparation refuses an ineligible mint",
+   "kind": "group_row",
+   "group": "PYUSD purchase > PYUSD preparation",
+   "files": [
+    "src/domain/pyusd/attempts.ts"
+   ],
+   "mutation": "Skip assessMintForTransfer in preparation.",
+   "own_row": "failed",
+   "error": "AssertionError: expected undefined to match object { code: 'pyusd_unavailable', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "prep-rate-version",
+   "test": "rate change invalidates an unexecuted PYUSD review at preparation",
+   "kind": "group_row",
+   "group": "PYUSD purchase > PYUSD preparation",
+   "files": [
+    "src/domain/pyusd/attempts.ts"
+   ],
+   "mutation": "Skip the rate-version recheck.",
+   "own_row": "failed",
+   "error": "AssertionError: expected undefined to match object { code: 'review_invalidated', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "prep-rate-age",
+   "test": "rate expiry between review and preparation refuses preparation",
+   "kind": "group_row",
+   "group": "PYUSD purchase > PYUSD preparation",
+   "files": [
+    "src/domain/pyusd/attempts.ts"
+   ],
+   "mutation": "Check the age only at pricing.",
+   "own_row": "failed",
+   "error": "AssertionError: expected undefined to match object { code: 'rate_expired' }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "prep-buyer-balance",
+   "test": "buyer without enough PYUSD cannot prepare",
+   "kind": "group_row",
+   "group": "PYUSD purchase > PYUSD preparation",
+   "files": [
+    "src/domain/pyusd/attempts.ts"
+   ],
+   "mutation": "Skip the buyer balance check.",
+   "own_row": "failed",
+   "error": "AssertionError: expected undefined to match object { code: 'pyusd_unavailable', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "prep-buyer-frozen",
+   "test": "frozen buyer token account cannot prepare",
+   "kind": "group_row",
+   "group": "PYUSD purchase > PYUSD preparation",
+   "files": [
+    "src/domain/pyusd/attempts.ts"
+   ],
+   "mutation": "Skip the buyer frozen check.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { code: 'pyusd_unavailable', \u2026(3) } to match object { code: 'pyusd_unavailable', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "prep-merchant-recheck",
+   "test": "merchant token account is rechecked at preparation",
+   "kind": "group_row",
+   "group": "PYUSD purchase > PYUSD preparation",
+   "files": [
+    "src/domain/pyusd/attempts.ts"
+   ],
+   "mutation": "Skip the merchant account check in preparation.",
+   "own_row": "failed",
+   "error": "AssertionError: expected undefined to match object { code: 'pyusd_unavailable', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "prep-bytes-after-commit",
+   "test": "no unsigned bytes leave before the attempt is saved",
+   "kind": "group_row",
+   "group": "PYUSD purchase > PYUSD preparation",
+   "files": [
+    "src/domain/pyusd/attempts.ts"
+   ],
+   "mutation": "Build and return the bytes before the commit: when the transaction saving the attempt fails, the bytes are returned anyway. Narrowed to the failing save, so a successful preparation is unchanged.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { kind: 'prepared', \u2026(3) } to be an instance of Error",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "prep-release-once",
+   "test": "a prepared purchase never releases bytes again",
+   "kind": "group_row",
+   "group": "PYUSD purchase > PYUSD preparation",
+   "files": [
+    "src/domain/pyusd/attempts.ts"
+   ],
+   "mutation": "Return the transaction again for an existing attempt.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: false, error: { \u2026(4) } } to match object { ok: false, error: { \u2026(2) } }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "prep-bytes-stored",
+   "test": "released transaction bytes are never stored",
+   "kind": "group_row",
+   "group": "PYUSD purchase > PYUSD preparation",
+   "files": [
+    "src/domain/pyusd/attempts.ts"
+   ],
+   "mutation": "Save the wire bytes on the attempt.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ Array(1) ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "constraint-reference",
+   "test": "memo reference is unique per attempt",
+   "kind": "group_row",
+   "group": "PYUSD purchase > PYUSD attempt constraints",
+   "files": [
+    "drizzle/0022_s16_pyusd.sql"
+   ],
+   "mutation": "Drop the reference unique index.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to match object { code: '23505', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "constraint-signature",
+   "test": "a finalized signature binds to one attempt",
+   "kind": "group_row",
+   "group": "PYUSD purchase > PYUSD attempt constraints",
+   "files": [
+    "drizzle/0022_s16_pyusd.sql"
+   ],
+   "mutation": "Drop the signature unique index.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to match object { code: '23505', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "rate-change-reprices",
+   "test": "rate change never alters a prepared attempt",
+   "kind": "standalone",
+   "group": "PYUSD purchase > PYUSD preparation standalone tests",
+   "files": [
+    "drizzle/0022_s16_pyusd.sql",
+    "src/domain/pyusd/rate.ts"
+   ],
+   "mutation": "Re-price open attempts on a rate change. envoi_web holds no UPDATE on pyusd_atomic_amount, so the mutation also grants it in migration 0022.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 1335808n to be 1335807n // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "cancel-closes-unpaid",
+   "test": "cancel after PYUSD preparation reports checking",
+   "kind": "standalone",
+   "group": "PYUSD purchase > PYUSD preparation standalone tests",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
+   "mutation": "Allow unpaid_closed.",
+   "own_row": "failed",
+   "error": "AssertionError: expected undefined to match object { code: 'payment_uncertain' }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "hint-origin",
+   "test": "signature hint rejects a foreign Origin",
+   "kind": "group_row",
+   "group": "PYUSD purchase > signature hints and reconcile before expiry",
+   "files": [
+    "src/app/api/v1/purchases/[id]/pyusd/submitted/route.ts"
+   ],
+   "mutation": "Remove assertSameOrigin from the hint route.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 200 to be 403 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "hint-owner",
+   "test": "signature hint requires the owning buyer",
+   "kind": "group_row",
+   "group": "PYUSD purchase > signature hints and reconcile before expiry",
+   "files": [
+    "src/domain/pyusd/attempts.ts"
+   ],
+   "mutation": "Drop the owner predicate on the hint route.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ { decision: 'not_found', \u2026(2) } ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "hint-marks-paid",
+   "test": "submitted signature is only a hint",
+   "kind": "group_row",
+   "group": "PYUSD purchase > signature hints and reconcile before expiry",
+   "files": [
+    "src/domain/pyusd/attempts.ts"
+   ],
+   "mutation": "Mark the purchase paid on the hint: a hint the finalized read cannot find yet is taken as payment. Narrowed to the unverified hint, so a found transaction is still decided by verification.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, data: { \u2026(3) } } to match object { ok: true, data: { \u2026(2) } }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "hint-debounce",
+   "test": "user-triggered PYUSD reads are debounced",
+   "kind": "group_row",
+   "group": "PYUSD purchase > signature hints and reconcile before expiry",
+   "files": [
+    "src/domain/pyusd/attempts.ts"
+   ],
+   "mutation": "Skip the debounce.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 2 to be 1 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "hint-failed-as-mismatch",
+   "test": "a failed landing leaves the attempt prepared",
+   "kind": "group_row",
+   "group": "PYUSD purchase > signature hints and reconcile before expiry",
+   "files": [
+    "src/domain/pyusd/attempts.ts"
+   ],
+   "mutation": "Treat a failed landing as a mismatch.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, data: { \u2026(3) } } to match object { ok: true, \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "hint-later-unread",
+   "test": "a later hint is verified when the first is not ours",
+   "kind": "group_row",
+   "group": "PYUSD purchase > signature hints and reconcile before expiry",
+   "files": [
+    "src/domain/pyusd/attempts.ts"
+   ],
+   "mutation": "Audit every hint after the first without reading it.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, data: { \u2026(3) } } to match object { data: { check: 'confirmed', \u2026(1) } }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "hint-cap",
+   "test": "hints beyond the per-attempt cap are not read",
+   "kind": "group_row",
+   "group": "PYUSD purchase > signature hints and reconcile before expiry",
+   "files": [
+    "src/domain/pyusd/attempts.ts"
+   ],
+   "mutation": "Drop the hint cap.",
+   "own_row": "failed",
+   "error": "AssertionError: expected Error: Failed query: update \"payment_atte\u2026 { \u2026(2) } to be an instance of Response",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "hint-flag-gated",
+   "test": "disabled rail still reconciles prepared attempts",
+   "kind": "group_row",
+   "group": "PYUSD purchase > signature hints and reconcile before expiry",
+   "files": [
+    "src/domain/pyusd/attempts.ts"
+   ],
+   "mutation": "Gate hint verification and reconcile on the flag.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, data: { \u2026(3) } } to match object { ok: true, data: { \u2026(2) } }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 30,
+   "proof": true
+  },
+  {
+   "id": "lock-keyed-by-rail",
+   "test": "an unresolved payment blocks the same basket on the other rail",
+   "kind": "standalone",
+   "group": "PYUSD across rails",
+   "files": [
+    "src/domain/purchases/review.ts"
+   ],
+   "mutation": "Key the lock by rail.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, data: { \u2026(3) } } to match object { ok: false, error: { \u2026(2) } }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "two open reviews of one basket cannot both start payment"
+   ],
+   "same_group_others": [
+    "two open reviews of one basket cannot both start payment"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 4,
+   "proof": true
+  },
+  {
+   "id": "lock-any-pending",
+   "test": "an abandoned PayPal order does not lock its basket",
+   "kind": "standalone",
+   "group": "PYUSD across rails",
+   "files": [
+    "src/domain/purchases/state.ts"
+   ],
+   "mutation": "Lock on any pending_payment purchase.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 409 to be 201 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 4,
+   "proof": true
+  },
+  {
+   "id": "lock-only-at-review",
+   "test": "two open reviews of one basket cannot both start payment",
+   "kind": "standalone",
+   "group": "PYUSD across rails",
+   "files": [
+    "src/domain/payments/attempts.ts",
+    "src/domain/pyusd/attempts.ts"
+   ],
+   "mutation": "Check the basket lock only at review creation (drop the recheck in both execution starts).",
+   "own_row": "failed",
+   "error": "AssertionError: expected { kind: 'prepared', \u2026(3) } to match object { kind: 'refused', error: { \u2026(2) } }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 4,
+   "proof": true
+  },
+  {
+   "id": "lock-without-row-locks",
+   "test": "two open reviews of one basket cannot both start payment",
+   "kind": "standalone",
+   "group": "PYUSD across rails",
+   "files": [
+    "src/domain/purchases/review.ts"
+   ],
+   "mutation": "Check the basket lock without first locking the buyer's same-basket purchases.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { kind: 'prepared', \u2026(3) } to match object { kind: 'refused', error: { \u2026(2) } }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 4,
+   "proof": true
+  },
+  {
+   "id": "boot-throws",
+   "test": "PYUSD failure leaves PayPal working",
+   "kind": "standalone",
+   "group": "PYUSD across rails",
+   "files": [
+    "src/app/api/v1/purchases/route.ts"
+   ],
+   "mutation": "Initialize PYUSD at boot and throw on failure.",
+   "own_row": "failed",
+   "error": "AssertionError: rpc_unavailable: the app modules load: expected false to be true // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 4,
+   "proof": true
+  },
+  {
+   "id": "limiter-shared-window",
+   "test": "RPC calls stop at 20 per 10 seconds across web and runner",
+   "kind": "group_row",
+   "group": "shared RPC limiter",
+   "files": [
+    "src/integrations/solana/limiter.ts"
+   ],
+   "mutation": "Count per process.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, \u2026(1) } to match object { ok: false, reason: 'global' }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "limiter-per-method",
+   "test": "one RPC method stops at 10 per 10 seconds",
+   "kind": "group_row",
+   "group": "shared RPC limiter",
+   "files": [
+    "src/integrations/solana/limiter.ts"
+   ],
+   "mutation": "Drop the per-method count.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, \u2026(1) } to match object { ok: false, reason: 'method' }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "limiter-slots",
+   "test": "at most two RPC requests run at once",
+   "kind": "group_row",
+   "group": "shared RPC limiter",
+   "files": [
+    "src/integrations/solana/limiter.ts"
+   ],
+   "mutation": "Drop the slot rows.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, \u2026(1) } to match object { ok: false, reason: 'concurrency' }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "limiter-backoff",
+   "test": "RPC 429 backs off every caller",
+   "kind": "group_row",
+   "group": "shared RPC limiter",
+   "files": [
+    "src/integrations/solana/limiter.ts"
+   ],
+   "mutation": "Retry immediately.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, \u2026(1) } to match object { ok: false, reason: 'backoff' }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "limiter-lease",
+   "test": "abandoned RPC slot is reclaimed after its lease",
+   "kind": "group_row",
+   "group": "shared RPC limiter",
+   "files": [
+    "src/integrations/solana/limiter.ts"
+   ],
+   "mutation": "Never expire slot leases.",
+   "own_row": "failed",
+   "error": "AssertionError: expected false to be true // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "wallet-devnet-chain",
+   "test": "wallet is asked for solana:devnet",
+   "kind": "group_row",
+   "group": "browser wallet handoff",
+   "files": [
+    "src/lib/wallet/standard.ts"
+   ],
+   "mutation": "Omit the chain.",
+   "own_row": "failed",
+   "error": "AssertionError: expected undefined to be 'solana:devnet' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "wallet-capability-filter",
+   "test": "wallet without devnet sign-and-send is not offered",
+   "kind": "group_row",
+   "group": "browser wallet handoff",
+   "files": [
+    "src/lib/wallet/standard.ts"
+   ],
+   "mutation": "Skip the capability filter.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'FIXTURE mainnet wallet', \u2026(2) ] to deeply equal [ 'FIXTURE devnet wallet' ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "wallet-link-purchase-id",
+   "test": "Phantom link carries only public outlet and item ids",
+   "kind": "group_row",
+   "group": "browser wallet handoff",
+   "files": [
+    "src/lib/wallet/phantom-browse.ts"
+   ],
+   "mutation": "Add the purchase id to the link.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ [ 'outlet', 'out_fixture' ], \u2026(2) ] to deeply equal [ [ 'outlet', 'out_fixture' ], \u2026(1) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "wallet-one-shot",
+   "test": "the wallet is asked once per released transaction",
+   "kind": "group_row",
+   "group": "browser wallet handoff",
+   "files": [
+    "src/lib/wallet/standard.ts"
+   ],
+   "mutation": "Keep the bytes after the wallet call.",
+   "own_row": "failed",
+   "error": "AssertionError: resolve: expected { kind: 'sent', \u2026(1) } to deeply equal { kind: 'checking', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "phone-pay-button",
+   "test": "phone without a wallet gets the Phantom link, not a pay button",
+   "kind": "standalone",
+   "group": "PYUSD wallet and receipt standalone tests",
+   "files": [
+    "src/lib/wallet/standard.ts"
+   ],
+   "mutation": "Show the pay button whenever PYUSD is selected.",
+   "own_row": "failed",
+   "error": "AssertionError: expected '<section class=\"card\" aria-labelledby\u2026' to contain '>Open in Phantom</a>'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "receipt-received",
+   "test": "PYUSD receipt says transferred and finalized on devnet",
+   "kind": "standalone",
+   "group": "PYUSD wallet and receipt standalone tests",
+   "files": [
+    "src/app/receipt/[purchaseId]/pyusd-receipt.tsx"
+   ],
+   "mutation": "Change the copy to \"received\".",
+   "own_row": "failed",
+   "error": "AssertionError: expected false to be true // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  }
+ ],
+ "run": "2026-10-17, in a git archive of 91605ae with a copy of node_modules (the checkout itself untouched), local PostgreSQL 18.",
+ "first_run": "An earlier full run on 0bd8afb proved 107 of 114; its seven failures are recorded in 00-status.md and led to commit 91605ae."
+}
