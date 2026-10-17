@@ -142,6 +142,28 @@ export async function verifyWalletProof(
     return { ok: false, reason: account.reason === "missing" ? "token_account_missing" : account.reason === "frozen" ? "token_account_frozen" : "token_account_not_token_2022" };
   }
 
+  // Two first proofs from two challenges can both find no destination and both insert; the loser's
+  // insert fails on payment_destinations_outlet_rail_unique. Its transaction, challenge consumption
+  // included, rolls back, and one retry finds the winner's committed row and replaces it as a newer
+  // version, as any later proof does.
+  for (let tries = 0; ; tries++) {
+    try {
+      return await recordProof(db, principal, challenge, wallet, account, now);
+    } catch (err) {
+      if (tries > 0 || !isUniqueViolation(err)) throw err;
+    }
+  }
+}
+
+function isUniqueViolation(err: unknown): boolean {
+  for (let current: unknown = err; current; current = (current as { cause?: unknown }).cause) {
+    if ((current as { code?: unknown }).code === "23505") return true;
+  }
+  return false;
+}
+
+// Consumes the challenge and records the destination and its audit row in one transaction.
+async function recordProof(db: Db, principal: OutletMemberPrincipal, challenge: { id: string }, wallet: Address, account: { address: Address }, now: Date): Promise<WalletProof> {
   return db.transaction(async (tx): Promise<WalletProof> => {
     const consumed = await tx
       .update(walletChallenges)

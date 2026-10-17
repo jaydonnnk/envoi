@@ -322,6 +322,47 @@ describe("PYUSD merchant routes", () => {
       expect(await pyusdDestinations(shop)).toEqual([{ walletAddress: wallet.address, tokenAccount: await associatedPyusdAccount(wallet.address), version: 1 }]);
     });
 
+    // Not a Gate 3 named test: the 500 two concurrent first proofs used to answer.
+    it("two concurrent first proofs from two challenges both record a destination", async () => {
+      const shop = await api.newShop("proof-race");
+      const [first, second] = [await merchantWallet(), await merchantWallet()];
+      const proofs = [await signed(await issued(shop, first), first), await signed(await issued(shop, second), second)];
+      // Barrier: a superuser transaction holds an uncommitted PYUSD destination for the outlet, so both
+      // proofs find no row and both wait on its unique key at their inserts; it then rolls back.
+      let release!: () => void;
+      const released = new Promise<void>((resolve) => (release = resolve));
+      let holding!: () => void;
+      const held = new Promise<void>((resolve) => (holding = resolve));
+      const barrier = database.admin
+        .begin(async (sql) => {
+          await sql`
+            insert into payment_destinations (id, outlet_id, rail, environment, status, version, wallet_address, token_account, key_verified_at, key_verified_by_user_id, created_at)
+            values ('dst_fixture_barrier', ${shop.outletId}, 'pyusd', 'devnet', 'active', 1, ${first.address}, ${await associatedPyusdAccount(first.address)}, now(), ${shop.merchant.userId}, now())`;
+          holding();
+          await released;
+          throw new Error("FIXTURE: roll the barrier back");
+        })
+        .catch(() => undefined);
+      await held;
+      const responses = Promise.all(proofs.map((proof) => submitProof(shop, proof)));
+      const deadline = Date.now() + 10_000;
+      for (;;) {
+        const [waiting] = await database.admin<{ n: number }[]>`
+          select count(*)::int as n from pg_stat_activity where datname = ${database.name} and wait_event_type = 'Lock' and query ilike '%insert into payment_destinations%'`;
+        if (waiting!.n >= 2) break;
+        if (Date.now() > deadline) throw new Error("the two proofs never reached the destination insert");
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      }
+      release();
+      await barrier;
+      const answers = await Promise.all((await responses).map((response) => envelope(response)));
+      expect(answers.map((answer) => answer.ok)).toEqual([true, true]);
+      const rows = await pyusdDestinations(shop);
+      expect(rows).toHaveLength(1);
+      expect(rows[0]!.version).toBe(2);
+      expect([first.address, second.address]).toContain(rows[0]!.walletAddress);
+    });
+
     it("a PYUSD-only shop cannot publish while PYUSD is disabled", async () => {
       // Every precondition but the PayPal connection, which this shop never has.
       const shop = await api.newShop("pyusd-only");
