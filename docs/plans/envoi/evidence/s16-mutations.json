@@ -1,8 +1,10 @@
 {
  "branch": "envoi/slice-16-pyusd-purchase",
- "base_commit": "91605ae",
+ "base_commit": "bf6111a",
  "uncommitted_changes": false,
  "method": "Each definition in s16-mutation-defs.json applied alone by exact text replacement, its whole test file run with the vitest JSON reporter, every touched file restored and compared by SHA-256, then the whole file rerun. A proof needs the named row to fail on an AssertionError, no other row of its group to fail (for a Gate 3 group row; a standalone test's other failures are recorded), a byte-identical restore and an all-passing rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations, as envoi_web, with DATABASE_URL removed; Solana RPC is a FIXTURE faked at the bounded transport, wallets are key pairs made in the run, PayPal is the FIXTURE fake at the PayPalWriteClient boundary, and every landed transaction is synthetic. Two definitions widen a grant in migration 0022 together with the code change, because envoi_web's privileges independently refuse the mutated write; that is recorded per definition.",
+ "run": "2026-10-17, in a git archive of bf6111a with a copy of node_modules (the checkout itself untouched), local PostgreSQL 18; the archive has no .git, so branch and base_commit are filled from the archived commit.",
+ "previous_runs": "114 of 114 on 91605ae; before that 107 of 114 on 0bd8afb, whose seven failures are recorded in 00-status.md and led to commit 91605ae.",
  "results": [
   {
    "id": "identity-genesis",
@@ -14,7 +16,7 @@
    ],
    "mutation": "Skip the genesis comparison.",
    "own_row": "failed",
-   "error": "AssertionError: expected { ok: true, epoch: 700n } to deeply equal { ok: false, \u2026(1) }",
+   "error": "AssertionError: expected { ok: true, epoch: 700n, \u2026(1) } to deeply equal { ok: false, \u2026(1) }",
    "fails_on_assertion": true,
    "other_failing_rows": [],
    "same_group_others": [],
@@ -33,7 +35,7 @@
    ],
    "mutation": "Skip the mint owner-program check.",
    "own_row": "failed",
-   "error": "AssertionError: expected { ok: true, epoch: 700n } to deeply equal { ok: false, \u2026(1) }",
+   "error": "AssertionError: expected { ok: true, epoch: 700n, \u2026(1) } to deeply equal { ok: false, \u2026(1) }",
    "fails_on_assertion": true,
    "other_failing_rows": [],
    "same_group_others": [],
@@ -52,7 +54,7 @@
    ],
    "mutation": "Skip the decimals check.",
    "own_row": "failed",
-   "error": "AssertionError: expected { ok: true, epoch: 700n } to deeply equal { ok: false, \u2026(1) }",
+   "error": "AssertionError: expected { ok: true, epoch: 700n, \u2026(1) } to deeply equal { ok: false, \u2026(1) }",
    "fails_on_assertion": true,
    "other_failing_rows": [],
    "same_group_others": [],
@@ -951,7 +953,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 20,
+   "rerun_rows": 21,
    "proof": true
   },
   {
@@ -970,7 +972,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 20,
+   "rerun_rows": 21,
    "proof": true
   },
   {
@@ -989,7 +991,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 20,
+   "rerun_rows": 21,
    "proof": true
   },
   {
@@ -1008,7 +1010,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 20,
+   "rerun_rows": 21,
    "proof": true
   },
   {
@@ -1027,7 +1029,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 20,
+   "rerun_rows": 21,
    "proof": true
   },
   {
@@ -1046,7 +1048,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 20,
+   "rerun_rows": 21,
    "proof": true
   },
   {
@@ -1065,7 +1067,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 20,
+   "rerun_rows": 21,
    "proof": true
   },
   {
@@ -1084,7 +1086,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 20,
+   "rerun_rows": 21,
    "proof": true
   },
   {
@@ -1103,7 +1105,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 20,
+   "rerun_rows": 21,
    "proof": true
   },
   {
@@ -1124,7 +1126,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 20,
+   "rerun_rows": 21,
    "proof": true
   },
   {
@@ -1143,7 +1145,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 20,
+   "rerun_rows": 21,
    "proof": true
   },
   {
@@ -1162,7 +1164,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 20,
+   "rerun_rows": 21,
    "proof": true
   },
   {
@@ -1183,7 +1185,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 20,
+   "rerun_rows": 21,
    "proof": true
   },
   {
@@ -1202,7 +1204,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 20,
+   "rerun_rows": 21,
    "proof": true
   },
   {
@@ -1221,7 +1223,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 20,
+   "rerun_rows": 21,
    "proof": true
   },
   {
@@ -1240,7 +1242,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 20,
+   "rerun_rows": 21,
    "proof": true
   },
   {
@@ -1260,7 +1262,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 20,
+   "rerun_rows": 21,
    "proof": true
   },
   {
@@ -1281,7 +1283,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 20,
+   "rerun_rows": 21,
    "proof": true
   },
   {
@@ -1300,7 +1302,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 20,
+   "rerun_rows": 21,
    "proof": true
   },
   {
@@ -1319,7 +1321,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 20,
+   "rerun_rows": 21,
    "proof": true
   },
   {
@@ -1338,7 +1340,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1357,7 +1359,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1376,7 +1378,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1395,7 +1397,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1414,7 +1416,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1433,7 +1435,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1452,7 +1454,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1467,11 +1469,13 @@
    "own_row": "failed",
    "error": "AssertionError: expected undefined to match object { code: 'pyusd_unavailable', \u2026(1) }",
    "fails_on_assertion": true,
-   "other_failing_rows": [],
+   "other_failing_rows": [
+    "one preparation makes five RPC reads and reads the mint once"
+   ],
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1490,7 +1494,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1509,7 +1513,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1528,7 +1532,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1547,7 +1551,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1566,7 +1570,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1585,7 +1589,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1604,7 +1608,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1623,7 +1627,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1642,7 +1646,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1661,7 +1665,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1680,7 +1684,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1700,7 +1704,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1719,7 +1723,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1738,7 +1742,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1757,7 +1761,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1776,7 +1780,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1795,7 +1799,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1814,7 +1818,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1833,7 +1837,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1852,7 +1856,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -1871,7 +1875,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 30,
+   "rerun_rows": 31,
    "proof": true
   },
   {
@@ -2183,7 +2187,5 @@
    "rerun_rows": 6,
    "proof": true
   }
- ],
- "run": "2026-10-17, in a git archive of 91605ae with a copy of node_modules (the checkout itself untouched), local PostgreSQL 18.",
- "first_run": "An earlier full run on 0bd8afb proved 107 of 114; its seven failures are recorded in 00-status.md and led to commit 91605ae."
+ ]
 }
