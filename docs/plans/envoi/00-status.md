@@ -13,8 +13,8 @@ Updated: 2026-10-18 (Asia/Singapore).
   No contract or test changes; see the [reopening record](03-program-design.md#reopening-2026-10-12-typescript-pin-after-the-s1-boot-check) and [Version pins](03-program-design.md#version-pins).
   **Reopened and RE-APPROVED 2026-10-15** for one change, approved by the user in advance: Chinese text accuracy leaves the R5 vision falsifiers; no contract, type, call stack, clock, test name or test count changes; see the [record](#reopening-2026-10-15-english-only-menu-photos) and [Gate 3's section](03-program-design.md#reopening-2026-10-15-english-only-menu-photos).
   `03-program-design.md` now has SHA256 `3f5c8386b8e26e2f3bc6a7e8274ed9582ee5561afc9fe59cee0d4de3305b7cab` after the 2026-10-18 Phantom landing reopening, pinned in `checks/gate4_check.py`.
-  **REOPENED 2026-10-18, IN PROGRESS** for S17 review finding 1 (and the wording of finding 7): a verifying landing anywhere in the post-expiry window decides the attempt; drafted on `envoi/slice-17-review-fixes`, awaiting the user's approval; see the [record](#reopening-2026-10-18-verifying-landing-wins-the-window-scan).
-  Until it is re-approved, `gate4_check.py` fails R10 on the changed file, and the code for finding 1 is not built.
+  **Reopened and RE-APPROVED 2026-10-18** for S17 review finding 1 (and the wording of finding 7): a verifying landing anywhere in the post-expiry window decides the attempt; drafted on `envoi/slice-17-review-fixes` and re-approved by the user ("I approve Gate 3 for the verifying-landing change. Build finding 1 on envoi/slice-17-review-fixes."); see the [record](#reopening-2026-10-18-verifying-landing-wins-the-window-scan).
+  `03-program-design.md` now has SHA256 `bc6b1f0945e8df33f6860085f75175cf6cf2a46e143f62cf9b365dabd09a5a49`, pinned in `checks/gate4_check.py`.
   Before that it was **RE-APPROVED 2026-10-12** by the user ("I approve both pls publish the branches and commit all the changes to main so that we can proceed with the first slice") after a reopening the same day for one change only: PayPal start and completion check `PAYMENTS_ENABLED` and refuse with the new error code `payments_disabled` (Gate 4 delta D10); see the [reopening record](#gate-3-reopening-for-the-paypal-kill-switch-2026-10-12).
   Approval accepts that contract as a proposal; it establishes no runtime evidence.
   Before that it was **RE-APPROVED 2026-10-11** by the user ("Yes approve commit the branch and push and merge to main"), after being reopened on 2026-10-10; the revision of the affected import and PYUSD contracts was drafted on 2026-10-11 and revised the same day after the user's review (fixes A-K) and for fixes L and M after Gate 2 was reopened.
@@ -47,7 +47,9 @@ Updated: 2026-10-18 (Asia/Singapore).
   The case text `a confirmed or mismatched attempt is still scanned after expiry` is corrected to say `operator` for the mismatched attempt, as the call stack does (finding 7).
   [Gate 3 reopening](03-program-design.md#reopening-2026-10-18-a-verifying-landing-wins-the-window-scan).
 - **Unchanged:** Gate 2 (it already says "A matching transfer confirms the original attempt"), Gate 4 (the regression test is a review-fix test recorded here, so no named-test or case count changes), every route, table, migration, error code and clock; `gate4_check.py` still counts 92 named tests and 231 cases.
-- **Approval:** pending.
+- **Approval, 2026-10-18, in the user's words:** "I approve Gate 3 for the verifying-landing change. Build finding 1 on envoi/slice-17-review-fixes."
+  It authorizes building finding 1 on that branch, not pushing, merging or deploying.
+- **Checker:** the new SHA256 of `03-program-design.md` is pinned in `gate4_check.py`; `02-architecture.md` is unchanged.
 
 ### Reopening 2026-10-18: Phantom landing
 

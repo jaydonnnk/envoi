@@ -395,8 +395,9 @@ for f, text in current.items():
 # b24f7986...20688cb4: the PayPal kill-switch reopening, re-approved 2026-10-12.
 # 98e6ac37...76cb5b3ad: the S1 TypeScript pin reopening, approved in advance by the user on 2026-10-12.
 # 0fd07da5...76c475ac: the English-only menu photo reopening, approved in advance by the user on 2026-10-15.
-# Current: the Phantom landing reopening, re-approved by the user on 2026-10-18.
-G3_REOPENING_SHA256 = "3f5c8386b8e26e2f3bc6a7e8274ed9582ee5561afc9fe59cee0d4de3305b7cab"
+# 3f5c8386...305b7cab: the Phantom landing reopening, re-approved by the user on 2026-10-18.
+# Current: the verifying-landing reopening (S17 review finding 1), re-approved by the user on 2026-10-18.
+G3_REOPENING_SHA256 = "bc6b1f0945e8df33f6860085f75175cf6cf2a46e143f62cf9b365dabd09a5a49"
 # 02-architecture.md may likewise equal its Phantom landing reopening text, re-approved on 2026-10-18
 # (938d0a99...f3bf30a6 was the English-only text of 2026-10-15).
 G2_REOPENING_SHA256 = "28d54654a19e885b4908715f7793846c4c873f94f6cc380d985af9fe45561154"

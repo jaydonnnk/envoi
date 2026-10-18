@@ -4,7 +4,7 @@
 **Reopened 2026-10-12 for one change only and RE-APPROVED by the user the same day** ("I approve both pls publish the branches and commit all the changes to main so that we can proceed with the first slice"): PayPal start and completion now check `PAYMENTS_ENABLED` and refuse with a new error code, `payments_disabled`; see [Reopening 2026-10-12](#reopening-2026-10-12-paypal-payments-kill-switch).
 **Reopened 2026-10-15 for one change only, approved by the user in advance:** menu photos are English only, so Chinese text accuracy is no longer an R5 falsifier; see [Reopening 2026-10-15](#reopening-2026-10-15-english-only-menu-photos).
 **Reopened 2026-10-18 for one change and RE-APPROVED by the user the same day** ("Yea sure i approve the gates then make the relevant changes and push to main thnaks"): the Phantom Browse link names the PYUSD rail, and `/buy` opened from it creates the PYUSD review itself; see [Reopening 2026-10-18](#reopening-2026-10-18-phantom-landing-opens-the-pyusd-review).
-**Reopened again 2026-10-18 for one change, drafted for the user's approval:** a verifying landing anywhere in the post-expiry window decides the attempt, so a newer failing transaction carrying the same reference can no longer turn a correct payment into a mismatch; see [Reopening 2026-10-18: verifying landing wins](#reopening-2026-10-18-a-verifying-landing-wins-the-window-scan).
+**Reopened again 2026-10-18 for one change and RE-APPROVED by the user the same day** ("I approve Gate 3 for the verifying-landing change. Build finding 1 on envoi/slice-17-review-fixes."): a verifying landing anywhere in the post-expiry window decides the attempt, so a newer failing transaction carrying the same reference can no longer turn a correct payment into a mismatch; see [Reopening 2026-10-18: verifying landing wins](#reopening-2026-10-18-a-verifying-landing-wins-the-window-scan).
 Approval accepts these contracts as a proposal; it establishes no runtime, account, model, wallet or usability evidence and authorizes no implementation or Gate 4 approval.
 The user removed Zapier because it is paid and reopened Gates 1, 2 and 3.
 Gate 1 was re-approved on 2026-10-10 and Gate 2 on 2026-10-11.
@@ -31,7 +31,8 @@ Gate 3 program design, 2026-10-07 (Asia/Singapore). **APPROVED by the user 2026-
 - **Contracts touched:** `ScanCoverage` gains `pendingMismatch`; `RecoveryStep` gains `mark_mismatch`; the `mismatch` outcome of `CandidateOutcome` carries the candidate as an `ExtraTransfer`; the classification prose, the `expired_scanning -> mismatch` transition, the [PYUSD recovery call stack](#pyusd-recovery-added-2026-10-11) and the two case texts above.
   No route, table, migration (coverage is stored in the existing `pyusd_scan` column), error code, clock, named-test or case count changes.
   The regression test for this finding is a review-fix test recorded in `00-status.md`, like the S16 review fixes, so no count in Gate 4 changes and Gate 4 stays closed.
-- **Approval:** pending; the user asked on 2026-10-18 to "Reopen Gate 3 for finding 1 and draft the change for my approval first".
+- **Approval:** the user asked on 2026-10-18 to "Reopen Gate 3 for finding 1 and draft the change for my approval first", and re-approved Gate 3 for it the same day: "I approve Gate 3 for the verifying-landing change. Build finding 1 on envoi/slice-17-review-fixes."
+  This authorizes building finding 1 on that branch; it does not authorize pushing, merging or deploying.
 
 ## Reopening 2026-10-18: Phantom landing opens the PYUSD review
 
