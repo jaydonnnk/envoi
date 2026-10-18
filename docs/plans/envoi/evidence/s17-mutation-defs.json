@@ -115,11 +115,11 @@
   "id": "rec-mismatch-not-ours",
   "test": "a successful transaction with our reference that fails verification blocks release",
   "test_file": "tests/integration/pyusd-recovery.test.ts",
-  "mutation": "Treat it as not ours and continue.",
+  "mutation": "Treat it as not ours and continue. (Rewritten 2026-10-18 for the S17 review fix of finding 1: the same fault on the changed code.)",
   "edits": [
    {
     "file": "src/domain/pyusd/recovery.ts",
-    "old": "  return result.decision === \"confirmed\" ? { kind: \"bind\", evidence: result.evidence } : { kind: \"mismatch\", signature: tx.signature, reason: result.reason };",
+    "old": "  return result.decision === \"confirmed\" ? { kind: \"bind\", evidence: result.evidence } : { kind: \"mismatch\", transfer };",
     "new": "  return result.decision === \"confirmed\" ? { kind: \"bind\", evidence: result.evidence } : { kind: \"skip\" };"
    }
   ],
@@ -199,12 +199,12 @@
   "id": "rec-stop-on-bind",
   "test": "the scan continues after a transfer binds",
   "test_file": "tests/integration/pyusd-recovery.test.ts",
-  "mutation": "Stop the scan when a candidate binds.",
+  "mutation": "Stop the scan when a candidate binds. (Rewritten 2026-10-18 for the S17 review fix of finding 1: the same fault on the changed code.)",
   "edits": [
    {
     "file": "src/domain/pyusd/reconcile.ts",
-    "old": "        if (await applyScanOutcome(deps.db, attempt.id, outcome, now, actor)) attempt = (await loadAttempt(deps.db, attempt.id)) ?? attempt;\n",
-    "new": "        if (await applyScanOutcome(deps.db, attempt.id, outcome, now, actor)) attempt = (await loadAttempt(deps.db, attempt.id)) ?? attempt;\n        if (outcome.kind === \"bind\") return stop(null);\n"
+    "old": "          attempt = (await loadAttempt(deps.db, attempt.id)) ?? attempt;\n",
+    "new": "          attempt = (await loadAttempt(deps.db, attempt.id)) ?? attempt;\n          if (outcome.kind === \"bind\") return stop(null);\n"
    }
   ],
   "kind": "group_row"
@@ -260,12 +260,12 @@
   "id": "second-landing-skip",
   "test": "a second reference landing is an extra transfer",
   "test_file": "tests/unit/pyusd-recovery.test.ts",
-  "mutation": "Classify every candidate as skip once a signature is bound.",
+  "mutation": "Classify every candidate as skip once a signature is bound. (Rewritten 2026-10-18 for the S17 review fix of finding 1: the same fault on the changed code.)",
   "edits": [
    {
     "file": "src/domain/pyusd/recovery.ts",
-    "old": "  if (attempt.finalizedSignature !== null || attempt.state === \"mismatch\") {\n",
-    "new": "  if (attempt.finalizedSignature !== null) return { kind: \"skip\" };\n  if (attempt.state === \"mismatch\") {\n"
+    "old": "  if (attempt.finalizedSignature !== null || attempt.state === \"mismatch\") return { kind: \"extra\", transfer };",
+    "new": "  if (attempt.finalizedSignature !== null) return { kind: \"skip\" };\n  if (attempt.state === \"mismatch\") return { kind: \"extra\", transfer };"
    }
   ],
   "kind": "standalone"
