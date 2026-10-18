@@ -1,0 +1,100 @@
+[
+ {
+  "id": "fix3-landing-push",
+  "test": "a Phantom landing replaces /buy in the history",
+  "test_file": "tests/unit/s17-review-fixes.test.ts",
+  "mutation": "Open the landing's review with push, as before the fix.",
+  "edits": [
+   {
+    "file": "src/app/buy/landing.ts",
+    "old": "  return landing ? (href) => router.replace(href) : (href) => router.push(href);",
+    "new": "  return landing ? (href) => router.push(href) : (href) => router.push(href);"
+   }
+  ],
+  "kind": "standalone"
+ },
+ {
+  "id": "fix5-receipt-held-old",
+  "test": "a held receipt says what its next check does",
+  "test_file": "tests/unit/s17-review-fixes.test.ts",
+  "mutation": "Show the release-off held wording whatever the switch says.",
+  "edits": [
+   {
+    "file": "src/app/receipt/[purchaseId]/pyusd-receipt.tsx",
+    "old": "      body: heldBody(PYUSD_PROOFS.automaticUnpaidRelease),",
+    "new": "      body: heldBody(false),"
+   }
+  ],
+  "kind": "standalone"
+ },
+ {
+  "id": "fix5-check-message-old",
+  "test": "a held check result says what the next check does",
+  "test_file": "tests/unit/s17-review-fixes.test.ts",
+  "mutation": "Invert the switch in the held check message.",
+  "edits": [
+   {
+    "file": "src/app/receipt/[purchaseId]/live-status.tsx",
+    "old": "  held_no_match: PYUSD_PROOFS.automaticUnpaidRelease\n",
+    "new": "  held_no_match: !PYUSD_PROOFS.automaticUnpaidRelease\n"
+   }
+  ],
+  "kind": "standalone"
+ },
+ {
+  "id": "fix6-held-not-due",
+  "test": "a held attempt is due again once release is enabled",
+  "test_file": "tests/integration/s17-review-fixes.test.ts",
+  "mutation": "Never claim a held attempt.",
+  "edits": [
+   {
+    "file": "src/domain/maintenance/due.ts",
+    "old": "...(releaseEnabled ? [\"held_no_match\"] : [])",
+    "new": "...([] as string[])"
+   }
+  ],
+  "kind": "standalone"
+ },
+ {
+  "id": "fix6-held-not-closed",
+  "test": "a held attempt closes unpaid once release is enabled",
+  "test_file": "tests/integration/s17-review-fixes.test.ts",
+  "mutation": "Close only from expired_scanning.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/reconcile.ts",
+    "old": "close ? [\"expired_scanning\", \"held_no_match\"] : [\"expired_scanning\"]",
+    "new": "[\"expired_scanning\"]"
+   }
+  ],
+  "kind": "standalone"
+ },
+ {
+  "id": "fix8-closedby-release",
+  "test": "merchant orders say an operator-closed mismatch may have reached the shop",
+  "test_file": "tests/integration/s17-review-fixes.test.ts",
+  "mutation": "Report every unpaid close as a release.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/orders.ts",
+    "old": "attempt.outcomeReason === OPERATOR_RESOLUTION ? \"operator\" : \"release\"",
+    "new": "\"release\""
+   }
+  ],
+  "kind": "standalone"
+ },
+ {
+  "id": "fix8-copy-dropped",
+  "test": "merchant orders say an operator-closed mismatch may have reached the shop",
+  "test_file": "tests/integration/s17-review-fixes.test.ts",
+  "mutation": "Drop the operator-closed copy.",
+  "edits": [
+   {
+    "file": "src/app/merchant/orders/order-copy.ts",
+    "old": "        if (order.pyusd?.closedBy === \"operator\") return PYUSD_OPERATOR_CLOSED;\n",
+    "new": ""
+   }
+  ],
+  "kind": "standalone"
+ }
+]
