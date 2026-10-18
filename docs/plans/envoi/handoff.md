@@ -60,8 +60,8 @@ A FIXTURE copy of the phone attempt with its hint withheld was confirmed by the 
 The `envoi_maintenance` password was rotated on 2026-10-18 with the user's choice, because `.env.local` had no `MAINTENANCE_DATABASE_URL`; the new URL is only in `.env.local`.
 `PYUSD_PROOFS.automaticUnpaidRelease` is true on `main` since `4ba8586`; the desktop attempt `pur_bi3om6wno6f6t4vbilkswfut3y` is paid and its window scan is complete with no extra transfer.
 S16 adds the PYUSD devnet rail: Test Shop's merchant proved key control of a Phantom devnet wallet, set a dated rate, and one desktop Chrome payment of 1.8 PYUSD devnet test tokens was verified finalized and shown paid; Phantom kept the prepared blockhash, memo and transfer and added only two ComputeBudget instructions (R13 passes).
-`PYUSD_ENABLED` is unset on Render [verified 2026-10-18 after the S17 deploy]; it stays off outside recorded proof runs, and PYUSD opens to testers only on the user's authorization.
-R14 is open: the Browse link did not keep the basket on the user's iPhone, and which page it opened is [unknown] until the user's next test; phone PYUSD stays unavailable to testers.
+`PYUSD_ENABLED` was on in Render on 2026-10-18 [verified by the S17 review], and the user said the same day they will turn it off; PYUSD opens to testers only on the user's authorization.
+R14 passed on the user's iPhone on 2026-10-18 (see above); phone PYUSD stays closed to testers until that authorization.
 `main` and the S16 branch were pushed at `115f5d9` at 02:02 SGT on 2026-10-18 and Render serves it; no authorization for that push is recorded [unknown].
 A buyer taps Scan on `/buy`, and `/buy/scan` resolves a scanned or pasted sticker to one outlet, "Which outlet?", "This shop is not on Envoi" or "Envoi cannot identify a shop from this code", with paste and text search when the camera is denied or missing.
 Neon has no approved identifier mapping, so an enrolled-sticker demo on Render needs the user to submit a mapping and name it for approval.

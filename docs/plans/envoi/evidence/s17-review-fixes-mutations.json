@@ -1,0 +1,148 @@
+{
+ "branch": "envoi/slice-17-review-fixes",
+ "base_commit": "7ba7445",
+ "uncommitted_changes": false,
+ "method": "Each definition in s17-review-fixes-mutation-defs.json applied alone by exact text replacement, its whole test file run with the vitest JSON reporter, every touched file restored and compared by SHA-256, then the whole file rerun. A proof needs the named row to fail on an AssertionError, no other row of its group to fail (for a Gate 3 group row; a standalone test's other failures are recorded), a byte-identical restore and an all-passing rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations, as envoi_web for the routes and envoi_maintenance for the runner, with DATABASE_URL removed; Solana RPC is a FIXTURE faked at the bounded transport, wallets are key pairs made in the run, PayPal is the FIXTURE fake at the PayPalWriteClient boundary, and every signature, history page and landed transaction is synthetic. Every definition here is a standalone review-fix test recorded in 00-status.md (S17 review fixes, 2026-10-18).",
+ "results": [
+  {
+   "id": "fix3-landing-push",
+   "test": "a Phantom landing replaces /buy in the history",
+   "kind": "standalone",
+   "group": "S17 review fixes",
+   "files": [
+    "src/app/buy/landing.ts"
+   ],
+   "mutation": "Open the landing's review with push, as before the fix.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ \u2026(2) ] to deeply equal [ \u2026(2) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "fix5-receipt-held-old",
+   "test": "a held receipt says what its next check does",
+   "kind": "standalone",
+   "group": "S17 review fixes",
+   "files": [
+    "src/app/receipt/[purchaseId]/pyusd-receipt.tsx"
+   ],
+   "mutation": "Show the release-off held wording whatever the switch says.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'Envoi checked every devnet transactio\u2026' to be 'Envoi checked every devnet transactio\u2026' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "fix5-check-message-old",
+   "test": "a held check result says what the next check does",
+   "kind": "standalone",
+   "group": "S17 review fixes",
+   "files": [
+    "src/app/receipt/[purchaseId]/live-status.tsx"
+   ],
+   "mutation": "Invert the switch in the held check message.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'Envoi found no matching devnet transf\u2026' to be 'Envoi found no matching devnet transf\u2026' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "fix6-held-not-due",
+   "test": "a held attempt is due again once release is enabled",
+   "kind": "standalone",
+   "group": "S17 review fixes",
+   "files": [
+    "src/domain/maintenance/due.ts"
+   ],
+   "mutation": "Never claim a held attempt.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to include 'att_h44cuwaw2hdpdsicexiolk6ctu'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "fix6-held-not-closed",
+   "test": "a held attempt closes unpaid once release is enabled",
+   "kind": "standalone",
+   "group": "S17 review fixes",
+   "files": [
+    "src/domain/pyusd/reconcile.ts"
+   ],
+   "mutation": "Close only from expired_scanning.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { \u2026(18) } to match object { state: 'closed_unpaid' }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "fix8-closedby-release",
+   "test": "merchant orders say an operator-closed mismatch may have reached the shop",
+   "kind": "standalone",
+   "group": "S17 review fixes",
+   "files": [
+    "src/domain/purchases/orders.ts"
+   ],
+   "mutation": "Report every unpaid close as a release.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'release' to be 'operator' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "fix8-copy-dropped",
+   "test": "merchant orders say an operator-closed mismatch may have reached the shop",
+   "kind": "standalone",
+   "group": "S17 review fixes",
+   "files": [
+    "src/app/merchant/orders/order-copy.ts"
+   ],
+   "mutation": "Drop the operator-closed copy.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { chip: 'Not paid', \u2026(2) } to deeply equal { chip: 'Not paid', \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  }
+ ]
+}
