@@ -60,6 +60,10 @@ describe("PYUSD extra transfers and operator acts", () => {
     await database?.drop();
   });
 
+  // What an operator act answered: its refusal message, or "accepted". Compared as a value, so an act
+  // that wrongly succeeds fails the test on an assertion.
+  const refusal = (act: Promise<unknown>) => act.then(() => "accepted", (err: Error) => err.message);
+
   const auditRows = (attemptId: string, action: string) =>
     database.admin<{ actor: string; details: Record<string, unknown> }[]>`select actor, details from audit_events where attempt_id = ${attemptId} and action = ${action}`;
 
@@ -100,9 +104,7 @@ describe("PYUSD extra transfers and operator acts", () => {
 
   it("mismatch resolution waits for a complete window scan", async () => {
     const prepared = await scannedMismatch("ops-wait-scan", false);
-    await expect(resolvePyusdMismatch(h.admin, { operatorEmail, attemptId: prepared.attempt.id, reason: "FIXTURE no tokens reached the shop", evidenceRef: "FIXTURE-EVIDENCE-1" })).rejects.toThrow(
-      /window scan .* is not complete/,
-    );
+    expect(await refusal(resolvePyusdMismatch(h.admin, { operatorEmail, attemptId: prepared.attempt.id, reason: "FIXTURE no tokens reached the shop", evidenceRef: "FIXTURE-EVIDENCE-1" }))).toMatch(/window scan .* is not complete/);
     expect(await h.attemptOf(prepared.purchaseId)).toMatchObject({ state: "mismatch" });
     expect(await h.purchaseState(prepared.purchaseId)).toBe("uncertain");
     expect(await auditRows(prepared.attempt.id, "pyusd_mismatch_resolved_unpaid")).toEqual([]);
@@ -111,9 +113,7 @@ describe("PYUSD extra transfers and operator acts", () => {
   it("mismatch resolution needs recorded evidence", async () => {
     const prepared = await scannedMismatch("ops-evidence", true);
     for (const evidenceRef of [null, "", "   "]) {
-      await expect(resolvePyusdMismatch(h.admin, { operatorEmail, attemptId: prepared.attempt.id, reason: "FIXTURE no tokens reached the shop", evidenceRef })).rejects.toThrow(
-        "An evidence reference is required",
-      );
+      expect(await refusal(resolvePyusdMismatch(h.admin, { operatorEmail, attemptId: prepared.attempt.id, reason: "FIXTURE no tokens reached the shop", evidenceRef }))).toMatch("An evidence reference is required");
     }
     expect(await h.attemptOf(prepared.purchaseId)).toMatchObject({ state: "mismatch" });
     await resolvePyusdMismatch(h.admin, { operatorEmail, attemptId: prepared.attempt.id, reason: "FIXTURE no tokens reached the shop", evidenceRef: "FIXTURE-EVIDENCE-2" });
@@ -129,9 +129,7 @@ describe("PYUSD extra transfers and operator acts", () => {
   it("a refund needs an out-of-band reference", async () => {
     const { prepared, extra } = await paidWithExtra("ops-refund-empty");
     for (const reference of [null, "", "  "]) {
-      await expect(recordExtraTransferRefund(h.admin, { operatorEmail, attemptId: prepared.attempt.id, signature: extra, reason: "FIXTURE shop returned it", reference })).rejects.toThrow(
-        "An out-of-band refund reference is required",
-      );
+      expect(await refusal(recordExtraTransferRefund(h.admin, { operatorEmail, attemptId: prepared.attempt.id, signature: extra, reason: "FIXTURE shop returned it", reference }))).toMatch("An out-of-band refund reference is required");
     }
     const [row] = await database.admin<{ refund_reference: string | null }[]>`select refund_reference from pyusd_extra_transfers where attempt_id = ${prepared.attempt.id}`;
     expect(row?.refund_reference).toBeNull();
@@ -157,8 +155,8 @@ describe("PYUSD extra transfers and operator acts", () => {
     const prepared = await scannedMismatch("ops-flag-resolve", true);
     const unflagged = await newMerchant(database, "pyusd-not-operator", { membership: false });
     const input = { attemptId: prepared.attempt.id, reason: "FIXTURE no tokens reached the shop", evidenceRef: "FIXTURE-EVIDENCE-3" };
-    await expect(resolvePyusdMismatch(h.admin, { ...input, operatorEmail: unflagged.email })).rejects.toThrow("does not hold the operator flag");
-    await expect(resolvePyusdMismatch(h.admin, { ...input, operatorEmail: "nobody-fixture@merchant.example.test" })).rejects.toThrow("No permanent account");
+    expect(await refusal(resolvePyusdMismatch(h.admin, { ...input, operatorEmail: unflagged.email }))).toMatch("does not hold the operator flag");
+    expect(await refusal(resolvePyusdMismatch(h.admin, { ...input, operatorEmail: "nobody-fixture@merchant.example.test" }))).toMatch("No permanent account");
     expect(await auditRows(prepared.attempt.id, "pyusd_mismatch_resolved_unpaid")).toEqual([]);
     expect(await h.attemptOf(prepared.purchaseId)).toMatchObject({ state: "mismatch" });
     await resolvePyusdMismatch(h.admin, { ...input, operatorEmail });
@@ -169,7 +167,7 @@ describe("PYUSD extra transfers and operator acts", () => {
     const { prepared, extra } = await paidWithExtra("ops-flag-refund");
     const unflagged = await newMerchant(database, "pyusd-not-operator", { membership: false });
     const input = { attemptId: prepared.attempt.id, signature: extra, reason: "FIXTURE shop returned it", reference: "FIXTURE-REFUND-2" };
-    await expect(recordExtraTransferRefund(h.admin, { ...input, operatorEmail: unflagged.email })).rejects.toThrow("does not hold the operator flag");
+    expect(await refusal(recordExtraTransferRefund(h.admin, { ...input, operatorEmail: unflagged.email }))).toMatch("does not hold the operator flag");
     const [row] = await database.admin<{ refund_reference: string | null }[]>`select refund_reference from pyusd_extra_transfers where attempt_id = ${prepared.attempt.id}`;
     expect(row?.refund_reference).toBeNull();
     expect(await auditRows(prepared.attempt.id, "pyusd_extra_transfer_refund_recorded")).toEqual([]);

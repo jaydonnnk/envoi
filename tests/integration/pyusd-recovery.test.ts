@@ -3,12 +3,14 @@ import { readOperatorHealth } from "@/domain/maintenance/health";
 import { claimDuePyusdAttempts } from "@/domain/maintenance/due";
 import { PYUSD_PROOFS } from "@/domain/pyusd/constants";
 import { reconcilePyusdAttempt } from "@/domain/pyusd/reconcile";
+import { pyusdReceiptStatus } from "@/app/receipt/[purchaseId]/pyusd-receipt";
 import { applyScanOutcome, decideRecoveryStep } from "@/domain/pyusd/recovery";
 import { createTestDatabase, type TestDatabase } from "../support/db";
 import { createFakeChain, fakeRpcFetch, fakeSolanaClient, MAINNET_GENESIS, type FakeChain, type FixtureSignature } from "../support/fake-solana";
 import { envelope, loadMerchantRoutes, shopApi } from "../support/publication";
 import { callsOf, type PyusdTestState } from "../support/pyusd";
-import { BOUND, historySignature, LANDING_SLOT, loadRecoveryRoutes, recoveryHarness, type RecoveryRoutes } from "../support/pyusd-recovery";
+import { BOUND, historySignature, LANDING_SLOT, loadRecoveryRoutes, recoveryHarness, type Prepared, type RecoveryRoutes } from "../support/pyusd-recovery";
+import { transcript } from "../support/transcript";
 import { webEnvFor } from "../support/session";
 
 const state = vi.hoisted((): PyusdTestState & { proofs: { automaticUnpaidRelease: boolean } } => ({ env: {}, fetch: null, proofs: { automaticUnpaidRelease: false } }));
@@ -270,6 +272,43 @@ describe("PYUSD recovery", () => {
       expect(await insert()).toBe("ok");
       expect(await insert()).toBe("23505");
     });
+  });
+
+  // Not a Gate 3 guard: the S17 visible result, walked once and printed as the labeled FIXTURE
+  // transcript when ENVOI_TRANSCRIPT is set (evidence/s17-fake-chain-transcript.txt).
+  it("FIXTURE transcript: lost wallet responses recovered over a fake chain", async () => {
+    const log = transcript("S17 PYUSD recovery over a FIXTURE devnet RPC; every signature and transaction is synthetic");
+    const receipt = async (prepared: Prepared) => {
+      const status = pyusdReceiptStatus(await h.purchaseState(prepared.purchaseId), "11:05", { attemptState: (await h.attemptOf(prepared.purchaseId)).state, closedBy: null });
+      return `${status.title} (${status.chip})`;
+    };
+    const step = async (label: string, prepared: Prepared, check?: string) => {
+      const attempt = await h.attemptOf(prepared.purchaseId);
+      const scan = attempt.scan ? `scan ${attempt.scan.reachedBeforePreparation ? "complete" : "incomplete"}, ${attempt.scan.pagesRead} page(s), ${attempt.scan.candidatesChecked} candidate(s)` : "no scan";
+      log.step(`${label}: ${check ? `reconcile ${check}; ` : ""}attempt ${attempt.state}, purchase ${await h.purchaseState(prepared.purchaseId)}, ${scan}; receipt "${await receipt(prepared)}"`);
+    };
+    const paid = await h.preparedAttempt("rec-transcript-paid");
+    const mismatched = await h.preparedAttempt("rec-transcript-mismatch");
+    const empty = await h.preparedAttempt("rec-transcript-empty");
+    log.step(`three attempts prepared with bound ${BOUND}; each wallet response is lost, so no signature hint arrives`);
+    const transfer = h.land(paid.attempt, historySignature(80_001));
+    const wrong = h.land(mismatched.attempt, historySignature(80_002), { amount: mismatched.attempt.atomicAmount + 1n });
+    h.setHistory(paid, [transfer, h.older(80_101)]);
+    h.setHistory(mismatched, [wrong, h.older(80_102)]);
+    h.setHistory(empty, [h.older(80_103)]);
+    chain.blockHeight = BOUND + 3n;
+    chain.finalizedBlockHeight = BOUND;
+    for (const [label, prepared] of [["verified", paid], ["mismatching", mismatched], ["empty", empty]] as const) await step(`${label}, confirmed height past the bound, finalized at it`, prepared, await h.runnerReconcile(prepared));
+    expect(await receipt(paid)).toBe("Checking payment (Not confirmed)");
+    h.expireAll();
+    log.step(`finalized height ${BOUND + 1n} passes the bound`);
+    for (const [label, prepared] of [["verified", paid], ["mismatching", mismatched], ["empty", empty]] as const) await step(label, prepared, await h.runnerReconcile(prepared));
+    expect(await h.attemptOf(paid.purchaseId)).toMatchObject({ state: "confirmed", scan: { reachedBeforePreparation: true } });
+    expect(await h.attemptOf(mismatched.purchaseId)).toMatchObject({ state: "mismatch" });
+    expect(await h.attemptOf(empty.purchaseId)).toMatchObject({ state: "held_no_match" });
+    expect(await receipt(paid)).toBe("Paid (Paid)");
+    expect(await receipt(empty)).toBe("Checking payment (Not confirmed)");
+    log.print();
   });
 
   it("web and runner cannot scan one attempt at once", async () => {

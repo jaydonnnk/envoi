@@ -186,11 +186,12 @@ export async function applyScanOutcome(db: Db, attemptId: string, outcome: Candi
       case "extra": {
         const { transfer } = outcome;
         // Names exactly the columns the web and maintenance roles may insert: the query builder would
-        // list the refund columns as DEFAULT, which their grants refuse.
+        // list the refund columns as DEFAULT, which their grants refuse. The unique index on
+        // (attempt_id, signature) turns a resumed scan's second insert into no row.
         const inserted = await tx.execute<{ id: string }>(sql`
           insert into pyusd_extra_transfers (id, attempt_id, signature, slot, destination_delta, verification, found_at)
           values (${newId("pxt")}, ${attemptId}, ${transfer.signature}, ${transfer.slot.toString()}, ${transfer.destinationDelta?.toString() ?? null}, ${transfer.verification}, ${transfer.foundAt.toISOString()})
-          on conflict (attempt_id, signature) do nothing
+          on conflict do nothing
           returning id`);
         if (inserted.length === 0) return false;
         await audit("pyusd_extra_transfer", true, {
