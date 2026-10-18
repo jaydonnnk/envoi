@@ -65,7 +65,7 @@ const base58 = (bytes: number[] | Uint8Array) => getBase58Decoder().decode(new U
 // FIXTURE: a 64-byte transaction signature in base58, distinct per fill byte.
 export const fixtureSignature = (fill: number) => base58(new Uint8Array(64).fill(fill));
 
-type LandedOptions = { reference?: string; amount?: bigint; err?: unknown; extraOuter?: { program: Address; data: number[] }[] };
+type LandedOptions = { reference?: string; amount?: bigint; err?: unknown; extraOuter?: { program: Address; data: number[] }[]; slot?: number };
 
 // FIXTURE: the getTransaction JSON (encoding "json", maxSupportedTransactionVersion 0) of a landed
 // transfer for an attempt, shaped as Phantom lands one: Envoi's memo and TransferChecked, with a
@@ -75,7 +75,7 @@ export function landedTransactionJson(attempt: Pick<PyusdAttempt, "buyerWallet" 
   const keys: string[] = [attempt.buyerWallet, attempt.sourceTokenAccount, attempt.destinationTokenAccount, PYUSD_DEVNET.mint, PYUSD_DEVNET.memoProgram, PYUSD_DEVNET.tokenProgram, ...extra.map((ix) => ix.program)];
   const amount = options.amount ?? attempt.atomicAmount;
   return {
-    slot: 300_000_040,
+    slot: options.slot ?? 300_000_040,
     version: 0,
     blockTime: 1_793_000_000,
     transaction: {

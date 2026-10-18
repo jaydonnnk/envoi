@@ -1,25 +1,24 @@
 import type { Address } from "@solana/kit";
-import { and, eq, isNull, lte, or, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { buyerActor, recordAudit } from "@/domain/audit/events";
-import { PYUSD_HINT_CAP, PYUSD_PROOFS } from "@/domain/pyusd/constants";
+import { PYUSD_HINT_CAP } from "@/domain/pyusd/constants";
 import { checkPyusdIdentity, checkPyusdTokenAccounts, type TokenAccountCheck } from "@/domain/pyusd/identity";
-import { assessMintForTransfer, epochOfSlot, feeAtEpoch } from "@/domain/pyusd/mint";
+import { assessMintForTransfer } from "@/domain/pyusd/mint";
 import { isRateExpired, latestPyusdRate } from "@/domain/pyusd/rate";
-import { decideRecoveryStep } from "@/domain/pyusd/recovery";
-import { canTransitionPyusdAttempt, feeToStored, pyusdAttemptLocks, toPyusdAttempt, type PyusdAttempt, type PyusdAttemptState } from "@/domain/pyusd/state";
-import { verifyPyusdTransfer, type VerificationResult } from "@/domain/pyusd/verify";
+import { reconcilePyusdAttempt, type PyusdCheck } from "@/domain/pyusd/reconcile";
+import { feeToStored, pyusdAttemptLocks, type PyusdAttemptState } from "@/domain/pyusd/state";
 import { basketLocked, findBasketLock, lockSameBasket } from "@/domain/purchases/review";
-import { canTransitionPurchase, transitionPurchase, type PaymentAttemptRow, type PurchaseState } from "@/domain/purchases/state";
+import { transitionPurchase, type PaymentAttemptRow, type PurchaseState } from "@/domain/purchases/state";
 import { webEnv } from "@/env";
 import { buildUnsignedTransfer } from "@/integrations/solana/build";
 import { decodeMintAccount } from "@/integrations/solana/decode";
 import type { SolanaReadClient } from "@/integrations/solana/rpc";
 import type { BuyerPrincipal } from "@/lib/auth-context";
-import { enrollments, outlets, paymentAttempts, paymentDestinations, PURCHASE_STATES, purchases, type StoredSignatureHint } from "@/lib/db/schema";
+import { enrollments, outlets, paymentAttempts, paymentDestinations, purchases, type StoredSignatureHint } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
 import { newId, newMemoReference } from "@/lib/ids";
-import { durationMs, type Now } from "@/lib/time";
+import type { Now } from "@/lib/time";
 
 // PYUSD preparation, the lock and signature binding (Gate 3 "PYUSD purchase"; Gate 2 "Preparation,
 // wallet broadcast and verification"). Preparation reads every chain fact first, outside any
@@ -254,15 +253,7 @@ export async function preparePyusdPayment(deps: PyusdDeps, principal: BuyerPrinc
   return { kind: "prepared", attemptId, transactionBase64: built.wireBase64, chain: "solana:devnet" };
 }
 
-// Throws on a transition the PYUSD table forbids: that is a programming error, never a runtime outcome.
-function assertPyusdTransition(from: PyusdAttemptState, to: PyusdAttemptState): void {
-  if (!canTransitionPyusdAttempt(from, to)) throw new Error(`illegal PYUSD attempt transition ${from} -> ${to}`);
-}
-
-// Every purchase state the transition table lets move to `to` for this reason.
-function purchaseStatesInto(to: PurchaseState, reason: string): PurchaseState[] {
-  return PURCHASE_STATES.filter((from) => canTransitionPurchase({ from, to, reason }));
-}
+export type { PyusdCheck };
 
 export type HintResult = { recorded: "appended" | "repeated" | "over_cap" | "closed"; check: PyusdCheck | null };
 
@@ -315,112 +306,4 @@ export async function recordSignatureHint(deps: PyusdDeps, principal: BuyerPrinc
     }
   }
   return appError("execution_locked", "Several hints arrived at once. Check the receipt.", { retryable: true });
-}
-
-// The hint that may be read now: the oldest one still unread or not found, and only while every
-// older hint is decided not ours or a failed landing. A hint behind an undecided one waits.
-export function readableHint(hints: PyusdAttempt["hints"]): { index: number; signature: string } | null {
-  for (let index = 0; index < hints.length; index += 1) {
-    const decision = hints[index]!.decision;
-    if (decision === "not_ours" || decision === "failed_landing") continue;
-    if (decision === "unread" || decision === "not_found") return { index, signature: hints[index]!.signature };
-    return null;
-  }
-  return null;
-}
-
-export type PyusdCheck = "debounced" | "nothing_to_read" | "rpc_unavailable" | "identity_changed" | "not_found" | VerificationResult["decision"];
-
-// Starts a debounce window by compare-and-set; false while one is still open.
-async function claimRead(db: Db, attemptId: string, now: Date): Promise<boolean> {
-  const windowStart = new Date(now.getTime() - durationMs("T_PROVIDER_READ_DEBOUNCE"));
-  const claimed = await db
-    .update(paymentAttempts)
-    .set({ lastProviderReadAt: now })
-    .where(and(eq(paymentAttempts.id, attemptId), or(isNull(paymentAttempts.lastProviderReadAt), lte(paymentAttempts.lastProviderReadAt, windowStart))))
-    .returning({ id: paymentAttempts.id });
-  return claimed.length === 1;
-}
-
-async function decideHint(db: Conn, attemptId: string, index: number, signature: string, decision: StoredSignatureHint["decision"]): Promise<void> {
-  await db
-    .update(paymentAttempts)
-    .set({ pyusdHints: sql`jsonb_set(${paymentAttempts.pyusdHints}, ${`{${index},decision}`}::text[], ${JSON.stringify(decision)}::jsonb)` })
-    .where(and(eq(paymentAttempts.id, attemptId), sql`${paymentAttempts.pyusdHints} -> ${index}::int ->> 'signature' = ${signature}`));
-}
-
-// Reconcile before expiry (S16's hint branch of Gate 3's PYUSD recovery). Shared by the hint route and
-// the buyer's "Check status"; never checks PYUSD_ENABLED, so a prepared attempt still converges with
-// the rail switched off. At most one provider read per attempt per T_PROVIDER_READ_DEBOUNCE, and no
-// RPC call while there is nothing to read. Every state change is a compare-and-set after the read.
-export async function reconcilePyusdAttempt(deps: PyusdDeps, attemptId: string, actor: string): Promise<PyusdCheck> {
-  const { db } = deps;
-  const [row] = await db.select().from(paymentAttempts).where(and(eq(paymentAttempts.id, attemptId), eq(paymentAttempts.rail, "pyusd")));
-  if (!row) return "nothing_to_read";
-  const attempt = toPyusdAttempt(row);
-  if (attempt.state !== "prepared") return "nothing_to_read";
-  const hint = readableHint(attempt.hints);
-  if (!hint) return "nothing_to_read";
-  if (!(await claimRead(db, attemptId, deps.now()))) return "debounced";
-
-  const identity = await checkPyusdIdentity(deps.rpc);
-  if (!identity.ok) {
-    if (identity.reason === "rpc_unavailable" || identity.reason === "rpc_unconfigured") return "rpc_unavailable";
-    await recordAudit(db, { at: deps.now(), actor, action: "pyusd_identity_changed", purchaseId: attempt.purchaseId, attemptId, operatorVisible: true, details: { reason: identity.reason } });
-    return "identity_changed";
-  }
-  const rpc = deps.rpc!;
-  const height = await rpc.getBlockHeight("finalized");
-  if (height.kind !== "ok") return "rpc_unavailable";
-  if (decideRecoveryStep(attempt, height.value, PYUSD_PROOFS).action !== "verify_hints_then_wait") return "nothing_to_read";
-
-  const read = await rpc.getTransactionFinalized(hint.signature);
-  if (read.kind !== "ok") return "rpc_unavailable";
-  if (read.value === null) {
-    await decideHint(db, attemptId, hint.index, hint.signature, "not_found");
-    return "not_found";
-  }
-  const schedule = await rpc.getEpochSchedule();
-  if (schedule.kind !== "ok") return "rpc_unavailable";
-  const now = deps.now();
-  const result = verifyPyusdTransfer(read.value, attempt, feeAtEpoch(attempt.fee, epochOfSlot(schedule.value, read.value.slot)), now);
-
-  await db.transaction(async (tx) => {
-    const audit = (action: string, operatorVisible: boolean, details: Record<string, string | number | boolean | null>) =>
-      recordAudit(tx, { at: now, actor, action, purchaseId: attempt.purchaseId, attemptId, operatorVisible, details: { signature: hint.signature, ...details } });
-    switch (result.decision) {
-      case "confirmed": {
-        assertPyusdTransition("prepared", "confirmed");
-        const bound = await tx
-          .update(paymentAttempts)
-          .set({ state: "confirmed", pyusdFinalizedSignature: result.evidence.signature, pyusdVerifiedAt: now, updatedAt: now })
-          .where(and(eq(paymentAttempts.id, attemptId), eq(paymentAttempts.state, "prepared")))
-          .returning({ id: paymentAttempts.id });
-        if (bound.length === 0) return;
-        await decideHint(tx, attemptId, hint.index, hint.signature, "confirmed");
-        await transitionPurchase(tx, attempt.purchaseId, purchaseStatesInto("paid", "pyusd_confirmed"), "paid", "pyusd_confirmed");
-        await audit("pyusd_transfer_confirmed", false, { slot: result.evidence.slot.toString(), atomicAmount: result.evidence.atomicAmount.toString(), destination: result.evidence.destinationTokenAccount });
-        return;
-      }
-      case "not_ours":
-      case "failed_landing":
-        await decideHint(tx, attemptId, hint.index, hint.signature, result.decision);
-        await audit(result.decision === "not_ours" ? "pyusd_hint_not_ours" : "pyusd_hint_failed_landing", false, {});
-        return;
-      case "uncertain": {
-        assertPyusdTransition("prepared", "mismatch");
-        const moved = await tx
-          .update(paymentAttempts)
-          .set({ state: "mismatch", outcomeReason: result.reason, updatedAt: now })
-          .where(and(eq(paymentAttempts.id, attemptId), eq(paymentAttempts.state, "prepared")))
-          .returning({ id: paymentAttempts.id });
-        if (moved.length === 0) return;
-        await decideHint(tx, attemptId, hint.index, hint.signature, "uncertain");
-        await transitionPurchase(tx, attempt.purchaseId, purchaseStatesInto("uncertain", "pyusd_mismatch"), "uncertain", "pyusd_mismatch");
-        await audit("pyusd_transfer_mismatch", true, { reason: result.reason });
-        return;
-      }
-    }
-  });
-  return result.decision;
 }

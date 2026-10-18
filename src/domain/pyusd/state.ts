@@ -1,6 +1,6 @@
 import type { Address } from "@solana/kit";
 import type { FeeEvidence } from "@/domain/pyusd/mint";
-import type { PYUSD_ATTEMPT_STATES, StoredFeeEvidence, StoredSignatureHint } from "@/lib/db/schema";
+import type { PYUSD_ATTEMPT_STATES, StoredFeeEvidence, StoredScanCoverage, StoredSignatureHint } from "@/lib/db/schema";
 import type { PaymentAttemptRow } from "@/domain/purchases/state";
 
 // The PYUSD attempt lifecycle (Gate 3 State transitions: PYUSD attempt). No transition re-prepares,
@@ -24,6 +24,9 @@ const PYUSD_TRANSITIONS: Record<PyusdAttemptState, readonly PyusdAttemptState[]>
 export function canTransitionPyusdAttempt(from: PyusdAttemptState, to: PyusdAttemptState): boolean {
   return PYUSD_TRANSITIONS[from].includes(to);
 }
+
+// The outcome reason an audited operator resolution writes when it closes a mismatch unpaid (S17).
+export const OPERATOR_RESOLUTION = "operator_resolved_unpaid";
 
 // States in which money can still move for the attempt's purchase.
 export function pyusdAttemptLocks(state: PyusdAttemptState): boolean {
@@ -49,7 +52,30 @@ export type PyusdAttempt = {
   fee: FeeEvidence;
   hints: readonly SignatureHint[];
   finalizedSignature: string | null;
+  // S17: the successful landing that failed verification, and the post-expiry window scan.
+  mismatchSignature: string | null;
+  scan: ScanCoverage | null;
 };
+
+export type ScanGap = NonNullable<StoredScanCoverage["lastGap"]>;
+
+export type ScanCoverage = {
+  startedAtFinalizedHeight: bigint;
+  newestSignature: string | null; // top boundary, fixed when the scan starts after expiry
+  beforeCursor: string | null; // resume point; never passes an undecided candidate
+  reachedBeforePreparation: boolean; // a fully decided stretch of history held a signature older than preparationSlot
+  pagesRead: number;
+  candidatesChecked: number;
+  lastGap: ScanGap | null;
+};
+
+export function scanFromStored(scan: StoredScanCoverage): ScanCoverage {
+  return { ...scan, startedAtFinalizedHeight: BigInt(scan.startedAtFinalizedHeight) };
+}
+
+export function scanToStored(scan: ScanCoverage): StoredScanCoverage {
+  return { ...scan, startedAtFinalizedHeight: scan.startedAtFinalizedHeight.toString() };
+}
 
 export function feeFromStored(fee: StoredFeeEvidence): FeeEvidence {
   const schedule = (s: StoredFeeEvidence["older"]) => ({ epoch: BigInt(s.epoch), basisPoints: s.basisPoints, maximumFee: BigInt(s.maximumFee) });
@@ -96,5 +122,7 @@ export function toPyusdAttempt(row: PaymentAttemptRow): PyusdAttempt {
     fee: feeFromStored(row.pyusdFee),
     hints: row.pyusdHints.map((hint) => ({ signature: hint.signature, receivedAt: new Date(hint.receivedAt), decision: hint.decision })),
     finalizedSignature: row.pyusdFinalizedSignature,
+    mismatchSignature: row.pyusdMismatchSignature,
+    scan: row.pyusdScan ? scanFromStored(row.pyusdScan) : null,
   };
 }

@@ -58,6 +58,55 @@ export async function releaseAttemptClaim(db: Db, attemptId: string, owner: stri
     .where(and(eq(paymentAttempts.id, attemptId), eq(paymentAttempts.maintenanceClaimOwner, owner)));
 }
 
+// PYUSD attempts recovery can still move (S17): prepared or scanning, a confirmed or mismatched one
+// whose window scan is incomplete, and a held one once automatic unpaid release is enabled.
+export const pyusdDue = (releaseEnabled: boolean): SQL =>
+  and(
+    eq(paymentAttempts.rail, "pyusd"),
+    or(
+      inArray(paymentAttempts.state, ["prepared", "expired_scanning", ...(releaseEnabled ? ["held_no_match"] : [])]),
+      and(
+        inArray(paymentAttempts.state, ["confirmed", "mismatch"]),
+        sql`coalesce((${paymentAttempts.pyusdScan} ->> 'reachedBeforePreparation')::boolean, false) = false`,
+      ),
+    ),
+  )!;
+
+// Claims up to `limit` due PYUSD attempts by taking their attempt lease (T_LEASE), the same lease the
+// web reconcile route takes, so a runner and the web never read or scan one attempt at once.
+// Attempts never checked come first, then the one checked longest ago.
+export async function claimDuePyusdAttempts(db: Db, now: Date, limit: number, owner: string, releaseEnabled: boolean): Promise<DueRow[]> {
+  const leaseFree = or(isNull(paymentAttempts.leaseExpiresAt), lte(paymentAttempts.leaseExpiresAt, now));
+  const candidates = db
+    .select({ id: paymentAttempts.id })
+    .from(paymentAttempts)
+    .where(and(pyusdDue(releaseEnabled), leaseFree))
+    .orderBy(sql`${paymentAttempts.maintenanceCheckedAt} asc nulls first`, asc(paymentAttempts.createdAt), asc(paymentAttempts.id))
+    .limit(limit)
+    .for("update", { skipLocked: true });
+  const claimed = await db
+    .update(paymentAttempts)
+    .set({ leaseOwner: owner, leaseExpiresAt: deadlineOf("T_LEASE", now) })
+    .where(and(inArray(paymentAttempts.id, candidates), leaseFree))
+    .returning({ id: paymentAttempts.id, checkedAt: paymentAttempts.maintenanceCheckedAt, createdAt: paymentAttempts.createdAt });
+  const checked = (at: Date | null) => at?.getTime() ?? Number.NEGATIVE_INFINITY;
+  return claimed
+    .sort((a, b) => checked(a.checkedAt) - checked(b.checkedAt) || a.createdAt.getTime() - b.createdAt.getTime() || a.id.localeCompare(b.id))
+    .map((row) => ({ id: row.id, dueAt: row.createdAt }));
+}
+
+// Gives the PYUSD lease back and records the check. Only the owner's lease is released.
+export async function releasePyusdClaim(db: Db, attemptId: string, owner: string, checkedAt: Date | null): Promise<void> {
+  await db
+    .update(paymentAttempts)
+    .set({
+      leaseOwner: null,
+      leaseExpiresAt: null,
+      ...(checkedAt ? { maintenanceChecks: sql`${paymentAttempts.maintenanceChecks} + 1`, maintenanceCheckedAt: checkedAt } : {}),
+    })
+    .where(and(eq(paymentAttempts.id, attemptId), eq(paymentAttempts.leaseOwner, owner)));
+}
+
 // Purchases whose stored state lags what derivePurchaseView reads: an open review past T_REVIEW,
 // or a pending payment whose attempt never dispatched a capture. Storing them is cleanup only; no
 // buyer path waits for it.

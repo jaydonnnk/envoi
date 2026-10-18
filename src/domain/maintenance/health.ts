@@ -1,6 +1,6 @@
-import { and, asc, desc, eq, isNotNull, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNotNull, or, sql } from "drizzle-orm";
 import { readImportHealth, type ImportHealth } from "@/domain/imports/health";
-import { maintenanceRuns, paymentAttempts, purchases, type MaintenanceReportJson } from "@/lib/db/schema";
+import { maintenanceRuns, paymentAttempts, purchases, pyusdExtraTransfers, type MaintenanceReportJson, type StoredScanCoverage } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { durationMs } from "@/lib/time";
 import { attemptDue, isHeartbeatOverdue } from "./due";
@@ -33,7 +33,88 @@ export type OperatorHealth = {
   overdueWork: { dueAttempts: number; uncertainPurchases: number; items: OverdueItem[] };
   // Since S11. Menu imports never depend on maintenance; they are shown here for the operator only.
   imports: ImportHealth;
+  // Since S17: PYUSD attempts held, in mismatch or still scanning, with their window-scan coverage,
+  // and every extra transfer a window scan recorded.
+  pyusd: PyusdHealth;
 };
+
+export type PyusdAttemptHealth = {
+  purchaseId: string;
+  purchaseState: string;
+  attemptId: string;
+  attemptState: string;
+  reason: string | null;
+  mismatchSignature: string | null;
+  scan: (Omit<StoredScanCoverage, "startedAtFinalizedHeight"> & { startedAtFinalizedHeight: string; complete: boolean }) | null;
+  since: string;
+};
+
+export type ExtraTransferHealth = {
+  purchaseId: string;
+  purchaseState: string;
+  attemptId: string;
+  signature: string;
+  slot: string;
+  destinationDelta: string | null;
+  verification: string;
+  foundAt: string;
+  refundReference: string | null;
+};
+
+export type PyusdHealth = { attempts: PyusdAttemptHealth[]; extraTransfers: ExtraTransferHealth[] };
+
+// The PYUSD attempt states an operator watches: held after a complete empty scan, a mismatch only an
+// audited operator act can close, and one still scanning after expiry.
+export const PYUSD_WATCHED_STATES = ["held_no_match", "mismatch", "expired_scanning"] as const;
+
+async function readPyusdHealth(db: Pick<Db, "select">): Promise<PyusdHealth> {
+  const attempts = await db
+    .select({
+      purchaseId: purchases.id,
+      purchaseState: purchases.state,
+      attemptId: paymentAttempts.id,
+      attemptState: paymentAttempts.state,
+      reason: paymentAttempts.outcomeReason,
+      mismatchSignature: paymentAttempts.pyusdMismatchSignature,
+      scan: paymentAttempts.pyusdScan,
+      since: paymentAttempts.updatedAt,
+    })
+    .from(paymentAttempts)
+    .innerJoin(purchases, eq(purchases.id, paymentAttempts.purchaseId))
+    .where(and(eq(paymentAttempts.rail, "pyusd"), inArray(paymentAttempts.state, [...PYUSD_WATCHED_STATES])))
+    .orderBy(asc(paymentAttempts.createdAt), asc(paymentAttempts.id))
+    .limit(ITEMS_SHOWN);
+  const extras = await db
+    .select({
+      purchaseId: purchases.id,
+      purchaseState: purchases.state,
+      attemptId: pyusdExtraTransfers.attemptId,
+      signature: pyusdExtraTransfers.signature,
+      slot: pyusdExtraTransfers.slot,
+      destinationDelta: pyusdExtraTransfers.destinationDelta,
+      verification: pyusdExtraTransfers.verification,
+      foundAt: pyusdExtraTransfers.foundAt,
+      refundReference: pyusdExtraTransfers.refundReference,
+    })
+    .from(pyusdExtraTransfers)
+    .innerJoin(paymentAttempts, eq(paymentAttempts.id, pyusdExtraTransfers.attemptId))
+    .innerJoin(purchases, eq(purchases.id, paymentAttempts.purchaseId))
+    .orderBy(desc(pyusdExtraTransfers.foundAt), asc(pyusdExtraTransfers.id))
+    .limit(ITEMS_SHOWN);
+  return {
+    attempts: attempts.map((row) => ({
+      ...row,
+      scan: row.scan ? { ...row.scan, complete: row.scan.reachedBeforePreparation } : null,
+      since: row.since.toISOString(),
+    })),
+    extraTransfers: extras.map((row) => ({
+      ...row,
+      slot: row.slot.toString(),
+      destinationDelta: row.destinationDelta?.toString() ?? null,
+      foundAt: row.foundAt.toISOString(),
+    })),
+  };
+}
 
 const ITEMS_SHOWN = 20;
 
@@ -95,6 +176,7 @@ export async function readOperatorHealth(db: Pick<Db, "select">, now: Date, impo
       })),
     },
     imports: await readImportHealth(db, now, importConfig),
+    pyusd: await readPyusdHealth(db),
   };
 }
 

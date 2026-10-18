@@ -72,7 +72,9 @@ const PAYPAL_ENTRIES = [
   "src/app/api/v1/integrations/paypal/webhook/route.ts",
   "src/app/paypal/return/page.tsx",
   "src/app/paypal/cancel/page.tsx",
-  "src/domain/maintenance/tasks.ts",
+  // reconcile_attempts; since S17 tasks.ts also lists reconcile_pyusd_attempts, so the PayPal task has
+  // its own module.
+  "src/domain/maintenance/paypal-task.ts",
 ].map((file) => join(ROOT, file));
 
 function solanaReach(graph: { modules: string[]; packages: string[] }): string[] {

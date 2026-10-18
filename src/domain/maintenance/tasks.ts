@@ -1,16 +1,21 @@
-import { reconcileAttempt, type ReconcileOutcome } from "@/domain/payments/attempts";
 import { applyDerivedTransitions } from "@/domain/purchases/state";
+import { PYUSD_PROOFS } from "@/domain/pyusd/constants";
+import { reconcilePyusdAttempt, type PyusdCheck } from "@/domain/pyusd/reconcile";
 import type { PayPalReadClient } from "@/integrations/paypal/orders-read";
+import type { SolanaReadClient } from "@/integrations/solana/rpc";
 import type { Db } from "@/lib/db/web";
 import { newId } from "@/lib/ids";
 import type { RedactingLogger } from "@/lib/log";
 import { deadlineOf, type Now } from "@/lib/time";
 import { isCapacityAlert } from "./health";
-import { claimDueAttempts, expiredReviews, finishRun, purgeExpiredSessions, recordDatabaseSize, releaseAttemptClaim, writeHeartbeat } from "./due";
+import { claimDuePyusdAttempts, expiredReviews, finishRun, purgeExpiredSessions, recordDatabaseSize, releasePyusdClaim, writeHeartbeat } from "./due";
+import { reconcileAttempts } from "./paypal-task";
 
 // The maintenance run (Gate 3 Maintenance; S5). A fixed, finite list of tasks, each reading or
 // cleaning up existing state. MaintenanceDeps holds no PayPal write client, so no task can create,
-// capture or replay a payment, and the runner build cannot reach the capture module (tested).
+// capture or replay a payment, and the runner build cannot reach the capture module (tested). Its
+// Solana client (S17) is the read-only SolanaReadClient, which has no send, airdrop or signing
+// method, and is null while SOLANA_RPC_URL is unset.
 
 export type TaskName = "heartbeat" | "record_capacity" | "reconcile_attempts" | "reconcile_pyusd_attempts" | "close_expired_reviews" | "purge_expired_sessions";
 
@@ -21,8 +26,7 @@ export type TaskOutcome =
   | { status: "partial"; processed: number; blockedReason: string }
   | { status: "failed"; reason: string; operatorVisible: true };
 
-// S17 adds the PYUSD read client; until then there is none.
-export type MaintenanceDeps = { paypal: PayPalReadClient; solana: null; now: Now; log: RedactingLogger };
+export type MaintenanceDeps = { paypal: PayPalReadClient; solana: SolanaReadClient | null; now: Now; log: RedactingLogger };
 
 // The run a task belongs to: its id, which is also the heartbeat row, and its trigger.
 export type RunContext = { runId: string; trigger: "manual" | "scheduled" };
@@ -31,6 +35,8 @@ export type MaintenanceTask = {
   name: TaskName;
   timeoutMs: number;
   limit: number;
+  // A task that reads devnet runs only with a Solana client; without one it claims nothing.
+  requiresSolana?: true;
   claim(db: Db, now: Date, limit: number, run: RunContext): Promise<ClaimedWork[]>;
   run(db: Db, work: ClaimedWork, deps: MaintenanceDeps, run: RunContext): Promise<TaskOutcome>;
 };
@@ -61,30 +67,30 @@ const recordCapacity: MaintenanceTask = {
   },
 };
 
-// Reconcile outcomes that read the attempt's record: only these count as a maintenance check.
-// "in_flight" (a completion holds the capture lease) and "debounced" (a provider read happened
-// within T_PROVIDER_READ_DEBOUNCE) skip the read, so the attempt stays first in line for the next run.
-const CHECKED_OUTCOMES: readonly ReconcileOutcome[] = ["read", "no_record", "no_order"];
+// PYUSD reconcile outcomes that read devnet and decided something. The rest (an unreachable or
+// changed RPC, a lease another reconcile holds) leave the attempt first in line for the next run.
+const PYUSD_CHECKED: readonly PyusdCheck[] = ["nothing_to_read", "not_found", "confirmed", "not_ours", "failed_landing", "uncertain", "scan_incomplete", "scan_complete", "held_no_match", "closed_unpaid"];
 
-// Reads PayPal's record of each due attempt through the read-only client and applies what it
-// proves. A capture whose outcome is unknown is never replayed here: replay is null, so an attempt
-// PayPal shows no capture for stays uncertain, for the buyer's own check or the operator.
-const reconcileAttempts: MaintenanceTask = {
-  name: "reconcile_attempts",
-  timeoutMs: 75_000,
-  limit: 10,
+// Reads devnet for each due PYUSD attempt through the read-only client, at most two a run, each
+// within the per-claim page and fetch caps: hint verification, expiry and the window scan, through
+// the same reconcile the buyer's route uses. Without SOLANA_RPC_URL it claims nothing.
+const reconcilePyusdAttempts: MaintenanceTask = {
+  name: "reconcile_pyusd_attempts",
+  timeoutMs: 45_000,
+  limit: 2,
+  requiresSolana: true,
   async claim(db, now, limit, run) {
-    return (await claimDueAttempts(db, now, limit, run.runId)).map((row) => ({ id: row.id, kind: "reconcile_attempts", dueAt: row.dueAt }));
+    return (await claimDuePyusdAttempts(db, now, limit, run.runId, PYUSD_PROOFS.automaticUnpaidRelease)).map((row) => ({ id: row.id, kind: "reconcile_pyusd_attempts", dueAt: row.dueAt }));
   },
   async run(db, work, deps, run) {
     let checked = false;
     try {
-      const outcome = await reconcileAttempt({ db, read: deps.paypal, replay: null, now: deps.now, actor: "maintenance" }, work.id);
-      checked = CHECKED_OUTCOMES.includes(outcome);
-      deps.log("info", "maintenance_reconcile", { runId: run.runId, attemptId: work.id, outcome });
+      const outcome = await reconcilePyusdAttempt({ db, rpc: deps.solana, now: deps.now }, work.id, "maintenance", { kind: "runner", owner: run.runId });
+      checked = PYUSD_CHECKED.includes(outcome);
+      deps.log("info", "maintenance_reconcile_pyusd", { runId: run.runId, attemptId: work.id, outcome });
       return checked ? { status: "ok", processed: 1 } : { status: "partial", processed: 0, blockedReason: outcome };
     } finally {
-      await releaseAttemptClaim(db, work.id, run.runId, checked ? deps.now() : null);
+      await releasePyusdClaim(db, work.id, run.runId, checked ? deps.now() : null);
     }
   },
 };
@@ -116,8 +122,8 @@ const purgeSessions: MaintenanceTask = {
   },
 };
 
-// Exhaustive and in run order. reconcile_pyusd_attempts joins in S17, so that edit shows there.
-export const MAINTENANCE_TASKS: readonly MaintenanceTask[] = [heartbeat, recordCapacity, reconcileAttempts, closeExpiredReviews, purgeSessions];
+// Exhaustive and in run order.
+export const MAINTENANCE_TASKS: readonly MaintenanceTask[] = [heartbeat, recordCapacity, reconcileAttempts, reconcilePyusdAttempts, closeExpiredReviews, purgeSessions];
 
 export type TaskReport = { name: TaskName; status: "ok" | "partial" | "failed"; processed: number; reason: string | null };
 
@@ -177,6 +183,10 @@ export async function runMaintenance(
   for (const task of tasks) {
     if (remaining() <= 0) {
       reports.push(report(task.name, { status: "partial", processed: 0, blockedReason: RUN_DEADLINE }));
+      continue;
+    }
+    if (task.requiresSolana && deps.solana === null) {
+      reports.push(report(task.name, { status: "partial", processed: 0, blockedReason: "solana_rpc_unset" }));
       continue;
     }
     let processed = 0;

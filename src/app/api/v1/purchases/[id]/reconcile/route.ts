@@ -1,6 +1,6 @@
 import { buyerActor } from "@/domain/audit/events";
 import { reconcileAttempt } from "@/domain/payments/attempts";
-import { reconcilePyusdAttempt } from "@/domain/pyusd/attempts";
+import { reconcilePyusdAttempt } from "@/domain/pyusd/reconcile";
 import { getOwnPurchase } from "@/domain/purchases/review";
 import { purchaseJson } from "@/domain/purchases/serialize";
 import { applyDerivedTransitions } from "@/domain/purchases/state";

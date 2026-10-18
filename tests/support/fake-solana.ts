@@ -31,7 +31,18 @@ export type FakeChain = {
   calls: { method: string; params: unknown[] }[];
   // When set, every call answers this way instead.
   outage: "unreachable" | null;
+  // S17: the finalized block height, when it differs from the confirmed one (blockHeight).
+  finalizedBlockHeight: bigint | null;
+  // S17: getSignaturesForAddress history per address, newest first.
+  signatures: Map<string, FixtureSignature[]>;
+  // S17: one-shot faults, each answering the first matching call instead of the chain.
+  faults: FixtureFault[];
+  // S17: awaited before answering a call, so a test can hold two readers at one point.
+  beforeAnswer: ((method: string, params: unknown[]) => Promise<void>) | null;
 };
+
+export type FixtureSignature = { signature: string; slot: bigint; err: unknown | null };
+export type FixtureFault = { method: string; when?: (params: unknown[]) => boolean; answer: "429" | "unreachable" };
 
 export const zeroFee = (epoch: bigint) => ({ epoch, maximumFee: 0n, transferFeeBasisPoints: 0 });
 
@@ -94,6 +105,10 @@ export function createFakeChain(): FakeChain {
     transactions: new Map(),
     calls: [],
     outage: null,
+    finalizedBlockHeight: null,
+    signatures: new Map(),
+    faults: [],
+    beforeAnswer: null,
   };
   chain.accounts.set(PYUSD_DEVNET.mint, { owner: PYUSD_DEVNET.tokenProgram, data: mintData() });
   return chain;
@@ -115,6 +130,13 @@ export function fakeRpcFetch(chain: FakeChain): RpcFetch {
     const { method, params } = JSON.parse(init.body) as { method: string; params: unknown[] };
     chain.calls.push({ method, params });
     if (chain.outage === "unreachable") throw new TypeError("fetch failed (FIXTURE outage)");
+    await chain.beforeAnswer?.(method, params);
+    const fault = chain.faults.findIndex((candidate) => candidate.method === method && (candidate.when?.(params) ?? true));
+    if (fault >= 0) {
+      const [hit] = chain.faults.splice(fault, 1);
+      if (hit!.answer === "unreachable") throw new TypeError("fetch failed (FIXTURE fault)");
+      return new Response("rate limited (FIXTURE)", { status: 429 });
+    }
     switch (method) {
       case "getGenesisHash":
         return ok(chain.genesis);
@@ -134,14 +156,21 @@ export function fakeRpcFetch(chain: FakeChain): RpcFetch {
         return ok({ epoch: Number(chain.epoch), absoluteSlot: Number(chain.slot), blockHeight: Number(chain.blockHeight), slotIndex: 1, slotsInEpoch: 432_000 });
       case "getLatestBlockhash":
         return ok({ context: { slot: Number(chain.slot) }, value: { blockhash: chain.blockhash.blockhash, lastValidBlockHeight: Number(chain.blockhash.lastValidBlockHeight) } });
-      case "getBlockHeight":
-        return ok(Number(chain.blockHeight));
+      case "getBlockHeight": {
+        const commitment = (params[0] as { commitment?: string } | undefined)?.commitment;
+        return ok(Number(commitment === "finalized" ? (chain.finalizedBlockHeight ?? chain.blockHeight) : chain.blockHeight));
+      }
       case "getEpochSchedule":
         return ok({ slotsPerEpoch: 432_000, leaderScheduleSlotOffset: 432_000, warmup: false, firstNormalEpoch: 0, firstNormalSlot: 0 });
       case "getTransaction":
         return ok(chain.transactions.get(params[0] as string) ?? null);
-      case "getSignaturesForAddress":
-        return ok([]);
+      case "getSignaturesForAddress": {
+        const history = chain.signatures.get(params[0] as string) ?? [];
+        const { limit, before } = (params[1] ?? {}) as { limit?: number; before?: string };
+        const start = before === undefined ? 0 : history.findIndex((entry) => entry.signature === before) + 1;
+        const page = before !== undefined && start === 0 ? [] : history.slice(start, start + (limit ?? 1000));
+        return ok(page.map((entry) => ({ signature: entry.signature, slot: Number(entry.slot), err: entry.err, memo: null, blockTime: null, confirmationStatus: "finalized" })));
+      }
       default:
         return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, error: { code: -32601, message: "Method not found" } }), { status: 200 });
     }

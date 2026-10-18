@@ -207,6 +207,7 @@ describe("maintenance runner (fixture PayPal)", () => {
         ["heartbeat", "ok", null],
         ["record_capacity", "ok", null],
         ["reconcile_attempts", "partial", "run_deadline"],
+        ["reconcile_pyusd_attempts", "partial", "run_deadline"],
         ["close_expired_reviews", "partial", "run_deadline"],
         ["purge_expired_sessions", "partial", "run_deadline"],
       ]);

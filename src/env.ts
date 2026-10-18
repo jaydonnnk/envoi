@@ -59,8 +59,9 @@ function refuseUnknownRailNames(source: NodeJS.ProcessEnv): void {
 const migrationSchema = z.object({ MIGRATION_DATABASE_URL: postgresUrl });
 
 // The maintenance runner (S5): its own direct connection as envoi_maintenance, and the PayPal
-// sandbox credentials for order reads only. It never reads the web database URL, the auth secret or
-// the payments kill switch, which maintenance does not check.
+// sandbox credentials for order reads only, and since S17 the devnet RPC URL for chain reads only. It
+// never reads the web database URL, the auth secret, the payments kill switch or PYUSD_ENABLED, which
+// maintenance does not check.
 const maintenanceSchema = z.object({
   MAINTENANCE_DATABASE_URL: postgresUrl,
   ENVOI_ENVIRONMENT: environment,
@@ -68,6 +69,9 @@ const maintenanceSchema = z.object({
   PAYPAL_CLIENT_ID: z.string().min(1),
   PAYPAL_CLIENT_SECRET: z.string().min(1),
   PAYPAL_PARTNER_ATTRIBUTION_ID: z.string().min(1),
+  // S17: devnet reads for reconcile_pyusd_attempts through the read-only client; unset, that task
+  // claims nothing.
+  SOLANA_RPC_URL: z.url().optional(),
 });
 const testSchema = z.object({ TEST_DATABASE_URL: postgresUrl });
 

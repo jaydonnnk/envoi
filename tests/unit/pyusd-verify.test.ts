@@ -36,6 +36,8 @@ const ATTEMPT: PyusdAttempt = {
   fee: { preparedEpoch: 700n, older: { epoch: 0n, basisPoints: 0, maximumFee: 0n }, newer: { epoch: 0n, basisPoints: 0, maximumFee: 0n } },
   hints: [],
   finalizedSignature: null,
+  mismatchSignature: null,
+  scan: null,
 };
 const ZERO_FEE: FeeSchedule = { epoch: 700n, basisPoints: 0, maximumFee: 0n };
 const NOW = new Date("2026-10-27T03:00:00.000Z");

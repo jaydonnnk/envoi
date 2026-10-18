@@ -2,6 +2,8 @@ import { runMaintenance, type RunContext } from "@/domain/maintenance/tasks";
 import { loadLocalEnvFile, maintenanceEnv } from "@/env";
 import { paypalConfigFromEnv } from "@/integrations/paypal/client";
 import { createPayPalReadClient } from "@/integrations/paypal/orders-read";
+import { createDatabaseRpcLimiter } from "@/integrations/solana/limiter";
+import { createSolanaReadClient } from "@/integrations/solana/rpc";
 import { connectRunner } from "@/lib/db/runner";
 import { isEntrypoint } from "@/lib/entrypoint";
 import { log, redact } from "@/lib/log";
@@ -10,7 +12,8 @@ import { durationMs, systemNow } from "@/lib/time";
 // Maintenance entrypoint (Gate 3 call stack "Maintenance run"; S5). Compiled by `npm run
 // runner:build` and started by `npm run runner:start`: connect as envoi_maintenance, run every task
 // once, write the report, close the connection and exit, non-zero when any outcome is
-// operator-visible. It holds only a PayPal read client. Pass --trigger=scheduled from a schedule;
+// operator-visible. It holds only a PayPal read client and, when SOLANA_RPC_URL is set, the read-only
+// Solana client behind the shared database RPC limiter. Pass --trigger=scheduled from a schedule;
 // every other start is recorded as manual.
 
 export async function main(argv: readonly string[]): Promise<number> {
@@ -20,7 +23,8 @@ export async function main(argv: readonly string[]): Promise<number> {
   const trigger: RunContext["trigger"] = argv.includes("--trigger=scheduled") ? "scheduled" : "manual";
   const { db, close } = connectRunner(env.MAINTENANCE_DATABASE_URL);
   try {
-    const report = await runMaintenance(db, { paypal: createPayPalReadClient(paypalConfigFromEnv(env)), solana: null, now: systemNow, log }, trigger);
+    const solana = env.SOLANA_RPC_URL ? createSolanaReadClient({ rpcUrl: env.SOLANA_RPC_URL }, createDatabaseRpcLimiter(db, systemNow)) : null;
+    const report = await runMaintenance(db, { paypal: createPayPalReadClient(paypalConfigFromEnv(env)), solana, now: systemNow, log }, trigger);
     log(report.operatorVisible ? "error" : "info", "maintenance_run_finished", {
       runId: report.runId,
       trigger: report.trigger,
