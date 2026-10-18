@@ -1,9 +1,95 @@
 {
  "branch": "envoi/slice-17-review-fixes",
- "base_commit": "7ba7445",
+ "base_commit": "da3d229",
  "uncommitted_changes": false,
  "method": "Each definition in s17-review-fixes-mutation-defs.json applied alone by exact text replacement, its whole test file run with the vitest JSON reporter, every touched file restored and compared by SHA-256, then the whole file rerun. A proof needs the named row to fail on an AssertionError, no other row of its group to fail (for a Gate 3 group row; a standalone test's other failures are recorded), a byte-identical restore and an all-passing rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations, as envoi_web for the routes and envoi_maintenance for the runner, with DATABASE_URL removed; Solana RPC is a FIXTURE faked at the bounded transport, wallets are key pairs made in the run, PayPal is the FIXTURE fake at the PayPalWriteClient boundary, and every signature, history page and landed transaction is synthetic. Every definition here is a standalone review-fix test recorded in 00-status.md (S17 review fixes, 2026-10-18).",
  "results": [
+  {
+   "id": "fix1-release-despite-pending",
+   "test": "the oldest failing landing is the mismatch when nothing verifies",
+   "kind": "standalone",
+   "group": "S17 review fixes",
+   "files": [
+    "src/domain/pyusd/recovery.ts"
+   ],
+   "mutation": "Release a complete scan whatever is pending.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'closed_unpaid' to be 'uncertain' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "fix1-keep-newest",
+   "test": "the oldest failing landing is the mismatch when nothing verifies",
+   "kind": "standalone",
+   "group": "S17 review fixes",
+   "files": [
+    "src/domain/pyusd/reconcile.ts"
+   ],
+   "mutation": "Keep the first (newest) failing candidate pending instead of the oldest.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { \u2026(18) } to match object { state: 'mismatch', \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "fix1-no-extra-on-bind",
+   "test": "a verifying landing wins over a newer failing one",
+   "kind": "standalone",
+   "group": "S17 review fixes",
+   "files": [
+    "src/domain/pyusd/reconcile.ts"
+   ],
+   "mutation": "Drop the pending candidate when a landing binds instead of recording it as an extra transfer.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ { \u2026(2) } ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "fix1-mismatch-at-once",
+   "test": "a verifying landing wins over a newer failing one",
+   "kind": "standalone",
+   "group": "S17 review fixes",
+   "files": [
+    "src/domain/pyusd/reconcile.ts"
+   ],
+   "mutation": "Apply a failing candidate as a mismatch when it is read, as before the fix.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { \u2026(18) } to match object { state: 'confirmed', \u2026(3) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "the oldest failing landing is the mismatch when nothing verifies"
+   ],
+   "other_errors": {
+    "the oldest failing landing is the mismatch when nothing verifies": "AssertionError: expected 'scan_complete' to be 'uncertain' // Object.is equality"
+   },
+   "same_group_others": [
+    "the oldest failing landing is the mismatch when nothing verifies"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
   {
    "id": "fix3-landing-push",
    "test": "a Phantom landing replaces /buy in the history",
@@ -74,14 +160,14 @@
    ],
    "mutation": "Never claim a held attempt.",
    "own_row": "failed",
-   "error": "AssertionError: expected [] to include 'att_h44cuwaw2hdpdsicexiolk6ctu'",
+   "error": "AssertionError: expected [] to include 'att_ca4moghntd5njzubljpgxvv67y'",
    "fails_on_assertion": true,
    "other_failing_rows": [],
    "other_errors": {},
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 3,
+   "rerun_rows": 5,
    "proof": true
   },
   {
@@ -101,7 +187,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 3,
+   "rerun_rows": 5,
    "proof": true
   },
   {
@@ -121,7 +207,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 3,
+   "rerun_rows": 5,
    "proof": true
   },
   {
@@ -141,7 +227,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 3,
+   "rerun_rows": 5,
    "proof": true
   }
  ]

@@ -1631,7 +1631,7 @@
  },
  {
   "id": "wallet-link-purchase-id",
-  "test": "Phantom link carries only public outlet and item ids",
+  "test": "Phantom link carries only public outlet and item ids and the rail",
   "test_file": "tests/unit/pyusd-wallet.test.ts",
   "mutation": "Add the purchase id to the link.",
   "edits": [
