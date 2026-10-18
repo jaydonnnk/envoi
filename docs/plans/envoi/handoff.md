@@ -53,10 +53,13 @@ Proposed target remains 4 of 5 first-time buyers completing an eligible test-env
 
 ## Next authorized action
 
-**Next action: S16 is done on 2026-10-18 ([record](00-status.md#s16-pyusd-devnet-purchase-2026-10-17-to-2026-10-18)); its review fixes are on `main` at `91e86f6` and deployed ([record](00-status.md#s16-review-fixes-2026-10-18)); S17 starts only on the user's authorization naming it.**
+**Next action: S17 is done on 2026-10-18 on `envoi/slice-17-pyusd-recovery` ([record](00-status.md#s17-pyusd-recovery-2026-10-18)), not yet pushed or deployed; pushing it, fast-forwarding and pushing `main` (which deploys) each need the user's authorization; then S14 starts only on the user's authorization naming it.**
+S17 recovers PYUSD attempts past their bound with a leased, capped window scan of the merchant account's history, records extra transfers (shown on the receipt, merchant orders and operator health) and adds the operator acts `resolve-pyusd-mismatch` and `record-extra-transfer-refund`; 35 of 35 mutations pass; migration 0023 is on Neon.
+A FIXTURE copy of the phone attempt with its hint withheld was confirmed by the window scan alone in one manual runner run against real devnet; on Neon, one reconcile as `envoi_maintenance` confirmed the phone payment `pur_b6bf45fmxlulegnn26a4pl5zkq` through its recorded hint and completed its window scan, so it is paid and its basket is unlocked.
+The `envoi_maintenance` password was rotated on 2026-10-18 with the user's choice, because `.env.local` had no `MAINTENANCE_DATABASE_URL`; the new URL is only in `.env.local`.
+`PYUSD_PROOFS.automaticUnpaidRelease` stays false until the user approves that reviewed commit; the desktop attempt `pur_bi3om6wno6f6t4vbilkswfut3y` is paid but not yet window-scanned, which needs the user's authorization.
 S16 adds the PYUSD devnet rail: Test Shop's merchant proved key control of a Phantom devnet wallet, set a dated rate, and one desktop Chrome payment of 1.8 PYUSD devnet test tokens was verified finalized and shown paid; Phantom kept the prepared blockhash, memo and transfer and added only two ComputeBudget instructions (R13 passes).
-`PYUSD_ENABLED` is unset on Render again [verified 2026-10-18]; it stays off outside recorded proof runs until S17 passes, and PYUSD opens to testers only on the user's authorization after S17.
-One phone payment (`pur_b6bf45fmxlulegnn26a4pl5zkq`) is finalized on devnet but stays `pending_payment` with its attempt `prepared` and basket locked on Neon, because its only read came before finalization and its buyer session is gone; the S16 review showed locally that an open receipt would have turned it paid 30 seconds later, so the phone page most likely stopped polling [hypothesis]; S17's `reconcile_pyusd_attempts` is its recovery path.
+`PYUSD_ENABLED` is unset on Render [verified 2026-10-18 by the S16 session]; it stays off outside recorded proof runs, and PYUSD opens to testers only on the user's authorization.
 R14 is open: the Browse link did not keep the basket on the user's iPhone, and which page it opened is [unknown] until the user's next test; phone PYUSD stays unavailable to testers.
 `main` and the S16 branch were pushed at `115f5d9` at 02:02 SGT on 2026-10-18 and Render serves it; no authorization for that push is recorded [unknown].
 A buyer taps Scan on `/buy`, and `/buy/scan` resolves a scanned or pasted sticker to one outlet, "Which outlet?", "This shop is not on Envoi" or "Envoi cannot identify a shop from this code", with paste and text search when the camera is denied or missing.
@@ -83,7 +86,7 @@ S13 is done (2026-10-14): in Claude Code, an agent holding a scoped demo token s
 S4 is done (2026-10-14), with its review fixes, see [S4 review fixes](00-status.md#s4-review-fixes-2026-10-14).
 The two S2 purchases that PayPal refused before the seller consented stay `uncertain` for good, by the user's choice on 2026-10-13, and keep locking their basket (1 Kopi O and 1 Kaya toast set) in the browser session that made them.
 The Claude Code agent token stays live in Neon (`agt_ggembpdxft5soezukk2c6remma`, label "Claude Code"); no revoke subcommand exists.
-On "start S17", create `envoi/slice-17-<slug>` from the current `main` tip, confirm it with `git branch --show-current`, and request S17's listed authorizations in `04-slices.md` by name before acting.
+On "start S14", create `envoi/slice-14-<slug>` from the current `main` tip, confirm it with `git branch --show-current`, and request S14's listed authorizations in `04-slices.md` by name before acting.
 The 25 Oct checkpoint is met: S1-S4, S13, S6, S5, S7 and S8 are all done, so no cut applies before S11.
 Rerun the checker and its fault harness under [`checks/`](checks/gate4_check.py) after any edit to the gate folder.
 Gate 3 was re-approved on 2026-10-11 with fixes A-M; its record, mirrors and fail-capable checks are in `00-status.md`.
