@@ -1,0 +1,1212 @@
+{
+ "note": "Neon, 2026-10-18. READ ONLY reads in a read-only transaction with the migration login (never neon_auth); writes: migration 0023 (npm run db:migrate, authorized 'Migration 0023 on Neon'), the envoi_maintenance password rotation (authorized 'Rotate the password': .env.local had no MAINTENANCE_DATABASE_URL; role attributes before and after unchanged: LOGIN, NOSUPERUSER, NOCREATEDB, NOCREATEROLE, NOINHERIT), and one shared reconcilePyusdAttempt call as envoi_maintenance on the phone attempt only (authorized 'Maintenance run on phone', 'Phone attempt only'), mode runner, owner manual-s17-phone, read-only devnet client behind the database RPC limiter. Nothing else on Neon was written.",
+ "before": {
+  "readOnly": {
+   "transaction_read_only": "on"
+  },
+  "migrations": {
+   "n": 23
+  },
+  "tables": {
+   "pyusd_extra_transfers": false
+  },
+  "newColumns": [],
+  "checks": [],
+  "tableGrants": [
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "audit_events",
+    "privs": "INSERT"
+   },
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "payment_attempts",
+    "privs": "SELECT"
+   },
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "purchases",
+    "privs": "SELECT"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "audit_events",
+    "privs": "INSERT"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "payment_attempts",
+    "privs": "INSERT,SELECT"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "purchases",
+    "privs": "INSERT,SELECT"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "rpc_limiter_backoff",
+    "privs": "SELECT"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "rpc_limiter_calls",
+    "privs": "DELETE,INSERT,SELECT"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "rpc_limiter_slots",
+    "privs": "SELECT"
+   }
+  ],
+  "columnGrants": [
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "payment_attempts",
+    "privilege_type": "UPDATE",
+    "columns": "capture_gross_sgd_cents,capture_id,capture_verified_at,last_provider_read_at,lease_expires_at,lease_owner,maintenance_checked_at,maintenance_checks,maintenance_claim_expires_at,maintenance_claim_owner,outcome_reason,provider_read_due_at,state,updated_at"
+   },
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "purchases",
+    "privilege_type": "UPDATE",
+    "columns": "state"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "payment_attempts",
+    "privilege_type": "INSERT",
+    "columns": "approval_url,capture_gross_sgd_cents,capture_id,capture_request_id,capture_verified_at,create_request_id,created_at,currency,id,last_provider_read_at,lease_expires_at,lease_owner,maintenance_checked_at,maintenance_checks,maintenance_claim_expires_at,maintenance_claim_owner,order_id,outcome_reason,payee_merchant_id,provider_read_due_at,purchase_id,pyusd_atomic_amount,pyusd_blockhash,pyusd_buyer_wallet,pyusd_destination_token_account,pyusd_fee,pyusd_finalized_signature,pyusd_hints,pyusd_last_valid_block_height,pyusd_message_fingerprint,pyusd_preparation_slot,pyusd_rate_version_id,pyusd_reference,pyusd_source_token_account,pyusd_verified_at,rail,state,total_sgd_cents,updated_at"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "payment_attempts",
+    "privilege_type": "UPDATE",
+    "columns": "approval_url,capture_gross_sgd_cents,capture_id,capture_request_id,capture_verified_at,last_provider_read_at,lease_expires_at,lease_owner,order_id,outcome_reason,provider_read_due_at,pyusd_finalized_signature,pyusd_hints,pyusd_verified_at,state,updated_at"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "purchases",
+    "privilege_type": "INSERT",
+    "columns": "acknowledged_at,acknowledged_by_user_id,basket_lock_key,buyer_user_id,checkout_key,created_at,currency,destination_id,destination_version,entry_point,id,lines,menu_revision_id,outlet_id,pyusd_atomic_amount,pyusd_rate_version_id,rail,review_expires_at,state,supersedes_purchase_id,total_sgd_cents"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "purchases",
+    "privilege_type": "UPDATE",
+    "columns": "acknowledged_at,acknowledged_by_user_id,state"
+   }
+  ],
+  "attempts": [
+   {
+    "id": "att_3myu6gbk4zwmb7nknj23ilhfl4",
+    "rail": "pyusd",
+    "state": "confirmed",
+    "pyusd_fee": {
+     "newer": {
+      "epoch": "644",
+      "maximumFee": "0",
+      "basisPoints": 0
+     },
+     "older": {
+      "epoch": "644",
+      "maximumFee": "0",
+      "basisPoints": 0
+     },
+     "preparedEpoch": "1185"
+    },
+    "created_at": "2026-10-17T16:23:35.695+00:00",
+    "lease_owner": null,
+    "purchase_id": "pur_bi3om6wno6f6t4vbilkswfut3y",
+    "pyusd_hints": [
+     {
+      "decision": "confirmed",
+      "signature": "2AcWTpJWtiLKBNS36vL9UyTV9goYMbR4tajb8aDVvnmNAwHbJvYeJA65oZbdDnx2EiptJVT1gwYbPZRnXGkw7cUM",
+      "receivedAt": "2026-10-17T16:23:40.987Z"
+     }
+    ],
+    "outcome_reason": null,
+    "pyusd_blockhash": "kFAcGb96SJKoSqG9aWpCr1tNkFgnwkKrpzvxiuu29RU",
+    "pyusd_reference": "WKtTviMKkFYrF8FZY4k68D",
+    "lease_expires_at": null,
+    "pyusd_verified_at": "2026-10-17T16:23:42.329+00:00",
+    "pyusd_buyer_wallet": "89CbH6RAXRfNFpRNDGdyzThBUyccySPqPA5QVkLa38mv",
+    "pyusd_atomic_amount": 1800000,
+    "last_provider_read_at": "2026-10-17T16:23:41.001+00:00",
+    "pyusd_rate_version_id": "rat_pfaadi5fspair5diaog5b5qd7a",
+    "pyusd_preparation_slot": 512132611,
+    "pyusd_finalized_signature": "2AcWTpJWtiLKBNS36vL9UyTV9goYMbR4tajb8aDVvnmNAwHbJvYeJA65oZbdDnx2EiptJVT1gwYbPZRnXGkw7cUM",
+    "pyusd_message_fingerprint": "a793573876179c60eb13a9fa6e6930d622de532f5ac5fba7df3a16cfc1f26c94",
+    "pyusd_source_token_account": "7PwsUNDMHskHT2eEEoaAy7Fb8d5rsymc1iJafEzMGgGZ",
+    "pyusd_last_valid_block_height": 499348224,
+    "pyusd_destination_token_account": "4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14",
+    "purchase_state": "paid"
+   },
+   {
+    "id": "att_xglpu6vhxg42y3a7gy2tod47xa",
+    "rail": "pyusd",
+    "state": "prepared",
+    "pyusd_fee": {
+     "newer": {
+      "epoch": "644",
+      "maximumFee": "0",
+      "basisPoints": 0
+     },
+     "older": {
+      "epoch": "644",
+      "maximumFee": "0",
+      "basisPoints": 0
+     },
+     "preparedEpoch": "1185"
+    },
+    "created_at": "2026-10-17T16:26:53.92+00:00",
+    "lease_owner": null,
+    "purchase_id": "pur_b6bf45fmxlulegnn26a4pl5zkq",
+    "pyusd_hints": [
+     {
+      "decision": "not_found",
+      "signature": "2RAZudPogRpLjmjir4D8qTF5sGRsQLcP1MH31sDNDqHgpWFYkqVSH65QJuKjUVQzTHhSGxiBjx22eHX27KrNAUnr",
+      "receivedAt": "2026-10-17T16:26:58.642Z"
+     }
+    ],
+    "outcome_reason": null,
+    "pyusd_blockhash": "3NQon3opzWJQSPWXjnmP3Cs6cBUz4QzjirixmbTfTJob",
+    "pyusd_reference": "3Y9LaXsrH3YZeUZwgJwCqv",
+    "lease_expires_at": null,
+    "pyusd_verified_at": null,
+    "pyusd_buyer_wallet": "89CbH6RAXRfNFpRNDGdyzThBUyccySPqPA5QVkLa38mv",
+    "pyusd_atomic_amount": 1800000,
+    "last_provider_read_at": "2026-10-17T16:26:58.661+00:00",
+    "pyusd_rate_version_id": "rat_pfaadi5fspair5diaog5b5qd7a",
+    "pyusd_preparation_slot": 512133440,
+    "pyusd_finalized_signature": null,
+    "pyusd_message_fingerprint": "39b3d8d8a23dfeb9fb2fa8140ef716fdb3bc7d9f8e4dcf8823f56fa9b0d7d658",
+    "pyusd_source_token_account": "7PwsUNDMHskHT2eEEoaAy7Fb8d5rsymc1iJafEzMGgGZ",
+    "pyusd_last_valid_block_height": 499349053,
+    "pyusd_destination_token_account": "4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14",
+    "purchase_state": "pending_payment"
+   }
+  ],
+  "audit": [
+   {
+    "at": "2026-10-17T16:23:35.695Z",
+    "actor": "buyer:usr_o2tys4cx5id37b634ar3nv5dae",
+    "action": "pyusd_attempt_prepared",
+    "purchase_id": "pur_bi3om6wno6f6t4vbilkswfut3y",
+    "attempt_id": "att_3myu6gbk4zwmb7nknj23ilhfl4",
+    "operator_visible": false,
+    "details": {
+     "reference": "WKtTviMKkFYrF8FZY4k68D",
+     "atomicAmount": "1800000",
+     "messageFingerprint": "a793573876179c60eb13a9fa6e6930d622de532f5ac5fba7df3a16cfc1f26c94",
+     "lastValidBlockHeight": "499348224"
+    }
+   },
+   {
+    "at": "2026-10-17T16:23:40.987Z",
+    "actor": "buyer:usr_o2tys4cx5id37b634ar3nv5dae",
+    "action": "pyusd_hint_received",
+    "purchase_id": "pur_bi3om6wno6f6t4vbilkswfut3y",
+    "attempt_id": "att_3myu6gbk4zwmb7nknj23ilhfl4",
+    "operator_visible": false,
+    "details": {
+     "signature": "2AcWTpJWtiLKBNS36vL9UyTV9goYMbR4tajb8aDVvnmNAwHbJvYeJA65oZbdDnx2EiptJVT1gwYbPZRnXGkw7cUM"
+    }
+   },
+   {
+    "at": "2026-10-17T16:23:42.329Z",
+    "actor": "buyer:usr_o2tys4cx5id37b634ar3nv5dae",
+    "action": "pyusd_transfer_confirmed",
+    "purchase_id": "pur_bi3om6wno6f6t4vbilkswfut3y",
+    "attempt_id": "att_3myu6gbk4zwmb7nknj23ilhfl4",
+    "operator_visible": false,
+    "details": {
+     "slot": "512132636",
+     "signature": "2AcWTpJWtiLKBNS36vL9UyTV9goYMbR4tajb8aDVvnmNAwHbJvYeJA65oZbdDnx2EiptJVT1gwYbPZRnXGkw7cUM",
+     "destination": "4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14",
+     "atomicAmount": "1800000"
+    }
+   },
+   {
+    "at": "2026-10-17T16:26:53.920Z",
+    "actor": "buyer:kXAi4JypuBGDBEG2zcrBL0AGHamNjajn",
+    "action": "pyusd_attempt_prepared",
+    "purchase_id": "pur_b6bf45fmxlulegnn26a4pl5zkq",
+    "attempt_id": "att_xglpu6vhxg42y3a7gy2tod47xa",
+    "operator_visible": false,
+    "details": {
+     "reference": "3Y9LaXsrH3YZeUZwgJwCqv",
+     "atomicAmount": "1800000",
+     "messageFingerprint": "39b3d8d8a23dfeb9fb2fa8140ef716fdb3bc7d9f8e4dcf8823f56fa9b0d7d658",
+     "lastValidBlockHeight": "499349053"
+    }
+   },
+   {
+    "at": "2026-10-17T16:26:58.642Z",
+    "actor": "buyer:kXAi4JypuBGDBEG2zcrBL0AGHamNjajn",
+    "action": "pyusd_hint_received",
+    "purchase_id": "pur_b6bf45fmxlulegnn26a4pl5zkq",
+    "attempt_id": "att_xglpu6vhxg42y3a7gy2tod47xa",
+    "operator_visible": false,
+    "details": {
+     "signature": "2RAZudPogRpLjmjir4D8qTF5sGRsQLcP1MH31sDNDqHgpWFYkqVSH65QJuKjUVQzTHhSGxiBjx22eHX27KrNAUnr"
+    }
+   }
+  ],
+  "extraTransfers": null,
+  "purchaseStates": [
+   {
+    "state": "paid",
+    "n": 6
+   },
+   {
+    "state": "pending_payment",
+    "n": 1
+   },
+   {
+    "state": "review_expired",
+    "n": 7
+   },
+   {
+    "state": "review_open",
+    "n": 11
+   },
+   {
+    "state": "uncertain",
+    "n": 2
+   },
+   {
+    "state": "unpaid_closed",
+    "n": 4
+   }
+  ],
+  "attemptStates": [
+   {
+    "rail": "paypal",
+    "state": "abandoned",
+    "n": 4
+   },
+   {
+    "rail": "paypal",
+    "state": "capture_confirmed",
+    "n": 5
+   },
+   {
+    "rail": "paypal",
+    "state": "capture_unknown",
+    "n": 2
+   },
+   {
+    "rail": "pyusd",
+    "state": "confirmed",
+    "n": 1
+   },
+   {
+    "rail": "pyusd",
+    "state": "prepared",
+    "n": 1
+   }
+  ],
+  "limiter": {
+   "calls": 3
+  },
+  "testShop": [
+   {
+    "id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+    "published": true,
+    "rail": "paypal",
+    "status": "active",
+    "version": 2
+   },
+   {
+    "id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+    "published": true,
+    "rail": "pyusd",
+    "status": "active",
+    "version": 2
+   }
+  ]
+ },
+ "afterMigration": {
+  "readOnly": {
+   "transaction_read_only": "on"
+  },
+  "migrations": {
+   "n": 24
+  },
+  "tables": {
+   "pyusd_extra_transfers": true
+  },
+  "newColumns": [
+   {
+    "column_name": "pyusd_mismatch_signature",
+    "data_type": "text"
+   },
+   {
+    "column_name": "pyusd_scan",
+    "data_type": "jsonb"
+   }
+  ],
+  "checks": [
+   {
+    "conname": "payment_attempts_pyusd_mismatch_check"
+   },
+   {
+    "conname": "pyusd_extra_transfers_attempt_id_not_null"
+   },
+   {
+    "conname": "pyusd_extra_transfers_attempt_id_payment_attempts_id_fk"
+   },
+   {
+    "conname": "pyusd_extra_transfers_found_at_not_null"
+   },
+   {
+    "conname": "pyusd_extra_transfers_id_not_null"
+   },
+   {
+    "conname": "pyusd_extra_transfers_pkey"
+   },
+   {
+    "conname": "pyusd_extra_transfers_refund_check"
+   },
+   {
+    "conname": "pyusd_extra_transfers_refund_recorded_by_user_id_user_id_fk"
+   },
+   {
+    "conname": "pyusd_extra_transfers_signature_not_null"
+   },
+   {
+    "conname": "pyusd_extra_transfers_slot_not_null"
+   },
+   {
+    "conname": "pyusd_extra_transfers_verification_check"
+   },
+   {
+    "conname": "pyusd_extra_transfers_verification_not_null"
+   }
+  ],
+  "tableGrants": [
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "audit_events",
+    "privs": "INSERT"
+   },
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "payment_attempts",
+    "privs": "SELECT"
+   },
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "purchases",
+    "privs": "SELECT"
+   },
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "pyusd_extra_transfers",
+    "privs": "SELECT"
+   },
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "rpc_limiter_backoff",
+    "privs": "SELECT"
+   },
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "rpc_limiter_calls",
+    "privs": "DELETE,INSERT,SELECT"
+   },
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "rpc_limiter_slots",
+    "privs": "SELECT"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "audit_events",
+    "privs": "INSERT"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "payment_attempts",
+    "privs": "INSERT,SELECT"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "purchases",
+    "privs": "INSERT,SELECT"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "pyusd_extra_transfers",
+    "privs": "SELECT"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "rpc_limiter_backoff",
+    "privs": "SELECT"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "rpc_limiter_calls",
+    "privs": "DELETE,INSERT,SELECT"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "rpc_limiter_slots",
+    "privs": "SELECT"
+   }
+  ],
+  "columnGrants": [
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "payment_attempts",
+    "privilege_type": "UPDATE",
+    "columns": "capture_gross_sgd_cents,capture_id,capture_verified_at,last_provider_read_at,lease_expires_at,lease_owner,maintenance_checked_at,maintenance_checks,maintenance_claim_expires_at,maintenance_claim_owner,outcome_reason,provider_read_due_at,pyusd_finalized_signature,pyusd_hints,pyusd_mismatch_signature,pyusd_scan,pyusd_verified_at,state,updated_at"
+   },
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "purchases",
+    "privilege_type": "UPDATE",
+    "columns": "state"
+   },
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "pyusd_extra_transfers",
+    "privilege_type": "INSERT",
+    "columns": "attempt_id,destination_delta,found_at,id,signature,slot,verification"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "payment_attempts",
+    "privilege_type": "INSERT",
+    "columns": "approval_url,capture_gross_sgd_cents,capture_id,capture_request_id,capture_verified_at,create_request_id,created_at,currency,id,last_provider_read_at,lease_expires_at,lease_owner,maintenance_checked_at,maintenance_checks,maintenance_claim_expires_at,maintenance_claim_owner,order_id,outcome_reason,payee_merchant_id,provider_read_due_at,purchase_id,pyusd_atomic_amount,pyusd_blockhash,pyusd_buyer_wallet,pyusd_destination_token_account,pyusd_fee,pyusd_finalized_signature,pyusd_hints,pyusd_last_valid_block_height,pyusd_message_fingerprint,pyusd_mismatch_signature,pyusd_preparation_slot,pyusd_rate_version_id,pyusd_reference,pyusd_scan,pyusd_source_token_account,pyusd_verified_at,rail,state,total_sgd_cents,updated_at"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "payment_attempts",
+    "privilege_type": "UPDATE",
+    "columns": "approval_url,capture_gross_sgd_cents,capture_id,capture_request_id,capture_verified_at,last_provider_read_at,lease_expires_at,lease_owner,order_id,outcome_reason,provider_read_due_at,pyusd_finalized_signature,pyusd_hints,pyusd_mismatch_signature,pyusd_scan,pyusd_verified_at,state,updated_at"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "purchases",
+    "privilege_type": "INSERT",
+    "columns": "acknowledged_at,acknowledged_by_user_id,basket_lock_key,buyer_user_id,checkout_key,created_at,currency,destination_id,destination_version,entry_point,id,lines,menu_revision_id,outlet_id,pyusd_atomic_amount,pyusd_rate_version_id,rail,review_expires_at,state,supersedes_purchase_id,total_sgd_cents"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "purchases",
+    "privilege_type": "UPDATE",
+    "columns": "acknowledged_at,acknowledged_by_user_id,state"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "pyusd_extra_transfers",
+    "privilege_type": "INSERT",
+    "columns": "attempt_id,destination_delta,found_at,id,signature,slot,verification"
+   }
+  ],
+  "attempts": [
+   {
+    "id": "att_3myu6gbk4zwmb7nknj23ilhfl4",
+    "rail": "pyusd",
+    "state": "confirmed",
+    "pyusd_fee": {
+     "newer": {
+      "epoch": "644",
+      "maximumFee": "0",
+      "basisPoints": 0
+     },
+     "older": {
+      "epoch": "644",
+      "maximumFee": "0",
+      "basisPoints": 0
+     },
+     "preparedEpoch": "1185"
+    },
+    "created_at": "2026-10-17T16:23:35.695+00:00",
+    "pyusd_scan": null,
+    "lease_owner": null,
+    "purchase_id": "pur_bi3om6wno6f6t4vbilkswfut3y",
+    "pyusd_hints": [
+     {
+      "decision": "confirmed",
+      "signature": "2AcWTpJWtiLKBNS36vL9UyTV9goYMbR4tajb8aDVvnmNAwHbJvYeJA65oZbdDnx2EiptJVT1gwYbPZRnXGkw7cUM",
+      "receivedAt": "2026-10-17T16:23:40.987Z"
+     }
+    ],
+    "outcome_reason": null,
+    "pyusd_blockhash": "kFAcGb96SJKoSqG9aWpCr1tNkFgnwkKrpzvxiuu29RU",
+    "pyusd_reference": "WKtTviMKkFYrF8FZY4k68D",
+    "lease_expires_at": null,
+    "pyusd_verified_at": "2026-10-17T16:23:42.329+00:00",
+    "pyusd_buyer_wallet": "89CbH6RAXRfNFpRNDGdyzThBUyccySPqPA5QVkLa38mv",
+    "pyusd_atomic_amount": 1800000,
+    "last_provider_read_at": "2026-10-17T16:23:41.001+00:00",
+    "pyusd_rate_version_id": "rat_pfaadi5fspair5diaog5b5qd7a",
+    "pyusd_preparation_slot": 512132611,
+    "pyusd_mismatch_signature": null,
+    "pyusd_finalized_signature": "2AcWTpJWtiLKBNS36vL9UyTV9goYMbR4tajb8aDVvnmNAwHbJvYeJA65oZbdDnx2EiptJVT1gwYbPZRnXGkw7cUM",
+    "pyusd_message_fingerprint": "a793573876179c60eb13a9fa6e6930d622de532f5ac5fba7df3a16cfc1f26c94",
+    "pyusd_source_token_account": "7PwsUNDMHskHT2eEEoaAy7Fb8d5rsymc1iJafEzMGgGZ",
+    "pyusd_last_valid_block_height": 499348224,
+    "pyusd_destination_token_account": "4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14",
+    "purchase_state": "paid"
+   },
+   {
+    "id": "att_xglpu6vhxg42y3a7gy2tod47xa",
+    "rail": "pyusd",
+    "state": "prepared",
+    "pyusd_fee": {
+     "newer": {
+      "epoch": "644",
+      "maximumFee": "0",
+      "basisPoints": 0
+     },
+     "older": {
+      "epoch": "644",
+      "maximumFee": "0",
+      "basisPoints": 0
+     },
+     "preparedEpoch": "1185"
+    },
+    "created_at": "2026-10-17T16:26:53.92+00:00",
+    "pyusd_scan": null,
+    "lease_owner": null,
+    "purchase_id": "pur_b6bf45fmxlulegnn26a4pl5zkq",
+    "pyusd_hints": [
+     {
+      "decision": "not_found",
+      "signature": "2RAZudPogRpLjmjir4D8qTF5sGRsQLcP1MH31sDNDqHgpWFYkqVSH65QJuKjUVQzTHhSGxiBjx22eHX27KrNAUnr",
+      "receivedAt": "2026-10-17T16:26:58.642Z"
+     }
+    ],
+    "outcome_reason": null,
+    "pyusd_blockhash": "3NQon3opzWJQSPWXjnmP3Cs6cBUz4QzjirixmbTfTJob",
+    "pyusd_reference": "3Y9LaXsrH3YZeUZwgJwCqv",
+    "lease_expires_at": null,
+    "pyusd_verified_at": null,
+    "pyusd_buyer_wallet": "89CbH6RAXRfNFpRNDGdyzThBUyccySPqPA5QVkLa38mv",
+    "pyusd_atomic_amount": 1800000,
+    "last_provider_read_at": "2026-10-17T16:26:58.661+00:00",
+    "pyusd_rate_version_id": "rat_pfaadi5fspair5diaog5b5qd7a",
+    "pyusd_preparation_slot": 512133440,
+    "pyusd_mismatch_signature": null,
+    "pyusd_finalized_signature": null,
+    "pyusd_message_fingerprint": "39b3d8d8a23dfeb9fb2fa8140ef716fdb3bc7d9f8e4dcf8823f56fa9b0d7d658",
+    "pyusd_source_token_account": "7PwsUNDMHskHT2eEEoaAy7Fb8d5rsymc1iJafEzMGgGZ",
+    "pyusd_last_valid_block_height": 499349053,
+    "pyusd_destination_token_account": "4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14",
+    "purchase_state": "pending_payment"
+   }
+  ],
+  "audit": [
+   {
+    "at": "2026-10-17T16:23:35.695Z",
+    "actor": "buyer:usr_o2tys4cx5id37b634ar3nv5dae",
+    "action": "pyusd_attempt_prepared",
+    "purchase_id": "pur_bi3om6wno6f6t4vbilkswfut3y",
+    "attempt_id": "att_3myu6gbk4zwmb7nknj23ilhfl4",
+    "operator_visible": false,
+    "details": {
+     "reference": "WKtTviMKkFYrF8FZY4k68D",
+     "atomicAmount": "1800000",
+     "messageFingerprint": "a793573876179c60eb13a9fa6e6930d622de532f5ac5fba7df3a16cfc1f26c94",
+     "lastValidBlockHeight": "499348224"
+    }
+   },
+   {
+    "at": "2026-10-17T16:23:40.987Z",
+    "actor": "buyer:usr_o2tys4cx5id37b634ar3nv5dae",
+    "action": "pyusd_hint_received",
+    "purchase_id": "pur_bi3om6wno6f6t4vbilkswfut3y",
+    "attempt_id": "att_3myu6gbk4zwmb7nknj23ilhfl4",
+    "operator_visible": false,
+    "details": {
+     "signature": "2AcWTpJWtiLKBNS36vL9UyTV9goYMbR4tajb8aDVvnmNAwHbJvYeJA65oZbdDnx2EiptJVT1gwYbPZRnXGkw7cUM"
+    }
+   },
+   {
+    "at": "2026-10-17T16:23:42.329Z",
+    "actor": "buyer:usr_o2tys4cx5id37b634ar3nv5dae",
+    "action": "pyusd_transfer_confirmed",
+    "purchase_id": "pur_bi3om6wno6f6t4vbilkswfut3y",
+    "attempt_id": "att_3myu6gbk4zwmb7nknj23ilhfl4",
+    "operator_visible": false,
+    "details": {
+     "slot": "512132636",
+     "signature": "2AcWTpJWtiLKBNS36vL9UyTV9goYMbR4tajb8aDVvnmNAwHbJvYeJA65oZbdDnx2EiptJVT1gwYbPZRnXGkw7cUM",
+     "destination": "4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14",
+     "atomicAmount": "1800000"
+    }
+   },
+   {
+    "at": "2026-10-17T16:26:53.920Z",
+    "actor": "buyer:kXAi4JypuBGDBEG2zcrBL0AGHamNjajn",
+    "action": "pyusd_attempt_prepared",
+    "purchase_id": "pur_b6bf45fmxlulegnn26a4pl5zkq",
+    "attempt_id": "att_xglpu6vhxg42y3a7gy2tod47xa",
+    "operator_visible": false,
+    "details": {
+     "reference": "3Y9LaXsrH3YZeUZwgJwCqv",
+     "atomicAmount": "1800000",
+     "messageFingerprint": "39b3d8d8a23dfeb9fb2fa8140ef716fdb3bc7d9f8e4dcf8823f56fa9b0d7d658",
+     "lastValidBlockHeight": "499349053"
+    }
+   },
+   {
+    "at": "2026-10-17T16:26:58.642Z",
+    "actor": "buyer:kXAi4JypuBGDBEG2zcrBL0AGHamNjajn",
+    "action": "pyusd_hint_received",
+    "purchase_id": "pur_b6bf45fmxlulegnn26a4pl5zkq",
+    "attempt_id": "att_xglpu6vhxg42y3a7gy2tod47xa",
+    "operator_visible": false,
+    "details": {
+     "signature": "2RAZudPogRpLjmjir4D8qTF5sGRsQLcP1MH31sDNDqHgpWFYkqVSH65QJuKjUVQzTHhSGxiBjx22eHX27KrNAUnr"
+    }
+   }
+  ],
+  "extraTransfers": [
+   {
+    "n": 0
+   }
+  ],
+  "purchaseStates": [
+   {
+    "state": "paid",
+    "n": 6
+   },
+   {
+    "state": "pending_payment",
+    "n": 1
+   },
+   {
+    "state": "review_expired",
+    "n": 7
+   },
+   {
+    "state": "review_open",
+    "n": 11
+   },
+   {
+    "state": "uncertain",
+    "n": 2
+   },
+   {
+    "state": "unpaid_closed",
+    "n": 4
+   }
+  ],
+  "attemptStates": [
+   {
+    "rail": "paypal",
+    "state": "abandoned",
+    "n": 4
+   },
+   {
+    "rail": "paypal",
+    "state": "capture_confirmed",
+    "n": 5
+   },
+   {
+    "rail": "paypal",
+    "state": "capture_unknown",
+    "n": 2
+   },
+   {
+    "rail": "pyusd",
+    "state": "confirmed",
+    "n": 1
+   },
+   {
+    "rail": "pyusd",
+    "state": "prepared",
+    "n": 1
+   }
+  ],
+  "limiter": {
+   "calls": 3
+  },
+  "testShop": [
+   {
+    "id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+    "published": true,
+    "rail": "paypal",
+    "status": "active",
+    "version": 2
+   },
+   {
+    "id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+    "published": true,
+    "rail": "pyusd",
+    "status": "active",
+    "version": 2
+   }
+  ]
+ },
+ "reconcileCalls": [
+  {
+   "call": 1,
+   "at": "2026-10-18T07:09:27.590Z",
+   "outcome": "scan_complete",
+   "state": "confirmed",
+   "scan": {
+    "lastGap": null,
+    "pagesRead": 1,
+    "beforeCursor": "2AcWTpJWtiLKBNS36vL9UyTV9goYMbR4tajb8aDVvnmNAwHbJvYeJA65oZbdDnx2EiptJVT1gwYbPZRnXGkw7cUM",
+    "newestSignature": "2RAZudPogRpLjmjir4D8qTF5sGRsQLcP1MH31sDNDqHgpWFYkqVSH65QJuKjUVQzTHhSGxiBjx22eHX27KrNAUnr",
+    "candidatesChecked": 0,
+    "reachedBeforePreparation": true,
+    "startedAtFinalizedHeight": "499569718"
+   }
+  }
+ ],
+ "after": {
+  "readOnly": {
+   "transaction_read_only": "on"
+  },
+  "migrations": {
+   "n": 24
+  },
+  "tables": {
+   "pyusd_extra_transfers": true
+  },
+  "newColumns": [
+   {
+    "column_name": "pyusd_mismatch_signature",
+    "data_type": "text"
+   },
+   {
+    "column_name": "pyusd_scan",
+    "data_type": "jsonb"
+   }
+  ],
+  "checks": [
+   {
+    "conname": "payment_attempts_pyusd_mismatch_check"
+   },
+   {
+    "conname": "pyusd_extra_transfers_attempt_id_not_null"
+   },
+   {
+    "conname": "pyusd_extra_transfers_attempt_id_payment_attempts_id_fk"
+   },
+   {
+    "conname": "pyusd_extra_transfers_found_at_not_null"
+   },
+   {
+    "conname": "pyusd_extra_transfers_id_not_null"
+   },
+   {
+    "conname": "pyusd_extra_transfers_pkey"
+   },
+   {
+    "conname": "pyusd_extra_transfers_refund_check"
+   },
+   {
+    "conname": "pyusd_extra_transfers_refund_recorded_by_user_id_user_id_fk"
+   },
+   {
+    "conname": "pyusd_extra_transfers_signature_not_null"
+   },
+   {
+    "conname": "pyusd_extra_transfers_slot_not_null"
+   },
+   {
+    "conname": "pyusd_extra_transfers_verification_check"
+   },
+   {
+    "conname": "pyusd_extra_transfers_verification_not_null"
+   }
+  ],
+  "tableGrants": [
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "audit_events",
+    "privs": "INSERT"
+   },
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "payment_attempts",
+    "privs": "SELECT"
+   },
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "purchases",
+    "privs": "SELECT"
+   },
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "pyusd_extra_transfers",
+    "privs": "SELECT"
+   },
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "rpc_limiter_backoff",
+    "privs": "SELECT"
+   },
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "rpc_limiter_calls",
+    "privs": "DELETE,INSERT,SELECT"
+   },
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "rpc_limiter_slots",
+    "privs": "SELECT"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "audit_events",
+    "privs": "INSERT"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "payment_attempts",
+    "privs": "INSERT,SELECT"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "purchases",
+    "privs": "INSERT,SELECT"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "pyusd_extra_transfers",
+    "privs": "SELECT"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "rpc_limiter_backoff",
+    "privs": "SELECT"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "rpc_limiter_calls",
+    "privs": "DELETE,INSERT,SELECT"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "rpc_limiter_slots",
+    "privs": "SELECT"
+   }
+  ],
+  "columnGrants": [
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "payment_attempts",
+    "privilege_type": "UPDATE",
+    "columns": "capture_gross_sgd_cents,capture_id,capture_verified_at,last_provider_read_at,lease_expires_at,lease_owner,maintenance_checked_at,maintenance_checks,maintenance_claim_expires_at,maintenance_claim_owner,outcome_reason,provider_read_due_at,pyusd_finalized_signature,pyusd_hints,pyusd_mismatch_signature,pyusd_scan,pyusd_verified_at,state,updated_at"
+   },
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "purchases",
+    "privilege_type": "UPDATE",
+    "columns": "state"
+   },
+   {
+    "grantee": "envoi_maintenance",
+    "table_name": "pyusd_extra_transfers",
+    "privilege_type": "INSERT",
+    "columns": "attempt_id,destination_delta,found_at,id,signature,slot,verification"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "payment_attempts",
+    "privilege_type": "INSERT",
+    "columns": "approval_url,capture_gross_sgd_cents,capture_id,capture_request_id,capture_verified_at,create_request_id,created_at,currency,id,last_provider_read_at,lease_expires_at,lease_owner,maintenance_checked_at,maintenance_checks,maintenance_claim_expires_at,maintenance_claim_owner,order_id,outcome_reason,payee_merchant_id,provider_read_due_at,purchase_id,pyusd_atomic_amount,pyusd_blockhash,pyusd_buyer_wallet,pyusd_destination_token_account,pyusd_fee,pyusd_finalized_signature,pyusd_hints,pyusd_last_valid_block_height,pyusd_message_fingerprint,pyusd_mismatch_signature,pyusd_preparation_slot,pyusd_rate_version_id,pyusd_reference,pyusd_scan,pyusd_source_token_account,pyusd_verified_at,rail,state,total_sgd_cents,updated_at"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "payment_attempts",
+    "privilege_type": "UPDATE",
+    "columns": "approval_url,capture_gross_sgd_cents,capture_id,capture_request_id,capture_verified_at,last_provider_read_at,lease_expires_at,lease_owner,order_id,outcome_reason,provider_read_due_at,pyusd_finalized_signature,pyusd_hints,pyusd_mismatch_signature,pyusd_scan,pyusd_verified_at,state,updated_at"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "purchases",
+    "privilege_type": "INSERT",
+    "columns": "acknowledged_at,acknowledged_by_user_id,basket_lock_key,buyer_user_id,checkout_key,created_at,currency,destination_id,destination_version,entry_point,id,lines,menu_revision_id,outlet_id,pyusd_atomic_amount,pyusd_rate_version_id,rail,review_expires_at,state,supersedes_purchase_id,total_sgd_cents"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "purchases",
+    "privilege_type": "UPDATE",
+    "columns": "acknowledged_at,acknowledged_by_user_id,state"
+   },
+   {
+    "grantee": "envoi_web",
+    "table_name": "pyusd_extra_transfers",
+    "privilege_type": "INSERT",
+    "columns": "attempt_id,destination_delta,found_at,id,signature,slot,verification"
+   }
+  ],
+  "attempts": [
+   {
+    "id": "att_3myu6gbk4zwmb7nknj23ilhfl4",
+    "rail": "pyusd",
+    "state": "confirmed",
+    "pyusd_fee": {
+     "newer": {
+      "epoch": "644",
+      "maximumFee": "0",
+      "basisPoints": 0
+     },
+     "older": {
+      "epoch": "644",
+      "maximumFee": "0",
+      "basisPoints": 0
+     },
+     "preparedEpoch": "1185"
+    },
+    "created_at": "2026-10-17T16:23:35.695+00:00",
+    "pyusd_scan": null,
+    "lease_owner": null,
+    "purchase_id": "pur_bi3om6wno6f6t4vbilkswfut3y",
+    "pyusd_hints": [
+     {
+      "decision": "confirmed",
+      "signature": "2AcWTpJWtiLKBNS36vL9UyTV9goYMbR4tajb8aDVvnmNAwHbJvYeJA65oZbdDnx2EiptJVT1gwYbPZRnXGkw7cUM",
+      "receivedAt": "2026-10-17T16:23:40.987Z"
+     }
+    ],
+    "outcome_reason": null,
+    "pyusd_blockhash": "kFAcGb96SJKoSqG9aWpCr1tNkFgnwkKrpzvxiuu29RU",
+    "pyusd_reference": "WKtTviMKkFYrF8FZY4k68D",
+    "lease_expires_at": null,
+    "pyusd_verified_at": "2026-10-17T16:23:42.329+00:00",
+    "pyusd_buyer_wallet": "89CbH6RAXRfNFpRNDGdyzThBUyccySPqPA5QVkLa38mv",
+    "pyusd_atomic_amount": 1800000,
+    "last_provider_read_at": "2026-10-17T16:23:41.001+00:00",
+    "pyusd_rate_version_id": "rat_pfaadi5fspair5diaog5b5qd7a",
+    "pyusd_preparation_slot": 512132611,
+    "pyusd_mismatch_signature": null,
+    "pyusd_finalized_signature": "2AcWTpJWtiLKBNS36vL9UyTV9goYMbR4tajb8aDVvnmNAwHbJvYeJA65oZbdDnx2EiptJVT1gwYbPZRnXGkw7cUM",
+    "pyusd_message_fingerprint": "a793573876179c60eb13a9fa6e6930d622de532f5ac5fba7df3a16cfc1f26c94",
+    "pyusd_source_token_account": "7PwsUNDMHskHT2eEEoaAy7Fb8d5rsymc1iJafEzMGgGZ",
+    "pyusd_last_valid_block_height": 499348224,
+    "pyusd_destination_token_account": "4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14",
+    "purchase_state": "paid"
+   },
+   {
+    "id": "att_xglpu6vhxg42y3a7gy2tod47xa",
+    "rail": "pyusd",
+    "state": "confirmed",
+    "pyusd_fee": {
+     "newer": {
+      "epoch": "644",
+      "maximumFee": "0",
+      "basisPoints": 0
+     },
+     "older": {
+      "epoch": "644",
+      "maximumFee": "0",
+      "basisPoints": 0
+     },
+     "preparedEpoch": "1185"
+    },
+    "created_at": "2026-10-17T16:26:53.92+00:00",
+    "pyusd_scan": {
+     "lastGap": null,
+     "pagesRead": 1,
+     "beforeCursor": "2AcWTpJWtiLKBNS36vL9UyTV9goYMbR4tajb8aDVvnmNAwHbJvYeJA65oZbdDnx2EiptJVT1gwYbPZRnXGkw7cUM",
+     "newestSignature": "2RAZudPogRpLjmjir4D8qTF5sGRsQLcP1MH31sDNDqHgpWFYkqVSH65QJuKjUVQzTHhSGxiBjx22eHX27KrNAUnr",
+     "candidatesChecked": 0,
+     "reachedBeforePreparation": true,
+     "startedAtFinalizedHeight": "499569718"
+    },
+    "lease_owner": null,
+    "purchase_id": "pur_b6bf45fmxlulegnn26a4pl5zkq",
+    "pyusd_hints": [
+     {
+      "decision": "confirmed",
+      "signature": "2RAZudPogRpLjmjir4D8qTF5sGRsQLcP1MH31sDNDqHgpWFYkqVSH65QJuKjUVQzTHhSGxiBjx22eHX27KrNAUnr",
+      "receivedAt": "2026-10-17T16:26:58.642Z"
+     }
+    ],
+    "outcome_reason": null,
+    "pyusd_blockhash": "3NQon3opzWJQSPWXjnmP3Cs6cBUz4QzjirixmbTfTJob",
+    "pyusd_reference": "3Y9LaXsrH3YZeUZwgJwCqv",
+    "lease_expires_at": null,
+    "pyusd_verified_at": "2026-10-18T07:09:16.244+00:00",
+    "pyusd_buyer_wallet": "89CbH6RAXRfNFpRNDGdyzThBUyccySPqPA5QVkLa38mv",
+    "pyusd_atomic_amount": 1800000,
+    "last_provider_read_at": "2026-10-17T16:26:58.661+00:00",
+    "pyusd_rate_version_id": "rat_pfaadi5fspair5diaog5b5qd7a",
+    "pyusd_preparation_slot": 512133440,
+    "pyusd_mismatch_signature": null,
+    "pyusd_finalized_signature": "2RAZudPogRpLjmjir4D8qTF5sGRsQLcP1MH31sDNDqHgpWFYkqVSH65QJuKjUVQzTHhSGxiBjx22eHX27KrNAUnr",
+    "pyusd_message_fingerprint": "39b3d8d8a23dfeb9fb2fa8140ef716fdb3bc7d9f8e4dcf8823f56fa9b0d7d658",
+    "pyusd_source_token_account": "7PwsUNDMHskHT2eEEoaAy7Fb8d5rsymc1iJafEzMGgGZ",
+    "pyusd_last_valid_block_height": 499349053,
+    "pyusd_destination_token_account": "4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14",
+    "purchase_state": "paid"
+   }
+  ],
+  "audit": [
+   {
+    "at": "2026-10-17T16:23:35.695Z",
+    "actor": "buyer:usr_o2tys4cx5id37b634ar3nv5dae",
+    "action": "pyusd_attempt_prepared",
+    "purchase_id": "pur_bi3om6wno6f6t4vbilkswfut3y",
+    "attempt_id": "att_3myu6gbk4zwmb7nknj23ilhfl4",
+    "operator_visible": false,
+    "details": {
+     "reference": "WKtTviMKkFYrF8FZY4k68D",
+     "atomicAmount": "1800000",
+     "messageFingerprint": "a793573876179c60eb13a9fa6e6930d622de532f5ac5fba7df3a16cfc1f26c94",
+     "lastValidBlockHeight": "499348224"
+    }
+   },
+   {
+    "at": "2026-10-17T16:23:40.987Z",
+    "actor": "buyer:usr_o2tys4cx5id37b634ar3nv5dae",
+    "action": "pyusd_hint_received",
+    "purchase_id": "pur_bi3om6wno6f6t4vbilkswfut3y",
+    "attempt_id": "att_3myu6gbk4zwmb7nknj23ilhfl4",
+    "operator_visible": false,
+    "details": {
+     "signature": "2AcWTpJWtiLKBNS36vL9UyTV9goYMbR4tajb8aDVvnmNAwHbJvYeJA65oZbdDnx2EiptJVT1gwYbPZRnXGkw7cUM"
+    }
+   },
+   {
+    "at": "2026-10-17T16:23:42.329Z",
+    "actor": "buyer:usr_o2tys4cx5id37b634ar3nv5dae",
+    "action": "pyusd_transfer_confirmed",
+    "purchase_id": "pur_bi3om6wno6f6t4vbilkswfut3y",
+    "attempt_id": "att_3myu6gbk4zwmb7nknj23ilhfl4",
+    "operator_visible": false,
+    "details": {
+     "slot": "512132636",
+     "signature": "2AcWTpJWtiLKBNS36vL9UyTV9goYMbR4tajb8aDVvnmNAwHbJvYeJA65oZbdDnx2EiptJVT1gwYbPZRnXGkw7cUM",
+     "destination": "4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14",
+     "atomicAmount": "1800000"
+    }
+   },
+   {
+    "at": "2026-10-17T16:26:53.920Z",
+    "actor": "buyer:kXAi4JypuBGDBEG2zcrBL0AGHamNjajn",
+    "action": "pyusd_attempt_prepared",
+    "purchase_id": "pur_b6bf45fmxlulegnn26a4pl5zkq",
+    "attempt_id": "att_xglpu6vhxg42y3a7gy2tod47xa",
+    "operator_visible": false,
+    "details": {
+     "reference": "3Y9LaXsrH3YZeUZwgJwCqv",
+     "atomicAmount": "1800000",
+     "messageFingerprint": "39b3d8d8a23dfeb9fb2fa8140ef716fdb3bc7d9f8e4dcf8823f56fa9b0d7d658",
+     "lastValidBlockHeight": "499349053"
+    }
+   },
+   {
+    "at": "2026-10-17T16:26:58.642Z",
+    "actor": "buyer:kXAi4JypuBGDBEG2zcrBL0AGHamNjajn",
+    "action": "pyusd_hint_received",
+    "purchase_id": "pur_b6bf45fmxlulegnn26a4pl5zkq",
+    "attempt_id": "att_xglpu6vhxg42y3a7gy2tod47xa",
+    "operator_visible": false,
+    "details": {
+     "signature": "2RAZudPogRpLjmjir4D8qTF5sGRsQLcP1MH31sDNDqHgpWFYkqVSH65QJuKjUVQzTHhSGxiBjx22eHX27KrNAUnr"
+    }
+   },
+   {
+    "at": "2026-10-18T07:09:16.244Z",
+    "actor": "maintenance",
+    "action": "pyusd_transfer_confirmed",
+    "purchase_id": "pur_b6bf45fmxlulegnn26a4pl5zkq",
+    "attempt_id": "att_xglpu6vhxg42y3a7gy2tod47xa",
+    "operator_visible": false,
+    "details": {
+     "slot": "512133468",
+     "signature": "2RAZudPogRpLjmjir4D8qTF5sGRsQLcP1MH31sDNDqHgpWFYkqVSH65QJuKjUVQzTHhSGxiBjx22eHX27KrNAUnr",
+     "destination": "4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14",
+     "atomicAmount": "1800000"
+    }
+   }
+  ],
+  "extraTransfers": [
+   {
+    "n": 0
+   }
+  ],
+  "purchaseStates": [
+   {
+    "state": "paid",
+    "n": 7
+   },
+   {
+    "state": "review_expired",
+    "n": 7
+   },
+   {
+    "state": "review_open",
+    "n": 11
+   },
+   {
+    "state": "uncertain",
+    "n": 2
+   },
+   {
+    "state": "unpaid_closed",
+    "n": 4
+   }
+  ],
+  "attemptStates": [
+   {
+    "rail": "paypal",
+    "state": "abandoned",
+    "n": 4
+   },
+   {
+    "rail": "paypal",
+    "state": "capture_confirmed",
+    "n": 5
+   },
+   {
+    "rail": "paypal",
+    "state": "capture_unknown",
+    "n": 2
+   },
+   {
+    "rail": "pyusd",
+    "state": "confirmed",
+    "n": 2
+   }
+  ],
+  "limiter": {
+   "calls": 2
+  },
+  "testShop": [
+   {
+    "id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+    "published": true,
+    "rail": "paypal",
+    "status": "active",
+    "version": 2
+   },
+   {
+    "id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+    "published": true,
+    "rail": "pyusd",
+    "status": "active",
+    "version": 2
+   }
+  ]
+ },
+ "newAuditRows": [
+  {
+   "at": "2026-10-18T07:09:16.244Z",
+   "actor": "maintenance",
+   "action": "pyusd_transfer_confirmed",
+   "purchase_id": "pur_b6bf45fmxlulegnn26a4pl5zkq",
+   "attempt_id": "att_xglpu6vhxg42y3a7gy2tod47xa",
+   "operator_visible": false,
+   "details": {
+    "slot": "512133468",
+    "signature": "2RAZudPogRpLjmjir4D8qTF5sGRsQLcP1MH31sDNDqHgpWFYkqVSH65QJuKjUVQzTHhSGxiBjx22eHX27KrNAUnr",
+    "destination": "4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14",
+    "atomicAmount": "1800000"
+   }
+  }
+ ]
+}
