@@ -1,0 +1,502 @@
+[
+ {
+  "id": "rec-final-height-confirmed",
+  "test": "release waits for finalized height past the saved bound",
+  "test_file": "tests/integration/pyusd-recovery.test.ts",
+  "mutation": "Compare the confirmed height.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/reconcile.ts",
+    "old": "  const height = await rpc.getBlockHeight(\"finalized\");\n",
+    "new": "  const height = await rpc.getBlockHeight(\"confirmed\");\n"
+   }
+  ],
+  "kind": "group_row"
+ },
+ {
+  "id": "rec-final-height-ge",
+  "test": "release waits for finalized height past the saved bound",
+  "test_file": "tests/integration/pyusd-recovery.test.ts",
+  "mutation": "Use >= against the bound.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/recovery.ts",
+    "old": "  if (finalizedBlockHeight <= attempt.lastValidBlockHeight) return { action: \"verify_hints_then_wait\" };",
+    "new": "  if (finalizedBlockHeight < attempt.lastValidBlockHeight) return { action: \"verify_hints_then_wait\" };"
+   }
+  ],
+  "kind": "group_row"
+ },
+ {
+  "id": "rec-no-early-scan",
+  "test": "scan starts only after expiry is final",
+  "test_file": "tests/integration/pyusd-recovery.test.ts",
+  "mutation": "Start scanning on the first reconcile: request the merchant account's history before expiry is final.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/reconcile.ts",
+    "old": "      case \"verify_hints_then_wait\": {\n",
+    "new": "      case \"verify_hints_then_wait\": {\n        await rpc.getSignaturesFinalized(attempt.destinationTokenAccount, attempt.scan?.beforeCursor ?? null, 1000);\n"
+   }
+  ],
+  "kind": "group_row"
+ },
+ {
+  "id": "rec-end-is-complete",
+  "test": "scan that never reaches before preparation is incomplete",
+  "test_file": "tests/integration/pyusd-recovery.test.ts",
+  "mutation": "Treat the end of pages as complete.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/reconcile.ts",
+    "old": "    if (page.value.length < PAGE_LIMIT) return stop(null);\n",
+    "new": "    if (page.value.length < PAGE_LIMIT) {\n      coverage.reachedBeforePreparation = true;\n      return stop(null);\n    }\n"
+   }
+  ],
+  "kind": "group_row"
+ },
+ {
+  "id": "rec-page-cap-is-end",
+  "test": "scan stops at the page cap without releasing",
+  "test_file": "tests/integration/pyusd-recovery.test.ts",
+  "mutation": "Treat the page cap as the end of history.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/reconcile.ts",
+    "old": "  return stop(\"page_cap\");\n}\n\n// Closes a complete, empty scan",
+    "new": "  coverage.reachedBeforePreparation = true;\n  return stop(null);\n}\n\n// Closes a complete, empty scan"
+   }
+  ],
+  "kind": "group_row"
+ },
+ {
+  "id": "rec-fetch-cap-is-end",
+  "test": "scan stops at the fetch cap without releasing",
+  "test_file": "tests/integration/pyusd-recovery.test.ts",
+  "mutation": "Treat the fetch cap as the end of history.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/reconcile.ts",
+    "old": "        if (fetches >= SCAN_CAPS.fetches) return stop(\"page_cap\");\n",
+    "new": "        if (fetches >= SCAN_CAPS.fetches) {\n          coverage.reachedBeforePreparation = true;\n          return stop(null);\n        }\n"
+   }
+  ],
+  "kind": "group_row"
+ },
+ {
+  "id": "rec-restart-newest",
+  "test": "scan resumes from its saved cursor",
+  "test_file": "tests/integration/pyusd-recovery.test.ts",
+  "mutation": "Restart each claim from the newest signature.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/reconcile.ts",
+    "old": "    const page = await rpc.getSignaturesFinalized(attempt.destinationTokenAccount, coverage.beforeCursor, PAGE_LIMIT);",
+    "new": "    const page = await rpc.getSignaturesFinalized(attempt.destinationTokenAccount, pages === 0 ? null : coverage.beforeCursor, PAGE_LIMIT);"
+   }
+  ],
+  "kind": "group_row"
+ },
+ {
+  "id": "rec-skip-undecided",
+  "test": "429 or null transaction keeps the attempt locked",
+  "test_file": "tests/integration/pyusd-recovery.test.ts",
+  "mutation": "Skip the undecided candidate and advance.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/reconcile.ts",
+    "old": "        if (read.value === null) return stop(\"null_transaction\");\n",
+    "new": "        if (read.value === null) {\n          coverage.beforeCursor = entry.signature;\n          continue;\n        }\n"
+   }
+  ],
+  "kind": "group_row"
+ },
+ {
+  "id": "rec-mismatch-not-ours",
+  "test": "a successful transaction with our reference that fails verification blocks release",
+  "test_file": "tests/integration/pyusd-recovery.test.ts",
+  "mutation": "Treat it as not ours and continue.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/recovery.ts",
+    "old": "  return result.decision === \"confirmed\" ? { kind: \"bind\", evidence: result.evidence } : { kind: \"mismatch\", signature: tx.signature, reason: result.reason };",
+    "new": "  return result.decision === \"confirmed\" ? { kind: \"bind\", evidence: result.evidence } : { kind: \"skip\" };"
+   }
+  ],
+  "kind": "group_row"
+ },
+ {
+  "id": "rec-release-default-on",
+  "test": "automatic unpaid release stays off until its proofs are recorded",
+  "test_file": "tests/integration/pyusd-recovery.test.ts",
+  "mutation": "Default the switch to true.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/constants.ts",
+    "old": "  automaticUnpaidRelease: false,",
+    "new": "  automaticUnpaidRelease: true,"
+   }
+  ],
+  "kind": "group_row"
+ },
+ {
+  "id": "rec-never-release",
+  "test": "a complete empty scan closes the attempt once release is enabled",
+  "test_file": "tests/integration/pyusd-recovery.test.ts",
+  "mutation": "Never release.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/recovery.ts",
+    "old": "  const release = (): RecoveryStep => (proofs.automaticUnpaidRelease ? { action: \"close_unpaid\" } : { action: \"hold\", reason: \"automatic_release_not_enabled\" });",
+    "new": "  const release = (): RecoveryStep => ({ action: \"hold\", reason: \"automatic_release_not_enabled\" });"
+   }
+  ],
+  "kind": "group_row"
+ },
+ {
+  "id": "rec-skip-identity",
+  "test": "devnet reset stops verification and scanning",
+  "test_file": "tests/integration/pyusd-recovery.test.ts",
+  "mutation": "Skip the identity check in recovery.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/reconcile.ts",
+    "old": "  if (!identity.ok) {\n    const unreachable",
+    "new": "  if (!identity.ok && identity.reason === \"rpc_unconfigured\") {\n    const unreachable"
+   }
+  ],
+  "kind": "group_row"
+ },
+ {
+  "id": "rec-done-before-scan",
+  "test": "a confirmed or mismatched attempt is still scanned after expiry",
+  "test_file": "tests/integration/pyusd-recovery.test.ts",
+  "mutation": "Yield done for confirmed or mismatch before the window scan completes.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/recovery.ts",
+    "old": "  if (attempt.state === \"prepared\" || attempt.scan === null) return { action: \"start_scan\" };",
+    "new": "  if (attempt.state === \"confirmed\" || attempt.state === \"mismatch\") return { action: \"done\" };\n  if (attempt.state === \"prepared\" || attempt.scan === null) return { action: \"start_scan\" };"
+   }
+  ],
+  "kind": "group_row"
+ },
+ {
+  "id": "rec-stop-on-bind",
+  "test": "the scan continues after a transfer binds",
+  "test_file": "tests/integration/pyusd-recovery.test.ts",
+  "mutation": "Stop the scan when a candidate binds.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/reconcile.ts",
+    "old": "        if (await applyScanOutcome(deps.db, attempt.id, outcome, now, actor)) attempt = (await loadAttempt(deps.db, attempt.id)) ?? attempt;\n",
+    "new": "        if (await applyScanOutcome(deps.db, attempt.id, outcome, now, actor)) attempt = (await loadAttempt(deps.db, attempt.id)) ?? attempt;\n        if (outcome.kind === \"bind\") return stop(null);\n"
+   }
+  ],
+  "kind": "group_row"
+ },
+ {
+  "id": "rec-extra-uncertain",
+  "test": "an extra transfer keeps the purchase paid and alerts the operator",
+  "test_file": "tests/integration/pyusd-recovery.test.ts",
+  "mutation": "Move the purchase to uncertain on an extra transfer.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/recovery.ts",
+    "old": "        if (inserted.length === 0) return false;\n        await audit(\"pyusd_extra_transfer\", true, {",
+    "new": "        if (inserted.length === 0) return false;\n        await tx.update(purchases).set({ state: \"uncertain\" }).where(eq(purchases.id, attempt.purchaseId));\n        await audit(\"pyusd_extra_transfer\", true, {"
+   },
+   {
+    "file": "src/domain/pyusd/recovery.ts",
+    "old": "import { paymentAttempts, PURCHASE_STATES, pyusdExtraTransfers } from \"@/lib/db/schema\";",
+    "new": "import { paymentAttempts, PURCHASE_STATES, purchases, pyusdExtraTransfers } from \"@/lib/db/schema\";"
+   }
+  ],
+  "kind": "group_row"
+ },
+ {
+  "id": "rec-extra-unique",
+  "test": "an extra transfer is recorded once per attempt",
+  "test_file": "tests/integration/pyusd-recovery.test.ts",
+  "mutation": "Drop the unique index.",
+  "edits": [
+   {
+    "file": "drizzle/0023_s17_pyusd_recovery.sql",
+    "old": "CREATE UNIQUE INDEX \"pyusd_extra_transfers_attempt_signature_unique\" ON \"pyusd_extra_transfers\" USING btree (\"attempt_id\",\"signature\");--> statement-breakpoint\n",
+    "new": ""
+   }
+  ],
+  "kind": "group_row"
+ },
+ {
+  "id": "web-runner-lease",
+  "test": "web and runner cannot scan one attempt at once",
+  "test_file": "tests/integration/pyusd-recovery.test.ts",
+  "mutation": "Skip the lease claim in the web reconcile path.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/reconcile.ts",
+    "old": "  if (!(await claimPyusdLease(db, attemptId, owner, deps.now()))) return \"in_flight\";",
+    "new": "  if (mode.kind === \"runner\" && !(await claimPyusdLease(db, attemptId, owner, deps.now()))) return \"in_flight\";"
+   }
+  ],
+  "kind": "standalone"
+ },
+ {
+  "id": "second-landing-skip",
+  "test": "a second reference landing is an extra transfer",
+  "test_file": "tests/unit/pyusd-recovery.test.ts",
+  "mutation": "Classify every candidate as skip once a signature is bound.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/recovery.ts",
+    "old": "  if (attempt.finalizedSignature !== null || attempt.state === \"mismatch\") {\n",
+    "new": "  if (attempt.finalizedSignature !== null) return { kind: \"skip\" };\n  if (attempt.state === \"mismatch\") {\n"
+   }
+  ],
+  "kind": "standalone"
+ },
+ {
+  "id": "receipt-extra-hidden",
+  "test": "PYUSD receipt shows a detected extra transfer",
+  "test_file": "tests/unit/pyusd-recovery.test.ts",
+  "mutation": "Hide extra transfers on a paid receipt.",
+  "edits": [
+   {
+    "file": "src/app/receipt/[purchaseId]/pyusd-receipt.tsx",
+    "old": "  if (transfers.length === 0) return null;\n",
+    "new": "  if (transfers.length >= 0) return null;\n"
+   }
+  ],
+  "kind": "standalone"
+ },
+ {
+  "id": "orders-extra-hidden",
+  "test": "merchant orders show a detected extra transfer",
+  "test_file": "tests/integration/pyusd-operator-acts.test.ts",
+  "mutation": "Hide extra transfers from the merchant orders page.",
+  "edits": [
+   {
+    "file": "src/app/merchant/orders/orders-view.tsx",
+    "old": "          {order.pyusd.extraTransfers.map((transfer) => (",
+    "new": "          {order.pyusd.extraTransfers.slice(0, 0).map((transfer) => ("
+   }
+  ],
+  "kind": "addition"
+ },
+ {
+  "id": "resolve-scan-check",
+  "test": "mismatch resolution waits for a complete window scan",
+  "test_file": "tests/integration/pyusd-operator-acts.test.ts",
+  "mutation": "Skip the scan-completeness check.",
+  "edits": [
+   {
+    "file": "src/operator/cli.ts",
+    "old": "    if (attempt.scan?.reachedBeforePreparation !== true) {\n",
+    "new": "    if (attempt.scan === undefined) {\n"
+   }
+  ],
+  "kind": "addition"
+ },
+ {
+  "id": "resolve-evidence-optional",
+  "test": "mismatch resolution needs recorded evidence",
+  "test_file": "tests/integration/pyusd-operator-acts.test.ts",
+  "mutation": "Make the evidence optional.",
+  "edits": [
+   {
+    "file": "src/operator/cli.ts",
+    "old": "  const evidenceRef = requiredText(input.evidenceRef, \"An evidence reference\");\n",
+    "new": "  const evidenceRef = input.evidenceRef?.trim() ?? \"\";\n"
+   }
+  ],
+  "kind": "addition"
+ },
+ {
+  "id": "refund-empty-reference",
+  "test": "a refund needs an out-of-band reference",
+  "test_file": "tests/integration/pyusd-operator-acts.test.ts",
+  "mutation": "Accept an empty reference; the migration's refund check is relaxed with it, because the database independently refuses an empty reference.",
+  "edits": [
+   {
+    "file": "src/operator/cli.ts",
+    "old": "  const reference = requiredText(input.reference, \"An out-of-band refund reference\");\n",
+    "new": "  const reference = input.reference?.trim() ?? \"\";\n"
+   },
+   {
+    "file": "drizzle/0023_s17_pyusd_recovery.sql",
+    "old": "(length(btrim(\"pyusd_extra_transfers\".\"refund_reference\")) > 0 and",
+    "new": "(\"pyusd_extra_transfers\".\"refund_reference\" is not null and"
+   }
+  ],
+  "kind": "addition"
+ },
+ {
+  "id": "refund-closes-purchase",
+  "test": "a refund reference changes no payment state",
+  "test_file": "tests/integration/pyusd-operator-acts.test.ts",
+  "mutation": "Let the act close the purchase.",
+  "edits": [
+   {
+    "file": "src/operator/cli.ts",
+    "old": "      .where(and(eq(schema.pyusdExtraTransfers.id, transfer.id), isNull(schema.pyusdExtraTransfers.refundReference)));\n",
+    "new": "      .where(and(eq(schema.pyusdExtraTransfers.id, transfer.id), isNull(schema.pyusdExtraTransfers.refundReference)));\n    await tx.update(schema.purchases).set({ state: \"unpaid_closed\" }).where(eq(schema.purchases.id, transfer.purchaseId));\n"
+   }
+  ],
+  "kind": "addition"
+ },
+ {
+  "id": "resolve-flag-skip",
+  "test": "mismatch resolution needs a flagged operator account",
+  "test_file": "tests/integration/pyusd-operator-acts.test.ts",
+  "mutation": "Skip the flag check in resolve-pyusd-mismatch.",
+  "edits": [
+   {
+    "file": "src/operator/cli.ts",
+    "old": "    await requireOperatorFlag(tx, operator, \"resolve-pyusd-mismatch\");\n",
+    "new": ""
+   }
+  ],
+  "kind": "addition"
+ },
+ {
+  "id": "refund-flag-skip",
+  "test": "a refund reference needs a flagged operator account",
+  "test_file": "tests/integration/pyusd-operator-acts.test.ts",
+  "mutation": "Skip the flag check in record-extra-transfer-refund.",
+  "edits": [
+   {
+    "file": "src/operator/cli.ts",
+    "old": "    await requireOperatorFlag(tx, operator, \"record-extra-transfer-refund\");\n",
+    "new": ""
+   }
+  ],
+  "kind": "addition"
+ },
+ {
+  "id": "grant-web-refund-insert",
+  "test": "the web role cannot record a refund reference",
+  "test_file": "tests/integration/pyusd-recovery-grants.test.ts",
+  "mutation": "Widen the web role's INSERT on pyusd_extra_transfers to the refund columns.",
+  "edits": [
+   {
+    "file": "drizzle/0023_s17_pyusd_recovery.sql",
+    "old": "GRANT UPDATE (\"until\", \"consecutive\") ON TABLE public.\"rpc_limiter_backoff\" TO envoi_maintenance;\n",
+    "new": "GRANT UPDATE (\"until\", \"consecutive\") ON TABLE public.\"rpc_limiter_backoff\" TO envoi_maintenance;--> statement-breakpoint\nGRANT INSERT (\"refund_reference\", \"refund_recorded_at\", \"refund_recorded_by_user_id\") ON TABLE public.\"pyusd_extra_transfers\" TO envoi_web;\n"
+   }
+  ],
+  "kind": "grant"
+ },
+ {
+  "id": "grant-web-refund-update",
+  "test": "the web role cannot record a refund reference",
+  "test_file": "tests/integration/pyusd-recovery-grants.test.ts",
+  "mutation": "Grant the web role UPDATE of the refund reference.",
+  "edits": [
+   {
+    "file": "drizzle/0023_s17_pyusd_recovery.sql",
+    "old": "GRANT UPDATE (\"until\", \"consecutive\") ON TABLE public.\"rpc_limiter_backoff\" TO envoi_maintenance;\n",
+    "new": "GRANT UPDATE (\"until\", \"consecutive\") ON TABLE public.\"rpc_limiter_backoff\" TO envoi_maintenance;--> statement-breakpoint\nGRANT UPDATE (\"refund_reference\") ON TABLE public.\"pyusd_extra_transfers\" TO envoi_web;\n"
+   }
+  ],
+  "kind": "grant"
+ },
+ {
+  "id": "grant-web-delete",
+  "test": "the web role cannot delete an extra transfer",
+  "test_file": "tests/integration/pyusd-recovery-grants.test.ts",
+  "mutation": "Grant the web role DELETE on pyusd_extra_transfers.",
+  "edits": [
+   {
+    "file": "drizzle/0023_s17_pyusd_recovery.sql",
+    "old": "GRANT UPDATE (\"until\", \"consecutive\") ON TABLE public.\"rpc_limiter_backoff\" TO envoi_maintenance;\n",
+    "new": "GRANT UPDATE (\"until\", \"consecutive\") ON TABLE public.\"rpc_limiter_backoff\" TO envoi_maintenance;--> statement-breakpoint\nGRANT DELETE ON TABLE public.\"pyusd_extra_transfers\" TO envoi_web;\n"
+   }
+  ],
+  "kind": "grant"
+ },
+ {
+  "id": "grant-maintenance-refund-insert",
+  "test": "the maintenance role cannot record a refund reference",
+  "test_file": "tests/integration/pyusd-recovery-grants.test.ts",
+  "mutation": "Widen the maintenance role's INSERT on pyusd_extra_transfers to the refund columns.",
+  "edits": [
+   {
+    "file": "drizzle/0023_s17_pyusd_recovery.sql",
+    "old": "GRANT UPDATE (\"until\", \"consecutive\") ON TABLE public.\"rpc_limiter_backoff\" TO envoi_maintenance;\n",
+    "new": "GRANT UPDATE (\"until\", \"consecutive\") ON TABLE public.\"rpc_limiter_backoff\" TO envoi_maintenance;--> statement-breakpoint\nGRANT INSERT (\"refund_reference\", \"refund_recorded_at\", \"refund_recorded_by_user_id\") ON TABLE public.\"pyusd_extra_transfers\" TO envoi_maintenance;\n"
+   }
+  ],
+  "kind": "grant"
+ },
+ {
+  "id": "grant-maintenance-refund-update",
+  "test": "the maintenance role cannot record a refund reference",
+  "test_file": "tests/integration/pyusd-recovery-grants.test.ts",
+  "mutation": "Grant the maintenance role UPDATE of the refund reference.",
+  "edits": [
+   {
+    "file": "drizzle/0023_s17_pyusd_recovery.sql",
+    "old": "GRANT UPDATE (\"until\", \"consecutive\") ON TABLE public.\"rpc_limiter_backoff\" TO envoi_maintenance;\n",
+    "new": "GRANT UPDATE (\"until\", \"consecutive\") ON TABLE public.\"rpc_limiter_backoff\" TO envoi_maintenance;--> statement-breakpoint\nGRANT UPDATE (\"refund_reference\") ON TABLE public.\"pyusd_extra_transfers\" TO envoi_maintenance;\n"
+   }
+  ],
+  "kind": "grant"
+ },
+ {
+  "id": "grant-maintenance-reprice",
+  "test": "the maintenance role cannot re-price or rebind a PYUSD attempt",
+  "test_file": "tests/integration/pyusd-recovery-grants.test.ts",
+  "mutation": "Grant the maintenance role UPDATE of the attempt's amount.",
+  "edits": [
+   {
+    "file": "drizzle/0023_s17_pyusd_recovery.sql",
+    "old": "GRANT UPDATE (\"until\", \"consecutive\") ON TABLE public.\"rpc_limiter_backoff\" TO envoi_maintenance;\n",
+    "new": "GRANT UPDATE (\"until\", \"consecutive\") ON TABLE public.\"rpc_limiter_backoff\" TO envoi_maintenance;--> statement-breakpoint\nGRANT UPDATE (\"pyusd_atomic_amount\") ON TABLE public.\"payment_attempts\" TO envoi_maintenance;\n"
+   }
+  ],
+  "kind": "grant"
+ },
+ {
+  "id": "grant-maintenance-rebind",
+  "test": "the maintenance role cannot re-price or rebind a PYUSD attempt",
+  "test_file": "tests/integration/pyusd-recovery-grants.test.ts",
+  "mutation": "Grant the maintenance role UPDATE of the attempt's reference and destination.",
+  "edits": [
+   {
+    "file": "drizzle/0023_s17_pyusd_recovery.sql",
+    "old": "GRANT UPDATE (\"until\", \"consecutive\") ON TABLE public.\"rpc_limiter_backoff\" TO envoi_maintenance;\n",
+    "new": "GRANT UPDATE (\"until\", \"consecutive\") ON TABLE public.\"rpc_limiter_backoff\" TO envoi_maintenance;--> statement-breakpoint\nGRANT UPDATE (\"pyusd_reference\", \"pyusd_destination_token_account\") ON TABLE public.\"payment_attempts\" TO envoi_maintenance;\n"
+   }
+  ],
+  "kind": "grant"
+ },
+ {
+  "id": "grant-maintenance-slot-update",
+  "test": "the maintenance role cannot reseat the RPC limiter",
+  "test_file": "tests/integration/pyusd-recovery-grants.test.ts",
+  "mutation": "Grant the maintenance role UPDATE of a limiter slot's number.",
+  "edits": [
+   {
+    "file": "drizzle/0023_s17_pyusd_recovery.sql",
+    "old": "GRANT UPDATE (\"until\", \"consecutive\") ON TABLE public.\"rpc_limiter_backoff\" TO envoi_maintenance;\n",
+    "new": "GRANT UPDATE (\"until\", \"consecutive\") ON TABLE public.\"rpc_limiter_backoff\" TO envoi_maintenance;--> statement-breakpoint\nGRANT UPDATE (\"slot\") ON TABLE public.\"rpc_limiter_slots\" TO envoi_maintenance;\n"
+   }
+  ],
+  "kind": "grant"
+ },
+ {
+  "id": "grant-maintenance-slot-insert",
+  "test": "the maintenance role cannot reseat the RPC limiter",
+  "test_file": "tests/integration/pyusd-recovery-grants.test.ts",
+  "mutation": "Grant the maintenance role INSERT on the limiter slots.",
+  "edits": [
+   {
+    "file": "drizzle/0023_s17_pyusd_recovery.sql",
+    "old": "GRANT UPDATE (\"until\", \"consecutive\") ON TABLE public.\"rpc_limiter_backoff\" TO envoi_maintenance;\n",
+    "new": "GRANT UPDATE (\"until\", \"consecutive\") ON TABLE public.\"rpc_limiter_backoff\" TO envoi_maintenance;--> statement-breakpoint\nGRANT INSERT ON TABLE public.\"rpc_limiter_slots\" TO envoi_maintenance;\n"
+   }
+  ],
+  "kind": "grant"
+ }
+]

@@ -1,0 +1,9 @@
+[FIXTURE fault injection] S17 PYUSD recovery over a FIXTURE devnet RPC; every signature and transaction is synthetic
+  - three attempts prepared with bound 280000150; each wallet response is lost, so no signature hint arrives
+  - verified, confirmed height past the bound, finalized at it: reconcile nothing_to_read; attempt prepared, purchase pending_payment, no scan; receipt "Checking payment (Not confirmed)"
+  - mismatching, confirmed height past the bound, finalized at it: reconcile nothing_to_read; attempt prepared, purchase pending_payment, no scan; receipt "Checking payment (Not confirmed)"
+  - empty, confirmed height past the bound, finalized at it: reconcile nothing_to_read; attempt prepared, purchase pending_payment, no scan; receipt "Checking payment (Not confirmed)"
+  - finalized height 280000151 passes the bound
+  - verified: reconcile scan_complete; attempt confirmed, purchase paid, scan complete, 1 page(s), 1 candidate(s); receipt "Paid (Paid)"
+  - mismatching: reconcile scan_complete; attempt mismatch, purchase uncertain, scan complete, 1 page(s), 1 candidate(s); receipt "Checking payment (Not confirmed)"
+  - empty: reconcile held_no_match; attempt held_no_match, purchase uncertain, scan complete, 1 page(s), 0 candidate(s); receipt "Checking payment (Not confirmed)"

@@ -1364,7 +1364,7 @@
   "mutation": "Mark the purchase paid on the hint: a hint the finalized read cannot find yet is taken as payment. Narrowed to the unverified hint, so a found transaction is still decided by verification.",
   "edits": [
    {
-    "file": "src/domain/pyusd/attempts.ts",
+    "file": "src/domain/pyusd/reconcile.ts",
     "old": "    await decideHint(db, attemptId, hint.index, hint.signature, \"not_found\");\n",
     "new": "    await decideHint(db, attemptId, hint.index, hint.signature, \"not_found\");\n    await transitionPurchase(db, attempt.purchaseId, [\"pending_payment\"], \"paid\", \"pyusd_confirmed\");\n"
    }
@@ -1378,9 +1378,9 @@
   "mutation": "Skip the debounce.",
   "edits": [
    {
-    "file": "src/domain/pyusd/attempts.ts",
-    "old": "  if (!(await claimRead(db, attemptId, deps.now()))) return \"debounced\";\n",
-    "new": "  await claimRead(db, attemptId, deps.now());\n"
+    "file": "src/domain/pyusd/reconcile.ts",
+    "old": "  if (mode.kind === \"web\" && !(await claimRead(db, attemptId, deps.now()))) return \"debounced\";\n",
+    "new": "  if (mode.kind === \"web\") await claimRead(db, attemptId, deps.now());\n"
    }
   ],
   "kind": "group_row"
@@ -1392,7 +1392,7 @@
   "mutation": "Treat a failed landing as a mismatch.",
   "edits": [
    {
-    "file": "src/domain/pyusd/attempts.ts",
+    "file": "src/domain/pyusd/reconcile.ts",
     "old": "  const result = verifyPyusdTransfer(read.value, attempt, feeAtEpoch(attempt.fee, epochOfSlot(schedule.value, read.value.slot)), now);\n",
     "new": "  const verified = verifyPyusdTransfer(read.value, attempt, feeAtEpoch(attempt.fee, epochOfSlot(schedule.value, read.value.slot)), now);\n  const result: VerificationResult = verified.decision === \"failed_landing\" ? { decision: \"uncertain\", reason: \"metadata_incomplete\" } : verified;\n"
    }
@@ -1406,7 +1406,7 @@
   "mutation": "Audit every hint after the first without reading it.",
   "edits": [
    {
-    "file": "src/domain/pyusd/attempts.ts",
+    "file": "src/domain/pyusd/reconcile.ts",
     "old": "    if (decision === \"not_ours\" || decision === \"failed_landing\") continue;\n",
     "new": "    if (decision === \"not_ours\" || decision === \"failed_landing\") return null;\n"
    }
@@ -1434,9 +1434,14 @@
   "mutation": "Gate hint verification and reconcile on the flag.",
   "edits": [
    {
-    "file": "src/domain/pyusd/attempts.ts",
+    "file": "src/domain/pyusd/reconcile.ts",
     "old": "  const [row] = await db.select().from(paymentAttempts).where(and(eq(paymentAttempts.id, attemptId), eq(paymentAttempts.rail, \"pyusd\")));\n",
     "new": "  if (!webEnv().PYUSD_ENABLED) return \"nothing_to_read\";\n  const [row] = await db.select().from(paymentAttempts).where(and(eq(paymentAttempts.id, attemptId), eq(paymentAttempts.rail, \"pyusd\")));\n"
+   },
+   {
+    "file": "src/domain/pyusd/reconcile.ts",
+    "old": "import { verifyPyusdTransfer, type VerificationResult } from \"@/domain/pyusd/verify\";\n",
+    "new": "import { verifyPyusdTransfer, type VerificationResult } from \"@/domain/pyusd/verify\";\nimport { webEnv } from \"@/env\";\n"
    }
   ],
   "kind": "group_row"
