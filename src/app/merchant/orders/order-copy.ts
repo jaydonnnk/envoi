@@ -17,6 +17,14 @@ const PYUSD_CHECKING: OrderStatus = {
   body: "The buyer's wallet may have sent PYUSD devnet test tokens, but Envoi has not verified a finalized transfer, so it is not paid. Do not treat it as paid unless it shows Paid.",
 };
 
+// S17 review fixes: the operator closes only a mismatch, so a transaction that did not match the order
+// may still have moved tokens to the shop.
+export const PYUSD_OPERATOR_CLOSED: OrderStatus = {
+  chip: "Not paid",
+  tone: "plain",
+  body: "Closed unpaid by the Envoi operator: a devnet transaction for this order did not match it, so it was never verified as paid. Tokens from that transaction may have reached your PYUSD devnet account; any refund to the buyer is arranged by you outside Envoi. Do not treat the order as paid.",
+};
+
 // Only a verified capture or a verified finalized PYUSD transfer reads as paid. Every other state
 // says plainly that it is not.
 export function orderStatus(order: MerchantOrder): OrderStatus {
@@ -28,6 +36,7 @@ export function orderStatus(order: MerchantOrder): OrderStatus {
       case "uncertain":
         return PYUSD_CHECKING;
       case "unpaid_closed":
+        if (order.pyusd?.closedBy === "operator") return PYUSD_OPERATOR_CLOSED;
         return { chip: "Not paid", tone: "plain", body: "Closed unpaid: Envoi never verified a matching finalized devnet transfer for this order. Do not treat it as paid." };
       default:
         break;

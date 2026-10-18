@@ -2,6 +2,7 @@ import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { recordAudit } from "@/domain/audit/events";
 import { derivePurchaseView, applyDerivedTransitions, type PaymentAttemptRow, type PurchaseRow, type PurchaseState } from "@/domain/purchases/state";
 import { formatPyusdAtomic } from "@/domain/pyusd/rate";
+import { OPERATOR_RESOLUTION } from "@/domain/pyusd/state";
 import { extraTransfersOf, type ExtraTransfer } from "@/domain/pyusd/recovery";
 import { merchantMemberships, outlets, paymentAttempts, paymentDestinations, purchases, type StoredLine } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
@@ -38,6 +39,9 @@ export type MerchantOrder = {
     // S17: extra transfers a window scan found. They never change the state above, and an order
     // never shows one as refunded: any refund is arranged between the shop and the buyer.
     extraTransfers: { signature: string; amount: string | null }[];
+    // S17 review fixes: who closed a PYUSD order unpaid. The operator closes only a mismatch, whose
+    // transaction may have reached the shop; release closes only a complete scan that found nothing.
+    closedBy: "operator" | "release" | null;
   } | null;
   payment: {
     environment: "sandbox";
@@ -97,6 +101,7 @@ function orderJson({ purchase, sellerMerchantId, tokenAccount }: OrderRow, attem
             attemptState: view.pyusdAttempt,
             signature: paid && attempt?.rail === "pyusd" ? attempt.pyusdFinalizedSignature : null,
             extraTransfers: extras.map((transfer) => ({ signature: transfer.signature, amount: transfer.destinationDelta === null ? null : formatPyusdAtomic(transfer.destinationDelta) })),
+            closedBy: attempt?.rail !== "pyusd" || attempt.state !== "closed_unpaid" ? null : attempt.outcomeReason === OPERATOR_RESOLUTION ? "operator" : "release",
           }
         : null,
     payment: attempt && attempt.rail !== "pyusd"
