@@ -14,8 +14,10 @@ import { newId } from "@/lib/ids";
 // height passes its lastValidBlockHeight bound. Then every released attempt, whatever its state, gets
 // one window scan of the merchant token account's history, from a top boundary fixed when the scan
 // starts down to a signature older than the preparation slot. The scan binds the first verifying
-// landing when nothing is bound, marks a failing one as a mismatch, and records every other
-// successful landing that carries the reference as an extra transfer, which never changes a state.
+// landing it reaches when nothing is bound, and records every other successful landing that carries
+// the reference as an extra transfer, which never changes a state. A failing landing never decides the
+// attempt while a verifying one may still be found (Gate 3 reopening 2026-10-18): the oldest is held as
+// the coverage's pendingMismatch and marks the mismatch only when the complete scan bound nothing.
 
 export type SignatureEntry = { signature: string; slot: bigint; failed: boolean };
 
@@ -24,6 +26,7 @@ export type RecoveryStep =
   | { action: "start_scan" }
   | { action: "continue_scan"; before: string | null }
   | { action: "close_unpaid" }
+  | { action: "mark_mismatch" } // the complete scan bound nothing and holds a pending mismatch
   | { action: "hold"; reason: "automatic_release_not_enabled" }
   | { action: "operator"; reason: "mismatch" }
   | { action: "done" }; // fix M: the window scan is complete and the state needs nothing more
@@ -40,7 +43,7 @@ export type ExtraTransfer = {
 
 export type CandidateOutcome =
   | { kind: "bind"; evidence: PyusdEvidence } // nothing bound yet, and this one verifies
-  | { kind: "mismatch"; signature: string; reason: VerificationFailure } // nothing bound yet, ours, successful, fails verification
+  | { kind: "mismatch"; transfer: ExtraTransfer } // nothing bound yet, ours, successful, fails verification; held as pendingMismatch until the scan completes
   | { kind: "extra"; transfer: ExtraTransfer } // ours and successful, while another landing is bound or in mismatch
   | { kind: "skip" }; // not ours, a failed landing, or the bound or mismatching signature itself
 
@@ -50,7 +53,7 @@ export function isScanComplete(coverage: ScanCoverage | null): boolean {
 }
 
 export function startScanCoverage(finalizedBlockHeight: bigint): ScanCoverage {
-  return { startedAtFinalizedHeight: finalizedBlockHeight, newestSignature: null, beforeCursor: null, reachedBeforePreparation: false, pagesRead: 0, candidatesChecked: 0, lastGap: null };
+  return { startedAtFinalizedHeight: finalizedBlockHeight, newestSignature: null, beforeCursor: null, reachedBeforePreparation: false, pagesRead: 0, candidatesChecked: 0, lastGap: null, pendingMismatch: null };
 }
 
 export function decideRecoveryStep(attempt: Pick<PyusdAttempt, "state" | "lastValidBlockHeight" | "scan">, finalizedBlockHeight: bigint, proofs: typeof PYUSD_PROOFS): RecoveryStep {
@@ -65,7 +68,7 @@ export function decideRecoveryStep(attempt: Pick<PyusdAttempt, "state" | "lastVa
   if (!isScanComplete(attempt.scan)) return { action: "continue_scan", before: attempt.scan.beforeCursor };
   switch (attempt.state) {
     case "expired_scanning":
-      return release();
+      return attempt.scan.pendingMismatch ? { action: "mark_mismatch" } : release();
     case "confirmed":
       return { action: "done" };
     case "mismatch":
@@ -117,20 +120,16 @@ export function destinationDeltaOf(tx: LandedTransaction, destination: string): 
 export function classifyScanCandidate(attempt: Pick<PyusdAttempt, "state" | "finalizedSignature" | "mismatchSignature" | "destinationTokenAccount">, tx: LandedTransaction, result: VerificationResult, now: Date): CandidateOutcome {
   if (tx.signature === attempt.finalizedSignature || tx.signature === attempt.mismatchSignature) return { kind: "skip" };
   if (result.decision === "not_ours" || result.decision === "failed_landing") return { kind: "skip" };
-  if (attempt.finalizedSignature !== null || attempt.state === "mismatch") {
-    return {
-      kind: "extra",
-      transfer: {
-        signature: tx.signature,
-        slot: tx.slot,
-        destinationDelta: destinationDeltaOf(tx, attempt.destinationTokenAccount),
-        verification: result.decision === "confirmed" ? "verified" : result.reason,
-        foundAt: now,
-        refundReference: null,
-      },
-    };
-  }
-  return result.decision === "confirmed" ? { kind: "bind", evidence: result.evidence } : { kind: "mismatch", signature: tx.signature, reason: result.reason };
+  const transfer: ExtraTransfer = {
+    signature: tx.signature,
+    slot: tx.slot,
+    destinationDelta: destinationDeltaOf(tx, attempt.destinationTokenAccount),
+    verification: result.decision === "confirmed" ? "verified" : result.reason,
+    foundAt: now,
+    refundReference: null,
+  };
+  if (attempt.finalizedSignature !== null || attempt.state === "mismatch") return { kind: "extra", transfer };
+  return result.decision === "confirmed" ? { kind: "bind", evidence: result.evidence } : { kind: "mismatch", transfer };
 }
 
 type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
@@ -144,7 +143,8 @@ function purchaseStatesInto(to: PurchaseState, reason: string): PurchaseState[] 
 }
 
 // Applies one scan outcome by compare-and-set in one short transaction. A bind or a mismatch moves
-// only an attempt still in expired_scanning; an extra transfer is recorded once and never changes the
+// only an attempt still in expired_scanning, and the reconcile applies a mismatch only once the
+// complete scan bound nothing; an extra transfer is recorded once and never changes the
 // attempt, the purchase or the bound evidence. Returns whether anything was written.
 export async function applyScanOutcome(db: Db, attemptId: string, outcome: CandidateOutcome, now: Date, actor = "system"): Promise<boolean> {
   if (outcome.kind === "skip") return false;
@@ -175,12 +175,12 @@ export async function applyScanOutcome(db: Db, attemptId: string, outcome: Candi
         assertPyusdTransition("expired_scanning", "mismatch");
         const moved = await tx
           .update(paymentAttempts)
-          .set({ state: "mismatch", outcomeReason: outcome.reason, pyusdMismatchSignature: outcome.signature, updatedAt: now })
+          .set({ state: "mismatch", outcomeReason: outcome.transfer.verification, pyusdMismatchSignature: outcome.transfer.signature, updatedAt: now })
           .where(and(eq(paymentAttempts.id, attemptId), eq(paymentAttempts.state, "expired_scanning")))
           .returning({ id: paymentAttempts.id });
         if (moved.length === 0) return false;
         await transitionPurchase(tx, attempt.purchaseId, purchaseStatesInto("uncertain", "pyusd_mismatch"), "uncertain", "pyusd_mismatch");
-        await audit("pyusd_transfer_mismatch", true, { signature: outcome.signature, reason: outcome.reason });
+        await audit("pyusd_transfer_mismatch", true, { signature: outcome.transfer.signature, reason: outcome.transfer.verification });
         return true;
       }
       case "extra": {

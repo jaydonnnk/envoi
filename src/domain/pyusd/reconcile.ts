@@ -230,7 +230,10 @@ async function startWindowScan(db: Db, attemptId: string, height: bigint, now: D
 // One claim's share of the window scan: at most SCAN_CAPS.pages pages and SCAN_CAPS.fetches candidate
 // reads. The cursor only ever moves past entries that are decided, in order, so a gap leaves every
 // undecided candidate ahead of it, and a page with more candidates than the fetch cap still completes
-// across claims. Any gap is recorded and stops this claim.
+// across claims. Any gap is recorded and stops this claim. A failing candidate while nothing is bound
+// is held as pendingMismatch, saved with the cursor, instead of moving the attempt (Gate 3 reopening
+// 2026-10-18): the oldest one is kept, a newer one and, once a candidate binds, the pending one are
+// recorded as extra transfers.
 async function scanWindow(deps: ReconcileDeps, rpc: SolanaReadClient, start: PyusdAttempt, owner: string, actor: string): Promise<void> {
   let attempt = start;
   const coverage: ScanCoverage = { ...attempt.scan!, lastGap: null };
@@ -268,7 +271,17 @@ async function scanWindow(deps: ReconcileDeps, rpc: SolanaReadClient, start: Pyu
         const now = deps.now();
         const result = verifyPyusdTransfer(read.value, attempt, feeAtEpoch(attempt.fee, epochOfSlot(schedule, read.value.slot)), now);
         const outcome = classifyScanCandidate(attempt, read.value, result, now);
-        if (await applyScanOutcome(deps.db, attempt.id, outcome, now, actor)) attempt = (await loadAttempt(deps.db, attempt.id)) ?? attempt;
+        if (outcome.kind === "mismatch") {
+          // History is newest first, so this one is older than any pending one, which becomes extra.
+          if (coverage.pendingMismatch) await applyScanOutcome(deps.db, attempt.id, { kind: "extra", transfer: coverage.pendingMismatch }, now, actor);
+          coverage.pendingMismatch = outcome.transfer;
+        } else if (await applyScanOutcome(deps.db, attempt.id, outcome, now, actor)) {
+          attempt = (await loadAttempt(deps.db, attempt.id)) ?? attempt;
+          if (outcome.kind === "bind" && coverage.pendingMismatch) {
+            await applyScanOutcome(deps.db, attempt.id, { kind: "extra", transfer: coverage.pendingMismatch }, now, actor);
+            coverage.pendingMismatch = null;
+          }
+        }
       }
       coverage.beforeCursor = entry.signature;
     }
@@ -380,6 +393,12 @@ async function recover(deps: ReconcileDeps, attemptId: string, owner: string, ac
       case "close_unpaid":
       case "hold":
         return releaseOrHold(db, attempt, step.action === "close_unpaid", actor, deps.now());
+      case "mark_mismatch": {
+        // The complete scan bound nothing: the oldest failing landing decides the mismatch.
+        await applyScanOutcome(db, attemptId, { kind: "mismatch", transfer: attempt.scan!.pendingMismatch! }, deps.now(), actor);
+        const after = await loadAttempt(db, attemptId);
+        return after?.state === "mismatch" ? "uncertain" : isScanComplete(after?.scan ?? null) ? "scan_complete" : "scan_incomplete";
+      }
       case "operator":
       case "done":
         return attempt.state === "closed_unpaid" ? "closed_unpaid" : "scan_complete";

@@ -404,6 +404,8 @@ export type StoredScanCoverage = {
   pagesRead: number;
   candidatesChecked: number;
   lastGap: "rate_limited" | "null_transaction" | "rpc_unavailable" | "too_large" | "page_cap" | "identity_changed" | null;
+  // Gate 3 reopening 2026-10-18; absent on coverage saved before it, which reads as null.
+  pendingMismatch?: { signature: string; slot: string; destinationDelta: string | null; verification: string; foundAt: string } | null;
 };
 
 export const paymentAttempts = pgTable(

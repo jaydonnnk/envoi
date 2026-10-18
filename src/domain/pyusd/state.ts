@@ -1,5 +1,6 @@
 import type { Address } from "@solana/kit";
 import type { FeeEvidence } from "@/domain/pyusd/mint";
+import type { ExtraTransfer } from "@/domain/pyusd/recovery";
 import type { PYUSD_ATTEMPT_STATES, StoredFeeEvidence, StoredScanCoverage, StoredSignatureHint } from "@/lib/db/schema";
 import type { PaymentAttemptRow } from "@/domain/purchases/state";
 
@@ -67,14 +68,41 @@ export type ScanCoverage = {
   pagesRead: number;
   candidatesChecked: number;
   lastGap: ScanGap | null;
+  // Gate 3 reopening 2026-10-18: the oldest ours, successful and failing candidate seen while nothing
+  // is bound. It marks the mismatch only if the complete scan binds nothing; a binding turns it into an
+  // extra transfer.
+  pendingMismatch: ExtraTransfer | null;
 };
 
 export function scanFromStored(scan: StoredScanCoverage): ScanCoverage {
-  return { ...scan, startedAtFinalizedHeight: BigInt(scan.startedAtFinalizedHeight) };
+  const pending = scan.pendingMismatch ?? null;
+  return {
+    ...scan,
+    startedAtFinalizedHeight: BigInt(scan.startedAtFinalizedHeight),
+    pendingMismatch: pending && {
+      signature: pending.signature,
+      slot: BigInt(pending.slot),
+      destinationDelta: pending.destinationDelta === null ? null : BigInt(pending.destinationDelta),
+      verification: pending.verification as ExtraTransfer["verification"],
+      foundAt: new Date(pending.foundAt),
+      refundReference: null,
+    },
+  };
 }
 
 export function scanToStored(scan: ScanCoverage): StoredScanCoverage {
-  return { ...scan, startedAtFinalizedHeight: scan.startedAtFinalizedHeight.toString() };
+  const pending = scan.pendingMismatch;
+  return {
+    ...scan,
+    startedAtFinalizedHeight: scan.startedAtFinalizedHeight.toString(),
+    pendingMismatch: pending && {
+      signature: pending.signature,
+      slot: pending.slot.toString(),
+      destinationDelta: pending.destinationDelta?.toString() ?? null,
+      verification: pending.verification,
+      foundAt: pending.foundAt.toISOString(),
+    },
+  };
 }
 
 export function feeFromStored(fee: StoredFeeEvidence): FeeEvidence {

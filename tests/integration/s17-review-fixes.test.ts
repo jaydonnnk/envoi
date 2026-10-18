@@ -28,7 +28,7 @@ vi.mock("@/domain/pyusd/constants", async (importOriginal) => {
   return { ...actual, PYUSD_PROOFS: state.proofs };
 });
 
-// S17 review fixes, 2026-10-18 (findings 6 and 8): review-fix tests recorded in 00-status.md, not Gate 3
+// S17 review fixes, 2026-10-18 (findings 1, 6 and 8): review-fix tests recorded in 00-status.md, not Gate 3
 // named tests. Every attempt, signature and history page is a FIXTURE over a FIXTURE devnet RPC, on its
 // own published FIXTURE shop, against local PostgreSQL as envoi_maintenance and envoi_web.
 
@@ -85,6 +85,36 @@ describe("S17 review fixes", () => {
     expect(await h.purchaseState(prepared.purchaseId)).toBe("unpaid_closed");
     // The basket is free again for the same buyer.
     expect((await h.reviewRequest(prepared.cookie, prepared.shop)).status).toBe(201);
+  });
+
+  const extraRows = (attemptId: string) =>
+    database.admin<{ signature: string; verification: string }[]>`select signature, verification from pyusd_extra_transfers where attempt_id = ${attemptId} order by signature`;
+
+  // Finding 1 (Gate 3 reopening 2026-10-18). With the wallet response lost, the buyer's correct
+  // transfer lands, then a newer transaction carrying the same memo text fails verification; history
+  // is read newest first.
+  it("a verifying landing wins over a newer failing one", async () => {
+    const prepared = await h.preparedAttempt("fix-verifying-wins");
+    h.expireAll();
+    const paid = h.land(prepared.attempt, h.freshSignature(), { slot: LANDING_SLOT });
+    const copy = h.land(prepared.attempt, h.freshSignature(), { slot: LANDING_SLOT + 10, amount: 1n });
+    h.setHistory(prepared, [copy, paid, h.older()]);
+    await h.runnerReconcile(prepared);
+    expect(await h.attemptOf(prepared.purchaseId)).toMatchObject({ state: "confirmed", finalizedSignature: paid.signature, mismatchSignature: null, scan: { reachedBeforePreparation: true } });
+    expect(await h.purchaseState(prepared.purchaseId)).toBe("paid");
+    expect(await extraRows(prepared.attempt.id)).toEqual([{ signature: copy.signature, verification: "amount_mismatch" }]);
+  });
+
+  it("the oldest failing landing is the mismatch when nothing verifies", async () => {
+    const prepared = await h.preparedAttempt("fix-oldest-mismatch");
+    h.expireAll();
+    const older = h.land(prepared.attempt, h.freshSignature(), { slot: LANDING_SLOT, amount: 2n });
+    const newer = h.land(prepared.attempt, h.freshSignature(), { slot: LANDING_SLOT + 10, amount: 1n });
+    h.setHistory(prepared, [newer, older, h.older()]);
+    expect(await h.runnerReconcile(prepared)).toBe("uncertain");
+    expect(await h.attemptOf(prepared.purchaseId)).toMatchObject({ state: "mismatch", mismatchSignature: older.signature, finalizedSignature: null });
+    expect(await h.purchaseState(prepared.purchaseId)).toBe("uncertain");
+    expect(await extraRows(prepared.attempt.id)).toEqual([{ signature: newer.signature, verification: "amount_mismatch" }]);
   });
 
   it("merchant orders say an operator-closed mismatch may have reached the shop", async () => {
