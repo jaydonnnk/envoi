@@ -1,0 +1,731 @@
+{
+ "branch": "envoi/slice-17-pyusd-recovery",
+ "base_commit": "fea9c72",
+ "uncommitted_changes": false,
+ "method": "Each definition in s17-mutation-defs.json applied alone by exact text replacement, its whole test file run with the vitest JSON reporter, every touched file restored and compared by SHA-256, then the whole file rerun. A proof needs the named row to fail on an AssertionError, no other row of its group to fail (for a Gate 3 group row; a standalone test's other failures are recorded), a byte-identical restore and an all-passing rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations, as envoi_web for the routes and envoi_maintenance for the runner, with DATABASE_URL removed; Solana RPC is a FIXTURE faked at the bounded transport, wallets are key pairs made in the run, PayPal is the FIXTURE fake at the PayPalWriteClient boundary, and every signature, history page and landed transaction is synthetic. The grant definitions only widen a grant in migration 0023, with no code change, so each proves the grant itself is the barrier; two definitions change a migration constraint beside the code because the database independently refuses the mutated write.",
+ "results": [
+  {
+   "id": "rec-final-height-confirmed",
+   "test": "release waits for finalized height past the saved bound",
+   "kind": "group_row",
+   "group": "PYUSD recovery > PYUSD recovery over a fake chain",
+   "files": [
+    "src/domain/pyusd/reconcile.ts"
+   ],
+   "mutation": "Compare the confirmed height.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'held_no_match' to be 'nothing_to_read' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "FIXTURE transcript: lost wallet responses recovered over a fake chain"
+   ],
+   "other_errors": {
+    "FIXTURE transcript: lost wallet responses recovered over a fake chain": "AssertionError: expected 'Paid (Paid)' to be 'Checking payment (Not confirmed)' // Object.is equality"
+   },
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "rec-final-height-ge",
+   "test": "release waits for finalized height past the saved bound",
+   "kind": "group_row",
+   "group": "PYUSD recovery > PYUSD recovery over a fake chain",
+   "files": [
+    "src/domain/pyusd/recovery.ts"
+   ],
+   "mutation": "Use >= against the bound.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'held_no_match' to be 'nothing_to_read' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "FIXTURE transcript: lost wallet responses recovered over a fake chain"
+   ],
+   "other_errors": {
+    "FIXTURE transcript: lost wallet responses recovered over a fake chain": "AssertionError: expected 'Paid (Paid)' to be 'Checking payment (Not confirmed)' // Object.is equality"
+   },
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "rec-no-early-scan",
+   "test": "scan starts only after expiry is final",
+   "kind": "group_row",
+   "group": "PYUSD recovery > PYUSD recovery over a fake chain",
+   "files": [
+    "src/domain/pyusd/reconcile.ts"
+   ],
+   "mutation": "Start scanning on the first reconcile: request the merchant account's history before expiry is final.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 1 to be +0 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "rec-end-is-complete",
+   "test": "scan that never reaches before preparation is incomplete",
+   "kind": "group_row",
+   "group": "PYUSD recovery > PYUSD recovery over a fake chain",
+   "files": [
+    "src/domain/pyusd/reconcile.ts"
+   ],
+   "mutation": "Treat the end of pages as complete.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'held_no_match' to be 'scan_incomplete' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "rec-page-cap-is-end",
+   "test": "scan stops at the page cap without releasing",
+   "kind": "group_row",
+   "group": "PYUSD recovery > PYUSD recovery over a fake chain",
+   "files": [
+    "src/domain/pyusd/reconcile.ts"
+   ],
+   "mutation": "Treat the page cap as the end of history.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'held_no_match' to be 'scan_incomplete' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "rec-fetch-cap-is-end",
+   "test": "scan stops at the fetch cap without releasing",
+   "kind": "group_row",
+   "group": "PYUSD recovery > PYUSD recovery over a fake chain",
+   "files": [
+    "src/domain/pyusd/reconcile.ts"
+   ],
+   "mutation": "Treat the fetch cap as the end of history.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'held_no_match' to be 'scan_incomplete' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "rec-restart-newest",
+   "test": "scan resumes from its saved cursor",
+   "kind": "group_row",
+   "group": "PYUSD recovery > PYUSD recovery over a fake chain",
+   "files": [
+    "src/domain/pyusd/reconcile.ts"
+   ],
+   "mutation": "Restart each claim from the newest signature.",
+   "own_row": "failed",
+   "error": "AssertionError: expected undefined to be '118D3qVN4eQmQNZ7Pwn2AHraEmnAa5m9DgsSB\u2026' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "rec-skip-undecided",
+   "test": "429 or null transaction keeps the attempt locked",
+   "kind": "group_row",
+   "group": "PYUSD recovery > PYUSD recovery over a fake chain",
+   "files": [
+    "src/domain/pyusd/reconcile.ts"
+   ],
+   "mutation": "Skip the undecided candidate and advance.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { \u2026(18) } to match object { state: 'expired_scanning', \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "rec-mismatch-not-ours",
+   "test": "a successful transaction with our reference that fails verification blocks release",
+   "kind": "group_row",
+   "group": "PYUSD recovery > PYUSD recovery over a fake chain",
+   "files": [
+    "src/domain/pyusd/recovery.ts"
+   ],
+   "mutation": "Treat it as not ours and continue.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { \u2026(18) } to match object { state: 'mismatch', \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "FIXTURE transcript: lost wallet responses recovered over a fake chain"
+   ],
+   "other_errors": {
+    "FIXTURE transcript: lost wallet responses recovered over a fake chain": "AssertionError: expected { \u2026(18) } to match object { state: 'mismatch' }"
+   },
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "rec-release-default-on",
+   "test": "automatic unpaid release stays off until its proofs are recorded",
+   "kind": "group_row",
+   "group": "PYUSD recovery > PYUSD recovery over a fake chain",
+   "files": [
+    "src/domain/pyusd/constants.ts"
+   ],
+   "mutation": "Default the switch to true.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'closed_unpaid' to be 'held_no_match' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "FIXTURE transcript: lost wallet responses recovered over a fake chain",
+    "web and runner cannot scan one attempt at once"
+   ],
+   "other_errors": {
+    "FIXTURE transcript: lost wallet responses recovered over a fake chain": "AssertionError: expected { \u2026(18) } to match object { state: 'held_no_match' }",
+    "web and runner cannot scan one attempt at once": "AssertionError: expected 'closed_unpaid' to be 'held_no_match' // Object.is equality"
+   },
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "rec-never-release",
+   "test": "a complete empty scan closes the attempt once release is enabled",
+   "kind": "group_row",
+   "group": "PYUSD recovery > PYUSD recovery over a fake chain",
+   "files": [
+    "src/domain/pyusd/recovery.ts"
+   ],
+   "mutation": "Never release.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'held_no_match' to be 'closed_unpaid' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "rec-skip-identity",
+   "test": "devnet reset stops verification and scanning",
+   "kind": "group_row",
+   "group": "PYUSD recovery > PYUSD recovery over a fake chain",
+   "files": [
+    "src/domain/pyusd/reconcile.ts"
+   ],
+   "mutation": "Skip the identity check in recovery.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'held_no_match' to be 'identity_changed' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "rec-done-before-scan",
+   "test": "a confirmed or mismatched attempt is still scanned after expiry",
+   "kind": "group_row",
+   "group": "PYUSD recovery > PYUSD recovery over a fake chain",
+   "files": [
+    "src/domain/pyusd/recovery.ts"
+   ],
+   "mutation": "Yield done for confirmed or mismatch before the window scan completes.",
+   "own_row": "failed",
+   "error": "AssertionError: expected undefined to be true // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "rec-stop-on-bind",
+   "test": "the scan continues after a transfer binds",
+   "kind": "group_row",
+   "group": "PYUSD recovery > PYUSD recovery over a fake chain",
+   "files": [
+    "src/domain/pyusd/reconcile.ts"
+   ],
+   "mutation": "Stop the scan when a candidate binds.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { \u2026(18) } to match object { state: 'confirmed', \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "FIXTURE transcript: lost wallet responses recovered over a fake chain"
+   ],
+   "other_errors": {
+    "FIXTURE transcript: lost wallet responses recovered over a fake chain": "AssertionError: expected { \u2026(18) } to match object { state: 'confirmed', scan: { \u2026(1) } }"
+   },
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "rec-extra-uncertain",
+   "test": "an extra transfer keeps the purchase paid and alerts the operator",
+   "kind": "group_row",
+   "group": "PYUSD recovery > PYUSD recovery over a fake chain",
+   "files": [
+    "src/domain/pyusd/recovery.ts"
+   ],
+   "mutation": "Move the purchase to uncertain on an extra transfer.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'uncertain' to be 'paid' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "rec-extra-unique",
+   "test": "an extra transfer is recorded once per attempt",
+   "kind": "group_row",
+   "group": "PYUSD recovery > PYUSD recovery over a fake chain",
+   "files": [
+    "drizzle/0023_s17_pyusd_recovery.sql"
+   ],
+   "mutation": "Drop the unique index.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'ok' to be '23505' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "web-runner-lease",
+   "test": "web and runner cannot scan one attempt at once",
+   "kind": "standalone",
+   "group": "PYUSD recovery",
+   "files": [
+    "src/domain/pyusd/reconcile.ts"
+   ],
+   "mutation": "Skip the lease claim in the web reconcile path.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { ok: true, data: { \u2026(2) } } to match object { ok: true, \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "second-landing-skip",
+   "test": "a second reference landing is an extra transfer",
+   "kind": "standalone",
+   "group": "PYUSD recovery standalone tests",
+   "files": [
+    "src/domain/pyusd/recovery.ts"
+   ],
+   "mutation": "Classify every candidate as skip once a signature is bound.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { kind: 'skip' } to deeply equal { kind: 'extra', transfer: { \u2026(6) } }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 2,
+   "proof": true
+  },
+  {
+   "id": "receipt-extra-hidden",
+   "test": "PYUSD receipt shows a detected extra transfer",
+   "kind": "standalone",
+   "group": "PYUSD recovery standalone tests",
+   "files": [
+    "src/app/receipt/[purchaseId]/pyusd-receipt.tsx"
+   ],
+   "mutation": "Hide extra transfers on a paid receipt.",
+   "own_row": "failed",
+   "error": "AssertionError: expected '' to contain 'Extra transfer detected'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 2,
+   "proof": true
+  },
+  {
+   "id": "orders-extra-hidden",
+   "test": "merchant orders show a detected extra transfer",
+   "kind": "addition",
+   "group": "PYUSD extra transfers and operator acts",
+   "files": [
+    "src/app/merchant/orders/orders-view.tsx"
+   ],
+   "mutation": "Hide extra transfers from the merchant orders page.",
+   "own_row": "failed",
+   "error": "AssertionError: expected '<section class=\"orders\" aria-labelled\u2026' to contain 'Extra transfer'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "resolve-scan-check",
+   "test": "mismatch resolution waits for a complete window scan",
+   "kind": "addition",
+   "group": "PYUSD extra transfers and operator acts",
+   "files": [
+    "src/operator/cli.ts"
+   ],
+   "mutation": "Skip the scan-completeness check.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'accepted' to match /window scan .* is not complete/",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "resolve-evidence-optional",
+   "test": "mismatch resolution needs recorded evidence",
+   "kind": "addition",
+   "group": "PYUSD extra transfers and operator acts",
+   "files": [
+    "src/operator/cli.ts"
+   ],
+   "mutation": "Make the evidence optional.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'accepted' to match 'An evidence reference is required'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "refund-empty-reference",
+   "test": "a refund needs an out-of-band reference",
+   "kind": "addition",
+   "group": "PYUSD extra transfers and operator acts",
+   "files": [
+    "drizzle/0023_s17_pyusd_recovery.sql",
+    "src/operator/cli.ts"
+   ],
+   "mutation": "Accept an empty reference; the migration's refund check is relaxed with it, because the database independently refuses an empty reference.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'accepted' to match 'An out-of-band refund reference is re\u2026'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "refund-closes-purchase",
+   "test": "a refund reference changes no payment state",
+   "kind": "addition",
+   "group": "PYUSD extra transfers and operator acts",
+   "files": [
+    "src/operator/cli.ts"
+   ],
+   "mutation": "Let the act close the purchase.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'unpaid_closed' to be 'paid' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "resolve-flag-skip",
+   "test": "mismatch resolution needs a flagged operator account",
+   "kind": "addition",
+   "group": "PYUSD extra transfers and operator acts",
+   "files": [
+    "src/operator/cli.ts"
+   ],
+   "mutation": "Skip the flag check in resolve-pyusd-mismatch.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'accepted' to match 'does not hold the operator flag'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "refund-flag-skip",
+   "test": "a refund reference needs a flagged operator account",
+   "kind": "addition",
+   "group": "PYUSD extra transfers and operator acts",
+   "files": [
+    "src/operator/cli.ts"
+   ],
+   "mutation": "Skip the flag check in record-extra-transfer-refund.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'accepted' to match 'does not hold the operator flag'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "grant-web-refund-insert",
+   "test": "the web role cannot record a refund reference",
+   "kind": "grant",
+   "group": "PYUSD recovery grants",
+   "files": [
+    "drizzle/0023_s17_pyusd_recovery.sql"
+   ],
+   "mutation": "Widen the web role's INSERT on pyusd_extra_transfers to the refund columns.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'ok' to be '42501' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "grant-web-refund-update",
+   "test": "the web role cannot record a refund reference",
+   "kind": "grant",
+   "group": "PYUSD recovery grants",
+   "files": [
+    "drizzle/0023_s17_pyusd_recovery.sql"
+   ],
+   "mutation": "Grant the web role UPDATE of the refund reference.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'ok' to be '42501' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "grant-web-delete",
+   "test": "the web role cannot delete an extra transfer",
+   "kind": "grant",
+   "group": "PYUSD recovery grants",
+   "files": [
+    "drizzle/0023_s17_pyusd_recovery.sql"
+   ],
+   "mutation": "Grant the web role DELETE on pyusd_extra_transfers.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'ok' to be '42501' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "grant-maintenance-refund-insert",
+   "test": "the maintenance role cannot record a refund reference",
+   "kind": "grant",
+   "group": "PYUSD recovery grants",
+   "files": [
+    "drizzle/0023_s17_pyusd_recovery.sql"
+   ],
+   "mutation": "Widen the maintenance role's INSERT on pyusd_extra_transfers to the refund columns.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'ok' to be '42501' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "grant-maintenance-refund-update",
+   "test": "the maintenance role cannot record a refund reference",
+   "kind": "grant",
+   "group": "PYUSD recovery grants",
+   "files": [
+    "drizzle/0023_s17_pyusd_recovery.sql"
+   ],
+   "mutation": "Grant the maintenance role UPDATE of the refund reference.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'ok' to be '42501' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "grant-maintenance-reprice",
+   "test": "the maintenance role cannot re-price or rebind a PYUSD attempt",
+   "kind": "grant",
+   "group": "PYUSD recovery grants",
+   "files": [
+    "drizzle/0023_s17_pyusd_recovery.sql"
+   ],
+   "mutation": "Grant the maintenance role UPDATE of the attempt's amount.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'ok' to be '42501' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "grant-maintenance-rebind",
+   "test": "the maintenance role cannot re-price or rebind a PYUSD attempt",
+   "kind": "grant",
+   "group": "PYUSD recovery grants",
+   "files": [
+    "drizzle/0023_s17_pyusd_recovery.sql"
+   ],
+   "mutation": "Grant the maintenance role UPDATE of the attempt's reference and destination.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'ok' to be '42501' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "grant-maintenance-slot-update",
+   "test": "the maintenance role cannot reseat the RPC limiter",
+   "kind": "grant",
+   "group": "PYUSD recovery grants",
+   "files": [
+    "drizzle/0023_s17_pyusd_recovery.sql"
+   ],
+   "mutation": "Grant the maintenance role UPDATE of a limiter slot's number.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'ok' to be '42501' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "grant-maintenance-slot-insert",
+   "test": "the maintenance role cannot reseat the RPC limiter",
+   "kind": "grant",
+   "group": "PYUSD recovery grants",
+   "files": [
+    "drizzle/0023_s17_pyusd_recovery.sql"
+   ],
+   "mutation": "Grant the maintenance role INSERT on the limiter slots.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'ok' to be '42501' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  }
+ ]
+}
