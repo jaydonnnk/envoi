@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ensureBuyerSession, postJson } from "@/lib/browser/session";
-import { landingReview, requestReview, type Rail, type ReviewLine } from "./landing";
+import { landingReview, requestReview, reviewNavigation, type Rail, type ReviewLine } from "./landing";
 
 export type BasketItem = { id: string; name: string; unitSgdCents: number | null; available: boolean | null };
 
@@ -55,10 +55,10 @@ export function BasketForm({
     setQuantities((current) => ({ ...current, [id]: Math.min(MAX_QUANTITY, Math.max(0, (current[id] ?? 0) + delta)) }));
   }
 
-  async function submit(lines: ReviewLine[], reviewRail: Rail) {
+  async function submit(lines: ReviewLine[], reviewRail: Rail, landing: boolean) {
     try {
       await ensureBuyerSession();
-      const refused = await requestReview((body) => postJson<{ purchaseId: string }>("/api/v1/purchases", body), (href) => router.push(href), outletId, reviewRail, lines);
+      const refused = await requestReview((body) => postJson<{ purchaseId: string }>("/api/v1/purchases", body), reviewNavigation(router, landing), outletId, reviewRail, lines);
       if (refused !== null) throw new Error(refused);
     } catch (err) {
       setError(err instanceof Error && err.message !== "session" ? err.message : "The review could not be created. Try again.");
@@ -69,7 +69,7 @@ export function BasketForm({
   function review() {
     setBusy(true);
     setError(null);
-    void submit(chosen.map((item) => ({ menuItemId: item.id, quantity: quantities[item.id] ?? 0 })), rail);
+    void submit(chosen.map((item) => ({ menuItemId: item.id, quantity: quantities[item.id] ?? 0 })), rail, false);
   }
 
   // One landing review per page load, even when React runs the effect twice in development.
@@ -77,7 +77,7 @@ export function BasketForm({
   useEffect(() => {
     if (landed.current || landing === null) return;
     landed.current = true;
-    void submit(landing.lines, landing.rail);
+    void submit(landing.lines, landing.rail, true);
     // Runs once on mount, for the basket the link pre-filled.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

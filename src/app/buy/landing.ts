@@ -19,6 +19,14 @@ export function landingReview(autoReview: boolean, lines: readonly ReviewLine[])
   return autoReview && lines.length > 0 ? { rail: "pyusd", lines: [...lines] } : null;
 }
 
+// How a review is opened. The landing replaces /buy in the browser history, so Back from the review
+// leaves the link's page instead of landing on it again and reopening the same review (S17 review
+// fixes, finding 3); the Review button adds a history entry as any link does.
+export type Router = { push: (href: string) => void; replace: (href: string) => void };
+export function reviewNavigation(router: Router, landing: boolean): (href: string) => void {
+  return landing ? (href) => router.replace(href) : (href) => router.push(href);
+}
+
 // Asks the server for one review and opens it; a refusal comes back as the message to show, and
 // nothing is opened.
 export async function requestReview(post: ReviewPost, navigate: (href: string) => void, outletId: string, rail: Rail, lines: ReviewLine[]): Promise<string | null> {
