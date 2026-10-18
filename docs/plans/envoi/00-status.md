@@ -13,6 +13,8 @@ Updated: 2026-10-18 (Asia/Singapore).
   No contract or test changes; see the [reopening record](03-program-design.md#reopening-2026-10-12-typescript-pin-after-the-s1-boot-check) and [Version pins](03-program-design.md#version-pins).
   **Reopened and RE-APPROVED 2026-10-15** for one change, approved by the user in advance: Chinese text accuracy leaves the R5 vision falsifiers; no contract, type, call stack, clock, test name or test count changes; see the [record](#reopening-2026-10-15-english-only-menu-photos) and [Gate 3's section](03-program-design.md#reopening-2026-10-15-english-only-menu-photos).
   `03-program-design.md` now has SHA256 `3f5c8386b8e26e2f3bc6a7e8274ed9582ee5561afc9fe59cee0d4de3305b7cab` after the 2026-10-18 Phantom landing reopening, pinned in `checks/gate4_check.py`.
+  **REOPENED 2026-10-18, IN PROGRESS** for S17 review finding 1 (and the wording of finding 7): a verifying landing anywhere in the post-expiry window decides the attempt; drafted on `envoi/slice-17-review-fixes`, awaiting the user's approval; see the [record](#reopening-2026-10-18-verifying-landing-wins-the-window-scan).
+  Until it is re-approved, `gate4_check.py` fails R10 on the changed file, and the code for finding 1 is not built.
   Before that it was **RE-APPROVED 2026-10-12** by the user ("I approve both pls publish the branches and commit all the changes to main so that we can proceed with the first slice") after a reopening the same day for one change only: PayPal start and completion check `PAYMENTS_ENABLED` and refuse with the new error code `payments_disabled` (Gate 4 delta D10); see the [reopening record](#gate-3-reopening-for-the-paypal-kill-switch-2026-10-12).
   Approval accepts that contract as a proposal; it establishes no runtime evidence.
   Before that it was **RE-APPROVED 2026-10-11** by the user ("Yes approve commit the branch and push and merge to main"), after being reopened on 2026-10-10; the revision of the affected import and PYUSD contracts was drafted on 2026-10-11 and revised the same day after the user's review (fixes A-K) and for fixes L and M after Gate 2 was reopened.
@@ -35,6 +37,17 @@ Updated: 2026-10-18 (Asia/Singapore).
   An independent review of the draft on 2026-10-12 found four major issues, and all four are fixed in it; see the [review fixes](#gate-4-review-fixes-2026-10-12).
   Its minor findings are fixed or dispositioned; see the [minor review fixes](#gate-4-minor-review-fixes-2026-10-12).
   The user decided delta D10 on 2026-10-12 by reopening Gate 3 for a PayPal check of `PAYMENTS_ENABLED`, re-approved the same day; S2 builds it and names its test.
+
+### Reopening 2026-10-18: verifying landing wins the window scan
+
+- **Trigger:** the independent S17 review on 2026-10-18, finding 1, reproduced over the FIXTURE fake chain on local PostgreSQL: with no hint, a correct transfer followed by a newer successful transaction carrying the same memo text and a 1-unit amount ended `scan_complete` with the attempt `mismatch`, the purchase `uncertain` and the correct transfer stored as an extra transfer `verified`.
+  The scan reads history newest first and applied a failing candidate as soon as it read it; the operator can then only close the purchase unpaid.
+- **Authorization, 2026-10-18, in the user's words:** "Fix all 8 findings on envoi/slice-17-review-fixes. Reopen Gate 3 for finding 1 and draft the change for my approval first."
+- **Change, drafted on `envoi/slice-17-review-fixes` from `main` at `d0d0db0`:** while nothing is bound, a failing candidate is held in the scan coverage as `pendingMismatch` instead of moving the attempt; a verifying candidate binds wherever it sits in the window and turns the pending one into an extra transfer; only a complete scan that bound nothing marks the mismatch.
+  The case text `a confirmed or mismatched attempt is still scanned after expiry` is corrected to say `operator` for the mismatched attempt, as the call stack does (finding 7).
+  [Gate 3 reopening](03-program-design.md#reopening-2026-10-18-a-verifying-landing-wins-the-window-scan).
+- **Unchanged:** Gate 2 (it already says "A matching transfer confirms the original attempt"), Gate 4 (the regression test is a review-fix test recorded here, so no named-test or case count changes), every route, table, migration, error code and clock; `gate4_check.py` still counts 92 named tests and 231 cases.
+- **Approval:** pending.
 
 ### Reopening 2026-10-18: Phantom landing
 

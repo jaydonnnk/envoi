@@ -4,6 +4,7 @@
 **Reopened 2026-10-12 for one change only and RE-APPROVED by the user the same day** ("I approve both pls publish the branches and commit all the changes to main so that we can proceed with the first slice"): PayPal start and completion now check `PAYMENTS_ENABLED` and refuse with a new error code, `payments_disabled`; see [Reopening 2026-10-12](#reopening-2026-10-12-paypal-payments-kill-switch).
 **Reopened 2026-10-15 for one change only, approved by the user in advance:** menu photos are English only, so Chinese text accuracy is no longer an R5 falsifier; see [Reopening 2026-10-15](#reopening-2026-10-15-english-only-menu-photos).
 **Reopened 2026-10-18 for one change and RE-APPROVED by the user the same day** ("Yea sure i approve the gates then make the relevant changes and push to main thnaks"): the Phantom Browse link names the PYUSD rail, and `/buy` opened from it creates the PYUSD review itself; see [Reopening 2026-10-18](#reopening-2026-10-18-phantom-landing-opens-the-pyusd-review).
+**Reopened again 2026-10-18 for one change, drafted for the user's approval:** a verifying landing anywhere in the post-expiry window decides the attempt, so a newer failing transaction carrying the same reference can no longer turn a correct payment into a mismatch; see [Reopening 2026-10-18: verifying landing wins](#reopening-2026-10-18-a-verifying-landing-wins-the-window-scan).
 Approval accepts these contracts as a proposal; it establishes no runtime, account, model, wallet or usability evidence and authorizes no implementation or Gate 4 approval.
 The user removed Zapier because it is paid and reopened Gates 1, 2 and 3.
 Gate 1 was re-approved on 2026-10-10 and Gate 2 on 2026-10-11.
@@ -13,6 +14,24 @@ Every other contract below stays as approved on 2026-10-07.
 See [Revision 2026-10-11](#revision-2026-10-11-direct-vision-and-pyusd), [`00-status.md`](00-status.md#reopening-2026-10-10-zapier-removed) and [`handoff.md`](handoff.md#gate-3-handover-2026-10-11).
 
 Gate 3 program design, 2026-10-07 (Asia/Singapore). **APPROVED by the user 2026-10-07** ("gate 3 is approved"), together with a separate authorization to commit these planning documents and push `main`. Authorities: [approved Gate 1 product](01-product.md) and [approved Gate 2 architecture](02-architecture.md). Approval accepts the contracts below and the disposition of the eight Gate 2 review findings; it establishes no runtime, account, integration or usability evidence, and it does not authorize implementation or Gate 4. A separate, narrowly scoped authorization on the same day covered the R11 flag flip, its redeploy and a read-only schema inspection, all now complete. This document contains contracts only: file map, types and signatures without bodies, call stacks, state transitions, race rules, capacity budgets and named failure tests. No application implementation, no installed application packages and no approved slices exist.
+
+## Reopening 2026-10-18: a verifying landing wins the window scan
+
+- **Finding (S17 review, 2026-10-18, finding 1):** the window scan reads the merchant account's history newest first and applied the first candidate it decided.
+  When the wallet response was lost (no hint), a correct transfer followed by a newer successful transaction carrying the same memo text but failing verification ended `mismatch`, with the purchase `uncertain` and the buyer's correct transfer recorded as an extra transfer.
+  The operator's only exit from `mismatch` is closing it unpaid, so a buyer who paid correctly could end unpaid.
+  The memo text is public once the buyer's transfer lands, so anyone can send such a transaction before the scan starts.
+  Reproduced on local PostgreSQL over the FIXTURE fake chain; Gate 2 already says "A matching transfer confirms the original attempt", so only this design is wrong and Gate 2 stays as approved.
+- **Change:** while the attempt is still `expired_scanning`, a candidate that is ours, successful and fails verification no longer moves the attempt when it is read.
+  The scan keeps the oldest such candidate in its coverage as `pendingMismatch` and records any newer one as an extra transfer.
+  A verifying candidate binds whenever nothing is bound, wherever it sits in the window, and the pending candidate then becomes an extra transfer.
+  Only when the complete scan bound nothing does the pending candidate move the attempt to `mismatch` and the purchase to `uncertain`, with the operator alert; release stays impossible while one is pending, because an incomplete scan never releases and a complete one with a pending candidate marks the mismatch instead.
+  A hint is unchanged: it is the buyer's own wallet response, read before any scan, and a third party cannot submit one.
+- **Wording fix in the same change (S17 review finding 7):** the case `a confirmed or mismatched attempt is still scanned after expiry` said `decideRecoveryStep` yields `done` for both, while the call stack yields `operator` for `mismatch`; the case now says what the call stack says, and the code already does.
+- **Contracts touched:** `ScanCoverage` gains `pendingMismatch`; `RecoveryStep` gains `mark_mismatch`; the `mismatch` outcome of `CandidateOutcome` carries the candidate as an `ExtraTransfer`; the classification prose, the `expired_scanning -> mismatch` transition, the [PYUSD recovery call stack](#pyusd-recovery-added-2026-10-11) and the two case texts above.
+  No route, table, migration (coverage is stored in the existing `pyusd_scan` column), error code, clock, named-test or case count changes.
+  The regression test for this finding is a review-fix test recorded in `00-status.md`, like the S16 review fixes, so no count in Gate 4 changes and Gate 4 stays closed.
+- **Approval:** pending; the user asked on 2026-10-18 to "Reopen Gate 3 for finding 1 and draft the change for my approval first".
 
 ## Reopening 2026-10-18: Phantom landing opens the PYUSD review
 
@@ -973,6 +992,7 @@ export type ScanCoverage = {
   pagesRead: number;
   candidatesChecked: number;
   lastGap: "rate_limited" | "null_transaction" | "rpc_unavailable" | "too_large" | "page_cap" | "identity_changed" | null;
+  pendingMismatch: ExtraTransfer | null;  // reopened 2026-10-18: the oldest ours-successful-failing candidate seen while nothing is bound; decides mismatch only if the complete scan binds nothing
 };
 
 export const PYUSD_HINT_CAP: 3;   // signature hints stored per attempt; later ones are audited only (added 2026-10-11 after review)
@@ -1081,12 +1101,13 @@ export type RecoveryStep =
   | { action: "continue_scan"; before: string | null }
   | { action: "close_unpaid" }
   | { action: "hold"; reason: "automatic_release_not_enabled" }
+  | { action: "mark_mismatch" }          // reopened 2026-10-18: complete scan, nothing bound, a pending mismatch candidate
   | { action: "operator"; reason: "mismatch" }
   | { action: "done" };                  // fix M: the window scan is complete and the state needs nothing more
 
 export type CandidateOutcome =          // fix M
   | { kind: "bind"; evidence: PyusdEvidence }                // nothing bound yet, and this one verifies
-  | { kind: "mismatch"; reason: VerificationFailure }        // nothing bound yet, ours, successful, fails verification
+  | { kind: "mismatch"; transfer: ExtraTransfer }            // nothing bound yet, ours, successful, fails verification; held as pendingMismatch until the scan completes (reopened 2026-10-18)
   | { kind: "extra"; transfer: ExtraTransfer }               // ours and successful, while another landing is bound or in mismatch
   | { kind: "skip" };                                        // not ours, a failed landing, or the bound signature itself
 
@@ -1100,6 +1121,8 @@ export function isScanComplete(coverage: ScanCoverage): boolean; // reachedBefor
 A scan starts only after the finalized block height exceeds `lastValidBlockHeight`, so its fixed top boundary covers every slot in which the transaction could have landed.
 **Revised 2026-10-11 when Gate 2 was reopened (fix M):** every released attempt gets this window scan, including one already `confirmed` by a hint or in `mismatch`, and a scan does not stop when a candidate binds.
 `classifyScanCandidate` binds the first verifying landing when nothing is bound, and records every other successful landing that carries the reference as an extra transfer, whether or not it verifies.
+**Revised 2026-10-18 ([reopening](#reopening-2026-10-18-a-verifying-landing-wins-the-window-scan)):** the history is read newest first, so "first" means the first one the scan reaches, and a failing landing never decides the attempt while a verifying one may still be found.
+While nothing is bound and the attempt is `expired_scanning`, a `mismatch` outcome is held as the coverage's `pendingMismatch` (the oldest one; any newer one is recorded as an extra transfer); a later `bind` turns the pending candidate into an extra transfer, and only a complete scan that bound nothing moves the attempt to `mismatch`, through `mark_mismatch`.
 An extra transfer never changes the attempt or purchase state or the bound evidence; the receipt, the merchant's order view and the operator health view show it, and any refund is arranged outside Envoi.
 Because the window is fixed when the scan starts, the check ends; a transfer built later from a new blockhash with the same memo text is not Envoi's released transaction and is not watched.
 Candidates are all successful signatures at or after `preparationSlot`; a failed transaction moves no tokens, so it can be skipped.
@@ -1259,7 +1282,7 @@ prepared -> confirmed                  (a hint or a scanned signature passes ver
 prepared -> mismatch                   (a successful finalized transaction carrying this reference fails verification)
 prepared -> expired_scanning           (finalized block height > lastValidBlockHeight)
 expired_scanning -> confirmed          (the scan finds a verified transfer)
-expired_scanning -> mismatch           (the scan finds a successful transaction with this reference that fails verification)
+expired_scanning -> mismatch           (the complete scan bound nothing and found a successful transaction with this reference that fails verification; revised 2026-10-18)
 expired_scanning -> held_no_match      (complete scan, no match, automatic unpaid release not enabled)
 expired_scanning -> closed_unpaid      (complete scan, no match, automatic unpaid release enabled)
 held_no_match -> closed_unpaid         (automatic unpaid release enabled later; the recorded coverage is already complete)
@@ -1522,19 +1545,21 @@ POST /api/v1/purchases/{id}/reconcile (rail pyusd), and maintenance reconcile_py
      prepared, height <= lastValidBlockHeight  => verify the readable hint, if any; otherwise wait
      prepared, height > lastValidBlockHeight   => verify the readable hint first; then expired_scanning with the top boundary fixed now
      confirmed or mismatch, height > lastValidBlockHeight, scan incomplete => start or continue the window scan (fix M)
-     window scan complete => done for confirmed; operator for mismatch; held or closed as below for no match
+     window scan complete => done for confirmed; operator for mismatch; mark_mismatch for a pending mismatch; held or closed as below for no match
      expired_scanning, or a scanning confirmed or mismatch attempt => getSignaturesFinalized(merchant token account, before = cursor, 1000)
          at most 3 pages and 20 candidate fetches per claim
          applyScanPage -> candidates: successful signatures at or after preparationSlot
          each candidate other than the bound signature -> getTransactionFinalized -> verifyPyusdTransfer -> classifyScanCandidate
-            bind            => attempt confirmed, purchase paid; the scan continues (fix M)
-            mismatch        => attempt mismatch, purchase uncertain, operator alert; release is impossible; the scan continues
+            bind            => attempt confirmed, purchase paid; a pending mismatch becomes an extra transfer; the scan continues (fix M)
+            mismatch        => while expired_scanning: kept as pendingMismatch (a newer pending one becomes an extra transfer);
+                               no state change yet; release is impossible while one is pending; the scan continues (revised 2026-10-18)
             extra           => applyScanOutcome records the extra transfer once, operator alert; no state changes (fix M)
             skip            => continue
          429, null transaction, unavailable, oversized, page cap or identity change => record lastGap, keep the cursor, stop
          a page advances the cursor only after all its candidates are decided
          reachedBeforePreparation => complete:
-            still expired_scanning (nothing bound, no mismatch) =>
+            still expired_scanning with a pendingMismatch => attempt mismatch, purchase uncertain, operator alert (revised 2026-10-18)
+            still expired_scanning (nothing bound, no pending mismatch) =>
               PYUSD_PROOFS.automaticUnpaidRelease ? closed_unpaid, purchase unpaid_closed, basket unlocked
                                                   : held_no_match, purchase uncertain, operator alert
             confirmed or mismatch => the extra-transfer check is complete; no state changes
@@ -2085,11 +2110,11 @@ Two cases added for fix M call the outcome writer or insert directly, so they do
 | `scan stops at the fetch cap without releasing` | stopping at the 20-fetch cap records `page_cap` and leaves the attempt locked | treat the fetch cap as the end of history; this case fails |
 | `scan resumes from its saved cursor` | the next claim requests the page before the persisted cursor | restart from the newest signature; this case fails |
 | `429 or null transaction keeps the attempt locked` | a rate-limited page, a null candidate transaction or a candidate read that timed out as `unavailable` leaves the cursor and state unchanged | skip the undecided candidate and advance; this case fails |
-| `a successful transaction with our reference that fails verification blocks release` | such a candidate moves the attempt to `mismatch` and the purchase to `uncertain` | treat it as not ours and continue; this case fails |
+| `a successful transaction with our reference that fails verification blocks release` | once the window scan completes with no verifying landing, such a candidate moves the attempt to `mismatch` and the purchase to `uncertain` (revised 2026-10-18) | treat it as not ours and continue; this case fails |
 | `automatic unpaid release stays off until its proofs are recorded` | a complete empty scan ends in `held_no_match` while `PYUSD_PROOFS.automaticUnpaidRelease` is false | default the switch to true; this case fails |
 | `a complete empty scan closes the attempt once release is enabled` | with the switch true, a complete empty scan ends in `closed_unpaid`, the purchase `unpaid_closed` and the basket unlocked | never release; this case fails |
 | `devnet reset stops verification and scanning` | a genesis mismatch during recovery records `identity_changed` and changes no state | skip the identity check in recovery; this case fails |
-| `a confirmed or mismatched attempt is still scanned after expiry` | a hint-confirmed attempt and a mismatched attempt whose finalized height passes the bound each get a window scan that runs to completion, after which `decideRecoveryStep` yields `done` | yield `done` for `confirmed` or `mismatch` before the window scan completes; this case fails |
+| `a confirmed or mismatched attempt is still scanned after expiry` | a hint-confirmed attempt and a mismatched attempt whose finalized height passes the bound each get a window scan that runs to completion, after which `decideRecoveryStep` yields `done` for the confirmed attempt and `operator` for the mismatched one (revised 2026-10-18 to match the call stack) | yield `done` for `confirmed` or `mismatch` before the window scan completes; this case fails |
 | `the scan continues after a transfer binds` | an expired attempt whose window holds the verified transfer and older signatures binds it and still reaches before `preparationSlot` | stop the scan when a candidate binds; this case fails |
 | `an extra transfer keeps the purchase paid and alerts the operator` | applying an `extra` outcome to a confirmed attempt records the transfer with its destination delta, leaves the purchase `paid` and the bound evidence unchanged, and lists it in the operator health view | move the purchase to `uncertain` on an extra transfer; this case fails |
 | `an extra transfer is recorded once per attempt` | inserting the same attempt and signature into the extra-transfer table twice violates a unique constraint, so a resumed scan cannot record one twice | drop the unique index; this case fails |
