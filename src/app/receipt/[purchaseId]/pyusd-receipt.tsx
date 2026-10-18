@@ -2,7 +2,17 @@
 // Solana devnet" with the signature, recipient and amount, and never that tokens are kept, settled
 // or live money, or an SGD settlement. Every other state says plainly that it is not paid.
 
+import { PYUSD_PROOFS } from "@/domain/pyusd/constants";
+
 export type ReceiptStatus = { title: string; chip: string; tone: "ok" | "warn"; body: string };
+
+// A held attempt (a complete scan found nothing while release was off): what its next check does
+// depends on the reviewed switch, so the copy never promises a close that will not happen.
+export function heldBody(release: boolean): string {
+  return release
+    ? "Envoi checked every devnet transaction that could carry this payment and found no matching transfer. Its next check closes this purchase as unpaid; Check status runs it now. Do not pay again."
+    : "Envoi checked every devnet transaction that could carry this payment and found no matching transfer, but it does not close a payment as unpaid on its own. Do not pay again; it is flagged for the operator.";
+}
 
 export const PYUSD_PAID_LINE = "Transferred and finalized on Solana devnet";
 
@@ -15,7 +25,7 @@ export function pyusdReceiptStatus(state: string, reviewOpenUntil: string, closu
       title: "Checking payment",
       chip: "Not confirmed",
       tone: "warn",
-      body: "Envoi checked every devnet transaction that could carry this payment and found no matching transfer, but it does not close a payment as unpaid on its own yet. Do not pay again; it is flagged for the operator.",
+      body: heldBody(PYUSD_PROOFS.automaticUnpaidRelease),
     };
   }
   if (state === "unpaid_closed" && closure.closedBy === "operator") {

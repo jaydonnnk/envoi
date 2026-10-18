@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { PYUSD_PROOFS } from "@/domain/pyusd/constants";
 import { postJson } from "@/lib/browser/session";
 import { startReceiptPolling, type PolledState } from "./polling";
 
@@ -22,7 +23,7 @@ type PyusdCheck =
   | "held_no_match"
   | "closed_unpaid";
 
-const PYUSD_CHECK_MESSAGE: Record<PyusdCheck, string> = {
+export const PYUSD_CHECK_MESSAGE: Record<PyusdCheck, string> = {
   debounced: "Envoi read Solana devnet less than 30 seconds ago. This receipt shows that answer; try again shortly.",
   nothing_to_read: "Envoi has no transaction signature to check yet. Do not pay again; this stays locked until the payment is decided.",
   rpc_unavailable: "Solana devnet did not answer, so nothing changed. Do not pay again; try Check status in a moment.",
@@ -35,7 +36,9 @@ const PYUSD_CHECK_MESSAGE: Record<PyusdCheck, string> = {
   in_flight: "Envoi is already checking this payment on Solana devnet. Try again in a moment.",
   scan_incomplete: "Envoi is checking every devnet transaction that could carry this payment. Do not pay again; this takes a few checks.",
   scan_complete: "Envoi finished checking devnet for this payment. The status above is up to date.",
-  held_no_match: "Envoi found no matching devnet transfer, but it does not close a payment as unpaid on its own yet. It is flagged for the operator; do not pay again.",
+  held_no_match: PYUSD_PROOFS.automaticUnpaidRelease
+    ? "Envoi found no matching devnet transfer. Its next check closes this purchase as unpaid; do not pay again."
+    : "Envoi found no matching devnet transfer, but it does not close a payment as unpaid on its own. It is flagged for the operator; do not pay again.",
   closed_unpaid: "Envoi checked every devnet transaction that could carry this payment and found none, so it is closed unpaid.",
 };
 
