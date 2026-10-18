@@ -53,13 +53,13 @@ Proposed target remains 4 of 5 first-time buyers completing an eligible test-env
 
 ## Next authorized action
 
-**Next action: S17 is done on 2026-10-18 on `envoi/slice-17-pyusd-recovery` ([record](00-status.md#s17-pyusd-recovery-2026-10-18)), not yet pushed or deployed; pushing it, fast-forwarding and pushing `main` (which deploys) each need the user's authorization; then S14 starts only on the user's authorization naming it.**
+**Next action: S17 is done on 2026-10-18 ([record](00-status.md#s17-pyusd-recovery-2026-10-18)), on `main` at `6cba215` and deployed with CI green; S14 starts only on the user's authorization naming it.**
 S17 recovers PYUSD attempts past their bound with a leased, capped window scan of the merchant account's history, records extra transfers (shown on the receipt, merchant orders and operator health) and adds the operator acts `resolve-pyusd-mismatch` and `record-extra-transfer-refund`; 35 of 35 mutations pass; migration 0023 is on Neon.
 A FIXTURE copy of the phone attempt with its hint withheld was confirmed by the window scan alone in one manual runner run against real devnet; on Neon, one reconcile as `envoi_maintenance` confirmed the phone payment `pur_b6bf45fmxlulegnn26a4pl5zkq` through its recorded hint and completed its window scan, so it is paid and its basket is unlocked.
 The `envoi_maintenance` password was rotated on 2026-10-18 with the user's choice, because `.env.local` had no `MAINTENANCE_DATABASE_URL`; the new URL is only in `.env.local`.
 `PYUSD_PROOFS.automaticUnpaidRelease` stays false until the user approves that reviewed commit; the desktop attempt `pur_bi3om6wno6f6t4vbilkswfut3y` is paid but not yet window-scanned, which needs the user's authorization.
 S16 adds the PYUSD devnet rail: Test Shop's merchant proved key control of a Phantom devnet wallet, set a dated rate, and one desktop Chrome payment of 1.8 PYUSD devnet test tokens was verified finalized and shown paid; Phantom kept the prepared blockhash, memo and transfer and added only two ComputeBudget instructions (R13 passes).
-`PYUSD_ENABLED` is unset on Render [verified 2026-10-18 by the S16 session]; it stays off outside recorded proof runs, and PYUSD opens to testers only on the user's authorization.
+`PYUSD_ENABLED` is unset on Render [verified 2026-10-18 after the S17 deploy]; it stays off outside recorded proof runs, and PYUSD opens to testers only on the user's authorization.
 R14 is open: the Browse link did not keep the basket on the user's iPhone, and which page it opened is [unknown] until the user's next test; phone PYUSD stays unavailable to testers.
 `main` and the S16 branch were pushed at `115f5d9` at 02:02 SGT on 2026-10-18 and Render serves it; no authorization for that push is recorded [unknown].
 A buyer taps Scan on `/buy`, and `/buy/scan` resolves a scanned or pasted sticker to one outlet, "Which outlet?", "This shop is not on Envoi" or "Envoi cannot identify a shop from this code", with paste and text search when the camera is denied or missing.
