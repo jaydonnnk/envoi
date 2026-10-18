@@ -202,6 +202,18 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
   This record's update is pushed after it.
 - **Not established [unknown]:** a real phone, Render's logs, throttling seen from Render (R17's limiter counts there), and a mismatch or extra transfer on real devnet.
 
+### S17 follow-ups: desktop window scan and automatic unpaid release, 2026-10-18
+
+- **Authorization, 2026-10-18, in the user's words:** "Go on 1 and 2 while i do 3 and 4", where 1 is the window scan of the desktop attempt on Neon and 2 is turning on automatic unpaid release as a reviewed commit; 3 (setting `PYUSD_ENABLED=true` on Render) and 4 (the iPhone test of the Phantom Browse link, R14) are the user's.
+  Pushing or merging the release commit needs the user's approval of that commit, which is the exit decision's third condition.
+- **Desktop window scan [verified],** [`s17-neon-desktop.json`](evidence/s17-neon-desktop.json): one shared reconcile as `envoi_maintenance` on the attempt of `pur_bi3om6wno6f6t4vbilkswfut3y` only (runner mode, owner `manual-s17-desktop`), between READ ONLY reads: scan complete in 1 page with 1 candidate checked (the phone payment, another reference), no extra transfer; the attempt stays `confirmed` and the purchase `paid`; no state, audit or extra-transfer row changed, only that attempt's `pyusd_scan` and limiter rows.
+- **Automatic unpaid release, on branch `envoi/s17-automatic-unpaid-release` from `main` at `83840f8`, commit `4ba8586`, not pushed:** `PYUSD_PROOFS.automaticUnpaidRelease` becomes true, because S16 recorded exact blockhash preservation and a complete-history scan was shown on devnet (the FIXTURE copy with no hint and both Neon attempts).
+  With it on, an expired attempt whose complete scan finds no transfer closes `closed_unpaid` with its purchase `unpaid_closed` and frees its basket; maintenance also claims attempts already `held_no_match` again (Neon has none).
+  Tests: the rows that prove the hold branch (`automatic unpaid release stays off until its proofs are recorded`), the web/runner race and the FIXTURE transcript now pin the switch off; `a complete empty scan closes the attempt once release is enabled` runs on the shipped constant.
+  Typecheck and lint clean; 469 of 469 tests.
+  Mutations [verified], 3 of 3, in [`s17-release-mutations.json`](evidence/s17-release-mutations.json): `rec-release-default-on` rewritten to release regardless of the switch, new `rec-release-shipped-off` turning the shipped switch off, and `rec-never-release` rechecked; each fails its row on an AssertionError, restores byte-identical and passes on rerun; `rec-release-default-on` also fails the transcript and the race test, which share its fault.
+  Not covered by a test [unknown]: an attempt already `held_no_match` being claimed and closed after the switch turns on.
+
 ### S16 review fixes, 2026-10-18
 
 - **Review:** an independent, adversarial review of S16 on 2026-10-18 gave the verdict ISSUES FOUND, with no blocker and no major finding: six medium (F1-F6) and five minor (F7-F11).

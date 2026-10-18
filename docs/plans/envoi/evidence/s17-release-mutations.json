@@ -1,0 +1,74 @@
+{
+ "branch": "envoi/s17-automatic-unpaid-release",
+ "base_commit": "4ba8586",
+ "uncommitted_changes": false,
+ "method": "s17-mutate.py run with these three ids only, twice (both runs proved all three; this is the second); same method as s17-mutations.json.",
+ "results": [
+  {
+   "id": "rec-release-default-on",
+   "test": "automatic unpaid release stays off until its proofs are recorded",
+   "kind": "group_row",
+   "group": "PYUSD recovery > PYUSD recovery over a fake chain",
+   "files": [
+    "src/domain/pyusd/recovery.ts"
+   ],
+   "mutation": "Release regardless of the switch (rewritten when the shipped switch turned on: the row now pins the switch off).",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'closed_unpaid' to be 'held_no_match' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "FIXTURE transcript: lost wallet responses recovered over a fake chain",
+    "web and runner cannot scan one attempt at once"
+   ],
+   "other_errors": {
+    "FIXTURE transcript: lost wallet responses recovered over a fake chain": "AssertionError: expected { \u2026(18) } to match object { state: 'held_no_match' }",
+    "web and runner cannot scan one attempt at once": "AssertionError: expected 'closed_unpaid' to be 'held_no_match' // Object.is equality"
+   },
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "rec-never-release",
+   "test": "a complete empty scan closes the attempt once release is enabled",
+   "kind": "group_row",
+   "group": "PYUSD recovery > PYUSD recovery over a fake chain",
+   "files": [
+    "src/domain/pyusd/recovery.ts"
+   ],
+   "mutation": "Never release.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'held_no_match' to be 'closed_unpaid' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "rec-release-shipped-off",
+   "test": "a complete empty scan closes the attempt once release is enabled",
+   "kind": "group_row",
+   "group": "PYUSD recovery > PYUSD recovery over a fake chain",
+   "files": [
+    "src/domain/pyusd/constants.ts"
+   ],
+   "mutation": "Turn the shipped switch back off.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'held_no_match' to be 'closed_unpaid' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  }
+ ]
+}
