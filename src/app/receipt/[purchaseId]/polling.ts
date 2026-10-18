@@ -13,16 +13,21 @@ export function isTerminalPurchaseState(state: string): boolean {
   return TERMINAL.has(state);
 }
 
-export type PolledState = { state: string; attemptState: string | null };
+// settled is false while a paid or closed PYUSD purchase's window scan is still running (S17), so a
+// detected extra transfer can still appear; it is absent for PayPal.
+export type PolledState = { state: string; attemptState: string | null; settled?: boolean };
 
 export type PollerDeps = BoundedPollerDeps<PolledState>;
 
-// Starts polling from the state the page rendered. Returns a stop function. A terminal state stops
-// polling for good, whether it was rendered or polled.
+// Starts polling from the state the page rendered. Returns a stop function. A terminal, settled state
+// stops polling for good, whether it was rendered or polled.
 export function startReceiptPolling(initial: PolledState, deps: PollerDeps): () => void {
   return startBoundedPolling(
     initial,
-    { isDone: (polled) => isTerminalPurchaseState(polled.state), same: (a, b) => a.state === b.state && a.attemptState === b.attemptState },
+    {
+      isDone: (polled) => isTerminalPurchaseState(polled.state) && polled.settled !== false,
+      same: (a, b) => a.state === b.state && a.attemptState === b.attemptState && a.settled === b.settled,
+    },
     deps,
   );
 }

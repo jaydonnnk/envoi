@@ -2,6 +2,7 @@ import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { recordAudit } from "@/domain/audit/events";
 import { derivePurchaseView, applyDerivedTransitions, type PaymentAttemptRow, type PurchaseRow, type PurchaseState } from "@/domain/purchases/state";
 import { formatPyusdAtomic } from "@/domain/pyusd/rate";
+import { extraTransfersOf, type ExtraTransfer } from "@/domain/pyusd/recovery";
 import { merchantMemberships, outlets, paymentAttempts, paymentDestinations, purchases, type StoredLine } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
@@ -34,6 +35,9 @@ export type MerchantOrder = {
     recipientTokenAccount: string | null;
     attemptState: string | null;
     signature: string | null;
+    // S17: extra transfers a window scan found. They never change the state above, and an order
+    // never shows one as refunded: any refund is arranged between the shop and the buyer.
+    extraTransfers: { signature: string; amount: string | null }[];
   } | null;
   payment: {
     environment: "sandbox";
@@ -71,7 +75,7 @@ async function latestAttempts(db: Pick<Db, "select">, purchaseIds: string[]): Pr
   return latest;
 }
 
-function orderJson({ purchase, sellerMerchantId, tokenAccount }: OrderRow, attempt: PaymentAttemptRow | null, now: Date): MerchantOrder {
+function orderJson({ purchase, sellerMerchantId, tokenAccount }: OrderRow, attempt: PaymentAttemptRow | null, extras: readonly ExtraTransfer[], now: Date): MerchantOrder {
   const view = derivePurchaseView(purchase, attempt, now);
   const paid = view.state === "paid";
   return {
@@ -92,6 +96,7 @@ function orderJson({ purchase, sellerMerchantId, tokenAccount }: OrderRow, attem
             recipientTokenAccount: attempt?.rail === "pyusd" ? attempt.pyusdDestinationTokenAccount : tokenAccount,
             attemptState: view.pyusdAttempt,
             signature: paid && attempt?.rail === "pyusd" ? attempt.pyusdFinalizedSignature : null,
+            extraTransfers: extras.map((transfer) => ({ signature: transfer.signature, amount: transfer.destinationDelta === null ? null : formatPyusdAtomic(transfer.destinationDelta) })),
           }
         : null,
     payment: attempt && attempt.rail !== "pyusd"
@@ -141,7 +146,11 @@ export async function listOutletOrders(db: Db, outletId: string, now: Date, befo
     .limit(ORDERS_PAGE + 1);
   const rows = page.slice(0, ORDERS_PAGE);
   const attempts = await latestAttempts(db, rows.map((row) => row.purchase.id));
-  const orders = rows.map((row) => orderJson(row, attempts.get(row.purchase.id) ?? null, now));
+  const extras = await extraTransfersOf(db, [...attempts.values()].filter((attempt) => attempt.rail === "pyusd").map((attempt) => attempt.id));
+  const orders = rows.map((row) => {
+    const attempt = attempts.get(row.purchase.id) ?? null;
+    return orderJson(row, attempt, (attempt && extras.get(attempt.id)) ?? [], now);
+  });
   for (const order of orders) {
     const stored = rows.find((row) => row.purchase.id === order.id)!.purchase.state;
     if (order.state !== stored) await applyDerivedTransitions(db, order.id, now);
@@ -169,7 +178,8 @@ export async function acknowledgeOrder(db: Db, input: { purchaseId: string; user
       .for("update", { of: purchases });
     if (!row) return appError("not_found", "Order not found.");
     const attempt = (await latestAttempts(tx, [row.purchase.id])).get(row.purchase.id) ?? null;
-    const order = orderJson(row, attempt, input.now);
+    const extras = attempt?.rail === "pyusd" ? ((await extraTransfersOf(tx, [attempt.id])).get(attempt.id) ?? []) : [];
+    const order = orderJson(row, attempt, extras, input.now);
 
     if (row.purchase.state !== "paid") {
       return appError("validation_failed", "Only a paid order can be acknowledged. This order is not paid, so nothing changed.", {
@@ -191,6 +201,6 @@ export async function acknowledgeOrder(db: Db, input: { purchaseId: string; user
       outletId: row.purchase.outletId,
       operatorVisible: false,
     });
-    return { order: orderJson({ purchase: updated!, sellerMerchantId: row.sellerMerchantId, tokenAccount: row.tokenAccount }, attempt, input.now), changed: true };
+    return { order: orderJson({ purchase: updated!, sellerMerchantId: row.sellerMerchantId, tokenAccount: row.tokenAccount }, attempt, extras, input.now), changed: true };
   });
 }

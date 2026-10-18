@@ -6,7 +6,34 @@ export type ReceiptStatus = { title: string; chip: string; tone: "ok" | "warn"; 
 
 export const PYUSD_PAID_LINE = "Transferred and finalized on Solana devnet";
 
-export function pyusdReceiptStatus(state: string, reviewOpenUntil: string): ReceiptStatus {
+// S17: how a PYUSD attempt ended, for the receipt of a purchase that is not paid.
+export type PyusdClosure = { attemptState: string | null; closedBy: "operator" | "release" | null };
+
+export function pyusdReceiptStatus(state: string, reviewOpenUntil: string, closure: PyusdClosure = { attemptState: null, closedBy: null }): ReceiptStatus {
+  if (state === "uncertain" && closure.attemptState === "held_no_match") {
+    return {
+      title: "Checking payment",
+      chip: "Not confirmed",
+      tone: "warn",
+      body: "Envoi checked every devnet transaction that could carry this payment and found no matching transfer, but it does not close a payment as unpaid on its own yet. Do not pay again; it is flagged for the operator.",
+    };
+  }
+  if (state === "unpaid_closed" && closure.closedBy === "operator") {
+    return {
+      title: "Not paid",
+      chip: "Not paid",
+      tone: "warn",
+      body: "A devnet transaction for this purchase did not match it, so it was never shown as paid. The Envoi operator reviewed it and closed this purchase as unpaid, with recorded evidence. Anything that reached the shop is settled with the shop outside Envoi.",
+    };
+  }
+  if (state === "unpaid_closed" && closure.closedBy === "release") {
+    return {
+      title: "Not paid",
+      chip: "Not paid",
+      tone: "warn",
+      body: "Envoi checked every devnet transaction that could carry this payment and found none, so it closed this purchase as unpaid. Nothing was charged.",
+    };
+  }
   switch (state) {
     case "paid":
       return {
@@ -86,5 +113,32 @@ export function PyusdReceiptDetails({ pyusd, paid }: { pyusd: PyusdReceipt; paid
         </div>
       )}
     </>
+  );
+}
+
+// S17, Gate 2 fix M: an extra transfer is a separate status beside the receipt's payment state. It
+// says what was detected and who arranges any refund, and never that anything was refunded.
+export type PyusdExtraTransferView = { signature: string; amount: string | null };
+
+export function extraTransferLine(transfer: PyusdExtraTransferView): string {
+  const amount = transfer.amount === null ? "of an unknown amount" : `of ${transfer.amount} PYUSD`;
+  return `An extra transfer ${amount} carrying this purchase's reference was detected on Solana devnet. It does not change the status above. Any refund is arranged with the shop outside Envoi.`;
+}
+
+export function PyusdExtraTransfers({ transfers }: { transfers: readonly PyusdExtraTransferView[] }) {
+  if (transfers.length === 0) return null;
+  return (
+    <section className="card" aria-labelledby="extra-transfer-heading">
+      <h2 id="extra-transfer-heading">{transfers.length === 1 ? "Extra transfer detected" : `${transfers.length} extra transfers detected`}</h2>
+      {transfers.map((transfer) => (
+        <div className="row address" key={transfer.signature}>
+          <span>{extraTransferLine(transfer)}</span>
+          <a className="mono" href={explorerTransactionUrl(transfer.signature)} rel="noreferrer" target="_blank">
+            {transfer.signature}
+          </a>
+        </div>
+      ))}
+      <p className="fine muted">Devnet test tokens only. Envoi cannot move tokens, so it does not return them itself.</p>
+    </section>
   );
 }

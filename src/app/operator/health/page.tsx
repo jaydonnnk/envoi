@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import { readOperatorHealth, type OperatorHealth } from "@/domain/maintenance/health";
+import { formatPyusdAtomic } from "@/domain/pyusd/rate";
 import { getAuth } from "@/lib/auth";
 import { isOperator, requireOperator } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
@@ -184,6 +185,73 @@ function MenuImports({ health }: { health: OperatorHealth }) {
   );
 }
 
+const GAP_LABEL: Record<string, string> = {
+  rate_limited: "devnet RPC rate limit",
+  null_transaction: "a candidate transaction was not returned",
+  rpc_unavailable: "devnet RPC unreachable",
+  too_large: "an RPC answer over 1 MiB",
+  page_cap: "per-run page or fetch cap",
+  identity_changed: "devnet identity changed",
+};
+
+const ATTEMPT_LABEL: Record<string, string> = {
+  held_no_match: "Held: complete scan found no transfer",
+  mismatch: "Mismatch: a landing failed verification",
+  expired_scanning: "Expired, window scan running",
+};
+
+function coverageText(scan: OperatorHealth["pyusd"]["attempts"][number]["scan"]): string {
+  if (!scan) return "Window scan not started";
+  const progress = `${scan.pagesRead} ${scan.pagesRead === 1 ? "page" : "pages"}, ${scan.candidatesChecked} ${scan.candidatesChecked === 1 ? "candidate" : "candidates"} checked`;
+  if (scan.complete) return `Window scan complete: reached before preparation; ${progress}`;
+  return `Window scan incomplete: ${progress}${scan.lastGap ? `; stopped at ${GAP_LABEL[scan.lastGap] ?? scan.lastGap}` : ""}`;
+}
+
+function PyusdRecovery({ health }: { health: OperatorHealth }) {
+  const { attempts, extraTransfers } = health.pyusd;
+  const attention = attempts.some((row) => row.attemptState !== "expired_scanning") || extraTransfers.some((row) => row.refundReference === null);
+  return (
+    <section className="card" aria-labelledby="pyusd-heading">
+      <div className="rail-head">
+        <h2 id="pyusd-heading">PYUSD recovery</h2>
+        <span className={`chip ${attention ? "warn" : "ok"}`}>{attention ? "Needs attention" : "Clear"}</span>
+      </div>
+      <p className="muted">Solana devnet test tokens only. Held and mismatched attempts keep their basket locked; Envoi never marks a mismatch paid.</p>
+      {attempts.length === 0 && <p className="muted">No PYUSD attempt is held, in mismatch or scanning.</p>}
+      {attempts.map((row) => (
+        <div className="row stacked" key={row.attemptId}>
+          <span className="mono">{row.purchaseId}</span>
+          <span>
+            {ATTEMPT_LABEL[row.attemptState] ?? row.attemptState}, purchase {row.purchaseState}
+            {row.reason ? ` (${row.reason})` : ""}, since <span className="nowrap">{when(row.since)}</span>
+          </span>
+          <span className="muted">{coverageText(row.scan)}</span>
+          {row.mismatchSignature && <span className="mono">{row.mismatchSignature}</span>}
+        </div>
+      ))}
+      <h3>Extra transfers</h3>
+      {extraTransfers.length === 0 && <p className="muted">No window scan has found an extra transfer.</p>}
+      {extraTransfers.map((row) => (
+        <div className="row stacked" key={`${row.attemptId}-${row.signature}`}>
+          <span className="mono">{row.signature}</span>
+          <span>
+            {row.destinationDelta === null ? "Amount unknown (incomplete metadata)" : `${formatPyusdAtomic(BigInt(row.destinationDelta))} PYUSD to the shop`} on devnet, purchase{" "}
+            <span className="mono">{row.purchaseId}</span> ({row.purchaseState}), found <span className="nowrap">{when(row.foundAt)}</span>
+          </span>
+          <span className="muted">
+            {row.verification === "verified" ? "Verifies as a copy of the transfer" : `Does not verify (${row.verification})`}; refund reference:{" "}
+            {row.refundReference ?? "none recorded"}
+          </span>
+        </div>
+      ))}
+      <p className="fine muted">
+        An extra transfer never changes the payment state. Envoi does not refund it: any refund is arranged with the shop outside Envoi, and its reference is recorded with
+        record-extra-transfer-refund. A mismatch closes only as unpaid, with evidence, after its window scan completes, through resolve-pyusd-mismatch.
+      </p>
+    </section>
+  );
+}
+
 // The operator health view (S5). Anyone but a flagged operator gets the same not-found page as an
 // unknown address.
 export default async function OperatorHealthPage() {
@@ -193,11 +261,12 @@ export default async function OperatorHealthPage() {
     <main>
       <p className="eyebrow">Operator</p>
       <h1>Health</h1>
-      <p className="lead">Checked {when(health.checkedAt)}. Sandbox test money only; maintenance reads payments and never moves money.</p>
+      <p className="lead">Checked {when(health.checkedAt)}. Sandbox test money and devnet test tokens only; maintenance reads payments and never moves money.</p>
       <div className="stack">
         <Heartbeat health={health} />
         <Capacity health={health} />
         <OverdueWork health={health} />
+        <PyusdRecovery health={health} />
         <MenuImports health={health} />
       </div>
     </main>

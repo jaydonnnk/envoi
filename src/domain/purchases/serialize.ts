@@ -32,6 +32,14 @@ export function purchaseJson(purchase: OwnPurchase) {
           attemptState: purchase.view.pyusdAttempt,
           signature: purchase.view.state === "paid" && attempt?.rail === "pyusd" ? attempt.pyusdFinalizedSignature : null,
           verifiedAt: purchase.view.state === "paid" && attempt?.rail === "pyusd" ? (attempt.pyusdVerifiedAt?.toISOString() ?? null) : null,
+          // S17: whether the post-expiry window scan is complete, and every extra transfer it found.
+          // An extra transfer never changes the state above, and nothing here says it was refunded.
+          windowScanComplete: attempt?.rail === "pyusd" ? attempt.pyusdScan?.reachedBeforePreparation === true : false,
+          extraTransfers: purchase.extraTransfers.map((transfer) => ({
+            signature: transfer.signature,
+            amount: transfer.destinationDelta === null ? null : formatPyusdAtomic(transfer.destinationDelta),
+            foundAt: transfer.foundAt.toISOString(),
+          })),
         }
       : null,
     payment: attempt && attempt.rail !== "pyusd"

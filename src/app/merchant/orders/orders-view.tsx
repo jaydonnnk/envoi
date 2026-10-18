@@ -5,7 +5,7 @@ import { SINGAPORE_TIME } from "@/app/purchase-copy";
 import type { MerchantOrder, OutletOrders } from "@/domain/purchases/orders";
 import { requestJson } from "@/lib/browser/session";
 import { formatSgd, sgdFromCents } from "@/lib/money";
-import { mayStillBePaid, orderStatus } from "./order-copy";
+import { extraTransferNote, mayStillBePaid, orderStatus } from "./order-copy";
 import { startOrdersPolling, withNewest, withOlder, type PolledOrder } from "./polling";
 
 const polled = (orders: readonly MerchantOrder[]): PolledOrder[] =>
@@ -70,6 +70,14 @@ function OrderCard({ order, onAcknowledged }: { order: MerchantOrder; onAcknowle
             <span className="muted">Finalized devnet transfer</span>
             {paid && order.pyusd.signature ? <span className="mono">{order.pyusd.signature}</span> : <span>None, not paid</span>}
           </div>
+          {order.pyusd.extraTransfers.map((transfer) => (
+            <div className="row address extra-transfer" key={transfer.signature}>
+              <span>
+                <span className="chip warn">Extra transfer</span> {extraTransferNote(transfer.amount)}
+              </span>
+              <span className="mono">{transfer.signature}</span>
+            </div>
+          ))}
         </>
       ) : (
         <div className="row stacked">

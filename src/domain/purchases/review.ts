@@ -15,6 +15,7 @@ import {
 } from "@/domain/purchases/state";
 import { webEnv } from "@/env";
 import type { BuyerPrincipal } from "@/lib/auth-context";
+import { extraTransfersOf, type ExtraTransfer } from "@/domain/pyusd/recovery";
 import { outlets, paymentAttempts, paymentDestinations, purchases, pyusdRates, type StoredLine } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
@@ -219,6 +220,9 @@ export type OwnPurchase = {
     atomicAmount: bigint;
   } | null;
   attempt: PaymentAttemptRow | null;
+  // S17: extra transfers a window scan found for this purchase's PYUSD attempt; they never change
+  // the payment state.
+  extraTransfers: ExtraTransfer[];
   view: PurchaseView;
   // The shop's acknowledgment (S8), separate from the payment state and only ever on a paid order.
   acknowledgedAt: Date | null;
@@ -246,6 +250,7 @@ export async function getOwnPurchase(db: Conn, principal: BuyerPrincipal, purcha
   if (!row) return null;
   const { purchase } = row;
   const attempt = await latestAttempt(db, purchase.id);
+  const extraTransfers = attempt?.rail === "pyusd" ? ((await extraTransfersOf(db, [attempt.id])).get(attempt.id) ?? []) : [];
   return {
     id: purchase.id,
     outletId: purchase.outletId,
@@ -272,6 +277,7 @@ export async function getOwnPurchase(db: Conn, principal: BuyerPrincipal, purcha
           }
         : null,
     attempt,
+    extraTransfers,
     view: derivePurchaseView(purchase, attempt, now),
     acknowledgedAt: purchase.acknowledgedAt,
   };

@@ -3,6 +3,8 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { recordAudit } from "@/domain/audit/events";
+import { transitionPurchase } from "@/domain/purchases/state";
+import { canTransitionPyusdAttempt, OPERATOR_RESOLUTION } from "@/domain/pyusd/state";
 import { loadLocalEnvFile, migrationEnv } from "@/env";
 import * as schema from "@/lib/db/schema";
 import { pgConnection } from "@/lib/db/web";
@@ -330,6 +332,125 @@ export async function grantOperator(db: OperatorDb, input: { email: string; evid
   });
 }
 
+// The operator account an act names, by email: a permanent account, which must then hold a live
+// operator grant from grant-operator. The CLI runs with migration credentials and could record any
+// name, so each act refuses an unknown account and one without the flag before it writes anything.
+async function permanentAccount(tx: OperatorDb, email: string): Promise<{ userId: string; email: string }> {
+  const normalized = email.trim().toLowerCase();
+  const [account] = await tx
+    .select({ id: schema.user.id, isAnonymous: schema.user.isAnonymous })
+    .from(schema.user)
+    .innerJoin(schema.account, and(eq(schema.account.userId, schema.user.id), eq(schema.account.providerId, "credential")))
+    .where(eq(schema.user.email, normalized))
+    .limit(1);
+  if (!account || account.isAnonymous) throw new Error(`No permanent account ${normalized}; nothing changed.`);
+  return { userId: account.id, email: normalized };
+}
+
+async function requireOperatorFlag(tx: OperatorDb, account: { userId: string; email: string }, act: string): Promise<void> {
+  const [grant] = await tx
+    .select({ id: schema.operatorGrants.id })
+    .from(schema.operatorGrants)
+    .where(and(eq(schema.operatorGrants.userId, account.userId), isNull(schema.operatorGrants.revokedAt)))
+    .limit(1);
+  if (!grant) throw new Error(`${act}: account ${account.email} does not hold the operator flag; nothing changed. Flag it with grant-operator first.`);
+}
+
+// A required free-text field of an operator act, at most 200 characters.
+function requiredText(value: string | null | undefined, what: string): string {
+  const text = value?.trim() ?? "";
+  if (text === "") throw new Error(`${what} is required; nothing changed.`);
+  if (text.length > 200) throw new Error(`${what} must be at most 200 characters; nothing changed.`);
+  return text;
+}
+
+export type MismatchResolution = { attemptId: string; purchaseId: string };
+
+// S17 (D1; Gate 3 "PYUSD attempt": mismatch -> closed_unpaid). Closes a PYUSD mismatch, out of band,
+// only as unpaid, only after its window scan is complete so every landing that may need a refund is
+// known, and only with a reason and an evidence reference, such as an out-of-band refund reference or
+// proof that no tokens reached the merchant. The audit row names the flagged operator account. There
+// is no path to confirmed: mismatched evidence is never paid.
+export async function resolvePyusdMismatch(
+  db: OperatorDb,
+  input: { operatorEmail: string; attemptId: string; reason: string | null; evidenceRef: string | null },
+  now: Date = new Date(),
+): Promise<MismatchResolution> {
+  const reason = requiredText(input.reason, "A reason");
+  const evidenceRef = requiredText(input.evidenceRef, "An evidence reference");
+  return db.transaction(async (tx) => {
+    const operator = await permanentAccount(tx, input.operatorEmail);
+    await requireOperatorFlag(tx, operator, "resolve-pyusd-mismatch");
+    const [attempt] = await tx
+      .select({ id: schema.paymentAttempts.id, purchaseId: schema.paymentAttempts.purchaseId, state: schema.paymentAttempts.state, scan: schema.paymentAttempts.pyusdScan })
+      .from(schema.paymentAttempts)
+      .where(and(eq(schema.paymentAttempts.id, input.attemptId), eq(schema.paymentAttempts.rail, "pyusd")))
+      .for("update");
+    if (!attempt) throw new Error(`No PYUSD attempt ${input.attemptId}; nothing changed.`);
+    if (attempt.state !== "mismatch") throw new Error(`Attempt ${attempt.id} is ${attempt.state}, not mismatch; only a mismatch can be resolved, and nothing changed.`);
+    if (attempt.scan?.reachedBeforePreparation !== true) {
+      throw new Error(`The window scan of attempt ${attempt.id} is not complete, so another landing may still be unknown; nothing changed. Run maintenance until the health view shows it complete.`);
+    }
+    if (!canTransitionPyusdAttempt("mismatch", "closed_unpaid")) throw new Error("illegal PYUSD attempt transition mismatch -> closed_unpaid");
+    await tx
+      .update(schema.paymentAttempts)
+      .set({ state: "closed_unpaid", outcomeReason: OPERATOR_RESOLUTION, updatedAt: now })
+      .where(and(eq(schema.paymentAttempts.id, attempt.id), eq(schema.paymentAttempts.state, "mismatch")));
+    await transitionPurchase(tx, attempt.purchaseId, ["uncertain", "pending_payment"], "unpaid_closed", "pyusd_operator_resolution");
+    await recordAudit(tx, {
+      at: now,
+      actor: `operator:${operator.userId}`,
+      action: "pyusd_mismatch_resolved_unpaid",
+      purchaseId: attempt.purchaseId,
+      attemptId: attempt.id,
+      operatorVisible: true,
+      details: { operatorUserId: operator.userId, reason, evidenceRef },
+    });
+    return { attemptId: attempt.id, purchaseId: attempt.purchaseId };
+  });
+}
+
+export type RefundRecord = { status: "recorded" | "unchanged"; attemptId: string; signature: string; refundReference: string };
+
+// S17 (D1; Gate 2 fix M). Records an out-of-band refund reference against one extra transfer. It
+// changes no payment state: the purchase, the attempt and its bound evidence stay as they are, and
+// nothing in Envoi moves tokens or calls the transfer refunded. A transfer that already holds a
+// reference keeps it.
+export async function recordExtraTransferRefund(
+  db: OperatorDb,
+  input: { operatorEmail: string; attemptId: string; signature: string; reference: string | null; reason: string | null },
+  now: Date = new Date(),
+): Promise<RefundRecord> {
+  const reference = requiredText(input.reference, "An out-of-band refund reference");
+  const reason = requiredText(input.reason, "A reason");
+  return db.transaction(async (tx) => {
+    const operator = await permanentAccount(tx, input.operatorEmail);
+    await requireOperatorFlag(tx, operator, "record-extra-transfer-refund");
+    const [transfer] = await tx
+      .select({ id: schema.pyusdExtraTransfers.id, refundReference: schema.pyusdExtraTransfers.refundReference, purchaseId: schema.paymentAttempts.purchaseId })
+      .from(schema.pyusdExtraTransfers)
+      .innerJoin(schema.paymentAttempts, eq(schema.paymentAttempts.id, schema.pyusdExtraTransfers.attemptId))
+      .where(and(eq(schema.pyusdExtraTransfers.attemptId, input.attemptId), eq(schema.pyusdExtraTransfers.signature, input.signature)))
+      .for("update", { of: schema.pyusdExtraTransfers });
+    if (!transfer) throw new Error(`No extra transfer ${input.signature} on attempt ${input.attemptId}; nothing changed.`);
+    if (transfer.refundReference !== null) return { status: "unchanged", attemptId: input.attemptId, signature: input.signature, refundReference: transfer.refundReference };
+    await tx
+      .update(schema.pyusdExtraTransfers)
+      .set({ refundReference: reference, refundRecordedAt: now, refundRecordedByUserId: operator.userId })
+      .where(and(eq(schema.pyusdExtraTransfers.id, transfer.id), isNull(schema.pyusdExtraTransfers.refundReference)));
+    await recordAudit(tx, {
+      at: now,
+      actor: `operator:${operator.userId}`,
+      action: "pyusd_extra_transfer_refund_recorded",
+      purchaseId: transfer.purchaseId,
+      attemptId: input.attemptId,
+      operatorVisible: true,
+      details: { operatorUserId: operator.userId, reason, evidenceRef: reference, signature: input.signature },
+    });
+    return { status: "recorded", attemptId: input.attemptId, signature: input.signature, refundReference: reference };
+  });
+}
+
 // Reads one line from the terminal without echoing it. Refuses when stdin is not a terminal, so a
 // password is never piped in from a file or a shell history.
 function promptHidden(prompt: string): Promise<string> {
@@ -367,10 +488,21 @@ function promptHidden(prompt: string): Promise<string> {
   });
 }
 
-const COMMANDS = ["seed-demo-fixture", "assign-paypal-destination", "issue-agent-token", "create-merchant", "approve-membership", "approve-enrollment", "approve-identifier", "grant-operator"];
+const COMMANDS = [
+  "seed-demo-fixture",
+  "assign-paypal-destination",
+  "issue-agent-token",
+  "create-merchant",
+  "approve-membership",
+  "approve-enrollment",
+  "approve-identifier",
+  "grant-operator",
+  "resolve-pyusd-mismatch",
+  "record-extra-transfer-refund",
+];
 
 const USAGE =
-  "usage: npm run operator -- seed-demo-fixture | assign-paypal-destination <outletId> <sellerMerchantId> | issue-agent-token <label> | create-merchant <email> <name> | approve-membership <email> [evidenceRef] | approve-enrollment <outletId> [evidenceRef] | approve-identifier [identifierId [evidenceRef]] | grant-operator <email> [evidenceRef]";
+  "usage: npm run operator -- seed-demo-fixture | assign-paypal-destination <outletId> <sellerMerchantId> | issue-agent-token <label> | create-merchant <email> <name> | approve-membership <email> [evidenceRef] | approve-enrollment <outletId> [evidenceRef] | approve-identifier [identifierId [evidenceRef]] | grant-operator <email> [evidenceRef] | resolve-pyusd-mismatch <operatorEmail> <attemptId> <reason> <evidenceRef> | record-extra-transfer-refund <operatorEmail> <attemptId> <signature> <reason> <refundReference>";
 
 async function run(db: OperatorDb, argv: string[]): Promise<number> {
   const [command, ...args] = argv;
@@ -451,6 +583,21 @@ async function run(db: OperatorDb, argv: string[]): Promise<number> {
       result.status === "created"
         ? `flagged account ${result.userId} as the operator (grant ${result.grantId}); it can now open /operator/health after signing in`
         : `account ${result.userId} is already the operator (grant ${result.grantId}); nothing changed`,
+    );
+    return 0;
+  }
+  // A missing evidence or refund reference reaches the act, which refuses it and changes nothing.
+  if (command === "resolve-pyusd-mismatch" && (args.length === 3 || args.length === 4)) {
+    const result = await resolvePyusdMismatch(db, { operatorEmail: args[0]!, attemptId: args[1]!, reason: args[2]!, evidenceRef: args[3] ?? null });
+    console.log(`closed PYUSD attempt ${result.attemptId} unpaid; purchase ${result.purchaseId} is unpaid_closed; the audit row names the operator, the reason and the evidence`);
+    return 0;
+  }
+  if (command === "record-extra-transfer-refund" && (args.length === 4 || args.length === 5)) {
+    const result = await recordExtraTransferRefund(db, { operatorEmail: args[0]!, attemptId: args[1]!, signature: args[2]!, reason: args[3]!, reference: args[4] ?? null });
+    console.log(
+      result.status === "recorded"
+        ? `recorded refund reference "${result.refundReference}" against extra transfer ${result.signature} of attempt ${result.attemptId}; no payment state changed`
+        : `extra transfer ${result.signature} of attempt ${result.attemptId} already holds refund reference "${result.refundReference}"; nothing changed`,
     );
     return 0;
   }

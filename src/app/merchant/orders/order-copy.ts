@@ -27,6 +27,8 @@ export function orderStatus(order: MerchantOrder): OrderStatus {
       case "pending_payment":
       case "uncertain":
         return PYUSD_CHECKING;
+      case "unpaid_closed":
+        return { chip: "Not paid", tone: "plain", body: "Closed unpaid: Envoi never verified a matching finalized devnet transfer for this order. Do not treat it as paid." };
       default:
         break;
     }
@@ -53,6 +55,13 @@ export function orderStatus(order: MerchantOrder): OrderStatus {
     case "superseded":
       return { chip: "Not paid", tone: "plain", body: "The buyer replaced this review with a newer one. Nothing was charged." };
   }
+}
+
+// S17, Gate 2 fix M: an extra transfer beside an order. It says what reached the shop's devnet account
+// and that Envoi does not return it, never that it was refunded.
+export function extraTransferNote(amount: string | null): string {
+  const what = amount === null ? "A second devnet transfer of an unknown amount" : `A second devnet transfer of ${amount} PYUSD`;
+  return `${what} with this order's reference reached your PYUSD devnet account. The order's payment status is unchanged. Envoi does not return it; any refund to the buyer is arranged by you outside Envoi.`;
 }
 
 // Not paid now, but a payment may still be confirmed later.

@@ -8,8 +8,9 @@ import { isPrincipal, requireBuyerSession } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
 import { formatSgd, sgdFromCents } from "@/lib/money";
 import { formatPyusdAtomic, formatPyusdPerSgd } from "@/domain/pyusd/rate";
+import { OPERATOR_RESOLUTION } from "@/domain/pyusd/state";
 import { LiveStatus } from "./live-status";
-import { PyusdReceiptDetails, pyusdReceiptStatus } from "./pyusd-receipt";
+import { PyusdExtraTransfers, PyusdReceiptDetails, pyusdReceiptStatus } from "./pyusd-receipt";
 
 const SINGAPORE_DATE = new Intl.DateTimeFormat("en-SG", { dateStyle: "medium", timeZone: "Asia/Singapore" });
 
@@ -33,7 +34,11 @@ function statusOf(purchase: OwnPurchase): Status {
     return { title: "No payment was attempted", chip: "Not paid", tone: "warn", body: "This is a tracer receipt. Envoi sent nothing to any payment provider, and no money moved." };
   }
   const deadline = SINGAPORE_CLOCK.format(purchase.reviewExpiresAt);
-  if (purchase.rail === "pyusd") return pyusdReceiptStatus(purchase.view.state, deadline);
+  if (purchase.rail === "pyusd") {
+    const attempt = purchase.attempt?.rail === "pyusd" ? purchase.attempt : null;
+    const closedBy = attempt?.state !== "closed_unpaid" ? null : attempt.outcomeReason === OPERATOR_RESOLUTION ? "operator" : "release";
+    return pyusdReceiptStatus(purchase.view.state, deadline, { attemptState: attempt?.state ?? null, closedBy });
+  }
   switch (purchase.view.state) {
     case "paid":
       return { title: "Paid", chip: "Paid", tone: "ok", body: "PayPal sandbox confirmed this capture to the shop's sandbox seller. Test money only: no real money moved." };
@@ -91,10 +96,13 @@ export default async function ReceiptPage({ params }: { params: Promise<{ purcha
   const canContinue =
     purchase.view.state === "review_open" ||
     (purchase.rail !== "pyusd" && purchase.view.state === "pending_payment" && (attemptState === "order_created" || attemptState === "create_unknown"));
-  // A prepared PYUSD attempt is checked against devnet; a PayPal one only once a capture may have been sent.
+  // A prepared or scanning PYUSD attempt is checked against devnet; a PayPal one only once a capture
+  // may have been sent.
   const canCheck =
     purchase.view.state === "uncertain" ||
-    (purchase.view.state === "pending_payment" && attemptState !== null && (purchase.rail === "pyusd" ? attemptState === "prepared" : CAPTURE_IN_FLIGHT.has(attemptState)));
+    (purchase.view.state === "pending_payment" &&
+      attemptState !== null &&
+      (purchase.rail === "pyusd" ? attemptState === "prepared" || attemptState === "expired_scanning" : CAPTURE_IN_FLIGHT.has(attemptState)));
 
   return (
     <main>
@@ -166,6 +174,11 @@ export default async function ReceiptPage({ params }: { params: Promise<{ purcha
           <span className="mono">{purchase.id}</span>
         </div>
       </section>
+      {pyusd && (
+        <PyusdExtraTransfers
+          transfers={purchase.extraTransfers.map((transfer) => ({ signature: transfer.signature, amount: transfer.destinationDelta === null ? null : formatPyusdAtomic(transfer.destinationDelta) }))}
+        />
+      )}
       {purchase.view.state === "paid" && (
         <section className="card acknowledgment" aria-labelledby="acknowledgment-heading">
           <h2 id="acknowledgment-heading">Shop acknowledgment</h2>
@@ -181,7 +194,16 @@ export default async function ReceiptPage({ params }: { params: Promise<{ purcha
           <p className="fine muted">Acknowledgment is separate from payment: it never changes the paid status above.</p>
         </section>
       )}
-      {purchase.entryPoint !== "fixture_tracer" && <LiveStatus purchaseId={purchase.id} rail={purchase.rail === "pyusd" ? "pyusd" : "paypal"} state={purchase.view.state} attemptState={attemptState} canCheck={canCheck} />}
+      {purchase.entryPoint !== "fixture_tracer" && (
+        <LiveStatus
+          purchaseId={purchase.id}
+          rail={purchase.rail === "pyusd" ? "pyusd" : "paypal"}
+          state={purchase.view.state}
+          attemptState={attemptState}
+          settled={purchase.attempt?.rail === "pyusd" ? purchase.attempt.pyusdScan?.reachedBeforePreparation === true : undefined}
+          canCheck={canCheck}
+        />
+      )}
       {canContinue && (
         <div className="actions">
           <a className="button" href={`/review/${encodeURIComponent(purchase.id)}`}>

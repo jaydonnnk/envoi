@@ -6,7 +6,21 @@ import { postJson } from "@/lib/browser/session";
 import { startReceiptPolling, type PolledState } from "./polling";
 
 type Check = "read" | "no_record" | "provider_unreachable" | "debounced" | "in_flight" | "no_order";
-type PyusdCheck = "debounced" | "nothing_to_read" | "rpc_unavailable" | "identity_changed" | "not_found" | "confirmed" | "not_ours" | "failed_landing" | "uncertain";
+type PyusdCheck =
+  | "debounced"
+  | "in_flight"
+  | "nothing_to_read"
+  | "rpc_unavailable"
+  | "identity_changed"
+  | "not_found"
+  | "confirmed"
+  | "not_ours"
+  | "failed_landing"
+  | "uncertain"
+  | "scan_incomplete"
+  | "scan_complete"
+  | "held_no_match"
+  | "closed_unpaid";
 
 const PYUSD_CHECK_MESSAGE: Record<PyusdCheck, string> = {
   debounced: "Envoi read Solana devnet less than 30 seconds ago. This receipt shows that answer; try again shortly.",
@@ -18,6 +32,11 @@ const PYUSD_CHECK_MESSAGE: Record<PyusdCheck, string> = {
   not_ours: "That signature is not this purchase's transfer, so nothing changed.",
   failed_landing: "That transaction failed on devnet and moved no tokens, so nothing changed.",
   uncertain: "The devnet transaction did not match this purchase exactly, so it is not shown as paid. It is flagged for the operator.",
+  in_flight: "Envoi is already checking this payment on Solana devnet. Try again in a moment.",
+  scan_incomplete: "Envoi is checking every devnet transaction that could carry this payment. Do not pay again; this takes a few checks.",
+  scan_complete: "Envoi finished checking devnet for this payment. The status above is up to date.",
+  held_no_match: "Envoi found no matching devnet transfer, but it does not close a payment as unpaid on its own yet. It is flagged for the operator; do not pay again.",
+  closed_unpaid: "Envoi checked every devnet transaction that could carry this payment and found none, so it is closed unpaid.",
 };
 
 const CHECK_MESSAGE: Record<Check, string> = {
@@ -29,12 +48,16 @@ const CHECK_MESSAGE: Record<Check, string> = {
   no_order: "PayPal never confirmed an order for this purchase, so there is nothing to check yet.",
 };
 
-type PurchaseEnvelope = { state?: unknown; payment?: { attemptState?: unknown } | null; pyusd?: { attemptState?: unknown } | null };
+type PurchaseEnvelope = { state?: unknown; payment?: { attemptState?: unknown } | null; pyusd?: { attemptState?: unknown; windowScanComplete?: unknown } | null };
 
 function polledOf(purchase: PurchaseEnvelope | undefined): PolledState | null {
   const state = purchase?.state;
   const attemptState = purchase?.payment?.attemptState ?? purchase?.pyusd?.attemptState ?? null;
-  return typeof state === "string" ? { state, attemptState: typeof attemptState === "string" ? attemptState : null } : null;
+  if (typeof state !== "string") return null;
+  const polled: PolledState = { state, attemptState: typeof attemptState === "string" ? attemptState : null };
+  // A PYUSD purchase with no attempt released nothing, so it has no window to scan.
+  if (purchase?.pyusd) polled.settled = polled.attemptState === null || purchase.pyusd.windowScanComplete === true;
+  return polled;
 }
 
 // A PayPal poll reads stored state. A PYUSD poll asks the shared reconcile route, which reads devnet
@@ -61,12 +84,14 @@ export function LiveStatus({
   rail,
   state,
   attemptState,
+  settled,
   canCheck,
 }: {
   purchaseId: string;
   rail: "paypal" | "pyusd";
   state: string;
   attemptState: string | null;
+  settled?: boolean;
   canCheck: boolean;
 }) {
   const router = useRouter();
@@ -76,7 +101,7 @@ export function LiveStatus({
   useEffect(
     () =>
       startReceiptPolling(
-        { state, attemptState },
+        settled === undefined ? { state, attemptState } : { state, attemptState, settled },
         {
           fetchState: () => fetchState(purchaseId, rail),
           onChange: () => router.refresh(),
@@ -85,7 +110,7 @@ export function LiveStatus({
           now: () => Date.now(),
         },
       ),
-    [purchaseId, rail, state, attemptState, router],
+    [purchaseId, rail, state, attemptState, settled, router],
   );
 
   if (!canCheck) return null;
