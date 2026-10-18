@@ -322,11 +322,14 @@ NEEDLES = [
 # 64-byte base58 shape of a secret key, so each is exempt by the SHA256 of its exact value. On 2026-10-17 devnet RPC
 # getSignatureStatuses read all three as finalized, and none has a keypair's layout (its last 32 bytes the public key).
 # The last two are the S16 proof-run payments, 2026-10-18, read the same way: finalized, not a keypair's layout.
+# The sixth is the R14 iPhone payment, 2026-10-18 (the S16 Phantom landing amendment): verified finalized by Envoi's
+# reconcile on Neon, and checked not to have a keypair's layout.
 PUBLIC_SIGNATURES = {"a2a696c194b441f6af62eba24ff6d340f35342cffbfdd1d1b5ff3d9f3f696a82",
                      "0f3f8bfbc247c9ef2b68a4d7a388133bf23c95a34806fca7813b2ea117413306",
                      "72edc599d3a7b3a48ef93aceb1a13f07eb16a83e15b45d23147e22597f96cc8f",
                      "5bf3e62720616966a3ddab84d69d429720d6671ce3bfe3f0d2b7d2ac4f1436ed",
-                     "9537eb7eedecb88a03f44fbc3830f5ee102b5314ce6a02f84c752012bc8aaa6a"}
+                     "9537eb7eedecb88a03f44fbc3830f5ee102b5314ce6a02f84c752012bc8aaa6a",
+                     "19926a0c726656e1d4f4d576479d57a0cccb47002a42cdf257a1c74675b8bbd9"}
 
 
 def scan(lines):

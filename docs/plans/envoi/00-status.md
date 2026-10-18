@@ -232,7 +232,10 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - **Pushed [verified], 2026-10-18:** the branch and `main`, fast-forwarded from `1496124` to `3f6ca1d`, match on `git ls-remote`; CI passed on the branch (run 39112199324) and on `main` (run 39112199382).
   At 08:58Z Render's `/buy` page for Test Shop served the landing code (`rail:"pyusd",lines:` in its page chunk).
   This record's update is pushed after it.
-- **Not established [unknown]:** the same flow inside Phantom's browser on the user's iPhone (R14 rerun), and whether its Pay step reaches Envoi; the earlier run's narrow-column screenshot is unexplained.
+- **R14 rerun on the user's iPhone, 2026-10-18 [verified on Neon, user-reported flow]:** "Open in Phantom" opened the PYUSD review directly and the user paid ("Works"); the receipt read "Checking payment" at 17:34 SGT.
+  READ ONLY on Neon: `pur_3rvqxuggwi3q3nrbslidzn7sfu` prepared at 09:33:50Z, hint received 09:33:57Z, attempt `confirmed` and purchase `paid` by the read at 09:34:27Z, finalized signature `4kPKEcbtCuNCPyQpjVsnB1xFzvBcoruABCp9FPg8N1FHDSNmSpJoRRM32XgQiryV5rizPUmrywrA9jyRsHkMNJZ1`, window scan complete in one page; three PYUSD attempts, all confirmed.
+  So R14 passes on this iPhone: Browse keeps the query, the wallet browser keeps its session through approval, and the payment is verified.
+  Phantom's browser again drew the page as a narrow column with black margins; the content wraps as at 390px and the page paints its own background, so the frame is Phantom's [hypothesis], not Envoi's layout.
 
 ### S17 follow-ups: desktop window scan and automatic unpaid release, 2026-10-18
 
