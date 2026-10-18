@@ -176,6 +176,8 @@ describe("PYUSD recovery", () => {
     });
 
     it("automatic unpaid release stays off until its proofs are recorded", async () => {
+      // The switch is on in the shipped constants; this row pins it off to prove the hold branch.
+      state.proofs.automaticUnpaidRelease = false;
       const prepared = await h.preparedAttempt("rec-held");
       h.expireAll();
       h.setHistory(prepared, [h.older()]);
@@ -185,7 +187,7 @@ describe("PYUSD recovery", () => {
     });
 
     it("a complete empty scan closes the attempt once release is enabled", async () => {
-      state.proofs.automaticUnpaidRelease = true;
+      // Runs on the shipped constant, so turning release back off fails this row.
       const prepared = await h.preparedAttempt("rec-release");
       h.expireAll();
       h.setHistory(prepared, [h.older()]);
@@ -277,6 +279,8 @@ describe("PYUSD recovery", () => {
   // Not a Gate 3 guard: the S17 visible result, walked once and printed as the labeled FIXTURE
   // transcript when ENVOI_TRANSCRIPT is set (evidence/s17-fake-chain-transcript.txt).
   it("FIXTURE transcript: lost wallet responses recovered over a fake chain", async () => {
+    // The recorded transcript shows S17's visible result, an empty scan held while release is off.
+    state.proofs.automaticUnpaidRelease = false;
     const log = transcript("S17 PYUSD recovery over a FIXTURE devnet RPC; every signature and transaction is synthetic");
     const receipt = async (prepared: Prepared) => {
       const status = pyusdReceiptStatus(await h.purchaseState(prepared.purchaseId), "11:05", { attemptState: (await h.attemptOf(prepared.purchaseId)).state, closedBy: null });
@@ -312,6 +316,8 @@ describe("PYUSD recovery", () => {
   });
 
   it("web and runner cannot scan one attempt at once", async () => {
+    // Release off keeps the outcome a hold, so the assertions below see the scan alone.
+    state.proofs.automaticUnpaidRelease = false;
     const prepared = await h.preparedAttempt("rec-web-runner");
     h.expireAll();
     const candidates = [h.notOurs(prepared.attempt, historySignature(70_001), LANDING_SLOT + 2), h.notOurs(prepared.attempt, historySignature(70_002), LANDING_SLOT + 1)];

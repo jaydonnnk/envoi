@@ -37,9 +37,9 @@ export const PYUSD_DEVNET = {
 } as const;
 
 export const PYUSD_PROOFS = {
-  // Set true only by a reviewed change after the wallet blockhash-preservation and history-coverage
-  // proofs are recorded in 00-status.md (S17).
-  automaticUnpaidRelease: false,
+  // Set true by a reviewed change after the wallet blockhash-preservation (S16) and history-coverage
+  // (S17, devnet) proofs were recorded in 00-status.md, on the user's approval of that commit.
+  automaticUnpaidRelease: true,
 } as const;
 
 // Signature hints stored per attempt; later ones are audited only.

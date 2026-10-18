@@ -129,12 +129,12 @@
   "id": "rec-release-default-on",
   "test": "automatic unpaid release stays off until its proofs are recorded",
   "test_file": "tests/integration/pyusd-recovery.test.ts",
-  "mutation": "Default the switch to true.",
+  "mutation": "Release regardless of the switch (rewritten when the shipped switch turned on: the row now pins the switch off).",
   "edits": [
    {
-    "file": "src/domain/pyusd/constants.ts",
-    "old": "  automaticUnpaidRelease: false,",
-    "new": "  automaticUnpaidRelease: true,"
+    "file": "src/domain/pyusd/recovery.ts",
+    "old": "  const release = (): RecoveryStep => (proofs.automaticUnpaidRelease ? { action: \"close_unpaid\" } : { action: \"hold\", reason: \"automatic_release_not_enabled\" });",
+    "new": "  const release = (): RecoveryStep => ({ action: \"close_unpaid\" });"
    }
   ],
   "kind": "group_row"
@@ -149,6 +149,20 @@
     "file": "src/domain/pyusd/recovery.ts",
     "old": "  const release = (): RecoveryStep => (proofs.automaticUnpaidRelease ? { action: \"close_unpaid\" } : { action: \"hold\", reason: \"automatic_release_not_enabled\" });",
     "new": "  const release = (): RecoveryStep => ({ action: \"hold\", reason: \"automatic_release_not_enabled\" });"
+   }
+  ],
+  "kind": "group_row"
+ },
+ {
+  "id": "rec-release-shipped-off",
+  "test": "a complete empty scan closes the attempt once release is enabled",
+  "test_file": "tests/integration/pyusd-recovery.test.ts",
+  "mutation": "Turn the shipped switch back off.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/constants.ts",
+    "old": "  automaticUnpaidRelease: true,",
+    "new": "  automaticUnpaidRelease: false,"
    }
   ],
   "kind": "group_row"
