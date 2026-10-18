@@ -253,8 +253,6 @@ export async function preparePyusdPayment(deps: PyusdDeps, principal: BuyerPrinc
   return { kind: "prepared", attemptId, transactionBase64: built.wireBase64, chain: "solana:devnet" };
 }
 
-export type { PyusdCheck };
-
 export type HintResult = { recorded: "appended" | "repeated" | "over_cap" | "closed"; check: PyusdCheck | null };
 
 // Appends a hint by compare-and-set on the hint count while the attempt is not terminal and holds
