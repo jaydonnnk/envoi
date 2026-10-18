@@ -1,5 +1,61 @@
 [
  {
+  "id": "fix1-release-despite-pending",
+  "test": "the oldest failing landing is the mismatch when nothing verifies",
+  "test_file": "tests/integration/s17-review-fixes.test.ts",
+  "mutation": "Release a complete scan whatever is pending.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/recovery.ts",
+    "old": "      return attempt.scan.pendingMismatch ? { action: \"mark_mismatch\" } : release();",
+    "new": "      return release();"
+   }
+  ],
+  "kind": "standalone"
+ },
+ {
+  "id": "fix1-keep-newest",
+  "test": "the oldest failing landing is the mismatch when nothing verifies",
+  "test_file": "tests/integration/s17-review-fixes.test.ts",
+  "mutation": "Keep the first (newest) failing candidate pending instead of the oldest.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/reconcile.ts",
+    "old": "          coverage.pendingMismatch = outcome.transfer;",
+    "new": "          coverage.pendingMismatch ??= outcome.transfer;"
+   }
+  ],
+  "kind": "standalone"
+ },
+ {
+  "id": "fix1-no-extra-on-bind",
+  "test": "a verifying landing wins over a newer failing one",
+  "test_file": "tests/integration/s17-review-fixes.test.ts",
+  "mutation": "Drop the pending candidate when a landing binds instead of recording it as an extra transfer.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/reconcile.ts",
+    "old": "          if (outcome.kind === \"bind\" && coverage.pendingMismatch) {",
+    "new": "          if (outcome.kind === \"bind\" && coverage.pendingMismatch === undefined) {"
+   }
+  ],
+  "kind": "standalone"
+ },
+ {
+  "id": "fix1-mismatch-at-once",
+  "test": "a verifying landing wins over a newer failing one",
+  "test_file": "tests/integration/s17-review-fixes.test.ts",
+  "mutation": "Apply a failing candidate as a mismatch when it is read, as before the fix.",
+  "edits": [
+   {
+    "file": "src/domain/pyusd/reconcile.ts",
+    "old": "        if (outcome.kind === \"mismatch\") {",
+    "new": "        if (outcome.kind === \"mismatch\" && attempt.state === \"confirmed\") {"
+   }
+  ],
+  "kind": "standalone"
+ },
+ {
   "id": "fix3-landing-push",
   "test": "a Phantom landing replaces /buy in the history",
   "test_file": "tests/unit/s17-review-fixes.test.ts",
