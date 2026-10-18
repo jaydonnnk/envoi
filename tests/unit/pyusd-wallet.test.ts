@@ -73,7 +73,7 @@ describe("browser wallet handoff", () => {
     expect(devnetWallets(registryOf([mainnetOnly, offered, signOnly]), "solana:signAndSendTransaction").map((wallet) => wallet.name)).toEqual(["FIXTURE devnet wallet"]);
   });
 
-  it("Phantom link carries only public outlet and item ids", () => {
+  it("Phantom link carries only public outlet and item ids and the rail", () => {
     const link = new URL(buildPhantomBrowseLink(APP, "out_fixture", [{ menuItemId: "itm_kopi", quantity: 2 }, { menuItemId: "itm_toast", quantity: 1 }]));
     expect(link.origin + link.pathname.slice(0, "/ul/browse/".length)).toBe("https://phantom.com/ul/browse/");
     expect([...link.searchParams.keys()]).toEqual(["ref"]);
@@ -83,6 +83,7 @@ describe("browser wallet handoff", () => {
     expect([...target.searchParams.entries()]).toEqual([
       ["outlet", "out_fixture"],
       ["items", "itm_kopi:2,itm_toast:1"],
+      ["rail", "pyusd"],
     ]);
   });
 

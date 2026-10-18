@@ -5,9 +5,10 @@ import { getPublishedMenu, listPublishedOutlets } from "@/domain/outlets/search"
 import { textSuggestionsEnabled } from "@/integrations/ai/openai";
 import { webDb } from "@/lib/db/web";
 import { BasketForm } from "./basket-form";
+import { landsOnPyusd } from "./landing";
 import { TextSuggest } from "./text-suggest";
 
-type BuySearchParams = { outlet?: string | string[]; items?: string | string[] };
+type BuySearchParams = { outlet?: string | string[]; items?: string | string[]; rail?: string | string[] };
 
 const MANUAL_LIST_ID = "shops";
 
@@ -18,7 +19,7 @@ export const dynamic = "force-dynamic";
 // Neon and request time without a separate endpoint (R12).
 async function loadBuyData(searchParams: Promise<BuySearchParams>) {
   const started = performance.now();
-  const { outlet, items } = await searchParams;
+  const { outlet, items, rail: railParam } = await searchParams;
   const outletId = typeof outlet === "string" ? outlet : undefined;
   // Items a text suggestion picked start at quantity 1; the Phantom Browse link (S16) names each as
   // "id:quantity". Only ids on this outlet's published menu count; BasketForm ignores any other id,
@@ -30,7 +31,10 @@ async function loadBuyData(searchParams: Promise<BuySearchParams>) {
   // A shop with only a PYUSD wallet is reviewed on PYUSD; every other shop starts on PayPal.
   const rails = menu ? await outletRails(webDb(), menu.outlet.id) : null;
   const dbMs = Math.round(performance.now() - dbStarted);
-  return { outletId, preselected, menu, shops, rail: rails && !rails.paypal && rails.pyusd ? ("pyusd" as const) : ("paypal" as const), dbMs, serverMs: Math.round(performance.now() - started) };
+  // The Phantom Browse link names rail=pyusd (reopening 2026-10-18): that basket is reviewed on PYUSD
+  // as soon as the page loads; the server still decides whether this shop takes PYUSD.
+  const autoReview = landsOnPyusd(railParam, preselected.length);
+  return { outletId, preselected, menu, shops, rail: rails && !rails.paypal && rails.pyusd ? ("pyusd" as const) : ("paypal" as const), autoReview, dbMs, serverMs: Math.round(performance.now() - started) };
 }
 
 function preselectedLine(entry: string): { id: string; quantity: number } {
@@ -69,7 +73,7 @@ const PyusdOnlyPending = () => (
 );
 
 export default async function BuyPage({ searchParams }: { searchParams: Promise<BuySearchParams> }) {
-  const { outletId, preselected, menu, shops, rail, dbMs, serverMs } = await loadBuyData(searchParams);
+  const { outletId, preselected, menu, shops, rail, autoReview, dbMs, serverMs } = await loadBuyData(searchParams);
   const textEnabled = textSuggestionsEnabled();
 
   if (menu) {
@@ -89,7 +93,7 @@ export default async function BuyPage({ searchParams }: { searchParams: Promise<
               <PyusdOnlyStatus outletId={menu.outlet.id} />
             </Suspense>
           )}
-          <BasketForm outletId={menu.outlet.id} items={menu.items} preselected={preselected} rail={rail} />
+          <BasketForm outletId={menu.outlet.id} items={menu.items} preselected={preselected} rail={rail} autoReview={autoReview} />
         </section>
       </main>
     );

@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ensureBuyerSession, postJson } from "@/lib/browser/session";
+import { landingReview, requestReview, type Rail, type ReviewLine } from "./landing";
 
 export type BasketItem = { id: string; name: string; unitSgdCents: number | null; available: boolean | null };
 
@@ -19,11 +20,14 @@ export function BasketForm({
   items,
   preselected = [],
   rail = "paypal",
+  autoReview = false,
 }: {
   outletId: string;
   items: BasketItem[];
   preselected?: { id: string; quantity: number }[];
   rail?: "paypal" | "pyusd";
+  // Set when the Phantom Browse link named the PYUSD rail: the pre-filled basket is reviewed on PYUSD on landing.
+  autoReview?: boolean;
 }) {
   const router = useRouter();
   const [quantities, setQuantities] = useState<Record<string, number>>(() =>
@@ -34,7 +38,14 @@ export function BasketForm({
       }),
     ),
   );
-  const [busy, setBusy] = useState(false);
+  // The basket the Phantom Browse link asks to review on landing, fixed at the first render.
+  const [landing] = useState(() =>
+    landingReview(
+      autoReview,
+      items.flatMap((item) => (quantities[item.id] ?? 0) > 0 ? [{ menuItemId: item.id, quantity: quantities[item.id] ?? 0 }] : []),
+    ),
+  );
+  const [busy, setBusy] = useState(landing !== null);
   const [error, setError] = useState<string | null>(null);
 
   const chosen = items.filter((item) => (quantities[item.id] ?? 0) > 0);
@@ -44,23 +55,32 @@ export function BasketForm({
     setQuantities((current) => ({ ...current, [id]: Math.min(MAX_QUANTITY, Math.max(0, (current[id] ?? 0) + delta)) }));
   }
 
-  async function review() {
-    setBusy(true);
-    setError(null);
+  async function submit(lines: ReviewLine[], reviewRail: Rail) {
     try {
       await ensureBuyerSession();
-      const result = await postJson<{ purchaseId: string }>("/api/v1/purchases", {
-        outletId,
-        rail,
-        lines: chosen.map((item) => ({ menuItemId: item.id, quantity: quantities[item.id] })),
-      });
-      if (!result.ok || !result.data) throw new Error(result.error?.message ?? "The review could not be created. Try again.");
-      router.push(`/review/${encodeURIComponent(result.data.purchaseId)}`);
+      const refused = await requestReview((body) => postJson<{ purchaseId: string }>("/api/v1/purchases", body), (href) => router.push(href), outletId, reviewRail, lines);
+      if (refused !== null) throw new Error(refused);
     } catch (err) {
       setError(err instanceof Error && err.message !== "session" ? err.message : "The review could not be created. Try again.");
       setBusy(false);
     }
   }
+
+  function review() {
+    setBusy(true);
+    setError(null);
+    void submit(chosen.map((item) => ({ menuItemId: item.id, quantity: quantities[item.id] ?? 0 })), rail);
+  }
+
+  // One landing review per page load, even when React runs the effect twice in development.
+  const landed = useRef(false);
+  useEffect(() => {
+    if (landed.current || landing === null) return;
+    landed.current = true;
+    void submit(landing.lines, landing.rail);
+    // Runs once on mount, for the basket the link pre-filled.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>
