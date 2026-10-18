@@ -128,7 +128,7 @@ export function extraTransferLine(transfer: PyusdExtraTransferView): string {
 export function PyusdExtraTransfers({ transfers }: { transfers: readonly PyusdExtraTransferView[] }) {
   if (transfers.length === 0) return null;
   return (
-    <section className="card" aria-labelledby="extra-transfer-heading">
+    <section className="card extra-transfers" aria-labelledby="extra-transfer-heading">
       <h2 id="extra-transfer-heading">{transfers.length === 1 ? "Extra transfer detected" : `${transfers.length} extra transfers detected`}</h2>
       {transfers.map((transfer) => (
         <div className="row address" key={transfer.signature}>

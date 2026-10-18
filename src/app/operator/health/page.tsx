@@ -219,7 +219,7 @@ function PyusdRecovery({ health }: { health: OperatorHealth }) {
       <p className="muted">Solana devnet test tokens only. Held and mismatched attempts keep their basket locked; Envoi never marks a mismatch paid.</p>
       {attempts.length === 0 && <p className="muted">No PYUSD attempt is held, in mismatch or scanning.</p>}
       {attempts.map((row) => (
-        <div className="row stacked" key={row.attemptId}>
+        <div className="row address" key={row.attemptId}>
           <span className="mono">{row.purchaseId}</span>
           <span>
             {ATTEMPT_LABEL[row.attemptState] ?? row.attemptState}, purchase {row.purchaseState}
@@ -232,7 +232,7 @@ function PyusdRecovery({ health }: { health: OperatorHealth }) {
       <h3>Extra transfers</h3>
       {extraTransfers.length === 0 && <p className="muted">No window scan has found an extra transfer.</p>}
       {extraTransfers.map((row) => (
-        <div className="row stacked" key={`${row.attemptId}-${row.signature}`}>
+        <div className="row address" key={`${row.attemptId}-${row.signature}`}>
           <span className="mono">{row.signature}</span>
           <span>
             {row.destinationDelta === null ? "Amount unknown (incomplete metadata)" : `${formatPyusdAtomic(BigInt(row.destinationDelta))} PYUSD to the shop`} on devnet, purchase{" "}
