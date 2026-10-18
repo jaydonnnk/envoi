@@ -8,6 +8,7 @@ This plan selects and orders runnable slices.
 It changes no approved product or architecture decision.
 Its one contract change, delta D10, is made in Gate 3 itself, which you reopened for it on 2026-10-12.
 **Reopened 2026-10-15 for one change, approved by the user in advance:** S11's menu photos are English only, so its evaluation photos no longer include Chinese text; rotated and small-price text stay. Gates 2 and 3 carry the same change.
+**Reopened 2026-10-18 for one change and RE-APPROVED by the user the same day** ("Yea sure i approve the gates then make the relevant changes and push to main thnaks"): the [S16 amendment](#s16-amendment-2026-10-18-phantom-landing) builds the Phantom landing that Gates 2 and 3 now describe, on its own branch before S14; no build order, test count or cut order changes.
 Where a slice needs something Gate 3 did not specify, the gap is named in [Gate 3 deltas](#gate-3-deltas) instead of being decided silently.
 Drafting and revising this plan installed, provisioned, deployed and spent nothing, and it contains no application code.
 
@@ -626,6 +627,27 @@ PYUSD opens to testers only after S17, on your authorization.
 Install the five PYUSD pins; migrations, push and deploy; turning `PYUSD_ENABLED` on and off on Render for each proof run; read-only devnet RPC reads.
 You perform: the Phantom wallets on devnet, devnet SOL and test PYUSD, the merchant's PYUSD token account and the phone checks.
 No private key or recovery phrase ever reaches Envoi, a document or a log.
+
+#### S16 amendment 2026-10-18: Phantom landing
+
+Branch: `envoi/slice-16-phantom-landing`, from `main`, built after S17 and before S14.
+
+**Visible result.**
+On a phone without a wallet, "Open in Phantom" on a PYUSD review opens Phantom's browser straight on a fresh PYUSD review of the same basket, with its Pay button; no shop page, PayPal review or switch comes first.
+A refused review leaves the shop page with the basket filled in and the refusal's message.
+
+**Builds.**
+`buildPhantomBrowseLink` adds `rail=pyusd`; `/buy` with `rail=pyusd` and a basket asks once, on landing, for the PYUSD review through the ordinary `POST /purchases` and opens it.
+
+**Tests.**
+Gate 3's case `Phantom link carries only public outlet and item ids and the rail` (renamed, `rail=pyusd` added to what it asserts), and a slice test that a landing with `rail=pyusd` and a basket requests exactly one PYUSD review and opens it, and that a refusal keeps the basket and shows the message, each with its own mutation.
+Like the S16 review fixes, the slice test is recorded in `00-status.md` and is not a named addition, so no count in [Test assignment](#test-assignment) changes.
+
+**Evidence.**
+R14 again on the user's iPhone: which page Phantom's browser opens first, and one payment confirmed on the receipt.
+
+**Authorizations to request at start.**
+Push and deploy; turning `PYUSD_ENABLED` on for the phone check (the user's Render change).
 
 ### S17 PYUSD recovery
 

@@ -7,6 +7,7 @@ The 2026-10-11 review changed five points: the browser shrinks the menu photo be
 Preparation now releases the unsigned bytes exactly once and never stores them, because a wallet may add different instructions each time it signs ([step 4](#preparation-wallet-broadcast-and-verification)).
 The post-expiry history scan now runs for every released attempt, including a confirmed one, so a second transfer carrying the same reference is recorded and shown instead of going unnoticed ([recovery](#lost-response-recovery-and-rpc)).
 **Reopened 2026-10-15 for one change, approved by the user in advance:** menu photos are English only for this hackathon, so the evaluation and the falsifier samples no longer require Chinese text, and on a line printed in English and another script only the English name is drafted ([consent and evaluation](#request-memory-menu-boundary)).
+**Reopened 2026-10-18 for one change and RE-APPROVED by the user the same day** ("Yea sure i approve the gates then make the relevant changes and push to main thnaks"): the Phantom Browse link also names the PYUSD rail, and the page it opens in Phantom's browser creates the fresh PYUSD review itself, so the buyer confirms one review there instead of a shop page, a PayPal review and a switch ([phone path](#phone-path-and-independent-access-gate)).
 Everything else approved on 2026-10-07 stands, including hosting, in-app auth, PayPal recovery, identity-only scan and MCP handoff.
 Gate 1 was re-approved on 2026-10-10; Gate 3 may now revise affected contracts, and Gate 4 waits for Gate 3 re-approval, which the user gave on 2026-10-11.
 See [`00-status.md`](00-status.md#reopening-2026-10-10-zapier-removed) and [`handoff.md`](handoff.md#gate-2-handover-2026-10-10).
@@ -380,8 +381,9 @@ The separate Connect deeplink documents `cluster=devnet` but defaults to mainnet
 **[hypothesis]** Treat the wallet browser as a separate cookie/session container, never as the owner of a purchase created in Safari/Chrome.
 
 **[hypothesis] Selected phone path:** on a phone browser with no injected wallet, a PYUSD review shows an "Open in Phantom" link instead of a pay button.
-The link uses the documented Browse URL, `https://phantom.com/ul/browse/<url>?ref=<ref>`, and the encoded Envoi URL carries only the public outlet ID and the selected public item IDs and quantities.
-Inside Phantom's browser the buyer gets a new anonymous session; the server re-reads the published menu, prices a fresh review and the buyer confirms it there before any PYUSD preparation.
+The link uses the documented Browse URL, `https://phantom.com/ul/browse/<url>?ref=<ref>`, and the encoded Envoi URL carries only the public outlet ID, the selected public item IDs and quantities, and the rail name `pyusd`.
+Inside Phantom's browser the buyer gets a new anonymous session; the page asks for a fresh PYUSD review of that basket through the ordinary review request, the server re-reads the published menu and prices it, and the buyer confirms it there, by paying, before any PYUSD preparation.
+If the server refuses that review, the page stays on the shop with the basket filled in and says why.
 The link is a suggestion, not a review, token or authority: it carries no session, purchase ID, price, payee or personal data, needs no new route and may be reused, because each use only creates a fresh unexecuted review.
 The original browser's PYUSD review is never prepared and simply expires, so no released attempt exists outside the wallet browser.
 Never copy session cookies, transfer purchase ownership or expose the old receipt.

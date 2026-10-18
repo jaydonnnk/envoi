@@ -391,10 +391,12 @@ for f, text in current.items():
 # any further edit to it must update this hash on purpose.
 # b24f7986...20688cb4: the PayPal kill-switch reopening, re-approved 2026-10-12.
 # 98e6ac37...76cb5b3ad: the S1 TypeScript pin reopening, approved in advance by the user on 2026-10-12.
-# Current: the English-only menu photo reopening, approved in advance by the user on 2026-10-15.
-G3_REOPENING_SHA256 = "0fd07da57b826bf9fa56431da1b11484bc44e56a6ee4846a0bfa715d76c475ac"
-# 02-architecture.md may likewise equal its English-only reopening text, approved in advance on 2026-10-15.
-G2_REOPENING_SHA256 = "938d0a993ff63fdfc416ea77b5df7c628663c52917dbf149332efdedf3bf30a6"
+# 0fd07da5...76c475ac: the English-only menu photo reopening, approved in advance by the user on 2026-10-15.
+# Current: the Phantom landing reopening, re-approved by the user on 2026-10-18.
+G3_REOPENING_SHA256 = "3f5c8386b8e26e2f3bc6a7e8274ed9582ee5561afc9fe59cee0d4de3305b7cab"
+# 02-architecture.md may likewise equal its Phantom landing reopening text, re-approved on 2026-10-18
+# (938d0a99...f3bf30a6 was the English-only text of 2026-10-15).
+G2_REOPENING_SHA256 = "28d54654a19e885b4908715f7793846c4c873f94f6cc380d985af9fe45561154"
 # Gate 1, re-approved 2026-10-16 after deferring menu photo drafting: the revised mockup, and
 # 01-product.md without its closing status line, which keeps changing as slices finish.
 G1_MOCKUP_SHA256 = {os.path.join("mockups", "merchant-onboarding.html"): "d376e4517de5b7f0c4c892675b0e033111cbac0af1b157519f23078ade16f568"}

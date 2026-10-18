@@ -8,10 +8,11 @@ Updated: 2026-10-18 (Asia/Singapore).
   **Reopened again and RE-APPROVED 2026-10-11** for two PYUSD double-payment fixes found in the Gate 3 review: the user approved the fixes in advance ("reopen gate 2 and approve the fixes i approve it already").
   Preparation releases the unsigned bytes exactly once and never stores them, and the post-expiry window scan runs for every released attempt and records any extra transfer; see the [record](#gate-2-reopening-for-double-payment-fixes-2026-10-11).
   **Reopened and RE-APPROVED 2026-10-15** for one change, approved by the user in advance: menu photos are English only, so the consented test photos and the vision falsifier samples no longer require Chinese text; see the [record](#reopening-2026-10-15-english-only-menu-photos).
+  **Reopened and RE-APPROVED 2026-10-18** ("Yea sure i approve the gates then make the relevant changes and push to main thnaks"): the phone path's Browse link also names the PYUSD rail and Phantom's browser opens the PYUSD review directly; see the [record](#reopening-2026-10-18-phantom-landing).
 - Gate 3 - Program Design: **RE-APPROVED 2026-10-12** by the user a second time, in advance, for one pin change found by the S1 boot check: `typescript@7.0.2` becomes `typescript@6.0.3`, because `typescript-eslint` refuses TypeScript 7 ("for this change gate 3( i pre approve it)").
   No contract or test changes; see the [reopening record](03-program-design.md#reopening-2026-10-12-typescript-pin-after-the-s1-boot-check) and [Version pins](03-program-design.md#version-pins).
   **Reopened and RE-APPROVED 2026-10-15** for one change, approved by the user in advance: Chinese text accuracy leaves the R5 vision falsifiers; no contract, type, call stack, clock, test name or test count changes; see the [record](#reopening-2026-10-15-english-only-menu-photos) and [Gate 3's section](03-program-design.md#reopening-2026-10-15-english-only-menu-photos).
-  `03-program-design.md` now has SHA256 `0fd07da57b826bf9fa56431da1b11484bc44e56a6ee4846a0bfa715d76c475ac`, pinned in `checks/gate4_check.py`.
+  `03-program-design.md` now has SHA256 `3f5c8386b8e26e2f3bc6a7e8274ed9582ee5561afc9fe59cee0d4de3305b7cab` after the 2026-10-18 Phantom landing reopening, pinned in `checks/gate4_check.py`.
   Before that it was **RE-APPROVED 2026-10-12** by the user ("I approve both pls publish the branches and commit all the changes to main so that we can proceed with the first slice") after a reopening the same day for one change only: PayPal start and completion check `PAYMENTS_ENABLED` and refuse with the new error code `payments_disabled` (Gate 4 delta D10); see the [reopening record](#gate-3-reopening-for-the-paypal-kill-switch-2026-10-12).
   Approval accepts that contract as a proposal; it establishes no runtime evidence.
   Before that it was **RE-APPROVED 2026-10-11** by the user ("Yes approve commit the branch and push and merge to main"), after being reopened on 2026-10-10; the revision of the affected import and PYUSD contracts was drafted on 2026-10-11 and revised the same day after the user's review (fixes A-K) and for fixes L and M after Gate 2 was reopened.
@@ -21,6 +22,7 @@ Updated: 2026-10-18 (Asia/Singapore).
   The user's verdicts on six least confident calls are review decisions recorded in the [approval history](#approval-history).
   The 2026-10-07 approval and eight finding dispositions still govern unaffected decisions.
   The OpenAI provider pin does not change, and the completed R11 action/R12 region decision are not reopened.
+  **Reopened and RE-APPROVED 2026-10-18** ("Yea sure i approve the gates then make the relevant changes and push to main thnaks"): the same change in the Browse link, the `/buy` landing and one renamed case; no count changes; see the [record](#reopening-2026-10-18-phantom-landing).
 - Gate 4 - Slice plan: **APPROVED 2026-10-12** by the user ("I approve both pls publish the branches and commit all the changes to main so that we can proceed with the first slice"), on branch `envoi/gate-4-vision-pyusd`.
   Approval accepts the slice order, the test assignment, the cut order, deltas D1-D9 as refinements and D10's placement in S2; it starts no slice and authorizes no install, provisioning, deployment, spending, wallet use or OpenAI call.
   At approval no slice was authorized or started; S1 started on 2026-10-12 under the user's handover prompt and is done (see [S1](#s1-tracer-bullet-on-render-free-2026-10-12)).
@@ -33,6 +35,20 @@ Updated: 2026-10-18 (Asia/Singapore).
   An independent review of the draft on 2026-10-12 found four major issues, and all four are fixed in it; see the [review fixes](#gate-4-review-fixes-2026-10-12).
   Its minor findings are fixed or dispositioned; see the [minor review fixes](#gate-4-minor-review-fixes-2026-10-12).
   The user decided delta D10 on 2026-10-12 by reopening Gate 3 for a PayPal check of `PAYMENTS_ENABLED`, re-approved the same day; S2 builds it and names its test.
+
+### Reopening 2026-10-18: Phantom landing
+
+- **Trigger:** the user's R14 iPhone run on 2026-10-18 (record in [S17 follow-ups](#s17-follow-ups-desktop-window-scan-and-automatic-unpaid-release-2026-10-18)): "Open in Phantom" kept the basket but opened the shop page, then a PayPal review, before the PYUSD Pay button.
+  The user: "i dont like how i have to review twice. The last page should be the only page that shows up after i click open in phantom".
+- **Authorization, 2026-10-18:** to "reopen Gate 3 for this one change, draft it, and bring it back for your approval", the user answered "yes that would be great thanks".
+  Drafting showed that Gate 2's phone path says the link carries "only" the outlet and item ids, and that Gate 4 needs a place to build it, so Gates 2 and 4 are reopened for the same change; this is flagged for the user's approval.
+- **Change, on branch `envoi/gate-3-phantom-landing` from `main` at `50dc432`:** the Browse link adds `rail=pyusd`; `/buy` with `rail=pyusd` and a basket requests the PYUSD review through the ordinary `POST /purchases` and opens it, and a refusal leaves the basket and the message.
+  [Gate 2 phone path](02-architecture.md#phone-path-and-independent-access-gate), [Gate 3 reopening](03-program-design.md#reopening-2026-10-18-phantom-landing-opens-the-pyusd-review), [Gate 4 S16 amendment](04-slices.md#s16-amendment-2026-10-18-phantom-landing).
+  One Envoi review stays: the buyer confirms the server-priced review by paying, so no rule about review before approval changes.
+  No type, state, route, error code, named-test or case count, build order or cut order changes; Gate 1 never mentions Phantom and stays closed.
+- **Approval, 2026-10-18:** the user re-approved Gates 2, 3 and 4 for this change ("Yea sure i approve the gates then make the relevant changes and push to main thnaks"), which also authorizes building the S16 amendment and pushing it to `main`.
+  It does not authorize opening PYUSD to testers.
+- **Checker:** the new SHA256 values of `02-architecture.md` and `03-program-design.md` are pinned in `gate4_check.py`.
 
 ### Reopening 2026-10-15: menu photo drafting deferred
 
@@ -121,6 +137,7 @@ Checker maintenance only: no gate document's decision or count wording changed, 
   Two faults are added: the additions baseline restated as 39, which fails R14 only through the pin, and one exempt signature altered by one character, which fails R8.
 - **Gate checks [verified], 2026-10-17:** `gate4_check.py` passes with base `main` and with `5f6ab39`, `gate4_prove.py` gives 76/76 with each, and `03-program-design.md` keeps SHA256 `0fd07da57b826bf9fa56431da1b11484bc44e56a6ee4846a0bfa715d76c475ac`.
   Reverting the pin fails R14 on the pristine folder, an empty exemption fails R8, and exempting the pattern wholesale lets the altered signature pass.
+  **Reopened and RE-APPROVED 2026-10-18** ("Yea sure i approve the gates then make the relevant changes and push to main thnaks"): an S16 amendment builds the Phantom landing before S14; no build order, test count or cut order changes; see the [record](#reopening-2026-10-18-phantom-landing).
 
 ## Slices
 
@@ -213,6 +230,10 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
   Typecheck and lint clean; 469 of 469 tests.
   Mutations [verified], 3 of 3, in [`s17-release-mutations.json`](evidence/s17-release-mutations.json): `rec-release-default-on` rewritten to release regardless of the switch, new `rec-release-shipped-off` turning the shipped switch off, and `rec-never-release` rechecked; each fails its row on an AssertionError, restores byte-identical and passes on rerun; `rec-release-default-on` also fails the transcript and the race test, which share its fault.
   Not covered by a test [unknown]: an attempt already `held_no_match` being claimed and closed after the switch turns on.
+- **R14 on the user's iPhone, 2026-10-18 [user-reported, with screenshots]:** with `PYUSD_ENABLED` on (the user's Render change), "Open in Phantom" opened Phantom's browser on Test Shop's `/buy` with the basket kept (1 Kopi C); "Review" gave a PayPal review, "Review with PYUSD instead" a PYUSD review with "Pay 1.800000 PYUSD with Phantom".
+  So Browse keeps the query on that iPhone; the user said "Im able to pay".
+  A READ ONLY Neon read right after found no new PYUSD attempt (still two, paid count 7), so no preparation reached Envoi from that run [verified]; whether the wallet was asked is [unknown] and asked of the user.
+  In one screenshot Phantom's browser shows the page as a narrow column with black margins [unknown whether layout or screenshot].
 - **Approval and ship, 2026-10-18, in the user's words:** "i approve Approve commit 4ba8586 and push/merge it to main (deploys)".
   Pushed [verified]: the branch and `main`, fast-forwarded from `83840f8` to `feef954`, match on `git ls-remote`; CI passed on the branch (run 39109690592) and on `main` (run 39109693305).
   Render answers `/buy` with 200 after the push; which commit it runs is [unknown], because the switch has no visible effect until an attempt expires with an empty complete scan and no public route names the commit.
@@ -1854,6 +1875,7 @@ All unaffected risk dispositions stand; the 2026-10-11 Gate 3 revision of the af
 - 2026-10-16: the user re-approved Gate 1 ("I approve Gate 1."), accepting the deferral of menu photo drafting in `01-product.md` and `mockups/merchant-onboarding.html` as a proposal.
   It authorizes no other gate change.
 
+- 2026-10-18: the user reopened Gates 2, 3 and 4 for the Phantom landing and re-approved them the same day ("Yea sure i approve the gates then make the relevant changes and push to main thnaks"), authorizing the S16 amendment's build and its push to `main`; see [Reopening 2026-10-18](#reopening-2026-10-18-phantom-landing).
 ### Initial Gate 2 documentary verification, 2026-10-07 (historical, before free-hosting revision)
 
 - A one-off Python check inspected all seven gate-folder Markdown documents and three local Markdown links/anchors: targets/anchors exist, required architecture sections exist, gate state and mirrors agree, and Gates 3/4 remain pending with no documents created.

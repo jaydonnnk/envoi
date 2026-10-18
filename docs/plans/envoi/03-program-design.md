@@ -3,6 +3,7 @@
 **Reopened 2026-10-10; revised 2026-10-11, revised again after the user's review the same day, revised a third time the same day for fixes L and M after Gate 2 was reopened, and RE-APPROVED by the user on 2026-10-11** ("Yes approve commit the branch and push and merge to main").
 **Reopened 2026-10-12 for one change only and RE-APPROVED by the user the same day** ("I approve both pls publish the branches and commit all the changes to main so that we can proceed with the first slice"): PayPal start and completion now check `PAYMENTS_ENABLED` and refuse with a new error code, `payments_disabled`; see [Reopening 2026-10-12](#reopening-2026-10-12-paypal-payments-kill-switch).
 **Reopened 2026-10-15 for one change only, approved by the user in advance:** menu photos are English only, so Chinese text accuracy is no longer an R5 falsifier; see [Reopening 2026-10-15](#reopening-2026-10-15-english-only-menu-photos).
+**Reopened 2026-10-18 for one change and RE-APPROVED by the user the same day** ("Yea sure i approve the gates then make the relevant changes and push to main thnaks"): the Phantom Browse link names the PYUSD rail, and `/buy` opened from it creates the PYUSD review itself; see [Reopening 2026-10-18](#reopening-2026-10-18-phantom-landing-opens-the-pyusd-review).
 Approval accepts these contracts as a proposal; it establishes no runtime, account, model, wallet or usability evidence and authorizes no implementation or Gate 4 approval.
 The user removed Zapier because it is paid and reopened Gates 1, 2 and 3.
 Gate 1 was re-approved on 2026-10-10 and Gate 2 on 2026-10-11.
@@ -12,6 +13,19 @@ Every other contract below stays as approved on 2026-10-07.
 See [Revision 2026-10-11](#revision-2026-10-11-direct-vision-and-pyusd), [`00-status.md`](00-status.md#reopening-2026-10-10-zapier-removed) and [`handoff.md`](handoff.md#gate-3-handover-2026-10-11).
 
 Gate 3 program design, 2026-10-07 (Asia/Singapore). **APPROVED by the user 2026-10-07** ("gate 3 is approved"), together with a separate authorization to commit these planning documents and push `main`. Authorities: [approved Gate 1 product](01-product.md) and [approved Gate 2 architecture](02-architecture.md). Approval accepts the contracts below and the disposition of the eight Gate 2 review findings; it establishes no runtime, account, integration or usability evidence, and it does not authorize implementation or Gate 4. A separate, narrowly scoped authorization on the same day covered the R11 flag flip, its redeploy and a read-only schema inspection, all now complete. This document contains contracts only: file map, types and signatures without bodies, call stacks, state transitions, race rules, capacity budgets and named failure tests. No application implementation, no installed application packages and no approved slices exist.
+
+## Reopening 2026-10-18: Phantom landing opens the PYUSD review
+
+- **Finding:** on 2026-10-18 the user ran R14 on an iPhone: "Open in Phantom" kept the basket, but Phantom's browser opened the shop page, then a PayPal review, so the buyer had to review again and switch to PYUSD before the Pay button.
+  The user's words: "i dont like how i have to review twice. The last page should be the only page that shows up after i click open in phantom".
+- **Change:** the Browse link's Envoi URL adds `rail=pyusd`, and `/buy` opened with `rail=pyusd` and a basket asks for that PYUSD review itself through the ordinary `POST /purchases` and shows it, so the first page in Phantom's browser is the PYUSD review with its Pay button.
+  The buyer still confirms that review there, by paying; nothing is prepared, signed or sent without that tap.
+  A refused review (an item gone, a locked basket, PYUSD off or the shop without a PYUSD destination) leaves the buyer on `/buy` with the basket filled in and the refusal's message.
+  The link still carries no purchase id, session, price, payee or personal data, needs no new route, and each use still creates only a fresh unexecuted review.
+- **Contracts touched:** the `phantom-browse.ts` row of the [file map](#browser-wallet-modules-added-2026-10-11), the [PYUSD call stack](#call-stacks)'s phone link and the `/buy` landing beside it, and the case `Phantom link carries only public outlet and item ids`, renamed `Phantom link carries only public outlet and item ids and the rail` with `rail=pyusd` added to what it asserts.
+  No type, state, clock, route, error code, named-test or case count changes; the landing's own test is a slice test, recorded where it is built.
+- **Gate 2:** its phone path names the rail and the landing in the same words; see [`02-architecture.md`](02-architecture.md#phone-path-and-independent-access-gate).
+- **Approval:** the user asked for this reopening on 2026-10-18 ("yes that would be great thanks") and re-approved Gates 2, 3 and 4 the same day ("Yea sure i approve the gates then make the relevant changes and push to main thnaks").
 
 ## Reopening 2026-10-15: English-only menu photos
 
@@ -327,7 +341,7 @@ The image proxy and the Zapier result routes are removed by the 2026-10-11 revis
 | Path | Why it lives there |
 | --- | --- |
 | `src/lib/wallet/standard.ts` | Browser-only wallet discovery: keeps only wallets whose chains include `solana:devnet` and that offer the needed feature. |
-| `src/lib/wallet/phantom-browse.ts` | Builds the Phantom Browse link from public outlet and item ids only. |
+| `src/lib/wallet/phantom-browse.ts` | Builds the Phantom Browse link from public outlet and item ids and the rail `pyusd` only (rail added 2026-10-18). |
 | `src/app/review/[purchaseId]/pyusd-pay.tsx` | Client component: prepare, hand the exact bytes to the wallet once through a one-shot holder (fix L), post the signature hint; on a phone with no wallet, the Phantom link instead of a pay button. |
 | `src/app/merchant/setup/pyusd-wallet.tsx` | Client component: request a challenge, have the wallet sign the exact bytes, submit the proof; set the rate. |
 
@@ -1467,7 +1481,7 @@ POST /api/v1/purchases/{id}/pyusd/prepare                           body { walle
 
 browser (pyusd-pay.tsx)
   wallets = getWallets() with chains including solana:devnet and the solana:signAndSendTransaction feature
-  none on a phone => an "Open in Phantom" link from buildPhantomBrowseLink; never a pay button
+  none on a phone => an "Open in Phantom" link from buildPhantomBrowseLink, naming rail pyusd; never a pay button
   none on a desktop => no pay button; explain that a devnet wallet is needed
   -> a one-shot holder gives the exact bytes to one call and drops them (fix L):
      signAndSendTransaction({ account, chain: "solana:devnet", transaction: exact bytes })
@@ -1493,8 +1507,9 @@ GET /receipt/{purchaseId}  polls stored state within the approved polling bounds
   T_PROVIDER_READ_DEBOUNCE; a paid receipt lists any extra transfer (fix M)
 ```
 
-The phone link is `https://phantom.com/ul/browse/<encoded APP_BASE_URL/buy?outlet=<id>&items=<itemId:qty,...>>?ref=<encoded APP_BASE_URL>`.
-It carries no purchase id, session, price, payee or personal data; inside Phantom's browser the buyer gets a new anonymous session, and `/buy` only pre-fills a basket that the buyer reviews through the ordinary `POST /purchases`.
+The phone link is `https://phantom.com/ul/browse/<encoded APP_BASE_URL/buy?outlet=<id>&items=<itemId:qty,...>&rail=pyusd>?ref=<encoded APP_BASE_URL>` (rail added 2026-10-18).
+It carries no purchase id, session, price, payee or personal data; inside Phantom's browser the buyer gets a new anonymous session, and `/buy` with `rail=pyusd` and a basket asks once, on landing, for a PYUSD review of that basket through the ordinary `POST /purchases` and shows it; the buyer confirms it there by paying.
+A refused review leaves `/buy` showing the basket and the refusal's message; without `rail=pyusd`, `/buy` only pre-fills the basket, as before.
 The original browser's review is never prepared and simply expires.
 
 ### PYUSD recovery (added 2026-10-11)
@@ -1976,7 +1991,7 @@ The browser wallet modules with a fake Wallet Standard registry; no database and
 | --- | --- | --- |
 | `wallet is asked for solana:devnet` | the fake Wallet Standard wallet receives `chain: "solana:devnet"` and the exact prepared bytes | omit the chain; this case fails |
 | `wallet without devnet sign-and-send is not offered` | a wallet lacking `solana:devnet` or the sign-and-send feature is not listed | skip the capability filter; this case fails |
-| `Phantom link carries only public outlet and item ids` | the decoded link targets `APP_BASE_URL/buy` with exactly the outlet id and item-quantity pairs, and no purchase id, session, price or payee | add the purchase id to the link; this case fails |
+| `Phantom link carries only public outlet and item ids and the rail` | the decoded link targets `APP_BASE_URL/buy` with exactly the outlet id, the item-quantity pairs and `rail=pyusd`, and no purchase id, session, price or payee | add the purchase id to the link; this case fails |
 | `the wallet is asked once per released transaction` | after one `signAndSendTransaction` call that resolves, rejects or throws, a second pay action makes no wallet call and the page shows "checking payment" | keep the bytes after the wallet call; this case fails |
 
 **Group `signature hints and reconcile before expiry`**, 8 cases.
@@ -2267,7 +2282,7 @@ Every case in the test plan appears exactly once in the "Now" column of these tw
 | `wallet is asked for solana:devnet` | draft | `browser wallet handoff` -> `wallet is asked for solana:devnet` |
 | `wallet without devnet sign-and-send is not offered` | draft | `browser wallet handoff` -> `wallet without devnet sign-and-send is not offered` |
 | `phone without a wallet gets the Phantom link, not a pay button` | draft | standalone `phone without a wallet gets the Phantom link, not a pay button` |
-| `Phantom link carries only public outlet and item ids` | draft | `browser wallet handoff` -> `Phantom link carries only public outlet and item ids` |
+| `Phantom link carries only public outlet and item ids` | draft | `browser wallet handoff` -> `Phantom link carries only public outlet and item ids and the rail` |
 | `submitted signature is only a hint` | draft | `signature hints and reconcile before expiry` -> `submitted signature is only a hint` |
 | `PYUSD receipt says transferred and finalized on devnet` | draft | standalone `PYUSD receipt says transferred and finalized on devnet` |
 | `ComputeBudget and Lighthouse assertions are accepted` | draft | `PYUSD verification by meaning` -> `ComputeBudget and Lighthouse assertions are accepted` |
