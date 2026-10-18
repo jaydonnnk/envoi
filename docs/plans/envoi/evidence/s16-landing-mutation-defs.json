@@ -1,0 +1,86 @@
+[
+ {
+  "id": "link-no-rail",
+  "test": "Phantom link carries only public outlet and item ids and the rail",
+  "test_file": "tests/unit/pyusd-wallet.test.ts",
+  "mutation": "Drop rail=pyusd from the link.",
+  "edits": [
+   {
+    "file": "src/lib/wallet/phantom-browse.ts",
+    "old": "  target.searchParams.set(\"rail\", \"pyusd\");\n",
+    "new": ""
+   }
+  ],
+  "kind": "group_row"
+ },
+ {
+  "id": "landing-rail-paypal",
+  "test": "a Phantom landing requests one PYUSD review and opens it",
+  "test_file": "tests/unit/phantom-landing.test.ts",
+  "mutation": "Ask for the landing review on PayPal.",
+  "edits": [
+   {
+    "file": "src/app/buy/landing.ts",
+    "old": "{ rail: \"pyusd\", lines: [...lines] }",
+    "new": "{ rail: \"paypal\", lines: [...lines] }"
+   }
+  ],
+  "kind": "standalone"
+ },
+ {
+  "id": "refusal-opens",
+  "test": "a refused Phantom landing keeps the basket and shows the message",
+  "test_file": "tests/unit/phantom-landing.test.ts",
+  "mutation": "Open the review page before checking the answer.",
+  "edits": [
+   {
+    "file": "src/app/buy/landing.ts",
+    "old": "  const result = await post({ outletId, rail, lines });\n",
+    "new": "  const result = await post({ outletId, rail, lines });\n  navigate(`/review/${encodeURIComponent(result.data?.purchaseId ?? \"\")}`);\n"
+   }
+  ],
+  "kind": "standalone"
+ },
+ {
+  "id": "lands-without-rail",
+  "test": "a link without the PYUSD rail or a basket only fills the basket",
+  "test_file": "tests/unit/phantom-landing.test.ts",
+  "mutation": "Land on PYUSD whatever the rail parameter says.",
+  "edits": [
+   {
+    "file": "src/app/buy/landing.ts",
+    "old": "  return railParam === \"pyusd\" && preselectedCount > 0;",
+    "new": "  return railParam !== undefined && preselectedCount > 0;"
+   }
+  ],
+  "kind": "standalone"
+ },
+ {
+  "id": "lands-without-basket",
+  "test": "a link without the PYUSD rail or a basket only fills the basket",
+  "test_file": "tests/unit/phantom-landing.test.ts",
+  "mutation": "Land on PYUSD with an empty basket.",
+  "edits": [
+   {
+    "file": "src/app/buy/landing.ts",
+    "old": "  return railParam === \"pyusd\" && preselectedCount > 0;",
+    "new": "  return railParam === \"pyusd\" && preselectedCount >= 0;"
+   }
+  ],
+  "kind": "standalone"
+ },
+ {
+  "id": "review-without-flag",
+  "test": "a link without the PYUSD rail or a basket only fills the basket",
+  "test_file": "tests/unit/phantom-landing.test.ts",
+  "mutation": "Review on landing even when the page did not land on PYUSD.",
+  "edits": [
+   {
+    "file": "src/app/buy/landing.ts",
+    "old": "  return autoReview && lines.length > 0 ?",
+    "new": "  return lines.length > 0 ?"
+   }
+  ],
+  "kind": "standalone"
+ }
+]

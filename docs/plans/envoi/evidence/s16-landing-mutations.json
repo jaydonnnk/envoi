@@ -1,0 +1,134 @@
+{
+ "branch": "envoi/slice-16-phantom-landing",
+ "base_commit": "894e768",
+ "uncommitted_changes": true,
+ "method": "Each definition in s16-landing-mutation-defs.json applied alone by exact text replacement, its whole test file run with the vitest JSON reporter, every touched file restored and compared by SHA-256, then the whole file rerun. A proof needs the named row to fail on an AssertionError, no other row of its group to fail (for a Gate 3 group row; a standalone test's other failures are recorded), a byte-identical restore and an all-passing rerun. Unit tests only: the landing request and navigation are injected fakes, and every id is a FIXTURE value.",
+ "results": [
+  {
+   "id": "link-no-rail",
+   "test": "Phantom link carries only public outlet and item ids and the rail",
+   "kind": "group_row",
+   "group": "browser wallet handoff",
+   "files": [
+    "src/lib/wallet/phantom-browse.ts"
+   ],
+   "mutation": "Drop rail=pyusd from the link.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ [ 'outlet', 'out_fixture' ], \u2026(1) ] to deeply equal [ [ 'outlet', 'out_fixture' ], \u2026(2) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "landing-rail-paypal",
+   "test": "a Phantom landing requests one PYUSD review and opens it",
+   "kind": "standalone",
+   "group": "Phantom landing",
+   "files": [
+    "src/app/buy/landing.ts"
+   ],
+   "mutation": "Ask for the landing review on PayPal.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { rail: 'paypal', lines: [ { \u2026(2) } ] } to deeply equal { rail: 'pyusd', lines: [ { \u2026(2) } ] }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "refusal-opens",
+   "test": "a refused Phantom landing keeps the basket and shows the message",
+   "kind": "standalone",
+   "group": "Phantom landing",
+   "files": [
+    "src/app/buy/landing.ts"
+   ],
+   "mutation": "Open the review page before checking the answer.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ '/review/' ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "a Phantom landing requests one PYUSD review and opens it"
+   ],
+   "other_errors": {
+    "a Phantom landing requests one PYUSD review and opens it": "AssertionError: expected [ '/review/pur_fixture_landing', \u2026(1) ] to deeply equal [ '/review/pur_fixture_landing' ]"
+   },
+   "same_group_others": [
+    "a Phantom landing requests one PYUSD review and opens it"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "lands-without-rail",
+   "test": "a link without the PYUSD rail or a basket only fills the basket",
+   "kind": "standalone",
+   "group": "Phantom landing",
+   "files": [
+    "src/app/buy/landing.ts"
+   ],
+   "mutation": "Land on PYUSD whatever the rail parameter says.",
+   "own_row": "failed",
+   "error": "AssertionError: expected true to be false // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "lands-without-basket",
+   "test": "a link without the PYUSD rail or a basket only fills the basket",
+   "kind": "standalone",
+   "group": "Phantom landing",
+   "files": [
+    "src/app/buy/landing.ts"
+   ],
+   "mutation": "Land on PYUSD with an empty basket.",
+   "own_row": "failed",
+   "error": "AssertionError: expected true to be false // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "review-without-flag",
+   "test": "a link without the PYUSD rail or a basket only fills the basket",
+   "kind": "standalone",
+   "group": "Phantom landing",
+   "files": [
+    "src/app/buy/landing.ts"
+   ],
+   "mutation": "Review on landing even when the page did not land on PYUSD.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { rail: 'pyusd', lines: [ { \u2026(2) } ] } to be null",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  }
+ ]
+}

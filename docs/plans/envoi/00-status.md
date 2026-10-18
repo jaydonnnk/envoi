@@ -219,6 +219,18 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
   This record's update is pushed after it.
 - **Not established [unknown]:** a real phone, Render's logs, throttling seen from Render (R17's limiter counts there), and a mismatch or extra transfer on real devnet.
 
+### S16 amendment: Phantom landing, 2026-10-18
+
+- **Authorization, 2026-10-18, in the user's words:** "Yea sure i approve the gates then make the relevant changes and push to main thnaks", after the [reopening](#reopening-2026-10-18-phantom-landing) of Gates 2, 3 and 4.
+- **Branch:** `envoi/slice-16-phantom-landing`, from `main` at `1496124`; code commit `894e768`, then this record.
+- **Built:** `buildPhantomBrowseLink` adds `rail=pyusd`; new `src/app/buy/landing.ts` (`landsOnPyusd`, `landingReview`, `requestReview`), shared by the server page and the client form; `/buy` reads `rail` and, with `rail=pyusd` and a pre-filled basket, `BasketForm` asks once on mount for the PYUSD review through the ordinary `POST /purchases` and opens it; a refusal leaves the basket and shows the server's message, and the Review button keeps the shop's usual rail.
+- **Tests [verified]:** Gate 3's case renamed `Phantom link carries only public outlet and item ids and the rail` (`tests/unit/pyusd-wallet.test.ts`), now asserting `rail=pyusd`; slice tests in `tests/unit/phantom-landing.test.ts`: `a Phantom landing requests one PYUSD review and opens it`, `a refused Phantom landing keeps the basket and shows the message`, `a link without the PYUSD rail or a basket only fills the basket`.
+  Typecheck and lint clean; 472 of 472 tests in 67 files.
+- **Mutations [verified], 6 of 6,** by [`s16-landing-mutate.py`](evidence/s16-landing-mutate.py) with [`s16-landing-mutation-defs.json`](evidence/s16-landing-mutation-defs.json), results in [`s16-landing-mutations.json`](evidence/s16-landing-mutations.json), on `894e768`: drop the rail from the link, ask on PayPal, open the review before checking the answer, land whatever the rail says, land with an empty basket, and review without the landing flag; each fails its row on an AssertionError, restores byte-identical and passes on rerun; `refusal-opens` also fails the first landing test, which shares its fault.
+  The once-per-mount guard (a React ref) has no unit test, because the project has no DOM test library; the browser check below shows one review per landing.
+- **Local browser check [verified],** on `npm run build` (no warning; "scan-build: no send method name in 196 built files.") and `next start` at http://localhost:3100 with FIXTURE settings and a disposable database, dropped after: at 390px, `/buy?outlet=...&items=<Kopi>:1&rail=pyusd` opened the PYUSD review of 1 Kopi directly, with exactly one purchase in the database and an "Open in Phantom" link carrying `rail=pyusd` (no wallet in that browser); landing again reopened the same open review; with the shop's PYUSD destination disconnected, the landing stayed on `/buy` with the basket and "This shop has not connected a PYUSD devnet wallet."; no horizontal scroll at 390px or 1280px.
+- **Not established [unknown]:** the same flow inside Phantom's browser on the user's iPhone (R14 rerun), and whether its Pay step reaches Envoi; the earlier run's narrow-column screenshot is unexplained.
+
 ### S17 follow-ups: desktop window scan and automatic unpaid release, 2026-10-18
 
 - **Authorization, 2026-10-18, in the user's words:** "Go on 1 and 2 while i do 3 and 4", where 1 is the window scan of the desktop attempt on Neon and 2 is turning on automatic unpaid release as a reviewed commit; 3 (setting `PYUSD_ENABLED=true` on Render) and 4 (the iPhone test of the Phantom Browse link, R14) are the user's.
