@@ -394,6 +394,17 @@ export type StoredFeeEvidence = {
   older: { epoch: string; basisPoints: number; maximumFee: string };
   newer: { epoch: string; basisPoints: number; maximumFee: string };
 };
+// The post-expiry window scan of one attempt (S17; Gate 3 ScanCoverage), with block heights as
+// decimal strings. Null until the attempt's finalized block height passes its bound.
+export type StoredScanCoverage = {
+  startedAtFinalizedHeight: string;
+  newestSignature: string | null;
+  beforeCursor: string | null;
+  reachedBeforePreparation: boolean;
+  pagesRead: number;
+  candidatesChecked: number;
+  lastGap: "rate_limited" | "null_transaction" | "rpc_unavailable" | "too_large" | "page_cap" | "identity_changed" | null;
+};
 
 export const paymentAttempts = pgTable(
   "payment_attempts",
@@ -444,6 +455,10 @@ export const paymentAttempts = pgTable(
     pyusdHints: jsonb("pyusd_hints").$type<StoredSignatureHint[]>().notNull().default(sql`'[]'::jsonb`),
     pyusdFinalizedSignature: text("pyusd_finalized_signature").unique(),
     pyusdVerifiedAt: timestamp("pyusd_verified_at", { withTimezone: true }),
+    // Recovery (S17): the window scan's coverage, and the signature of the successful landing that
+    // failed verification, so the scan never records that one as an extra transfer.
+    pyusdScan: jsonb("pyusd_scan").$type<StoredScanCoverage>(),
+    pyusdMismatchSignature: text("pyusd_mismatch_signature"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -459,6 +474,8 @@ export const paymentAttempts = pgTable(
       sql`${t.rail} <> 'pyusd' or (${t.payeeMerchantId} is null and ${t.createRequestId} is null and ${t.pyusdBuyerWallet} is not null and ${t.pyusdSourceTokenAccount} is not null and ${t.pyusdDestinationTokenAccount} is not null and ${t.pyusdAtomicAmount} > 0 and ${t.pyusdRateVersionId} is not null and ${t.pyusdReference} is not null and ${t.pyusdMessageFingerprint} is not null and ${t.pyusdBlockhash} is not null and ${t.pyusdLastValidBlockHeight} is not null and ${t.pyusdPreparationSlot} is not null and ${t.pyusdFee} is not null)`,
     ),
     check("payment_attempts_pyusd_confirmed_check", sql`${t.state} <> 'confirmed' or (${t.pyusdFinalizedSignature} is not null and ${t.pyusdVerifiedAt} is not null)`),
+    // A mismatch names the landing that failed verification (S17).
+    check("payment_attempts_pyusd_mismatch_check", sql`${t.state} <> 'mismatch' or ${t.pyusdMismatchSignature} is not null`),
     check("payment_attempts_pyusd_hints_check", sql`jsonb_typeof(${t.pyusdHints}) = 'array' and jsonb_array_length(${t.pyusdHints}) <= 3`),
     // One PYUSD attempt per purchase, ever: its bytes are released once, and a lost response leaves
     // the attempt locked until recovery, never a second preparation.
@@ -731,6 +748,61 @@ export const pyusdRates = pgTable(
   (t) => [
     check("pyusd_rates_bounds_check", sql`${t.atomicPerSgd} between 1 and 10000000`),
     index("pyusd_rates_outlet_confirmed_idx").on(t.outletId, t.confirmedAt),
+  ],
+);
+
+// Extra transfers (S17; Gate 2 fix M; Gate 3 ExtraTransfer): every other successful landing that
+// carries an attempt's reference, found by its window scan. A row never changes the attempt, the
+// purchase or the bound evidence. The refund reference is recorded out of band by the operator act
+// record-extra-transfer-refund, with migration credentials: neither the web nor the maintenance role
+// may write it, and recording it changes no payment state.
+export const PYUSD_EXTRA_VERIFICATIONS = [
+  "verified",
+  "metadata_incomplete",
+  "account_keys_unresolved",
+  "blockhash_mismatch",
+  "extra_signer",
+  "fee_payer_mismatch",
+  "transfer_count",
+  "mint_mismatch",
+  "decimals_mismatch",
+  "source_mismatch",
+  "destination_mismatch",
+  "amount_mismatch",
+  "memo_count",
+  "fee_nonzero_at_execution",
+  "balance_delta_mismatch",
+  "outer_instruction_not_allowlisted",
+  "lighthouse_not_assertion",
+  "inner_program_not_allowlisted",
+  "inner_instruction_not_allowlisted",
+] as const;
+
+export const pyusdExtraTransfers = pgTable(
+  "pyusd_extra_transfers",
+  {
+    id: text("id").primaryKey(),
+    attemptId: text("attempt_id")
+      .notNull()
+      .references(() => paymentAttempts.id),
+    signature: text("signature").notNull(),
+    slot: bigint("slot", { mode: "bigint" }).notNull(),
+    // The destination's balance change in the transaction's own metadata; null when incomplete.
+    destinationDelta: bigint("destination_delta", { mode: "bigint" }),
+    verification: text("verification").notNull(),
+    foundAt: timestamp("found_at", { withTimezone: true }).notNull(),
+    refundReference: text("refund_reference"),
+    refundRecordedAt: timestamp("refund_recorded_at", { withTimezone: true }),
+    refundRecordedByUserId: text("refund_recorded_by_user_id").references(() => user.id),
+  },
+  (t) => [
+    // A resumed scan cannot record one landing twice.
+    uniqueIndex("pyusd_extra_transfers_attempt_signature_unique").on(t.attemptId, t.signature),
+    check("pyusd_extra_transfers_verification_check", sql`${t.verification} in (${sql.raw(PYUSD_EXTRA_VERIFICATIONS.map((v) => `'${v}'`).join(", "))})`),
+    check(
+      "pyusd_extra_transfers_refund_check",
+      sql`(${t.refundReference} is null and ${t.refundRecordedAt} is null and ${t.refundRecordedByUserId} is null) or (length(btrim(${t.refundReference})) > 0 and ${t.refundRecordedAt} is not null and ${t.refundRecordedByUserId} is not null)`,
+    ),
   ],
 );
 
