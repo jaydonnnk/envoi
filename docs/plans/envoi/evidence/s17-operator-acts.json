@@ -1,0 +1,65 @@
+{
+ "label": "FIXTURE rows in a disposable local database; every signature is a FIXTURE value, not a real devnet transaction",
+ "recordedAt": "2026-10-18",
+ "commands": "npx tsx src/operator/cli.ts (the real CLI, through node_modules/.bin/tsx with --tsconfig) from an empty scratch working directory (no .env.local) under env -i with MIGRATION_DATABASE_URL = the disposable database's admin URL; operator and merchant emails are FIXTURE example.test logins, not recorded here",
+ "refusalsObserved": [
+  "resolve-pyusd-mismatch naming the unflagged FIXTURE merchant account: exit 1, 'does not hold the operator flag; nothing changed'",
+  "resolve-pyusd-mismatch without an evidence reference: exit 1, 'An evidence reference is required; nothing changed.'",
+  "record-extra-transfer-refund with a blank reference: exit 1, 'An out-of-band refund reference is required; nothing changed.'"
+ ],
+ "audit": [
+  {
+   "at": "2026-10-18T07:01:46.417Z",
+   "actor": "operator:usr_zqts5dmigqt36z5ehrjy4cdsd4",
+   "action": "pyusd_mismatch_resolved_unpaid",
+   "purchase_id": "pur_aeefp4czx2jf32t5pgdnhvht7i",
+   "attempt_id": "att_hl2ayyqpeulxlgvbg67x7zlwsa",
+   "operator_visible": true,
+   "details": {
+    "reason": "FIXTURE: amount mismatch, no tokens kept",
+    "evidenceRef": "FIXTURE-evidence-001",
+    "operatorUserId": "usr_zqts5dmigqt36z5ehrjy4cdsd4"
+   }
+  },
+  {
+   "at": "2026-10-18T07:01:47.125Z",
+   "actor": "operator:usr_zqts5dmigqt36z5ehrjy4cdsd4",
+   "action": "pyusd_extra_transfer_refund_recorded",
+   "purchase_id": "pur_iegiectl5cojvgkqtp7mtvzlhu",
+   "attempt_id": "att_6bhnr5kglmmrgyfpwjcds3he6e",
+   "operator_visible": true,
+   "details": {
+    "reason": "FIXTURE: buyer paid twice",
+    "signature": "EyFYDWDhksPYpRk3DLzeW4izQagJZte6bKCQFagLYBdtJyaEyjbQpAWCbqDhHVymzjPJ4vdeHG1HHQp1qi6FhZD",
+    "evidenceRef": "FIXTURE-refund-ref-001",
+    "operatorUserId": "usr_zqts5dmigqt36z5ehrjy4cdsd4"
+   }
+  }
+ ],
+ "mismatchAfter": {
+  "id": "att_hl2ayyqpeulxlgvbg67x7zlwsa",
+  "state": "closed_unpaid",
+  "outcome_reason": "operator_resolved_unpaid",
+  "pyusd_mismatch_signature": "d69ZJoUyxL1FXgkWtDz63ane8kW2t8jfcUg7uAfne4JxDbyscQ2trLiboUu8QHs1EofG6JiVeAmE4jBHfq9jomY",
+  "scan_complete": "true",
+  "purchase_id": "pur_aeefp4czx2jf32t5pgdnhvht7i",
+  "purchase_state": "unpaid_closed"
+ },
+ "refundAfter": {
+  "id": "att_6bhnr5kglmmrgyfpwjcds3he6e",
+  "state": "confirmed",
+  "pyusd_finalized_signature": "DojKwxnUhDMfqJr7ryzgD9FKnnNXbz1Axd1nUsCtk5v9NK2UKB3YVjYboRsJbTZiFFgmeRzkqjkkviAGGefeeBC",
+  "purchase_id": "pur_iegiectl5cojvgkqtp7mtvzlhu",
+  "purchase_state": "paid",
+  "signature": "EyFYDWDhksPYpRk3DLzeW4izQagJZte6bKCQFagLYBdtJyaEyjbQpAWCbqDhHVymzjPJ4vdeHG1HHQp1qi6FhZD",
+  "refund_reference": "FIXTURE-refund-ref-001",
+  "refund_recorded_at": "2026-10-18T07:01:47.125Z",
+  "refund_recorded_by_user_id": "usr_zqts5dmigqt36z5ehrjy4cdsd4"
+ },
+ "operatorGrants": [
+  {
+   "user_id": "usr_zqts5dmigqt36z5ehrjy4cdsd4",
+   "granted_at": "2026-10-18T06:55:11.292Z"
+  }
+ ]
+}

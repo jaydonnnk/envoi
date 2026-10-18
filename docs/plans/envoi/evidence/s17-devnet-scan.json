@@ -1,0 +1,154 @@
+{
+ "label": "FIXTURE copy of the phone attempt (hint withheld) in a disposable local database; the transfer read is real devnet, read-only",
+ "recordedAt": "2026-10-18",
+ "command": "compiled runner (npm run runner:build) started with node --import <repo>/.maintenance-build/src/maintenance/resolve-hook.js <repo>/.maintenance-build/src/maintenance/run.js from an empty scratch working directory (no .env.local), env -i with MAINTENANCE_DATABASE_URL = the disposable database's envoi_maintenance URL, SOLANA_RPC_URL=https://api.devnet.solana.com, ENVOI_ENVIRONMENT=local, LOG_LEVEL=info and FIXTURE PayPal names; exit code 0",
+ "seed": ".maintenance-build/s17-devnet-scan-seed.mts (ignored): FIXTURE outlet, destination, rate and pending purchase; the attempt copies the Neon phone attempt pur_b6bf45fmxlulegnn26a4pl5zkq's public fields from a READ ONLY read, with pyusd_hints = []",
+ "runnerLog": [
+  {
+   "at": "2026-10-18T06:51:03.456Z",
+   "level": "info",
+   "event": "maintenance_capacity",
+   "runId": "mnt_wkf6lw4uldhiwph6ttwk45afme",
+   "databaseSizeBytes": 10049215
+  },
+  {
+   "at": "2026-10-18T06:51:06.112Z",
+   "level": "info",
+   "event": "maintenance_reconcile_pyusd",
+   "runId": "mnt_wkf6lw4uldhiwph6ttwk45afme",
+   "attemptId": "att_tpasjzaxqdfm2cob4a5pnqfugy",
+   "outcome": "scan_complete"
+  },
+  {
+   "at": "2026-10-18T06:51:06.117Z",
+   "level": "info",
+   "event": "maintenance_sessions_purged",
+   "runId": "mnt_wkf6lw4uldhiwph6ttwk45afme",
+   "deleted": 0
+  },
+  {
+   "at": "2026-10-18T06:51:06.118Z",
+   "level": "info",
+   "event": "maintenance_run_finished",
+   "runId": "mnt_wkf6lw4uldhiwph6ttwk45afme",
+   "trigger": "manual",
+   "startedAt": "2026-10-18T06:51:03.422Z",
+   "finishedAt": "2026-10-18T06:51:06.117Z",
+   "tasks": "heartbeat:ok:1 record_capacity:ok:1 reconcile_attempts:ok:0 reconcile_pyusd_attempts:ok:1 close_expired_reviews:ok:0 purge_expired_sessions:ok:0"
+  }
+ ],
+ "rpcLimiterCalls": 7,
+ "attempt": {
+  "id": "att_tpasjzaxqdfm2cob4a5pnqfugy",
+  "purchase_id": "pur_uheixuvnii5p3mase7vq7my5xq",
+  "rail": "pyusd",
+  "state": "confirmed",
+  "pyusd_reference": "3Y9LaXsrH3YZeUZwgJwCqv",
+  "pyusd_hints": [],
+  "pyusd_finalized_signature": "2RAZudPogRpLjmjir4D8qTF5sGRsQLcP1MH31sDNDqHgpWFYkqVSH65QJuKjUVQzTHhSGxiBjx22eHX27KrNAUnr",
+  "pyusd_verified_at": "2026-10-18T06:51:06.098Z",
+  "pyusd_scan": {
+   "lastGap": null,
+   "pagesRead": 1,
+   "beforeCursor": "2AcWTpJWtiLKBNS36vL9UyTV9goYMbR4tajb8aDVvnmNAwHbJvYeJA65oZbdDnx2EiptJVT1gwYbPZRnXGkw7cUM",
+   "newestSignature": "2RAZudPogRpLjmjir4D8qTF5sGRsQLcP1MH31sDNDqHgpWFYkqVSH65QJuKjUVQzTHhSGxiBjx22eHX27KrNAUnr",
+   "candidatesChecked": 1,
+   "reachedBeforePreparation": true,
+   "startedAtFinalizedHeight": "499565209"
+  },
+  "pyusd_mismatch_signature": null,
+  "pyusd_last_valid_block_height": "499349053",
+  "pyusd_preparation_slot": "512133440",
+  "pyusd_atomic_amount": "1800000",
+  "pyusd_destination_token_account": "4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14",
+  "outcome_reason": null
+ },
+ "purchase": {
+  "id": "pur_uheixuvnii5p3mase7vq7my5xq",
+  "state": "paid",
+  "rail": "pyusd",
+  "total_sgd_cents": 180,
+  "pyusd_atomic_amount": "1800000"
+ },
+ "audit": [
+  {
+   "at": "2026-10-18T06:51:04.647Z",
+   "actor": "maintenance",
+   "action": "pyusd_attempt_expired",
+   "purchase_id": "pur_uheixuvnii5p3mase7vq7my5xq",
+   "attempt_id": "att_tpasjzaxqdfm2cob4a5pnqfugy",
+   "operator_visible": false,
+   "details": {
+    "finalizedBlockHeight": "499565209",
+    "lastValidBlockHeight": "499349053"
+   }
+  },
+  {
+   "at": "2026-10-18T06:51:06.098Z",
+   "actor": "maintenance",
+   "action": "pyusd_transfer_confirmed",
+   "purchase_id": "pur_uheixuvnii5p3mase7vq7my5xq",
+   "attempt_id": "att_tpasjzaxqdfm2cob4a5pnqfugy",
+   "operator_visible": false,
+   "details": {
+    "slot": "512133468",
+    "source": "window_scan",
+    "signature": "2RAZudPogRpLjmjir4D8qTF5sGRsQLcP1MH31sDNDqHgpWFYkqVSH65QJuKjUVQzTHhSGxiBjx22eHX27KrNAUnr",
+    "destination": "4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14",
+    "atomicAmount": "1800000"
+   }
+  }
+ ],
+ "extraTransfers": [],
+ "maintenanceRuns": [
+  {
+   "id": "mnt_wkf6lw4uldhiwph6ttwk45afme",
+   "trigger": "manual",
+   "status": "ok",
+   "started_at": "2026-10-18T06:51:03.422Z",
+   "finished_at": "2026-10-18T06:51:06.117Z",
+   "report": {
+    "tasks": [
+     {
+      "name": "heartbeat",
+      "reason": null,
+      "status": "ok",
+      "processed": 1
+     },
+     {
+      "name": "record_capacity",
+      "reason": null,
+      "status": "ok",
+      "processed": 1
+     },
+     {
+      "name": "reconcile_attempts",
+      "reason": null,
+      "status": "ok",
+      "processed": 0
+     },
+     {
+      "name": "reconcile_pyusd_attempts",
+      "reason": null,
+      "status": "ok",
+      "processed": 1
+     },
+     {
+      "name": "close_expired_reviews",
+      "reason": null,
+      "status": "ok",
+      "processed": 0
+     },
+     {
+      "name": "purge_expired_sessions",
+      "reason": null,
+      "status": "ok",
+      "processed": 0
+     }
+    ],
+    "operatorVisible": false
+   }
+  }
+ ],
+ "database": "envoi_t_s17devnet_e2082df7 (dropped after this read)"
+}
