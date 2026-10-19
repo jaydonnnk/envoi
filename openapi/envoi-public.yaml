@@ -1,0 +1,151 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Envoi public read API",
+    "version": "1.0.0",
+    "description": "Hand-written description of Envoi's two public read routes: the list of published shops and one shop's published menu. Envoi is a test environment: shops marked isDemoFixture are seeded demo fixtures, and payments use PayPal sandbox test money only. Nothing in this API pays, approves or prices a purchase; a buyer's price is always recalculated by Envoi at review. Prices are whole Singapore cents, and an unknown price or availability is null, never zero or false. This file is written in JSON syntax, which is valid YAML 1.2, so it can be read without a YAML library. The envelope flag ok is typed boolean without a literal value because the APIMatic TypeScript generator (CLI 2.0.0-beta.6, codegen v4) turns a boolean enum or const into the string \"True\" or \"False\"."
+  },
+  "servers": [
+    { "url": "https://envoi-helx.onrender.com", "description": "Render test deployment" },
+    { "url": "http://localhost:3100", "description": "Local test server" }
+  ],
+  "paths": {
+    "/api/v1/outlets": {
+      "get": {
+        "operationId": "listOutlets",
+        "summary": "List published shops",
+        "description": "Returns up to 50 shops that have a published, confirmed menu, ordered by name and then id. A shop without a published menu is not listed.",
+        "tags": ["Outlets"],
+        "responses": {
+          "200": {
+            "description": "The published shops.",
+            "headers": { "Cache-Control": { "$ref": "#/components/headers/PublicShortCache" } },
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/OutletListResponse" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/outlets/{id}/menu": {
+      "get": {
+        "operationId": "getOutletMenu",
+        "summary": "Read a shop's published menu",
+        "description": "Returns the shop and the items of its published, confirmed menu revision in menu order. An unknown shop and a shop without a published menu both answer 404 not_found, so they cannot be told apart.",
+        "tags": ["Outlets"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The shop id, as listed by listOutlets.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The shop's published menu.",
+            "headers": { "Cache-Control": { "$ref": "#/components/headers/PublicShortCache" } },
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MenuResponse" } } }
+          },
+          "404": {
+            "description": "The shop is unknown or has no published menu.",
+            "headers": { "Cache-Control": { "$ref": "#/components/headers/NoStore" } },
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/NotFoundResponse" } } }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "headers": {
+      "PublicShortCache": {
+        "description": "Public read, cacheable for 30 seconds.",
+        "required": true,
+        "schema": { "type": "string", "enum": ["public, max-age=30"] }
+      },
+      "NoStore": {
+        "description": "Error answers are never cached.",
+        "required": true,
+        "schema": { "type": "string", "enum": ["no-store"] }
+      }
+    },
+    "schemas": {
+      "OutletSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "area", "isDemoFixture"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^out_[a-z2-7]{26}$" },
+          "name": { "type": "string" },
+          "area": { "type": "string" },
+          "isDemoFixture": { "type": "boolean", "description": "True for a seeded demo fixture shop, which is not a real business." }
+        }
+      },
+      "MenuItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "unitSgdCents", "available"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^itm_[a-z2-7]{26}$" },
+          "name": { "type": "string" },
+          "unitSgdCents": { "type": ["integer", "null"], "minimum": 0, "description": "Unit price in Singapore cents; null when the price is unknown." },
+          "available": { "type": ["boolean", "null"], "description": "Merchant-supplied availability; null when unknown." }
+        }
+      },
+      "OutletList": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["outlets"],
+        "properties": {
+          "outlets": { "type": "array", "items": { "$ref": "#/components/schemas/OutletSummary" } }
+        }
+      },
+      "Menu": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["outlet", "menuRevisionId", "items"],
+        "properties": {
+          "outlet": { "$ref": "#/components/schemas/OutletSummary" },
+          "menuRevisionId": { "type": "string", "pattern": "^mrv_[a-z2-7]{26}$" },
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/MenuItem" } }
+        }
+      },
+      "OutletListResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ok", "data"],
+        "properties": {
+          "ok": { "type": "boolean", "description": "Always true on a 200 answer." },
+          "data": { "$ref": "#/components/schemas/OutletList" }
+        }
+      },
+      "MenuResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ok", "data"],
+        "properties": {
+          "ok": { "type": "boolean", "description": "Always true on a 200 answer." },
+          "data": { "$ref": "#/components/schemas/Menu" }
+        }
+      },
+      "NotFoundResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ok", "error"],
+        "properties": {
+          "ok": { "type": "boolean", "description": "Always false on an error answer." },
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["code", "message", "retryable", "details"],
+            "properties": {
+              "code": { "type": "string", "enum": ["not_found"] },
+              "message": { "type": "string" },
+              "retryable": { "type": "boolean", "description": "False: repeating the same read gives the same answer." },
+              "details": { "type": "object", "additionalProperties": false, "properties": {} }
+            }
+          }
+        }
+      }
+    }
+  }
+}
