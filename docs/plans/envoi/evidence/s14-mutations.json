@@ -1,0 +1,582 @@
+{
+ "branch": "envoi/slice-14-apimatic",
+ "base_commit": "bdfb892",
+ "uncommitted_changes": true,
+ "method": "Each definition in s14-mutation-defs.json applied alone by exact text replacement, its whole test file run with the vitest JSON reporter, every touched file restored and compared by SHA-256, then the whole file rerun. A proof needs the named row to fail on an AssertionError, a byte-identical restore and an all-passing rerun; other failing rows are recorded. The integration test runs the real public route handlers as envoi_web on a local PostgreSQL database built from the migrations, with DATABASE_URL removed, holding the seeded demo FIXTURE shop and one confirmed but unpublished FIXTURE shop. The unit test checks the contract validator on hand-built responses. Every definition here is an S14 test recorded in 00-status.md.",
+ "results": [
+  {
+   "id": "m01-rename-outlets-field",
+   "test": "public API matches its OpenAPI document",
+   "kind": "standalone",
+   "group": "public API contract",
+   "files": [
+    "src/app/api/v1/outlets/route.ts"
+   ],
+   "mutation": "Named mutation: the list route renames its outlets field to shops.",
+   "own_row": "failed",
+   "error": "AssertionError: list: expected [ \u2026(2) ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 1,
+   "proof": true
+  },
+  {
+   "id": "m02-rename-menu-field",
+   "test": "public API matches its OpenAPI document",
+   "kind": "standalone",
+   "group": "public API contract",
+   "files": [
+    "src/app/api/v1/outlets/[id]/menu/route.ts"
+   ],
+   "mutation": "Named mutation: the menu route renames menuRevisionId to revisionId.",
+   "own_row": "failed",
+   "error": "AssertionError: published menu: expected [ \u2026(2) ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 1,
+   "proof": true
+  },
+  {
+   "id": "m03-undocumented-error-code",
+   "test": "public API matches its OpenAPI document",
+   "kind": "standalone",
+   "group": "public API contract",
+   "files": [
+    "src/app/api/v1/outlets/[id]/menu/route.ts"
+   ],
+   "mutation": "The menu route answers an unknown shop with validation_failed (400) instead of not_found (404).",
+   "own_row": "failed",
+   "error": "AssertionError: unpublished menu: expected [ Array(1) ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 1,
+   "proof": true
+  },
+  {
+   "id": "m04-cache-header",
+   "test": "public API matches its OpenAPI document",
+   "kind": "standalone",
+   "group": "public API contract",
+   "files": [
+    "src/lib/http/respond.ts"
+   ],
+   "mutation": "Public reads are cached for 300 seconds instead of the documented 30.",
+   "own_row": "failed",
+   "error": "AssertionError: list: expected [ Array(1) ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 1,
+   "proof": true
+  },
+  {
+   "id": "m05-list-unpublished",
+   "test": "public API matches its OpenAPI document",
+   "kind": "standalone",
+   "group": "public API contract",
+   "files": [
+    "src/domain/outlets/search.ts"
+   ],
+   "mutation": "The list stops filtering on a published menu, so the unpublished shop is listed.",
+   "own_row": "failed",
+   "error": "AssertionError: list: expected 2 to be 1 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 1,
+   "proof": true
+  },
+  {
+   "id": "m06-menu-drops-item",
+   "test": "public API matches its OpenAPI document",
+   "kind": "standalone",
+   "group": "public API contract",
+   "files": [
+    "src/domain/outlets/search.ts"
+   ],
+   "mutation": "The menu read drops its first item; the body still fits the schema.",
+   "own_row": "failed",
+   "error": "AssertionError: published menu: expected 3 to be 4 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 1,
+   "proof": true
+  },
+  {
+   "id": "m07-unpublished-menu-readable",
+   "test": "public API matches its OpenAPI document",
+   "kind": "standalone",
+   "group": "public API contract",
+   "files": [
+    "src/domain/outlets/search.ts"
+   ],
+   "mutation": "The menu read joins any confirmed revision of the shop instead of the published one, so the unpublished shop answers 200 with a fitting body.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 200, 200, 200, 404 ] to deeply equal [ 200, 200, 404, 404 ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 1,
+   "proof": true
+  },
+  {
+   "id": "m08-document-overclaims",
+   "test": "public API matches its OpenAPI document",
+   "kind": "standalone",
+   "group": "public API contract",
+   "files": [
+    "openapi/envoi-public.yaml"
+   ],
+   "mutation": "The document gains a 500 response for listOutlets that no call exercises.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'GET /api/v1/outlets 200', \u2026(2) ] to deeply equal [ 'GET /api/v1/outlets 200', \u2026(3) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 1,
+   "proof": true
+  },
+  {
+   "id": "v01-required",
+   "test": "rejects missing required field",
+   "kind": "standalone",
+   "group": "OpenAPI contract validator",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "The validator ignores required.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 11,
+   "proof": true
+  },
+  {
+   "id": "v02-additional-properties",
+   "test": "rejects renamed field",
+   "kind": "standalone",
+   "group": "OpenAPI contract validator",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "The validator ignores additionalProperties: false.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 11,
+   "proof": true
+  },
+  {
+   "id": "v03-type",
+   "test": "rejects wrong type",
+   "kind": "standalone",
+   "group": "OpenAPI contract validator",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "The validator ignores type.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "rejects fractional cents",
+    "rejects null where not allowed"
+   ],
+   "other_errors": {
+    "rejects fractional cents": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+    "rejects null where not allowed": "AssertionError: expected [] to deeply equal [ Array(1) ]"
+   },
+   "same_group_others": [
+    "rejects fractional cents",
+    "rejects null where not allowed"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 11,
+   "proof": true
+  },
+  {
+   "id": "v04-null",
+   "test": "rejects null where not allowed",
+   "kind": "standalone",
+   "group": "OpenAPI contract validator",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "A null passes any type.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "accepts a fitting menu, including unknown price and availability"
+   ],
+   "other_errors": {
+    "accepts a fitting menu, including unknown price and availability": "AssertionError: expected [ \u2026(2) ] to deeply equal []"
+   },
+   "same_group_others": [
+    "accepts a fitting menu, including unknown price and availability"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 11,
+   "proof": true
+  },
+  {
+   "id": "v05-integer",
+   "test": "rejects fractional cents",
+   "kind": "standalone",
+   "group": "OpenAPI contract validator",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "Every number counts as an integer.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 11,
+   "proof": true
+  },
+  {
+   "id": "v06-minimum",
+   "test": "rejects negative cents",
+   "kind": "standalone",
+   "group": "OpenAPI contract validator",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "The validator ignores minimum.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 11,
+   "proof": true
+  },
+  {
+   "id": "v07-enum",
+   "test": "rejects enum",
+   "kind": "standalone",
+   "group": "OpenAPI contract validator",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "The validator ignores enum.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "checks status, headers and content type of a live response"
+   ],
+   "other_errors": {
+    "checks status, headers and content type of a live response": "AssertionError: expected [] to deeply equal [ Array(1) ]"
+   },
+   "same_group_others": [
+    "checks status, headers and content type of a live response"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 11,
+   "proof": true
+  },
+  {
+   "id": "v08-pattern",
+   "test": "rejects pattern",
+   "kind": "standalone",
+   "group": "OpenAPI contract validator",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "The validator ignores pattern.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 11,
+   "proof": true
+  },
+  {
+   "id": "v09-items",
+   "test": "rejects fractional cents",
+   "kind": "standalone",
+   "group": "OpenAPI contract validator",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "The validator does not descend into array items.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "rejects negative cents",
+    "rejects renamed field"
+   ],
+   "other_errors": {
+    "rejects negative cents": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+    "rejects renamed field": "AssertionError: expected [] to deeply equal [ Array(1) ]"
+   },
+   "same_group_others": [
+    "rejects negative cents",
+    "rejects renamed field"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 11,
+   "proof": true
+  },
+  {
+   "id": "v10-ref",
+   "test": "rejects missing required field",
+   "kind": "standalone",
+   "group": "OpenAPI contract validator",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "The validator does not follow $ref and stops checking.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "rejects enum",
+    "rejects fractional cents",
+    "rejects negative cents",
+    "rejects null where not allowed",
+    "rejects pattern",
+    "rejects renamed field",
+    "rejects wrong type"
+   ],
+   "other_errors": {
+    "rejects enum": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+    "rejects fractional cents": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+    "rejects negative cents": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+    "rejects null where not allowed": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+    "rejects pattern": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+    "rejects renamed field": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+    "rejects wrong type": "AssertionError: expected [] to deeply equal [ Array(1) ]"
+   },
+   "same_group_others": [
+    "rejects enum",
+    "rejects fractional cents",
+    "rejects negative cents",
+    "rejects null where not allowed",
+    "rejects pattern",
+    "rejects renamed field",
+    "rejects wrong type"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 11,
+   "proof": true
+  },
+  {
+   "id": "v11-unknown-keyword",
+   "test": "refuses a schema keyword it does not understand",
+   "kind": "standalone",
+   "group": "OpenAPI contract validator",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "An unknown keyword is silently skipped.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [Function] to throw an error",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 11,
+   "proof": true
+  },
+  {
+   "id": "v12-undocumented-status",
+   "test": "checks status, headers and content type of a live response",
+   "kind": "standalone",
+   "group": "OpenAPI contract validator",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "An undocumented status passes.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 11,
+   "proof": true
+  },
+  {
+   "id": "v13-missing-header",
+   "test": "checks status, headers and content type of a live response",
+   "kind": "standalone",
+   "group": "OpenAPI contract validator",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "A missing required header passes.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ 'header Cache-Control: missing' ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 11,
+   "proof": true
+  },
+  {
+   "id": "v14-header-value",
+   "test": "checks status, headers and content type of a live response",
+   "kind": "standalone",
+   "group": "OpenAPI contract validator",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "A header value is not checked.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 11,
+   "proof": true
+  },
+  {
+   "id": "v15-content-type",
+   "test": "checks status, headers and content type of a live response",
+   "kind": "standalone",
+   "group": "OpenAPI contract validator",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "An undocumented content type passes.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 11,
+   "proof": true
+  },
+  {
+   "id": "v16-undocumented-operation",
+   "test": "checks status, headers and content type of a live response",
+   "kind": "standalone",
+   "group": "OpenAPI contract validator",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "An undocumented operation passes.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 11,
+   "proof": true
+  },
+  {
+   "id": "m09-success-ok-false",
+   "test": "public API matches its OpenAPI document",
+   "kind": "standalone",
+   "group": "public API contract",
+   "files": [
+    "src/lib/http/respond.ts"
+   ],
+   "mutation": "Every success envelope says ok: false; the document types ok as a plain boolean, so only the test's ok assertion holds it.",
+   "own_row": "failed",
+   "error": "AssertionError: list: expected false to be true // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 1,
+   "proof": true
+  },
+  {
+   "id": "m10-error-ok-true",
+   "test": "public API matches its OpenAPI document",
+   "kind": "standalone",
+   "group": "public API contract",
+   "files": [
+    "src/lib/http/respond.ts"
+   ],
+   "mutation": "Every error envelope says ok: true.",
+   "own_row": "failed",
+   "error": "AssertionError: unpublished menu: expected true to be false // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 1,
+   "proof": true
+  }
+ ]
+}

@@ -1,0 +1,10 @@
+TEST ENVIRONMENT at http://localhost:3100: demo fixture shops, PayPal sandbox test money only.
+listOutlets: 1 published shop(s)
+  out_cm44qas2qzzqylrwmixv3qa4bi  Lorong Demo Kopi (Tanjong Pagar)  [DEMO FIXTURE]
+getOutletMenu(out_cm44qas2qzzqylrwmixv3qa4bi): revision mrv_7dsoutfutcs36dwplgf7xyzggm, 4 item(s)
+  Kopi O  S$1.60  available
+  Kaya toast set  S$4.50  available
+  Teh C peng  S$2.20  available
+  Soft-boiled eggs (2)  S$2.00  available
+getOutletMenu(out_4m64r5wzcl6ohxbutpkbppreky): 404 not_found, "That shop is not on Envoi."
+PASS

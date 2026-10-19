@@ -1,0 +1,3 @@
+PASS list: GET /api/v1/outlets 200
+PASS demo fixture menu: GET /api/v1/outlets/out_cm44qas2qzzqylrwmixv3qa4bi/menu 200
+PASS unknown shop: GET /api/v1/outlets/out_jw3hny46aolv6uljy5rimrz3th/menu 404

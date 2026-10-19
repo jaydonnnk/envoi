@@ -1,0 +1,11 @@
+TEST ENVIRONMENT at https://envoi-helx.onrender.com: demo fixture shops, PayPal sandbox test money only.
+listOutlets: 2 published shop(s)
+  out_wgoyp6kgg75472b6s772dplgoq  Lorong Demo Kopi (Tanjong Pagar)  [DEMO FIXTURE]
+  out_vrlbnc3zylbrr6g2drovaiqkfu  Test Shop (Test Area)  [DEMO FIXTURE]
+getOutletMenu(out_wgoyp6kgg75472b6s772dplgoq): revision mrv_ul7mgjlmivuukefojwyxekjm5y, 4 item(s)
+  Kopi O  S$1.60  available
+  Kaya toast set  S$4.50  available
+  Teh C peng  S$2.20  available
+  Soft-boiled eggs (2)  S$2.00  available
+getOutletMenu(out_wzkcyc5quy73kjvrsuoufap25k): 404 not_found, "That shop is not on Envoi."
+PASS

@@ -1,0 +1,366 @@
+[
+ {
+  "id": "m01-rename-outlets-field",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "public API matches its OpenAPI document",
+  "kind": "standalone",
+  "mutation": "Named mutation: the list route renames its outlets field to shops.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/outlets/route.ts",
+    "old": "httpOk({ outlets }, ",
+    "new": "httpOk({ shops: outlets }, "
+   }
+  ]
+ },
+ {
+  "id": "m02-rename-menu-field",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "public API matches its OpenAPI document",
+  "kind": "standalone",
+  "mutation": "Named mutation: the menu route renames menuRevisionId to revisionId.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/outlets/[id]/menu/route.ts",
+    "old": "return httpOk(menu, ",
+    "new": "const { menuRevisionId: revisionId, ...rest } = menu;\n  return httpOk({ ...rest, revisionId }, "
+   }
+  ]
+ },
+ {
+  "id": "m03-undocumented-error-code",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "public API matches its OpenAPI document",
+  "kind": "standalone",
+  "mutation": "The menu route answers an unknown shop with validation_failed (400) instead of not_found (404).",
+  "edits": [
+   {
+    "file": "src/app/api/v1/outlets/[id]/menu/route.ts",
+    "old": "appError(\"not_found\", ",
+    "new": "appError(\"validation_failed\", "
+   }
+  ]
+ },
+ {
+  "id": "m04-cache-header",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "public API matches its OpenAPI document",
+  "kind": "standalone",
+  "mutation": "Public reads are cached for 300 seconds instead of the documented 30.",
+  "edits": [
+   {
+    "file": "src/lib/http/respond.ts",
+    "old": "\"public-short\": \"public, max-age=30\"",
+    "new": "\"public-short\": \"public, max-age=300\""
+   }
+  ]
+ },
+ {
+  "id": "m05-list-unpublished",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "public API matches its OpenAPI document",
+  "kind": "standalone",
+  "mutation": "The list stops filtering on a published menu, so the unpublished shop is listed.",
+  "edits": [
+   {
+    "file": "src/domain/outlets/search.ts",
+    "old": ".where(isNotNull(outlets.publishedMenuRevisionId))",
+    "new": ".where(undefined)"
+   }
+  ]
+ },
+ {
+  "id": "m06-menu-drops-item",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "public API matches its OpenAPI document",
+  "kind": "standalone",
+  "mutation": "The menu read drops its first item; the body still fits the schema.",
+  "edits": [
+   {
+    "file": "src/domain/outlets/search.ts",
+    "old": "items: rows.flatMap(",
+    "new": "items: rows.slice(1).flatMap("
+   }
+  ]
+ },
+ {
+  "id": "m07-unpublished-menu-readable",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "public API matches its OpenAPI document",
+  "kind": "standalone",
+  "mutation": "The menu read joins any confirmed revision of the shop instead of the published one, so the unpublished shop answers 200 with a fitting body.",
+  "edits": [
+   {
+    "file": "src/domain/outlets/search.ts",
+    "old": "and(eq(menuRevisions.id, outlets.publishedMenuRevisionId), eq(menuRevisions.status, \"confirmed\")))\n    .leftJoin(",
+    "new": "and(eq(menuRevisions.outletId, outlets.id), eq(menuRevisions.status, \"confirmed\")))\n    .leftJoin("
+   }
+  ]
+ },
+ {
+  "id": "m08-document-overclaims",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "public API matches its OpenAPI document",
+  "kind": "standalone",
+  "mutation": "The document gains a 500 response for listOutlets that no call exercises.",
+  "edits": [
+   {
+    "file": "openapi/envoi-public.yaml",
+    "old": "\"responses\": {\n          \"200\": {\n            \"description\": \"The published shops.\",",
+    "new": "\"responses\": {\n          \"500\": { \"description\": \"Server error.\", \"content\": {} },\n          \"200\": {\n            \"description\": \"The published shops.\","
+   }
+  ]
+ },
+ {
+  "id": "v01-required",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects missing required field",
+  "kind": "standalone",
+  "mutation": "The validator ignores required.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "if (!(name in record)) errors.push",
+    "new": "if (false) errors.push"
+   }
+  ]
+ },
+ {
+  "id": "v02-additional-properties",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects renamed field",
+  "kind": "standalone",
+  "mutation": "The validator ignores additionalProperties: false.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "else if (schema.additionalProperties === false) errors.push",
+    "new": "else if (false) errors.push"
+   }
+  ]
+ },
+ {
+  "id": "v03-type",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects wrong type",
+  "kind": "standalone",
+  "mutation": "The validator ignores type.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "if (!allowed.includes(actual) && ",
+    "new": "if (false && !allowed.includes(actual) && "
+   }
+  ]
+ },
+ {
+  "id": "v04-null",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects null where not allowed",
+  "kind": "standalone",
+  "mutation": "A null passes any type.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "if (value === null) return \"null\";",
+    "new": "if (value === null) return \"string\";"
+   }
+  ]
+ },
+ {
+  "id": "v05-integer",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects fractional cents",
+  "kind": "standalone",
+  "mutation": "Every number counts as an integer.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "return Number.isInteger(value) ? \"integer\" : \"number\";",
+    "new": "return \"integer\";"
+   }
+  ]
+ },
+ {
+  "id": "v06-minimum",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects negative cents",
+  "kind": "standalone",
+  "mutation": "The validator ignores minimum.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "value < schema.minimum)",
+    "new": "value < schema.minimum - 10)"
+   }
+  ]
+ },
+ {
+  "id": "v07-enum",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects enum",
+  "kind": "standalone",
+  "mutation": "The validator ignores enum.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "!schema.enum.some((option) => option === value)",
+    "new": "false"
+   }
+  ]
+ },
+ {
+  "id": "v08-pattern",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects pattern",
+  "kind": "standalone",
+  "mutation": "The validator ignores pattern.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "!new RegExp(schema.pattern, \"u\").test(value)",
+    "new": "false"
+   }
+  ]
+ },
+ {
+  "id": "v09-items",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects fractional cents",
+  "kind": "standalone",
+  "mutation": "The validator does not descend into array items.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "if (Array.isArray(value) && schema.items) {",
+    "new": "if (false) {"
+   }
+  ]
+ },
+ {
+  "id": "v10-ref",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects missing required field",
+  "kind": "standalone",
+  "mutation": "The validator does not follow $ref and stops checking.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "if (typeof schema.$ref === \"string\") return validate(document, resolve(document, schema.$ref), value, path);",
+    "new": "if (typeof schema.$ref === \"string\") return [];"
+   }
+  ]
+ },
+ {
+  "id": "v11-unknown-keyword",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "refuses a schema keyword it does not understand",
+  "kind": "standalone",
+  "mutation": "An unknown keyword is silently skipped.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "if (!KNOWN.has(keyword)) throw",
+    "new": "if (false) throw"
+   }
+  ]
+ },
+ {
+  "id": "v12-undocumented-status",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "checks status, headers and content type of a live response",
+  "kind": "standalone",
+  "mutation": "An undocumented status passes.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "if (!documented) return [`${method} ${template} answered ${response.status}, which is not documented`];",
+    "new": "if (!documented) return [];"
+   }
+  ]
+ },
+ {
+  "id": "v13-missing-header",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "checks status, headers and content type of a live response",
+  "kind": "standalone",
+  "mutation": "A missing required header passes.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "if (header.required) errors.push(`header ${name}: missing`);",
+    "new": "if (false) errors.push(`header ${name}: missing`);"
+   }
+  ]
+ },
+ {
+  "id": "v14-header-value",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "checks status, headers and content type of a live response",
+  "kind": "standalone",
+  "mutation": "A header value is not checked.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "errors.push(...validate(document, header.schema, value, `header ${name}`));",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "v15-content-type",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "checks status, headers and content type of a live response",
+  "kind": "standalone",
+  "mutation": "An undocumented content type passes.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "if (!media) return [...errors, `content-type ${contentType || \"(none)\"} is not documented for ${response.status}`];",
+    "new": "if (!media) return errors;"
+   }
+  ]
+ },
+ {
+  "id": "v16-undocumented-operation",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "checks status, headers and content type of a live response",
+  "kind": "standalone",
+  "mutation": "An undocumented operation passes.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "if (!operation) return [`${method} ${template} is not documented`];",
+    "new": "if (!operation) return [];"
+   }
+  ]
+ },
+ {
+  "id": "m09-success-ok-false",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "public API matches its OpenAPI document",
+  "kind": "standalone",
+  "mutation": "Every success envelope says ok: false; the document types ok as a plain boolean, so only the test's ok assertion holds it.",
+  "edits": [
+   {
+    "file": "src/lib/http/respond.ts",
+    "old": "Response.json({ ok: true, data: body }",
+    "new": "Response.json({ ok: false, data: body }"
+   }
+  ]
+ },
+ {
+  "id": "m10-error-ok-true",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "public API matches its OpenAPI document",
+  "kind": "standalone",
+  "mutation": "Every error envelope says ok: true.",
+  "edits": [
+   {
+    "file": "src/lib/http/respond.ts",
+    "old": "{ ok: false, error: {",
+    "new": "{ ok: true, error: {"
+   }
+  ]
+ }
+]
