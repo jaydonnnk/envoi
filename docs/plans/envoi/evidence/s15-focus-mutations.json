@@ -1,0 +1,97 @@
+{
+ "method": "Run in an rsync copy of the envoi/slice-15-release working tree without .env.local, with a cp -cR copy of node_modules and DATABASE_URL removed. Each definition in s15-focus-mutation-defs.json is applied alone by exact text replacement, every touched file restored and compared by SHA-256. Vitest definitions: the named row must fail on an AssertionError and the whole file pass on rerun; other failing rows are recorded. Command definitions: the command must exit non-zero with the needle in its output, the control command must pass under the same mutation, and the command must pass on rerun.",
+ "results": [
+  {
+   "id": "f01-no-action",
+   "kind": "standalone",
+   "files": [
+    "src/lib/browser/focus.ts"
+   ],
+   "mutation": "Focus moves even when no action ran.",
+   "test": "does nothing when no action ran",
+   "group": "focus returns to the button after its action",
+   "own_row": "failed",
+   "error": "AssertionError: expected { focus: [Function focus] } to be null",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "f02-running",
+   "kind": "standalone",
+   "files": [
+    "src/lib/browser/focus.ts"
+   ],
+   "mutation": "Focus moves while the action is still running.",
+   "test": "does nothing while the action is still running",
+   "group": "focus returns to the button after its action",
+   "own_row": "failed",
+   "error": "AssertionError: expected { focus: [Function focus] } to be null",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "f03-elsewhere",
+   "kind": "standalone",
+   "files": [
+    "src/lib/browser/focus.ts"
+   ],
+   "mutation": "Focus is taken from a control the user moved to.",
+   "test": "leaves focus the user moved to another control",
+   "group": "focus returns to the button after its action",
+   "own_row": "failed",
+   "error": "AssertionError: expected { focus: [Function focus] } to be null",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "f04-null-active",
+   "kind": "standalone",
+   "files": [
+    "src/lib/browser/focus.ts"
+   ],
+   "mutation": "No focused element is treated as focus the user placed.",
+   "test": "returns focus to the button when the action ends with no focused element",
+   "group": "focus returns to the button after its action",
+   "own_row": "failed",
+   "error": "AssertionError: expected null to be { focus: [Function focus] } // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "f05-target",
+   "kind": "standalone",
+   "files": [
+    "src/lib/browser/focus.ts"
+   ],
+   "mutation": "Nothing is focused when focus fell to the body.",
+   "test": "returns focus to the button when the action ends with focus on the page body",
+   "group": "focus returns to the button after its action",
+   "own_row": "failed",
+   "error": "AssertionError: expected null to be { focus: [Function focus] } // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "returns focus to the button when the action ends with no focused element"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  }
+ ]
+}

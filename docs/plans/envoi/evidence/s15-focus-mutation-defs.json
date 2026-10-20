@@ -1,0 +1,72 @@
+[
+ {
+  "id": "f01-no-action",
+  "kind": "standalone",
+  "test_file": "tests/unit/restore-focus.test.ts",
+  "test": "does nothing when no action ran",
+  "mutation": "Focus moves even when no action ran.",
+  "edits": [
+   {
+    "file": "src/lib/browser/focus.ts",
+    "old": "if (!wasBusy || busy) return null;",
+    "new": "if (busy) return null;"
+   }
+  ]
+ },
+ {
+  "id": "f02-running",
+  "kind": "standalone",
+  "test_file": "tests/unit/restore-focus.test.ts",
+  "test": "does nothing while the action is still running",
+  "mutation": "Focus moves while the action is still running.",
+  "edits": [
+   {
+    "file": "src/lib/browser/focus.ts",
+    "old": "if (!wasBusy || busy) return null;",
+    "new": "if (!wasBusy) return null;"
+   }
+  ]
+ },
+ {
+  "id": "f03-elsewhere",
+  "kind": "standalone",
+  "test_file": "tests/unit/restore-focus.test.ts",
+  "test": "leaves focus the user moved to another control",
+  "mutation": "Focus is taken from a control the user moved to.",
+  "edits": [
+   {
+    "file": "src/lib/browser/focus.ts",
+    "old": "  if (active !== null && active !== body) return null;\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "f04-null-active",
+  "kind": "standalone",
+  "test_file": "tests/unit/restore-focus.test.ts",
+  "test": "returns focus to the button when the action ends with no focused element",
+  "mutation": "No focused element is treated as focus the user placed.",
+  "edits": [
+   {
+    "file": "src/lib/browser/focus.ts",
+    "old": "if (active !== null && active !== body) return null;",
+    "new": "if (active !== body) return null;"
+   }
+  ]
+ },
+ {
+  "id": "f05-target",
+  "kind": "standalone",
+  "test_file": "tests/unit/restore-focus.test.ts",
+  "test": "returns focus to the button when the action ends with focus on the page body",
+  "mutation": "Nothing is focused when focus fell to the body.",
+  "edits": [
+   {
+    "file": "src/lib/browser/focus.ts",
+    "old": "  return lastButton;\n}",
+    "new": "  return lastButton && null;\n}"
+   }
+  ]
+ }
+]
