@@ -240,13 +240,17 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
     A failure resolved without delay did not reproduce the loss, because React never committed the disabled state; those first checks were discarded as invalid.
   - **Not exercised in a browser [unknown]:** the receipt status check (shown only for an uncertain payment), handoff redemption, the rail switch, PYUSD pay and the signed-in merchant screens; they use the same hook.
 - **Drafts, 2026-10-21:** the [usability kit](usability/README.md) with its [timing sheet](usability/timing-sheet.csv) and [results record](usability/results.md), the [evidence pack](evidence-pack.md) and the [video script](video-script.md); none is a result.
+- **Idle cold first visit, 2026-10-21 [verified], S1 method** ([record](evidence/s15-cold-visit.json)): three visits to `/buy` on Render from Singapore at 17:45, 18:06 and 18:30 UTC, each after at least 21 idle minutes and away from the minute-17 maintenance run, all 200 with the fixture label.
+  Interactive page in 28.0, 28.0 and 28.7 s (S1: 26.1 to 36.2 s); derived Render wake about 25.1 to 25.3 s; database share 1.7, 1.6 and 2.3 s, far below the 18 s R12 threshold, so R12 stays accepted.
+  Boundary: Render serves `main`, whose application code is unchanged since `3801035`; the S15 focus fix is not deployed yet, and it changes no server path [hypothesis].
+- **Scheduled maintenance [unknown]:** the workflow is active on the default branch since 16:21 UTC on 2026-10-20, but no run fired at 17:17 or 18:17 UTC; GitHub documents that scheduled runs can be delayed or dropped.
 - **Work items:**
   - [x] History secret scan with an injected self-test, before any visibility change.
   - [x] Identifier review decision by the user.
   - [x] Repository public (the user), then `LICENSE` (MIT) and README.
   - [ ] `maintenance.yml` at hourly minute 17, shown running on a public runner: a run started by hand passed; a scheduled run is still to be shown.
   - [x] R2 recorded before the usability test.
-  - [ ] Idle cold first visit re-measured on the release build.
+  - [x] Idle cold first visit re-measured (application code of the release; the focus fix deploys with the final merge).
   - [x] Full suite, HTTP contract run, mobile and keyboard checks; the focus-loss finding fixed.
   - [ ] Gate 1 usability test with five first-time buyers.
   - [ ] Render, Neon, Actions, OpenAI and, if PYUSD is offered, devnet access through 16 Dec 2026.

@@ -1,0 +1,61 @@
+{
+ "measurement": "S15 re-measurement of an idle cold first visit, the S1 R12 method",
+ "recordedOn": "2026-10-21",
+ "client": {
+  "location": "Singapore, the same Mac as S1",
+  "machine": "macOS arm64, Node 24.21.0 fetch",
+  "script": "tests/e2e/latency.ts"
+ },
+ "target": {
+  "url": "https://envoi-helx.onrender.com/buy",
+  "render": "Render Free web service serving main; the application code is unchanged since 3801035, and the S15 focus fix on envoi/slice-15-release is not yet deployed",
+  "neon": "Neon Free, aws-us-east-2"
+ },
+ "coldConditions": "No request to Render for at least 21 minutes before each visit (none since the session started for cold-1; the visits are 21 and 23 minutes apart), and no Neon activity for at least 5 minutes: the hourly maintenance run at minute 17 was avoided, and no scheduled run fired during this window.",
+ "budgetMs": 180000,
+ "r12DatabaseThresholdMs": 18000,
+ "visits": [
+  {
+   "label": "cold-1",
+   "startedAt": "2026-10-20T17:45:07.705Z",
+   "status": 200,
+   "fixtureLabeled": true,
+   "interactiveMs": 28046,
+   "documentTtfbMs": 27172,
+   "documentTotalMs": 27176,
+   "assetCount": 6,
+   "serverMs": 1725,
+   "dbMs": 1723,
+   "warmHealthRttMs": 306,
+   "derivedRenderWakeMs": 25141
+  },
+  {
+   "label": "cold-2",
+   "startedAt": "2026-10-20T18:06:36.594Z",
+   "status": 200,
+   "fixtureLabeled": true,
+   "interactiveMs": 27960,
+   "documentTtfbMs": 27341,
+   "documentTotalMs": 27412,
+   "assetCount": 6,
+   "serverMs": 1719,
+   "dbMs": 1630,
+   "warmHealthRttMs": 337,
+   "derivedRenderWakeMs": 25285
+  },
+  {
+   "label": "cold-3",
+   "startedAt": "2026-10-20T18:30:05.390Z",
+   "status": 200,
+   "fixtureLabeled": true,
+   "interactiveMs": 28674,
+   "documentTtfbMs": 27809,
+   "documentTotalMs": 27813,
+   "assetCount": 6,
+   "serverMs": 2275,
+   "dbMs": 2271,
+   "warmHealthRttMs": 388,
+   "derivedRenderWakeMs": 25146
+  }
+ ]
+}
