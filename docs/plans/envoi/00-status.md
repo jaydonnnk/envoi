@@ -225,6 +225,13 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - **Maintenance on a public runner, 2026-10-21 [verified]:** run [`39456804524`](https://github.com/jaydonnnk/envoi/actions/runs/39456804524), started by hand, failed in 39 s with `Invalid maintenance configuration: ENVOI_ENVIRONMENT: Invalid option`, because the stored value was not exactly `sandbox`; the user re-entered it.
   Run [`39464794004`](https://github.com/jaydonnnk/envoi/actions/runs/39464794004), started by hand, passed in 40 s on Neon: maintenance run `mnt_bjcb5npqufqjlv66kipctikjri`, `heartbeat:ok:1 record_capacity:ok:1 reconcile_attempts:ok:4 reconcile_pyusd_attempts:ok:0 close_expired_reviews:ok:16 purge_expired_sessions:ok:5`.
   That run is recorded with trigger `scheduled` although it was started by hand, because the workflow always passed `--trigger=scheduled`; the branch now passes it only for a schedule, and the fix reaches `main` with the final merge.
+- **Full suite on `envoi/slice-15-release`, 2026-10-21 [verified]:** `typecheck`, `typecheck:client` and `lint` exit 0; 183 of 183 unit and 343 of 343 integration tests pass with the Neon names unset; `npm run build` with the FIXTURE environment exits 0; `scripts/scan-build.ts` finds no send method name in 196 built files; `tests/e2e/run-public-api.ts 3100` passes the contract check and the generated client.
+- **Screens and keyboard, 2026-10-21 [verified], on a local production build** (`next start` on a disposable database `envoi_s15_screens` with the demo FIXTURE shop and the fixture sandbox seller `FXTRSELLER2AB`, `ENVOI_ENVIRONMENT=sandbox`, `PYUSD_ENABLED` off), so Render stayed idle for the cold visits:
+  - At 390 px and 1280 px, `/buy`, the shop page and the review show the "TEST ENVIRONMENT" badge, the demo fixture, PayPal sandbox and devnet notice and the "Demo fixture" label, with no horizontal scroll (`scrollWidth` equals the viewport).
+  - Keyboard only: Tab reaches the shop link, Enter opens it, Tab and Enter add one Kopi O, Tab reaches Review with a visible focus ring, and Enter opens the server-priced review paid to the fixture seller.
+  - **Finding, not fixed:** when an action fails in place, focus is lost: the Review button disables itself while the request runs, so the browser moves focus to `<body>`, and after the refusal "This shop has no PayPal sandbox seller connected yet." the next Tab starts from the top of the page.
+    The same `disabled={busy}` pattern is on about 20 buttons across buyer and merchant screens; the fix is a cross-cutting change put to the user.
+- **Drafts, 2026-10-21:** the [usability kit](usability/README.md) with its [timing sheet](usability/timing-sheet.csv) and [results record](usability/results.md), the [evidence pack](evidence-pack.md) and the [video script](video-script.md); none is a result.
 - **Work items:**
   - [x] History secret scan with an injected self-test, before any visibility change.
   - [x] Identifier review decision by the user.
@@ -232,7 +239,7 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
   - [ ] `maintenance.yml` at hourly minute 17, shown running on a public runner: a run started by hand passed; a scheduled run is still to be shown.
   - [x] R2 recorded before the usability test.
   - [ ] Idle cold first visit re-measured on the release build.
-  - [ ] Full suite, HTTP contract run, mobile and keyboard checks.
+  - [x] Full suite, HTTP contract run, mobile and keyboard checks (one keyboard finding open).
   - [ ] Gate 1 usability test with five first-time buyers.
   - [ ] Render, Neon, Actions, OpenAI and, if PYUSD is offered, devnet access through 16 Dec 2026.
   - [ ] Evidence pack, video script, final merge, push and deploy.
