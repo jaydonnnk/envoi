@@ -229,8 +229,16 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - **Screens and keyboard, 2026-10-21 [verified], on a local production build** (`next start` on a disposable database `envoi_s15_screens` with the demo FIXTURE shop and the fixture sandbox seller `FXTRSELLER2AB`, `ENVOI_ENVIRONMENT=sandbox`, `PYUSD_ENABLED` off), so Render stayed idle for the cold visits:
   - At 390 px and 1280 px, `/buy`, the shop page and the review show the "TEST ENVIRONMENT" badge, the demo fixture, PayPal sandbox and devnet notice and the "Demo fixture" label, with no horizontal scroll (`scrollWidth` equals the viewport).
   - Keyboard only: Tab reaches the shop link, Enter opens it, Tab and Enter add one Kopi O, Tab reaches Review with a visible focus ring, and Enter opens the server-priced review paid to the fixture seller.
-  - **Finding, not fixed:** when an action fails in place, focus is lost: the Review button disables itself while the request runs, so the browser moves focus to `<body>`, and after the refusal "This shop has no PayPal sandbox seller connected yet." the next Tab starts from the top of the page.
-    The same `disabled={busy}` pattern is on about 20 buttons across buyer and merchant screens; the fix is a cross-cutting change put to the user.
+  - **Finding:** when an action fails in place, focus is lost: the Review button disables itself while the request runs, so the browser moves focus to `<body>`, and after the refusal "This shop has no PayPal sandbox seller connected yet." the next Tab starts from the top of the page.
+    The same `disabled={busy}` pattern is on about 20 buttons across buyer and merchant screens.
+- **Focus fix, 2026-10-21, scope chosen by the user:** "All ~20 buttons".
+  `src/lib/browser/focus.ts` adds `useRestoreFocus(busy)`: when an action ends and focus is on `<body>` or nowhere, focus returns to the last button that had focus; only buttons are remembered, so a phone's keyboard never opens, and focus the user moved elsewhere is never taken.
+  It is called in 19 places across 15 components (buyer: basket, text search, scan, review PayPal and rail switch, PYUSD pay, receipt status check, handoff redemption; merchant: sign-in and sign-out, outlet form, details, PayPal, publish, menu editor, photo import, SGQR sticker, PYUSD wallet, orders).
+  - Decision function `focusAfterAction`: 5 rows in `tests/unit/restore-focus.test.ts`, 5 of 5 mutations proved on an AssertionError with byte-identical restores ([definitions](evidence/s15-focus-mutation-defs.json), [runner](evidence/s15-focus-mutate.py), [results](evidence/s15-focus-mutations.json)).
+  - Wiring, browser evidence on the local production build, each action refused by a fetch failure delayed 800 ms: with the hook's `focus()` call removed (rebuilt), basket Review, Continue to PayPal, scan "Find the shop" and merchant "Sign in" each left focus on `<body>`; restored byte-identically (SHA-256 checked) and rebuilt, each kept focus on its own button.
+    Text search kept focus on a button with or without the hook, so it was not affected.
+    A failure resolved without delay did not reproduce the loss, because React never committed the disabled state; those first checks were discarded as invalid.
+  - **Not exercised in a browser [unknown]:** the receipt status check (shown only for an uncertain payment), handoff redemption, the rail switch, PYUSD pay and the signed-in merchant screens; they use the same hook.
 - **Drafts, 2026-10-21:** the [usability kit](usability/README.md) with its [timing sheet](usability/timing-sheet.csv) and [results record](usability/results.md), the [evidence pack](evidence-pack.md) and the [video script](video-script.md); none is a result.
 - **Work items:**
   - [x] History secret scan with an injected self-test, before any visibility change.
@@ -239,7 +247,7 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
   - [ ] `maintenance.yml` at hourly minute 17, shown running on a public runner: a run started by hand passed; a scheduled run is still to be shown.
   - [x] R2 recorded before the usability test.
   - [ ] Idle cold first visit re-measured on the release build.
-  - [x] Full suite, HTTP contract run, mobile and keyboard checks (one keyboard finding open).
+  - [x] Full suite, HTTP contract run, mobile and keyboard checks; the focus-loss finding fixed.
   - [ ] Gate 1 usability test with five first-time buyers.
   - [ ] Render, Neon, Actions, OpenAI and, if PYUSD is offered, devnet access through 16 Dec 2026.
   - [ ] Evidence pack, video script, final merge, push and deploy.
