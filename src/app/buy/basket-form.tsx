@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ensureBuyerSession, postJson } from "@/lib/browser/session";
 import { landingReview, requestReview, reviewNavigation, type Rail, type ReviewLine } from "./landing";
+import { useRestoreFocus } from "@/lib/browser/focus";
 
 export type BasketItem = { id: string; name: string; unitSgdCents: number | null; available: boolean | null };
 
@@ -47,6 +48,7 @@ export function BasketForm({
   );
   const [busy, setBusy] = useState(landing !== null);
   const [error, setError] = useState<string | null>(null);
+  useRestoreFocus(busy);
 
   const chosen = items.filter((item) => (quantities[item.id] ?? 0) > 0);
   const subtotal = chosen.reduce((sum, item) => sum + (item.unitSgdCents ?? 0) * (quantities[item.id] ?? 0), 0);

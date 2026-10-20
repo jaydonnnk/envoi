@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import type { PublishedOutletSummary } from "@/domain/outlets/search";
 import type { Suggestion } from "@/domain/suggestions/types";
 import { ensureBuyerSession, postJson } from "@/lib/browser/session";
+import { useRestoreFocus } from "@/lib/browser/focus";
 
 const MAX_TEXT = 280;
 const MAX_AREA = 80;
@@ -39,6 +40,7 @@ export function TextSuggest({ manualListId }: { manualListId: string }) {
   const [busy, setBusy] = useState(false);
   const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
+  useRestoreFocus(busy);
   const areaRef = useRef<HTMLInputElement>(null);
 
   function showManual(message: string) {

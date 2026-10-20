@@ -6,6 +6,7 @@ import { decodeEmvcoTlv, type SgqrDecode, type SgqrField } from "@/domain/sgqr/d
 import { isMappable, mappableIdentifier } from "@/domain/sgqr/validate";
 import { qrDetector } from "@/lib/browser/qr";
 import { requestJson } from "@/lib/browser/session";
+import { useRestoreFocus } from "@/lib/browser/focus";
 
 // S9: the merchant selects a photo of their SGQR sticker and it is decoded here, in the browser.
 // The image never leaves the browser. The decoded text is sent only with a submission, so the
@@ -82,6 +83,7 @@ export function SgqrSticker({ outlet, onSaved }: { outlet: MerchantOutlet; onSav
   const [uen, setUen] = useState("");
   const [distinguisher, setDistinguisher] = useState("");
   const [busy, setBusy] = useState(false);
+  useRestoreFocus(busy);
   const [error, setError] = useState<string | null>(null);
   // Remounts the file input after a submission, so it no longer names the photo just used.
   const [photoInput, setPhotoInput] = useState(0);

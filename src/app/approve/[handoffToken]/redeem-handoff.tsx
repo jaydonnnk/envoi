@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ensureBuyerSession, postJson } from "@/lib/browser/session";
+import { useRestoreFocus } from "@/lib/browser/focus";
 
 const OUTCOME_COPY: Record<string, string> = {
   expired: "This link has expired. Ask your assistant for a new one. Nothing was charged.",
@@ -16,6 +17,7 @@ export function RedeemHandoff({ token }: { token: string }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  useRestoreFocus(busy);
 
   async function redeem() {
     setBusy(true);

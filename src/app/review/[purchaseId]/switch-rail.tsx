@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { postJson } from "@/lib/browser/session";
+import { useRestoreFocus } from "@/lib/browser/focus";
 
 // Changing the payment method needs a fresh review (product rule): this asks the server to price the
 // same basket on the other rail and opens that new review. The browser sends item ids and
@@ -11,6 +12,7 @@ export function SwitchRail({ outletId, lines, rail, label }: { outletId: string;
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  useRestoreFocus(busy);
 
   async function open() {
     setBusy(true);

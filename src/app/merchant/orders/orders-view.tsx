@@ -7,6 +7,7 @@ import { requestJson } from "@/lib/browser/session";
 import { formatSgd, sgdFromCents } from "@/lib/money";
 import { extraTransferNote, mayStillBePaid, orderStatus } from "./order-copy";
 import { startOrdersPolling, withNewest, withOlder, type PolledOrder } from "./polling";
+import { useRestoreFocus } from "@/lib/browser/focus";
 
 const polled = (orders: readonly MerchantOrder[]): PolledOrder[] =>
   orders.map((order) => ({ id: order.id, state: order.state, attemptState: order.payment?.attemptState ?? null, acknowledgedAt: order.acknowledgedAt }));
@@ -20,6 +21,7 @@ async function fetchOrders(outletId: string, before: string | null = null): Prom
 function OrderCard({ order, onAcknowledged }: { order: MerchantOrder; onAcknowledged: (order: MerchantOrder) => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  useRestoreFocus(busy);
   const status = orderStatus(order);
   const paid = order.state === "paid";
 
@@ -127,6 +129,7 @@ export function OrdersView({ initial }: { initial: OutletOrders }) {
   const [run, setRun] = useState(0);
   const [checking, setChecking] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
+  useRestoreFocus(checking || loadingOlder);
   const [olderError, setOlderError] = useState(false);
   const outletId = data.outlet.id;
 

@@ -6,6 +6,7 @@ import { SGQR_MAX_PAYLOAD_CHARS } from "@/domain/sgqr/decode";
 import type { SgqrResolution } from "@/domain/sgqr/resolve";
 import { qrDetector } from "@/lib/browser/qr";
 import { ensureBuyerSession, postJson } from "@/lib/browser/session";
+import { useRestoreFocus } from "@/lib/browser/focus";
 
 const SCAN_INTERVAL_MS = 250;
 // A camera left scanning, for example on a counter, turns itself off; "Scan again" restarts it.
@@ -161,6 +162,7 @@ export function ScanSticker() {
   }
 
   const busy = outcome.kind === "checking" || outcome.kind === "opening";
+  useRestoreFocus(busy);
   return (
     <div className="scan">
       <section className="card" aria-labelledby="camera-heading">

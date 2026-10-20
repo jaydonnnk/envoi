@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { postJson } from "@/lib/browser/session";
+import { useRestoreFocus } from "@/lib/browser/focus";
 
 // Email and password sign-in through Better Auth. The password goes only to /api/auth and is never
 // kept in state after the request.
 export function SignInForm() {
   const [busy, setBusy] = useState(false);
+  useRestoreFocus(busy);
   const [error, setError] = useState<string | null>(null);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -43,6 +45,7 @@ export function SignInForm() {
 
 export function SignOutButton() {
   const [busy, setBusy] = useState(false);
+  useRestoreFocus(busy);
   async function signOut() {
     setBusy(true);
     await postJson("/api/auth/sign-out").catch(() => null);

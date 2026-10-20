@@ -14,6 +14,7 @@ import {
   type PayMode,
   type StandardWallet,
 } from "@/lib/wallet/standard";
+import { useRestoreFocus } from "@/lib/browser/focus";
 
 // Pays a PYUSD review from a devnet wallet (S16; Gate 3 call stack "PYUSD purchase"). The server
 // prepares and locks the attempt and returns the unsigned transfer once; the exact bytes go to the
@@ -107,6 +108,7 @@ export function PyusdPay({ purchaseId, outletId, lines, appBaseUrl, amount, vali
   const [mode, setMode] = useState<PayMode | "discovering">(initial?.mode ?? "discovering");
   const [wallets, setWallets] = useState<StandardWallet[]>(initial?.wallets ?? []);
   const [stage, setStage] = useState<Stage>({ kind: "ready" });
+  useRestoreFocus(stage.kind === "working");
   // Set once the server released the bytes: from then on this page never offers payment again.
   const released = useRef(false);
   const receiptHref = `/receipt/${encodeURIComponent(purchaseId)}`;

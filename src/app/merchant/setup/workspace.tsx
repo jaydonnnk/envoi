@@ -9,6 +9,7 @@ import { MenuEditor } from "./menu-editor";
 import type { DraftWithImport } from "./menu-import";
 import { PyusdWalletCard } from "./pyusd-wallet";
 import { SgqrSticker } from "./sgqr-sticker";
+import { useRestoreFocus } from "@/lib/browser/focus";
 
 function OutletChips({ outlet }: { outlet: MerchantOutlet }) {
   return (
@@ -27,6 +28,7 @@ type Saved = { outlet: MerchantOutlet; draft?: DraftJson };
 
 function OutletForm({ outlet, submitLabel, onSaved, onCancel }: { outlet?: MerchantOutlet; submitLabel: string; onSaved: (saved: Saved) => void; onCancel?: () => void }) {
   const [busy, setBusy] = useState(false);
+  useRestoreFocus(busy);
   const [error, setError] = useState<string | null>(null);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -80,6 +82,7 @@ function OutletForm({ outlet, submitLabel, onSaved, onCancel }: { outlet?: Merch
 function ConfirmDetails({ outlet, onSaved }: { outlet: MerchantOutlet; onSaved: (saved: Saved) => void }) {
   const [reviewed, setReviewed] = useState(false);
   const [busy, setBusy] = useState(false);
+  useRestoreFocus(busy);
   const [error, setError] = useState<string | null>(null);
 
   async function confirm() {
@@ -117,6 +120,7 @@ function ConfirmDetails({ outlet, onSaved }: { outlet: MerchantOutlet; onSaved: 
 // use that one; no seller id can be typed here.
 function PayPalCard({ outlet, onSaved }: { outlet: MerchantOutlet; onSaved: (saved: Saved) => void }) {
   const [busy, setBusy] = useState(false);
+  useRestoreFocus(busy);
   const [error, setError] = useState<string | null>(null);
   const connection = outlet.paypal;
 
@@ -178,6 +182,7 @@ const CHECKS: { check: PublicationCheck; label: string }[] = [
 
 function PublishCard({ outlet, onPublished }: { outlet: MerchantOutlet; onPublished: (saved: Saved) => void }) {
   const [busy, setBusy] = useState(false);
+  useRestoreFocus(busy);
   const [error, setError] = useState<string | null>(null);
   const { publication } = outlet;
   const pending = publication.draftRevisionId !== null && publication.draftVersion !== null;

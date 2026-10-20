@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import type { MerchantOutlet, PyusdSetup } from "@/domain/outlets/merchant";
 import { requestJson } from "@/lib/browser/session";
 import { browserWalletRegistry, connectDevnetAccount, devnetWallets, signMessageOnce, type StandardWallet } from "@/lib/wallet/standard";
+import { useRestoreFocus } from "@/lib/browser/focus";
 
 // The shop's PYUSD devnet wallet and rate (S16; Gate 3 call stack "PYUSD merchant wallet and rate").
 // The merchant asks for a five-minute challenge, has the wallet sign exactly those bytes, and sends
@@ -29,6 +30,7 @@ export function PyusdWalletCard({ outlet, onSaved }: { outlet: MerchantOutlet; o
   const { pyusd } = outlet;
   const [wallets, setWallets] = useState<StandardWallet[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
+  useRestoreFocus(busy !== null);
   const [error, setError] = useState<string | null>(null);
   const [rate, setRate] = useState(pyusd.rate?.pyusdPerSgd ?? "");
   const button = rateButton(pyusd.rate, rate, new Date());

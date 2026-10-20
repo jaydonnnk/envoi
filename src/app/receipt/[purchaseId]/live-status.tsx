@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { PYUSD_PROOFS } from "@/domain/pyusd/constants";
 import { postJson } from "@/lib/browser/session";
 import { startReceiptPolling, type PolledState } from "./polling";
+import { useRestoreFocus } from "@/lib/browser/focus";
 
 type Check = "read" | "no_record" | "provider_unreachable" | "debounced" | "in_flight" | "no_order";
 type PyusdCheck =
@@ -100,6 +101,7 @@ export function LiveStatus({
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
+  useRestoreFocus(busy);
 
   useEffect(
     () =>

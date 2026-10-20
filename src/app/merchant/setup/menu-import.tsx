@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { MENU_CONSENT_TEXT, MENU_CONSENT_VERSION } from "@/domain/imports/consent";
 import type { ImportJson } from "@/domain/imports/lifecycle";
 import type { DraftJson } from "@/domain/menu/serialize";
+import { useRestoreFocus } from "@/lib/browser/focus";
 
 // Menu photo import on the setup page (S11). The merchant reads and accepts the versioned OpenAI
 // notice, picks a photo, and this tab shrinks it to one JPEG of at most 2,048 pixels per side and
@@ -75,6 +76,7 @@ export function MenuPhotoImport({
   const [accepted, setAccepted] = useState(false);
   const [photo, setPhoto] = useState<{ original: string; jpeg: Blob } | null>(null);
   const [busy, setBusy] = useState<"shrink" | "draft" | null>(null);
+  useRestoreFocus(busy !== null);
   const [message, setMessage] = useState<{ tone: "error" | "ok"; text: string; reload?: boolean } | null>(null);
 
   // The original photo's object URL is released when it is replaced or the editor goes away.

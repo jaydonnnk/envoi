@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { postJson } from "@/lib/browser/session";
+import { useRestoreFocus } from "@/lib/browser/focus";
 
 // Asks the server to create the exact sandbox order, then sends the buyer to PayPal's sandbox
 // approval page. The browser never chooses the amount, payee or link host.
@@ -11,6 +12,7 @@ import { postJson } from "@/lib/browser/session";
 export function ContinueToPayPal({ purchaseId, outletId, validUntil }: { purchaseId: string; outletId: string; validUntil: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<{ message: string; reviewAgain: boolean } | null>(null);
+  useRestoreFocus(busy);
   const receiptHref = `/receipt/${encodeURIComponent(purchaseId)}`;
   const reviewAgainHref = `/buy?outlet=${encodeURIComponent(outletId)}`;
 

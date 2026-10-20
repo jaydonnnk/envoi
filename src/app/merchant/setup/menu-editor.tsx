@@ -5,6 +5,7 @@ import type { DraftJson } from "@/domain/menu/serialize";
 import type { MenuItemDraft } from "@/domain/menu/types";
 import { requestJson } from "@/lib/browser/session";
 import { MenuPhotoImport, type DraftWithImport } from "./menu-import";
+import { useRestoreFocus } from "@/lib/browser/focus";
 
 type Row = { key: string; id?: string; name: string; portion: string; price: string; availability: MenuItemDraft["availability"]; fromPhoto?: boolean };
 
@@ -62,6 +63,7 @@ export function MenuEditor({
   const [dirty, setDirty] = useState(false);
   const [pending, setPending] = useState<"save" | "confirm" | null>(null);
   const busy = pending !== null;
+  useRestoreFocus(busy);
   const [message, setMessage] = useState<{ tone: "error" | "ok"; text: string } | null>(null);
   const [conflict, setConflict] = useState(false);
   const [attested, setAttested] = useState(false);
