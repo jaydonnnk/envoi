@@ -1,0 +1,268 @@
+[
+ {
+  "id": "h01-int-array",
+  "kind": "standalone",
+  "test_file": "tests/unit/history-scan.test.ts",
+  "test": "finds solana-keypair-array in deleted keypair.json",
+  "mutation": "The 64-integer array keypair rule is never added.",
+  "edits": [
+   {
+    "file": "scripts/scan-history.ts",
+    "old": "if (numbers.every((n) => n <= 255) && isKeypair(Buffer.from(numbers))) rules.add(\"solana-keypair-array\");",
+    "new": "void numbers;"
+   }
+  ]
+ },
+ {
+  "id": "h02-base58",
+  "kind": "standalone",
+  "test_file": "tests/unit/history-scan.test.ts",
+  "test": "finds solana-keypair-base58 in deleted keypair-b58.txt",
+  "mutation": "The base58 keypair rule is never added.",
+  "edits": [
+   {
+    "file": "scripts/scan-history.ts",
+    "old": "if (isKeypair(base58Decode(match[0]))) rules.add(\"solana-keypair-base58\");",
+    "new": "void match;"
+   }
+  ]
+ },
+ {
+  "id": "h03-base64",
+  "kind": "standalone",
+  "test_file": "tests/unit/history-scan.test.ts",
+  "test": "finds solana-keypair-base64 in deleted keypair-b64.txt",
+  "mutation": "The base64 keypair rule is never added.",
+  "edits": [
+   {
+    "file": "scripts/scan-history.ts",
+    "old": "if (isKeypair(Buffer.from(match[0], \"base64\"))) rules.add(\"solana-keypair-base64\");",
+    "new": "void match;"
+   }
+  ]
+ },
+ {
+  "id": "h04-layout",
+  "kind": "standalone",
+  "test_file": "tests/unit/history-scan.test.ts",
+  "test": "reports nothing for a 64-byte value that is not a keypair, or for a password-less local URL",
+  "mutation": "The ed25519 layout check accepts any 64 bytes, so a signature reads as a keypair.",
+  "edits": [
+   {
+    "file": "scripts/scan-history.ts",
+    "old": "return publicKey.equals(bytes.subarray(32));",
+    "new": "return publicKey.length === 32;"
+   }
+  ]
+ },
+ {
+  "id": "h05-env-raw",
+  "kind": "standalone",
+  "test_file": "tests/unit/history-scan.test.ts",
+  "test": "finds env-local-value:PLANTED_VALUE in deleted env-raw.txt",
+  "mutation": "The raw .env.local value is not a needle.",
+  "edits": [
+   {
+    "file": "scripts/scan-history.ts",
+    "old": "    needles.set(value, rule);\n",
+    "new": "    void rule;\n"
+   }
+  ]
+ },
+ {
+  "id": "h06-env-base64",
+  "kind": "standalone",
+  "test_file": "tests/unit/history-scan.test.ts",
+  "test": "finds env-local-value:PLANTED_VALUE in deleted env-b64.txt",
+  "mutation": "The base64 form of an .env.local value is not a needle.",
+  "edits": [
+   {
+    "file": "scripts/scan-history.ts",
+    "old": "    needles.set(Buffer.from(value).toString(\"base64\"), rule);\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "h07-env-password",
+  "kind": "standalone",
+  "test_file": "tests/unit/history-scan.test.ts",
+  "test": "finds env-local-value:PLANTED_URL in deleted env-password.txt",
+  "mutation": "A URL's password is not a needle on its own.",
+  "edits": [
+   {
+    "file": "scripts/scan-history.ts",
+    "old": "        needles.set(url.password, rule);\n        needles.set(decodeURIComponent(url.password), rule);\n",
+    "new": "        void url;\n"
+   }
+  ]
+ },
+ {
+  "id": "h08-public-shape",
+  "kind": "standalone",
+  "test_file": "tests/unit/history-scan.test.ts",
+  "test": "finds env-local-value:ENVOI_BUYER in deleted wallet-secret.txt",
+  "mutation": "A name reviewed as public is public whatever its value.",
+  "edits": [
+   {
+    "file": "scripts/scan-history.ts",
+    "old": "  ENVOI_BUYER: (value) => isPublicKey(value),",
+    "new": "  ENVOI_BUYER: (value) => value.length > 0,"
+   }
+  ]
+ },
+ {
+  "id": "h09-connection",
+  "kind": "standalone",
+  "test_file": "tests/unit/history-scan.test.ts",
+  "test": "finds connection-string in deleted conn.txt",
+  "mutation": "The committed-tree connection-string rule is dropped from the history scan.",
+  "edits": [
+   {
+    "file": "scripts/scan-history.ts",
+    "old": "TREE_RULES.filter((rule) => !PATH_RULES.has(rule.id))",
+    "new": "TREE_RULES.filter((rule) => !PATH_RULES.has(rule.id) && rule.id !== \"connection-string\")"
+   }
+  ]
+ },
+ {
+  "id": "h10-openai",
+  "kind": "standalone",
+  "test_file": "tests/unit/history-scan.test.ts",
+  "test": "finds openai-key in deleted openai.txt",
+  "mutation": "The OpenAI key rule is dropped.",
+  "edits": [
+   {
+    "file": "scripts/scan-history.ts",
+    "old": "  { id: \"openai-key\", pattern: /\\bsk-(?:proj-|svcacct-|admin-)?[A-Za-z0-9_-]{20,}/ },\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "h11-github",
+  "kind": "standalone",
+  "test_file": "tests/unit/history-scan.test.ts",
+  "test": "finds github-token in deleted github.txt",
+  "mutation": "The GitHub token rule is dropped.",
+  "edits": [
+   {
+    "file": "scripts/scan-history.ts",
+    "old": "  { id: \"github-token\", pattern: /\\b(?:gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{40,})/ },\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "h12-neon",
+  "kind": "standalone",
+  "test_file": "tests/unit/history-scan.test.ts",
+  "test": "finds neon-api-key in deleted neon.txt",
+  "mutation": "The Neon API key rule is dropped.",
+  "edits": [
+   {
+    "file": "scripts/scan-history.ts",
+    "old": "  { id: \"neon-api-key\", pattern: /\\bnapi_[a-z0-9]{40,}/ },\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "h13-pem",
+  "kind": "standalone",
+  "test_file": "tests/unit/history-scan.test.ts",
+  "test": "finds private-key-block in deleted pem.txt",
+  "mutation": "The PEM private key rule is dropped.",
+  "edits": [
+   {
+    "file": "scripts/scan-history.ts",
+    "old": "  { id: \"private-key-block\", pattern: /-----BEGIN [A-Z ]*PRIVATE KEY-----/ },\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "h14-jwt",
+  "kind": "standalone",
+  "test_file": "tests/unit/history-scan.test.ts",
+  "test": "finds jwt in deleted jwt.txt",
+  "mutation": "The JWT rule is dropped.",
+  "edits": [
+   {
+    "file": "scripts/scan-history.ts",
+    "old": "  { id: \"jwt\", pattern: /\\beyJ[A-Za-z0-9_-]{10,}\\.eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}/ },\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "h15-forbidden-path",
+  "kind": "standalone",
+  "test_file": "tests/unit/history-scan.test.ts",
+  "test": "finds forbidden-path in deleted config/.env.production",
+  "mutation": "A blob at a secret-holding path is not reported.",
+  "edits": [
+   {
+    "file": "scripts/scan-history.ts",
+    "old": "    if (FORBIDDEN_PATH.test(path)) findings.push({ object: sha, path, rule: \"forbidden-path\", line: 0 });\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "h16-messages",
+  "kind": "standalone",
+  "test_file": "tests/unit/history-scan.test.ts",
+  "test": "finds a needle in a commit message",
+  "mutation": "Commit and tag messages are not scanned.",
+  "edits": [
+   {
+    "file": "scripts/scan-history.ts",
+    "old": "    findings.push(...scanText(sha!, \"(message)\", text ?? \"\", needles));\n",
+    "new": "    void sha; void text;\n"
+   }
+  ]
+ },
+ {
+  "id": "h17-history",
+  "kind": "standalone",
+  "test_file": "tests/unit/history-scan.test.ts",
+  "test": "finds solana-keypair-array in deleted keypair.json",
+  "mutation": "Only the current tree is scanned, not the history.",
+  "edits": [
+   {
+    "file": "scripts/scan-history.ts",
+    "old": "git(repo, [\"rev-list\", \"--objects\", ...revArgs])",
+    "new": "git(repo, [\"ls-tree\", \"-r\", \"--format=%(objectname) %(path)\", \"HEAD\"])"
+   }
+  ]
+ },
+ {
+  "id": "h18-missing-remote",
+  "kind": "standalone",
+  "test_file": "tests/unit/history-scan.test.ts",
+  "test": "reports a ref the remote advertises that is missing locally",
+  "mutation": "A remote ref missing locally is never reported.",
+  "edits": [
+   {
+    "file": "scripts/scan-history.ts",
+    "old": "  const missingRemoteRefs = [...new Set(remoteRefs)].filter((sha) => !tips.includes(sha));",
+    "new": "  const missingRemoteRefs: string[] = [];"
+   }
+  ]
+ },
+ {
+  "id": "h19-env-encoded",
+  "kind": "standalone",
+  "test_file": "tests/unit/history-scan.test.ts",
+  "test": "finds env-local-value:PLANTED_VALUE in deleted env-encoded.txt",
+  "mutation": "The URL-encoded form of an .env.local value is not a needle.",
+  "edits": [
+   {
+    "file": "scripts/scan-history.ts",
+    "old": "    needles.set(encodeURIComponent(value), rule);\n",
+    "new": ""
+   }
+  ]
+ }
+]

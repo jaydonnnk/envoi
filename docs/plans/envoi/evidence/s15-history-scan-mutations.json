@@ -1,0 +1,365 @@
+{
+ "method": "Run in an rsync copy of the envoi/slice-15-release working tree without .env.local, with a cp -cR copy of node_modules and DATABASE_URL removed. Each definition in s15-history-scan-mutation-defs.json is applied alone by exact text replacement, every touched file restored and compared by SHA-256. Vitest definitions: the named row must fail on an AssertionError and the whole file pass on rerun; other failing rows are recorded. Command definitions: the command must exit non-zero with the needle in its output, the control command must pass under the same mutation, and the command must pass on rerun.",
+ "results": [
+  {
+   "id": "h01-int-array",
+   "kind": "standalone",
+   "files": [
+    "scripts/scan-history.ts"
+   ],
+   "mutation": "The 64-integer array keypair rule is never added.",
+   "test": "finds solana-keypair-array in deleted keypair.json",
+   "group": "history secret scan self-test",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to include 'solana-keypair-array'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "h02-base58",
+   "kind": "standalone",
+   "files": [
+    "scripts/scan-history.ts"
+   ],
+   "mutation": "The base58 keypair rule is never added.",
+   "test": "finds solana-keypair-base58 in deleted keypair-b58.txt",
+   "group": "history secret scan self-test",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to include 'solana-keypair-base58'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "h03-base64",
+   "kind": "standalone",
+   "files": [
+    "scripts/scan-history.ts"
+   ],
+   "mutation": "The base64 keypair rule is never added.",
+   "test": "finds solana-keypair-base64 in deleted keypair-b64.txt",
+   "group": "history secret scan self-test",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to include 'solana-keypair-base64'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "h04-layout",
+   "kind": "standalone",
+   "files": [
+    "scripts/scan-history.ts"
+   ],
+   "mutation": "The ed25519 layout check accepts any 64 bytes, so a signature reads as a keypair.",
+   "test": "reports nothing for a 64-byte value that is not a keypair, or for a password-less local URL",
+   "group": "history secret scan self-test",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ { \u2026(4) }, { \u2026(4) }, { \u2026(4) } ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "h05-env-raw",
+   "kind": "standalone",
+   "files": [
+    "scripts/scan-history.ts"
+   ],
+   "mutation": "The raw .env.local value is not a needle.",
+   "test": "finds env-local-value:PLANTED_VALUE in deleted env-raw.txt",
+   "group": "history secret scan self-test",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to include 'env-local-value:PLANTED_VALUE'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "h06-env-base64",
+   "kind": "standalone",
+   "files": [
+    "scripts/scan-history.ts"
+   ],
+   "mutation": "The base64 form of an .env.local value is not a needle.",
+   "test": "finds env-local-value:PLANTED_VALUE in deleted env-b64.txt",
+   "group": "history secret scan self-test",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to include 'env-local-value:PLANTED_VALUE'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "h07-env-password",
+   "kind": "standalone",
+   "files": [
+    "scripts/scan-history.ts"
+   ],
+   "mutation": "A URL's password is not a needle on its own.",
+   "test": "finds env-local-value:PLANTED_URL in deleted env-password.txt",
+   "group": "history secret scan self-test",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to include 'env-local-value:PLANTED_URL'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "h08-public-shape",
+   "kind": "standalone",
+   "files": [
+    "scripts/scan-history.ts"
+   ],
+   "mutation": "A name reviewed as public is public whatever its value.",
+   "test": "finds env-local-value:ENVOI_BUYER in deleted wallet-secret.txt",
+   "group": "history secret scan self-test",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'env-local-public:ENVOI_BUYER' ] to include 'env-local-value:ENVOI_BUYER'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "h09-connection",
+   "kind": "standalone",
+   "files": [
+    "scripts/scan-history.ts"
+   ],
+   "mutation": "The committed-tree connection-string rule is dropped from the history scan.",
+   "test": "finds connection-string in deleted conn.txt",
+   "group": "history secret scan self-test",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'env-local-value:PLANTED_URL' ] to include 'connection-string'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "h10-openai",
+   "kind": "standalone",
+   "files": [
+    "scripts/scan-history.ts"
+   ],
+   "mutation": "The OpenAI key rule is dropped.",
+   "test": "finds openai-key in deleted openai.txt",
+   "group": "history secret scan self-test",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to include 'openai-key'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "finds a needle in a commit message"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "h11-github",
+   "kind": "standalone",
+   "files": [
+    "scripts/scan-history.ts"
+   ],
+   "mutation": "The GitHub token rule is dropped.",
+   "test": "finds github-token in deleted github.txt",
+   "group": "history secret scan self-test",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to include 'github-token'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "h12-neon",
+   "kind": "standalone",
+   "files": [
+    "scripts/scan-history.ts"
+   ],
+   "mutation": "The Neon API key rule is dropped.",
+   "test": "finds neon-api-key in deleted neon.txt",
+   "group": "history secret scan self-test",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to include 'neon-api-key'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "h13-pem",
+   "kind": "standalone",
+   "files": [
+    "scripts/scan-history.ts"
+   ],
+   "mutation": "The PEM private key rule is dropped.",
+   "test": "finds private-key-block in deleted pem.txt",
+   "group": "history secret scan self-test",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to include 'private-key-block'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "h14-jwt",
+   "kind": "standalone",
+   "files": [
+    "scripts/scan-history.ts"
+   ],
+   "mutation": "The JWT rule is dropped.",
+   "test": "finds jwt in deleted jwt.txt",
+   "group": "history secret scan self-test",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to include 'jwt'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "h15-forbidden-path",
+   "kind": "standalone",
+   "files": [
+    "scripts/scan-history.ts"
+   ],
+   "mutation": "A blob at a secret-holding path is not reported.",
+   "test": "finds forbidden-path in deleted config/.env.production",
+   "group": "history secret scan self-test",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to include 'forbidden-path'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "h16-messages",
+   "kind": "standalone",
+   "files": [
+    "scripts/scan-history.ts"
+   ],
+   "mutation": "Commit and tag messages are not scanned.",
+   "test": "finds a needle in a commit message",
+   "group": "history secret scan self-test",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ 'openai-key' ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "h17-history",
+   "kind": "standalone",
+   "files": [
+    "scripts/scan-history.ts"
+   ],
+   "mutation": "Only the current tree is scanned, not the history.",
+   "test": "finds solana-keypair-array in deleted keypair.json",
+   "group": "history secret scan self-test",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to include 'solana-keypair-array'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "finds connection-string in deleted conn.txt",
+    "finds env-local-public:ENVOI_MERCHANT in deleted wallet.txt",
+    "finds env-local-value:ENVOI_BUYER in deleted wallet-secret.txt",
+    "finds env-local-value:PLANTED_URL in deleted env-password.txt",
+    "finds env-local-value:PLANTED_VALUE in deleted env-b64.txt",
+    "finds env-local-value:PLANTED_VALUE in deleted env-encoded.txt",
+    "finds env-local-value:PLANTED_VALUE in deleted env-raw.txt",
+    "finds forbidden-path in deleted config/.env.production",
+    "finds github-token in deleted github.txt",
+    "finds jwt in deleted jwt.txt",
+    "finds neon-api-key in deleted neon.txt",
+    "finds openai-key in deleted openai.txt",
+    "finds private-key-block in deleted pem.txt",
+    "finds solana-keypair-base58 in deleted keypair-b58.txt",
+    "finds solana-keypair-base64 in deleted keypair-b64.txt"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "h18-missing-remote",
+   "kind": "standalone",
+   "files": [
+    "scripts/scan-history.ts"
+   ],
+   "mutation": "A remote ref missing locally is never reported.",
+   "test": "reports a ref the remote advertises that is missing locally",
+   "group": "history secret scan self-test",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to have a length of 1 but got +0",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "h19-env-encoded",
+   "kind": "standalone",
+   "files": [
+    "scripts/scan-history.ts"
+   ],
+   "mutation": "The URL-encoded form of an .env.local value is not a needle.",
+   "test": "finds env-local-value:PLANTED_VALUE in deleted env-encoded.txt",
+   "group": "history secret scan self-test",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to include 'env-local-value:PLANTED_VALUE'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  }
+ ]
+}
