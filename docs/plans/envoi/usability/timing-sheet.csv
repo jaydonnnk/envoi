@@ -1,0 +1,6 @@
+tester_id,session_date_sgt,consent_recorded,first_time_confirmed,device,browser,entry_point,rail,coached,start_clock,stop_clock,duration_s,within_180s,outcome,help_requests,failures,receipt_purchase_id,external_record_id,match_outlet_recipient,match_items_quantities,match_amount_currency,match_rail,counts_toward_target,notes
+T1,,,,,,,,,,,,,,,,,,,,,,,
+T2,,,,,,,,,,,,,,,,,,,,,,,
+T3,,,,,,,,,,,,,,,,,,,,,,,
+T4,,,,,,,,,,,,,,,,,,,,,,,
+T5,,,,,,,,,,,,,,,,,,,,,,,
