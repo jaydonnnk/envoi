@@ -221,11 +221,15 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
   It reads six repository secrets, set by the user: `MAINTENANCE_DATABASE_URL`, `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_PARTNER_ATTRIBUTION_ID`, `ENVOI_ENVIRONMENT` and `SOLANA_RPC_URL` (the last two moved from variables to secrets on 2026-10-21, as the user stored them).
   Each must be set: an unset one arrives as an empty string, and `maintenanceEnv` refuses `SOLANA_RPC_URL=""` with "Invalid URL" [verified locally].
   GitHub runs a schedule and `workflow_dispatch` only from the default branch, so the workflow cannot run before it is on `main`.
+- **Early merge, 2026-10-21, authorized in the user's words:** "i authroize 2" (the fast-forward merge and push of `envoi/slice-15-release` to `main`, with no Render change); `main` = `origin/main` = `b85a730` [verified by `git ls-remote`].
+- **Maintenance on a public runner, 2026-10-21 [verified]:** run [`39456804524`](https://github.com/jaydonnnk/envoi/actions/runs/39456804524), started by hand, failed in 39 s with `Invalid maintenance configuration: ENVOI_ENVIRONMENT: Invalid option`, because the stored value was not exactly `sandbox`; the user re-entered it.
+  Run [`39464794004`](https://github.com/jaydonnnk/envoi/actions/runs/39464794004), started by hand, passed in 40 s on Neon: maintenance run `mnt_bjcb5npqufqjlv66kipctikjri`, `heartbeat:ok:1 record_capacity:ok:1 reconcile_attempts:ok:4 reconcile_pyusd_attempts:ok:0 close_expired_reviews:ok:16 purge_expired_sessions:ok:5`.
+  That run is recorded with trigger `scheduled` although it was started by hand, because the workflow always passed `--trigger=scheduled`; the branch now passes it only for a schedule, and the fix reaches `main` with the final merge.
 - **Work items:**
   - [x] History secret scan with an injected self-test, before any visibility change.
   - [x] Identifier review decision by the user.
   - [x] Repository public (the user), then `LICENSE` (MIT) and README.
-  - [ ] `maintenance.yml` at hourly minute 17, shown running on a public runner.
+  - [ ] `maintenance.yml` at hourly minute 17, shown running on a public runner: a run started by hand passed; a scheduled run is still to be shown.
   - [x] R2 recorded before the usability test.
   - [ ] Idle cold first visit re-measured on the release build.
   - [ ] Full suite, HTTP contract run, mobile and keyboard checks.

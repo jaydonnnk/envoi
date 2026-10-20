@@ -42,4 +42,5 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run runner:build
-      - run: npm run runner:start -- --trigger=scheduled
+      # Only a schedule is recorded as scheduled; a run started by hand is recorded as manual.
+      - run: npm run runner:start -- ${{ github.event_name == 'schedule' && '--trigger=scheduled' || '' }}
