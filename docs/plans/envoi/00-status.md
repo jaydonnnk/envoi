@@ -177,7 +177,51 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [x] S16 - PYUSD devnet purchase; first in the cut order, together with S17; kept by the user's go on 2026-10-16; started 2026-10-17 on `envoi/slice-16-pyusd-purchase`; done 2026-10-18 with one real devnet payment verified; `PYUSD_ENABLED` was later turned on by the user for R14 (see the Slices summary above).
 - [x] S17 - PYUSD recovery, extra transfers and the operator mismatch and refund acts; started 2026-10-18 on `envoi/slice-17-pyusd-recovery`; done 2026-10-18, with a no-hint devnet scan on a FIXTURE copy and the Neon phone payment confirmed by a manual reconcile; on `main` at `6cba215` and deployed; automatic unpaid release turned on at `4ba8586` with the user's approval ([record](#s17-follow-ups-desktop-window-scan-and-automatic-unpaid-release-2026-10-18)); review fixes done and merged 2026-10-18 ([record](#s17-review-fixes-2026-10-18)).
 - [x] S14 - APIMatic client and docs, account-conditional; third in the cut order; access check passed and started 2026-10-19 on `envoi/slice-14-apimatic`; done 2026-10-19; on `main` at `6eacfca`, pushed with CI green ([record](#s14-apimatic-client-and-docs-2026-10-19)); review fixes done 2026-10-19, on `main` at `9d4bd55` and deployed with CI green on 2026-10-20 ([record](#s14-review-fixes-2026-10-19)).
-- [ ] S15 - Judged release.
+- [ ] S15 - Judged release; started 2026-10-20 on `envoi/slice-15-release` ([record](#s15-judged-release-2026-10-20)).
+
+### S15 Judged release, 2026-10-20
+
+- **Authorization, 2026-10-20, in the user's words:** "Start s15".
+  Under rule 1 of `04-slices.md` this covered creating `envoi/slice-15-release` from `main` at `3801035`, confirmed with `git branch --show-current`.
+- **S15 authorizations requested at start, answered 2026-10-20:**
+  - License: "MIT (Recommended)".
+  - `maintenance.yml` at hourly minute 17, committed only after the repository is public, with its repository secrets set by the user: "Yes, after public".
+  - Intermediate pushes of `envoi/slice-15-release` only, with no merge to `main` and no deploy: "Yes, branch pushes".
+  - R2: after a plain-language explanation, the user chose "Accept if small (Recommended)": R2 is accepted only once the user reads the current Neon storage in the console and it is far below the 1 GB limit (about 100 MB or less); otherwise the runbook and rehearsal follow.
+    The reading is pending, so R2 is **not yet recorded as accepted**.
+  - Still to request by name: the visibility change (the user flips it), the final merge, push and deploy, and every Neon, Render or APIMatic action.
+- **Baseline on `main` at `3801035`, 2026-10-20 [verified]:** CI green on `3801035` (runs `39432356694` and `39432355326`); `typecheck`, `typecheck:client` and `lint` exit 0; 164 of 164 unit and 343 of 343 integration tests pass on the local disposable database with the Neon names unset; `gate4_check.py` passes and `gate4_prove.py` gives 76/76; both pinned SHA256 values are unchanged.
+  The HTTP contract run was not run locally at baseline; CI ran it green on `3801035`.
+- **History secret scan, 2026-10-20 [verified]:** `scripts/scan-history.ts` read every blob reachable from the 70 local refs and every ref `origin` advertises (none missing locally), 1,190 blobs, and all 237 commit messages; record in [`evidence/s15-history-scan.txt`](evidence/s15-history-scan.txt).
+  Rules: the committed-tree rules of `tests/support/secret-scan.ts`; OpenAI, GitHub, Neon API, AWS, PEM and JWT shapes; every `.env.local` value of 12 or more characters raw, URL-encoded and base64, and each URL's password (37 needles); Solana keypairs as 64-integer arrays, base58 or base64, confirmed by the ed25519 layout, so a transaction signature is not reported; and secret-holding paths such as `.env.*` and `*.pem`.
+  Result: **0 secret findings**.
+  The first run reported 146 lines matching four `.env.local` values; by shape, printed without values, they are two 32-byte devnet wallet addresses (`ENVOI_BUYER`, `ENVOI_MERCHANT`) and two password-less local URLs (`BETTER_AUTH_URL`, `TEST_DATABASE_URL`), so the scanner treats those four names as public only while the value keeps that shape.
+  A separate sweep of every revision for `SECRET`, `PASSWORD`, `TOKEN`, `API_KEY` or `PRIVATE_KEY` assignments of 12 or more characters found only fixture values (`test-fixture-secret-...`, `fixture-openai-key`, `fixture-unused`, `FIXTURE-client-secret`, `fixture-client-secret`).
+- **Injected self-test [verified]:** `tests/unit/history-scan.test.ts` plants one needle per rule in a commit that a later commit deletes, one in a commit message, and a ref that only the remote has; 19 rows pass, and a 64-byte non-keypair and a password-less local URL report nothing.
+  19 of 19 mutations prove each guard on its own row with an AssertionError, a byte-identical restore and a passing rerun ([definitions](evidence/s15-history-scan-mutation-defs.json), [runner](evidence/s15-history-scan-mutate.py), [results](evidence/s15-history-scan-mutations.json)), run in an rsync copy without `.env.local`.
+  Two first-draft proofs failed and were fixed, not waived: the raw needle equalled its URL-encoded form for the planted value, so the value now carries a slash and a plus and the encoded form has its own row; and a missing remote ref crashed `rev-list` instead of failing on an assertion, so present refs are now computed separately.
+- **Other GitHub surfaces [verified 2026-10-20]:** no pull requests, issues, releases, wiki repository, repository secrets or variables; 128 Actions runs, whose logs become public too and could not hold a repository secret because none exists.
+- **Identifier review, pending the user's decision:** none of these is a credential, and each is already in the history, so removing it from the current files would not unpublish it.
+  - Neon project `holy-boat-19447545`, organization `org-wispy-flower-08821549` and branch `br-fancy-sea-b4xb78sw`, in the gate documents and evidence; access still needs a password or API key.
+  - The Render host `envoi-helx.onrender.com`, public by design.
+  - PayPal sandbox merchant id `EQN6264CF9F4Y` and fixture ids, sandbox only.
+  - Account ids such as `usr_o2tys4cx5id37b634ar3nv5dae` and the agent token id `agt_ggembpdxft5soezukk2c6remma` (the id, not the token; no agent-token value is in the history).
+  - Two devnet wallet addresses, public on chain.
+  - The local account name in macOS and Windows checkout paths in `AGENTS.md`, `00-status.md`, `04-slices.md` and `handoff.md`.
+  - The commit author name and email of all 237 commits; only a history rewrite could change them, which is not authorized and is not recommended.
+- **Boundary:** `.env.local` needles cover current values only; a value rotated before 2026-10-20 is found only by the pattern rules.
+  The scan reads Git objects, not the Render or Neon consoles.
+- **Work items:**
+  - [x] History secret scan with an injected self-test, before any visibility change.
+  - [ ] Identifier review decision by the user.
+  - [ ] Repository public (the user), then `LICENSE` (MIT) and README.
+  - [ ] `maintenance.yml` at hourly minute 17, shown running on a public runner.
+  - [ ] R2 recorded before the usability test.
+  - [ ] Idle cold first visit re-measured on the release build.
+  - [ ] Full suite, HTTP contract run, mobile and keyboard checks.
+  - [ ] Gate 1 usability test with five first-time buyers.
+  - [ ] Render, Neon, Actions, OpenAI and, if PYUSD is offered, devnet access through 16 Dec 2026.
+  - [ ] Evidence pack, video script, final merge, push and deploy.
 
 ### S14 APIMatic client and docs, 2026-10-19
 

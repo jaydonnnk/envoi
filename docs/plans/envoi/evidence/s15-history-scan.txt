@@ -1,0 +1,33 @@
+# S15 history secret scan, 2026-10-20T14:06Z, envoi/slice-15-release at 3801035 plus the uncommitted scanner
+# npx tsx --tsconfig tsconfig.json scripts/scan-history.ts . --remote origin
+refs 70; blobs 1190; messages 237; env needles 37
+remote refs missing locally: 0
+IDENTIFIER env-local-public:TEST_DATABASE_URL .github/workflows/ci.yml (4 lines)
+IDENTIFIER windows-user-path AGENTS.md (8 lines)
+IDENTIFIER macos-home-path AGENTS.md (8 lines)
+IDENTIFIER env-local-public:ENVOI_MERCHANT docs/plans/envoi/00-status.md (55 lines)
+IDENTIFIER env-local-public:ENVOI_BUYER docs/plans/envoi/00-status.md (33 lines)
+IDENTIFIER macos-home-path docs/plans/envoi/00-status.md (404 lines)
+IDENTIFIER windows-user-path docs/plans/envoi/00-status.md (165 lines)
+IDENTIFIER macos-home-path docs/plans/envoi/04-slices.md (17 lines)
+IDENTIFIER windows-user-path docs/plans/envoi/04-slices.md (9 lines)
+IDENTIFIER env-local-public:TEST_DATABASE_URL docs/plans/envoi/evidence/s14-mutate.py (1 lines)
+IDENTIFIER env-local-public:TEST_DATABASE_URL docs/plans/envoi/evidence/s14-review-fixes-mutate.py (1 lines)
+IDENTIFIER env-local-public:ENVOI_BUYER docs/plans/envoi/evidence/s16-devnet-proof.json (10 lines)
+IDENTIFIER env-local-public:ENVOI_MERCHANT docs/plans/envoi/evidence/s16-devnet-proof.json (10 lines)
+IDENTIFIER env-local-public:TEST_DATABASE_URL docs/plans/envoi/evidence/s16-landing-mutate.py (1 lines)
+IDENTIFIER env-local-public:TEST_DATABASE_URL docs/plans/envoi/evidence/s16-mutate.py (3 lines)
+IDENTIFIER env-local-public:TEST_DATABASE_URL docs/plans/envoi/evidence/s16-review-fixes-mutate.py (1 lines)
+IDENTIFIER env-local-public:TEST_DATABASE_URL docs/plans/envoi/evidence/s17-mutate.py (1 lines)
+IDENTIFIER env-local-public:ENVOI_BUYER docs/plans/envoi/evidence/s17-neon-desktop.json (4 lines)
+IDENTIFIER env-local-public:ENVOI_BUYER docs/plans/envoi/evidence/s17-neon.json (6 lines)
+IDENTIFIER env-local-public:TEST_DATABASE_URL docs/plans/envoi/evidence/s17-review-fixes-mutate.py (1 lines)
+IDENTIFIER env-local-public:BETTER_AUTH_URL docs/plans/envoi/evidence/s5-mutations.json (1 lines)
+IDENTIFIER windows-user-path docs/plans/envoi/handoff.md (124 lines)
+IDENTIFIER macos-home-path docs/plans/envoi/handoff.md (178 lines)
+IDENTIFIER env-local-public:BETTER_AUTH_URL tests/integration/maintenance.test.ts (6 lines)
+IDENTIFIER env-local-public:BETTER_AUTH_URL tests/integration/pyusd-merchant.test.ts (3 lines)
+IDENTIFIER env-local-public:BETTER_AUTH_URL tests/support/session.ts (3 lines)
+IDENTIFIER env-local-public:TEST_DATABASE_URL tests/unit/no-secret.test.ts (2 lines)
+secret findings 0; identifier findings 1059
+# exit 0
