@@ -1,13 +1,13 @@
 // S14: checks a running deployment's public read routes against openapi/envoi-public.yaml, the same
 // check the integration test runs on the route handlers. Reads only; nothing is created or paid.
 //
-//   npx tsx tests/e2e/public-api-contract.ts <baseUrl>
+//   npx tsx tests/e2e/public-api-contract.ts <baseUrl> [nul]
 import { randomBytes } from "node:crypto";
 import { checkResponse, loadDocument } from "../support/openapi";
 
 const baseUrl = process.argv[2]?.replace(/\/$/, "");
 if (!baseUrl) {
-  console.error("usage: npx tsx tests/e2e/public-api-contract.ts <baseUrl>");
+  console.error("usage: npx tsx tests/e2e/public-api-contract.ts <baseUrl> [nul]");
   process.exit(2);
 }
 
@@ -34,5 +34,11 @@ else {
 const unknown = `out_${[...randomBytes(26)].map((byte) => "abcdefghijklmnopqrstuvwxyz234567"[byte % 32]).join("")}`;
 const missing = await check("unknown shop", "/api/v1/outlets/{id}/menu", `/api/v1/outlets/${unknown}/menu`);
 if (missing.status !== 404) failed = true;
+// S14 review fix 1: ids no shop can have, including an encoded NUL byte, answer the documented 404.
+// Some hosts refuse an encoded NUL before the app sees it (Render answers 400), so pass "nul" as a
+// third argument only where the app itself receives it, as in the CI run.
+for (const [label, id] of [["short id", "x"], ...(process.argv[3] === "nul" ? [["NUL byte id", "%00"]] : [])] as [string, string][]) {
+  if ((await check(label, "/api/v1/outlets/{id}/menu", `/api/v1/outlets/${id}/menu`)).status !== 404) failed = true;
+}
 
 process.exit(failed ? 1 : 0);

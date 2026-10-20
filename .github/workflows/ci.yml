@@ -1,5 +1,6 @@
 # Typecheck, lint, unit and integration tests (Gate 4 delta D4), then the production build and its scan
-# for Solana send method names (S16 review fixes, F5, by the user's instruction on 2026-10-18). No browser download.
+# for Solana send method names (S16 review fixes, F5, by the user's instruction on 2026-10-18), then the
+# public API contract over HTTP against that build (S14 review fix 4). No browser download.
 # Integration tests run against a disposable postgres service container on Neon's major version (D3).
 name: ci
 
@@ -44,9 +45,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
+      # The generated client is typechecked on its own (S14 review fix 3), so it never fails the build.
+      - run: npm run typecheck:client
       - run: npm run lint
       - run: npm run test:unit
       - run: npm run test:integration
       # The webpack build Render deploys; the unit test's esbuild bundle is only a proxy for it.
       - run: npm run build
       - run: npx tsx scripts/scan-build.ts .next
+      # The public API contract and the generated client over real HTTP against that build, on a
+      # disposable database with the demo FIXTURE shop (S14 review fix 4). Reads only.
+      - run: npx tsx tests/e2e/run-public-api.ts 3100

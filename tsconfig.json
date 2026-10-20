@@ -41,6 +41,8 @@
   ],
   "exclude": [
     "node_modules",
-    ".next"
+    ".next",
+    "clients",
+    "tests/e2e/apimatic-client.ts"
   ]
 }

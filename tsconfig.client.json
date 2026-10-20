@@ -1,0 +1,9 @@
+{
+  "//": "S14 review fix 3: the APIMatic-generated client and its demo script are typechecked here, by npm run typecheck:client, and not by tsconfig.json, so a regenerated client cannot fail next build or a Render deploy. The client's own tsconfig runs after this one.",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "incremental": false
+  },
+  "include": ["clients/typescript/src/**/*.ts", "tests/e2e/apimatic-client.ts"],
+  "exclude": ["node_modules"]
+}
