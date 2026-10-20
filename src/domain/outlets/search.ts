@@ -1,6 +1,7 @@
 import { and, asc, eq, isNotNull, sql } from "drizzle-orm";
 import { menuItems, menuRevisions, outlets } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
+import { isId } from "@/lib/ids";
 
 export type PublishedOutletSummary = { id: string; name: string; area: string; isDemoFixture: boolean };
 
@@ -19,6 +20,8 @@ export async function listPublishedOutlets(db: Db, limit = 50): Promise<Publishe
 }
 
 export async function getPublishedMenu(db: Pick<Db, "select">, outletId: string): Promise<PublishedMenu | null> {
+  // S14 review fix 1: an id no outlet can have answers like an unknown shop, before any query.
+  if (!isId("out", outletId)) return null;
   const rows = await db
     .select({
       outlet: { id: outlets.id, name: outlets.name, area: outlets.area, isDemoFixture: outlets.isDemoFixture },

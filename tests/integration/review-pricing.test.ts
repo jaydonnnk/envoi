@@ -61,18 +61,19 @@ describe("review creation", () => {
 
   it("unknown price never becomes zero", async () => {
     // FIXTURE: a second published outlet whose menu has one item with no price.
+    // Its id has the shape newId("out") makes, which the menu read requires since the S14 review fixes.
     const admin = fixture.database.admin;
-    await admin`insert into outlets (id, name, area, is_demo_fixture) values ('out_unknownprice', 'Unknown Price Fixture', 'Test', true)`;
-    await admin`insert into menu_revisions (id, outlet_id, status, confirmed_at) values ('mrv_unknownprice', 'out_unknownprice', 'confirmed', now())`;
+    await admin`insert into outlets (id, name, area, is_demo_fixture) values ('out_unknownpricefixtureaaaaaaa', 'Unknown Price Fixture', 'Test', true)`;
+    await admin`insert into menu_revisions (id, outlet_id, status, confirmed_at) values ('mrv_unknownprice', 'out_unknownpricefixtureaaaaaaa', 'confirmed', now())`;
     await admin`insert into menu_items (id, menu_revision_id, position, name, unit_sgd_cents, available) values
       ('itm_noprice', 'mrv_unknownprice', 0, 'Market price fish', null, true), ('itm_priced', 'mrv_unknownprice', 1, 'Rice', 100, true)`;
-    await admin`update outlets set published_menu_revision_id = 'mrv_unknownprice' where id = 'out_unknownprice'`;
-    await admin`insert into payment_destinations (id, outlet_id, rail, environment, seller_merchant_id, status) values ('dst_unknownprice', 'out_unknownprice', 'paypal', 'sandbox', 'FXTRSELLER2AB', 'active')`;
+    await admin`update outlets set published_menu_revision_id = 'mrv_unknownprice' where id = 'out_unknownpricefixtureaaaaaaa'`;
+    await admin`insert into payment_destinations (id, outlet_id, rail, environment, seller_merchant_id, status) values ('dst_unknownprice', 'out_unknownpricefixtureaaaaaaa', 'paypal', 'sandbox', 'FXTRSELLER2AB', 'active')`;
     const before = await count("purchases");
 
     const cookie = await anonymousCookie(routes.auth.POST);
     const response = await create(cookie, {
-      outletId: "out_unknownprice",
+      outletId: "out_unknownpricefixtureaaaaaaa",
       rail: "paypal",
       lines: [
         { menuItemId: "itm_noprice", quantity: 1 },

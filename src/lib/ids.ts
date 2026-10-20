@@ -25,6 +25,12 @@ export function newId(prefix: IdPrefix): string {
   return `${prefix}_${base32(randomBytes(16))}`;
 }
 
+// True only for a value newId(prefix) could have made: 128 bits are 26 base32 characters. Checking
+// a caller's id first keeps a malformed one, such as a NUL byte PostgreSQL refuses, from a query.
+export function isId(prefix: IdPrefix, value: string): boolean {
+  return new RegExp(`^${prefix}_[a-z2-7]{26}$`).test(value);
+}
+
 // 256 random bits, base32-encoded: agent handoff tokens and agent bearer tokens (Gate 3 Files).
 // Only hashToken's digest is stored; the token itself is shown once and never persisted.
 export function newSecretToken(): string {
