@@ -218,8 +218,8 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - **License and README, 2026-10-20:** `LICENSE` is the MIT text; `README.md` gives setup, reset, checks, maintenance and the PayPal sandbox, devnet and demo fixture labels.
   The setup and reset steps ran as written on a throwaway local database `envoi_readme` (migrate, seed, a second seed changing nothing, drop, recreate, migrate, seed, drop) [verified]; `npm run dev` from those steps was not run [unknown].
 - **`maintenance.yml`, 2026-10-20:** hourly at minute 17 and by hand (`workflow_dispatch`), `timeout-minutes: 2` (Gate 3 `T_MAINT_RUN`), one run at a time, read-only `contents`, the same pinned actions as `ci.yml`; it runs the compiled S5 runner with `--trigger=scheduled`.
-  It needs the repository secrets `MAINTENANCE_DATABASE_URL`, `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET` and `PAYPAL_PARTNER_ATTRIBUTION_ID` and the variables `ENVOI_ENVIRONMENT` and `SOLANA_RPC_URL`, set by the user.
-  Both variables must be set: an unset Actions variable arrives as an empty string, and `maintenanceEnv` refuses `SOLANA_RPC_URL=""` with "Invalid URL" [verified locally].
+  It reads six repository secrets, set by the user: `MAINTENANCE_DATABASE_URL`, `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_PARTNER_ATTRIBUTION_ID`, `ENVOI_ENVIRONMENT` and `SOLANA_RPC_URL` (the last two moved from variables to secrets on 2026-10-21, as the user stored them).
+  Each must be set: an unset one arrives as an empty string, and `maintenanceEnv` refuses `SOLANA_RPC_URL=""` with "Invalid URL" [verified locally].
   GitHub runs a schedule and `workflow_dispatch` only from the default branch, so the workflow cannot run before it is on `main`.
 - **Work items:**
   - [x] History secret scan with an injected self-test, before any visibility change.

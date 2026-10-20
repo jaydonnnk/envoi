@@ -2,8 +2,8 @@
 # repository is public). One finite run of the compiled runner as envoi_maintenance: it reconciles
 # uncertain payments with read-only PayPal and devnet clients, closes expired work and records the
 # heartbeat and capacity. It can never capture or send a payment. Schedules are best effort.
-# Secrets: MAINTENANCE_DATABASE_URL, PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, PAYPAL_PARTNER_ATTRIBUTION_ID.
-# Variables: ENVOI_ENVIRONMENT, SOLANA_RPC_URL. Both must be set: Actions passes an unset variable as
+# Secrets: MAINTENANCE_DATABASE_URL, PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, PAYPAL_PARTNER_ATTRIBUTION_ID,
+# ENVOI_ENVIRONMENT and SOLANA_RPC_URL, all set by the user. Each must be set: Actions passes an unset one as
 # an empty string, which the runner refuses as an invalid configuration.
 name: maintenance
 
@@ -29,8 +29,8 @@ jobs:
       PAYPAL_CLIENT_ID: ${{ secrets.PAYPAL_CLIENT_ID }}
       PAYPAL_CLIENT_SECRET: ${{ secrets.PAYPAL_CLIENT_SECRET }}
       PAYPAL_PARTNER_ATTRIBUTION_ID: ${{ secrets.PAYPAL_PARTNER_ATTRIBUTION_ID }}
-      ENVOI_ENVIRONMENT: ${{ vars.ENVOI_ENVIRONMENT }}
-      SOLANA_RPC_URL: ${{ vars.SOLANA_RPC_URL }}
+      ENVOI_ENVIRONMENT: ${{ secrets.ENVOI_ENVIRONMENT }}
+      SOLANA_RPC_URL: ${{ secrets.SOLANA_RPC_URL }}
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
