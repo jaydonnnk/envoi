@@ -33,26 +33,32 @@ describe("public API contract", () => {
 
   it("public API matches its OpenAPI document", async () => {
     const document = loadDocument();
-    const menuOf = (id: string) => routes.menu.GET(new Request(`${TEST_BASE_URL}/api/v1/outlets/${id}/menu`), routeParams(id));
+    // Next.js answers a handler that throws with an undocumented 500, so a throw is checked as one.
+    const menuOf = (id: string) =>
+      routes.menu.GET(new Request(`${TEST_BASE_URL}/api/v1/outlets/${encodeURIComponent(id)}/menu`), routeParams(id)).catch(() => new Response(null, { status: 500 }));
     const calls: { name: string; template: string; response: Response }[] = [
       { name: "list", template: "/api/v1/outlets", response: await routes.outlets.GET() },
       { name: "published menu", template: "/api/v1/outlets/{id}/menu", response: await menuOf(fixture.outletId) },
       { name: "unpublished menu", template: "/api/v1/outlets/{id}/menu", response: await menuOf(unpublishedId) },
       { name: "unknown outlet", template: "/api/v1/outlets/{id}/menu", response: await menuOf(newId("out")) },
+      // S14 review fix 1: an id no outlet can have, such as a NUL byte PostgreSQL refuses, answers the
+      // documented 404 like an unknown shop.
+      { name: "NUL byte id", template: "/api/v1/outlets/{id}/menu", response: await menuOf("\u0000") },
+      { name: "short id", template: "/api/v1/outlets/{id}/menu", response: await menuOf("x") },
+      { name: "2 KB id", template: "/api/v1/outlets/{id}/menu", response: await menuOf(`out_${"a".repeat(2048)}`) },
     ];
 
     const exercised = new Set<string>();
     for (const { name, template, response } of calls) {
       exercised.add(`GET ${template} ${response.status}`);
-      // Read a copy first so a body that fits the document must also carry the data asserted below.
-      const body = (await response.clone().json()) as { ok: unknown; data?: { outlets?: unknown[]; items?: unknown[] } };
-      expect(await checkResponse(document, template, "GET", response), name).toEqual([]);
-      // The document types ok as a plain boolean (see its description), so its value is held here.
-      expect(body.ok, name).toBe(response.status === 200);
+      // Check a copy first (checkResponse also holds the envelope flag ok, which the document types
+      // as a plain boolean), then read the body that fits the document for the data asserted below.
+      expect(await checkResponse(document, template, "GET", response.clone()), name).toEqual([]);
+      const body = (await response.json()) as { data?: { outlets?: unknown[]; items?: unknown[] } };
       if (name === "list") expect(body.data?.outlets?.length, name).toBe(1);
       if (name === "published menu") expect(body.data?.items?.length, name).toBe(fixture.items.length);
     }
     expect([...exercised].sort()).toEqual(documentedResponses(document).sort());
-    expect(calls.map((call) => call.response.status)).toEqual([200, 200, 404, 404]);
+    expect(calls.map((call) => call.response.status)).toEqual([200, 200, 404, 404, 404, 404, 404]);
   });
 });

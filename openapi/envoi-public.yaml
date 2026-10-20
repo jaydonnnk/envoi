@@ -36,7 +36,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "description": "The shop id, as listed by listOutlets.",
+            "description": "The shop id, as listed by listOutlets. Any other value answers 404 not_found, like an unknown shop.",
             "schema": { "type": "string" }
           }
         ],
@@ -47,7 +47,7 @@
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MenuResponse" } } }
           },
           "404": {
-            "description": "The shop is unknown or has no published menu.",
+            "description": "The shop is unknown, the id is not a shop id, or the shop has no published menu.",
             "headers": { "Cache-Control": { "$ref": "#/components/headers/NoStore" } },
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/NotFoundResponse" } } }
           }
@@ -87,8 +87,8 @@
         "properties": {
           "id": { "type": "string", "pattern": "^itm_[a-z2-7]{26}$" },
           "name": { "type": "string" },
-          "unitSgdCents": { "type": ["integer", "null"], "minimum": 0, "description": "Unit price in Singapore cents; null when the price is unknown." },
-          "available": { "type": ["boolean", "null"], "description": "Merchant-supplied availability; null when unknown." }
+          "unitSgdCents": { "type": ["integer", "null"], "minimum": 1, "description": "Unit price in Singapore cents, at least 1; null when the price is unknown. A menu is confirmed only with every price known, so a published menu currently never carries null." },
+          "available": { "type": ["boolean", "null"], "description": "Merchant-supplied availability; null when unknown. A menu is confirmed only with every availability known, so a published menu currently never carries null." }
         }
       },
       "OutletList": {
