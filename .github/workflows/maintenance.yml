@@ -1,0 +1,45 @@
+# Scheduled maintenance (Gate 3 T_MAINT_INTERVAL and T_MAINT_RUN; S5 runner, created in S15 once the
+# repository is public). One finite run of the compiled runner as envoi_maintenance: it reconciles
+# uncertain payments with read-only PayPal and devnet clients, closes expired work and records the
+# heartbeat and capacity. It can never capture or send a payment. Schedules are best effort.
+# Secrets: MAINTENANCE_DATABASE_URL, PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, PAYPAL_PARTNER_ATTRIBUTION_ID.
+# Variables: ENVOI_ENVIRONMENT, SOLANA_RPC_URL. Both must be set: Actions passes an unset variable as
+# an empty string, which the runner refuses as an invalid configuration.
+name: maintenance
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never two runs at once; a queued run waits rather than cancelling one that holds leases.
+concurrency:
+  group: maintenance
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    env:
+      MAINTENANCE_DATABASE_URL: ${{ secrets.MAINTENANCE_DATABASE_URL }}
+      PAYPAL_CLIENT_ID: ${{ secrets.PAYPAL_CLIENT_ID }}
+      PAYPAL_CLIENT_SECRET: ${{ secrets.PAYPAL_CLIENT_SECRET }}
+      PAYPAL_PARTNER_ATTRIBUTION_ID: ${{ secrets.PAYPAL_PARTNER_ATTRIBUTION_ID }}
+      ENVOI_ENVIRONMENT: ${{ vars.ENVOI_ENVIRONMENT }}
+      SOLANA_RPC_URL: ${{ vars.SOLANA_RPC_URL }}
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npm run runner:build
+      - run: npm run runner:start -- --trigger=scheduled
