@@ -1,0 +1,333 @@
+[
+ {
+  "id": "r01-nul-id-guard",
+  "kind": "standalone",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "public API matches its OpenAPI document",
+  "mutation": "Fix 1: getPublishedMenu queries any id, so a NUL byte reaches PostgreSQL and the route throws (an undocumented 500).",
+  "edits": [
+   {
+    "file": "src/domain/outlets/search.ts",
+    "old": "  if (!isId(\"out\", outletId)) return null;\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "r02-keyword",
+  "kind": "standalone",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects an unknown keyword on a header",
+  "mutation": "Fix 2: the load-time check accepts any keyword.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "if (!KNOWN.has(keyword)) fail(`keyword ${keyword}`);",
+    "new": "if (false) fail(`keyword ${keyword}`);"
+   }
+  ]
+ },
+ {
+  "id": "r03-walk-properties",
+  "kind": "standalone",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects an unknown keyword on a property",
+  "mutation": "Fix 2: the load-time check does not descend into properties.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "for (const [name, child] of Object.entries(s.properties as Record<string, unknown>)) assertSchema(document, child, `${where}.properties.${name}`);",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "r04-walk-items",
+  "kind": "standalone",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects an unknown keyword under items",
+  "mutation": "Fix 2: the load-time check does not descend into items.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "if (s.items !== undefined) assertSchema(document, s.items, `${where}.items`);",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "r05-walk-parameters",
+  "kind": "standalone",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects an unknown keyword on a path parameter",
+  "mutation": "Fix 2: path parameter schemas are not checked.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "for (const parameter of operation.parameters ?? []) schemas.push(",
+    "new": "for (const parameter of [] as typeof operation.parameters & {}) schemas.push("
+   }
+  ]
+ },
+ {
+  "id": "r06-walk-headers",
+  "kind": "standalone",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects an enum that is not a list",
+  "mutation": "Fix 2: header schemas are not checked.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "for (const [name, header] of Object.entries(document.components.headers)) schemas.push(",
+    "new": "for (const [name, header] of Object.entries({} as typeof document.components.headers)) schemas.push("
+   }
+  ]
+ },
+ {
+  "id": "r07-walk-responses",
+  "kind": "standalone",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects an unknown keyword on a response schema",
+  "mutation": "Fix 2: response schemas are not checked.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "for (const [media, { schema }] of Object.entries(response.content)) schemas.push(",
+    "new": "for (const [media, { schema }] of Object.entries({} as typeof response.content)) schemas.push("
+   }
+  ]
+ },
+ {
+  "id": "r08-ref-sibling",
+  "kind": "standalone",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects a sibling of $ref",
+  "mutation": "Fix 2: a keyword beside $ref, which validate() ignores, is accepted.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "if (Object.keys(s).some((keyword) => keyword !== \"$ref\" && keyword !== \"description\")) fail(",
+    "new": "if (false) fail("
+   }
+  ]
+ },
+ {
+  "id": "r09-additional-properties",
+  "kind": "standalone",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects an additionalProperties schema",
+  "mutation": "Fix 2: an additionalProperties schema, which validate() ignores, is accepted.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "if (s.additionalProperties !== undefined && s.additionalProperties !== false) fail(",
+    "new": "if (false) fail("
+   }
+  ]
+ },
+ {
+  "id": "r10-type",
+  "kind": "standalone",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects an unknown type",
+  "mutation": "Fix 2: an unknown type name is accepted.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "if (types.length === 0 || !types.every((type) => typeof type === \"string\" && TYPES.has(type))) fail(",
+    "new": "if (false) fail("
+   }
+  ]
+ },
+ {
+  "id": "r11-enum",
+  "kind": "standalone",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects an enum that is not a list",
+  "mutation": "Fix 2: an enum that is not a list, which validate() ignores, is accepted.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "if (s.enum !== undefined && !Array.isArray(s.enum)) fail(",
+    "new": "if (false) fail("
+   }
+  ]
+ },
+ {
+  "id": "r12-pattern",
+  "kind": "standalone",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects a pattern that is not a string",
+  "mutation": "Fix 2: a pattern that is not a string, which validate() ignores, is accepted.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "if (typeof s.pattern !== \"string\") fail(\"pattern is not a string\");",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "r13-minimum",
+  "kind": "standalone",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects a minimum that is not a number",
+  "mutation": "Fix 2: a minimum that is not a number, which validate() ignores, is accepted.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "if (s.minimum !== undefined && typeof s.minimum !== \"number\") fail(",
+    "new": "if (false) fail("
+   }
+  ]
+ },
+ {
+  "id": "r14-required",
+  "kind": "standalone",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects required that is not a list of names",
+  "mutation": "Fix 2: required that is not a list of names is accepted.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "if (s.required !== undefined && !(Array.isArray(s.required) && s.required.every((name) => typeof name === \"string\"))) fail(",
+    "new": "if (false) fail("
+   }
+  ]
+ },
+ {
+  "id": "r15-load-checks",
+  "kind": "standalone",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "refuses to load an unsupported document",
+  "mutation": "Fix 2: loadDocument returns a document without the load-time check, so the contract tests never run it.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "  assertSupported(document);\n  return document;",
+    "new": "  return document;"
+   }
+  ]
+ },
+ {
+  "id": "r16-envelope-ok",
+  "kind": "standalone",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "holds the envelope flag ok to the status",
+  "mutation": "Fix 4: checkResponse does not hold the envelope flag ok.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "if (typeOf(body) === \"object\" && (body as { ok?: unknown }).ok !== (response.status >= 200 && response.status < 300)) {",
+    "new": "if (false) {"
+   }
+  ]
+ },
+ {
+  "id": "r17-success-ok-false",
+  "kind": "standalone",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "public API matches its OpenAPI document",
+  "mutation": "Fix 4: a 200 answer says ok false; the integration test now catches it through checkResponse.",
+  "edits": [
+   {
+    "file": "src/lib/http/respond.ts",
+    "old": "Response.json({ ok: true, data: body }",
+    "new": "Response.json({ ok: false, data: body }"
+   }
+  ]
+ },
+ {
+  "id": "r18-error-ok-true",
+  "kind": "standalone",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "public API matches its OpenAPI document",
+  "mutation": "Fix 4: a 404 answer says ok true; the integration test now catches it through checkResponse.",
+  "edits": [
+   {
+    "file": "src/lib/http/respond.ts",
+    "old": "{ ok: false, error: {",
+    "new": "{ ok: true, error: {"
+   }
+  ]
+ },
+ {
+  "id": "r19-minimum-zero",
+  "kind": "standalone",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects zero cents",
+  "mutation": "Fix 6: the document allows a price of 0, which the database refuses.",
+  "edits": [
+   {
+    "file": "openapi/envoi-public.yaml",
+    "old": "\"minimum\": 1,",
+    "new": "\"minimum\": 0,"
+   }
+  ]
+ },
+ {
+  "id": "c01-client-typecheck",
+  "kind": "command",
+  "mutation": "Fix 3: the generated client gains a type error (planted). The separate client typecheck fails on it; the root typecheck, which next build runs, does not see it.",
+  "edits": [
+   {
+    "file": "clients/typescript/src/servers.ts",
+    "old": "  baseUrl: s.of(s.defaulted(s.string(), \"http://localhost:3100\")),",
+    "new": "  baseUrl: s.of(s.defaulted(s.string(), \"http://localhost:3100\")),\n  s14ReviewProbe: ((): number => \"a regenerated client with a type error\")(),"
+   }
+  ],
+  "command": "npm run -s typecheck:client",
+  "needle": "TS2322",
+  "control": "npm run -s typecheck"
+ },
+ {
+  "id": "c02-root-excludes-client",
+  "kind": "command",
+  "mutation": "Fix 3: the root tsconfig.json no longer excludes the generated client, with the same planted type error; the root typecheck, and so next build, fails on generated code.",
+  "edits": [
+   {
+    "file": "clients/typescript/src/servers.ts",
+    "old": "  baseUrl: s.of(s.defaulted(s.string(), \"http://localhost:3100\")),",
+    "new": "  baseUrl: s.of(s.defaulted(s.string(), \"http://localhost:3100\")),\n  s14ReviewProbe: ((): number => \"a regenerated client with a type error\")(),"
+   },
+   {
+    "file": "tsconfig.json",
+    "old": "    \".next\",\n    \"clients\",\n    \"tests/e2e/apimatic-client.ts\"\n",
+    "new": "    \".next\"\n"
+   }
+  ],
+  "command": "npm run -s typecheck",
+  "needle": "clients/typescript/src/servers.ts",
+  "expect": "fail"
+ },
+ {
+  "id": "c03-gitattributes",
+  "kind": "command",
+  "mutation": "Fix 5: .gitattributes no longer marks the generated client, so git diff --check reports the generator's blank lines at end of file. The copy has its own git index (git init, git fetch of main, git add -A), so the check covers every file against bdfb892.",
+  "edits": [
+   {
+    "file": ".gitattributes",
+    "old": "clients/typescript/** -whitespace\n",
+    "new": ""
+   }
+  ],
+  "command": "git add -A && git diff --cached --check bdfb892",
+  "needle": "new blank line at EOF"
+ },
+ {
+  "id": "c04-http-only-fault",
+  "kind": "command",
+  "mutation": "Fix 4: next.config.ts gains a rewrite that sends /api/v1/outlets to the health route over HTTP. The route handlers are unchanged, so the in-process integration test (control) still passes; only the HTTP run catches the routing fault.",
+  "edits": [
+   {
+    "file": "next.config.ts",
+    "old": "  async headers() {\n",
+    "new": "  async rewrites() {\n    return { beforeFiles: [{ source: \"/api/v1/outlets\", destination: \"/api/v1/health\" }], afterFiles: [], fallback: [] };\n  },\n  async headers() {\n"
+   }
+  ],
+  "command": "npm run -s build >/dev/null 2>&1 && npx tsx tests/e2e/run-public-api.ts 3101",
+  "needle": "FAIL list",
+  "control": "npx vitest run tests/integration/public-api-contract.test.ts",
+  "rerun_prefix": "npm run -s build >/dev/null 2>&1"
+ }
+]

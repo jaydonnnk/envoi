@@ -1,0 +1,435 @@
+{
+ "method": "Run in an rsync copy of the envoi/slice-14-review-fixes working tree without .env.local, with a cp -cR copy of node_modules and DATABASE_URL removed. Each definition in s14-review-fixes-mutation-defs.json is applied alone by exact text replacement, every touched file restored and compared by SHA-256. Vitest definitions: the named row must fail on an AssertionError and the whole file pass on rerun; other failing rows are recorded. Command definitions: the command must exit non-zero with the needle in its output, the control command must pass under the same mutation, and the command must pass on rerun.",
+ "results": [
+  {
+   "id": "r01-nul-id-guard",
+   "kind": "standalone",
+   "files": [
+    "src/domain/outlets/search.ts"
+   ],
+   "mutation": "Fix 1: getPublishedMenu queries any id, so a NUL byte reaches PostgreSQL and the route throws (an undocumented 500).",
+   "test": "public API matches its OpenAPI document",
+   "group": "public API contract",
+   "own_row": "failed",
+   "error": "AssertionError: NUL byte id: expected [ Array(1) ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 1,
+   "proof": true
+  },
+  {
+   "id": "r02-keyword",
+   "kind": "standalone",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "Fix 2: the load-time check accepts any keyword.",
+   "test": "rejects an unknown keyword on a header",
+   "group": "OpenAPI document support check",
+   "own_row": "failed",
+   "error": "AssertionError: expected [Function] to throw an error",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "refuses to load an unsupported document",
+    "rejects an unknown keyword on a path parameter",
+    "rejects an unknown keyword on a property",
+    "rejects an unknown keyword on a response schema",
+    "rejects an unknown keyword under items"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "r03-walk-properties",
+   "kind": "standalone",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "Fix 2: the load-time check does not descend into properties.",
+   "test": "rejects an unknown keyword on a property",
+   "group": "OpenAPI document support check",
+   "own_row": "failed",
+   "error": "AssertionError: expected [Function] to throw an error",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "refuses to load an unsupported document",
+    "rejects a minimum that is not a number",
+    "rejects a pattern that is not a string",
+    "rejects a sibling of $ref",
+    "rejects an unknown keyword under items",
+    "rejects an unknown type"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "r04-walk-items",
+   "kind": "standalone",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "Fix 2: the load-time check does not descend into items.",
+   "test": "rejects an unknown keyword under items",
+   "group": "OpenAPI document support check",
+   "own_row": "failed",
+   "error": "AssertionError: expected [Function] to throw an error",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "r05-walk-parameters",
+   "kind": "standalone",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "Fix 2: path parameter schemas are not checked.",
+   "test": "rejects an unknown keyword on a path parameter",
+   "group": "OpenAPI document support check",
+   "own_row": "failed",
+   "error": "AssertionError: expected [Function] to throw an error",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "r06-walk-headers",
+   "kind": "standalone",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "Fix 2: header schemas are not checked.",
+   "test": "rejects an enum that is not a list",
+   "group": "OpenAPI document support check",
+   "own_row": "failed",
+   "error": "AssertionError: expected [Function] to throw an error",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "rejects an unknown keyword on a header"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "r07-walk-responses",
+   "kind": "standalone",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "Fix 2: response schemas are not checked.",
+   "test": "rejects an unknown keyword on a response schema",
+   "group": "OpenAPI document support check",
+   "own_row": "failed",
+   "error": "AssertionError: expected [Function] to throw an error",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "r08-ref-sibling",
+   "kind": "standalone",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "Fix 2: a keyword beside $ref, which validate() ignores, is accepted.",
+   "test": "rejects a sibling of $ref",
+   "group": "OpenAPI document support check",
+   "own_row": "failed",
+   "error": "AssertionError: expected [Function] to throw an error",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "r09-additional-properties",
+   "kind": "standalone",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "Fix 2: an additionalProperties schema, which validate() ignores, is accepted.",
+   "test": "rejects an additionalProperties schema",
+   "group": "OpenAPI document support check",
+   "own_row": "failed",
+   "error": "AssertionError: expected [Function] to throw an error",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "r10-type",
+   "kind": "standalone",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "Fix 2: an unknown type name is accepted.",
+   "test": "rejects an unknown type",
+   "group": "OpenAPI document support check",
+   "own_row": "failed",
+   "error": "AssertionError: expected [Function] to throw an error",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "r11-enum",
+   "kind": "standalone",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "Fix 2: an enum that is not a list, which validate() ignores, is accepted.",
+   "test": "rejects an enum that is not a list",
+   "group": "OpenAPI document support check",
+   "own_row": "failed",
+   "error": "AssertionError: expected [Function] to throw an error",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "r12-pattern",
+   "kind": "standalone",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "Fix 2: a pattern that is not a string, which validate() ignores, is accepted.",
+   "test": "rejects a pattern that is not a string",
+   "group": "OpenAPI document support check",
+   "own_row": "failed",
+   "error": "AssertionError: expected [Function] to throw an error",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "r13-minimum",
+   "kind": "standalone",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "Fix 2: a minimum that is not a number, which validate() ignores, is accepted.",
+   "test": "rejects a minimum that is not a number",
+   "group": "OpenAPI document support check",
+   "own_row": "failed",
+   "error": "AssertionError: expected [Function] to throw an error",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "r14-required",
+   "kind": "standalone",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "Fix 2: required that is not a list of names is accepted.",
+   "test": "rejects required that is not a list of names",
+   "group": "OpenAPI document support check",
+   "own_row": "failed",
+   "error": "AssertionError: expected [Function] to throw an error",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "r15-load-checks",
+   "kind": "standalone",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "Fix 2: loadDocument returns a document without the load-time check, so the contract tests never run it.",
+   "test": "refuses to load an unsupported document",
+   "group": "OpenAPI document support check",
+   "own_row": "failed",
+   "error": "AssertionError: expected [Function] to throw an error",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "r16-envelope-ok",
+   "kind": "standalone",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "Fix 4: checkResponse does not hold the envelope flag ok.",
+   "test": "holds the envelope flag ok to the status",
+   "group": "OpenAPI contract validator",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ '$.ok: false on a 200 answer' ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "r17-success-ok-false",
+   "kind": "standalone",
+   "files": [
+    "src/lib/http/respond.ts"
+   ],
+   "mutation": "Fix 4: a 200 answer says ok false; the integration test now catches it through checkResponse.",
+   "test": "public API matches its OpenAPI document",
+   "group": "public API contract",
+   "own_row": "failed",
+   "error": "AssertionError: list: expected [ '$.ok: false on a 200 answer' ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 1,
+   "proof": true
+  },
+  {
+   "id": "r18-error-ok-true",
+   "kind": "standalone",
+   "files": [
+    "src/lib/http/respond.ts"
+   ],
+   "mutation": "Fix 4: a 404 answer says ok true; the integration test now catches it through checkResponse.",
+   "test": "public API matches its OpenAPI document",
+   "group": "public API contract",
+   "own_row": "failed",
+   "error": "AssertionError: unpublished menu: expected [ '$.ok: true on a 404 answer' ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 1,
+   "proof": true
+  },
+  {
+   "id": "r19-minimum-zero",
+   "kind": "standalone",
+   "files": [
+    "openapi/envoi-public.yaml"
+   ],
+   "mutation": "Fix 6: the document allows a price of 0, which the database refuses.",
+   "test": "rejects zero cents",
+   "group": "OpenAPI contract validator",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "c01-client-typecheck",
+   "kind": "command",
+   "files": [
+    "clients/typescript/src/servers.ts"
+   ],
+   "mutation": "Fix 3: the generated client gains a type error (planted). The separate client typecheck fails on it; the root typecheck, which next build runs, does not see it.",
+   "command": "npm run -s typecheck:client",
+   "exit": 2,
+   "needle": "TS2322",
+   "evidence": "clients/typescript/src/servers.ts(23,34): error TS2322: Type 'string' is not assignable to type 'number'.",
+   "fails_with_needle": true,
+   "control": "npm run -s typecheck",
+   "control_exit": 0,
+   "restored_identical": true,
+   "rerun_exit": 0,
+   "proof": true
+  },
+  {
+   "id": "c02-root-excludes-client",
+   "kind": "command",
+   "files": [
+    "clients/typescript/src/servers.ts",
+    "tsconfig.json"
+   ],
+   "mutation": "Fix 3: the root tsconfig.json no longer excludes the generated client, with the same planted type error; the root typecheck, and so next build, fails on generated code.",
+   "command": "npm run -s typecheck",
+   "exit": 2,
+   "needle": "clients/typescript/src/servers.ts",
+   "evidence": "clients/typescript/src/servers.ts(23,34): error TS2322: Type 'string' is not assignable to type 'number'.",
+   "fails_with_needle": true,
+   "control": null,
+   "control_exit": null,
+   "restored_identical": true,
+   "rerun_exit": 0,
+   "proof": true
+  },
+  {
+   "id": "c03-gitattributes",
+   "kind": "command",
+   "files": [
+    ".gitattributes"
+   ],
+   "mutation": "Fix 5: .gitattributes no longer marks the generated client, so git diff --check reports the generator's blank lines at end of file. The copy has its own git index (git init, git fetch of main, git add -A), so the check covers every file against bdfb892.",
+   "command": "git add -A && git diff --cached --check bdfb892",
+   "exit": 2,
+   "needle": "new blank line at EOF",
+   "evidence": "clients/typescript/api-reference.md:168: new blank line at EOF.",
+   "fails_with_needle": true,
+   "control": null,
+   "control_exit": null,
+   "restored_identical": true,
+   "rerun_exit": 0,
+   "proof": true
+  },
+  {
+   "id": "c04-http-only-fault",
+   "kind": "command",
+   "files": [
+    "next.config.ts"
+   ],
+   "mutation": "Fix 4: next.config.ts gains a rewrite that sends /api/v1/outlets to the health route over HTTP. The route handlers are unchanged, so the in-process integration test (control) still passes; only the HTTP run catches the routing fault.",
+   "command": "npm run -s build >/dev/null 2>&1 && npx tsx tests/e2e/run-public-api.ts 3101",
+   "exit": 1,
+   "needle": "FAIL list",
+   "evidence": "FAIL list: GET /api/v1/outlets 200",
+   "fails_with_needle": true,
+   "control": "npx vitest run tests/integration/public-api-contract.test.ts",
+   "control_exit": 0,
+   "restored_identical": true,
+   "rerun_exit": 0,
+   "proof": true
+  }
+ ]
+}
