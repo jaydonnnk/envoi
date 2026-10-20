@@ -176,7 +176,7 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [x] S10 - Buyer scan or paste; second in the cut order; started 2026-10-17 on `envoi/slice-10-scan`; done 2026-10-17, results fixture-only; review fixes 2026-10-17.
 - [x] S16 - PYUSD devnet purchase; first in the cut order, together with S17; kept by the user's go on 2026-10-16; started 2026-10-17 on `envoi/slice-16-pyusd-purchase`; done 2026-10-18 with one real devnet payment verified; `PYUSD_ENABLED` was later turned on by the user for R14 (see the Slices summary above).
 - [x] S17 - PYUSD recovery, extra transfers and the operator mismatch and refund acts; started 2026-10-18 on `envoi/slice-17-pyusd-recovery`; done 2026-10-18, with a no-hint devnet scan on a FIXTURE copy and the Neon phone payment confirmed by a manual reconcile; on `main` at `6cba215` and deployed; automatic unpaid release turned on at `4ba8586` with the user's approval ([record](#s17-follow-ups-desktop-window-scan-and-automatic-unpaid-release-2026-10-18)); review fixes done and merged 2026-10-18 ([record](#s17-review-fixes-2026-10-18)).
-- [x] S14 - APIMatic client and docs, account-conditional; third in the cut order; access check passed and started 2026-10-19 on `envoi/slice-14-apimatic`; done 2026-10-19; on `main` at `6eacfca`, pushed with CI green ([record](#s14-apimatic-client-and-docs-2026-10-19)); review fixes done 2026-10-19 on `envoi/slice-14-review-fixes`, not pushed ([record](#s14-review-fixes-2026-10-19)).
+- [x] S14 - APIMatic client and docs, account-conditional; third in the cut order; access check passed and started 2026-10-19 on `envoi/slice-14-apimatic`; done 2026-10-19; on `main` at `6eacfca`, pushed with CI green ([record](#s14-apimatic-client-and-docs-2026-10-19)); review fixes done 2026-10-19, on `main` at `9d4bd55` and deployed with CI green on 2026-10-20 ([record](#s14-review-fixes-2026-10-19)).
 - [ ] S15 - Judged release.
 
 ### S14 APIMatic client and docs, 2026-10-19
@@ -244,6 +244,10 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
   The S14 definitions m09 and m10 are superseded by r17 and r18, and the S14 runner's unit-test definitions name `rejects negative cents`, which no longer exists; each S14 definition records its run on its own commit, so that is history, not a defect.
 - **Boundary:** the committed client was generated from the `424ae44` document and is not regenerated, because that needs an APIMatic upload, which is not authorized; so it still accepts a price of 0 and carries the older descriptions [known drift, looser than the document]. Whether APIMatic's boolean literal bug persists on a current release stays [unknown]. The client's own `tshy` and `oxlint` build stays unrun [unknown]. CI has not yet run the new steps, because nothing is pushed [unknown].
   No screen changed, so no 390px or 1280px capture applies.
+- **Authorization to ship, 2026-10-20, in the user's words:** "Push envoi/slice-14-review-fixes, then fast-forward main to it and push (deploys). Check CI and Render after."
+- **Pushed [verified], 2026-10-20:** the branch and `main`, fast-forwarded from `424ae44` to `9d4bd55`, match on `git ls-remote`; CI passed on `main` (run 39431458976) and the branch (run 39431451294), including the new `npm run typecheck:client` step and the HTTP run (`PASS NUL byte id: GET /api/v1/outlets/%00/menu 404`, "contract check exit 0, generated client exit 0").
+  At 13:39Z Render answered `/buy?outlet=%00` with 200, where it answered 500 before the fix, so it serves the fix [verified]; `/api/v1/outlets/%00/menu` still answers 400 at Render's edge, before the app. Both end-to-end scripts passed on Render with read-only GETs.
+  This record's update is pushed after it.
 
 ### S17 PYUSD recovery, 2026-10-18
 
