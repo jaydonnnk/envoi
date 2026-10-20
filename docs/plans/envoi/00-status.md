@@ -211,12 +211,22 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
   - The commit author name and email of all 237 commits; only a history rewrite could change them, which is not authorized and is not recommended.
 - **Boundary:** `.env.local` needles cover current values only; a value rotated before 2026-10-20 is found only by the pattern rules.
   The scan reads Git objects, not the Render or Neon consoles.
+- **Decisions, 2026-10-20, in the user's words:** "1. I accept the publishing 2. Storage is 35MB. 3. Yea its public."
+  - Identifier review: every identifier listed above is accepted for publication as it is; nothing is removed or rewritten.
+  - **R2 accepted** under the user's condition: the Neon console reads 35 MB [user-reported], far below the 1 GB limit, so residual risk R2 is accepted and no runbook or rehearsal is made; once scheduled maintenance runs, the operator health view alerts at 70% of the limit.
+  - Visibility: `jaydonnnk/envoi` reads `PUBLIC` through `gh repo view` [verified 2026-10-20]; no commit landed between the post-commit rescan of `9407c3e` and the flip, so the published history is the scanned one.
+- **License and README, 2026-10-20:** `LICENSE` is the MIT text; `README.md` gives setup, reset, checks, maintenance and the PayPal sandbox, devnet and demo fixture labels.
+  The setup and reset steps ran as written on a throwaway local database `envoi_readme` (migrate, seed, a second seed changing nothing, drop, recreate, migrate, seed, drop) [verified]; `npm run dev` from those steps was not run [unknown].
+- **`maintenance.yml`, 2026-10-20:** hourly at minute 17 and by hand (`workflow_dispatch`), `timeout-minutes: 2` (Gate 3 `T_MAINT_RUN`), one run at a time, read-only `contents`, the same pinned actions as `ci.yml`; it runs the compiled S5 runner with `--trigger=scheduled`.
+  It needs the repository secrets `MAINTENANCE_DATABASE_URL`, `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET` and `PAYPAL_PARTNER_ATTRIBUTION_ID` and the variables `ENVOI_ENVIRONMENT` and `SOLANA_RPC_URL`, set by the user.
+  Both variables must be set: an unset Actions variable arrives as an empty string, and `maintenanceEnv` refuses `SOLANA_RPC_URL=""` with "Invalid URL" [verified locally].
+  GitHub runs a schedule and `workflow_dispatch` only from the default branch, so the workflow cannot run before it is on `main`.
 - **Work items:**
   - [x] History secret scan with an injected self-test, before any visibility change.
-  - [ ] Identifier review decision by the user.
-  - [ ] Repository public (the user), then `LICENSE` (MIT) and README.
+  - [x] Identifier review decision by the user.
+  - [x] Repository public (the user), then `LICENSE` (MIT) and README.
   - [ ] `maintenance.yml` at hourly minute 17, shown running on a public runner.
-  - [ ] R2 recorded before the usability test.
+  - [x] R2 recorded before the usability test.
   - [ ] Idle cold first visit re-measured on the release build.
   - [ ] Full suite, HTTP contract run, mobile and keyboard checks.
   - [ ] Gate 1 usability test with five first-time buyers.
