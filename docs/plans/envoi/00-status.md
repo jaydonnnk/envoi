@@ -2,7 +2,8 @@
 
 Updated: 2026-10-20 (Asia/Singapore).
 
-- Gate 1 - Product: **RE-APPROVED 2026-10-16** by the user ("I approve Gate 1.") after being reopened on 2026-10-15 for one change: menu photo drafting is deferred to "good to have" after the slices, and the merchant enters the menu by hand; see the [record](#reopening-2026-10-15-menu-photo-drafting-deferred).
+- Gate 1 - Product: **RE-APPROVED 2026-10-21** by the user ("Yep this works for now.  I approve gate 1") after being reopened the same day for one change: a landing page at the site's root address; see the [record](#reopening-2026-10-21-landing-page).
+  Before that it was **RE-APPROVED 2026-10-16** by the user ("I approve Gate 1.") after being reopened on 2026-10-15 for one change: menu photo drafting is deferred to "good to have" after the slices, and the merchant enters the menu by hand; see the [record](#reopening-2026-10-15-menu-photo-drafting-deferred).
   Before that it was **RE-APPROVED 2026-10-10** by the user ("I approve gate one") after being reopened and revised the same day to remove Zapier, which the user rejected as paid, and to record the PYUSD decisions; see the [reopening record](#reopening-2026-10-10-zapier-removed). Previously **APPROVED 2026-10-07** by the user after reopening it to add a buyer-side scan entry point. Approval covers product scope and buyer/merchant journeys, including text and scan/paste entry points.
 - Gate 2 - Architecture: **RE-APPROVED 2026-10-11** by the user ("gate 2 approved") after being reopened and revised on 2026-10-10 and revised again after a 2026-10-11 review. Approval covers only the direct vision import and PYUSD amendment in `02-architecture.md`, including the five review changes; the OpenAI/provider pin and all unaffected 2026-10-07 decisions stand. It accepts a proposal, not runtime/account proof. Previously **APPROVED 2026-10-07**.
   **Reopened again and RE-APPROVED 2026-10-11** for two PYUSD double-payment fixes found in the Gate 3 review: the user approved the fixes in advance ("reopen gate 2 and approve the fixes i approve it already").
@@ -37,6 +38,17 @@ Updated: 2026-10-20 (Asia/Singapore).
   An independent review of the draft on 2026-10-12 found four major issues, and all four are fixed in it; see the [review fixes](#gate-4-review-fixes-2026-10-12).
   Its minor findings are fixed or dispositioned; see the [minor review fixes](#gate-4-minor-review-fixes-2026-10-12).
   The user decided delta D10 on 2026-10-12 by reopening Gate 3 for a PayPal check of `PAYMENTS_ENABLED`, re-approved the same day; S2 builds it and names its test.
+
+### Reopening 2026-10-21: landing page
+
+- **Trigger, 2026-10-21, in the user's words:** "I feel like opening https://envoi-helx.onrender.com/buy needs its own landing page and not head directly into /buy. Can u help propose a landing page visual and let me see before i approve or make changes".
+  The site's root address redirected to `/buy`, and Gate 1's screen list had no landing page, so Gate 1 reopened for one added screen.
+- **Change:** [`mockups/landing.html`](mockups/landing.html), revised twice on the user's review ("Way too wordy and i dont wanna see the demo fixtrue on the lading page"; "There shouldne be a nav bar with 'Landing'"): one headline, "PayPal or PYUSD. Straight to the shop.", "Find a shop" and "I run a shop" buttons, three steps and source and evidence links; no shop, so no demo fixture wording, and the notice reads "Test money only. No real money moves."; no navigation bar.
+  `01-product.md` lists the screen; checked in a browser at 390 px (no horizontal scroll) and desktop width.
+- **Approval, 2026-10-21, in the user's words:** "Yep this works for now.  I approve gate 1".
+  It approves the screen, not building or deploying it.
+- **Other gates:** Gate 2 is unchanged (no data, route contract or provider); Gate 3 is unchanged, because the page reads nothing and calls nothing, and the root `src/app/page.tsx` it replaces was never in Gate 3's file map; Gate 4's S15 contract does not include building it, so building it needs a Gate 4 amendment the user approves.
+- **Checker:** `gate4_check.py` pins the new `01-product.md` body and `mockups/landing.html`; `gate4_prove.py` plants one fault for the new pin and gives 77/77; the check passes with base `main` and with `5f6ab39`.
 
 ### Reopening 2026-10-18: verifying landing wins the window scan
 

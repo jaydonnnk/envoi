@@ -135,6 +135,7 @@ fault(["R10"], "reopened Gate 3 text edited after review", lambda d: sub(d, "03-
 # Faults for the 2026-10-16 Gate 1 re-approval (menu photo drafting deferred)
 fault(["R10"], "re-approved Gate 1 body edited", lambda d: sub(d, "01-product.md", "Menu photo import is visibly not available in this release", "Menu photo import is available in this release"))
 fault(["R10"], "re-approved Gate 1 mockup edited", lambda d: sub(d, os.path.join("mockups", "merchant-onboarding.html"), "Menu photo import is not available in this release.", "Menu photo import is available in this release."))
+fault(["R10"], "re-approved landing mockup edited", lambda d: sub(d, os.path.join("mockups", "landing.html"), "Test money only. No real money moves.", "Real money moves."))
 # Faults for the 2026-10-15 English-only reopening of Gates 2-4
 fault(["R10"], "reopened Gate 2 text edited after approval", lambda d: sub(d, "02-architecture.md", "including rotated text, small prices, blur and non-SGD ambiguity", "including Chinese text, rotated text, small prices, blur and non-SGD ambiguity"))
 fault(["R10"], "reopened Gate 3 English-only text edited after approval", lambda d: sub(d, "03-program-design.md", "Rotated and small-price text accuracy on English menus", "Chinese, rotated and small-price text accuracy"))

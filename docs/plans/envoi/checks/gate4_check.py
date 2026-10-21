@@ -401,10 +401,14 @@ G3_REOPENING_SHA256 = "bc6b1f0945e8df33f6860085f75175cf6cf2a46e143f62cf9b365dabd
 # 02-architecture.md may likewise equal its Phantom landing reopening text, re-approved on 2026-10-18
 # (938d0a99...f3bf30a6 was the English-only text of 2026-10-15).
 G2_REOPENING_SHA256 = "28d54654a19e885b4908715f7793846c4c873f94f6cc380d985af9fe45561154"
-# Gate 1, re-approved 2026-10-16 after deferring menu photo drafting: the revised mockup, and
-# 01-product.md without its closing status line, which keeps changing as slices finish.
-G1_MOCKUP_SHA256 = {os.path.join("mockups", "merchant-onboarding.html"): "d376e4517de5b7f0c4c892675b0e033111cbac0af1b157519f23078ade16f568"}
-G1_BODY_SHA256 = "ce25854b2a39d4b722715c3936692e3bb7eaca3f01fac6b8bebeb9654a3dff07"
+# Gate 1, re-approved 2026-10-16 after deferring menu photo drafting and again on 2026-10-21 for the
+# landing page: the revised and added mockups, and 01-product.md without its closing status line,
+# which keeps changing as slices finish (ce25854b...3dff07 was the 2026-10-16 body).
+G1_MOCKUP_SHA256 = {
+    os.path.join("mockups", "merchant-onboarding.html"): "d376e4517de5b7f0c4c892675b0e033111cbac0af1b157519f23078ade16f568",
+    os.path.join("mockups", "landing.html"): "973c92b63f946b51c9911aa7f8ec75891041e5d0af1c41a086e09f917c923744",
+}
+G1_BODY_SHA256 = "d5c726e8f98cd74380412e9c4de8649bf6dcb5b207e3772a8ba1be46e2860dc3"
 for root, _, files in os.walk(folder):
     for name in sorted(files):
         rel = os.path.relpath(os.path.join(root, name), folder)
