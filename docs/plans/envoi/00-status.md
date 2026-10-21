@@ -243,18 +243,23 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - **Idle cold first visit, 2026-10-21 [verified], S1 method** ([record](evidence/s15-cold-visit.json)): three visits to `/buy` on Render from Singapore at 17:45, 18:06 and 18:30 UTC, each after at least 21 idle minutes and away from the minute-17 maintenance run, all 200 with the fixture label.
   Interactive page in 28.0, 28.0 and 28.7 s (S1: 26.1 to 36.2 s); derived Render wake about 25.1 to 25.3 s; database share 1.7, 1.6 and 2.3 s, far below the 18 s R12 threshold, so R12 stays accepted.
   Boundary: Render serves `main`, whose application code is unchanged since `3801035`; the S15 focus fix is not deployed yet, and it changes no server path [hypothesis].
-- **Scheduled maintenance [unknown]:** the workflow is active on the default branch since 16:21 UTC on 2026-10-20, but no run fired at 17:17 or 18:17 UTC; GitHub documents that scheduled runs can be delayed or dropped.
+- **Scheduled maintenance [verified], with a gap:** the first scheduled runs fired at 20:40 and 23:57 UTC on 2026-10-20 ([`39494027100`](https://github.com/jaydonnnk/envoi/actions/runs/39494027100), [`39518278235`](https://github.com/jaydonnnk/envoi/actions/runs/39518278235)), both `trigger: "scheduled"` with every task ok on Neon; none fired at 17:17, 18:17 or the other hours in between.
+  GitHub ran the hourly schedule about every three hours, late; so during tester sessions a person still runs maintenance by hand when PYUSD is offered, as accepted before S15.
+- **Final merge, push and deploy, 2026-10-21, authorized in the user's words:** "Yup do the final merge push and deploy and then guide me through how to demo the site".
+  `main` fast-forwarded to `97edd3a` and pushed (`git ls-remote` verified); CI passed on that commit on the branch (run `39475446632`).
+  Render deployed it by itself from the push: at 04:29 UTC its `/buy` page chunk changed from `page-26739e77b0fc4b35.js`, which has no `HTMLButtonElement` reference, to `page-4cbe7741cda45a88.js`, which has the focus hook's; `/buy`, `/api/v1/health` and `/api/v1/outlets` answer 200.
 - **Work items:**
   - [x] History secret scan with an injected self-test, before any visibility change.
   - [x] Identifier review decision by the user.
   - [x] Repository public (the user), then `LICENSE` (MIT) and README.
-  - [ ] `maintenance.yml` at hourly minute 17, shown running on a public runner: a run started by hand passed; a scheduled run is still to be shown.
+  - [x] `maintenance.yml` at hourly minute 17, shown running on a public runner (GitHub fires it about every three hours).
   - [x] R2 recorded before the usability test.
   - [x] Idle cold first visit re-measured (application code of the release; the focus fix deploys with the final merge).
   - [x] Full suite, HTTP contract run, mobile and keyboard checks; the focus-loss finding fixed.
   - [ ] Gate 1 usability test with five first-time buyers.
   - [ ] Render, Neon, Actions, OpenAI and, if PYUSD is offered, devnet access through 16 Dec 2026.
-  - [ ] Evidence pack, video script, final merge, push and deploy.
+  - [x] Final merge, push and deploy, before the usability test, by the user's choice.
+  - [ ] Evidence pack and video completed with the usability result; video recorded and uploaded by the user.
 
 ### S14 APIMatic client and docs, 2026-10-19
 

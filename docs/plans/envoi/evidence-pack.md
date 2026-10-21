@@ -35,7 +35,7 @@ Every payment below used PayPal sandbox money or Solana devnet test tokens; none
 
 | Claim | Label | Record |
 | --- | --- | --- |
-| Maintenance runs on a public GitHub runner on a schedule | [verified] for a run started by hand; a scheduled run is still to be shown | [S15](00-status.md#s15-judged-release-2026-10-20) |
+| Maintenance runs on a public GitHub runner on a schedule | [verified]; hourly in the workflow, about every three hours in practice | [S15](00-status.md#s15-judged-release-2026-10-20) |
 | The repository's whole Git history was scanned for secrets before it became public | [verified] | [S15](00-status.md#s15-judged-release-2026-10-20), [scan](evidence/s15-history-scan.txt) |
 | An idle cold first visit on Render Free takes about 28 s from Singapore, about 2 s of it the database | [verified] | [S15](00-status.md#s15-judged-release-2026-10-20), [S15 latency](evidence/s15-cold-visit.json), [S1 latency](evidence/s1-r12-latency.json) |
 | Storage exhaustion risk R2 is accepted at 35 MB of 1 GB | [user-reported] storage reading | [S15](00-status.md#s15-judged-release-2026-10-20) |
