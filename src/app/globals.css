@@ -203,3 +203,15 @@ footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; 
 .scan .card > .status + .fine { margin-top: 0; }
 .scan .card > p:last-child { margin-bottom: 0; }
 .scan .card > .fine + .button { margin-top: 14px; }
+
+/* Landing page at the root address (S15 amendment, 2026-10-21). */
+.landing-hero { max-width: 720px; margin: 40px 0 8px; }
+.landing-hero h1 { margin-top: 0; }
+.landing-hero .lead { font-size: 20px; }
+.landing-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; padding: 0; margin: 36px 0 0; list-style: none; counter-reset: step; }
+.landing-steps li { counter-increment: step; }
+.landing-steps li::before { content: counter(step); display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: #fff; font-weight: 700; margin-bottom: 12px; }
+.landing-steps h2 { font-size: 1.05rem; font-weight: 700; margin: 0 0 6px; }
+.landing-steps p { margin: 0; }
+.landing-links { display: flex; gap: 18px; margin-top: 40px; font-size: 14px; }
+@media (max-width: 740px) { .landing-steps { grid-template-columns: 1fr; } .landing-hero { margin-top: 24px; } .landing-hero .actions .button { flex: 1; } }
