@@ -264,7 +264,9 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - **Landing page, built 2026-10-22 under the approved [S15 amendment](04-slices.md#s15-amendment-2026-10-21-landing-page):** `src/app/page.tsx` replaces the redirect to `/buy` with the page of `mockups/landing.html`; `src/app/site-chrome.tsx` gives the root address the notice "Test money only. No real money moves." and no footer, while every other page keeps the demo fixture notice and footer; the logo now links to `/`.
   - `tests/unit/landing-page.test.ts`, 5 rows; 5 of 5 mutations proved on an AssertionError with byte-identical restores ([definitions](evidence/s15-landing-mutation-defs.json), [runner](evidence/s15-landing-mutate.py), [results](evidence/s15-landing-mutations.json)).
   - Browser, local production build [verified]: at 1280 px and 390 px the page matches the mockup with no horizontal scroll, no "fixture" text and no footer; Tab twice reaches "Find a shop", and Enter opens `/buy`, which keeps the full notice and footer.
-    The step titles rendered at normal weight, unlike the mockup, and are now bold; that CSS line is checked on the deployed page.
+    The step titles rendered at normal weight, unlike the mockup, and are now bold; on Render they compute to weight 700.
+  - **Merge, push and deploy, 2026-10-22, authorized in the user's words:** "yes", to "Do you authorize merging this to `main`, pushing, and letting Render deploy it?".
+    `main` fast-forwarded to `5c02fe7` (CI passed on the branch, run `39724644224`) and pushed; Render served the landing page at 05:11 UTC: at 390 px on https://envoi-helx.onrender.com/ it shows "Test money only. No real money moves.", no "fixture" text and no horizontal scroll, and `/buy` answers 200 [verified].
   - Fresh: `typecheck`, `typecheck:client` and `lint` exit 0; 193 of 193 unit and 343 of 343 integration tests; build, `scan-build.ts` (197 files) and the HTTP contract run pass.
 - **Work items:**
   - [x] History secret scan with an injected self-test, before any visibility change.
