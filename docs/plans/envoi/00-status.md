@@ -27,6 +27,7 @@ Updated: 2026-10-20 (Asia/Singapore).
   The OpenAI provider pin does not change, and the completed R11 action/R12 region decision are not reopened.
   **Reopened and RE-APPROVED 2026-10-18** ("Yea sure i approve the gates then make the relevant changes and push to main thnaks"): the same change in the Browse link, the `/buy` landing and one renamed case; no count changes; see the [record](#reopening-2026-10-18-phantom-landing).
 - Gate 4 - Slice plan: **APPROVED 2026-10-12** by the user ("I approve both pls publish the branches and commit all the changes to main so that we can proceed with the first slice"), on branch `envoi/gate-4-vision-pyusd`.
+  **Amended 2026-10-22** for one addition to S15, approved by the user ("I approve"): the [landing page](04-slices.md#s15-amendment-2026-10-21-landing-page) of the 2026-10-21 Gate 1 reopening; no build order, test count or cut order changes.
   Approval accepts the slice order, the test assignment, the cut order, deltas D1-D9 as refinements and D10's placement in S2; it starts no slice and authorizes no install, provisioning, deployment, spending, wallet use or OpenAI call.
   At approval no slice was authorized or started; S1 started on 2026-10-12 under the user's handover prompt and is done (see [S1](#s1-tracer-bullet-on-render-free-2026-10-12)).
   **Amended 2026-10-14** for one S6 acceptance sentence, confirmed by the user ("I also do conirm the receipt rewording ammendment"): the approved "keeps that receipt readable" became "readable with that session; the browser can no longer open it, disclosed before sign-in".
@@ -47,7 +48,7 @@ Updated: 2026-10-20 (Asia/Singapore).
   `01-product.md` lists the screen; checked in a browser at 390 px (no horizontal scroll) and desktop width.
 - **Approval, 2026-10-21, in the user's words:** "Yep this works for now.  I approve gate 1".
   It approves the screen, not building or deploying it.
-- **Other gates:** Gate 2 is unchanged (no data, route contract or provider); Gate 3 is unchanged, because the page reads nothing and calls nothing, and the root `src/app/page.tsx` it replaces was never in Gate 3's file map; Gate 4's S15 contract does not include building it, so building it needs a Gate 4 amendment the user approves.
+- **Other gates:** Gate 2 is unchanged (no data, route contract or provider); Gate 3 is unchanged, because the page reads nothing and calls nothing, and the root `src/app/page.tsx` it replaces was never in Gate 3's file map; Gate 4's S15 contract did not include building it, so an [S15 amendment](04-slices.md#s15-amendment-2026-10-21-landing-page) adds it, approved by the user on 2026-10-22 ("I approve").
 - **Checker:** `gate4_check.py` pins the new `01-product.md` body and `mockups/landing.html`; `gate4_prove.py` plants one fault for the new pin and gives 77/77; the check passes with base `main` and with `5f6ab39`.
 
 ### Reopening 2026-10-18: verifying landing wins the window scan
@@ -260,6 +261,11 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - **Final merge, push and deploy, 2026-10-21, authorized in the user's words:** "Yup do the final merge push and deploy and then guide me through how to demo the site".
   `main` fast-forwarded to `97edd3a` and pushed (`git ls-remote` verified); CI passed on that commit on the branch (run `39475446632`).
   Render deployed it by itself from the push: at 04:29 UTC its `/buy` page chunk changed from `page-26739e77b0fc4b35.js`, which has no `HTMLButtonElement` reference, to `page-4cbe7741cda45a88.js`, which has the focus hook's; `/buy`, `/api/v1/health` and `/api/v1/outlets` answer 200.
+- **Landing page, built 2026-10-22 under the approved [S15 amendment](04-slices.md#s15-amendment-2026-10-21-landing-page):** `src/app/page.tsx` replaces the redirect to `/buy` with the page of `mockups/landing.html`; `src/app/site-chrome.tsx` gives the root address the notice "Test money only. No real money moves." and no footer, while every other page keeps the demo fixture notice and footer; the logo now links to `/`.
+  - `tests/unit/landing-page.test.ts`, 5 rows; 5 of 5 mutations proved on an AssertionError with byte-identical restores ([definitions](evidence/s15-landing-mutation-defs.json), [runner](evidence/s15-landing-mutate.py), [results](evidence/s15-landing-mutations.json)).
+  - Browser, local production build [verified]: at 1280 px and 390 px the page matches the mockup with no horizontal scroll, no "fixture" text and no footer; Tab twice reaches "Find a shop", and Enter opens `/buy`, which keeps the full notice and footer.
+    The step titles rendered at normal weight, unlike the mockup, and are now bold; that CSS line is checked on the deployed page.
+  - Fresh: `typecheck`, `typecheck:client` and `lint` exit 0; 193 of 193 unit and 343 of 343 integration tests; build, `scan-build.ts` (197 files) and the HTTP contract run pass.
 - **Work items:**
   - [x] History secret scan with an injected self-test, before any visibility change.
   - [x] Identifier review decision by the user.

@@ -731,6 +731,26 @@ A public repository with an open-source license; a README with setup, reset and 
 The license choice, the repository visibility change, workflow creation, and the final merge, push and deploy.
 You perform: the YouTube upload and the Devpost submission.
 
+#### S15 amendment 2026-10-21: landing page
+
+Proposed 2026-10-21 after Gate 1 was re-approved for the landing page; approved by the user on 2026-10-22 ("I approve"), which authorizes building it on this branch, not the merge, push or deploy.
+Branch: `envoi/slice-15-release`.
+
+**Visible result.**
+Opening the site's root address shows the landing page of [`mockups/landing.html`](mockups/landing.html) instead of redirecting to `/buy`: "Find a shop" opens `/buy` and "I run a shop" opens `/merchant/setup`, with the test-environment badge and "Test money only. No real money moves."
+
+**Builds.**
+`src/app/page.tsx` as a static server page: no database read, no route, no environment name and no new dependency; the shared header keeps its badge, and the page states its own notice line without the demo fixture wording.
+
+**Test.**
+A slice test that renders the root page and asserts both links, the test-money notice and the absence of "Demo fixture", each with its own mutation; the screen checked in a browser at 390 px and 1280 px.
+
+**Unchanged.**
+Gates 2 and 3, the build order, the cut order and the test counts; `/buy` keeps working at its own address, so every existing link, QR code and the Phantom landing are unaffected.
+
+**Authorizations to request.**
+Building it on this branch, then the merge, push and deploy.
+
 ## Test assignment
 
 Every one of the 92 named tests in the re-approved Gate 3 test plan, 71 standalone tests and 21 groups covering 231 cases, is assigned to exactly one slice.
