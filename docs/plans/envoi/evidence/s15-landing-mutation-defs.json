@@ -1,0 +1,72 @@
+[
+ {
+  "id": "l01-buy-link",
+  "kind": "standalone",
+  "test_file": "tests/unit/landing-page.test.ts",
+  "test": "links buyers to the buy page",
+  "mutation": "Find a shop points at the root instead of the buy page.",
+  "edits": [
+   {
+    "file": "src/app/page.tsx",
+    "old": "<a className=\"button\" href=\"/buy\">",
+    "new": "<a className=\"button\" href=\"/\">"
+   }
+  ]
+ },
+ {
+  "id": "l02-merchant-link",
+  "kind": "standalone",
+  "test_file": "tests/unit/landing-page.test.ts",
+  "test": "links merchants to merchant setup",
+  "mutation": "I run a shop points at merchant orders instead of setup.",
+  "edits": [
+   {
+    "file": "src/app/page.tsx",
+    "old": "href=\"/merchant/setup\"",
+    "new": "href=\"/merchant/orders\""
+   }
+  ]
+ },
+ {
+  "id": "l03-landing-notice",
+  "kind": "standalone",
+  "test_file": "tests/unit/landing-page.test.ts",
+  "test": "says test money only",
+  "mutation": "The landing page shows the site-wide notice.",
+  "edits": [
+   {
+    "file": "src/app/site-chrome.tsx",
+    "old": "{landing ? LANDING_NOTICE : SITE_NOTICE}",
+    "new": "{SITE_NOTICE}"
+   }
+  ]
+ },
+ {
+  "id": "l04-landing-footer",
+  "kind": "standalone",
+  "test_file": "tests/unit/landing-page.test.ts",
+  "test": "shows no demo fixture wording",
+  "mutation": "The landing page shows the demo fixture footer.",
+  "edits": [
+   {
+    "file": "src/app/site-chrome.tsx",
+    "old": "  if (usePathname() === \"/\") return null;\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "l05-other-pages",
+  "kind": "standalone",
+  "test_file": "tests/unit/landing-page.test.ts",
+  "test": "every other page keeps the demo fixture notice and footer",
+  "mutation": "Every page gets the short landing notice.",
+  "edits": [
+   {
+    "file": "src/app/site-chrome.tsx",
+    "old": "const landing = usePathname() === \"/\";",
+    "new": "const landing = usePathname() !== \"\";"
+   }
+  ]
+ }
+]

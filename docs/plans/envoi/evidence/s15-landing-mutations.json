@@ -1,0 +1,97 @@
+{
+ "method": "Run in an rsync copy of the envoi/slice-15-release working tree without .env.local, with a cp -cR copy of node_modules and DATABASE_URL removed. Each definition in s15-landing-mutation-defs.json is applied alone by exact text replacement, every touched file restored and compared by SHA-256. Vitest definitions: the named row must fail on an AssertionError and the whole file pass on rerun; other failing rows are recorded. Command definitions: the command must exit non-zero with the needle in its output, the control command must pass under the same mutation, and the command must pass on rerun.",
+ "results": [
+  {
+   "id": "l01-buy-link",
+   "kind": "standalone",
+   "files": [
+    "src/app/page.tsx"
+   ],
+   "mutation": "Find a shop points at the root instead of the buy page.",
+   "test": "links buyers to the buy page",
+   "group": "landing page",
+   "own_row": "failed",
+   "error": "AssertionError: expected '<div><div class=\"notice\" role=\"note\">\u2026' to contain '<a class=\"button\" href=\"/buy\">Find a \u2026'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "l02-merchant-link",
+   "kind": "standalone",
+   "files": [
+    "src/app/page.tsx"
+   ],
+   "mutation": "I run a shop points at merchant orders instead of setup.",
+   "test": "links merchants to merchant setup",
+   "group": "landing page",
+   "own_row": "failed",
+   "error": "AssertionError: expected '<div><div class=\"notice\" role=\"note\">\u2026' to contain '<a class=\"button secondary\" href=\"/me\u2026'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "l03-landing-notice",
+   "kind": "standalone",
+   "files": [
+    "src/app/site-chrome.tsx"
+   ],
+   "mutation": "The landing page shows the site-wide notice.",
+   "test": "says test money only",
+   "group": "landing page",
+   "own_row": "failed",
+   "error": "AssertionError: expected '<div><div class=\"notice\" role=\"note\">\u2026' to contain '<div class=\"notice\" role=\"note\">Test \u2026'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "shows no demo fixture wording"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "l04-landing-footer",
+   "kind": "standalone",
+   "files": [
+    "src/app/site-chrome.tsx"
+   ],
+   "mutation": "The landing page shows the demo fixture footer.",
+   "test": "shows no demo fixture wording",
+   "group": "landing page",
+   "own_row": "failed",
+   "error": "AssertionError: expected '<div><div class=\"notice\" role=\"note\">\u2026' not to contain 'fixture'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "l05-other-pages",
+   "kind": "standalone",
+   "files": [
+    "src/app/site-chrome.tsx"
+   ],
+   "mutation": "Every page gets the short landing notice.",
+   "test": "every other page keeps the demo fixture notice and footer",
+   "group": "landing page",
+   "own_row": "failed",
+   "error": "AssertionError: expected '<div><div class=\"notice\" role=\"note\">\u2026' to contain 'Demo fixture shops, PayPal sandbox te\u2026'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  }
+ ]
+}
