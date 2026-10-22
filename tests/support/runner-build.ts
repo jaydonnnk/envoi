@@ -16,7 +16,7 @@ export type RunnerBuild = { outDir: string; remove: () => void };
 export async function buildRunner(label: string): Promise<RunnerBuild> {
   const outDir = join(REPO_ROOT, ".maintenance-build", `test-${label}-${randomBytes(4).toString("hex")}`);
   const tsc = join(REPO_ROOT, "node_modules", "typescript", "bin", "tsc");
-  await promisify(execFile)(process.execPath, [tsc, "-p", join(REPO_ROOT, "tsconfig.runner.json"), "--outDir", outDir], { cwd: REPO_ROOT });
+  await promisify(execFile)(process.execPath, [tsc, "-p", join(REPO_ROOT, "config", "tsconfig.runner.json"), "--outDir", outDir], { cwd: REPO_ROOT });
   return { outDir, remove: () => rmSync(outDir, { recursive: true, force: true }) };
 }
 

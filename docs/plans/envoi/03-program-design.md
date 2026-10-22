@@ -259,11 +259,11 @@ This gate does not stage, move or edit them; the R11 containment rules below sti
 | `neon.ts` | **Exists and tracked** at `auth: false`, committed in `f8caf7d`. Verified not to control the branch-level Auth service, which remains enabled in its own `neon_auth` schema. |
 | `neondb` schema state | **Verified 2026-10-07 by read-only inspection:** `public` contains zero tables; all nine Neon Auth tables sit in `neon_auth`. Better Auth must be pinned to `public`. |
 | `tsconfig.json` | Next.js web config, `strict`, no `any` at boundaries. |
-| `tsconfig.runner.json` | Separate NodeNext build of the maintenance entrypoint only, so CI can prove what maintenance can reach. |
-| `drizzle.config.ts` | Migration generation against `MIGRATION_DATABASE_URL`. |
+| `config/tsconfig.runner.json` | Separate NodeNext build of the maintenance entrypoint only, so CI can prove what maintenance can reach. |
+| `config/drizzle.config.ts` | Migration generation against `MIGRATION_DATABASE_URL`. |
 | `next.config.ts` | Node runtime, framework image optimizer unused, security headers, no-referrer on approval pages. **Revised 2026-10-11:** no `src/proxy.ts` or `middleware.ts` exists; if one is ever added, its matcher must exclude the menu-import route so no proxy clones the upload body. |
 | `render.yaml` | Proposed Render Free web service. Not applied; provisioning is not authorized. |
-| `vitest.config.ts`, `playwright.config.ts` | Test runners. |
+| `config/vitest.config.ts`, `playwright.config.ts` | Test runners. **Moved 2026-10-22:** the configs that their tools accept by `--config` or `-p` live in `config/`, so the root holds only files a tool requires there. |
 | `.github/workflows/ci.yml` | Typecheck, lint, unit and integration tests on push. |
 | `.github/workflows/maintenance.yml` | Proposed hourly runner. **Creation is not authorized by this gate.** |
 | `.env.example` | Names only, never values. Must equal the union of names in `src/env.ts`. Must not duplicate the real `.env.local`, which stays ignored. **Revised 2026-10-11:** includes `AI_MENU_MODEL`, `MENU_IMPORTS_ENABLED`, `SOLANA_RPC_URL` and `PYUSD_ENABLED`; the Zapier hook name is removed. |

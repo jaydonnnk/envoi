@@ -1,9 +1,12 @@
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
-const src = fileURLToPath(new URL("./src", import.meta.url));
+const root = fileURLToPath(new URL("..", import.meta.url));
+const src = fileURLToPath(new URL("../src", import.meta.url));
 
 export default defineConfig({
+  // This file lives in config/, so the project root is set explicitly to the repository root.
+  root,
   resolve: { alias: { "@": src } },
   test: {
     projects: [
