@@ -12,3 +12,5 @@ test-results/
 *.tsbuildinfo
 !.env.example
 next-env.d.ts
+# Archived order receipts exported by the operator (S18); never committed.
+/archive/

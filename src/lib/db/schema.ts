@@ -340,6 +340,12 @@ export const purchases = pgTable(
     // atomic amount; a changed rate is a new checkout, never a changed review.
     pyusdRateVersionId: text("pyusd_rate_version_id").references((): AnyPgColumn => pyusdRates.id),
     pyusdAtomicAmount: bigint("pyusd_atomic_amount", { mode: "bigint" }),
+    // The merchant's archive (S18): deleting an order on /merchant/orders only hides it. The state at
+    // archive time lets an order archived before it was paid come back once paid. Set once; only the
+    // operator's unarchive-order clears it (trigger in migration 0024).
+    merchantArchivedAt: timestamp("merchant_archived_at", { withTimezone: true }),
+    merchantArchivedByUserId: text("merchant_archived_by_user_id").references(() => user.id),
+    merchantArchivedState: text("merchant_archived_state"),
   },
   (t) => [
     check(
@@ -355,6 +361,10 @@ export const purchases = pgTable(
       sql`${t.entryPoint} = 'fixture_tracer' or (${t.rail} is not null and ${t.destinationId} is not null and ${t.destinationVersion} is not null and ${t.checkoutKey} is not null)`,
     ),
     check("purchases_acknowledged_check", sql`(${t.acknowledgedAt} is null) = (${t.acknowledgedByUserId} is null)`),
+    check(
+      "purchases_merchant_archived_check",
+      sql`((${t.merchantArchivedAt} is null) = (${t.merchantArchivedByUserId} is null)) and ((${t.merchantArchivedAt} is null) = (${t.merchantArchivedState} is null))`,
+    ),
     check(
       "purchases_pyusd_price_check",
       sql`(${t.rail} = 'pyusd' and ${t.pyusdRateVersionId} is not null and ${t.pyusdAtomicAmount} > 0) or (${t.rail} is distinct from 'pyusd' and ${t.pyusdRateVersionId} is null and ${t.pyusdAtomicAmount} is null)`,

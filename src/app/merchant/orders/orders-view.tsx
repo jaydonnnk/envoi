@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SINGAPORE_TIME } from "@/app/purchase-copy";
 import type { MerchantOrder, OutletOrders } from "@/domain/purchases/orders";
 import { requestJson } from "@/lib/browser/session";
 import { formatSgd, sgdFromCents } from "@/lib/money";
-import { extraTransferNote, mayStillBePaid, orderStatus } from "./order-copy";
+import { archivedCountLine, DELETE_COPY, extraTransferNote, mayStillBePaid, orderStatus } from "./order-copy";
 import { startOrdersPolling, withNewest, withOlder, type PolledOrder } from "./polling";
 import { useRestoreFocus } from "@/lib/browser/focus";
 
@@ -18,12 +18,33 @@ async function fetchOrders(outletId: string, before: string | null = null): Prom
   return result.ok && result.data ? result.data : null;
 }
 
-function OrderCard({ order, onAcknowledged }: { order: MerchantOrder; onAcknowledged: (order: MerchantOrder) => void }) {
+function OrderCard({
+  order,
+  onAcknowledged,
+  onArchived,
+}: {
+  order: MerchantOrder;
+  onAcknowledged: (order: MerchantOrder) => void;
+  onArchived: (order: MerchantOrder, changed: boolean) => void;
+}) {
   const [busy, setBusy] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const confirmRef = useRef<HTMLDialogElement>(null);
   useRestoreFocus(busy);
   const status = orderStatus(order);
   const paid = order.state === "paid";
+
+  // Delete (S18) archives the order: the confirmation says the record and the payment stay.
+  async function archive() {
+    setDeleting(true);
+    setError(null);
+    const result = await requestJson<{ order: MerchantOrder; changed: boolean }>("POST", `/api/v1/merchant/orders/${encodeURIComponent(order.id)}/archive`);
+    setDeleting(false);
+    confirmRef.current?.close();
+    if (result.ok && result.data) onArchived(result.data.order, result.data.changed);
+    else setError(result.error?.message ?? DELETE_COPY.failed);
+  }
 
   async function acknowledge() {
     setBusy(true);
@@ -96,25 +117,39 @@ function OrderCard({ order, onAcknowledged }: { order: MerchantOrder; onAcknowle
         {order.acknowledgedAt ? <span className="chip ok">Acknowledged</span> : <span className="chip">Not acknowledged</span>}
       </div>
       {order.acknowledgedAt && <p className="muted order-note">Acknowledged on {SINGAPORE_TIME.format(new Date(order.acknowledgedAt))}. The payment status above is unchanged.</p>}
-      {order.canAcknowledge && (
-        <div className="actions">
+      <div className="actions">
+        {order.canAcknowledge && (
           <button className="button" type="button" onClick={acknowledge} disabled={busy}>
             {busy ? "Acknowledging" : "Acknowledge order"}
           </button>
-        </div>
-      )}
-      {!paid && mayStillBePaid(order) && (
-        <div className="actions">
+        )}
+        {!paid && mayStillBePaid(order) && (
           <button className="button" type="button" disabled>
             Acknowledge after confirmed payment
           </button>
-        </div>
-      )}
+        )}
+        <button className="button danger" type="button" onClick={() => confirmRef.current?.showModal()} disabled={deleting}>
+          {DELETE_COPY.button}
+        </button>
+      </div>
       {error && (
         <p className="error" role="alert">
           {error}
         </p>
       )}
+      <dialog ref={confirmRef} className="confirm" aria-labelledby={`delete-${order.id}`}>
+        <h2 id={`delete-${order.id}`}>{DELETE_COPY.heading}</h2>
+        <p>{DELETE_COPY.body}</p>
+        {!paid && mayStillBePaid(order) && <p className="note">{DELETE_COPY.stillChecking}</p>}
+        <div className="actions">
+          <button className="button secondary" type="button" onClick={() => confirmRef.current?.close()} disabled={deleting}>
+            {DELETE_COPY.keep}
+          </button>
+          <button className="button danger-solid" type="button" onClick={archive} disabled={deleting}>
+            {deleting ? "Deleting" : DELETE_COPY.confirm}
+          </button>
+        </div>
+      </dialog>
     </article>
   );
 }
@@ -172,6 +207,13 @@ export function OrdersView({ initial }: { initial: OutletOrders }) {
   }
 
   const replace = (order: MerchantOrder) => setData((current) => ({ ...current, orders: current.orders.map((each) => (each.id === order.id ? order : each)) }));
+  // An archived order leaves the list at once; a repeat (already archived elsewhere) does not count twice.
+  const removeArchived = (order: MerchantOrder, changed: boolean) =>
+    setData((current) => ({
+      ...current,
+      orders: current.orders.filter((each) => each.id !== order.id),
+      archivedCount: current.archivedCount + (changed ? 1 : 0),
+    }));
 
   return (
     <section className="orders" aria-labelledby={`orders-${outletId}`}>
@@ -190,10 +232,11 @@ export function OrdersView({ initial }: { initial: OutletOrders }) {
       ) : (
         <div className="order-list">
           {data.orders.map((order) => (
-            <OrderCard key={order.id} order={order} onAcknowledged={replace} />
+            <OrderCard key={order.id} order={order} onAcknowledged={replace} onArchived={removeArchived} />
           ))}
         </div>
       )}
+      {data.archivedCount > 0 && <p className="muted">{archivedCountLine(data.archivedCount)}</p>}
       {olderError && (
         <p className="error" role="alert">
           Envoi could not load older orders. Try again.

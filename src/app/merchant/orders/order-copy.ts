@@ -77,3 +77,19 @@ export function extraTransferNote(amount: string | null): string {
 export function mayStillBePaid(order: MerchantOrder): boolean {
   return order.state === "pending_payment" || order.state === "uncertain" || order.state === "review_open";
 }
+
+// Delete on /merchant/orders (S18) archives the order; the words are the approved mockup's.
+export const DELETE_COPY = {
+  button: "Delete",
+  heading: "Delete this order from your list?",
+  body: "Envoi keeps an archived copy as a record. The payment, the buyer's receipt and any refund are not changed.",
+  stillChecking:
+    "This payment is still being checked. If it turns out to be paid, the order comes back to your list marked Paid, so you never miss a payment.",
+  keep: "Keep it",
+  confirm: "Delete order",
+  failed: "Envoi could not delete the order. Nothing changed; try again.",
+};
+
+export function archivedCountLine(count: number): string {
+  return `${count} deleted ${count === 1 ? "order is kept as a record" : "orders are kept as records"}. Ask the Envoi operator if you need one back.`;
+}

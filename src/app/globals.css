@@ -97,6 +97,12 @@ small { font-size: 13px; display: block; }
 .shop { display: flex; justify-content: space-between; align-items: center; gap: 14px; color: var(--ink); text-decoration: none; }
 .shop:hover { border-color: var(--blue); }
 .error { color: #9b1c1c; margin-top: 12px; }
+.button.danger { color: #a3271b; background: var(--paper); border-color: #d9a39c; }
+.button.danger-solid { background: #a3271b; border-color: #a3271b; color: #fff; }
+dialog.confirm { margin: auto; border: 1px solid var(--line); border-radius: 12px; padding: 24px; max-width: 460px; width: calc(100% - 32px); color: var(--ink); background: var(--paper); }
+dialog.confirm::backdrop { background: rgba(20, 41, 61, 0.45); }
+dialog.confirm h2 { margin-top: 0; }
+.note { border-left: 4px solid var(--blue); background: var(--pale); padding: 12px 14px; border-radius: 0 8px 8px 0; font-size: 14px; }
 
 label { display: block; font-weight: 600; margin: 16px 0 6px; }
 label:first-child { margin-top: 0; }
@@ -180,7 +186,16 @@ footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; 
   .layout > .first-on-phone { order: -1; }
 }
 /* S9: the SGQR sticker block inside the shop details card. */
-.sgqr { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
+.sgqr { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 28px; align-items: start; }
+.sgqr-main { min-width: 0; }
+.sgqr .identifiers .chip { margin-top: 6px; }
+.shop-qr { border: 1px solid var(--line); border-radius: 12px; padding: 18px; text-align: center; background: var(--paper); }
+.shop-qr h3 { margin: 0 0 10px; }
+.shop-qr img { display: block; width: 100%; max-width: 220px; height: auto; margin: 4px auto 12px; image-rendering: pixelated; }
+.shop-qr .actions { flex-direction: column; margin-top: 14px; }
+.shop-qr .actions .button { width: 100%; }
+.shop-qr .button[aria-disabled="true"] { pointer-events: none; opacity: 0.5; }
+@media (max-width: 740px) { .sgqr { grid-template-columns: 1fr; } .shop-qr { order: -1; } }
 .sgqr h3 { margin: 0 0 8px; font-size: 17px; }
 .sgqr ul { list-style: none; margin: 8px 0 0; padding: 0; }
 .sgqr .row > div { min-width: 0; }

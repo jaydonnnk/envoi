@@ -2,7 +2,10 @@ import { hashPassword } from "better-auth/crypto";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { recordAudit } from "@/domain/audit/events";
+import { archivedOrderReceipts } from "@/domain/purchases/orders";
 import { transitionPurchase } from "@/domain/purchases/state";
 import { canTransitionPyusdAttempt, OPERATOR_RESOLUTION } from "@/domain/pyusd/state";
 import { loadLocalEnvFile, migrationEnv } from "@/env";
@@ -296,6 +299,45 @@ export async function approveIdentifier(db: OperatorDb, input: { identifierId: s
   });
 }
 
+export type UnarchiveResult = { status: "unarchived" | "unchanged"; purchaseId: string };
+
+// Restores an order a merchant deleted from their list (S18). Only this act clears the archive: the
+// web and maintenance roles cannot (trigger in migration 0024). An order that is not archived
+// changes nothing.
+export async function unarchiveOrder(db: OperatorDb, purchaseId: string, now: Date = new Date()): Promise<UnarchiveResult> {
+  return db.transaction(async (tx) => {
+    const [row] = await tx
+      .select({ id: schema.purchases.id, outletId: schema.purchases.outletId, archivedAt: schema.purchases.merchantArchivedAt })
+      .from(schema.purchases)
+      .where(eq(schema.purchases.id, purchaseId))
+      .for("update");
+    if (!row) throw new Error(`No purchase ${purchaseId}; nothing changed.`);
+    if (row.archivedAt === null) return { status: "unchanged", purchaseId: row.id };
+    await tx
+      .update(schema.purchases)
+      .set({ merchantArchivedAt: null, merchantArchivedByUserId: null, merchantArchivedState: null })
+      .where(eq(schema.purchases.id, row.id));
+    await recordAudit(tx, { at: now, actor: "operator", action: "order_unarchived", purchaseId: row.id, outletId: row.outletId, operatorVisible: true });
+    return { status: "unarchived", purchaseId: row.id };
+  });
+}
+
+// Where export-archived-orders writes, relative to the working copy; .gitignore keeps it out of Git.
+const ARCHIVE_EXPORT_DIR = join("archive", "orders");
+
+// Writes one JSON receipt per archived order, or per archived order of one outlet, into `dir` (S18),
+// reading in a READ ONLY transaction. A file of the same name is overwritten. Returns the files.
+export async function exportArchivedOrders(db: OperatorDb, input: { outletId: string | null; dir?: string }, now: Date = new Date()): Promise<string[]> {
+  const receipts = await db.transaction(async (tx) => archivedOrderReceipts(tx, input.outletId, now), { accessMode: "read only" });
+  const dir = input.dir ?? ARCHIVE_EXPORT_DIR;
+  mkdirSync(dir, { recursive: true });
+  return receipts.map((receipt) => {
+    const file = join(dir, `${receipt.purchaseId}.json`);
+    writeFileSync(file, `${JSON.stringify(receipt, null, 2)}\n`);
+    return file;
+  });
+}
+
 export type OperatorGrantResult = { status: "created" | "unchanged"; userId: string; grantId: string };
 
 // Flags a permanent account made with create-merchant as the operator (S5). The operator health
@@ -499,10 +541,12 @@ const COMMANDS = [
   "grant-operator",
   "resolve-pyusd-mismatch",
   "record-extra-transfer-refund",
+  "unarchive-order",
+  "export-archived-orders",
 ];
 
 const USAGE =
-  "usage: npm run operator -- seed-demo-fixture | assign-paypal-destination <outletId> <sellerMerchantId> | issue-agent-token <label> | create-merchant <email> <name> | approve-membership <email> [evidenceRef] | approve-enrollment <outletId> [evidenceRef] | approve-identifier [identifierId [evidenceRef]] | grant-operator <email> [evidenceRef] | resolve-pyusd-mismatch <operatorEmail> <attemptId> <reason> <evidenceRef> | record-extra-transfer-refund <operatorEmail> <attemptId> <signature> <reason> <refundReference>";
+  "usage: npm run operator -- seed-demo-fixture | assign-paypal-destination <outletId> <sellerMerchantId> | issue-agent-token <label> | create-merchant <email> <name> | approve-membership <email> [evidenceRef] | approve-enrollment <outletId> [evidenceRef] | approve-identifier [identifierId [evidenceRef]] | grant-operator <email> [evidenceRef] | resolve-pyusd-mismatch <operatorEmail> <attemptId> <reason> <evidenceRef> | record-extra-transfer-refund <operatorEmail> <attemptId> <signature> <reason> <refundReference> | unarchive-order <purchaseId> | export-archived-orders [outletId]";
 
 async function run(db: OperatorDb, argv: string[]): Promise<number> {
   const [command, ...args] = argv;
@@ -599,6 +643,20 @@ async function run(db: OperatorDb, argv: string[]): Promise<number> {
         ? `recorded refund reference "${result.refundReference}" against extra transfer ${result.signature} of attempt ${result.attemptId}; no payment state changed`
         : `extra transfer ${result.signature} of attempt ${result.attemptId} already holds refund reference "${result.refundReference}"; nothing changed`,
     );
+    return 0;
+  }
+  if (command === "unarchive-order" && args.length === 1) {
+    const result = await unarchiveOrder(db, args[0]!);
+    console.log(
+      result.status === "unarchived"
+        ? `restored order ${result.purchaseId} to its merchant's order list`
+        : `order ${result.purchaseId} is not archived; nothing changed`,
+    );
+    return 0;
+  }
+  if (command === "export-archived-orders" && args.length <= 1) {
+    const files = await exportArchivedOrders(db, { outletId: args[0] ?? null });
+    console.log(`wrote ${files.length} archived order receipt${files.length === 1 ? "" : "s"} to ${ARCHIVE_EXPORT_DIR}`);
     return 0;
   }
   console.error(USAGE);
