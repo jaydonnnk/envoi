@@ -7,13 +7,13 @@ Filled in during and after the 2-8 Nov 2026 sessions; see the [kit](README.md) f
 
 | Decision | Value | Recorded on |
 | --- | --- | --- |
-| Rails offered | | |
-| Entry points offered | | |
-| Shop and sandbox seller id | | |
-| Account preparation | | |
-| Device | | |
-| Warm-up before the timer | | |
-| Facilitator | | |
+| Rails offered | PayPal sandbox only; PYUSD stays off | 2026-10-24, the user's choice |
+| Entry points offered | Text and scan, scored separately; scan uses the printed labeled FIXTURE sticker `R26ZZ0001X`, whose mapping was approved on Neon on 2026-10-24 | 2026-10-24, the user's choice |
+| Shop and sandbox seller id | Test Shop (`out_vrlbnc3zylbrr6g2drovaiqkfu`), sandbox seller `EQN6264CF9F4Y` | 2026-10-24, the user's choice |
+| Account preparation | A printed card per tester with a PayPal sandbox buyer email and password created for the test, and nothing else (kit item 4) | 2026-10-24 |
+| Device | Each tester's own phone | 2026-10-24, the user's choice |
+| Warm-up before the timer | Yes: the facilitator opens the Envoi link before the tester starts (kit item 6) | 2026-10-24 |
+| Facilitator | The user | 2026-10-24, the user's choice |
 
 ## Field reference
 

@@ -28,6 +28,8 @@ Every payment below used PayPal sandbox money or Solana devnet test tokens; none
 | An AI agent can hand a buyer a one-time link to a server-priced review over MCP, and cannot pay or read the receipt | [verified] | [S13](00-status.md#s13-agent-handoff-over-mcp-2026-10-14) |
 | A merchant signs in, enters a menu by hand, connects a sandbox seller and publishes | [verified] | [S6](00-status.md#s6-merchant-sign-in-and-manual-menu-draft-2026-10-14), [S7](00-status.md#s7-merchant-destination-and-publication-2026-10-14) |
 | A merchant sees only paid orders as paid and acknowledges them separately | [verified] | [S8](00-status.md#s8-merchant-orders-and-separate-acknowledgment-2026-10-15) |
+| A merchant's setup page shows an Envoi shop QR that opens the shop's buy page; it is not a payment code and the SGQR itself is never stored | [verified] locally; [user-reported] on the deployed site | [S18](00-status.md#s18-merchant-shop-qr-and-order-archive-2026-10-24) |
+| A merchant can delete any order; it is archived as a record, never erased, and an order paid after its archive comes back as Paid | [verified] | [S18](00-status.md#s18-merchant-shop-qr-and-order-archive-2026-10-24), [mutations](evidence/s18-mutations.json) |
 | Menu photo import drafts menus with AI | **not claimed**: no model met the pre-registered threshold, so import ships closed | [S11](00-status.md#s11-menu-photo-import-with-direct-vision-2026-10-15) |
 | The public read API matches its OpenAPI document, and an APIMatic-generated TypeScript client reads it | [verified] | [S14](00-status.md#s14-apimatic-client-and-docs-2026-10-19) |
 

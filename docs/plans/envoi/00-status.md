@@ -321,7 +321,7 @@ Post-release, outside the build order: S18, merchant shop QR and order archive, 
   - [x] R2 recorded before the usability test.
   - [x] Idle cold first visit re-measured (application code of the release; the focus fix deploys with the final merge).
   - [x] Full suite, HTTP contract run, mobile and keyboard checks; the focus-loss finding fixed.
-  - [ ] Gate 1 usability test with five first-time buyers.
+  - [ ] Gate 1 usability test with five first-time buyers; the pre-session decisions were recorded in [`usability/results.md`](usability/results.md) on 2026-10-24 by the user's choice (PayPal only, text and scan, Test Shop, the user facilitating on testers' own phones).
   - [ ] Render, Neon, Actions, OpenAI and, if PYUSD is offered, devnet access through 16 Dec 2026.
   - [x] Final merge, push and deploy, before the usability test, by the user's choice.
   - [ ] Evidence pack and video completed with the usability result; video recorded and uploaded by the user.
