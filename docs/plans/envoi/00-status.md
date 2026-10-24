@@ -209,7 +209,7 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [x] S14 - APIMatic client and docs, account-conditional; third in the cut order; access check passed and started 2026-10-19 on `envoi/slice-14-apimatic`; done 2026-10-19; on `main` at `6eacfca`, pushed with CI green ([record](#s14-apimatic-client-and-docs-2026-10-19)); review fixes done 2026-10-19, on `main` at `9d4bd55` and deployed with CI green on 2026-10-20 ([record](#s14-review-fixes-2026-10-19)).
 - [ ] S15 - Judged release; started 2026-10-20 on `envoi/slice-15-release` ([record](#s15-judged-release-2026-10-20)).
 
-Post-release, outside the build order: S18, merchant shop QR and order archive, started 2026-10-24 on `envoi/slice-18-shop-qr-archive` ([record](#s18-merchant-shop-qr-and-order-archive-2026-10-24)).
+Post-release, outside the build order: S18, merchant shop QR and order archive, started and done 2026-10-24 on `envoi/slice-18-shop-qr-archive` ([record](#s18-merchant-shop-qr-and-order-archive-2026-10-24)).
 
 ### S18 Merchant shop QR and order archive, 2026-10-24
 
@@ -234,7 +234,8 @@ Post-release, outside the build order: S18, merchant shop QR and order archive, 
 - **Post-slice cleanup [verified]:** the `architect-reviewer` cleanup found one unused export, `ARCHIVE_EXPORT_DIR`, made private; no orphan file, temporary scaffolding or TODO remains.
 - **Neon [verified], 2026-10-24:** a `READ ONLY` read before migration showed 24 migrations, no archive columns or trigger, and purchases paid 10, review_expired 30, uncertain 2, unpaid_closed 4; `npm run db:migrate` applied `0024`; the read after showed 25 migrations, the three columns, the trigger, `envoi_web` holding `UPDATE` on the three columns beside its earlier three, and the same purchase counts.
 - **Pushed and deployed [verified], 2026-10-24:** the branch and `main`, fast-forwarded to `e01e935`, were pushed (checked with `git ls-remote`); CI passed on `main` (run 40097756946); Render then served `/vendor/zxing_writer-3.1.3.wasm` (200, 648,328 bytes), a file first added in this slice, an anonymous archive `POST` answered 401 `unauthorized` and `/merchant/setup` 200.
-- **Not established yet:** the screens on the deployed site under the user's merchant account, and a real phone camera scan of the drawn QR; both need the user's sign-in.
+- **Deployed screens [user-reported], 2026-10-24:** the user checked the shop QR and Delete on the deployed site under their merchant account: "I checked the shop QR and Delete on the live site and they work."
+- **Done 2026-10-24.**
 
 ### S15 Judged release, 2026-10-20
 
