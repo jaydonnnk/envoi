@@ -232,7 +232,9 @@ Post-release, outside the build order: S18, merchant shop QR and order archive, 
   - Fixed during the check: the dialog opened at the top left because Tailwind's base reset removes the dialog's automatic margin (`margin: auto` added); Delete sat on its own row under Acknowledge (merged into one action row); the singular count read "1 deleted order is kept as records" (now "kept as a record").
 - **Build note:** `next build` stops on its first run after some changes with a Next.js "SecurityFatalError" upgrade notice and passes when run again; the notice asks for an upgrade, which is not in this slice's authority and is reported to the user.
 - **Post-slice cleanup [verified]:** the `architect-reviewer` cleanup found one unused export, `ARCHIVE_EXPORT_DIR`, made private; no orphan file, temporary scaffolding or TODO remains.
-- **Not established yet:** migration 0024 on Neon, the deploy and the checks on the deployed site, and a real phone camera scan of the drawn QR.
+- **Neon [verified], 2026-10-24:** a `READ ONLY` read before migration showed 24 migrations, no archive columns or trigger, and purchases paid 10, review_expired 30, uncertain 2, unpaid_closed 4; `npm run db:migrate` applied `0024`; the read after showed 25 migrations, the three columns, the trigger, `envoi_web` holding `UPDATE` on the three columns beside its earlier three, and the same purchase counts.
+- **Pushed and deployed [verified], 2026-10-24:** the branch and `main`, fast-forwarded to `e01e935`, were pushed (checked with `git ls-remote`); CI passed on `main` (run 40097756946); Render then served `/vendor/zxing_writer-3.1.3.wasm` (200, 648,328 bytes), a file first added in this slice, an anonymous archive `POST` answered 401 `unauthorized` and `/merchant/setup` 200.
+- **Not established yet:** the screens on the deployed site under the user's merchant account, and a real phone camera scan of the drawn QR; both need the user's sign-in.
 
 ### S15 Judged release, 2026-10-20
 
