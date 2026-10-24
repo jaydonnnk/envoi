@@ -167,6 +167,13 @@ def parse_slices(text):
 
 s4 = md["04-slices.md"]
 section_list, assigned, additions = parse_slices(s4)
+# Slices added after the judged release (S18 on 2026-10-24) sit after S15 and outside the build-order table,
+# the test assignment and the counts; every other rule reads only the planned slices.
+POST_RELEASE = ["S18"]
+post_release = [s for s, _ in section_list if s in POST_RELEASE]
+if post_release != POST_RELEASE or [s for s, _ in section_list][-len(POST_RELEASE):] != POST_RELEASE:
+    fail("R6", f"post-release slices {post_release} must follow every planned slice, in the order {POST_RELEASE}")
+section_list = [(s, title) for s, title in section_list if s not in POST_RELEASE]
 sections = [s for s, _ in section_list]
 titles = dict(section_list)
 # The earlier draft is the slice plan at 5f6ab39, the base of the 2026-10-12 revision, with its 20 named additions.
@@ -362,7 +369,10 @@ status, handoff = md["00-status.md"], md["handoff.md"]
 QUOTE = "I approve both pls publish the branches and commit all the changes to main"
 if not re.search(r"^- Gate 4 - Slice plan: \*\*APPROVED 2026-10-12\*\* by the user", status, flags=re.M):
     fail("R9", "00-status.md Gate 4 line does not record the 2026-10-12 approval")
-if not re.search(r"^- Gate 3 - Program Design: \*\*RE-APPROVED 2026-10-12\*\* by the user", status, flags=re.M):
+# A later reopening may lead the Gate 3 entry (2026-10-24), so the 2026-10-12 re-approval is looked for in the
+# whole entry, from its bullet to the Gate 4 bullet, not only at its start.
+g3_entry = re.search(r"^- Gate 3 - Program Design: .*?(?=^- Gate 4 )", status, flags=re.M | re.S)
+if not g3_entry or "**RE-APPROVED 2026-10-12** by the user" not in g3_entry.group(0):
     fail("R9", "00-status.md Gate 3 line does not record the 2026-10-12 re-approval")
 for item in ("- [x] Explicit user approval of Gate 4, 2026-10-12", "- [x] Explicit user re-approval of Gate 3, 2026-10-12"):
     if item not in status:
@@ -396,19 +406,22 @@ for f, text in current.items():
 # 98e6ac37...76cb5b3ad: the S1 TypeScript pin reopening, approved in advance by the user on 2026-10-12.
 # 0fd07da5...76c475ac: the English-only menu photo reopening, approved in advance by the user on 2026-10-15.
 # 3f5c8386...305b7cab: the Phantom landing reopening, re-approved by the user on 2026-10-18.
-# Current: the verifying-landing reopening (S17 review finding 1), re-approved by the user on 2026-10-18.
-G3_REOPENING_SHA256 = "bc6b1f0945e8df33f6860085f75175cf6cf2a46e143f62cf9b365dabd09a5a49"
-# 02-architecture.md may likewise equal its Phantom landing reopening text, re-approved on 2026-10-18
-# (938d0a99...f3bf30a6 was the English-only text of 2026-10-15).
-G2_REOPENING_SHA256 = "28d54654a19e885b4908715f7793846c4c873f94f6cc380d985af9fe45561154"
+# bc6b1f09...a5a49: the verifying-landing reopening (S17 review finding 1), re-approved by the user on 2026-10-18.
+# Current: the shop QR and order archive reopening, re-approved by the user on 2026-10-24.
+G3_REOPENING_SHA256 = "37740aeab04b7b124c1629e280dbd11a2f7af80e5a812323a82bd43bec16aebe"
+# 02-architecture.md may likewise equal its shop QR and order archive text, re-approved on 2026-10-24
+# (28d54654...45561154 was the Phantom landing text of 2026-10-18, 938d0a99...f3bf30a6 the English-only text of 2026-10-15).
+G2_REOPENING_SHA256 = "bc504e10209af74c5b596ccf18ee2ac9a17d8c625b145568ea4aae51d0e47a9f"
 # Gate 1, re-approved 2026-10-16 after deferring menu photo drafting and again on 2026-10-21 for the
-# landing page: the revised and added mockups, and 01-product.md without its closing status line,
-# which keeps changing as slices finish (ce25854b...3dff07 was the 2026-10-16 body).
+# landing page, and on 2026-10-24 for the shop QR and order archive: the revised and added mockups, and 01-product.md without its closing status line,
+# which keeps changing as slices finish (ce25854b...3dff07 was the 2026-10-16 body, d5c726e8...860dc3 the 2026-10-21 body).
 G1_MOCKUP_SHA256 = {
     os.path.join("mockups", "merchant-onboarding.html"): "d376e4517de5b7f0c4c892675b0e033111cbac0af1b157519f23078ade16f568",
     os.path.join("mockups", "landing.html"): "973c92b63f946b51c9911aa7f8ec75891041e5d0af1c41a086e09f917c923744",
+    os.path.join("mockups", "merchant-shop-qr.html"): "15fb8ab1666648de1a1ca102901d3bb01efe73bb4f2c4a27b748dc0fe75b54ce",
+    os.path.join("mockups", "merchant-orders-delete.html"): "196792d104e832c3887c6213c90811d6e96b22cb8a9057ec6be3a4d97923adf3",
 }
-G1_BODY_SHA256 = "d5c726e8f98cd74380412e9c4de8649bf6dcb5b207e3772a8ba1be46e2860dc3"
+G1_BODY_SHA256 = "d66a34c18120b4c339987502a6623451e5eda2731e81b857122d7512065025f4"
 for root, _, files in os.walk(folder):
     for name in sorted(files):
         rel = os.path.relpath(os.path.join(root, name), folder)

@@ -80,6 +80,7 @@ fault(["R5"], "removed name revived", lambda d: sub(d, "04-slices.md", "- Voice,
 fault(["R6"], "checklist order", lambda d: swap_checklist(d, "S9", "S10"))
 fault(["R6"], "dependency built later", lambda d: sub(d, "04-slices.md", "then text. | S4, S9 |", "then text. | S4, S16 |"))
 fault(["R6"], "section order", move_s9)
+fault(["R6"], "post-release slice placed before the release", lambda d: sub(d, "04-slices.md", "### S15 Judged release\n", "### S18 Merchant shop QR and order archive (moved)\n\n### S15 Judged release\n"))
 fault(["R7"], "em dash", lambda d: sub(d, "roadmap.md", "None of these candidates authorizes implementation.", "None of these candidates authorizes implementation \u2014 none."))
 fault(["R7"], "em dash entity", lambda d: sub(d, "04-slices.md", "Sections follow the build order.", "Sections follow the build order &" + "mdash; always."))
 fault(["R8"], "secret value", lambda d: sub(d, "research.md", "Research and mockup checks do not establish runtime evidence.", "Research and mockup checks do not establish runtime evidence. " + NPG))
@@ -143,7 +144,7 @@ fault(["R14"], "D10 part of the contract split miscounted", lambda d: sub(d, "04
 fault(["R4"], "kill-switch addition loses its mutation", lambda d: sub(d, "04-slices.md", "| Skip the `PAYMENTS_ENABLED` check in PayPal eligibility; the test fails. |", "| |"))
 # Faults for the approval record of 2026-10-12; the earlier approval-claim faults retired with R9's heuristic
 fault(["R9"], "Gate 4 approval reverted in the status line", lambda d: sub(d, "00-status.md", "- Gate 4 - Slice plan: **APPROVED 2026-10-12** by the user", "- Gate 4 - Slice plan: **in progress** by the user"))
-fault(["R9"], "Gate 3 re-approval reverted in the status line", lambda d: sub(d, "00-status.md", "- Gate 3 - Program Design: **RE-APPROVED 2026-10-12** by the user", "- Gate 3 - Program Design: **reopened 2026-10-12** by the user"))
+fault(["R9"], "Gate 3 re-approval reverted in the status line", lambda d: sub(d, "00-status.md", "**RE-APPROVED 2026-10-12** by the user", "**reopened 2026-10-12** by the user", count=-1))
 fault(["R9"], "Gate 4 checklist item unticked", lambda d: sub(d, "00-status.md", "- [x] Explicit user approval of Gate 4, 2026-10-12", "- [ ] Explicit user approval of Gate 4, 2026-10-12"))
 fault(["R9"], "approval missing from the history", lambda d: sub(d, "00-status.md", '- 2026-10-12: the user said "I approve both pls publish', '- 2026-10-12: the user said "I will approve later, pls publish'))
 fault(["R9"], "04 approval marker removed", lambda d: sub(d, "04-slices.md", "**APPROVED by the user on 2026-10-12**", "**Draft.**"))

@@ -117,6 +117,7 @@ Proposed application API prefix: `/api/v1`. Body fields, response/error types an
 | `POST /purchases/{id}/pyusd/submitted` | Owning buyer posts the wallet's returned signature as a hint only; finalized server verification decides payment. Shared `reconcile` route handles both rails. |
 | `POST /merchant/outlets/{id}/confirm`, `POST /merchant/outlets/{id}/publish` | Confirm exact current revisions; publish only with enrollment, confirmed complete menu and an active accepted test destination. |
 | `GET /merchant/outlets/{id}/orders`, `POST /merchant/orders/{id}/acknowledge` | Membership-scoped list; acknowledge only a verified payment, independently of payment status. |
+| `POST /merchant/orders/{id}/archive` (added 2026-10-24) | Membership: hide one order from the merchant's list as an archived record; never erases, never changes payment, receipt or acknowledgment. See the [amendment](#shop-qr-and-order-archive-amendment-2026-10-24). |
 | `POST /purchase-requests`, `POST /purchase-requests/redeem` | Scoped external-agent token creates a suggestion/human handoff; buyer session redeems a short-lived token into a new review. Neither authorizes payment. |
 | `POST /integrations/paypal/webhook` | Verify the event against the configured sandbox app, deduplicate and persist a due provider read. Event content alone cannot mark paid. |
 | `GET /health` | Minimal web readiness; private/operator view checks maintenance heartbeat, overdue work and capacity without exposing secrets. |
@@ -397,6 +398,28 @@ Failure keeps PYUSD visibly unavailable and PayPal working; a cut follows the ap
 
 Scoped supported client -> published registry/menu -> `create_purchase_request` -> unclaimed human URL, expiring after 10 minutes. Buyer opens it, establishes their own session and explicitly redeems it once -> server recalculates a fresh review -> same PayPal/wallet approval journey. Creating agent gets no payment authority, private receipt token or privileged readback. Expired/used handoffs require a new request; prevent link leakage with no-referrer/no analytics and log redaction.
 
+### Shop QR and order archive amendment, 2026-10-24
+
+Gate 1 was re-approved on 2026-10-24 for two merchant screens; this section is the architecture for both.
+
+**Shop QR.**
+1. The merchant setup page draws a QR code in the merchant's browser for the outlet's public buy link, `APP_BASE_URL` + `/buy?outlet=<outletId>`, only while the outlet is published.
+2. It encodes a link, never a payment payload: no PayNow, EMVCo or wallet data, so no bank app can pay with it.
+3. No new route, table, column or stored image; download and copy happen in the browser.
+4. The sticker payload rule is unchanged: Envoi still never stores the merchant's SGQR photo or payload.
+
+**Order archive.**
+1. `purchases` gains `merchant_archived_at` and `merchant_archived_by_user_id`, both nullable; the web role may set them once and never clear them.
+2. `POST /merchant/orders/{id}/archive` checks the session's membership of the order's outlet, sets the pair once (a repeat changes nothing) and writes an audit row in the same transaction.
+3. It never changes the purchase state, payment attempts, acknowledgment, the buyer's receipt or maintenance; maintenance still reconciles an archived uncertain order.
+4. The merchant's order list leaves out archived orders and returns their count, except an order that became paid after it was archived, which is listed again as Paid, so a payment is never hidden.
+5. The merchant cannot restore an order. The operator CLI gains `unarchive-order <purchaseId>`, which clears the pair with an audit row.
+6. The operator CLI gains `export-archived-orders [outletId]`, read-only, which writes one JSON receipt per archived order into `archive/orders/` in the working copy, a path Git ignores.
+   Each receipt holds the order's ids, outlet, lines, SGD amounts, rail, state, provider references, acknowledgment and archive time; no buyer account details, secrets, tokens or QR payloads.
+7. The server on Render never writes files; the export runs only on the operator's machine with migration credentials.
+
+**Risks.** A merchant may archive an order they later need: the record stays in the database and the operator can restore it. Exported receipts on the operator's disk are outside Envoi's control; the folder stays out of Git so they never reach the public repository.
+
 ## External
 
 Names below are **proposed configuration names only**, never values. No credentials were read or provisioned. Database/auth/provider secrets remain server-side.
@@ -462,3 +485,4 @@ Then revise Gate 4, preserving the user-decided S13 placement and PYUSD first-cu
 **Gate 2 re-approved by the user on 2026-10-11 ("gate 2 approved").**
 **Reopened again and re-approved on 2026-10-11 for the release-once and extra-transfer fixes** ("reopen gate 2 and approve the fixes i approve it already").
 Next is the Gate 3 revision described in the [Gate 3 handover](handoff.md#gate-3-handover-2026-10-11).
+**Reopened 2026-10-24 for the [shop QR and order archive amendment](#shop-qr-and-order-archive-amendment-2026-10-24); re-approved by the user on 2026-10-24 ("I approve Gate 2.").**

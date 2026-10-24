@@ -5,6 +5,7 @@
 **Reopened 2026-10-15 for one change only, approved by the user in advance:** menu photos are English only, so Chinese text accuracy is no longer an R5 falsifier; see [Reopening 2026-10-15](#reopening-2026-10-15-english-only-menu-photos).
 **Reopened 2026-10-18 for one change and RE-APPROVED by the user the same day** ("Yea sure i approve the gates then make the relevant changes and push to main thnaks"): the Phantom Browse link names the PYUSD rail, and `/buy` opened from it creates the PYUSD review itself; see [Reopening 2026-10-18](#reopening-2026-10-18-phantom-landing-opens-the-pyusd-review).
 **Reopened again 2026-10-18 for one change and RE-APPROVED by the user the same day** ("I approve Gate 3 for the verifying-landing change. Build finding 1 on envoi/slice-17-review-fixes."): a verifying landing anywhere in the post-expiry window decides the attempt, so a newer failing transaction carrying the same reference can no longer turn a correct payment into a mismatch; see [Reopening 2026-10-18: verifying landing wins](#reopening-2026-10-18-a-verifying-landing-wins-the-window-scan).
+**Reopened 2026-10-24 for the shop QR and order archive, after Gates 1 and 2 were re-approved the same day, and RE-APPROVED by the user the same day ("I approve Gate 3."):** see [Reopening 2026-10-24](#reopening-2026-10-24-shop-qr-and-order-archive).
 Approval accepts these contracts as a proposal; it establishes no runtime, account, model, wallet or usability evidence and authorizes no implementation or Gate 4 approval.
 The user removed Zapier because it is paid and reopened Gates 1, 2 and 3.
 Gate 1 was re-approved on 2026-10-10 and Gate 2 on 2026-10-11.
@@ -14,6 +15,78 @@ Every other contract below stays as approved on 2026-10-07.
 See [Revision 2026-10-11](#revision-2026-10-11-direct-vision-and-pyusd), [`00-status.md`](00-status.md#reopening-2026-10-10-zapier-removed) and [`handoff.md`](handoff.md#gate-3-handover-2026-10-11).
 
 Gate 3 program design, 2026-10-07 (Asia/Singapore). **APPROVED by the user 2026-10-07** ("gate 3 is approved"), together with a separate authorization to commit these planning documents and push `main`. Authorities: [approved Gate 1 product](01-product.md) and [approved Gate 2 architecture](02-architecture.md). Approval accepts the contracts below and the disposition of the eight Gate 2 review findings; it establishes no runtime, account, integration or usability evidence, and it does not authorize implementation or Gate 4. A separate, narrowly scoped authorization on the same day covered the R11 flag flip, its redeploy and a read-only schema inspection, all now complete. This document contains contracts only: file map, types and signatures without bodies, call stacks, state transitions, race rules, capacity budgets and named failure tests. No application implementation, no installed application packages and no approved slices exist.
+
+## Reopening 2026-10-24: shop QR and order archive
+
+- **Authority:** Gate 1 re-approved on 2026-10-24 ("I approve Gate 1.") and Gate 2 re-approved the same day ("I approve Gate 2.") for the [shop QR and order archive amendment](02-architecture.md#shop-qr-and-order-archive-amendment-2026-10-24); mockups [`merchant-shop-qr.html`](mockups/merchant-shop-qr.html) and [`merchant-orders-delete.html`](mockups/merchant-orders-delete.html).
+- **Version pin:** `zxing-wasm@3.1.3` becomes a direct, exact dependency.
+  It is already installed at that version through `barcode-detector@3.2.2`, so the lockfile resolves the same package; the import of its `writer` entry must not rely on a transitive dependency.
+  Its writer wasm is copied unchanged to `public/vendor/zxing_writer-3.1.3.wasm` and served from this site, never the library's default CDN, like the reader since S9.
+- **Files:**
+
+| File | Change |
+| --- | --- |
+| `drizzle/0024_order_archive.sql` | Adds nullable `merchant_archived_at`, `merchant_archived_by_user_id` (references `user`) and `merchant_archived_state` to `purchases`, with a check that the three are all null or all set; grants the web role column-level `UPDATE` on the three; a trigger refuses any update that changes a set `merchant_archived_at` for every role except the migration role. |
+| `src/lib/db/schema.ts` | The three columns. |
+| `src/domain/purchases/orders.ts` | `archiveOrder`; `listOutletOrders` leaves out hidden orders and returns `archivedCount`. |
+| `src/app/api/v1/merchant/orders/[id]/archive/route.ts` | `POST`, same-origin and session checks as acknowledge. |
+| `src/app/merchant/orders/orders-view.tsx`, `order-copy.ts` | Delete on every order, the confirmation dialog and the archived count, in the mockup's words. |
+| `src/lib/browser/qr.ts` | `drawShopQr(url)`, writer module prepared with `locateFile` pointing at the vendored writer wasm. |
+| `src/app/merchant/setup/shop-qr.tsx`, `workspace.tsx` | The QR card in the sticker section's right column; the approval chip moves under the UEN; a placeholder while unpublished. |
+| `src/operator/cli.ts` | `unarchive-order <purchaseId>` and `export-archived-orders [outletId]`. |
+| `.gitignore` | `/archive/`. |
+
+- **Types and signatures:**
+
+```ts
+type ArchiveOutcome = { order: MerchantOrder; changed: boolean };
+// Membership of the order's outlet, as acknowledgeOrder checks it; another outlet's order answers not_found.
+// Sets the three columns once, storing the state at that moment, with an audit row "order_archived"; a repeat
+// returns changed: false and writes nothing. Never writes any other column.
+function archiveOrder(db: Db, input: { purchaseId: string; userId: string; now: Date }): Promise<ArchiveOutcome | AppError>;
+
+// OutletOrders gains:
+archivedCount: number; // orders of this outlet hidden from the list
+// An order is hidden when merchant_archived_at is set, unless its state is now "paid" and
+// merchant_archived_state was not "paid": that order is listed again, marked Paid.
+// A hidden order is not a valid `before` cursor (validation_failed, reason unknown_before).
+
+type ArchivedOrderReceipt = {
+  kind: "envoi_archived_order"; exportedAt: string;
+  purchaseId: string; outlet: { id: string; name: string; isDemoFixture: boolean };
+  lines: StoredLine[]; totalSgdCents: number; currency: string; rail: string | null; state: PurchaseState;
+  payment: MerchantOrder["payment"]; pyusd: MerchantOrder["pyusd"];
+  acknowledgedAt: string | null; archivedAt: string; archivedByUserId: string; archivedState: PurchaseState;
+};
+```
+
+- **Route:** `POST /api/v1/merchant/orders/{id}/archive`, no body.
+  401 `unauthorized` without a merchant session, 403 `forbidden_origin` on a foreign `Origin`, 404 `not_found` for a missing order or another outlet's, 200 `{ order, changed }`.
+  Every order state may be archived, as Gate 1 approved ("all orders, acknowledged or not").
+- **Operator commands,** run with `MIGRATION_DATABASE_URL` like every operator act (D1):
+  - `unarchive-order <purchaseId>` clears the three columns with an operator-visible audit row `order_unarchived`; an order that is not archived changes nothing.
+  - `export-archived-orders [outletId]` reads in a `READ ONLY` transaction and writes `archive/orders/<purchaseId>.json`, one `ArchivedOrderReceipt` each, creating the folder; it overwrites a file of the same name and prints the count.
+    The receipt carries no buyer user id, session, email, token, secret or QR payload.
+- **Shop QR:** `shop-qr.tsx` renders only for a published outlet, drawing `${location.origin}/buy?outlet=<outletId>`; the origin is the deployed `APP_BASE_URL`, which `/mcp` already checks `Host` against.
+  Download saves `envoi-shop-qr-<outletId>.png` from the drawn image; Copy writes the link to the clipboard.
+  No server code, route or column.
+- **Authorization:** archive joins the same live-membership check as acknowledge; an agent token, a buyer session or another merchant cannot archive.
+  No buyer route reads the archive columns, so a receipt is unchanged.
+- **Named tests (12, all new in the slice that builds them):**
+  1. `archive hides an order and keeps its record`: the row and its attempts are unchanged apart from the three columns.
+  2. `archive works on every order state`: paid acknowledged, paid unacknowledged, pending, uncertain and unpaid closed.
+  3. `archive repeat changes nothing`.
+  4. `another outlet's order cannot be archived`: 404 and no write.
+  5. `an agent token or buyer session cannot archive`.
+  6. `an order archived before it was paid comes back as Paid`.
+  7. `a paid order archived stays hidden`.
+  8. `archived count matches the hidden orders`.
+  9. `the web role cannot clear an archive`: a direct `UPDATE` setting `merchant_archived_at` to null is refused by the trigger.
+  10. `maintenance still reconciles an archived uncertain order`.
+  11. `export writes one receipt per archived order without buyer identity`: a needle self-test plants a buyer user id and email and proves the scanner finds them in a serialized receipt before scanning the real export.
+  12. `the QR writer is served from this site and is the pinned package's file`: SHA-256 equality with `node_modules/zxing-wasm/dist/writer/zxing_writer.wasm`.
+  Each guard in tests 3-7, 9 and 11 gets its own mutation, recorded in the slice.
+- **Unchanged:** every other route, error code, clock, state transition and the 92 named tests and 231 cases; these 12 are additions counted in Gate 4's slice for this work.
 
 ## Reopening 2026-10-18: a verifying landing wins the window scan
 

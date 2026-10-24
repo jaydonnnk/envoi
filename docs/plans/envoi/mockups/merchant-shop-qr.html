@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Shop QR on merchant setup | Envoi product mockup</title><style>
+:root{--ink:#14293d;--muted:#52657a;--blue:#145deb;--pale:#f1f6fc;--cyan:#ceedf3;--line:#c9d7e6;--paper:#fff;--amber:#90500c;--warn:#fff4da;--green:#206a51;--red:#a3271b}
+*{box-sizing:border-box}body{margin:0;background:var(--pale);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,-apple-system,Arial,sans-serif}
+h1,h2,h3,.brand{font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;line-height:1.15}h1{font-size:clamp(2rem,4.5vw,3.2rem);letter-spacing:-.045em;margin:12px 0 16px}h2{font-size:1.45rem;letter-spacing:-.025em;margin:0 0 12px}h3{font-size:1.05rem;margin:0 0 8px}p{margin:0 0 14px}a{color:var(--blue);text-underline-offset:4px}
+header{background:var(--paper);border-bottom:1px solid var(--line)}.top{max-width:1000px;margin:auto;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{font-weight:bold;font-size:1.5rem;letter-spacing:-.06em;text-decoration:none;color:var(--ink);display:flex;align-items:center;gap:10px}.mark{background:var(--blue);color:#fff;display:grid;place-items:center;width:32px;height:32px;border-radius:8px;letter-spacing:0}
+.badge,.eyebrow{font:12px/1.4 Consolas,monospace;letter-spacing:.07em;text-transform:uppercase}.badge{background:var(--cyan);padding:6px 9px;border-radius:4px;white-space:nowrap}.notice{background:var(--warn);padding:10px 24px;text-align:center;color:#704009;font-size:13px}.eyebrow{color:var(--blue);font-weight:600}
+main{max-width:1000px;margin:auto;padding:30px 24px 56px}.lead{font-size:18px;color:var(--muted);max-width:640px}.stack{display:grid;gap:18px;margin-top:24px}.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:24px;min-width:0}
+.muted,small{color:var(--muted)}small{font-size:13px;display:block}.mono{font:15px/1.5 Consolas,monospace}.money{font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip{font-size:12px;display:inline-block;border:1px solid var(--line);padding:3px 9px;border-radius:100px;background:var(--pale);white-space:nowrap}.chip.ok{color:var(--green);background:#e6f4ed;border-color:#a8cfbf}.chip.warn{color:var(--amber);background:var(--warn);border-color:#e3c17f}.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px}
+.button{font:600 15px "Segoe UI",system-ui,Arial,sans-serif;border:1px solid var(--blue);border-radius:7px;background:var(--blue);color:#fff;padding:12px 18px;display:inline-block;text-decoration:none;cursor:pointer;text-align:center}.button.secondary{color:var(--ink);background:var(--paper);border-color:#8da3bb}.button.danger{color:var(--red);background:var(--paper);border-color:#d9a39c}.button.danger-solid{background:var(--red);border-color:var(--red);color:#fff}.button:disabled{background:#e3eaf1;border-color:var(--line);color:#536578;cursor:not-allowed}
+.rule{height:1px;background:var(--line);margin:20px 0}.note{border-left:4px solid var(--blue);background:var(--pale);padding:12px 14px;border-radius:0 8px 8px 0;font-size:14px}.flag{border:2px dashed #d67911;border-radius:10px;padding:2px 8px;font:12px Consolas,monospace;color:#8a4a07;background:#fff7ec;display:inline-block;margin-bottom:8px}
+input[type=file]{font:inherit;width:100%;padding:12px;border:1px solid #8da3bb;border-radius:7px;background:var(--paper)}
+:focus-visible{outline:3px solid #d67911;outline-offset:3px}
+footer{max-width:1000px;margin:auto;padding:16px 24px 32px;font-size:13px;color:var(--muted)}
+.sticker{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items:start}.qrbox{border:1px solid var(--line);border-radius:12px;padding:18px;text-align:center;background:var(--paper)}.qrbox svg{width:100%;max-width:220px;height:auto;display:block;margin:6px auto 12px}.qrbox .button{width:100%;margin-top:8px}.mapping{display:grid;gap:4px;margin:16px 0 20px}
+@media(max-width:740px){.top{padding:14px 16px}.top .badge{font-size:10px}main{padding:24px 16px 40px}.card{padding:18px}.sticker{grid-template-columns:1fr}.qrbox{order:-1}.lead{font-size:16px}}
+</style></head><body>
+<header><div class="top"><a class="brand" href="index.html"><span class="mark" aria-hidden="true">↗</span>envoi</a><span class="badge">Test environment</span></div><div class="notice">Gate 1 reopening mockup, 24 Oct 2026 · fictional shop · nothing here is built</div></header>
+<main>
+<span class="eyebrow">Merchant setup</span>
+<h1>Your shop</h1>
+<p class="lead">Signed in as Demo merchant. Buyers see only what you publish; drafts stay invisible to them.</p>
+<div class="stack">
+<section class="card" aria-labelledby="shop-h">
+  <h2 id="shop-h">1. Shop details</h2>
+  <h3>Kopi Corner</h3><small>Tanjong Pagar</small>
+  <div class="chips"><span class="chip warn">Demo fixture</span><span class="chip ok">Published</span><span class="chip">Enrollment approved</span><span class="chip">Details confirmed</span></div>
+  <div class="rule"></div>
+  <div class="sticker">
+    <div>
+      <h3>SGQR sticker</h3>
+      <p><strong>SGQR contains no menu and does not prove ownership.</strong> Decoding happens in this browser; the photo is not uploaded. A UEN may be absent, and different outlets may share one.</p>
+      <div class="mapping" aria-label="Submitted identifier">
+        <span class="mono">UEN R26ZZ0001X</span>
+        <small>Kopi Corner counter sticker</small>
+        <small>From the sticker, checksum valid</small>
+        <span><span class="chip ok">Approved by the Envoi operator</span></span>
+      </div>
+      <h3>Sticker photo</h3>
+      <input type="file" accept="image/*" aria-label="Sticker photo">
+      <p style="margin-top:12px"><a class="button secondary" href="#">Enter the UEN by hand</a></p>
+    </div>
+    <aside class="qrbox" aria-labelledby="qr-h">
+      <span class="flag">NEW</span>
+      <h3 id="qr-h">Your Envoi shop QR</h3>
+      <svg viewBox="0 0 246 246" role="img" aria-label="Envoi shop QR, fixture" version="1.1" xmlns="http://www.w3.org/2000/svg">
+ <g id="barcode" fill="#000000">
+  <rect x="0" y="0" width="246" height="246" fill="#FFFFFF"/>
+  <path d="M24 24h42v6h-42ZM78 24h6v6h-6ZM114 24h6v12h-6ZM132 24h18v6h-18ZM156 24h18v6h-18ZM180 24h42v6h-42ZM24 30h6v30h-6ZM60 30h6v30h-6ZM84 30h6v6h-6ZM96 30h6v6h-6ZM126 30h6v18h-6ZM144 30h12v12h-12ZM162 30h12v12h-12ZM180 30h6v30h-6ZM216 30h6v30h-6ZM36 36h18v18h-18ZM78 36h6v6h-6ZM90 36h6v6h-6ZM108 36h6v6h-6ZM192 36h18v18h-18ZM78 42h12v6h-12ZM96 42h12v6h-12ZM114 42h6v6h-6ZM138 42h6v12h-6ZM168 42h6v6h-6ZM120 48h12v6h-12ZM150 48h24v6h-24ZM72 54h18v6h-18ZM102 54h12v6h-12ZM126 54h12v6h-12ZM144 54h6v12h-6ZM156 54h12v6h-12ZM24 60h42v6h-42ZM72 60h6v6h-6ZM84 60h6v12h-6ZM96 60h6v12h-6ZM108 60h6v12h-6ZM120 60h6v6h-6ZM132 60h6v6h-6ZM156 60h6v6h-6ZM168 60h6v6h-6ZM180 60h42v6h-42ZM126 66h6v6h-6ZM138 66h24v6h-24ZM24 72h6v6h-6ZM42 72h6v6h-6ZM54 72h12v6h-12ZM72 72h6v6h-6ZM84 72h24v6h-24ZM114 72h6v6h-6ZM138 72h6v6h-6ZM150 72h6v6h-6ZM168 72h12v6h-12ZM186 72h6v6h-6ZM30 78h24v6h-24ZM72 78h12v6h-12ZM90 78h12v12h-12ZM108 78h6v6h-6ZM120 78h6v6h-6ZM132 78h6v6h-6ZM144 78h6v6h-6ZM168 78h24v6h-24ZM216 78h6v18h-6ZM36 84h6v6h-6ZM48 84h6v6h-6ZM60 84h12v6h-12ZM126 84h6v12h-6ZM138 84h12v6h-12ZM156 84h6v6h-6ZM186 84h12v6h-12ZM204 84h6v6h-6ZM24 90h6v6h-6ZM36 90h18v6h-18ZM66 90h6v6h-6ZM78 90h6v6h-6ZM96 90h6v6h-6ZM108 90h6v6h-6ZM138 90h6v12h-6ZM150 90h24v6h-24ZM192 90h12v6h-12ZM24 96h18v6h-18ZM60 96h12v6h-12ZM78 96h24v6h-24ZM162 96h6v6h-6ZM174 96h12v12h-12ZM198 96h6v6h-6ZM210 96h12v12h-12ZM24 102h24v6h-24ZM72 102h6v6h-6ZM84 102h6v6h-6ZM114 102h18v6h-18ZM150 102h6v6h-6ZM192 102h6v6h-6ZM24 108h18v6h-18ZM60 108h6v6h-6ZM72 108h36v6h-36ZM126 108h6v18h-6ZM144 108h6v6h-6ZM162 108h54v6h-54ZM30 114h12v6h-12ZM48 114h12v6h-12ZM66 114h6v6h-6ZM78 114h6v6h-6ZM90 114h6v6h-6ZM108 114h12v6h-12ZM138 114h6v6h-6ZM150 114h18v6h-18ZM180 114h6v12h-6ZM192 114h6v12h-6ZM210 114h6v12h-6ZM24 120h24v6h-24ZM60 120h18v6h-18ZM84 120h6v6h-6ZM108 120h6v12h-6ZM138 120h24v6h-24ZM168 120h6v6h-6ZM24 126h6v6h-6ZM36 126h6v6h-6ZM48 126h12v6h-12ZM72 126h6v6h-6ZM84 126h12v6h-12ZM120 126h6v6h-6ZM150 126h30v6h-30ZM186 126h6v6h-6ZM198 126h6v6h-6ZM24 132h12v6h-12ZM60 132h12v6h-12ZM102 132h12v6h-12ZM132 132h6v6h-6ZM144 132h6v6h-6ZM168 132h18v6h-18ZM204 132h18v6h-18ZM42 138h6v6h-6ZM54 138h6v6h-6ZM72 138h12v6h-12ZM96 138h6v6h-6ZM126 138h12v6h-12ZM168 138h12v6h-12ZM186 138h6v12h-6ZM210 138h12v12h-12ZM24 144h6v6h-6ZM36 144h12v6h-12ZM60 144h6v6h-6ZM72 144h24v6h-24ZM108 144h30v6h-30ZM156 144h24v6h-24ZM30 150h24v6h-24ZM66 150h12v6h-12ZM84 150h6v6h-6ZM102 150h48v6h-48ZM180 150h12v6h-12ZM204 150h18v6h-18ZM24 156h60v6h-60ZM90 156h6v6h-6ZM102 156h6v6h-6ZM114 156h6v6h-6ZM144 156h6v6h-6ZM180 156h6v12h-6ZM204 156h6v6h-6ZM216 156h6v6h-6ZM30 162h24v6h-24ZM66 162h6v6h-6ZM84 162h6v6h-6ZM96 162h6v6h-6ZM120 162h6v6h-6ZM132 162h6v6h-6ZM150 162h6v12h-6ZM162 162h12v6h-12ZM198 162h6v6h-6ZM210 162h6v6h-6ZM24 168h6v6h-6ZM42 168h12v6h-12ZM60 168h6v6h-6ZM72 168h12v6h-12ZM102 168h6v6h-6ZM114 168h18v6h-18ZM138 168h6v6h-6ZM162 168h36v6h-36ZM72 174h6v6h-6ZM90 174h18v6h-18ZM120 174h6v12h-6ZM132 174h30v6h-30ZM168 174h6v18h-6ZM192 174h12v6h-12ZM216 174h6v6h-6ZM24 180h42v6h-42ZM78 180h6v6h-6ZM90 180h6v12h-6ZM144 180h6v6h-6ZM180 180h6v6h-6ZM192 180h24v6h-24ZM24 186h6v30h-6ZM60 186h6v30h-6ZM72 186h6v6h-6ZM102 186h24v6h-24ZM138 186h12v6h-12ZM192 186h6v6h-6ZM216 186h6v6h-6ZM36 192h18v18h-18ZM78 192h30v6h-30ZM120 192h6v6h-6ZM144 192h18v6h-18ZM168 192h36v6h-36ZM72 198h12v6h-12ZM114 198h6v6h-6ZM138 198h18v6h-18ZM168 198h6v6h-6ZM180 198h6v6h-6ZM192 198h12v6h-12ZM210 198h6v6h-6ZM78 204h12v6h-12ZM96 204h6v6h-6ZM108 204h6v6h-6ZM126 204h12v6h-12ZM144 204h6v6h-6ZM156 204h12v6h-12ZM192 204h18v6h-18ZM216 204h6v6h-6ZM90 210h18v6h-18ZM114 210h24v6h-24ZM150 210h6v12h-6ZM174 210h6v6h-6ZM24 216h42v6h-42ZM72 216h6v6h-6ZM90 216h24v6h-24ZM168 216h6v6h-6ZM192 216h6v6h-6ZM210 216h6v6h-6Z"/>
+ </g>
+</svg>
+      <small>Opens Kopi Corner on Envoi so a buyer can pick items. It is not a payment code and is not your SGQR; nobody can pay with it in a bank app.</small>
+      <a class="button" href="#">Download QR (PNG)</a>
+      <a class="button secondary" href="#">Copy shop link</a>
+    </aside>
+  </div>
+</section>
+<section class="card"><h2>2. Menu</h2><p class="muted">Unchanged.</p></section>
+<section class="card">
+  <h2>Before you publish (QR not shown yet)</h2>
+  <div class="note">While the shop is unpublished, the QR area reads: "Your shop QR appears here after you publish. Buyers cannot open an unpublished shop."</div>
+</section>
+</div>
+</main>
+<footer>What moved: the "Approved by the Envoi operator" chip now sits under the UEN instead of at the far right, so the right column holds the shop QR. The SGQR photo is still never stored. On a phone the QR card shows first, above the sticker text.</footer>
+</body></html>

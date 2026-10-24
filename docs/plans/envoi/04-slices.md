@@ -9,6 +9,7 @@ It changes no approved product or architecture decision.
 Its one contract change, delta D10, is made in Gate 3 itself, which you reopened for it on 2026-10-12.
 **Reopened 2026-10-15 for one change, approved by the user in advance:** S11's menu photos are English only, so its evaluation photos no longer include Chinese text; rotated and small-price text stay. Gates 2 and 3 carry the same change.
 **Reopened 2026-10-18 for one change and RE-APPROVED by the user the same day** ("Yea sure i approve the gates then make the relevant changes and push to main thnaks"): the [S16 amendment](#s16-amendment-2026-10-18-phantom-landing) builds the Phantom landing that Gates 2 and 3 now describe, on its own branch before S14; no build order, test count or cut order changes.
+**Amended 2026-10-24 and approved by the user the same day ("I approve Gate 4."):** [S18](#s18-merchant-shop-qr-and-order-archive-added-2026-10-24) builds the shop QR and order archive of the Gate 1, 2 and 3 reopenings of 2026-10-24, after S15; the build-order table, the cut order and the counts of the original plan are unchanged, and S18's 12 named tests are counted in its own section.
 Where a slice needs something Gate 3 did not specify, the gap is named in [Gate 3 deltas](#gate-3-deltas) instead of being decided silently.
 Drafting and revising this plan installed, provisioned, deployed and spent nothing, and it contains no application code.
 
@@ -750,6 +751,37 @@ Gates 2 and 3, the build order, the cut order and the test counts; `/buy` keeps 
 
 **Authorizations to request.**
 Building it on this branch, then the merge, push and deploy.
+
+### S18 Merchant shop QR and order archive (added 2026-10-24)
+
+Added after Gates 1, 2 and 3 were re-approved on 2026-10-24 and approved by the user the same day ("I approve Gate 4."), which starts nothing; S18 starts only on an authorization naming it.
+It follows Gates 1, 2 and 3, re-approved on 2026-10-24 for the [shop QR and order archive](03-program-design.md#reopening-2026-10-24-shop-qr-and-order-archive).
+It runs after S15 and outside the build-order table above; it is never cut, because nothing in the judged release depends on it and it starts only on your authorization.
+Branch: `envoi/slice-18-shop-qr-archive`.
+Depends on: S8 (merchant orders), S9 (sticker section) and S7 (publication).
+
+**Visible result.**
+1. On `/merchant/setup`, a published shop shows "Your Envoi shop QR" in the sticker section's right column, with "Download QR (PNG)" and "Copy shop link"; scanning it with a phone camera opens that shop on `/buy`. The approval chip sits under the UEN. An unpublished shop shows the placeholder.
+2. On `/merchant/orders`, every order has Delete; confirming removes it from the list and the archived count rises; an order deleted while checking returns marked Paid if it is paid.
+3. `npm run operator -- export-archived-orders <outletId>` writes JSON receipts into `archive/orders/`, which `git status` does not show.
+
+**Builds.**
+Every file in the Gate 3 reopening's file map: migration `0024_order_archive.sql`, the schema columns, `archiveOrder` and the list filter and count, the archive route, the orders screen, `drawShopQr` with the vendored writer wasm, `shop-qr.tsx` and the workspace move, the two operator commands and `/archive/` in `.gitignore`.
+
+**Tests.**
+The 12 named tests of the [Gate 3 reopening](03-program-design.md#reopening-2026-10-24-shop-qr-and-order-archive), each new here; a mutation for each guard in tests 3-7, 9 and 11, recorded in `00-status.md`.
+The plan-wide rules above apply: disposable local PostgreSQL, browser checks at 390 px and 1280 px, and a real phone scan of the drawn QR.
+
+**Evidence.**
+Screenshots of both screens on the deployed site; the mutation results; a sample exported receipt with a scan proving no buyer identity; `git status` after an export.
+
+**Falsifiers.**
+- The drawn QR does not open the shop on a phone camera: stop and fix before release.
+- An archived order disappears while its payment can still become paid and never returns: stop; the reappear rule is broken.
+- The web role can clear an archive: stop; the trigger or grant is wrong.
+
+**Authorizations to request at start.**
+Starting S18 by ID; adding `zxing-wasm@3.1.3` as a direct dependency (an install); applying migration `0024` to Neon; the merge, push and deploy.
 
 ## Test assignment
 

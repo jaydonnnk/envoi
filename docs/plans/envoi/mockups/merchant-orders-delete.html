@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Delete orders on merchant orders | Envoi product mockup</title><style>
+:root{--ink:#14293d;--muted:#52657a;--blue:#145deb;--pale:#f1f6fc;--cyan:#ceedf3;--line:#c9d7e6;--paper:#fff;--amber:#90500c;--warn:#fff4da;--green:#206a51;--red:#a3271b}
+*{box-sizing:border-box}body{margin:0;background:var(--pale);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,-apple-system,Arial,sans-serif}
+h1,h2,h3,.brand{font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;line-height:1.15}h1{font-size:clamp(2rem,4.5vw,3.2rem);letter-spacing:-.045em;margin:12px 0 16px}h2{font-size:1.45rem;letter-spacing:-.025em;margin:0 0 12px}h3{font-size:1.05rem;margin:0 0 8px}p{margin:0 0 14px}a{color:var(--blue);text-underline-offset:4px}
+header{background:var(--paper);border-bottom:1px solid var(--line)}.top{max-width:1000px;margin:auto;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{font-weight:bold;font-size:1.5rem;letter-spacing:-.06em;text-decoration:none;color:var(--ink);display:flex;align-items:center;gap:10px}.mark{background:var(--blue);color:#fff;display:grid;place-items:center;width:32px;height:32px;border-radius:8px;letter-spacing:0}
+.badge,.eyebrow{font:12px/1.4 Consolas,monospace;letter-spacing:.07em;text-transform:uppercase}.badge{background:var(--cyan);padding:6px 9px;border-radius:4px;white-space:nowrap}.notice{background:var(--warn);padding:10px 24px;text-align:center;color:#704009;font-size:13px}.eyebrow{color:var(--blue);font-weight:600}
+main{max-width:1000px;margin:auto;padding:30px 24px 56px}.lead{font-size:18px;color:var(--muted);max-width:640px}.stack{display:grid;gap:18px;margin-top:24px}.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:24px;min-width:0}
+.muted,small{color:var(--muted)}small{font-size:13px;display:block}.mono{font:15px/1.5 Consolas,monospace}.money{font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip{font-size:12px;display:inline-block;border:1px solid var(--line);padding:3px 9px;border-radius:100px;background:var(--pale);white-space:nowrap}.chip.ok{color:var(--green);background:#e6f4ed;border-color:#a8cfbf}.chip.warn{color:var(--amber);background:var(--warn);border-color:#e3c17f}.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px}
+.button{font:600 15px "Segoe UI",system-ui,Arial,sans-serif;border:1px solid var(--blue);border-radius:7px;background:var(--blue);color:#fff;padding:12px 18px;display:inline-block;text-decoration:none;cursor:pointer;text-align:center}.button.secondary{color:var(--ink);background:var(--paper);border-color:#8da3bb}.button.danger{color:var(--red);background:var(--paper);border-color:#d9a39c}.button.danger-solid{background:var(--red);border-color:var(--red);color:#fff}.button:disabled{background:#e3eaf1;border-color:var(--line);color:#536578;cursor:not-allowed}
+.rule{height:1px;background:var(--line);margin:20px 0}.note{border-left:4px solid var(--blue);background:var(--pale);padding:12px 14px;border-radius:0 8px 8px 0;font-size:14px}.flag{border:2px dashed #d67911;border-radius:10px;padding:2px 8px;font:12px Consolas,monospace;color:#8a4a07;background:#fff7ec;display:inline-block;margin-bottom:8px}
+input[type=file]{font:inherit;width:100%;padding:12px;border:1px solid #8da3bb;border-radius:7px;background:var(--paper)}
+:focus-visible{outline:3px solid #d67911;outline-offset:3px}
+footer{max-width:1000px;margin:auto;padding:16px 24px 32px;font-size:13px;color:var(--muted)}
+.order{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 18px;padding:18px 0;border-bottom:1px solid var(--line)}.order:last-child{border:0}.order h3{margin:0}.acts{display:flex;gap:10px;flex-wrap:wrap;grid-column:1/-1}.total{font-size:22px;font-weight:700}
+dialog{border:1px solid var(--line);border-radius:12px;padding:24px;max-width:460px;width:calc(100% - 32px);color:var(--ink)}dialog::backdrop{background:rgba(20,41,61,.45)}dialog .acts{margin-top:18px}
+@media(max-width:740px){.top{padding:14px 16px}.top .badge{font-size:10px}main{padding:24px 16px 40px}.card{padding:18px}.acts .button{flex:1}.lead{font-size:16px}}
+</style></head><body>
+<header><div class="top"><a class="brand" href="index.html"><span class="mark" aria-hidden="true">↗</span>envoi</a><span class="badge">Test environment</span></div><div class="notice">Gate 1 reopening mockup, 24 Oct 2026 · fictional shop and sample orders · nothing here is built</div></header>
+<main>
+<span class="eyebrow">Merchant orders · Kopi Corner</span>
+<h1>Orders</h1>
+<p class="lead">Paid means PayPal or devnet confirmed it. Deleting an order only removes it from this list; Envoi keeps an archived copy as a record.</p>
+<div class="stack">
+<section class="card" aria-label="Orders">
+  <div class="order">
+    <div><h3>Kopi O x2, Kaya toast set x1</h3><small>24 Oct 2026, 20:10 · PayPal sandbox</small><div class="chips"><span class="chip ok">Paid</span><span class="chip">Acknowledged</span></div></div>
+    <span class="total money">S$7.70</span>
+    <div class="acts"><button class="button danger" data-del>Delete</button></div>
+  </div>
+  <div class="order">
+    <div><h3>Teh C peng x1</h3><small>24 Oct 2026, 19:52 · PayPal sandbox</small><div class="chips"><span class="chip ok">Paid</span><span class="chip">Not acknowledged</span></div></div>
+    <span class="total money">S$2.20</span>
+    <div class="acts"><button class="button">Acknowledge</button><button class="button danger" data-del>Delete</button></div>
+  </div>
+  <div class="order">
+    <div><h3>Kopi O x1</h3><small>24 Oct 2026, 19:40 · PayPal sandbox</small><div class="chips"><span class="chip warn">Checking payment</span></div></div>
+    <span class="total money">S$1.60</span>
+    <div class="acts"><button class="button danger" data-del data-moving>Delete</button></div>
+  </div>
+  <div class="order">
+    <div><h3>Soft-boiled eggs (2) x1</h3><small>23 Oct 2026, 08:15 · PayPal sandbox</small><div class="chips"><span class="chip">Not paid</span></div></div>
+    <span class="total money">S$2.00</span>
+    <div class="acts"><button class="button danger" data-del>Delete</button></div>
+  </div>
+</section>
+<p class="muted">3 deleted orders are kept as records. Ask the Envoi operator if you need one back.</p>
+</div>
+<dialog id="confirm" aria-labelledby="dlg-h">
+  <h2 id="dlg-h">Delete this order from your list?</h2>
+  <p>Envoi keeps an archived copy as a record. The payment, the buyer's receipt and any refund are not changed.</p>
+  <p id="moving" class="note" hidden>This payment is still being checked. If it turns out to be paid, the order comes back to your list marked Paid, so you never miss a payment.</p>
+  <div class="acts"><button class="button secondary" id="cancel">Keep it</button><button class="button danger-solid" id="ok">Delete order</button></div>
+</dialog>
+</main>
+<footer>Archive: deleting marks the order archived in the database; nothing is erased. The operator can export archived orders as JSON receipts into a folder Git ignores, on the operator's own machine.</footer>
+<script>
+const d=document.getElementById('confirm'),m=document.getElementById('moving');let row=null;
+document.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{row=b.closest('.order');m.hidden=!b.hasAttribute('data-moving');d.showModal();}));
+document.getElementById('cancel').onclick=()=>d.close();
+document.getElementById('ok').onclick=()=>{row&&row.remove();d.close();};
+</script>
+</body></html>
