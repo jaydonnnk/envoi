@@ -1,0 +1,120 @@
+{
+ "branch": "envoi/slice-18-shop-qr-archive",
+ "base_commit": "9e190e4",
+ "uncommitted_changes": true,
+ "method": "Each definition in s18-mutation-defs.json applied alone by exact text replacement, its named test run alone (vitest -t), every touched file restored and compared by SHA-256, then the test rerun. Integration tests run on local PostgreSQL with the real schema built from the migrations, as envoi_web, envoi_maintenance or the superuser where the test says; merchant accounts and their FIXTURE shops are created as in S8, and PayPal is the labeled FIXTURE fake. The migration mutation edits drizzle/0024_order_archive.sql, which each test database applies afresh. A proof also needs the mutated run to fail on an AssertionError.",
+ "results": [
+  {
+   "id": "archive-repeat-writes",
+   "test": "archive repeat changes nothing",
+   "files": [
+    "src/domain/purchases/orders.ts"
+   ],
+   "mutation": "Drop the already-archived early return; the update is limited to unarchived rows, so the trigger never fires and only the guard's absence shows: a repeat writes a second audit row.",
+   "mutated": "Tests  1 failed | 10 skipped (11)",
+   "error": "AssertionError: expected true to be false // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 10 skipped (11)",
+   "proof": true
+  },
+  {
+   "id": "archive-any-outlet",
+   "test": "another outlet's order cannot be archived",
+   "files": [
+    "src/domain/purchases/orders.ts"
+   ],
+   "mutation": "Drop the membership condition from the archive read, so any merchant can archive any outlet's order.",
+   "mutated": "Tests  1 failed | 10 skipped (11)",
+   "error": "AssertionError: expected 200 to be 404 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 10 skipped (11)",
+   "proof": true
+  },
+  {
+   "id": "archive-no-merchant-guard",
+   "test": "an agent token or buyer session cannot archive",
+   "files": [
+    "src/app/api/v1/merchant/orders/[id]/archive/route.ts"
+   ],
+   "mutation": "Skip the merchant-account guard in the archive route and pass a stand-in user id for a principal that is not a merchant account.",
+   "mutated": "Tests  1 failed | 10 skipped (11)",
+   "error": "AssertionError: expected 404 to be 403 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 10 skipped (11)",
+   "proof": true
+  },
+  {
+   "id": "archive-no-origin-check",
+   "test": "an agent token or buyer session cannot archive",
+   "files": [
+    "src/app/api/v1/merchant/orders/[id]/archive/route.ts"
+   ],
+   "mutation": "Drop the same-origin check from the archive route.",
+   "mutated": "Tests  1 failed | 10 skipped (11)",
+   "error": "AssertionError: expected 200 to be 403 // Object.is equality",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 10 skipped (11)",
+   "proof": true
+  },
+  {
+   "id": "archive-never-returns",
+   "test": "an order archived before it was paid comes back as Paid",
+   "files": [
+    "src/domain/purchases/orders.ts"
+   ],
+   "mutation": "List only orders that were never archived, so an order paid after its archive stays hidden.",
+   "mutated": "Tests  1 failed | 10 skipped (11)",
+   "error": "AssertionError: expected undefined to match object { state: 'paid' }",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 10 skipped (11)",
+   "proof": true
+  },
+  {
+   "id": "archive-paid-returns",
+   "test": "a paid order archived stays hidden",
+   "files": [
+    "src/domain/purchases/orders.ts"
+   ],
+   "mutation": "List every archived order that is paid now, including one already paid when it was archived.",
+   "mutated": "Tests  1 failed | 10 skipped (11)",
+   "error": "AssertionError: expected [ 'pur_dovgboo2tjsu26v5rd2xflst5e' ] to not include 'pur_dovgboo2tjsu26v5rd2xflst5e'",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 10 skipped (11)",
+   "proof": true
+  },
+  {
+   "id": "archive-trigger-missing",
+   "test": "the web role cannot clear an archive",
+   "files": [
+    "drizzle/0024_order_archive.sql"
+   ],
+   "mutation": "Leave out the trigger in migration 0024, so the web role's column grant can clear an archive.",
+   "mutated": "Tests  1 failed | 10 skipped (11)",
+   "error": "AssertionError: promise resolved \"[]\" instead of rejecting",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 10 skipped (11)",
+   "proof": true
+  },
+  {
+   "id": "export-buyer-identity",
+   "test": "export writes one receipt per archived order without buyer identity",
+   "files": [
+    "src/domain/purchases/orders.ts"
+   ],
+   "mutation": "Add the buyer's user id to each exported receipt.",
+   "mutated": "Tests  1 failed | 10 skipped (11)",
+   "error": "AssertionError: expected [ 'Yuh9UbwO19pLv5owMInjKrNyNuFZrZy0' ] to deeply equal []",
+   "fails_on_assertion": true,
+   "restored_identical": true,
+   "rerun": "Tests  1 passed | 10 skipped (11)",
+   "proof": true
+  }
+ ]
+}

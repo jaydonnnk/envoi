@@ -1,0 +1,116 @@
+[
+ {
+  "id": "archive-repeat-writes",
+  "test": "archive repeat changes nothing",
+  "test_file": "tests/integration/order-archive.test.ts",
+  "mutation": "Drop the already-archived early return; the update is limited to unarchived rows, so the trigger never fires and only the guard's absence shows: a repeat writes a second audit row.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/orders.ts",
+    "old": "    if (row.purchase.merchantArchivedAt !== null) return { order, changed: false };\n",
+    "new": ""
+   },
+   {
+    "file": "src/domain/purchases/orders.ts",
+    "old": "      .set({ merchantArchivedAt: input.now, merchantArchivedByUserId: input.userId, merchantArchivedState: order.state })\n      .where(eq(purchases.id, row.purchase.id));",
+    "new": "      .set({ merchantArchivedAt: input.now, merchantArchivedByUserId: input.userId, merchantArchivedState: order.state })\n      .where(and(eq(purchases.id, row.purchase.id), isNull(purchases.merchantArchivedAt)));"
+   }
+  ]
+ },
+ {
+  "id": "archive-any-outlet",
+  "test": "another outlet's order cannot be archived",
+  "test_file": "tests/integration/order-archive.test.ts",
+  "mutation": "Drop the membership condition from the archive read, so any merchant can archive any outlet's order.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/orders.ts",
+    "old": "export async function archiveOrder(db: Db, input: { purchaseId: string; userId: string; now: Date }): Promise<ArchiveOutcome | AppError> {\n  return db.transaction(async (tx) => {\n    const [row] = await tx\n      .select(orderColumns)\n      .from(purchases)\n      .innerJoin(\n        merchantMemberships,\n        and(eq(merchantMemberships.outletId, purchases.outletId), eq(merchantMemberships.userId, input.userId), isNull(merchantMemberships.revokedAt)),\n      )\n",
+    "new": "export async function archiveOrder(db: Db, input: { purchaseId: string; userId: string; now: Date }): Promise<ArchiveOutcome | AppError> {\n  return db.transaction(async (tx) => {\n    const [row] = await tx\n      .select(orderColumns)\n      .from(purchases)\n"
+   }
+  ]
+ },
+ {
+  "id": "archive-no-merchant-guard",
+  "test": "an agent token or buyer session cannot archive",
+  "test_file": "tests/integration/order-archive.test.ts",
+  "mutation": "Skip the merchant-account guard in the archive route and pass a stand-in user id for a principal that is not a merchant account.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/merchant/orders/[id]/archive/route.ts",
+    "old": "  if (!isMerchantAccount(principal)) return httpErr(principal);\n",
+    "new": ""
+   },
+   {
+    "file": "src/app/api/v1/merchant/orders/[id]/archive/route.ts",
+    "old": "userId: principal.userId,",
+    "new": "userId: isMerchantAccount(principal) ? principal.userId : \"FIXTURE-not-a-merchant\","
+   }
+  ]
+ },
+ {
+  "id": "archive-no-origin-check",
+  "test": "an agent token or buyer session cannot archive",
+  "test_file": "tests/integration/order-archive.test.ts",
+  "mutation": "Drop the same-origin check from the archive route.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/merchant/orders/[id]/archive/route.ts",
+    "old": "  const foreign = assertSameOrigin(request);\n  if (foreign) return httpErr(foreign);\n",
+    "new": "  const foreign = assertSameOrigin(request);\n  void foreign;\n"
+   }
+  ]
+ },
+ {
+  "id": "archive-never-returns",
+  "test": "an order archived before it was paid comes back as Paid",
+  "test_file": "tests/integration/order-archive.test.ts",
+  "mutation": "List only orders that were never archived, so an order paid after its archive stays hidden.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/orders.ts",
+    "old": "const listed = or(isNull(purchases.merchantArchivedAt), and(eq(purchases.state, \"paid\"), ne(purchases.merchantArchivedState, \"paid\")));",
+    "new": "const listed = or(isNull(purchases.merchantArchivedAt));"
+   }
+  ]
+ },
+ {
+  "id": "archive-paid-returns",
+  "test": "a paid order archived stays hidden",
+  "test_file": "tests/integration/order-archive.test.ts",
+  "mutation": "List every archived order that is paid now, including one already paid when it was archived.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/orders.ts",
+    "old": "and(eq(purchases.state, \"paid\"), ne(purchases.merchantArchivedState, \"paid\")));",
+    "new": "eq(purchases.state, \"paid\"));"
+   }
+  ]
+ },
+ {
+  "id": "archive-trigger-missing",
+  "test": "the web role cannot clear an archive",
+  "test_file": "tests/integration/order-archive.test.ts",
+  "mutation": "Leave out the trigger in migration 0024, so the web role's column grant can clear an archive.",
+  "edits": [
+   {
+    "file": "drizzle/0024_order_archive.sql",
+    "old": "CREATE TRIGGER purchases_merchant_archive_once BEFORE UPDATE ON \"purchases\" FOR EACH ROW EXECUTE FUNCTION envoi_merchant_archive_once();",
+    "new": "SELECT 1;"
+   }
+  ]
+ },
+ {
+  "id": "export-buyer-identity",
+  "test": "export writes one receipt per archived order without buyer identity",
+  "test_file": "tests/integration/order-archive.test.ts",
+  "mutation": "Add the buyer's user id to each exported receipt.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/orders.ts",
+    "old": "      archivedState: row.purchase.merchantArchivedState as PurchaseState,\n    };",
+    "new": "      archivedState: row.purchase.merchantArchivedState as PurchaseState,\n      buyerUserId: row.purchase.buyerUserId,\n    } as ArchivedOrderReceipt;"
+   }
+  ]
+ }
+]

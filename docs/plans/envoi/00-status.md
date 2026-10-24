@@ -209,6 +209,31 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [x] S14 - APIMatic client and docs, account-conditional; third in the cut order; access check passed and started 2026-10-19 on `envoi/slice-14-apimatic`; done 2026-10-19; on `main` at `6eacfca`, pushed with CI green ([record](#s14-apimatic-client-and-docs-2026-10-19)); review fixes done 2026-10-19, on `main` at `9d4bd55` and deployed with CI green on 2026-10-20 ([record](#s14-review-fixes-2026-10-19)).
 - [ ] S15 - Judged release; started 2026-10-20 on `envoi/slice-15-release` ([record](#s15-judged-release-2026-10-20)).
 
+Post-release, outside the build order: S18, merchant shop QR and order archive, started 2026-10-24 on `envoi/slice-18-shop-qr-archive` ([record](#s18-merchant-shop-qr-and-order-archive-2026-10-24)).
+
+### S18 Merchant shop QR and order archive, 2026-10-24
+
+- **Authorization, 2026-10-24, in the user's words:** "Commit the gate documents to main, then start S18."
+  Under rule 1 of `04-slices.md` this covered creating `envoi/slice-18-shop-qr-archive` from `main` at `9e190e4`, confirmed with `git branch --show-current`.
+- **S18 authorizations requested at start, answered 2026-10-24 by multiple choice:** "Install zxing-wasm", "Migration on Neon", "Push, ff main, deploy".
+- **Baseline on `9e190e4` [verified]:** typecheck, lint and 193 of 193 unit tests pass; 343 of 343 integration tests pass on local PostgreSQL 18.6 (Postgres.app).
+- **Install [verified]:** `npm install --save-exact zxing-wasm@3.1.3`; the lockfile already resolved that version through `barcode-detector@3.2.2`, so only the direct-dependency lines changed.
+- **Built:** migration `0024_order_archive.sql` (three archive columns, a check that they are set together, a trigger `envoi_merchant_archive_once` that refuses changing a set archive for `envoi_web` and `envoi_maintenance`, and the web role's column-level `UPDATE`), generated with `drizzle-kit` and edited after generation for the trigger and grant; `archiveOrder`, the list filter, `archivedCount` and `archivedOrderReceipts` in `src/domain/purchases/orders.ts`; `POST /api/v1/merchant/orders/{id}/archive` with the same-origin check; Delete, the confirmation dialog and the archived count on `/merchant/orders`; `drawShopQr` with the writer wasm vendored at `public/vendor/zxing_writer-3.1.3.wasm` and `shop-qr.tsx` in the sticker section's right column, the approval chip moved under the UEN; `unarchive-order` and `export-archived-orders` in the operator CLI; `/archive/` in `.gitignore`.
+- **Decision made in S18, a refinement:** the archived state stored is the state the merchant saw at that moment (derived on read), so a PayPal order whose approval window lapsed is stored as `unpaid_closed`, as the list showed it.
+- **Tests [verified]:** the 12 named tests of the Gate 3 reopening pass: 11 in `tests/integration/order-archive.test.ts` and `the QR writer is served from this site and is the pinned package's file` in `tests/unit/shop-qr.test.ts`; full suite 194 of 194 unit and 354 of 354 integration; typecheck, client typecheck and lint exit 0; `git diff --check` clean.
+- **Mutations [verified], 8 of 8,** by [`s18-mutate.py`](evidence/s18-mutate.py) with [`s18-mutation-defs.json`](evidence/s18-mutation-defs.json), results in [`s18-mutations.json`](evidence/s18-mutations.json), each failing its test on an AssertionError, restored byte-identical and passing on rerun: `archive-repeat-writes`, `archive-any-outlet`, `archive-no-merchant-guard`, `archive-no-origin-check`, `archive-never-returns`, `archive-paid-returns`, `archive-trigger-missing`, `export-buyer-identity`.
+  A first run proved 6 of 8: the repeat mutation was caught by the trigger (a database error, not the guard's own test) and the skipped merchant guard crashed on an undefined user id; both mutations were narrowed so each guard is shown alone, and the run was repeated.
+  The runner passes `--config config/vitest.config.ts`, because the config moved there on 2026-10-23.
+- **Local browser check [verified], 2026-10-24,** on a local production build (`next start` at `http://localhost:3100`) with a disposable database built through the real merchant and buyer routes with the FIXTURE PayPal fake, dropped after:
+  - `/merchant/setup` at 1280 px shows the QR card in the right column with the chip under the UEN; at 390 px the QR card comes first and nothing scrolls sideways.
+  - The drawn QR decodes in the browser's own detector to exactly `http://localhost:3100/buy?outlet=<outletId>`; the writer wasm loaded from `/vendor/zxing_writer-3.1.3.wasm` (200).
+  - On `/merchant/orders` Delete on a "Checking payment" order opened the dialog with the still-checking note, and confirming removed the order (4 to 3) and showed the archived count.
+  - `export-archived-orders` wrote one receipt into `archive/orders/`, which `git status` did not list.
+  - Fixed during the check: the dialog opened at the top left because Tailwind's base reset removes the dialog's automatic margin (`margin: auto` added); Delete sat on its own row under Acknowledge (merged into one action row); the singular count read "1 deleted order is kept as records" (now "kept as a record").
+- **Build note:** `next build` stops on its first run after some changes with a Next.js "SecurityFatalError" upgrade notice and passes when run again; the notice asks for an upgrade, which is not in this slice's authority and is reported to the user.
+- **Post-slice cleanup [verified]:** the `architect-reviewer` cleanup found one unused export, `ARCHIVE_EXPORT_DIR`, made private; no orphan file, temporary scaffolding or TODO remains.
+- **Not established yet:** migration 0024 on Neon, the deploy and the checks on the deployed site, and a real phone camera scan of the drawn QR.
+
 ### S15 Judged release, 2026-10-20
 
 - **Authorization, 2026-10-20, in the user's words:** "Start s15".
