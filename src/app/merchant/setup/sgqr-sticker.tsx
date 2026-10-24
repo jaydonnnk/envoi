@@ -7,6 +7,7 @@ import { isMappable, mappableIdentifier } from "@/domain/sgqr/validate";
 import { qrDetector } from "@/lib/browser/qr";
 import { requestJson } from "@/lib/browser/session";
 import { useRestoreFocus } from "@/lib/browser/focus";
+import { ShopQr } from "./shop-qr";
 
 // S9: the merchant selects a photo of their SGQR sticker and it is decoded here, in the browser.
 // The image never leaves the browser. The decoded text is sent only with a submission, so the
@@ -55,8 +56,8 @@ function Submitted({ identifiers }: { identifiers: OutletIdentifier[] }) {
               {SOURCE_LABEL[entry.source]}
               {checksumLabel(entry.checksumValid) ? `, ${checksumLabel(entry.checksumValid)!.toLowerCase()}` : ""}
             </small>
+            <span className={`chip ${entry.approved ? "ok" : "warn"}`}>{entry.approved ? "Approved by the Envoi operator" : "Waiting for the Envoi operator"}</span>
           </div>
-          <span className={`chip ${entry.approved ? "ok" : "warn"}`}>{entry.approved ? "Approved by the Envoi operator" : "Waiting for the Envoi operator"}</span>
         </li>
       ))}
     </ul>
@@ -133,90 +134,93 @@ export function SgqrSticker({ outlet, onSaved }: { outlet: MerchantOutlet; onSav
 
   const showForm = manual || reading.kind === "decoded";
   return (
-    <div className="sgqr" aria-labelledby={`${prefix}-heading`}>
-      <h3 id={`${prefix}-heading`}>SGQR sticker</h3>
-      <p className="muted">
-        <strong>SGQR contains no menu and does not prove ownership.</strong> Decoding happens in this browser; the photo is not uploaded. A UEN may be absent, and different outlets may share one.
-      </p>
-      <Submitted identifiers={outlet.identifiers} />
-      <label htmlFor={`${prefix}-photo`}>Sticker photo</label>
-      <input key={photoInput} id={`${prefix}-photo`} type="file" accept="image/*" onChange={select} disabled={busy} />
-
-      {reading.kind === "reading" && (
-        <p className="fine" role="status">
-          Reading the sticker
+    <div className="sgqr">
+      <div className="sgqr-main" aria-labelledby={`${prefix}-heading`}>
+        <h3 id={`${prefix}-heading`}>SGQR sticker</h3>
+        <p className="muted">
+          <strong>SGQR contains no menu and does not prove ownership.</strong> Decoding happens in this browser; the photo is not uploaded. A UEN may be absent, and different outlets may share one.
         </p>
-      )}
-      {(reading.kind === "unreadable" || reading.kind === "not_sgqr") && (
-        <div className="status" role="status">
-          <strong>{reading.kind === "unreadable" ? "No QR code could be read from this photo." : "This QR code is not an SGQR payment code."}</strong>
-          <small>Try a sharper, straight-on photo, or enter the UEN by hand.</small>
-        </div>
-      )}
-      {reading.kind === "decoded" && (
-        <div className="decoded">
-          <p className="chips">
-            <span className={`chip ${reading.decode.checksumValid ? "ok" : "warn"}`}>{checksumLabel(reading.decode.checksumValid)}</span>
-          </p>
-          {!reading.decode.checksumValid && <p className="hint">The code may be damaged or misread. Check every value against the sticker. A buyer who scans a code that fails this check is told Envoi cannot identify the shop and is sent to search by name.</p>}
-          {reading.decode.recognized.length === 0 ? (
-            <p className="muted">No PayNow identifier was found on this sticker. Enter the UEN by hand if it has one.</p>
-          ) : (
-            <ul>{reading.decode.recognized.map((field, index) => <FieldLine key={index} field={field} />)}</ul>
-          )}
-          {reading.decode.unrecognized.length > 0 && (
-            <details>
-              <summary>
-                {reading.decode.unrecognized.length} other {reading.decode.unrecognized.length === 1 ? "tag" : "tags"} Envoi does not read
-              </summary>
-              <ul>
-                {reading.decode.unrecognized.map((tag, index) => (
-                  <li key={index} className="row">
-                    <span className="mono">Tag {tag.tagId}</span>
-                    <span className="mono">{tag.value}</span>
-                  </li>
-                ))}
-              </ul>
-              <small>Listed as found, not interpreted.</small>
-            </details>
-          )}
-        </div>
-      )}
-      {!manual && reading.kind !== "decoded" && (
-        <div className="actions">
-          <button className="button secondary" type="button" onClick={enterByHand}>
-            Enter the UEN by hand
-          </button>
-        </div>
-      )}
+        <Submitted identifiers={outlet.identifiers} />
+        <label htmlFor={`${prefix}-photo`}>Sticker photo</label>
+        <input key={photoInput} id={`${prefix}-photo`} type="file" accept="image/*" onChange={select} disabled={busy} />
 
-      {showForm && (
-        <form onSubmit={submit}>
-          <label htmlFor={`${prefix}-uen`}>Business UEN</label>
-          <input id={`${prefix}-uen`} value={uen} onChange={(event) => setUen(event.target.value)} maxLength={13} autoComplete="off" required />
-          <small>Correct it if it differs from your business registration. A valid format does not prove ownership.</small>
-          <label htmlFor={`${prefix}-distinguisher`}>What distinguishes this outlet</label>
-          <input
-            id={`${prefix}-distinguisher`}
-            value={distinguisher}
-            onChange={(event) => setDistinguisher(event.target.value)}
-            maxLength={80}
-            placeholder="For example: stall 12, level 1"
-            required
-          />
-          <small>Buyers see this if several outlets share the UEN.</small>
+        {reading.kind === "reading" && (
+          <p className="fine" role="status">
+            Reading the sticker
+          </p>
+        )}
+        {(reading.kind === "unreadable" || reading.kind === "not_sgqr") && (
+          <div className="status" role="status">
+            <strong>{reading.kind === "unreadable" ? "No QR code could be read from this photo." : "This QR code is not an SGQR payment code."}</strong>
+            <small>Try a sharper, straight-on photo, or enter the UEN by hand.</small>
+          </div>
+        )}
+        {reading.kind === "decoded" && (
+          <div className="decoded">
+            <p className="chips">
+              <span className={`chip ${reading.decode.checksumValid ? "ok" : "warn"}`}>{checksumLabel(reading.decode.checksumValid)}</span>
+            </p>
+            {!reading.decode.checksumValid && <p className="hint">The code may be damaged or misread. Check every value against the sticker. A buyer who scans a code that fails this check is told Envoi cannot identify the shop and is sent to search by name.</p>}
+            {reading.decode.recognized.length === 0 ? (
+              <p className="muted">No PayNow identifier was found on this sticker. Enter the UEN by hand if it has one.</p>
+            ) : (
+              <ul>{reading.decode.recognized.map((field, index) => <FieldLine key={index} field={field} />)}</ul>
+            )}
+            {reading.decode.unrecognized.length > 0 && (
+              <details>
+                <summary>
+                  {reading.decode.unrecognized.length} other {reading.decode.unrecognized.length === 1 ? "tag" : "tags"} Envoi does not read
+                </summary>
+                <ul>
+                  {reading.decode.unrecognized.map((tag, index) => (
+                    <li key={index} className="row">
+                      <span className="mono">Tag {tag.tagId}</span>
+                      <span className="mono">{tag.value}</span>
+                    </li>
+                  ))}
+                </ul>
+                <small>Listed as found, not interpreted.</small>
+              </details>
+            )}
+          </div>
+        )}
+        {!manual && reading.kind !== "decoded" && (
           <div className="actions">
-            <button className="button" type="submit" disabled={busy}>
-              {busy ? "Submitting" : "Submit for operator approval"}
+            <button className="button secondary" type="button" onClick={enterByHand}>
+              Enter the UEN by hand
             </button>
           </div>
-        </form>
-      )}
-      {error && (
-        <p className="error" role="alert">
-          {error}
-        </p>
-      )}
+        )}
+
+        {showForm && (
+          <form onSubmit={submit}>
+            <label htmlFor={`${prefix}-uen`}>Business UEN</label>
+            <input id={`${prefix}-uen`} value={uen} onChange={(event) => setUen(event.target.value)} maxLength={13} autoComplete="off" required />
+            <small>Correct it if it differs from your business registration. A valid format does not prove ownership.</small>
+            <label htmlFor={`${prefix}-distinguisher`}>What distinguishes this outlet</label>
+            <input
+              id={`${prefix}-distinguisher`}
+              value={distinguisher}
+              onChange={(event) => setDistinguisher(event.target.value)}
+              maxLength={80}
+              placeholder="For example: stall 12, level 1"
+              required
+            />
+            <small>Buyers see this if several outlets share the UEN.</small>
+            <div className="actions">
+              <button className="button" type="submit" disabled={busy}>
+                {busy ? "Submitting" : "Submit for operator approval"}
+              </button>
+            </div>
+          </form>
+        )}
+        {error && (
+          <p className="error" role="alert">
+            {error}
+          </p>
+        )}
+      </div>
+      <ShopQr outlet={outlet} />
     </div>
   );
 }
