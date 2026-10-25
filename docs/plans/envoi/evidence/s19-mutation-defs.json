@@ -1,0 +1,226 @@
+[
+ {
+  "id": "m01-rename-expiresAt",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "agent purchase request matches its OpenAPI document",
+  "kind": "standalone",
+  "mutation": "Named mutation: the agent route renames expiresAt to expiry.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/purchase-requests/route.ts",
+    "old": "return httpOk({ url: created.url, expiresAt: created.expiresAt.toISOString() }, { status: 201 });",
+    "new": "return httpOk({ url: created.url, expiry: created.expiresAt.toISOString() }, { status: 201 });"
+   }
+  ]
+ },
+ {
+  "id": "m02-price-in-answer",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "agent purchase request matches its OpenAPI document",
+  "kind": "standalone",
+  "mutation": "The agent route adds a price to its 201 answer, which carries no price.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/purchase-requests/route.ts",
+    "old": "return httpOk({ url: created.url, expiresAt: created.expiresAt.toISOString() }, { status: 201 });",
+    "new": "return httpOk({ url: created.url, expiresAt: created.expiresAt.toISOString(), totalSgdCents: 440 }, { status: 201 });"
+   }
+  ]
+ },
+ {
+  "id": "m03-undocumented-success-status",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "agent purchase request matches its OpenAPI document",
+  "kind": "standalone",
+  "mutation": "The agent route answers 200 instead of the documented 201.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/purchase-requests/route.ts",
+    "old": "return httpOk({ url: created.url, expiresAt: created.expiresAt.toISOString() }, { status: 201 });",
+    "new": "return httpOk({ url: created.url, expiresAt: created.expiresAt.toISOString() }, { status: 200 });"
+   }
+  ]
+ },
+ {
+  "id": "m04-cache-header",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "agent purchase request matches its OpenAPI document",
+  "kind": "standalone",
+  "mutation": "The agent route lets its link be cached for 30 seconds.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/purchase-requests/route.ts",
+    "old": "return httpOk({ url: created.url, expiresAt: created.expiresAt.toISOString() }, { status: 201 });",
+    "new": "return httpOk({ url: created.url, expiresAt: created.expiresAt.toISOString() }, { status: 201, cache: \"public-short\" });"
+   }
+  ]
+ },
+ {
+  "id": "m05-undocumented-auth-status",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "agent purchase request matches its OpenAPI document",
+  "kind": "standalone",
+  "mutation": "The agent route answers a missing or unknown token with 403 forbidden_membership instead of 401.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/purchase-requests/route.ts",
+    "old": "if (!isAgent(agent)) return httpErr(agent);",
+    "new": "if (!isAgent(agent)) return httpErr({ ...agent, code: \"forbidden_membership\" });"
+   }
+  ]
+ },
+ {
+  "id": "m06-undocumented-reason",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "agent purchase request matches its OpenAPI document",
+  "kind": "standalone",
+  "mutation": "The agent route reports a body read failure with a reason the document does not list.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/purchase-requests/route.ts",
+    "old": "details: { reason: read.reason } });",
+    "new": "details: { reason: `body_${read.reason}` } });"
+   }
+  ]
+ },
+ {
+  "id": "m07-unknown-shop-409",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "agent purchase request matches its OpenAPI document",
+  "kind": "standalone",
+  "mutation": "Pricing refuses an unknown shop with a 409 refusal instead of 404 not_found.",
+  "edits": [
+   {
+    "file": "src/domain/purchases/price.ts",
+    "old": "if (!menu) return refuse(appError(\"not_found\", \"That shop is not on Envoi.\"));",
+    "new": "if (!menu) return refuse(appError(\"checkout_conflict\", \"That shop is not on Envoi.\"));"
+   }
+  ]
+ },
+ {
+  "id": "m08-link-path",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "agent purchase request matches its OpenAPI document",
+  "kind": "standalone",
+  "mutation": "The link no longer points at the approval page.",
+  "edits": [
+   {
+    "file": "src/domain/handoffs/redeem.ts",
+    "old": "/approve/${handoffToken}`",
+    "new": "/a/${handoffToken}`"
+   }
+  ]
+ },
+ {
+  "id": "m09-link-expiry",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "agent purchase request matches its OpenAPI document",
+  "kind": "standalone",
+  "mutation": "The answer claims the link lasts an hour longer than it does.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/purchase-requests/route.ts",
+    "old": "expiresAt: created.expiresAt.toISOString()",
+    "new": "expiresAt: new Date(created.expiresAt.getTime() + 3_600_000).toISOString()"
+   }
+  ]
+ },
+ {
+  "id": "m10-document-claims-429",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "agent purchase request matches its OpenAPI document",
+  "kind": "standalone",
+  "mutation": "The document claims a 429 rate_limited answer the route cannot give.",
+  "edits": [
+   {
+    "file": "openapi/envoi-public.yaml",
+    "old": "          \"404\": {\n            \"description\": \"The shop is unknown or has no published menu.\",",
+    "new": "          \"429\": {\n            \"description\": \"Too many requests.\",\n            \"headers\": { \"Cache-Control\": { \"$ref\": \"#/components/headers/NoStore\" } },\n            \"content\": { \"application/json\": { \"schema\": { \"$ref\": \"#/components/schemas/UnauthorizedResponse\" } } }\n          },\n          \"404\": {\n            \"description\": \"The shop is unknown or has no published menu.\","
+   }
+  ]
+ },
+ {
+  "id": "m11-document-unexercised-path",
+  "test_file": "tests/integration/public-api-contract.test.ts",
+  "test": "agent purchase request matches its OpenAPI document",
+  "kind": "standalone",
+  "mutation": "The document gains a path no contract test exercises.",
+  "edits": [
+   {
+    "file": "openapi/envoi-public.yaml",
+    "old": "    \"/api/v1/purchase-requests\": {\n      \"post\": {",
+    "new": "    \"/api/v1/receipts\": { \"get\": { \"responses\": {} } },\n    \"/api/v1/purchase-requests\": {\n      \"post\": {"
+   }
+  ]
+ },
+ {
+  "id": "t01-operation-under-purchases",
+  "test_file": "tests/unit/generated-client.test.ts",
+  "test": "generated client reaches no receipt or payment route",
+  "kind": "standalone",
+  "mutation": "The generated client's list operation is pointed at a path under /purchases.",
+  "edits": [
+   {
+    "file": "clients/typescript/src/resources/outlets.ts",
+    "old": "this.#servers.default(\"/api/v1/outlets\")",
+    "new": "this.#servers.default(\"/api/v1/purchases\")"
+   }
+  ]
+ },
+ {
+  "id": "t02-prefix-match",
+  "test_file": "tests/unit/generated-client.test.ts",
+  "test": "generated client reaches no receipt or payment route",
+  "kind": "standalone",
+  "mutation": "The check matches the text prefix /api/v1/purchase instead of whole path segments, so /api/v1/purchase-requests is taken for a purchases route.",
+  "edits": [
+   {
+    "file": "tests/unit/generated-client.test.ts",
+    "old": "path.split(\"/\").includes(\"purchases\")",
+    "new": "path.startsWith(\"/api/v1/purchase\")"
+   }
+  ]
+ },
+ {
+  "id": "t03-unreadable-operation",
+  "test_file": "tests/unit/generated-client.test.ts",
+  "test": "generated client reaches no receipt or payment route",
+  "kind": "standalone",
+  "mutation": "An operation's path is built in a form the pattern cannot read, so it would go unchecked.",
+  "edits": [
+   {
+    "file": "clients/typescript/src/resources/outlets.ts",
+    "old": "this.#servers.default(\"/api/v1/outlets\")",
+    "new": "this.#servers.default(`/api/v1/purchases`)"
+   }
+  ]
+ },
+ {
+  "id": "t04-agent-route-missing",
+  "test_file": "tests/unit/generated-client.test.ts",
+  "test": "generated client reaches no receipt or payment route",
+  "kind": "standalone",
+  "mutation": "The generated client lacks the agent's purchase request operation.",
+  "edits": [
+   {
+    "file": "clients/typescript/src/resources/purchase-requests.ts",
+    "old": "this.#servers.default(\"/api/v1/purchase-requests\")",
+    "new": "this.#servers.default(\"/api/v1/outlets\")"
+   }
+  ]
+ },
+ {
+  "id": "v01-request-body-unchecked",
+  "test_file": "tests/unit/openapi-contract-validator.test.ts",
+  "test": "rejects an unknown keyword on a request body schema",
+  "kind": "group",
+  "mutation": "assertSupported no longer reads request body schemas.",
+  "edits": [
+   {
+    "file": "tests/support/openapi.ts",
+    "old": "      for (const [media, { schema }] of Object.entries(operation.requestBody?.content ?? {})) schemas.push([`${method} ${template} request ${media}`, schema]);\n",
+    "new": ""
+   }
+  ]
+ }
+]

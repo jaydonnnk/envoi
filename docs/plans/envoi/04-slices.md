@@ -799,7 +799,7 @@ The S19 rows of the Gate 3 reopening's file map: `POST /api/v1/purchase-requests
 The route itself does not change.
 
 **Tests.**
-Named tests 1-3 of the [Gate 3 reopening](03-program-design.md#reopening-2026-10-25-continuation-slices-s19-s22), each new here, each guard with its own mutation recorded in `00-status.md`; for example, renaming `expiresAt` in the route must fail test 1.
+Named tests 1 and 3 of the [Gate 3 reopening](03-program-design.md#reopening-2026-10-25-continuation-slices-s19-s22), each new here (test 2 was retired on 2026-10-25 because the generator validates structure only), each guard with its own mutation recorded in `00-status.md`; for example, renaming `expiresAt` in the route must fail test 1.
 The existing contract check and `typecheck:client` keep passing on the regenerated client.
 
 **Evidence.**
@@ -914,7 +914,7 @@ You perform: the demo merchant's photo and its written permission.
 - **Target windows [hypothesis]:** S19 on 27 Oct, S21 28 Oct-1 Nov, S20 2-6 Nov, S22 7-11 Nov only on go; submission cutoff 13 Nov 2026 04:00 SGT.
 - **Cut sequence for these four:** S22 first, then S21 if it is not deployed by 1 Nov, then S20; S19's regenerated client and contract still ship if S20 is cut.
 - **Never cut:** the S15 usability study, every payment, approval and recipient guard of the earlier slices, and the human approval of every payment.
-- **Counts:** the 92 named tests, 231 cases and 39 additions of the original plan and S18's 12 tests are unchanged; S19-S21 carry the 16 named tests of the Gate 3 reopening, counted here.
+- **Counts:** the 92 named tests, 231 cases and 39 additions of the original plan and S18's 12 tests are unchanged; S19-S21 carry the 15 named tests of the Gate 3 reopening (test 2 retired on 2026-10-25), counted here.
 
 ## Test assignment
 

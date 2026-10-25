@@ -73,10 +73,10 @@ const MAX_SUGGESTED_QUANTITY = 20;
   - The printed link is shown to the person only, never written to the trace.
 - **Round 4 protocol (S22):** written into `00-status.md` before any call: the photo set with every round 3 photo kept and at least three fresh unseen ones, the demo merchant's photo with its written permission, the expected names, portions and prices for each, the S11 threshold unchanged, and the timed comparison of correcting the draft against typing the same menu. A pass changes no flag.
 - **Authorization:** unchanged. The suggestion route stays a buyer-session route; the agent route stays agent-token only; the reference agent gains no scope.
-- **Named tests (16, all new in the slice that builds them):**
+- **Named tests (15, all new in the slice that builds them; test 2 retired 2026-10-25, see below):**
   - S19:
     1. `agent purchase request matches its OpenAPI document`: created, validation, unauthorized and not-found answers validate against the document.
-    2. `regenerated client refuses a zero price`.
+    2. Retired 2026-10-25: `regenerated client refuses a zero price` (see the S19 reopening below).
     3. `generated client reaches no receipt or payment route`: no operation's path is under `/purchases`.
   - S21:
     4. `a basket holds only published available priced items`.
@@ -94,11 +94,15 @@ const MAX_SUGGESTED_QUANTITY = 20;
     15. `agent never sends an amount`.
     16. `agent trace holds no token, key or link`: a needle self-test plants each and proves the scanner finds it in a serialized trace first.
   Gate 3 tests `model cannot invent a price` and `model tool budget is enforced` re-run unchanged in S21.
-  Each guard in tests 1-16 gets its own mutation, recorded in its slice.
+  Each guard in tests 1 and 3-16 gets its own mutation, recorded in its slice.
   S22 adds no named test unless the round passes; the import screen's tests then come with its own Gate 1 and Gate 3 change.
-- **Unchanged:** every other route, error code, clock, state transition, role grant and the 92 named tests and 231 cases; these 16 are additions counted in Gate 4's sections for S19-S21.
+- **Unchanged:** every other route, error code, clock, state transition, role grant and the 92 named tests and 231 cases; these 15 are additions counted in Gate 4's sections for S19-S21.
 - **Wording correction, 2026-10-25, by the user's decision** ("Correct the Gate 3 answer list for POST /api/v1/purchase-requests to 201, 400 validation_failed, 401 unauthorized and 404 not_found as a wording correction, re-pin, and push to main before S19 starts."): the approved text listed a 409 refusal and a 429 `rate_limited` answer, but the route has no rate limiter and, on the `paypal` rail, `priceBasket` refuses a basket only with 400 `validation_failed` or 404 `not_found`. The answer list and test 1 now describe the existing route; no route, code, test count or decision changes.
 - **Wording correction, 2026-10-25, by the user's decision** ("Correct the Gate 3 request body wording for POST /api/v1/purchase-requests from itemId to menuItemId as a wording correction, re-pin gate4_check.py, commit and push to main."): the approved text named the line field `itemId`, but the route and the MCP `create_purchase_request` tool share one schema, `purchaseRequestShape` in `src/domain/handoffs/input.ts`, whose line field is `menuItemId`. The request body now names `menuItemId`; no route, code, test count or decision changes.
+- **Reopened 2026-10-25 during S19, by the user's decision** (asked whether to retire named test 2, the user chose "Retire test 2 (Recommended)"): S19's one APIMatic upload showed that the generator validates structure only.
+  Its generated `src/core/validation/schema.ts` says value constraints such as `minLength`, `pattern` or enum membership "are the service's to enforce", and the regenerated client still decodes a `unitSgdCents` of 0 [verified 2026-10-25 by a fake-fetch unit test failing on an AssertionError].
+  So test 2 cannot pass on a client committed unchanged and is retired; no wrapper is added under `clients/`.
+  A zero price stays refused by the `menu_items_price_check` database constraint, the document's `minimum` of 1 and the S14 contract validator row "zero cents"; the named tests drop from 16 to 15, and tests 3-16 keep their numbers.
 
 ## Reopening 2026-10-24: shop QR and order archive
 

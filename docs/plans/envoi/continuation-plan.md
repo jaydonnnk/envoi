@@ -92,7 +92,7 @@ Branch: `envoi/slice-19-sdk-agent-route`.
 The route itself exists since S13 and does not change.
 
 **Tests.**
-Named tests 1-3 of the [Gate 3 reopening](03-program-design.md#reopening-2026-10-25-continuation-slices-s19-s22), each with its own mutation; for example, renaming `expiresAt` in the route fails test 1.
+Named tests 1 and 3 (test 2 retired on 2026-10-25) of the [Gate 3 reopening](03-program-design.md#reopening-2026-10-25-continuation-slices-s19-s22), each with its own mutation; for example, renaming `expiresAt` in the route fails test 1.
 
 **Evidence.**
 The APIMatic CLI version; the diff of the regenerated client against the old one; the contract run on a local production build and read-only plus one link creation on Render.

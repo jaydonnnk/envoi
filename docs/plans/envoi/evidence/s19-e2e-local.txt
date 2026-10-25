@@ -1,0 +1,20 @@
+FIXTURE seed: {"status":"created","outletId":"out_gzts2tyfatmapiobmie77drkni","menuRevisionId":"mrv_iqoj3joeme26dqbryk676mminq"}
+PASS list: GET /api/v1/outlets 200
+PASS demo fixture menu: GET /api/v1/outlets/out_gzts2tyfatmapiobmie77drkni/menu 200
+PASS unknown shop: GET /api/v1/outlets/out_g2ir23oj3otg5oumnvmjk5qftc/menu 404
+PASS short id: GET /api/v1/outlets/x/menu 404
+PASS NUL byte id: GET /api/v1/outlets/%00/menu 404
+PASS purchase request with no token: POST /api/v1/purchase-requests 401
+TEST ENVIRONMENT at http://localhost:3100: demo fixture shops, PayPal sandbox test money only.
+listOutlets: 1 published shop(s)
+  out_gzts2tyfatmapiobmie77drkni  Lorong Demo Kopi (Tanjong Pagar)  [DEMO FIXTURE]
+getOutletMenu(out_gzts2tyfatmapiobmie77drkni): revision mrv_iqoj3joeme26dqbryk676mminq, 4 item(s)
+  Kopi O  S$1.60  available
+  Kaya toast set  S$4.50  available
+  Teh C peng  S$2.20  available
+  Soft-boiled eggs (2)  S$2.00  available
+getOutletMenu(out_pk5pmmmdob7ouh2we2q34y22f7): 404 not_found, "That shop is not on Envoi."
+createPurchaseRequest(1 x Kopi O at Lorong Demo Kopi): 201, link http://localhost:3100/approve/<one-time token>, expires 2026-10-25T16:26:23.980Z
+createPurchaseRequest with no token: 401 unauthorized, "An agent token is required."
+PASS
+contract check exit 0, generated client exit 0

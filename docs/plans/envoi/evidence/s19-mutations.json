@@ -1,0 +1,328 @@
+{
+ "branch": "envoi/slice-19-sdk-agent-route",
+ "base_commit": "74c9086",
+ "uncommitted_changes": true,
+ "method": "Each definition in s19-mutation-defs.json applied alone by exact text replacement, its whole test file run with the vitest JSON reporter, every touched file restored and compared by SHA-256, then the whole file rerun. A proof needs the named row to fail on an AssertionError, a byte-identical restore and an all-passing rerun; other failing rows are recorded. The integration test runs the real public route handlers, including POST /api/v1/purchase-requests with a FIXTURE agent token, as envoi_web on a local PostgreSQL database built from the migrations, with DATABASE_URL removed, holding the seeded demo FIXTURE shop with its FIXTURE PayPal sandbox seller and one confirmed but unpublished FIXTURE shop; PayPal is never called. The unit tests read the generated client's source and check the contract validator on the real document. Every definition here is an S19 test recorded in 00-status.md.",
+ "results": [
+  {
+   "id": "m01-rename-expiresAt",
+   "test": "agent purchase request matches its OpenAPI document",
+   "kind": "standalone",
+   "group": "public API contract",
+   "files": [
+    "src/app/api/v1/purchase-requests/route.ts"
+   ],
+   "mutation": "Named mutation: the agent route renames expiresAt to expiry.",
+   "own_row": "failed",
+   "error": "AssertionError: created: expected [ \u2026(2) ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 2,
+   "proof": true
+  },
+  {
+   "id": "m02-price-in-answer",
+   "test": "agent purchase request matches its OpenAPI document",
+   "kind": "standalone",
+   "group": "public API contract",
+   "files": [
+    "src/app/api/v1/purchase-requests/route.ts"
+   ],
+   "mutation": "The agent route adds a price to its 201 answer, which carries no price.",
+   "own_row": "failed",
+   "error": "AssertionError: created: expected [ Array(1) ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 2,
+   "proof": true
+  },
+  {
+   "id": "m03-undocumented-success-status",
+   "test": "agent purchase request matches its OpenAPI document",
+   "kind": "standalone",
+   "group": "public API contract",
+   "files": [
+    "src/app/api/v1/purchase-requests/route.ts"
+   ],
+   "mutation": "The agent route answers 200 instead of the documented 201.",
+   "own_row": "failed",
+   "error": "AssertionError: created: expected 200 to be 201 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 2,
+   "proof": true
+  },
+  {
+   "id": "m04-cache-header",
+   "test": "agent purchase request matches its OpenAPI document",
+   "kind": "standalone",
+   "group": "public API contract",
+   "files": [
+    "src/app/api/v1/purchase-requests/route.ts"
+   ],
+   "mutation": "The agent route lets its link be cached for 30 seconds.",
+   "own_row": "failed",
+   "error": "AssertionError: created: expected [ Array(1) ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 2,
+   "proof": true
+  },
+  {
+   "id": "m05-undocumented-auth-status",
+   "test": "agent purchase request matches its OpenAPI document",
+   "kind": "standalone",
+   "group": "public API contract",
+   "files": [
+    "src/app/api/v1/purchase-requests/route.ts"
+   ],
+   "mutation": "The agent route answers a missing or unknown token with 403 forbidden_membership instead of 401.",
+   "own_row": "failed",
+   "error": "AssertionError: no token: expected 403 to be 401 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 2,
+   "proof": true
+  },
+  {
+   "id": "m06-undocumented-reason",
+   "test": "agent purchase request matches its OpenAPI document",
+   "kind": "standalone",
+   "group": "public API contract",
+   "files": [
+    "src/app/api/v1/purchase-requests/route.ts"
+   ],
+   "mutation": "The agent route reports a body read failure with a reason the document does not list.",
+   "own_row": "failed",
+   "error": "AssertionError: body over 4 KiB: expected [ Array(1) ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 2,
+   "proof": true
+  },
+  {
+   "id": "m07-unknown-shop-409",
+   "test": "agent purchase request matches its OpenAPI document",
+   "kind": "standalone",
+   "group": "public API contract",
+   "files": [
+    "src/domain/purchases/price.ts"
+   ],
+   "mutation": "Pricing refuses an unknown shop with a 409 refusal instead of 404 not_found.",
+   "own_row": "failed",
+   "error": "AssertionError: unknown shop: expected 409 to be 404 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 2,
+   "proof": true
+  },
+  {
+   "id": "m08-link-path",
+   "test": "agent purchase request matches its OpenAPI document",
+   "kind": "standalone",
+   "group": "public API contract",
+   "files": [
+    "src/domain/handoffs/redeem.ts"
+   ],
+   "mutation": "The link no longer points at the approval page.",
+   "own_row": "failed",
+   "error": "AssertionError: created: expected [ Array(1) ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 2,
+   "proof": true
+  },
+  {
+   "id": "m09-link-expiry",
+   "test": "agent purchase request matches its OpenAPI document",
+   "kind": "standalone",
+   "group": "public API contract",
+   "files": [
+    "src/app/api/v1/purchase-requests/route.ts"
+   ],
+   "mutation": "The answer claims the link lasts an hour longer than it does.",
+   "own_row": "failed",
+   "error": "AssertionError: created: expected 4199992 to be less than or equal to 600000",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 2,
+   "proof": true
+  },
+  {
+   "id": "m10-document-claims-429",
+   "test": "agent purchase request matches its OpenAPI document",
+   "kind": "standalone",
+   "group": "public API contract",
+   "files": [
+    "openapi/envoi-public.yaml"
+   ],
+   "mutation": "The document claims a 429 rate_limited answer the route cannot give.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ \u2026(4) ] to deeply equal [ \u2026(5) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 2,
+   "proof": true
+  },
+  {
+   "id": "m11-document-unexercised-path",
+   "test": "agent purchase request matches its OpenAPI document",
+   "kind": "standalone",
+   "group": "public API contract",
+   "files": [
+    "openapi/envoi-public.yaml"
+   ],
+   "mutation": "The document gains a path no contract test exercises.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ '/api/v1/outlets', \u2026(3) ] to deeply equal [ '/api/v1/outlets', \u2026(2) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 2,
+   "proof": true
+  },
+  {
+   "id": "t01-operation-under-purchases",
+   "test": "generated client reaches no receipt or payment route",
+   "kind": "standalone",
+   "group": "generated client",
+   "files": [
+    "clients/typescript/src/resources/outlets.ts"
+   ],
+   "mutation": "The generated client's list operation is pointed at a path under /purchases.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ '/api/v1/purchases' ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 1,
+   "proof": true
+  },
+  {
+   "id": "t02-prefix-match",
+   "test": "generated client reaches no receipt or payment route",
+   "kind": "standalone",
+   "group": "generated client",
+   "files": [
+    "tests/unit/generated-client.test.ts"
+   ],
+   "mutation": "The check matches the text prefix /api/v1/purchase instead of whole path segments, so /api/v1/purchase-requests is taken for a purchases route.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ '/api/v1/purchase-requests' ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 1,
+   "proof": true
+  },
+  {
+   "id": "t03-unreadable-operation",
+   "test": "generated client reaches no receipt or payment route",
+   "kind": "standalone",
+   "group": "generated client",
+   "files": [
+    "clients/typescript/src/resources/outlets.ts"
+   ],
+   "mutation": "An operation's path is built in a form the pattern cannot read, so it would go unchecked.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 2 to be 3 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 1,
+   "proof": true
+  },
+  {
+   "id": "t04-agent-route-missing",
+   "test": "generated client reaches no receipt or payment route",
+   "kind": "standalone",
+   "group": "generated client",
+   "files": [
+    "clients/typescript/src/resources/purchase-requests.ts"
+   ],
+   "mutation": "The generated client lacks the agent's purchase request operation.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ '/api/v1/outlets', \u2026(2) ] to deeply equal [ '/api/v1/outlets', \u2026(2) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 1,
+   "proof": true
+  },
+  {
+   "id": "v01-request-body-unchecked",
+   "test": "rejects an unknown keyword on a request body schema",
+   "kind": "group",
+   "group": "OpenAPI document support check",
+   "files": [
+    "tests/support/openapi.ts"
+   ],
+   "mutation": "assertSupported no longer reads request body schemas.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [Function] to throw an error",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 27,
+   "proof": true
+  }
+ ]
+}
