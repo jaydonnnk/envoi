@@ -266,7 +266,7 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 Post-release, outside the build order: S18, merchant shop QR and order archive, started and done 2026-10-24 on `envoi/slice-18-shop-qr-archive` ([record](#s18-merchant-shop-qr-and-order-archive-2026-10-24)).
 
 Proposed 2026-10-25, outside the build order: S19, S21, S20 and S22 from the [continuation plan](continuation-plan.md); Gates 1-3 were re-approved for them on 2026-10-25 and Gate 4 was amended for them on 2026-10-25 ("I approve Gate 4.").
-S19 started 2026-10-25 on `envoi/slice-19-sdk-agent-route` and is built locally, awaiting merge, push and the Render run ([record](#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-2026-10-25)); S21, S20 and S22 have not started.
+S19 started 2026-10-25 on `envoi/slice-19-sdk-agent-route` and was done 2026-10-26, on `main` at `4b7fdb7` ([record](#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-2026-10-25)); S21, S20 and S22 have not started.
 
 ### S19 Agent route in the OpenAPI document and a regenerated client, 2026-10-25
 
@@ -296,7 +296,10 @@ S19 started 2026-10-25 on `envoi/slice-19-sdk-agent-route` and is built locally,
 - **Build note:** `next build` stopped twice on a first run with the Next.js "SecurityFatalError" upgrade notice, as in S18, and passed when run again; the notice's upgrade command is outside this slice's authority (a version pin is Gate 3) and is reported to the user.
 - **Post-slice cleanup [verified]:** the `architect-reviewer` cleanup found no orphan file, unused import or leftover scaffolding, and no reference to the old client name outside the S14 evidence; `README.md` still described the document as the two read routes only and now names the agent route and `clients/README.md`. The 28 disposable `envoi_t_*` databases left on local PostgreSQL date from 2026-10-14 to 2026-10-19, before S19, and were left alone.
 - **Commit, merge and push authorization, 2026-10-26:** the user chose "Commit, ff main, push" to three commits on the branch, a fast-forward of `main` and pushing both, which deploys to Render.
-- **Not yet done:** the user's Render run with read-only calls and one purchase request on Test Shop with a token they hold.
+- **Pushed [verified], 2026-10-26:** commits `b25d9bc`, `f357a35` and `4b7fdb7` on the branch; `main` fast-forwarded to `4b7fdb7` and pushed with the branch, both at `4b7fdb7` by `git ls-remote`; CI passed on `main` (run 40212173211) and the branch (run 40212173697).
+- **Render run [user-run, output verified], 2026-10-26:** the user issued agent token `agt_qbrhuihp6a6l7igro3q4fysjxe` ("S19 Render check") with `npm run operator -- issue-agent-token` against Neon, read it with `read -rs` and ran the generated client against `https://envoi-helx.onrender.com` for Test Shop ([output](evidence/s19-client-render.txt)): it listed Lorong Demo Kopi and Test Shop, both demo fixtures, read Test Shop's three items, got the typed 404, created one purchase request for 1 Kopi C (201, link to `/approve/`) and got the typed 401 with no token. The token never entered the chat, a file or a screenshot.
+  Neon writes: that agent token row and one purchase request row; the token is not revoked [the CLI has no revoke command]. The read-only HTTP contract check was not run on Render [unknown]. Which commit Render served is [unknown]; the routes called did not change in S19.
+- **Done 2026-10-26.**
 
 ### S18 Merchant shop QR and order archive, 2026-10-24
 

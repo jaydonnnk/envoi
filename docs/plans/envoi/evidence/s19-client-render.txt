@@ -1,0 +1,13 @@
+# S19 Render run, 2026-10-26, run by the user in their own terminal; pasted output, the agent token was read with read -rs and never printed.
+TEST ENVIRONMENT at https://envoi-helx.onrender.com: demo fixture shops, PayPal sandbox test money only.
+listOutlets: 2 published shop(s)
+  out_wgoyp6kgg75472b6s772dplgoq  Lorong Demo Kopi (Tanjong Pagar)  [DEMO FIXTURE]
+  out_vrlbnc3zylbrr6g2drovaiqkfu  Test Shop (Test Area)  [DEMO FIXTURE]
+getOutletMenu(out_vrlbnc3zylbrr6g2drovaiqkfu): revision mrv_dz4psvhgo6w4d4xdyefrc2aowy, 3 item(s)
+  Kopi C  S$1.80  available
+  Mee siam  S$5.50  unavailable
+  Kaya toast set  S$4.50  unavailable
+getOutletMenu(out_a7wqgfotzgkhrmswn475lh43ae): 404 not_found, "That shop is not on Envoi."
+createPurchaseRequest(1 x Kopi C at Test Shop): 201, link https://envoi-helx.onrender.com/approve/<one-time token>, expires 2026-10-25T16:57:27.664Z
+createPurchaseRequest with no token: 401 unauthorized, "An agent token is required."
+PASS
