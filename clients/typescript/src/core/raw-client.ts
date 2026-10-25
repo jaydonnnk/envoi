@@ -3,6 +3,8 @@ import { CoreError, ConnectionError, TimeoutError } from "./errors.js";
 import type { ApiError } from "./api-error.js";
 import { ResponseReader, type ResponseHandler } from "./response-decoder.js";
 import { ApiPromise, type RequestOutcome } from "./api-promise.js";
+import { Pageable } from "./pagination/pageable.js";
+import type { PagingState } from "./pagination/states/paging-state.js";
 import { buildBody } from "./request-body.js";
 import { RetryPolicy } from "./retry.js";
 import { UrlBuilder } from "./url.js";
@@ -28,7 +30,33 @@ export class RawClient {
     responseHandler: ResponseHandler<T, E>,
     options?: RequestOptions,
   ): ApiPromise<T, E> {
-    return new ApiPromise<T, E>(this.#dispatch<T, E>(apiRequest, responseHandler, options));
+    return new ApiPromise(this.#dispatch(apiRequest, responseHandler, options));
+  }
+
+  paginate<TRequest, TPage, TItem, E extends ApiError, TState extends PagingState<TPage, TState>>(
+    request: TRequest,
+    state: TState,
+    buildRequest: (request: TRequest, state: TState) => ApiRequest,
+    responseHandler: ResponseHandler<TPage, E>,
+    itemsSelector: (page: TPage) => readonly TItem[] | null | undefined,
+    options?: RequestOptions,
+  ): Pageable<TPage, TItem, E> {
+    const requestSnapshot = { ...request };
+    const dispatch = (apiRequest: ApiRequest): Promise<RequestOutcome<TPage, E>> =>
+      this.#dispatch(apiRequest, responseHandler, options);
+
+    return new Pageable(async function* () {
+      let current = state;
+      while (true) {
+        const outcome = await dispatch(buildRequest(requestSnapshot, current));
+        yield outcome;
+        if (!outcome.ok) return;
+        const itemCount = itemsSelector(outcome.data)?.length ?? 0;
+        const next = current.next(outcome.data, outcome.headers, itemCount, outcome.uri);
+        if (next === null) return;
+        current = next;
+      }
+    }, itemsSelector);
   }
 
   async #dispatch<T, E extends ApiError>(
@@ -148,7 +176,7 @@ export class RawClient {
         callerSignal,
         abortStreamRequest,
       );
-      return { ok: true, status: response.status, headers: response.headers, data };
+      return { ok: true, status: response.status, headers: response.headers, uri, data };
     }
 
     const error = await this.#responseReader.readError(
@@ -159,7 +187,7 @@ export class RawClient {
       callerSignal,
       abortStreamRequest,
     );
-    return { ok: false, status: response.status, headers: response.headers, error };
+    return { ok: false, status: response.status, headers: response.headers, uri, error };
   }
 }
 

@@ -2,7 +2,7 @@ import type { HttpMethod } from "./api-request.js";
 import type { ApiError } from "./api-error.js";
 
 /** Discriminant of the {@link CoreError} family. Closed, so a `switch` over it is exhaustive. */
-export type ErrorKind = "api" | "decode" | "encode" | "connection" | "timeout" | "auth";
+export type ErrorKind = "api" | "decode" | "encode" | "connection" | "timeout" | "auth" | "pagination";
 
 /**
  * What every {@link CoreError} is built with: the call it names, and an optional `cause`.
@@ -189,6 +189,25 @@ export class AuthError extends CoreErrorBase {
 }
 
 /**
+ * A next link the API sent could not be followed, so nothing was sent.
+ *
+ * @remarks
+ * Raised from inside a paged loop, between two pages: the page that carried the link has
+ * already been delivered, and a loop that stops after it never sees this. A link is followed
+ * only when it resolves, against the URL of the page that carried it, to the same scheme, host
+ * and port as the API base, so no credential ever leaves the API; a link to another origin is
+ * refused, and so is one that is not a URL. For a link to another origin, `uri` names the call
+ * that was refused; for a link that is not a URL there is no such call, so `uri` names the page
+ * that carried it and `cause` carries the platform's parse failure.
+ */
+export class PaginationError extends CoreErrorBase {
+  readonly kind = "pagination" as const;
+  constructor(message: string, init: CoreErrorInit) {
+    super(message, init);
+  }
+}
+
+/**
  * The API answered, and the answer is the failure.
  *
  * @remarks
@@ -211,8 +230,9 @@ export const ResponseError = ResponseErrorBase as unknown as abstract new (...ar
  * @remarks
  * One `catch (err) { if (err instanceof AcmeError) }` sees everything: the answers the API gave and
  * the bodies it could not decode, both {@link ResponseError}, plus a request value that would not
- * encode, a dropped connection, a timeout and auth that could not be obtained. Every one names the
- * call that raised it, and `message` opens with that name.
+ * encode, a dropped connection, a timeout, auth that could not be obtained and a pagination link
+ * that could not be followed. Every one names the call that raised it, and `message` opens with
+ * that name.
  *
  * Narrow with `instanceof` on a leaf, or on `err.kind`, which is exhaustive and selects the leaf
  * with its own members: `status` and `headers` on `"api"` and `"decode"`, `payload` on `"api"`,
@@ -222,7 +242,14 @@ export const ResponseError = ResponseErrorBase as unknown as abstract new (...ar
  * for a file are both `TypeError`. A caller abort is outside it too, arriving as the `reason` of
  * the signal you aborted.
  */
-export type CoreError = ApiError | DecodeError | EncodeError | ConnectionError | TimeoutError | AuthError;
+export type CoreError =
+  | ApiError
+  | DecodeError
+  | EncodeError
+  | ConnectionError
+  | TimeoutError
+  | AuthError
+  | PaginationError;
 
 /**
  * The value behind the {@link CoreError} type, exported as `AcmeError`: `err instanceof AcmeError`

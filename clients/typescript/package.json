@@ -1,7 +1,7 @@
 {
-  "name": "envoi-public-read-api",
-  "version": "1.0.0",
-  "description": "Hand-written description of Envoi's two public read routes: the list of published shops and one shop's published menu. Envoi is a test environment: shops marked isDemoFixture are seeded demo fixtures, and payments use PayPal sandbox test money only. Nothing in this API pays, approves or prices a purchase; a buyer's price is always recalculated by Envoi at review. Prices are whole Singapore cents, and an unknown price or availability is null, never zero or false. This file is written in JSON syntax, which is valid YAML 1.2, so it can be read without a YAML library. The envelope flag ok is typed boolean without a literal value because the APIMatic TypeScript generator (CLI 2.0.0-beta.6, codegen v4) turns a boolean enum or const into the string \"True\" or \"False\".",
+  "name": "envoi-public-api",
+  "version": "1.1.0",
+  "description": "Hand-written description of Envoi's public API: two read routes, the list of published shops and one shop's published menu, and the agent's purchase request route. Envoi is a test environment: shops marked isDemoFixture are seeded demo fixtures, and payments use PayPal sandbox test money only. The purchase request route needs an agent token and answers a one-time link that a human buyer opens to review Envoi's price and approve payment themselves. Nothing in this API pays, approves or prices a purchase or reads a receipt; a buyer's price is always recalculated by Envoi at review. Prices are whole Singapore cents, and an unknown price or availability is null, never zero or false. This file is written in JSON syntax, which is valid YAML 1.2, so it can be read without a YAML library. The envelope flag ok and the error flag retryable are typed boolean without a literal value because the APIMatic TypeScript generator (CLI 2.0.0-beta.6, codegen v4) turns a boolean enum or const into the string \"True\" or \"False\".",
   "type": "module",
   "exports": {
     ".": {
@@ -48,7 +48,7 @@
   "scripts": {
     "prepare": "tshy",
     "build": "tshy",
-    "smoke": "node -e \"require('envoi-public-read-api')\" && node --input-type=module -e \"import('envoi-public-read-api')\"",
+    "smoke": "node -e \"require('envoi-public-api')\" && node --input-type=module -e \"import('envoi-public-api')\"",
     "typecheck": "tsc --noEmit",
     "typecheck:dom": "tsc --noEmit -p tsconfig.dom.json",
     "lint": "oxlint --type-aware --max-warnings=0 src",

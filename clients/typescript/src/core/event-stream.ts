@@ -104,7 +104,7 @@ export type ResolvedEventStreamOptions = Required<EventStreamOptions>;
 
 export function buildEventStreamOptions(options: EventStreamOptions | undefined): ResolvedEventStreamOptions {
   const schema: Schema<ResolvedEventStreamOptions> = s.of(
-    s.fallback<ResolvedEventStreamOptions>(
+    s.fallback(
       s.object<ResolvedEventStreamOptions>({
         idleTimeout: s.fallback(
           s.nullable(s.int().check(s.gte(0), s.lte(MAX_TIMEOUT_MS))),

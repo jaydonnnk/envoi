@@ -4,9 +4,15 @@ import type { Schema } from "../core/validation/schema.js";
 export type MenuItem = {
   id: string;
   name: string;
-  /** Unit price in Singapore cents; null when the price is unknown. */
+  /**
+   * Unit price in Singapore cents, at least 1; null when the price is unknown. A menu is confirmed
+   * only with every price known, so a published menu currently never carries null.
+   */
   unitSgdCents: number | null;
-  /** Merchant-supplied availability; null when unknown. */
+  /**
+   * Merchant-supplied availability; null when unknown. A menu is confirmed only with every
+   * availability known, so a published menu currently never carries null.
+   */
   available: boolean | null;
 };
 

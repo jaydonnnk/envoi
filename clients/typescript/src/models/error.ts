@@ -5,7 +5,7 @@ export type Error = {
   /** @default "not_found" */
   code?: "not_found";
   message: string;
-  /** False: repeating the same read gives the same answer. */
+  /** False: repeating the same request gives the same answer. */
   retryable: boolean;
   details: Record<string, unknown>;
 };

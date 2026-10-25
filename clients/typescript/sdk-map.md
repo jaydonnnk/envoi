@@ -1,16 +1,16 @@
 <!-- Generated file — do not edit; regenerated with the SDK. -->
 
-# SDK map — Envoi public read API (TypeScript)
+# SDK map — Envoi public API (TypeScript)
 
 > A generated table of contents for this SDK. Consult this map and its sub-pages to learn signatures, request-field placement, error types and server wiring **by lookup**. Model shapes and enum values are *not* duplicated here — the map names the file declaring each type and the schema value exported beside it; read the shape there. The compiler is the backstop: a wrong name fails to build.
 
 |  |  |
 | --- | --- |
-| SDK display name | Envoi public read API |
-| Package | `envoi-public-read-api` |
-| Package version | `1.0.0` |
-| API spec version | `1.0.0` |
-| Import specifier | `envoi-public-read-api` — the package root is the **only** entry. Deep imports (`envoi-public-read-api/models/...`) do not resolve; the `exports` map exposes `.` and `./package.json` and nothing else |
+| SDK display name | Envoi public API |
+| Package | `envoi-public-api` |
+| Package version | `1.1.0` |
+| API spec version | `1.1.0` |
+| Import specifier | `envoi-public-api` — the package root is the **only** entry. Deep imports (`envoi-public-api/models/...`) do not resolve; the `exports` map exposes `.` and `./package.json` and nothing else |
 | Module format | dual ESM + CommonJS, as folder dialects (`dist/esm`, `dist/commonjs`), each with its own `package.json` marker. No `.mjs`, `.cjs`, `.d.mts` or `.d.cts` files exist |
 | Node floor | `>=20.3` (`engines.node`) |
 | TypeScript floor | a resolver that reads `exports` (4.7+), plus whatever the pinned `zod` requires — `zod@4` needs 5.5 or later. The public `.d.ts` chain reaches `zod/v4-mini`, so this is a real constraint rather than a build-tool version |
@@ -19,19 +19,22 @@
 
 Staleness check: the API spec version above changes when the SDK is regenerated from a new spec. If a lookup here fails to compile, trust the compiler and re-read the source file named in the row.
 
-All `Source` paths on this map and its sub-pages are relative to the **SDK root** — the directory holding this file and `package.json` — never to the page that carries them: a page two directories deep writes exactly what a page at the root would. The package ships its `src/` tree, so the same paths resolve inside `node_modules/envoi-public-read-api/` too. An import specifier ending `.js` inside that source is the NodeNext spelling of the sibling `.ts` file.
+All `Source` paths on this map and its sub-pages are relative to the **SDK root** — the directory holding this file and `package.json` — never to the page that carries them: a page two directories deep writes exactly what a page at the root would. The package ships its `src/` tree, so the same paths resolve inside `node_modules/envoi-public-api/` too. An import specifier ending `.js` inside that source is the NodeNext spelling of the sibling `.ts` file.
 
 ---
 
 ## Getting a client
 
 ```ts
-import { EnvoiPublicReadApiClient, ServerEnvironment } from "envoi-public-read-api";
+import { EnvoiPublicApiClient, ServerEnvironment } from "envoi-public-api";
 
-const client = new EnvoiPublicReadApiClient({ serverEnvironment: ServerEnvironment.Production });
+const client = new EnvoiPublicApiClient({
+  serverEnvironment: ServerEnvironment.Production,
+  agentBearer: "YOUR_BEARER_TOKEN",
+});
 ```
 
-The only constructor is `new EnvoiPublicReadApiClient(options: ClientOptions = {})`, so `new EnvoiPublicReadApiClient()` is the minimum. 2 operations are methods on the client itself.
+The only constructor is `new EnvoiPublicApiClient(options: ClientOptions = {})`, so `new EnvoiPublicApiClient()` is the minimum. Resources are memoized lazy getters on the client — `client.outlets`, `client.purchaseRequests` — and their classes are exported only for their merged namespaces and for `instanceof`; their constructors take engine internals that are not exported, so reach a resource only through its getter.
 
 All `ClientOptions` fields (source: `src/client-options.ts`; every field is `readonly`):
 
@@ -42,10 +45,13 @@ All `ClientOptions` fields (source: `src/client-options.ts`; every field is `rea
 | `retry` | `RetryOptions` | the `RetryOptions` defaults below |
 | `logging` | `LoggingOptions` | off — the `LoggingOptions` defaults below |
 | `fetch` | `FetchLike \| undefined` | the global `fetch`, resolved by the transport |
+| `agentBearer` | `TokenProvider \| undefined` | unset |
+
+The 1 auth field is optional, and an unset one is not an error — the operation that wanted it simply sends no credential. What each one puts on the wire, and which operations require it, are under Servers & auth.
 
 When no `fetch` is reachable the **constructor** throws `ConfigurationError`, not the first call.
 
-`RetryOptions` fields (source: `src/core/retry.ts`; exported from `envoi-public-read-api` as a type). Every field is optional, so pass only the fields you change — each one left out takes its default:
+`RetryOptions` fields (source: `src/core/retry.ts`; exported from `envoi-public-api` as a type). Every field is optional, so pass only the fields you change — each one left out takes its default:
 
 | Field | Type | Default |
 | --- | --- | --- |
@@ -68,9 +74,9 @@ Retry types named by the fields above — public members with their **declared t
 | Type | Public members | Source |
 | --- | --- | --- |
 | `RetryAttempt` — the `onRetry` callback argument | `attemptNumber: number` · `delay: number` · `reason: RetryReason` | `src/core/retry.ts` |
-| `RetryReason` — narrow on `kind` | `{ kind: "status"; status: number; headers: Headers }` or `{ kind: "fault"; error: ConnectionError \| TimeoutError }`, the two retryable leaves of `EnvoiPublicReadApiError` | `src/core/retry.ts` |
+| `RetryReason` — narrow on `kind` | `{ kind: "status"; status: number; headers: Headers }` or `{ kind: "fault"; error: ConnectionError \| TimeoutError }`, the two retryable leaves of `EnvoiPublicApiError` | `src/core/retry.ts` |
 
-`LoggingOptions` fields (source: `src/core/logging.ts`; exported from `envoi-public-read-api` as a type). Every field is optional, so pass only the fields you change — each one left out takes its default:
+`LoggingOptions` fields (source: `src/core/logging.ts`; exported from `envoi-public-api` as a type). Every field is optional, so pass only the fields you change — each one left out takes its default:
 
 | Field | Type | Default |
 | --- | --- | --- |
@@ -97,7 +103,7 @@ Logging types named by the fields above — their **declared types**, verbatim f
 
 **`ClientOptions.fetch` is the one transport extension point** — there are no hooks, no middleware and no interceptors, so a proxy, a custom agent and extra headers all go here. The SDK calls a replacement with one argument, the `Request` of the attempt, and no `init`. A replacement **must forward that `Request`, or its `signal`,** to whatever actually performs the request. Drop the signal and both the per-call signal and `retry.timeout` go inert — the call neither aborts nor times out. To add a header, copy the `Request` with `new Request(request)` and set it on the copy's `headers`: passing `{ headers }` to the copy replaces every header the SDK set rather than adding to them. A replacement may reject with an error of its own when that signal aborts: a timeout is still a `TimeoutError` that is retried, and an abort of `RequestOptions.signal` still rejects with the caller's own `reason`.
 
-**Cancellation.** The `signal` on `RequestOptions` is the per-request cancellation surface. Aborting rejects with the signal's **own `reason`** — whatever you passed to `abort()`, or the platform `DOMException` a bare `abort()` supplies — unwrapped, so it is **not** an `EnvoiPublicReadApiError` and a `catch` that tests the family must rethrow it. An already-aborted signal rejects immediately. The `retry.timeout` that bounded the attempt is the SDK's own and does stay in the family, as `err.kind === "timeout"`. It starts once the credential is in hand and covers the request up to its response headers — not obtaining the credential and not reading the body, which only the signal bounds, so a body that stalls after its headers holds a call with no signal until the transport gives up.
+**Cancellation.** The `signal` on `RequestOptions` is the per-request cancellation surface. Aborting rejects with the signal's **own `reason`** — whatever you passed to `abort()`, or the platform `DOMException` a bare `abort()` supplies — unwrapped, so it is **not** an `EnvoiPublicApiError` and a `catch` that tests the family must rethrow it. An already-aborted signal rejects immediately. The `retry.timeout` that bounded the attempt is the SDK's own and does stay in the family, as `err.kind === "timeout"`. It starts once the credential is in hand and covers the request up to its response headers — not obtaining the credential and not reading the body, which only the signal bounds, so a body that stalls after its headers holds a call with no signal until the transport gives up.
 
 The entire per-request surface is the optional second argument of every operation:
 
@@ -114,7 +120,6 @@ The entire per-request surface is the optional second argument of every operatio
 | You might reach for | Reality |
 | --- | --- |
 | hooks, middleware, interceptors, `onRequest`/`onResponse` | none. `fetch` is the one transport extension point |
-| pagination, `for await`, auto-paging helpers | no operation is paginated and nothing is async-iterable |
 | SSE, `text/event-stream` | no event streams. Every decoder reads the body to completion, bar a binary success, which hands its stream over unread |
 | multipart <em>responses</em>, XML bodies | none. A multipart reply is not decoded and an XML body is not sent — an operation declaring either is still emitted, with no body to supply or read |
 | per-request `headers`, `baseUrl`, idempotency key | none. `RequestOptions` is `{ signal, retry, logging }`; a header, a base URL and a caller-supplied idempotency key are not on it |
@@ -124,22 +129,22 @@ The entire per-request surface is the optional second argument of every operatio
 
 ## Error-handling model (read once — applies to every operation)
 
-Operations are **throw-based**, and every **operational** failure belongs to **one family**: `EnvoiPublicReadApiError`, a union over six leaves, so one `instanceof EnvoiPublicReadApiError` sees all of them. It is not the whole escape set — four throwables sit outside it, enumerated below. Every leaf names the call it raised — `err.method` and `err.uri` — and `message` opens with that name. `instanceof` is reliable **within one dialect**: a process that loads both — `import` in one file, `require` in another — gets two independent copies of every error class, and `instanceof` across that boundary is `false`. Narrow on `err.kind` there, or on `err.name`, which is stable across copies.
+Operations are **throw-based**, and every **operational** failure belongs to **one family**: `EnvoiPublicApiError`, a union over seven leaves, so one `instanceof EnvoiPublicApiError` sees all of them. It is not the whole escape set — four throwables sit outside it, enumerated below. Every leaf names the call it raised — `err.method` and `err.uri` — and `message` opens with that name. `instanceof` is reliable **within one dialect**: a process that loads both — `import` in one file, `require` in another — gets two independent copies of every error class, and `instanceof` across that boundary is `false`. Narrow on `err.kind` there, or on `err.name`, which is stable across copies.
 
 Core types (public members with their declared types; all are `readonly`):
 
 | Type | Public members | Source |
 | --- | --- | --- |
-| `EnvoiPublicReadApiError` (declared as `CoreError`) | `kind: ErrorKind` · `method: HttpMethod` · `uri: string` · `message` · `cause` — the union every failure below belongs to | `src/core/errors.ts` |
+| `EnvoiPublicApiError` (declared as `CoreError`) | `kind: ErrorKind` · `method: HttpMethod` · `uri: string` · `message` · `cause` — the union every failure below belongs to | `src/core/errors.ts` |
 | `ResponseError` | the rung the server answered on, `ApiError \| DecodeError`; adds `status: number` · `headers: Headers` | `src/core/errors.ts` |
 | `ApiError` | `kind: "api"` · `payload` — the open arm, whose `kind` is `string`. **Not generic**: a typed operation's subclass redeclares `payload` with its own literal arms | `src/core/api-error.ts` |
 | `TimeoutError` | `kind: "timeout"` · `timeout: number` | `src/core/errors.ts` |
-| `DecodeError`, `EncodeError`, `ConnectionError`, `AuthError` | their `kind`, and nothing beyond the two rows above | `src/core/errors.ts` |
+| `DecodeError`, `EncodeError`, `ConnectionError`, `AuthError`, `PaginationError` | their `kind`, and nothing beyond the two rows above | `src/core/errors.ts` |
 | `Declared<K, B>` | `kind: K` · `body: B` | `src/core/api-error.ts` |
 | `Undeclared` | `kind: "undeclared"` · `rawBody: ArrayBuffer` — the last arm of every error class, carrying the untouched bytes of a status no arm covers, a middleware's included | `src/core/api-error.ts` |
 | `ApiResult<T, E>` | on success `{ ok: true; status; headers; value: T }`, on failure `{ ok: false; status; headers; message: string; method: HttpMethod; uri: string; payload: P }`, `P` being the error class's payload union — the failure branch carries the error's own members, never the error object | `src/core/api-promise.ts` |
 
-`EnvoiPublicReadApiError` and `ResponseError` are each a **type and a value**: the type is the union, the value is the abstract class every leaf extends, so `instanceof` and `err.kind` select the same set. Neither can be constructed or extended. `uri` is the absolute URL the call dialled, with the server variables expanded and the path parameters filled. It carries no query, fragment or userinfo, so no query parameter reaches it. One failure names an unresolved URI: a path parameter rejected by its schema arrives as an `EncodeError` whose `uri` still shows the unfilled `{braces}` — an `undefined` one included, since a path parameter is always required, so its schema rejects it first.
+`EnvoiPublicApiError` and `ResponseError` are each a **type and a value**: the type is the union, the value is the abstract class every leaf extends, so `instanceof` and `err.kind` select the same set. Neither can be constructed or extended. `uri` is the absolute URL the call dialled, with the server variables expanded and the path parameters filled. It carries no query, fragment or userinfo, so no query parameter reaches it. One failure names an unresolved URI: a path parameter rejected by its schema arrives as an `EncodeError` whose `uri` still shows the unfilled `{braces}` — an `undefined` one included, since a path parameter is always required, so its schema rejects it first.
 
 `ErrorKind` is closed, so a `switch` over `err.kind` is exhaustive:
 
@@ -151,16 +156,17 @@ Core types (public members with their declared types; all are `readonly`):
 | `"connection"` | `fetch` rejected before a response line arrived | — |
 | `"timeout"` | `ClientOptions.retry.timeout` elapsed. `timeout` is the budget that ran out | `timeout` |
 | `"auth"` | a credential could not be **obtained**, per the paragraph below | — |
+| `"pagination"` | a next link the API sent resolved to another origin, or was not a URL, so the walk stopped there. Raised inside a paged loop, after the page that carried the link; `uri` names the link, or the page that carried it when the link is not a URL | — |
 
-**Four throwables sit outside the family**, so `instanceof EnvoiPublicReadApiError` is `false` on each and a `catch` that tests it has to rethrow what is left. `ConfigurationError` comes out of the **`EnvoiPublicReadApiClient` constructor**, synchronously and before any `ApiPromise` exists: no reachable `fetch`, an unknown `ClientOptions.serverEnvironment`, or a `ClientOptions.retry` or `ClientOptions.logging` whose reads throw. One call can reject with it too: a `RequestOptions.retry` or `RequestOptions.logging` whose reads throw. Either way the failed read is on `cause`. `SchemaError` is what a codec throws when called directly — `cacheControlSchema.decode(json)` — so it names no call; through an operation the same failure arrives one level down, on `DecodeError.cause` or `EncodeError.cause`, and a `serverOptions` override whose value is not a string raises it from the constructor too. Bugs stay outside the family and reach you raw — an unparseable `baseUrl` is a `TypeError`. And a caller abort arrives as the signal's own `reason`, unwrapped. The first two are exported from the package root; the other two are not ours to export.
+**Four throwables sit outside the family**, so `instanceof EnvoiPublicApiError` is `false` on each and a `catch` that tests it has to rethrow what is left. `ConfigurationError` comes out of the **`EnvoiPublicApiClient` constructor**, synchronously and before any `ApiPromise` exists: no reachable `fetch`, an unknown `ClientOptions.serverEnvironment`, or a `ClientOptions.retry` or `ClientOptions.logging` whose reads throw. One call can reject with it too: a `RequestOptions.retry` or `RequestOptions.logging` whose reads throw. Either way the failed read is on `cause`. `SchemaError` is what a codec throws when called directly — `cacheControlSchema.decode(json)` — so it names no call; through an operation the same failure arrives one level down, on `DecodeError.cause` or `EncodeError.cause`, and a `serverOptions` override whose value is not a string raises it from the constructor too. Bugs stay outside the family and reach you raw — an unparseable `baseUrl` is a `TypeError`. And a caller abort arrives as the signal's own `reason`, unwrapped. The first two are exported from the package root; the other two are not ours to export.
 
 **`AuthError` is about obtaining a credential, never about being refused one.** A 401 *from the API* is an `ApiError` like any other status. A 401 does have one auth consequence: it invalidates whatever that operation's scheme had cached, so the **next** call re-acquires.
 
 ```ts
 try {
-  const response = await client.getOutletMenu({ id: "some example string" });
+  const response = await client.outlets.getOutletMenu({ id: "some example string" });
 } catch (err) {
-  if (err instanceof EnvoiPublicReadApiError) {
+  if (err instanceof EnvoiPublicApiError) {
     switch (err.kind) {
       case "api":
         // TODO: the API answered with an error status — read err.status and err.payload
@@ -175,6 +181,9 @@ try {
       case "timeout":
       case "auth":
         // TODO: no response was produced — err.kind says which
+        break;
+      case "pagination":
+        // TODO: the walk stopped at a next link it could not follow — err.uri says where
         break;
     }
   } else {
@@ -191,7 +200,7 @@ try {
 
 ```ts
 try {
-  const result = await client.getOutletMenu({ id: "some example string" }).asApiResult();
+  const result = await client.outlets.getOutletMenu({ id: "some example string" }).asApiResult();
   // TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
   if (result.ok) {
     // TODO: Use 'result.value' — what this operation resolves to
@@ -199,7 +208,7 @@ try {
     // TODO: Use 'result.message', 'result.method' and 'result.uri', and narrow 'result.payload'
   }
 } catch (err) {
-  if (err instanceof EnvoiPublicReadApiError) {
+  if (err instanceof EnvoiPublicApiError) {
     // TODO: no error status was produced — err.kind says which failure this is
   } else {
     throw err;
@@ -209,11 +218,11 @@ try {
 
 `result.payload` is the same payload union a thrown `ApiError` carries on `err.payload`, and `result.message`, `result.method` and `result.uri` are that error's own members — so the **Error arms** bullet on an operation's page enumerates the payload either way, and the `catch` above it is for the rest of the family. `result.method` and `result.uri` are named on this map alone.
 
-Of **2 operations**, **1** declares typed error bodies and **1** rejects with the base `ApiError`, whose payload is always the `"undeclared"` arm.
+Of **3 operations**, **2** declare typed error bodies and **1** rejects with the base `ApiError`, whose payload is always the `"undeclared"` arm.
 
 ---
 
-## Operations — by resource (1 group, 2 operations)
+## Operations — by resource (2 groups, 3 operations)
 
 Each page below carries one block per operation, with bullets in the fixed order **Server**, **Signature**, **Wire**, **Auth**, **Request body**, **SDK-sent**, **Returns**, **Error**, **Error arms**, then a **Fields** table mapping every request field to the channel it travels on, and a **Type sources** table naming the declaring file and schema value of every type the operation mentions. With `api-reference.md` documenting operations only, that table is the route from an operation to the file declaring what it takes.
 
@@ -223,11 +232,12 @@ Each page below carries one block per operation, with bullets in the fixed order
 | --- | --- | --- |
 | **Call shape `op(request, options?)`** — one flat request object first, the per-call options second. There is no positional overload. What the second argument carries is a `signal`, a `retry` override and a log level; a per-call base URL, header or auth override does not exist | here, Getting a client | never — it always holds |
 | **The request object is flat and channel-blind.** A field named `body` *is* the whole request body; every other field is fanned out to path, query, header or form by the SDK. Nothing in the object is nested by channel | here | never — the **Fields** table `Channel` column always resolves it |
-| **Throw-based, returning `ApiPromise<T, E>`.** `await` it for `T`; call `.asApiResult()` on the returned value for the non-throwing `ApiResult<T, E>`. No operation is result-only | here, Error-handling model | never |
+| **Throw-based, returning `ApiPromise<T, E>`.** `await` it for `T`; call `.asApiResult()` on the returned value for the non-throwing `ApiResult<T, E>`. No operation is result-only | here, Error-handling model | the operation is paged — it returns a `Pageable<TPage, TItem, E>`: a loop over it throws `E` at the first error status, and `.asApiResult()` on the returned value is the form whose `.pages()` yields one `ApiResult<TPage, E>` per page |
 | **`E` is the base `ApiError`** and the payload is always the `"undeclared"` arm | Error-handling model | the spec declared error bodies — the **Error** bullet names a subclass and an **Error arms** bullet gives each arm's tag, status and body |
 | **The request body and its media type are stated on every block**, by a **Request body** bullet that is never omitted. `none` means no body **and no `Content-Type` header**, and a named media type means the body is **required** — the request type's field is not optional | here | the spec declared the body optional — the bullet adds **Optional**, the field is `field?:`, and omitting it sends no body and no `Content-Type` header at all |
-| **Resolves once, to one whole value** — except a binary body, which resolves to a stream the caller reads. No pagination, no SSE, no async iterables and no partial results | here, Not on this SDK | never at this SDK version |
+| **Resolves once, to one whole value** — except a binary body, which resolves to a stream the caller reads. No SSE and no partial results | here, Not on this SDK | the operation is paged — it returns a `Pageable`, the first request goes out when a loop starts, and each page resolves on its own as the loop reaches it. Its **Returns** bullet says so |
 | **Six identity headers ride every request** — `User-Agent`, `X-APIMatic-Lang`, `X-APIMatic-Package-Version`, `X-APIMatic-Gen-Version`, `X-APIMatic-OS` and `X-APIMatic-Runtime`. They identify the generated SDK, so **no option configures them** | here | the operation declared a header of the same name — the operation's layer is folded after the client's, so its value wins |
+| **A fresh `Idempotency-Key` rides every non-GET call that does not declare that header itself**, minted per call in the operation's own header layer. It makes a *replayed* request safe, not a repeated one — a value that changes per call deduplicates nothing, so it is no substitute for a key the API documents. **No option sets it**, and once minted it is always sent — a runtime with no `crypto` global mints it from `Math.random` mixed with the clock and a per-process counter | here | the operation is a GET, or declared that header itself — then its own value stands and nothing is minted |
 | **Server group `default`** | here, Servers & auth | the operation is on another group — its block carries a **Server** bullet |
 | **Every operation states its auth requirement**, by an **Auth** bullet that is never omitted — one scheme, a composition over schemes, or `none` for a public operation | here, Servers & auth | never — the bullet is always present |
 | **Every value is schema-encoded before the request is built** — a wrong type or format rejects and nothing is sent. **An omitted field that has a default is still sent, with that default**, filled by the SDK rather than by the server | here | the field has a default — it appears in the **Fields** table `Default` column |
@@ -248,7 +258,8 @@ Each page below carries one block per operation, with bullets in the fixed order
 
 | Resource (`client.X`) | Ops | Operations | Page |
 | --- | --- | --- | --- |
-| `client` (ungrouped) | 2 | `getOutletMenu` · `listOutlets` | [map/operations/client.md](map/operations/client.md) |
+| `outlets` | 2 | `getOutletMenu` · `listOutlets` | [map/operations/outlets.md](map/operations/outlets.md) |
+| `purchaseRequests` | 1 | `createPurchaseRequest` | [map/operations/purchase-requests.md](map/operations/purchase-requests.md) |
 
 ---
 
@@ -258,23 +269,37 @@ Each page below carries one block per operation, with bullets in the fixed order
 
 | Group | Count | Directory |
 | --- | --- | --- |
-| Objects (plain `type`, no class) | 9 | `src/models/` |
-| Enums (open; const companion plus schema) | 2 | `src/models/` |
-| Typed error classes (`ApiError` subclass, one per typed operation) | 1 | `src/`, in the declaring module's namespace |
+| Objects (plain `type`, no class) | 20 | `src/models/` |
+| Enums (open; const companion plus schema) | 3 | `src/models/` |
+| Typed error classes (`ApiError` subclass, one per typed operation) | 2 | `src/resources/`, in the declaring module's namespace |
 
 Conventions: every model is a plain `type`, not a class — build one with an object literal; there is no constructor and no builder. `f: T` is required, `f?: T` is optional (omit the key), and `f: T | null` is a **required, nullable** field where `null` is a value distinct from an omitted key. Optional properties are declared `f?: T`, not `f?: T | undefined`, so under `exactOptionalPropertyTypes` you must **omit or spread** an absent field rather than assign `undefined` to it. A schema value is directly usable both ways: `Schema<T, W = Encoded<T>>` is `{ decode(v: unknown): T; encode(v: unknown): W }`, and `Encoded<T>` is the wire projection — a `Date` becomes `string | number`, a `Uint8Array` becomes a base64 `string`, recursing through arrays and objects. `EnumSchema<T>` adds `readonly values: readonly T[]`, so an enum's known set is testable at run time. Enums are **not** TypeScript `enum`s and are open: a `const` companion plus a union that includes `(string & {})` or `(number & {})`, so **any** value of the base type is assignable and the schema validates the base type only, never membership — read the member names and the values they send off the companion, and use `.values` to test membership yourself. A discriminated union is narrowed with an exhaustive `switch` on its tag, with no fallback arm and no type guard to import; one without a discriminant is narrowed on the shape of its arms, which its declaration spells out. A property default is filled by the SDK on **encode as well as decode**, so omitting one still sends it — read it off the `defaulted(…)` entry in the schema, or off the property's `@default`. A numeric property is a `number` whatever its format, and its schema follows the type. `type: integer` with no format, `int32` or `int64` rejects a fraction and any value outside the safe-integer range; `type: number` with no format, `float`, `double` or `bigdecimal` rejects a non-finite value. A property's wire name is its `_keysMap` entry in the schema and may differ from the TypeScript name — read it there rather than deriving it. A named spec schema whose resolved form is a bare container, or which is used only as a form-encoded body, gets no model file and no exported name: the first is written inline at each use site, the second is flattened onto the operation's request type, one field per property, so read that field list from the request type.
 
 Every name comes from the package root — there is no default export, and no deep imports:
 
 ```ts
-import { type CacheControl, cacheControlSchema } from "envoi-public-read-api";
+import { type CacheControl, cacheControlSchema } from "envoi-public-api";
 ```
 
 ---
 
 ## Servers & auth
 
-**Auth — none.** The spec declares no security schemes, so every operation is public and the client sends no credential.
+**Authentication is per operation.** Every operation declares the requirement it enforces and the SDK sends exactly that: **1 of the 3 operations** requires a credential and **2** are public. Each block on a page above carries an **Auth** bullet naming its requirement, `none` included. There is no client-global switch and no per-call override.
+
+| Scheme (as an **Auth** bullet names it) | Configured with | What the SDK sends |
+| --- | --- | --- |
+| `agentBearer` | `agentBearer` | `Authorization: Bearer <token>` |
+
+A scheme **contributes** headers, query parameters and cookies rather than mutating the request, so a credential is encoded by exactly the code that encodes an operation's own parameters. The auth layer goes on **last**, which means a scheme's `Authorization` wins over one the operation declared.
+
+**Composition is emitted, not configured.** Where the spec puts two schemes in one requirement the SDK sends **both**; where it lists alternatives the SDK sends the **first configured** one, in the order the **Auth** bullet prints them. The combinators that express this (`allAuth`, `anyAuth`, `noneAuth`) live in the generated resource modules and are **not exported**.
+
+**A credential may be a function.** Every field typed `TokenProvider` is re-read on **every** request with no caching, so a key can rotate without rebuilding the client. An empty string counts as absent, and a function is treated as present without being invoked. The function is handed the call's `signal`, or one that never aborts when the call was given none, and the SDK waits for it to settle — so a function that fetches its credential should pass that signal on, or a cancelled call waits for the fetch to finish.
+
+**An unconfigured scheme does not throw.** The request goes out without that credential and the server decides. So a 401 on a call you believed was authenticated is usually an unset credential field rather than an SDK failure — check the operation's **Auth** bullet against what the client was given.
+
+**A 401 invalidates the cached credential.** On a **401** — 401 only, not 403 — the SDK clears whatever that operation's scheme had cached, so the *next* call re-acquires. The current request still rejects with the operation's `ApiError`. The credential fields are on `ClientOptions`.
 
 **Environments.** `ClientOptions.serverEnvironment` selects one for the whole client (source: `src/servers.ts`). `ServerEnvironment` is a `const` object with a derived union type, not a TypeScript `enum` — and unlike the model enums it is **closed**, so only the values below are assignable.
 
@@ -304,9 +329,9 @@ The facts that change what you type, and the floors that decide whether the pack
 
 |  |  |
 | --- | --- |
-| One entry, two dialects | `import` resolves `dist/esm`, `require` resolves `dist/commonjs`, both through the single `.` export. In a TypeScript CommonJS file the typed spelling is `import sdk = require("envoi-public-read-api")`; a plain `require` destructure works at run time but yields no types. `instanceof` is reliable **within** one dialect — if your app loads both, the two copies declare separate error classes |
+| One entry, two dialects | `import` resolves `dist/esm`, `require` resolves `dist/commonjs`, both through the single `.` export. In a TypeScript CommonJS file the typed spelling is `import sdk = require("envoi-public-api")`; a plain `require` destructure works at run time but yields no types. `instanceof` is reliable **within** one dialect — if your app loads both, the two copies declare separate error classes |
 | Consumer compiler settings | Under `exactOptionalPropertyTypes`, **omit or spread** an absent optional rather than assigning `undefined` to it. Under `verbatimModuleSyntax`, names that carry no runtime value (the options types, every model type) must be imported with `import type` |
-| Required globals, and only these | Always: `fetch` (or a replacement passed as the `fetch` option), `AbortController`, `AbortSignal.any`, `Headers`, `Request`, `URL`, `setTimeout` and `clearTimeout`, `JSON`, `BigInt`, and `console`, which is read as the package loads. Nothing else — no credential this SDK sends reaches for a further global. Three more are **read and never required** — `process`, `navigator` and `EdgeRuntime`, which name the host in `X-APIMatic-OS` and `X-APIMatic-Runtime`. A runtime offering none of them sends neither header and works unchanged. `process.env.ENVOI_PUBLIC_READ_API_CLIENT_LOG` is read at most once, when the client is built and code sets neither a `logger` nor a valid `level`. Logging writes to `console` only as the default logger, and for the warning on a `ENVOI_PUBLIC_READ_API_CLIENT_LOG` value that is not a level. |
+| Required globals, and only these | Always: `fetch` (or a replacement passed as the `fetch` option), `AbortController`, `AbortSignal.any`, `Headers`, `Request`, `URL`, `setTimeout` and `clearTimeout`, `JSON`, `BigInt`, and `console`, which is read as the package loads. `crypto.randomUUID` or `crypto.getRandomValues` mints the `Idempotency-Key` a non-GET call carries — **read and never required**, since a runtime offering neither fills the bytes from `Math.random` mixed with the clock and a per-process counter, so the header is always sent. Three more are **read and never required** — `process`, `navigator` and `EdgeRuntime`, which name the host in `X-APIMatic-OS` and `X-APIMatic-Runtime`. A runtime offering none of them sends neither header and works unchanged. `process.env.ENVOI_PUBLIC_API_CLIENT_LOG` is read at most once, when the client is built and code sets neither a `logger` nor a valid `level`. Logging writes to `console` only as the default logger, and for the warning on a `ENVOI_PUBLIC_API_CLIENT_LOG` value that is not a level. |
 | Values that cross the boundary | `Date` for `date-time`, `string` for `date`, `ArrayBuffer` for an undeclared error body, `Headers` on a result and on a thrown `ResponseError`. The engine also carries a `bigint` int64 path and a base64 `bytes()` codec, reached only where a model uses them |
 | Browser distribution | The package ships `dist/esm` and `dist/commonjs` and nothing else — **no bundle, no UMD file, no CDN artifact**. Use it through a bundler, which resolves `zod/v4-mini`, deduplicates it against your own copy and tree-shakes the rest |
 | Other runtimes | Deno, Bun, Cloudflare Workers and Vercel Edge are all likely to work — the SDK needs only the globals above and imports no Node built-in — but **none of them is tested for this package**, so nothing here claims support for them |

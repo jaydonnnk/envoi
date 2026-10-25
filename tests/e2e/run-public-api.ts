@@ -4,6 +4,10 @@
 // It creates a disposable, migrated local database holding the seeded demo FIXTURE shop, starts
 // `next start` against it with fixture settings (payments and PYUSD off), runs both scripts, then
 // stops the server and drops the database. CI runs it after `npm run build`.
+// S19: it also gives the fixture shop the FIXTURE PayPal sandbox seller the integration tests use and
+// issues one FIXTURE agent token in that database, handed to the generated client run only, in its
+// environment, so the client can create a purchase request; the token is never printed. Payments stay
+// off, so nothing reaches PayPal.
 //
 //   npm run build && npx tsx tests/e2e/run-public-api.ts [port]
 //
@@ -14,8 +18,9 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { ENV_NAMES } from "@/env";
 import * as schema from "@/lib/db/schema";
-import { seedDemoFixture } from "@/operator/cli";
+import { assignPayPalDestination, issueAgentToken, seedDemoFixture } from "@/operator/cli";
 import { createTestDatabase } from "../support/db";
+import { FIXTURE_SELLER } from "../support/payments";
 import { webEnvFor } from "../support/session";
 
 const port = Number(process.argv[2] ?? "3100");
@@ -45,8 +50,13 @@ let server: ChildProcess | undefined;
 let code = 1;
 try {
   const seedClient = postgres(database.adminUrl, { max: 1, onnotice: () => {} });
+  let agentToken: string;
   try {
-    console.log(`FIXTURE seed: ${JSON.stringify(await seedDemoFixture(drizzle(seedClient, { schema })))}`);
+    const db = drizzle(seedClient, { schema });
+    const seeded = await seedDemoFixture(db);
+    console.log(`FIXTURE seed: ${JSON.stringify(seeded)}`);
+    await assignPayPalDestination(db, seeded.outletId, FIXTURE_SELLER);
+    agentToken = (await issueAgentToken(db, "FIXTURE e2e agent")).token;
   } finally {
     await seedClient.end({ timeout: 5 });
   }
@@ -77,7 +87,7 @@ try {
   await waitFor(`${baseUrl}/api/v1/outlets`, server);
 
   const contract = await run("node_modules/.bin/tsx", ["tests/e2e/public-api-contract.ts", baseUrl, "nul"], env);
-  const client = await run("node_modules/.bin/tsx", ["tests/e2e/apimatic-client.ts", baseUrl], env);
+  const client = await run("node_modules/.bin/tsx", ["tests/e2e/apimatic-client.ts", baseUrl], { ...env, ENVOI_AGENT_TOKEN: agentToken });
   console.log(`contract check exit ${contract}, generated client exit ${client}`);
   code = contract === 0 && client === 0 ? 0 : 1;
 } finally {

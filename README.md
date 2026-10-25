@@ -70,8 +70,8 @@ To run it by hand: `npm run runner:build`, then `npm run runner:start` with the 
 
 ## Public API
 
-`openapi/envoi-public.yaml` describes the two public read routes (list shops, read a published menu).
-`clients/typescript/` is a TypeScript client generated from it by APIMatic and committed unchanged; the app never calls it.
+`openapi/envoi-public.yaml` describes the two public read routes (list shops, read a published menu) and the agent's purchase request route, which takes an agent token and answers a one-time link a human buyer opens to review and approve.
+`clients/typescript/` is a TypeScript client generated from it by APIMatic and committed unchanged; the app never calls it. [`clients/README.md`](clients/README.md) says how it was generated and what it checks.
 
 ## Project records
 
