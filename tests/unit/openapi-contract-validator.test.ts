@@ -104,6 +104,8 @@ describe("OpenAPI document support check", () => {
     ["a pattern that is not a string", (d: Doc) => Object.assign(schemas(d).OutletSummary!.properties.id!, { pattern: 7 }), "#/components/schemas/OutletSummary.properties.id: pattern is not a string"],
     ["a minimum that is not a number", (d: Doc) => Object.assign(schemas(d).MenuItem!.properties.unitSgdCents!, { minimum: "1" }), "#/components/schemas/MenuItem.properties.unitSgdCents: minimum is not a number"],
     ["required that is not a list of names", (d: Doc) => Object.assign(schemas(d).MenuItem!, { required: "id" }), "#/components/schemas/MenuItem: required is not a list of names"],
+    // S19: the agent route's request body is checked too.
+    ["an unknown keyword on a request body schema", (d: Doc) => Object.assign((d.paths["/api/v1/purchase-requests"]!.post as unknown as { requestBody: { content: Record<string, { schema: unknown }> } }).requestBody.content["application/json"]!, { schema: { type: "object", minProperties: 1 } }), "post /api/v1/purchase-requests request application/json: keyword minProperties"],
     ["an unknown keyword on a response schema", (d: Doc) => Object.assign(d.paths["/api/v1/outlets"]!.get!.responses["200"]!.content["application/json"]!, { schema: { type: "object", minProperties: 1 } }), "get /api/v1/outlets 200 application/json: keyword minProperties"],
   ])("rejects %s", (_name, corrupt, where) => {
     const d = structuredClone(loadDocument()) as Doc;

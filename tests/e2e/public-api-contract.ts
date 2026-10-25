@@ -1,5 +1,6 @@
 // S14: checks a running deployment's public read routes against openapi/envoi-public.yaml, the same
 // check the integration test runs on the route handlers. Reads only; nothing is created or paid.
+// S19: it also sends the agent's purchase request with no token, which must answer the documented 401.
 //
 //   npx tsx tests/e2e/public-api-contract.ts <baseUrl> [nul]
 import { randomBytes } from "node:crypto";
@@ -14,10 +15,11 @@ if (!baseUrl) {
 const document = loadDocument();
 let failed = false;
 
-async function check(label: string, template: string, path: string): Promise<Response> {
-  const response = await fetch(`${baseUrl}${path}`);
-  const errors = await checkResponse(document, template, "GET", response.clone());
-  console.log(`${errors.length === 0 ? "PASS" : "FAIL"} ${label}: GET ${path} ${response.status}`);
+async function check(label: string, template: string, path: string, init: RequestInit = {}): Promise<Response> {
+  const method = init.method ?? "GET";
+  const response = await fetch(`${baseUrl}${path}`, init);
+  const errors = await checkResponse(document, template, method, response.clone());
+  console.log(`${errors.length === 0 ? "PASS" : "FAIL"} ${label}: ${method} ${path} ${response.status}`);
   for (const error of errors) console.log(`  ${error}`);
   failed ||= errors.length > 0;
   return response;
@@ -40,5 +42,12 @@ if (missing.status !== 404) failed = true;
 for (const [label, id] of [["short id", "x"], ...(process.argv[3] === "nul" ? [["NUL byte id", "%00"]] : [])] as [string, string][]) {
   if ((await check(label, "/api/v1/outlets/{id}/menu", `/api/v1/outlets/${id}/menu`)).status !== 404) failed = true;
 }
+
+const noToken = await check("purchase request with no token", "/api/v1/purchase-requests", "/api/v1/purchase-requests", {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({ outletId: shop?.id ?? unknown, lines: [{ menuItemId: "itm_unknown", quantity: 1 }] }),
+});
+if (noToken.status !== 401) failed = true;
 
 process.exit(failed ? 1 : 0);

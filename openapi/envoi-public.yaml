@@ -1,9 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Envoi public read API",
-    "version": "1.0.0",
-    "description": "Hand-written description of Envoi's two public read routes: the list of published shops and one shop's published menu. Envoi is a test environment: shops marked isDemoFixture are seeded demo fixtures, and payments use PayPal sandbox test money only. Nothing in this API pays, approves or prices a purchase; a buyer's price is always recalculated by Envoi at review. Prices are whole Singapore cents, and an unknown price or availability is null, never zero or false. This file is written in JSON syntax, which is valid YAML 1.2, so it can be read without a YAML library. The envelope flag ok is typed boolean without a literal value because the APIMatic TypeScript generator (CLI 2.0.0-beta.6, codegen v4) turns a boolean enum or const into the string \"True\" or \"False\"."
+    "title": "Envoi public API",
+    "version": "1.1.0",
+    "description": "Hand-written description of Envoi's public API: two read routes, the list of published shops and one shop's published menu, and the agent's purchase request route. Envoi is a test environment: shops marked isDemoFixture are seeded demo fixtures, and payments use PayPal sandbox test money only. The purchase request route needs an agent token and answers a one-time link that a human buyer opens to review Envoi's price and approve payment themselves. Nothing in this API pays, approves or prices a purchase or reads a receipt; a buyer's price is always recalculated by Envoi at review. Prices are whole Singapore cents, and an unknown price or availability is null, never zero or false. This file is written in JSON syntax, which is valid YAML 1.2, so it can be read without a YAML library. The envelope flag ok and the error flag retryable are typed boolean without a literal value because the APIMatic TypeScript generator (CLI 2.0.0-beta.6, codegen v4) turns a boolean enum or const into the string \"True\" or \"False\"."
   },
   "servers": [
     { "url": "https://envoi-helx.onrender.com", "description": "Render test deployment" },
@@ -53,6 +53,41 @@
           }
         }
       }
+    },
+    "/api/v1/purchase-requests": {
+      "post": {
+        "operationId": "createPurchaseRequest",
+        "summary": "Propose a basket and get a link for a buyer",
+        "description": "An agent holding an Envoi agent token proposes one shop's items and quantities. Envoi checks the basket against the shop's published menu and answers a link that works once and expires 10 minutes after it is created. The buyer opens the link, reviews the price Envoi calculates and approves payment themselves. The answer carries no price, purchase id or payment authority. Fields other than outletId and lines, such as a price, total or payee, are dropped and never priced or stored.",
+        "tags": ["Purchase requests"],
+        "security": [{ "agentBearer": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PurchaseRequestBody" } } }
+        },
+        "responses": {
+          "201": {
+            "description": "The link for the buyer.",
+            "headers": { "Cache-Control": { "$ref": "#/components/headers/NoStore" } },
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PurchaseRequestCreatedResponse" } } }
+          },
+          "400": {
+            "description": "The body is not JSON, is over 4 KiB, or does not name a shop and 1 to 20 lines; or the basket does not fit the shop's published menu, such as an unknown, unpriced or unavailable item, a repeated item or a quantity outside 1 to 20, or the shop has no PayPal sandbox seller connected.",
+            "headers": { "Cache-Control": { "$ref": "#/components/headers/NoStore" } },
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationFailedResponse" } } }
+          },
+          "401": {
+            "description": "No agent token was sent, or the token is unknown or revoked.",
+            "headers": { "Cache-Control": { "$ref": "#/components/headers/NoStore" } },
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthorizedResponse" } } }
+          },
+          "404": {
+            "description": "The shop is unknown or has no published menu.",
+            "headers": { "Cache-Control": { "$ref": "#/components/headers/NoStore" } },
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/NotFoundResponse" } } }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -63,9 +98,16 @@
         "schema": { "type": "string", "enum": ["public, max-age=30"] }
       },
       "NoStore": {
-        "description": "Error answers are never cached.",
+        "description": "Never cached: every error answer and the purchase request link.",
         "required": true,
         "schema": { "type": "string", "enum": ["no-store"] }
+      }
+    },
+    "securitySchemes": {
+      "agentBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "An Envoi agent token, issued by the Envoi operator and shown once. It can propose a basket only: it cannot pay, approve a payment or read a receipt."
       }
     },
     "schemas": {
@@ -140,7 +182,91 @@
             "properties": {
               "code": { "type": "string", "enum": ["not_found"] },
               "message": { "type": "string" },
-              "retryable": { "type": "boolean", "description": "False: repeating the same read gives the same answer." },
+              "retryable": { "type": "boolean", "description": "False: repeating the same request gives the same answer." },
+              "details": { "type": "object", "additionalProperties": false, "properties": {} }
+            }
+          }
+        }
+      },
+      "PurchaseLine": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["menuItemId", "quantity"],
+        "properties": {
+          "menuItemId": { "type": "string", "description": "An item id from getOutletMenu." },
+          "quantity": { "type": "integer", "minimum": 1, "description": "Whole number from 1 to 20." }
+        }
+      },
+      "PurchaseRequestBody": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["outletId", "lines"],
+        "properties": {
+          "outletId": { "type": "string", "description": "A shop id from listOutlets." },
+          "lines": { "type": "array", "items": { "$ref": "#/components/schemas/PurchaseLine" }, "description": "1 to 20 lines, each item at most once." }
+        }
+      },
+      "PurchaseRequestCreated": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["url", "expiresAt"],
+        "properties": {
+          "url": { "type": "string", "pattern": "^https?://[^/]+/approve/[a-z2-7]{52}$", "description": "The one-time link for the buyer to open. It is not payment authority." },
+          "expiresAt": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$", "description": "When the link stops working, as an ISO 8601 UTC time, 10 minutes after it was created." }
+        }
+      },
+      "PurchaseRequestCreatedResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ok", "data"],
+        "properties": {
+          "ok": { "type": "boolean", "description": "Always true on a 201 answer." },
+          "data": { "$ref": "#/components/schemas/PurchaseRequestCreated" }
+        }
+      },
+      "ValidationFailedResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ok", "error"],
+        "properties": {
+          "ok": { "type": "boolean", "description": "Always false on an error answer." },
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["code", "message", "retryable", "details"],
+            "properties": {
+              "code": { "type": "string", "enum": ["validation_failed"] },
+              "message": { "type": "string" },
+              "retryable": { "type": "boolean", "description": "False: the same body gives the same answer until the body or the shop's menu changes." },
+              "details": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "enum": ["too_large", "timeout", "aborted", "line_count", "duplicate_item", "quantity", "unknown_item", "price_unknown", "unavailable", "no_destination"],
+                    "description": "Present when Envoi can name the problem: a body too large, too slow or aborted; or the basket's line count, a repeated item, a quantity, an unknown, unpriced or unavailable item, or no connected PayPal sandbox seller."
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "UnauthorizedResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ok", "error"],
+        "properties": {
+          "ok": { "type": "boolean", "description": "Always false on an error answer." },
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["code", "message", "retryable", "details"],
+            "properties": {
+              "code": { "type": "string", "enum": ["unauthorized"] },
+              "message": { "type": "string" },
+              "retryable": { "type": "boolean", "description": "False: send a valid agent token." },
               "details": { "type": "object", "additionalProperties": false, "properties": {} }
             }
           }

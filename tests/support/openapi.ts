@@ -10,6 +10,7 @@ export type OpenApiDocument = {
   paths: Record<string, Record<string, { responses: Record<string, OpenApiResponse> }>>;
   components: { schemas: Record<string, Schema>; headers: Record<string, { required?: boolean; schema: Schema }> };
 };
+type OpenApiRequestBody = { required?: boolean; content: Record<string, { schema: Schema }> };
 type OpenApiResponse = {
   headers?: Record<string, { $ref: string }>;
   content: Record<string, { schema: Schema }>;
@@ -33,8 +34,10 @@ export function assertSupported(document: OpenApiDocument): void {
   const schemas: [string, unknown][] = Object.entries(document.components.schemas).map(([name, schema]) => [`#/components/schemas/${name}`, schema]);
   for (const [name, header] of Object.entries(document.components.headers)) schemas.push([`#/components/headers/${name}`, header.schema]);
   for (const [template, methods] of Object.entries(document.paths)) {
-    for (const [method, operation] of Object.entries(methods) as [string, { parameters?: { name: string; schema: unknown }[]; responses: Record<string, OpenApiResponse> }][]) {
+    for (const [method, operation] of Object.entries(methods) as [string, { parameters?: { name: string; schema: unknown }[]; requestBody?: OpenApiRequestBody; responses: Record<string, OpenApiResponse> }][]) {
       for (const parameter of operation.parameters ?? []) schemas.push([`${method} ${template} parameter ${parameter.name}`, parameter.schema]);
+      // S19: the agent route's request body is checked like any other schema the document holds.
+      for (const [media, { schema }] of Object.entries(operation.requestBody?.content ?? {})) schemas.push([`${method} ${template} request ${media}`, schema]);
       for (const [status, response] of Object.entries(operation.responses)) {
         for (const [media, { schema }] of Object.entries(response.content)) schemas.push([`${method} ${template} ${status} ${media}`, schema]);
       }
