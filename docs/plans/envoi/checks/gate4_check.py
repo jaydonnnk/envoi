@@ -409,8 +409,8 @@ for f, text in current.items():
 # bc6b1f09...a5a49: the verifying-landing reopening (S17 review finding 1), re-approved by the user on 2026-10-18.
 # 37740aea...ec16aebe: the shop QR and order archive reopening, re-approved by the user on 2026-10-24.
 # Current: the continuation reopening for S19-S22, re-approved by the user on 2026-10-25, with the agent route's answer
-# list corrected the same day as a wording correction by the user's decision.
-G3_REOPENING_SHA256 = "037fb9635a52821261b4a075163c5ae185bc80c5057658847aec8366f4a62e19"
+# list and request body line field corrected the same day as wording corrections by the user's decision.
+G3_REOPENING_SHA256 = "7389910834be437e55315812c6116c4b1b8e8b232ff9276b7dd2903e1e8bf3aa"
 # 02-architecture.md may likewise equal its continuation amendment text, re-approved by the user on 2026-10-25
 # (bc504e10...d0e47a9f was the shop QR and order archive text, re-approved on 2026-10-24,
 # 28d54654...45561154 the Phantom landing text of 2026-10-18, 938d0a99...f3bf30a6 the English-only text of 2026-10-15).
