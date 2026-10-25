@@ -80,6 +80,14 @@ fault(["R5"], "removed name revived", lambda d: sub(d, "04-slices.md", "- Voice,
 fault(["R6"], "checklist order", lambda d: swap_checklist(d, "S9", "S10"))
 fault(["R6"], "dependency built later", lambda d: sub(d, "04-slices.md", "then text. | S4, S9 |", "then text. | S4, S16 |"))
 fault(["R6"], "section order", move_s9)
+def swap_s21_s20(d):
+    p = os.path.join(d, "04-slices.md")
+    s = open(p, encoding="utf-8").read()
+    a, b, c = s.index("### S21 Order from one sentence"), s.index("### S20 Reference buyer agent"), s.index("### S22 Menu photo experiment")
+    open(p, "w", encoding="utf-8").write(s[:a] + s[b:c] + s[a:b] + s[c:])
+
+
+fault(["R6"], "continuation slices out of their order", swap_s21_s20)
 fault(["R6"], "post-release slice placed before the release", lambda d: sub(d, "04-slices.md", "### S15 Judged release\n", "### S18 Merchant shop QR and order archive (moved)\n\n### S15 Judged release\n"))
 fault(["R7"], "em dash", lambda d: sub(d, "roadmap.md", "None of these candidates authorizes implementation.", "None of these candidates authorizes implementation \u2014 none."))
 fault(["R7"], "em dash entity", lambda d: sub(d, "04-slices.md", "Sections follow the build order.", "Sections follow the build order &" + "mdash; always."))
@@ -137,6 +145,7 @@ fault(["R10"], "reopened Gate 3 text edited after review", lambda d: sub(d, "03-
 fault(["R10"], "re-approved Gate 1 body edited", lambda d: sub(d, "01-product.md", "Menu photo import is visibly not available in this release", "Menu photo import is available in this release"))
 fault(["R10"], "re-approved Gate 1 mockup edited", lambda d: sub(d, os.path.join("mockups", "merchant-onboarding.html"), "Menu photo import is not available in this release.", "Menu photo import is available in this release."))
 fault(["R10"], "re-approved landing mockup edited", lambda d: sub(d, os.path.join("mockups", "landing.html"), "Test money only. No real money moves.", "Real money moves."))
+fault(["R10"], "continuation one-box mockup edited", lambda d: sub(d, os.path.join("mockups", "buyer-one-box.html"), "Which iced tea?", "Which tea?", count=-1))
 # Faults for the 2026-10-15 English-only reopening of Gates 2-4
 fault(["R10"], "reopened Gate 2 text edited after approval", lambda d: sub(d, "02-architecture.md", "including rotated text, small prices, blur and non-SGD ambiguity", "including Chinese text, rotated text, small prices, blur and non-SGD ambiguity"))
 fault(["R10"], "reopened Gate 3 English-only text edited after approval", lambda d: sub(d, "03-program-design.md", "Rotated and small-price text accuracy on English menus", "Chinese, rotated and small-price text accuracy"))

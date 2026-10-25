@@ -167,9 +167,9 @@ def parse_slices(text):
 
 s4 = md["04-slices.md"]
 section_list, assigned, additions = parse_slices(s4)
-# Slices added after the judged release (S18 on 2026-10-24) sit after S15 and outside the build-order table,
+# Slices added after the judged release (S18 on 2026-10-24; S19, S21, S20 and S22 on 2026-10-25) sit after S15 and outside the build-order table,
 # the test assignment and the counts; every other rule reads only the planned slices.
-POST_RELEASE = ["S18"]
+POST_RELEASE = ["S18", "S19", "S21", "S20", "S22"]
 post_release = [s for s, _ in section_list if s in POST_RELEASE]
 if post_release != POST_RELEASE or [s for s, _ in section_list][-len(POST_RELEASE):] != POST_RELEASE:
     fail("R6", f"post-release slices {post_release} must follow every planned slice, in the order {POST_RELEASE}")
@@ -407,21 +407,25 @@ for f, text in current.items():
 # 0fd07da5...76c475ac: the English-only menu photo reopening, approved in advance by the user on 2026-10-15.
 # 3f5c8386...305b7cab: the Phantom landing reopening, re-approved by the user on 2026-10-18.
 # bc6b1f09...a5a49: the verifying-landing reopening (S17 review finding 1), re-approved by the user on 2026-10-18.
-# Current: the shop QR and order archive reopening, re-approved by the user on 2026-10-24.
-G3_REOPENING_SHA256 = "37740aeab04b7b124c1629e280dbd11a2f7af80e5a812323a82bd43bec16aebe"
-# 02-architecture.md may likewise equal its shop QR and order archive text, re-approved on 2026-10-24
-# (28d54654...45561154 was the Phantom landing text of 2026-10-18, 938d0a99...f3bf30a6 the English-only text of 2026-10-15).
-G2_REOPENING_SHA256 = "bc504e10209af74c5b596ccf18ee2ac9a17d8c625b145568ea4aae51d0e47a9f"
+# 37740aea...ec16aebe: the shop QR and order archive reopening, re-approved by the user on 2026-10-24.
+# Current: the continuation reopening for S19-S22, re-approved by the user on 2026-10-25.
+G3_REOPENING_SHA256 = "68c732f8bfc8bab00ab7a31ee9f79e04684f3ab6c06c03e1f97134cff2e169e0"
+# 02-architecture.md may likewise equal its continuation amendment text, re-approved by the user on 2026-10-25
+# (bc504e10...d0e47a9f was the shop QR and order archive text, re-approved on 2026-10-24,
+# 28d54654...45561154 the Phantom landing text of 2026-10-18, 938d0a99...f3bf30a6 the English-only text of 2026-10-15).
+G2_REOPENING_SHA256 = "2c2a715f4dfec60961a6d51038fccf6c1d8b7fe485a6f7f7f2428ddec2a8c4f3"
 # Gate 1, re-approved 2026-10-16 after deferring menu photo drafting and again on 2026-10-21 for the
-# landing page, and on 2026-10-24 for the shop QR and order archive: the revised and added mockups, and 01-product.md without its closing status line,
-# which keeps changing as slices finish (ce25854b...3dff07 was the 2026-10-16 body, d5c726e8...860dc3 the 2026-10-21 body).
+# landing page, and on 2026-10-24 for the shop QR and order archive, then reopened and re-approved on 2026-10-25 for S19-S22:
+# the revised and added mockups, and 01-product.md without its closing status line, which keeps changing as slices finish
+# (ce25854b...3dff07 was the 2026-10-16 body, d5c726e8...860dc3 the 2026-10-21 body, d66a34c1...5025f4 the 2026-10-24 body).
 G1_MOCKUP_SHA256 = {
     os.path.join("mockups", "merchant-onboarding.html"): "d376e4517de5b7f0c4c892675b0e033111cbac0af1b157519f23078ade16f568",
     os.path.join("mockups", "landing.html"): "973c92b63f946b51c9911aa7f8ec75891041e5d0af1c41a086e09f917c923744",
     os.path.join("mockups", "merchant-shop-qr.html"): "15fb8ab1666648de1a1ca102901d3bb01efe73bb4f2c4a27b748dc0fe75b54ce",
     os.path.join("mockups", "merchant-orders-delete.html"): "196792d104e832c3887c6213c90811d6e96b22cb8a9057ec6be3a4d97923adf3",
+    os.path.join("mockups", "buyer-one-box.html"): "0e4ae5ade8fdd7111b56698d13b0d82d896cace1fbd5b55a5d95109286a61ad8",
 }
-G1_BODY_SHA256 = "d66a34c18120b4c339987502a6623451e5eda2731e81b857122d7512065025f4"
+G1_BODY_SHA256 = "c11ec26f19b5a45bdb67ef07a1ee8c358b8af98685752710d54011fe24b78e93"
 for root, _, files in os.walk(folder):
     for name in sorted(files):
         rel = os.path.relpath(os.path.join(root, name), folder)

@@ -1,5 +1,14 @@
 # Product: Envoi
 
+**Reopened 2026-10-25 for the continuation slices S19-S22 and RE-APPROVED by the user the same day** ("I approve Gate 1.").
+The user asked on 2026-10-25: "Draft the combined Gate 1, 2 and 3 reopening for S19-S22, including the one-box mockup."
+It follows an external review of 2026-10-24 and the [continuation plan](continuation-plan.md); everything not marked below stays as re-approved on 2026-10-24.
+Approval accepts these product changes as a proposal; it approves no architecture, contract, slice, build, model call, upload or deploy.
+Three changes, each marked *Added 2026-10-25* where it lands:
+- **One sentence, one box.** The buyer types what they want and where in one box; the separate area field goes. Envoi may fill the basket with the items and quantities it understood, ask which item when two fit, and say when an item is unavailable. The buyer still reviews the server price and approves the payment. Screen: [`mockups/buyer-one-box.html`](mockups/buyer-one-box.html).
+- **Envoi's own reference agent.** Envoi publishes a small external agent that a person runs in a terminal; it reads shops and menus through the generated API client and hands the buyer the same one-time link as any other agent. It never pays.
+- **Menu photo import may return through one more measured round.** The setup page keeps saying photo import is not available until a pre-registered round passes and the user approves the import screen in a later Gate 1 change.
+
 **Reopened 2026-10-15 for one change, revised and RE-APPROVED by the user on 2026-10-16** ("I approve Gate 1.").
 After three pre-registered vision evaluations found no model accurate enough (see [`00-status.md`](00-status.md#s11-vision-evaluation-round-3-results-2026-10-15)), the user decided on 2026-10-15: "Option A: ship S11 with imports closed and manual entry only, and reopen Gate 1 to move AI menu drafting to good-to-have after the slices."
 - **Menu photo drafting is deferred.** In the hackathon build the merchant enters the menu by hand; no AI model drafts a menu from a photo, and Envoi makes no AI-drafting claim.
@@ -54,11 +63,13 @@ The recommended prototype includes:
 - A merchant uploads **an SGQR image** and **enters the menu**. Supported identifiers actually present in SGQR become a draft for review/correction; it contains no menu and proves no ownership. The merchant enters item names, SGD prices, availability and missing details, and explicitly confirms before publication. Drafting the menu from a photo is deferred to after the slices (decided 2026-10-15).
 - Only an authorized demo merchant with connected test destinations can become discoverable. A photo or a well-formed business identifier does not prove ownership.
 - A buyer uses text to find registered shops and items. Ambiguous requests ask for clarification. Missing location asks for an area; "nearest" needs usable location information.
+  *Added 2026-10-25:* the text is one box holding both the request and the place. When the shop is known (named in the sentence, scanned, or the shop's page is open), Envoi may fill the basket with published, available items and the quantities the buyer asked for; when two items fit one phrase it asks which; when an item is unavailable it says so and adds nothing. A filled basket is a proposal: nothing is reviewed or paid until the buyer taps Review.
 - A buyer may instead **scan or paste the shop's SGQR sticker** to identify that exact outlet. A scan needs no location information and no "nearest" judgement, which removes the weakest step in the text path. It resolves only a shop already enrolled; an unenrolled sticker says so plainly and offers text search. A scan identifies the shop and nothing else.
 - The buyer reviews exact items, quantities, registered SGD price, shop/outlet, recipient, payment currency and selected rail. Cost estimates distinguish payer cost from merchant fees and mark missing information.
 - The buyer confirms in the payment provider or wallet. Envoi does not promise one physical tap across external approvals.
 - A confirmed receipt names the test environment and actual external reference. The merchant sees the corresponding payment and can acknowledge the order.
 - Another agent can discover the same participating merchant and open the same human approval journey. "Any agent" is limited to clients that implement the supported interface; it does not mean autonomous spending.
+  *Added 2026-10-25:* Envoi's own reference agent is one such client: a person runs it in a terminal, it reads shops and menus through the generated API client, asks which item when two fit, says when an item or shop is unavailable, and returns a one-time link. It has no payment authority and cannot read a receipt.
 
 ## Product rules
 
@@ -85,6 +96,7 @@ These are proposed integrations, not completed integrations. Access and technica
 ## Buyer journey
 
 1. Identify the shop one of two ways: enter "Find kaya toast and kopi near my area" and provide an area if location is unavailable, **or** scan/paste the sticker at the counter to resolve that exact outlet with no location needed.
+   *Added 2026-10-25:* the request and the place share one box, for example "Two Kopi C at Test Shop"; a request without a shop or area is asked "Which area, or which shop?". When the shop is known, the basket may arrive filled with the asked-for items and quantities.
 2. Review the matching registered outlet and its offered items. Resolve any ambiguity before continuing.
 3. Review the basket, registered price, supported methods, and known/unknown costs.
 4. Choose one method and continue to its external approval. Canceling keeps the purchase unpaid.
@@ -126,6 +138,7 @@ No complete-onboarding speed claim is established. Neither SGQR extraction nor a
 No PayNow execution, delivery, inventory reservations, custody, pooled payments, escrow, unattended purchases, auto-SGD conversion, or guaranteed refunds. Scanning does not make an arbitrary SGQR sticker payable and does not enroll a shop; it only finds one that is already enrolled. Voice, a negotiation conversation, AG Grid, and broad catalogue ingestion are optional. A small merchant view is sufficient.
 
 Menu-image import with AI drafting is deferred, decided by the user on 2026-10-15 after three pre-registered evaluations: it is on the "good to have" list after the slices, together with sharpening the import and language additions. Manual entry is the hackathon path, and no AI-drafting claim is made. Live deployment requires separate provider, legal, merchant enrollment and operational checks.
+*Added 2026-10-25:* one more pre-registered round may run, with a merchant rotate and crop step before upload, all earlier hard photos kept and fresh unseen photos added. It passes only if it meets the earlier accuracy threshold and correcting the draft is faster than typing the same menu. Until then, and until the user approves the import screen, manual entry stays the only path and no AI-drafting claim is made.
 
 Negotiation may be added only after the payment paths work: a merchant chooses explicit discount rules, the buyer sees the authorized discount, and changing the resulting price triggers a fresh review. A simpler rule-based offer is acceptable; two talking agents are not a requirement.
 
@@ -141,6 +154,7 @@ Each `.html` file in `mockups/` is a plain, throwaway product mockup. The direct
 - `mockups/merchant-orders.html`: payment visibility, acknowledgment and menu-maintenance link.
 - `mockups/merchant-shop-qr.html`: added 2026-10-24 (approved 2026-10-24): the merchant setup sticker area with an Envoi shop QR that opens the shop's buy page; it is not a payment code and not the merchant's SGQR, which Envoi never stores.
 - `mockups/merchant-orders-delete.html`: added 2026-10-24 (approved 2026-10-24): Delete on every merchant order; a deleted order is archived as a record, never erased, and an order still being checked returns if it becomes paid.
+- `mockups/buyer-one-box.html`: added 2026-10-25 (approved 2026-10-25): one box for the request and the place, with four example answers (basket filled with quantities, "Which iced tea?", an unavailable item, and "Which area, or which shop?"); the sample iced teas are not on Test Shop's live menu.
 - `mockups/index.html`: review navigation for the five screens above it; not a product screen. The landing page is opened directly.
 
 No mockup uploads an image, extracts data, publishes a shop or performs a payment. Sample prices and local interactions are fixture demonstrations, not market or integration evidence.
@@ -155,5 +169,6 @@ No mockup uploads an image, extracts data, publishes a shop or performs a paymen
 - Scope, audience, cuts, and the proposed measurement are accepted.
 - External approval, single-method payment, honest cost uncertainty, and order acknowledgment are explicit.
 - Seeded merchants and test transactions cannot be mistaken for live adoption or live money.
+- *Added 2026-10-25:* a basket filled from one sentence is visibly a proposal the buyer can change, holds only published available items, and is never reviewed or paid without the buyer's tap.
 
 **Gate 1 approved 2026-10-07, reopened 2026-10-10, revised and re-approved 2026-10-10, reopened again on 2026-10-15 to defer menu photo drafting, revised and re-approved on 2026-10-16, and reopened and re-approved on 2026-10-21 to add the landing page, and on 2026-10-24 to add the merchant shop QR and order archive. Gates 2 and 3, approved 2026-10-07, were also reopened for the Zapier removal and re-approved on 2026-10-11; Gate 3 was reopened again on 2026-10-12 for one PayPal kill-switch check and for the TypeScript pin found by the S1 boot check, and re-approved both times the same day.** The slice plan in `04-slices.md` was revised and approved on 2026-10-12 and amended on 2026-10-14 for one S6 receipt sentence; S1, the tracer bullet, was done on 2026-10-12, S2, the PayPal sandbox happy path, and S3, PayPal recovery, on 2026-10-13, S4, text entry with AI suggestions, on 2026-10-14, S13, agent handoff over MCP, also on 2026-10-14, S6, merchant sign-in and manual menu draft, also on 2026-10-14, with its review fixes the same day, S5, the maintenance runner with manual runs and the operator health view, also on 2026-10-14, S7, merchant destination and publication, also on 2026-10-14, and S8, merchant orders and separate acknowledgment, on 2026-10-15, with its review fixes the same day; S11, menu photo import, was done on 2026-10-16 and ships with imports closed after no vision model met its threshold; no later slice has started. The status text near the top of this file, including the "(2026-10-10)" draft date and the 2026-10-07 approvals, is dated history; this line is the current status. Current source corrections are in `research.md`; `stack-recommendation.md` mirrors the approved architecture proposal and the Gate 3 pins. These approvals do not establish runtime/account or usability evidence. The eight Gate 2 review findings are closed as dispositioned by Gate 3; the residual risks that disposition names remain open.

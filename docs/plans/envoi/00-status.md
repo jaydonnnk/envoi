@@ -2,17 +2,20 @@
 
 Updated: 2026-10-20 (Asia/Singapore).
 
-- Gate 1 - Product: **RE-APPROVED 2026-10-24** by the user ("I approve Gate 1.") after being reopened the same day for two changes: a shop QR on merchant setup and a delete (archive) action on merchant orders; see the [record](#reopening-2026-10-24-shop-qr-and-order-archive).
+- Gate 1 - Product: **RE-APPROVED 2026-10-25** by the user ("I approve Gate 1.") after being reopened the same day for the continuation slices S19-S22; see the [record](#reopening-2026-10-25-continuation-slices-s19-s22).
+  Before that it was **RE-APPROVED 2026-10-24** by the user ("I approve Gate 1.") after being reopened the same day for two changes: a shop QR on merchant setup and a delete (archive) action on merchant orders; see the [record](#reopening-2026-10-24-shop-qr-and-order-archive).
   Before that it was **RE-APPROVED 2026-10-21** by the user ("Yep this works for now.  I approve gate 1") after being reopened the same day for one change: a landing page at the site's root address; see the [record](#reopening-2026-10-21-landing-page).
   Before that it was **RE-APPROVED 2026-10-16** by the user ("I approve Gate 1.") after being reopened on 2026-10-15 for one change: menu photo drafting is deferred to "good to have" after the slices, and the merchant enters the menu by hand; see the [record](#reopening-2026-10-15-menu-photo-drafting-deferred).
   Before that it was **RE-APPROVED 2026-10-10** by the user ("I approve gate one") after being reopened and revised the same day to remove Zapier, which the user rejected as paid, and to record the PYUSD decisions; see the [reopening record](#reopening-2026-10-10-zapier-removed). Previously **APPROVED 2026-10-07** by the user after reopening it to add a buyer-side scan entry point. Approval covers product scope and buyer/merchant journeys, including text and scan/paste entry points.
-- Gate 2 - Architecture: **RE-APPROVED 2026-10-24** by the user ("I approve Gate 2.") for the [shop QR and order archive amendment](02-architecture.md#shop-qr-and-order-archive-amendment-2026-10-24), drafted after the Gate 1 re-approval the same day; it approves the proposal, not building it.
+- Gate 2 - Architecture: **RE-APPROVED 2026-10-25** by the user ("I approve Gate 2.") for the [continuation amendment](02-architecture.md#continuation-amendment-2026-10-25), after Gate 1's re-approval the same day; it approves the proposal, not building it.
+  Before that it was **RE-APPROVED 2026-10-24** by the user ("I approve Gate 2.") for the [shop QR and order archive amendment](02-architecture.md#shop-qr-and-order-archive-amendment-2026-10-24), drafted after the Gate 1 re-approval the same day; it approves the proposal, not building it.
   Before that it was **RE-APPROVED 2026-10-11** by the user ("gate 2 approved") after being reopened and revised on 2026-10-10 and revised again after a 2026-10-11 review. Approval covers only the direct vision import and PYUSD amendment in `02-architecture.md`, including the five review changes; the OpenAI/provider pin and all unaffected 2026-10-07 decisions stand. It accepts a proposal, not runtime/account proof. Previously **APPROVED 2026-10-07**.
   **Reopened again and RE-APPROVED 2026-10-11** for two PYUSD double-payment fixes found in the Gate 3 review: the user approved the fixes in advance ("reopen gate 2 and approve the fixes i approve it already").
   Preparation releases the unsigned bytes exactly once and never stores them, and the post-expiry window scan runs for every released attempt and records any extra transfer; see the [record](#gate-2-reopening-for-double-payment-fixes-2026-10-11).
   **Reopened and RE-APPROVED 2026-10-15** for one change, approved by the user in advance: menu photos are English only, so the consented test photos and the vision falsifier samples no longer require Chinese text; see the [record](#reopening-2026-10-15-english-only-menu-photos).
   **Reopened and RE-APPROVED 2026-10-18** ("Yea sure i approve the gates then make the relevant changes and push to main thnaks"): the phone path's Browse link also names the PYUSD rail and Phantom's browser opens the PYUSD review directly; see the [record](#reopening-2026-10-18-phantom-landing).
-- Gate 3 - Program Design: **RE-APPROVED 2026-10-24** by the user ("I approve Gate 3.") for the [shop QR and order archive](03-program-design.md#reopening-2026-10-24-shop-qr-and-order-archive), after Gates 1 and 2 were re-approved the same day.
+- Gate 3 - Program Design: **RE-APPROVED 2026-10-25** by the user ("I approve Gate 3.") for the [continuation reopening](03-program-design.md#reopening-2026-10-25-continuation-slices-s19-s22), after Gates 1 and 2 were re-approved the same day; it approves the proposal, not building it.
+  Before that it was **RE-APPROVED 2026-10-24** by the user ("I approve Gate 3.") for the [shop QR and order archive](03-program-design.md#reopening-2026-10-24-shop-qr-and-order-archive), after Gates 1 and 2 were re-approved the same day.
   Before that it was **RE-APPROVED 2026-10-12** by the user a second time, in advance, for one pin change found by the S1 boot check: `typescript@7.0.2` becomes `typescript@6.0.3`, because `typescript-eslint` refuses TypeScript 7 ("for this change gate 3( i pre approve it)").
   No contract or test changes; see the [reopening record](03-program-design.md#reopening-2026-10-12-typescript-pin-after-the-s1-boot-check) and [Version pins](03-program-design.md#version-pins).
   **Reopened and RE-APPROVED 2026-10-15** for one change, approved by the user in advance: Chinese text accuracy leaves the R5 vision falsifiers; no contract, type, call stack, clock, test name or test count changes; see the [record](#reopening-2026-10-15-english-only-menu-photos) and [Gate 3's section](03-program-design.md#reopening-2026-10-15-english-only-menu-photos).
@@ -31,6 +34,7 @@ Updated: 2026-10-20 (Asia/Singapore).
   **Reopened and RE-APPROVED 2026-10-18** ("Yea sure i approve the gates then make the relevant changes and push to main thnaks"): the same change in the Browse link, the `/buy` landing and one renamed case; no count changes; see the [record](#reopening-2026-10-18-phantom-landing).
 - Gate 4 - Slice plan: **APPROVED 2026-10-12** by the user ("I approve both pls publish the branches and commit all the changes to main so that we can proceed with the first slice"), on branch `envoi/gate-4-vision-pyusd`.
   **Amended 2026-10-22** for one addition to S15, approved by the user ("I approve"): the [landing page](04-slices.md#s15-amendment-2026-10-21-landing-page) of the 2026-10-21 Gate 1 reopening; no build order, test count or cut order changes.
+  **Amended 2026-10-25**, approved by the user ("I approve Gate 4."): [S19](04-slices.md#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-added-2026-10-25), S21, S20 and S22 for the continuation reopening, after S18 and outside the build-order table; no count of the original plan changes; it starts no slice and authorizes no install, upload, model call, merge, push or deploy.
   **Amended 2026-10-24**, approved by the user ("I approve Gate 4."): [S18 shop QR and order archive](04-slices.md#s18-merchant-shop-qr-and-order-archive-added-2026-10-24), after S15 and outside the build-order table; it starts no slice and authorizes no install, migration or deploy.
   Approval accepts the slice order, the test assignment, the cut order, deltas D1-D9 as refinements and D10's placement in S2; it starts no slice and authorizes no install, provisioning, deployment, spending, wallet use or OpenAI call.
   At approval no slice was authorized or started; S1 started on 2026-10-12 under the user's handover prompt and is done (see [S1](#s1-tracer-bullet-on-render-free-2026-10-12)).
@@ -43,6 +47,36 @@ Updated: 2026-10-20 (Asia/Singapore).
   An independent review of the draft on 2026-10-12 found four major issues, and all four are fixed in it; see the [review fixes](#gate-4-review-fixes-2026-10-12).
   Its minor findings are fixed or dispositioned; see the [minor review fixes](#gate-4-minor-review-fixes-2026-10-12).
   The user decided delta D10 on 2026-10-12 by reopening Gate 3 for a PayPal check of `PAYMENTS_ENABLED`, re-approved the same day; S2 builds it and names its test.
+
+### Reopening 2026-10-25: continuation slices S19-S22
+
+- **Trigger:** an external agent's review of 2026-10-24 scored Envoi a provisional 32 / 50 [hypothesis: another model's judgement, not an official score]; the user then asked for "a continuation slice build plan based on this in order to boost the score against the judging critera(presentation is separate)", and the [continuation plan](continuation-plan.md) was drafted on 2026-10-25.
+- **Authorization to draft, 2026-10-25, in the user's words:** "Draft the combined Gate 1, 2 and 3 reopening for S19-S22, including the one-box mockup."
+  It covers drafting only; it is not an approval of any gate, slice, install, upload, model call, merge, push or deploy.
+- **Drafted on branch `envoi/gate-reopen-s19-s22`, created from `main` at `6535635` and confirmed with `git branch --show-current`; uncommitted:**
+  - Gate 1, [`01-product.md`](01-product.md): one box for the request and the place, with a basket filled from the sentence that stays a proposal until the buyer taps Review; Envoi's own reference agent as one supported client; one more measured menu photo round, with no AI-drafting claim and imports closed until it passes and an import screen is approved.
+    New screen [`mockups/buyer-one-box.html`](mockups/buyer-one-box.html); `buyer.html` is kept as the current screen.
+  - Gate 2, [continuation amendment](02-architecture.md#continuation-amendment-2026-10-25): the suggestion route's optional `outletId` and basket proposal with nothing stored; the reference agent as an external component on a person's machine; the OpenAPI document covering the agent route; the rotate and crop step; new risks R19 and R20 (Gate 3's risk list ends at R18).
+  - Gate 3, [reopening](03-program-design.md#reopening-2026-10-25-continuation-slices-s19-s22): files, types, settle rules, the agent contract, the round 4 protocol and 16 new named tests; delta D6 widens; no version pin changes.
+- **Flagged for review, beyond the user's words:**
+  - A quantity outside 1-20 asks again instead of being clamped.
+  - The reference agent uses OpenAI, the provider Gate 2 already pins, rather than another model.
+  - Render stays never pre-warmed; cold start is left out of this reopening.
+  - The one-box screen replaces the area field for every buyer, so if S21 is built it should land before the 2-8 Nov usability sessions or not at all.
+- **Gate 1 approval, 2026-10-25, in the user's words:** "I approve Gate 1."
+  It approves the one-box screen, Envoi's reference agent as a supported client, the conditional menu photo round and the four flagged proposals as product scope, not building, deploying or any Gate 2 or 3 change.
+- **Gate 2 approval, 2026-10-25, in the user's words:** "I approve Gate 2."
+  It approves the continuation amendment, including risks R19 and R20, as a proposal; it authorizes no Gate 3 or 4 change, build, install, APIMatic upload, OpenAI call, photo processing or deploy.
+- **Gate 3 approval, 2026-10-25, in the user's words:** "I approve Gate 3."
+  It approves the files, types, settle rules, agent contract, round 4 protocol and 16 named tests as a proposal; it authorizes no Gate 4 change, slice, install, APIMatic upload, OpenAI call, photo processing or deploy.
+- **Order of approval:** Gate 1, then Gate 2, then Gate 3, each by its own approval, all given on 2026-10-25.
+- **Gate 4 sections drafted, 2026-10-25, in the user's words:** "Draft the Gate 4 slice sections for S19-S22 in 04-slices.md on this branch."
+  [S19](04-slices.md#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-added-2026-10-25), [S21](04-slices.md#s21-order-from-one-sentence-added-2026-10-25), [S20](04-slices.md#s20-reference-buyer-agent-on-the-generated-sdk-added-2026-10-25) and [S22](04-slices.md#s22-menu-photo-experiment-round-4-added-2026-10-25) follow S18 outside the build-order table; `gate4_check.py` lists them as post-release slices in that order, and `gate4_prove.py` plants one fault for that order.
+- **Gate 4 approval, 2026-10-25, in the user's words:** "I approve Gate 4."
+  It accepts the four sections, their order, the cut sequence and the 16 named tests' placement; it starts no slice and authorizes no install, APIMatic upload, OpenAI call, photo processing, commit, merge, push or deploy.
+- **Checker [verified 2026-10-25]:** `gate4_check.py` pins the new `01-product.md` body, `02-architecture.md`, `03-program-design.md` and the new mockup, and passes against `main`; `gate4_prove.py` gives 79/79, including one new planted fault for the mockup pin; `git diff --check` is clean.
+  The Gate 1, 2 and 3 pins were moved again for their approval records.
+- **Mockup [verified 2026-10-25]:** checked in a browser at 390 px and 1280 px with no horizontal scroll; at 390 px the quantity stepper was squeezed and cut off its plus button, fixed with `flex:none` before pinning.
 
 ### Reopening 2026-10-24: shop QR and order archive
 
@@ -210,6 +244,8 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 - [ ] S15 - Judged release; started 2026-10-20 on `envoi/slice-15-release` ([record](#s15-judged-release-2026-10-20)).
 
 Post-release, outside the build order: S18, merchant shop QR and order archive, started and done 2026-10-24 on `envoi/slice-18-shop-qr-archive` ([record](#s18-merchant-shop-qr-and-order-archive-2026-10-24)).
+
+Proposed 2026-10-25, outside the build order: S19, S21, S20 and S22 from the [continuation plan](continuation-plan.md); Gates 1-3 were re-approved for them on 2026-10-25 and Gate 4 was amended for them on 2026-10-25 ("I approve Gate 4."); none has started.
 
 ### S18 Merchant shop QR and order archive, 2026-10-24
 
@@ -2158,6 +2194,15 @@ All unaffected risk dispositions stand; the 2026-10-11 Gate 3 revision of the af
   It authorizes no other gate change.
 
 - 2026-10-18: the user reopened Gates 2, 3 and 4 for the Phantom landing and re-approved them the same day ("Yea sure i approve the gates then make the relevant changes and push to main thnaks"), authorizing the S16 amendment's build and its push to `main`; see [Reopening 2026-10-18](#reopening-2026-10-18-phantom-landing).
+- 2026-10-25: the user re-approved Gate 1 ("I approve Gate 1.") for the continuation slices S19-S22: the one-box screen in `mockups/buyer-one-box.html`, the reference agent as a supported client and one more measured menu photo round; see the [record](#reopening-2026-10-25-continuation-slices-s19-s22).
+  It authorizes no Gate 2, 3 or 4 change, slice, install, upload, model call, merge, push or deploy.
+- 2026-10-25: the user re-approved Gate 2 ("I approve Gate 2.") for the [continuation amendment](02-architecture.md#continuation-amendment-2026-10-25): one-box suggestions with nothing stored, the reference agent as an external component, the OpenAPI document covering the agent route, the rotate and crop step, and risks R19 and R20.
+  It authorizes no Gate 3 or 4 change, slice, install, upload, model call, merge, push or deploy.
+- 2026-10-25: the user re-approved Gate 3 ("I approve Gate 3.") for the [continuation reopening](03-program-design.md#reopening-2026-10-25-continuation-slices-s19-s22), including the 16 named tests and the widened delta D6.
+  It authorizes no Gate 4 change, slice, install, upload, model call, merge, push or deploy.
+- 2026-10-25: the user approved the Gate 4 amendment ("I approve Gate 4.") for S19, S21, S20 and S22, after S18 and outside the build-order table.
+  It starts no slice and authorizes no install, upload, model call, commit, merge, push or deploy.
+
 ### Initial Gate 2 documentary verification, 2026-10-07 (historical, before free-hosting revision)
 
 - A one-off Python check inspected all seven gate-folder Markdown documents and three local Markdown links/anchors: targets/anchors exist, required architecture sections exist, gate state and mirrors agree, and Gates 3/4 remain pending with no documents created.

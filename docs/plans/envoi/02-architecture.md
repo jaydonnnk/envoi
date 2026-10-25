@@ -420,6 +420,45 @@ Gate 1 was re-approved on 2026-10-24 for two merchant screens; this section is t
 
 **Risks.** A merchant may archive an order they later need: the record stays in the database and the operator can restore it. Exported receipts on the operator's disk are outside Envoi's control; the folder stays out of Git so they never reach the public repository.
 
+### Continuation amendment, 2026-10-25
+
+Drafted for the Gate 1 reopening of 2026-10-25, re-approved that day, and the [continuation plan](continuation-plan.md); re-approved by the user on 2026-10-25 ("I approve Gate 2.").
+Approval accepts this amendment as a proposal; it establishes no runtime, model, agent or photo evidence and authorizes no Gate 3 or 4 change, build, install, upload, model call or deploy.
+
+**One-box ordering (S21).**
+1. `POST /buyer/suggestions` keeps its route, limiter and budget, and takes one text field; the separate area field becomes optional and the screen stops sending it.
+   An optional `outletId` is accepted when the buyer is already on a shop's page or came from a scan; it is a public id and grants nothing.
+2. The model may propose item ids with quantities for one outlet, or a choice between item ids, still through the three read-only tools, which still return no price.
+3. The server turns that into a basket proposal only from published, priced, available items of a published outlet in scope, with each quantity between 1 and 20; anything else becomes a clarification, an unavailable answer or no match.
+4. The proposal is shown, not stored: no review, purchase or hold exists until the buyer taps Review, which sends the ordinary `POST /purchases` with the ids and quantities and gets the ordinary server price.
+5. The browser carries the proposal in memory from the response to the shop page; it is never put in a URL.
+6. A model failure or budget refusal keeps manual selection, as now. No new provider, model name, table or environment name.
+
+**Reference buyer agent (S20).**
+1. A new external component, `clients/buyer-agent/`, run by a person on their own machine; it is not deployed and the hosted app never imports it.
+2. It holds an agent token issued with the existing operator command, and an OpenAI key of its own, read from that machine's environment; neither is stored, logged or traced.
+3. Its model sees three tools, each a call of the generated client: list shops, read a menu, create a purchase request.
+   It refuses any item id the menu it last read did not return, before calling the client.
+4. It writes a trace of each client call (operation, status, returned ids, timings) for evidence, without tokens, keys or prompts beyond the buyer's sentence.
+5. Envoi sees it as any other agent token holder: the same `POST /purchase-requests` limits, single redemption, fresh server price and human PayPal or wallet approval. No new agent authority.
+6. Provider stays OpenAI, pinned as Gate 2 already pins it, through the existing `ai` and `@ai-sdk/openai` pins.
+
+**Generated client covers the agent route (S19).**
+The OpenAPI document gains `POST /purchase-requests` with the agent bearer scheme, so the generated client covers the whole agent path; the route itself does not change.
+APIMatic stays development tooling: the document is uploaded to generate the client, and nothing calls APIMatic at runtime.
+
+**Menu photo round 4 (S22).**
+1. Before the existing browser shrink, the merchant may rotate the photo in quarter turns and crop it to the menu; only the rotated, cropped and shrunk JPEG leaves the browser, under the unchanged upload bounds.
+2. The draft rule is unchanged: an unreadable or ambiguous price stays blank, never zero.
+3. The round reuses the S11 consent, admission, spend, leak and request-memory boundaries unchanged, and `MENU_IMPORTS_ENABLED` stays false whatever the round shows, until the import screen is approved in Gate 1.
+
+**Not changed.** Hosting, the rule that Render is never pre-warmed, auth, PayPal, PYUSD, scan, MCP, data, roles and every other route.
+
+**Risks.**
+- **R5 extends:** sentence-to-basket accuracy, quantity accuracy and the reference agent's tool choices are unmeasured until their pre-registered evaluations.
+- **New, R19:** a filled basket can be wrong in a way the buyer does not notice; the review shows every line and quantity before payment, and the falsifier is a usability failure where a tester pays for a basket they did not mean.
+- **New, R20:** the reference agent runs outside Envoi's control on a person's machine; its spend and key are that person's, and Envoi's guards do not depend on it behaving.
+
 ## External
 
 Names below are **proposed configuration names only**, never values. No credentials were read or provisioned. Database/auth/provider secrets remain server-side.
@@ -486,3 +525,4 @@ Then revise Gate 4, preserving the user-decided S13 placement and PYUSD first-cu
 **Reopened again and re-approved on 2026-10-11 for the release-once and extra-transfer fixes** ("reopen gate 2 and approve the fixes i approve it already").
 Next is the Gate 3 revision described in the [Gate 3 handover](handoff.md#gate-3-handover-2026-10-11).
 **Reopened 2026-10-24 for the [shop QR and order archive amendment](#shop-qr-and-order-archive-amendment-2026-10-24); re-approved by the user on 2026-10-24 ("I approve Gate 2.").**
+**Reopened 2026-10-25 for the [continuation amendment](#continuation-amendment-2026-10-25); re-approved by the user on 2026-10-25 ("I approve Gate 2.").**
