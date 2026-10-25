@@ -70,6 +70,9 @@ Updated: 2026-10-20 (Asia/Singapore).
 - **Gate 3 approval, 2026-10-25, in the user's words:** "I approve Gate 3."
   It approves the files, types, settle rules, agent contract, round 4 protocol and 16 named tests as a proposal; it authorizes no Gate 4 change, slice, install, APIMatic upload, OpenAI call, photo processing or deploy.
 - **Order of approval:** Gate 1, then Gate 2, then Gate 3, each by its own approval, all given on 2026-10-25.
+- **Committed and pushed, 2026-10-25, authorized in the user's words:** "Commit the gate documents , push to main, and then give a copy paste prompt for the next agent to start s19."
+  Commits `a0036b4` (continuation plan) and `1d577cb` (Gates 1-4) on `envoi/gate-reopen-s19-s22`; `main` fast-forwarded to `1d577cb` and pushed with the branch; `git ls-remote` showed both at `1d577cb` [verified]. Documents only: no application code changed.
+  This record is pushed after it.
 - **Gate 4 sections drafted, 2026-10-25, in the user's words:** "Draft the Gate 4 slice sections for S19-S22 in 04-slices.md on this branch."
   [S19](04-slices.md#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-added-2026-10-25), [S21](04-slices.md#s21-order-from-one-sentence-added-2026-10-25), [S20](04-slices.md#s20-reference-buyer-agent-on-the-generated-sdk-added-2026-10-25) and [S22](04-slices.md#s22-menu-photo-experiment-round-4-added-2026-10-25) follow S18 outside the build-order table; `gate4_check.py` lists them as post-release slices in that order, and `gate4_prove.py` plants one fault for that order.
 - **Gate 4 approval, 2026-10-25, in the user's words:** "I approve Gate 4."
