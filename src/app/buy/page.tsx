@@ -4,8 +4,8 @@ import { outletRails } from "@/domain/outlets/destination";
 import { getPublishedMenu, listPublishedOutlets } from "@/domain/outlets/search";
 import { textSuggestionsEnabled } from "@/integrations/ai/openai";
 import { webDb } from "@/lib/db/web";
-import { BasketForm } from "./basket-form";
 import { landsOnPyusd } from "./landing";
+import { ShopBasket } from "./shop-basket";
 import { TextSuggest } from "./text-suggest";
 
 type BuySearchParams = { outlet?: string | string[]; items?: string | string[]; rail?: string | string[] };
@@ -21,9 +21,10 @@ async function loadBuyData(searchParams: Promise<BuySearchParams>) {
   const started = performance.now();
   const { outlet, items, rail: railParam } = await searchParams;
   const outletId = typeof outlet === "string" ? outlet : undefined;
-  // Items a text suggestion picked start at quantity 1; the Phantom Browse link (S16) names each as
-  // "id:quantity". Only ids on this outlet's published menu count; BasketForm ignores any other id,
-  // and a quantity outside 1..20 reads as 1.
+  // The address's own preselection: an item answer names each id and starts it at quantity 1, and the
+  // Phantom Browse link (S16) names each as "id:quantity". Only ids on this outlet's published menu
+  // count; BasketForm ignores any other id, and a quantity outside 1..20 reads as 1. A basket answer
+  // from a sentence never uses this address: its proposal arrives in memory (see shop-basket.tsx).
   const preselected = typeof items === "string" ? items.split(",").slice(0, 20).map(preselectedLine) : [];
   const dbStarted = performance.now();
   const menu = outletId ? await getPublishedMenu(webDb(), outletId) : null;
@@ -93,7 +94,7 @@ export default async function BuyPage({ searchParams }: { searchParams: Promise<
               <PyusdOnlyStatus outletId={menu.outlet.id} />
             </Suspense>
           )}
-          <BasketForm outletId={menu.outlet.id} items={menu.items} preselected={preselected} rail={rail} autoReview={autoReview} />
+          <ShopBasket outletId={menu.outlet.id} items={menu.items} preselected={preselected} rail={rail} autoReview={autoReview} />
         </section>
       </main>
     );

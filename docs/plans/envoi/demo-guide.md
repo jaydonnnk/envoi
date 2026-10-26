@@ -1,6 +1,6 @@
 # Envoi demo and test guide
 
-Status: 2026-10-23, written from `main` at `1d354f8`.
+Status: 2026-10-23, written from `main` at `1d354f8`; the buyer text steps corrected 2026-10-26 for S21's one-box screen.
 It walks through every built journey, in the order a judge or tester would meet them.
 Test money only: PayPal sandbox and Solana devnet test tokens; no real money moves.
 Where this guide and a gate document disagree, the gate document wins.
@@ -70,10 +70,10 @@ MIGRATION_DATABASE_URL=postgres://postgres@127.0.0.1:5432/envoi_dev npm run oper
 
 1. Click "Find a shop", or open `/buy`.
 2. Check the "Test environment" badge and the sandbox and devnet notice.
-3. Type `kopi and kaya toast` with area `Tanjong Pagar`, then press "Find shops and items".
-4. Check: only registered shops and items appear, with prices from the shop's menu, not from the AI.
-5. Try nonsense such as `asdfgh`: you get no invented shop.
-6. Open the shop and add one drink and one food item to the basket.
+3. In the one box labeled "What would you like, and where?", type `two kopi o and one kaya toast near Tanjong Pagar`, then press "Find it". There is no separate area field: the place goes in the same sentence.
+4. Check: only registered shops and items appear, with prices from the shop's menu, not from the AI. A sentence that gives quantities opens the shop with the basket already filled and the note "Nothing is reviewed or paid yet."; a sentence that gives none lists the items with a "Choose quantities" button.
+5. Try nonsense such as `asdfgh`: you get no invented shop. Try `kopi near me`: you get "Which area, or which shop?", because Envoi has no location and does not guess the nearest shop.
+6. Change a quantity or add an item, then press Review.
 
 ## 4. Buyer: review and pay with PayPal sandbox
 

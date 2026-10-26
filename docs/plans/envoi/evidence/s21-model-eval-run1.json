@@ -1,0 +1,510 @@
+{
+ "label": "FIXTURE shops and fixture sentences; real OpenAI calls",
+ "ranAt": "2026-10-26T15:15:13.464Z",
+ "spendLimitUsd": 1,
+ "spentUsd": 0.008794,
+ "threshold": {
+  "correct": 22,
+  "of": 25,
+  "allOf": [
+   "B1",
+   "B2",
+   "B3",
+   "B4",
+   "B5",
+   "B6",
+   "B7",
+   "B8"
+  ],
+  "medianMs": 10000
+ },
+ "candidates": [
+  {
+   "model": "gpt-6-luna",
+   "correct": 21,
+   "of": 25,
+   "medianMs": 6188,
+   "basketsWrong": [
+    "B5",
+    "B7"
+   ],
+   "usd": 0.008796,
+   "passes": false,
+   "completed": true,
+   "rows": [
+    {
+     "id": "B1",
+     "correct": true,
+     "ms": 11038,
+     "usd": 0.000359,
+     "usage": {
+      "input": 2588,
+      "cached": 0,
+      "output": 201
+     },
+     "got": {
+      "kind": "basket",
+      "outlet": "Test Shop",
+      "lines": [
+       [
+        "Kopi C",
+        2
+       ]
+      ]
+     }
+    },
+    {
+     "id": "B2",
+     "correct": true,
+     "ms": 5518,
+     "usd": 0.000304,
+     "usage": {
+      "input": 1884,
+      "cached": 0,
+      "output": 231
+     },
+     "got": {
+      "kind": "basket",
+      "outlet": "Lorong Demo Kopi",
+      "lines": [
+       [
+        "Kopi O",
+        3
+       ]
+      ]
+     }
+    },
+    {
+     "id": "B3",
+     "correct": true,
+     "ms": 6456,
+     "usd": 0.000349,
+     "usage": {
+      "input": 2575,
+      "cached": 0,
+      "output": 182
+     },
+     "got": {
+      "kind": "basket",
+      "outlet": "Lorong Demo Kopi",
+      "lines": [
+       [
+        "Kaya toast set",
+        1
+       ],
+       [
+        "Kopi O",
+        2
+       ]
+      ]
+     }
+    },
+    {
+     "id": "B4",
+     "correct": true,
+     "ms": 6251,
+     "usd": 0.000379,
+     "usage": {
+      "input": 2645,
+      "cached": 0,
+      "output": 229
+     },
+     "got": {
+      "kind": "basket",
+      "outlet": "Lorong Demo Kopi",
+      "lines": [
+       [
+        "Teh C peng",
+        5
+       ]
+      ]
+     }
+    },
+    {
+     "id": "B5",
+     "correct": false,
+     "ms": 5099,
+     "usd": 0.000208,
+     "usage": {
+      "input": 1478,
+      "cached": 0,
+      "output": 120
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "B6",
+     "correct": true,
+     "ms": 6844,
+     "usd": 0.00036,
+     "usage": {
+      "input": 2590,
+      "cached": 0,
+      "output": 202
+     },
+     "got": {
+      "kind": "basket",
+      "outlet": "Test Shop",
+      "lines": [
+       [
+        "Iced lemon tea",
+        2
+       ]
+      ]
+     }
+    },
+    {
+     "id": "B7",
+     "correct": false,
+     "ms": 7114,
+     "usd": 0.000458,
+     "usage": {
+      "input": 2655,
+      "cached": 0,
+      "output": 384
+     },
+     "got": {
+      "kind": "basket",
+      "outlet": "Lorong Demo Kopi",
+      "lines": [
+       [
+        "Kopi O",
+        1
+       ],
+       [
+        "Soft-boiled eggs (2)",
+        1
+       ]
+      ]
+     }
+    },
+    {
+     "id": "B8",
+     "correct": true,
+     "ms": 5880,
+     "usd": 0.000381,
+     "usage": {
+      "input": 2606,
+      "cached": 0,
+      "output": 240
+     },
+     "got": {
+      "kind": "basket",
+      "outlet": "Test Shop",
+      "lines": [
+       [
+        "Iced milk tea",
+        1
+       ],
+       [
+        "Kopi C",
+        2
+       ]
+      ]
+     }
+    },
+    {
+     "id": "B9",
+     "correct": true,
+     "ms": 10123,
+     "usd": 0.000544,
+     "usage": {
+      "input": 2620,
+      "cached": 0,
+      "output": 564
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "item"
+      ]
+     }
+    },
+    {
+     "id": "C1",
+     "correct": true,
+     "ms": 5701,
+     "usd": 0.000376,
+     "usage": {
+      "input": 2600,
+      "cached": 0,
+      "output": 233
+     },
+     "got": {
+      "kind": "choose",
+      "outlet": "Test Shop",
+      "quantity": 2,
+      "names": [
+       "Iced lemon tea",
+       "Iced milk tea"
+      ]
+     }
+    },
+    {
+     "id": "C2",
+     "correct": true,
+     "ms": 9048,
+     "usd": 0.000504,
+     "usage": {
+      "input": 2595,
+      "cached": 0,
+      "output": 488
+     },
+     "got": {
+      "kind": "choose",
+      "outlet": "Test Shop",
+      "quantity": 3,
+      "names": [
+       "Iced lemon tea",
+       "Iced milk tea"
+      ]
+     }
+    },
+    {
+     "id": "C3",
+     "correct": true,
+     "ms": 6188,
+     "usd": 0.000469,
+     "usage": {
+      "input": 2863,
+      "cached": 0,
+      "output": 366
+     },
+     "got": {
+      "kind": "basket",
+      "outlet": "Lorong Demo Kopi",
+      "lines": [
+       [
+        "Kopi O",
+        2
+       ]
+      ]
+     }
+    },
+    {
+     "id": "C4",
+     "correct": true,
+     "ms": 8301,
+     "usd": 0.000495,
+     "usage": {
+      "input": 3491,
+      "cached": 1171,
+      "output": 503
+     },
+     "got": {
+      "kind": "basket",
+      "outlet": "Lorong Demo Kopi",
+      "lines": [
+       [
+        "Teh C peng",
+        2
+       ]
+      ]
+     }
+    },
+    {
+     "id": "U1",
+     "correct": false,
+     "ms": 7994,
+     "usd": 0.000435,
+     "usage": {
+      "input": 2651,
+      "cached": 0,
+      "output": 340
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "U2",
+     "correct": false,
+     "ms": 4797,
+     "usd": 0.000365,
+     "usage": {
+      "input": 2590,
+      "cached": 0,
+      "output": 213
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "U3",
+     "correct": true,
+     "ms": 7550,
+     "usd": 0.000489,
+     "usage": {
+      "input": 2591,
+      "cached": 0,
+      "output": 459
+     },
+     "got": {
+      "kind": "unavailable_item",
+      "outlet": "Test Shop",
+      "names": [
+       "Kaya toast set"
+      ]
+     }
+    },
+    {
+     "id": "L1",
+     "correct": true,
+     "ms": 2083,
+     "usd": 0.000106,
+     "usage": {
+      "input": 713,
+      "cached": 0,
+      "output": 70
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "L2",
+     "correct": true,
+     "ms": 1985,
+     "usd": 0.000107,
+     "usage": {
+      "input": 712,
+      "cached": 0,
+      "output": 71
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "L3",
+     "correct": true,
+     "ms": 2708,
+     "usd": 0.000108,
+     "usage": {
+      "input": 713,
+      "cached": 0,
+      "output": 73
+     },
+     "got": {
+      "kind": "clarification",
+      "missing": [
+       "area"
+      ]
+     }
+    },
+    {
+     "id": "N1",
+     "correct": true,
+     "ms": 5241,
+     "usd": 0.00035,
+     "usage": {
+      "input": 2601,
+      "cached": 0,
+      "output": 180
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "N2",
+     "correct": true,
+     "ms": 4216,
+     "usd": 0.000248,
+     "usage": {
+      "input": 1508,
+      "cached": 0,
+      "output": 194
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "N3",
+     "correct": true,
+     "ms": 3669,
+     "usd": 0.000205,
+     "usage": {
+      "input": 1486,
+      "cached": 0,
+      "output": 112
+     },
+     "got": {
+      "kind": "no_match"
+     }
+    },
+    {
+     "id": "I1",
+     "correct": true,
+     "ms": 5957,
+     "usd": 0.000405,
+     "usage": {
+      "input": 2721,
+      "cached": 0,
+      "output": 265
+     },
+     "got": {
+      "kind": "basket",
+      "outlet": "Lorong Demo Kopi",
+      "lines": [
+       [
+        "Kaya toast set",
+        5
+       ]
+      ]
+     }
+    },
+    {
+     "id": "X1",
+     "correct": true,
+     "ms": 6619,
+     "usd": 0.000386,
+     "usage": {
+      "input": 2653,
+      "cached": 0,
+      "output": 242
+     },
+     "got": {
+      "kind": "basket",
+      "outlet": "Lorong Demo Kopi",
+      "lines": [
+       [
+        "Kopi O",
+        2
+       ]
+      ]
+     }
+    },
+    {
+     "id": "M1",
+     "correct": true,
+     "ms": 6334,
+     "usd": 0.000406,
+     "usage": {
+      "input": 2654,
+      "cached": 0,
+      "output": 281
+     },
+     "got": {
+      "kind": "items",
+      "outlet": "Lorong Demo Kopi",
+      "items": [
+       "Kaya toast set",
+       "Kopi O"
+      ]
+     }
+    }
+   ]
+  }
+ ]
+}

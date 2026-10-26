@@ -77,6 +77,17 @@ export function createFakeOpenAI(script: (index: number, body: FakeOpenAICall["b
 }
 
 // A complete proposal with every field the strict schema requires.
-export function proposal(fields: Partial<{ kind: string; outletIds: string[]; outletId: string | null; itemIds: string[]; area: string | null; missing: string[] }>): Record<string, unknown> {
-  return { kind: "no_match", outletIds: [], outletId: null, itemIds: [], area: null, missing: [], ...fields };
+export function proposal(
+  fields: Partial<{
+    kind: string;
+    outletIds: string[];
+    outletId: string | null;
+    itemIds: string[];
+    lines: { itemId: string; quantity: number }[];
+    choices: string[];
+    area: string | null;
+    missing: string[];
+  }>,
+): Record<string, unknown> {
+  return { kind: "no_match", outletIds: [], outletId: null, itemIds: [], lines: [], choices: [], area: null, missing: [], ...fields };
 }

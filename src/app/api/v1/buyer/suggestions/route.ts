@@ -11,14 +11,18 @@ import { admit, SUGGESTION_LIMITS } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
-// The body is read counted and time-bounded before it is parsed: 280 characters of text and 80 of
-// area fit well inside 4 KiB even fully escaped, and a slow or oversized body is refused unread.
+// The body is read counted and time-bounded before it is parsed: 280 characters of text, 80 of area
+// and a 64-character outlet id fit well inside 4 KiB even fully escaped, and a slow or oversized body
+// is refused unread.
 const MAX_BODY_BYTES = 4_096;
 const BODY_READ_MS = 5_000;
 
+// The outletId is the shop the buyer is already looking at, or the one their scan resolved. It is a
+// public id and grants nothing: it only puts that shop in scope, and only when it is published.
 const body = z.object({
   text: z.string().trim().min(1).max(MAX_TEXT_LENGTH),
   area: z.string().trim().min(1).max(MAX_AREA_LENGTH).optional(),
+  outletId: z.string().trim().min(1).max(64).optional(),
 });
 
 // Buyer text to registered suggestions. The limiter admits the request before any model call

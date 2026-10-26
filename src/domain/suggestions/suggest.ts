@@ -1,5 +1,5 @@
-import { getPublishedMenu, listPublishedItemNames, listPublishedOutlets, searchPublishedOutlets, type PublishedOutletSummary } from "@/domain/outlets/search";
-import type { ModelProposal, PublishedItemSummary, Suggestion, SuggestionGap, SuggestionModel, SuggestionRequest, SuggestionTools } from "@/domain/suggestions/types";
+import { getPublishedMenu, listPublishedItemNames, listPublishedOutlets, searchPublishedOutlets, type PublishedMenuItem, type PublishedOutletSummary } from "@/domain/outlets/search";
+import { MAX_SUGGESTED_QUANTITY, type ModelProposal, type PublishedItemSummary, type Suggestion, type SuggestionGap, type SuggestionModel, type SuggestionRequest, type SuggestionTools } from "@/domain/suggestions/types";
 import type { BuyerPrincipal } from "@/lib/auth-context";
 import type { Db } from "@/lib/db/web";
 import { log } from "@/lib/log";
@@ -68,7 +68,8 @@ export function suggestionTools(db: Db): SuggestionTools {
 
 // Turns the model's proposal into a suggestion the buyer may see. Ids not in the published registry
 // are dropped, prices come from the registry, and an outlet or item answer needs an area the buyer
-// stated (in the area field or in their own words) or a shop the buyer named.
+// stated (in the area field or in their own words), a shop the buyer named, or the shop whose id the
+// buyer sent. Nothing here writes: a suggestion is a proposal the buyer still has to review.
 async function settle(db: Db, req: SuggestionRequest, proposal: ModelProposal): Promise<Suggestion> {
   if (proposal.kind === "no_match") return { kind: "no_match" };
   if (proposal.kind === "clarification") return clarify(proposal.missing.filter((gap) => gap in QUESTIONS));
@@ -78,9 +79,13 @@ async function settle(db: Db, req: SuggestionRequest, proposal: ModelProposal): 
   const area = usableArea(req.area) ?? (proposedArea && containsWords(text, proposedArea) ? proposedArea : null);
   const published = await listPublishedOutlets(db, 500);
   const named = new Set(published.filter((outlet) => containsWords(text, normalize(outlet.name))).map((outlet) => outlet.id));
-  if (!area && named.size === 0) return clarify(["area"]);
+  // Settle rule 2: an outletId the buyer sent widens the scope and nothing else, and only when it is
+  // a published outlet. An unknown or unpublished one answers exactly as if it were absent.
+  const sent = req.outletId !== undefined && published.some((outlet) => outlet.id === req.outletId) ? req.outletId : null;
+  // Settle rule 1: the buyer named the shop, stated an area, or sent the shop's id.
+  if (!area && named.size === 0 && sent === null) return clarify(["area"]);
 
-  const inScope = (outlet: PublishedOutletSummary) => named.has(outlet.id) || (area !== null && inArea(outlet, area));
+  const inScope = (outlet: PublishedOutletSummary) => named.has(outlet.id) || outlet.id === sent || (area !== null && inArea(outlet, area));
   const byId = new Map(published.map((outlet) => [outlet.id, outlet]));
 
   if (proposal.kind === "outlets") {
@@ -95,12 +100,60 @@ async function settle(db: Db, req: SuggestionRequest, proposal: ModelProposal): 
   if (!outlet || !inScope(outlet)) return { kind: "no_match" };
   const menu = await getPublishedMenu(db, outlet.id);
   if (!menu) return { kind: "no_match" };
+
+  if (proposal.kind === "basket") return settleBasket(outlet, menu.items, proposal.lines);
+  if (proposal.kind === "choose") return settleChoice(outlet, menu.items, proposal.choices, proposal.lines.map((line) => line.quantity));
+
   const wanted = new Set(proposal.itemIds);
-  const matches: PublishedItemSummary[] = menu.items
-    .filter((item) => wanted.has(item.id) && item.unitSgdCents !== null && item.available !== false)
-    .slice(0, MAX_MATCHES)
-    .map((item) => ({ id: item.id, name: item.name, unitSgdCents: item.unitSgdCents as number, available: item.available }));
+  const matches: PublishedItemSummary[] = summarize(
+    menu.items.filter((item) => wanted.has(item.id) && item.unitSgdCents !== null && item.available !== false).slice(0, MAX_MATCHES),
+  );
   return matches.length > 0 ? { kind: "items", outletId: outlet.id, outlet, matches } : { kind: "outlets", matches: [outlet] };
+}
+
+function summarize(items: readonly PublishedMenuItem[]): PublishedItemSummary[] {
+  return items.map((item) => ({ id: item.id, name: item.name, unitSgdCents: item.unitSgdCents as number, available: item.available }));
+}
+
+function suggestedQuantity(quantity: number): boolean {
+  return Number.isInteger(quantity) && quantity >= 1 && quantity <= MAX_SUGGESTED_QUANTITY;
+}
+
+// Settle rules 3 to 5. An item the shop published but marked unavailable is named, because dropping
+// it silently would leave the buyer believing the whole sentence was understood; the model's quantity
+// for it is dropped. A quantity outside the bound asks again rather than reaching a clamped basket.
+function settleBasket(outlet: PublishedOutletSummary, items: readonly PublishedMenuItem[], lines: readonly { itemId: string; quantity: number }[]): Suggestion {
+  const asked = new Map<string, number>();
+  for (const line of lines) if (!asked.has(line.itemId)) asked.set(line.itemId, line.quantity);
+
+  const unavailable = items.filter((item) => asked.has(item.id) && item.available === false).map((item) => ({ id: item.id, name: item.name }));
+  if (unavailable.length > 0) return { kind: "unavailable_item", outletId: outlet.id, outlet, items: unavailable };
+  if ([...asked.values()].some((quantity) => !suggestedQuantity(quantity))) return clarify(["item"]);
+
+  const kept = summarize(
+    items.filter((item) => asked.has(item.id) && item.unitSgdCents !== null && item.available !== false && suggestedQuantity(asked.get(item.id) as number)).slice(0, MAX_MATCHES),
+  ).map((item) => ({ item, quantity: asked.get(item.id) as number }));
+  // Nothing the buyer asked for is on this menu: show the shop so they can pick from it, as the item
+  // answer does, rather than claiming no shop matched.
+  return kept.length > 0 ? { kind: "basket", outletId: outlet.id, outlet, lines: kept } : { kind: "outlets", matches: [outlet] };
+}
+
+// Settle rule 6: a choice keeps only published, priced, available ids; one survivor is the basket the
+// buyer meant, and none is no match. ModelProposal carries quantities in "lines" only, so the one
+// quantity the buyer gave for the phrase is the single distinct quantity there; without exactly one,
+// the answer asks again rather than picking a number for them.
+function settleChoice(outlet: PublishedOutletSummary, items: readonly PublishedMenuItem[], choices: readonly string[], quantities: readonly number[]): Suggestion {
+  const asked = [...new Set(quantities)];
+  if (asked.length !== 1 || !suggestedQuantity(asked[0] as number)) return clarify(["item"]);
+  const quantity = asked[0] as number;
+  const offered = new Set(choices);
+  const matches = summarize(
+    items.filter((item) => offered.has(item.id) && item.unitSgdCents !== null && item.available !== false).slice(0, MAX_MATCHES),
+  );
+  if (matches.length === 0) return { kind: "no_match" };
+  const [only] = matches;
+  if (matches.length === 1) return { kind: "basket", outletId: outlet.id, outlet, lines: [{ item: only as PublishedItemSummary, quantity }] };
+  return { kind: "choose", outletId: outlet.id, outlet, quantity, matches };
 }
 
 export async function suggestFromText(db: Db, principal: BuyerPrincipal, req: SuggestionRequest, now: Date, model: SuggestionModel): Promise<SuggestionResult> {

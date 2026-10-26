@@ -1,0 +1,385 @@
+[
+ {
+  "id": "m01-basket-keeps-an-invented-id",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "test": "a basket holds only published available priced items",
+  "kind": "standalone",
+  "mutation": "Named test 4, published guard: a basket line is built from the proposal's ids with a made-up item for an id the published menu does not hold, so an invented id reaches the buyer with a price of 0.",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "  const kept = summarize(\n    items.filter((item) => asked.has(item.id) && item.unitSgdCents !== null && item.available !== false && suggestedQuantity(asked.get(item.id) as number)).slice(0, MAX_MATCHES),\n  ).map((item) => ({ item, quantity: asked.get(item.id) as number }));",
+    "new": "  const onMenu = new Map(items.map((item) => [item.id, item]));\n  const proposed = [...asked.keys()].map((id) => {\n    const found = onMenu.get(id);\n    return { id, name: found ? found.name : id, unitSgdCents: found ? found.unitSgdCents : 0, available: found ? found.available : true };\n  });\n  const kept = summarize(\n    proposed.filter((item) => item.unitSgdCents !== null && item.available !== false && suggestedQuantity(asked.get(item.id) as number)).slice(0, MAX_MATCHES),\n  ).map((item) => ({ item, quantity: asked.get(item.id) as number }));"
+   }
+  ]
+ },
+ {
+  "id": "m02-basket-keeps-an-unpriced-item",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "test": "a basket holds only published available priced items",
+  "kind": "standalone",
+  "mutation": "Named test 4, priced guard: the survivor filter stops requiring a price, so an item the shop has not priced reaches the basket.",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "    items.filter((item) => asked.has(item.id) && item.unitSgdCents !== null && item.available !== false && suggestedQuantity(asked.get(item.id) as number)).slice(0, MAX_MATCHES),",
+    "new": "    items.filter((item) => asked.has(item.id) && item.available !== false && suggestedQuantity(asked.get(item.id) as number)).slice(0, MAX_MATCHES),"
+   }
+  ]
+ },
+ {
+  "id": "m03-basket-keeps-an-unasked-item",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "test": "a basket holds only published available priced items",
+  "kind": "standalone",
+  "mutation": "Named test 4, asked-for guard: the survivor filter stops requiring that the buyer asked for the item, so the whole menu enters the basket.",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "    items.filter((item) => asked.has(item.id) && item.unitSgdCents !== null && item.available !== false && suggestedQuantity(asked.get(item.id) as number)).slice(0, MAX_MATCHES),",
+    "new": "    items.filter((item) => item.unitSgdCents !== null && item.available !== false).slice(0, MAX_MATCHES),"
+   }
+  ]
+ },
+ {
+  "id": "m04-unavailable-needs-two",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "test": "an unavailable item is named and never added",
+  "kind": "standalone",
+  "mutation": "Named test 5: the unavailable answer needs two unavailable items, so a single one is dropped silently and the rest becomes a basket.",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "  if (unavailable.length > 0) return { kind: \"unavailable_item\", outletId: outlet.id, outlet, items: unavailable };",
+    "new": "  if (unavailable.length > 1) return { kind: \"unavailable_item\", outletId: outlet.id, outlet, items: unavailable };"
+   }
+  ]
+ },
+ {
+  "id": "m05-unavailable-answer-also-adds",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "test": "an unavailable item is named and never added",
+  "kind": "standalone",
+  "mutation": "Named test 5, never added: the unavailable answer also lists the available items the buyer asked for, so the refusal carries a basket with it.",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "  if (unavailable.length > 0) return { kind: \"unavailable_item\", outletId: outlet.id, outlet, items: unavailable };",
+    "new": "  if (unavailable.length > 0) return { kind: \"unavailable_item\", outletId: outlet.id, outlet, items: [...unavailable, ...items.filter((item) => asked.has(item.id) && item.available !== false).map((item) => ({ id: item.id, name: item.name }))] };"
+   }
+  ]
+ },
+ {
+  "id": "m06-quantity-check-skipped",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "test": "a quantity outside 1 to 20 asks again",
+  "kind": "standalone",
+  "mutation": "Named test 6: the settle rule 5 check never fires, so an out-of-bound quantity is dropped instead of asked about.",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "  if ([...asked.values()].some((quantity) => !suggestedQuantity(quantity))) return clarify([\"item\"]);",
+    "new": "  if (asked.size > MAX_MATCHES * 100) return clarify([\"item\"]);"
+   }
+  ]
+ },
+ {
+  "id": "m07-quantity-clamped",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "test": "a quantity outside 1 to 20 asks again",
+  "kind": "standalone",
+  "mutation": "Named mutation for test 6: an out-of-bound quantity is clamped into 1-20 and rounded, which is exactly the clamped basket settle rule 5 forbids.",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "  if ([...asked.values()].some((quantity) => !suggestedQuantity(quantity))) return clarify([\"item\"]);",
+    "new": "  for (const [id, quantity] of asked) if (!suggestedQuantity(quantity)) asked.set(id, Math.min(MAX_SUGGESTED_QUANTITY, Math.max(1, Math.round(quantity))));"
+   }
+  ]
+ },
+ {
+  "id": "m08-quantity-bound-moved",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "test": "a quantity outside 1 to 20 asks again",
+  "kind": "standalone",
+  "mutation": "Named test 6, the bound itself: MAX_SUGGESTED_QUANTITY becomes 21, so 21 is a basket rather than a question.",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/types.ts",
+    "old": "export const MAX_SUGGESTED_QUANTITY = 20;",
+    "new": "export const MAX_SUGGESTED_QUANTITY = 21;"
+   }
+  ]
+ },
+ {
+  "id": "m09-fractional-quantity-allowed",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "test": "a quantity outside 1 to 20 asks again",
+  "kind": "standalone",
+  "mutation": "Named test 6, integrality: the bound keeps 1-20 but a fractional quantity is accepted into a basket.",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "  return Number.isInteger(quantity) && quantity >= 1 && quantity <= MAX_SUGGESTED_QUANTITY;",
+    "new": "  return quantity >= 1 && quantity <= MAX_SUGGESTED_QUANTITY;"
+   }
+  ]
+ },
+ {
+  "id": "m10-two-fitting-items-become-a-basket",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "test": "two fitting items ask which one",
+  "kind": "standalone",
+  "mutation": "Named test 7: one survivor becomes a basket even when two items fit, so Envoi picks the item the buyer did not.",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "  if (matches.length === 1) return { kind: \"basket\", outletId: outlet.id, outlet, lines: [{ item: only as PublishedItemSummary, quantity }] };",
+    "new": "  if (matches.length >= 1) return { kind: \"basket\", outletId: outlet.id, outlet, lines: [{ item: only as PublishedItemSummary, quantity }] };"
+   }
+  ]
+ },
+ {
+  "id": "m11-choice-keeps-an-unpublished-id",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "test": "two fitting items ask which one",
+  "kind": "standalone",
+  "mutation": "Named test 7: the choice stops requiring that the id is one the buyer's phrase was offered, so the whole menu is offered.",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "    items.filter((item) => offered.has(item.id) && item.unitSgdCents !== null && item.available !== false).slice(0, MAX_MATCHES),",
+    "new": "    items.filter((item) => item.unitSgdCents !== null && item.available !== false).slice(0, MAX_MATCHES),"
+   }
+  ]
+ },
+ {
+  "id": "m12-choice-loses-the-quantity",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "test": "two fitting items ask which one",
+  "kind": "standalone",
+  "mutation": "Named test 7: the choice always says one, so the buyer's quantity is lost from the question.",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "  return { kind: \"choose\", outletId: outlet.id, outlet, quantity, matches };",
+    "new": "  return { kind: \"choose\", outletId: outlet.id, outlet, quantity: 1, matches };"
+   }
+  ]
+ },
+ {
+  "id": "m13-one-survivor-stays-a-choice",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "test": "one surviving choice becomes a basket",
+  "kind": "standalone",
+  "mutation": "Named test 8: the one-survivor branch never fires, so the buyer is asked to pick between one item.",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "  if (matches.length === 1) return { kind: \"basket\", outletId: outlet.id, outlet, lines: [{ item: only as PublishedItemSummary, quantity }] };",
+    "new": "  if (matches.length === 99) return { kind: \"basket\", outletId: outlet.id, outlet, lines: [{ item: only as PublishedItemSummary, quantity }] };"
+   }
+  ]
+ },
+ {
+  "id": "m14-no-survivor-is-an-empty-choice",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "test": "a choice with no survivor is no match",
+  "kind": "standalone",
+  "mutation": "Beyond the named tests, settle rule 6's tail: no survivor returns an empty choice instead of no match.",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "  if (matches.length === 0) return { kind: \"no_match\" };",
+    "new": "  if (matches.length === 0) return { kind: \"choose\", outletId: outlet.id, outlet, quantity, matches };"
+   }
+  ]
+ },
+ {
+  "id": "m15-first-of-two-quantities-wins",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "test": "a choice carrying two quantities asks again",
+  "kind": "standalone",
+  "mutation": "Beyond the named tests: a choice carrying two different quantities takes the first instead of asking again.",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "  if (asked.length !== 1 || !suggestedQuantity(asked[0] as number)) return clarify([\"item\"]);",
+    "new": "  if (asked.length < 1 || !suggestedQuantity(asked[0] as number)) return clarify([\"item\"]);"
+   }
+  ]
+ },
+ {
+  "id": "m16-sent-outlet-ignored",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "test": "an outletId puts that shop in scope and nothing else",
+  "kind": "standalone",
+  "mutation": "Named test 9, settle rule 1: a sent outletId is ignored, so the shop the buyer is already looking at still asks for an area.",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "  if (!area && named.size === 0 && sent === null) return clarify([\"area\"]);",
+    "new": "  if (!area && named.size === 0) return clarify([\"area\"]);"
+   }
+  ]
+ },
+ {
+  "id": "m17-sent-outlet-not-checked",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "test": "an outletId puts that shop in scope and nothing else",
+  "kind": "standalone",
+  "mutation": "Named test 9, settle rule 2: a sent outletId is trusted without being a published outlet, so an unpublished or unknown id stops the area question.",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "  const sent = req.outletId !== undefined && published.some((outlet) => outlet.id === req.outletId) ? req.outletId : null;",
+    "new": "  const sent = req.outletId ?? null;"
+   }
+  ]
+ },
+ {
+  "id": "m18-sent-outlet-trusted-for-everything",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "test": "an outletId puts that shop in scope and nothing else",
+  "kind": "standalone",
+  "mutation": "Named test 9, and nothing else: any sent outletId puts every published shop in scope, not only that one.",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "  const inScope = (outlet: PublishedOutletSummary) => named.has(outlet.id) || outlet.id === sent || (area !== null && inArea(outlet, area));",
+    "new": "  const inScope = (outlet: PublishedOutletSummary) => sent !== null || named.has(outlet.id) || (area !== null && inArea(outlet, area));"
+   }
+  ]
+ },
+ {
+  "id": "m19-named-shop-ignored",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "test": "a shop named in the sentence needs no area",
+  "kind": "standalone",
+  "mutation": "Named test 10: a shop the buyer named in their own words no longer puts it in scope, so the sentence asks for an area.",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "  const named = new Set(published.filter((outlet) => containsWords(text, normalize(outlet.name))).map((outlet) => outlet.id));",
+    "new": "  const named = new Set<string>();"
+   }
+  ]
+ },
+ {
+  "id": "m20-suggestion-writes-an-audit-row",
+  "test_file": "tests/integration/buyer-suggestions.test.ts",
+  "test": "a suggestion writes nothing",
+  "kind": "standalone",
+  "mutation": "Named test 11, settle rule 7: a basket answer records an audit row, so a proposal that is never reviewed leaves a trace.",
+  "edits": [
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "import { log } from \"@/lib/log\";",
+    "new": "import { recordAudit } from \"@/domain/audit/events\";\nimport { log } from \"@/lib/log\";"
+   },
+   {
+    "file": "src/domain/suggestions/suggest.ts",
+    "old": "  const suggestion = await settle(db, req, outcome.proposal);",
+    "new": "  const suggestion = await settle(db, req, outcome.proposal);\n  if (suggestion.kind === \"basket\") await recordAudit(db, { at: now, actor: `buyer:${principal.userId}`, action: \"suggestion_basket\", operatorVisible: false });"
+   }
+  ]
+ },
+ {
+  "id": "m21-basket-in-the-address",
+  "test_file": "tests/unit/one-box.test.ts",
+  "test": "the prefilled basket never reaches a URL",
+  "kind": "standalone",
+  "mutation": "Named mutation for test 12: the shop address a basket answer opens also carries the held item ids and quantities, which is the mechanism Gate 2 one-box point 5 forbids.",
+  "edits": [
+   {
+    "file": "src/app/buy/one-box.ts",
+    "old": "  return `/buy?outlet=${encodeURIComponent(outletId)}`;",
+    "new": "  const params = new URLSearchParams({ outlet: outletId });\n  if (held !== null && held.outletId === outletId) params.set(\"items\", held.lines.map((line) => `${line.id}:${line.quantity}`).join(\",\"));\n  return `/buy?${params.toString()}`;"
+   }
+  ]
+ },
+ {
+  "id": "m22-proposal-crosses-shops",
+  "test_file": "tests/unit/one-box.test.ts",
+  "test": "the prefilled basket never reaches a URL",
+  "kind": "standalone",
+  "mutation": "Named test 12: a held proposal is returned for any shop, so one shop's basket can prefill another's.",
+  "edits": [
+   {
+    "file": "src/app/buy/one-box.ts",
+    "old": "  return held !== null && held.outletId === outletId ? held : null;",
+    "new": "  return held;"
+   }
+  ]
+ },
+ {
+  "id": "m23-storage-carries-the-basket",
+  "test_file": "tests/unit/one-box.test.ts",
+  "test": "no client source of the one-box answers reaches storage",
+  "kind": "standalone",
+  "mutation": "Beyond the named tests: the basket is also written to sessionStorage before the navigation, which the slice forbids.",
+  "edits": [
+   {
+    "file": "src/app/buy/text-suggest.tsx",
+    "old": "    holdBasketProposal({ outletId, lines });",
+    "new": "    window.sessionStorage.setItem(\"basket\", JSON.stringify(lines));\n    holdBasketProposal({ outletId, lines });"
+   }
+  ]
+ },
+ {
+  "id": "m24-proposal-module-loses-its-client-boundary",
+  "test_file": "tests/unit/one-box.test.ts",
+  "test": "no client source of the one-box answers reaches storage",
+  "kind": "standalone",
+  "mutation": "Beyond the named tests: the module holding the proposal loses its client directive, so a server render could share one browser's held basket.",
+  "edits": [
+   {
+    "file": "src/app/buy/one-box.ts",
+    "old": "\"use client\";",
+    "new": "// client module;"
+   }
+  ]
+ },
+ {
+  "id": "m25-choice-heading-generic",
+  "test_file": "tests/unit/one-box.test.ts",
+  "test": "the one-box answers say the mockup's words",
+  "kind": "standalone",
+  "mutation": "Beyond the named tests: the choice question stops naming the phrase the buyer used, so the approved mockup copy is lost.",
+  "edits": [
+   {
+    "file": "src/app/buy/one-box.ts",
+    "old": "  return shared.length > 0 ? `Which ${shared.join(\" \")}?` : \"Which one?\";",
+    "new": "  return \"Which one?\";"
+   }
+  ]
+ },
+ {
+  "id": "m26-count-as-a-digit",
+  "test_file": "tests/unit/one-box.test.ts",
+  "test": "the one-box answers say the mockup's words",
+  "kind": "standalone",
+  "mutation": "Beyond the named tests: the choice summary states the count as a digit, so it no longer reads as the approved copy.",
+  "edits": [
+   {
+    "file": "src/app/buy/one-box.ts",
+    "old": "  return COUNT_WORDS[count] ?? String(count);",
+    "new": "  return String(count);"
+   }
+  ]
+ },
+ {
+  "id": "m27-unavailable-always-singular",
+  "test_file": "tests/unit/one-box.test.ts",
+  "test": "the one-box answers say the mockup's words",
+  "kind": "standalone",
+  "mutation": "Beyond the named tests: the unavailable answer says \"is\" for two named items, so the copy reads wrong when more than one is unavailable.",
+  "edits": [
+   {
+    "file": "src/app/buy/one-box.ts",
+    "old": "  return `${itemNames.join(\", \")} ${itemNames.length === 1 ? \"is\" : \"are\"} unavailable at ${outletName} today`;",
+    "new": "  return `${itemNames.join(\", \")} is unavailable at ${outletName} today`;"
+   }
+  ]
+ }
+]

@@ -1,13 +1,14 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import type { PublishedOutletSummary } from "@/domain/outlets/search";
 import type { Suggestion } from "@/domain/suggestions/types";
 import { ensureBuyerSession, postJson } from "@/lib/browser/session";
 import { useRestoreFocus } from "@/lib/browser/focus";
+import { chooseHeading, chooseSummary, holdBasketProposal, shopHref, unavailableHeading, type BasketLine } from "./one-box";
 
 const MAX_TEXT = 280;
-const MAX_AREA = 80;
 // The server answers within T_AI_BUDGET (30 seconds) plus its own reads. A dropped connection can
 // leave the request open with no answer, so the page gives up after 40 seconds and offers the list.
 const CLIENT_TIMEOUT_MS = 40_000;
@@ -16,9 +17,10 @@ function sgd(cents: number): string {
   return `S$${Math.floor(cents / 100)}.${String(cents % 100).padStart(2, "0")}`;
 }
 
-function shopHref(outletId: string, itemIds: string[] = []): string {
-  const params = new URLSearchParams({ outlet: outletId });
-  if (itemIds.length > 0) params.set("items", itemIds.join(","));
+// The item answer keeps its own address, which names the items and starts each at quantity 1. A
+// basket answer never uses it: its quantities travel in memory instead (see one-box.ts).
+function itemsHref(outletId: string, itemIds: string[]): string {
+  const params = new URLSearchParams({ outlet: outletId, items: itemIds.join(",") });
   return `/buy?${params.toString()}`;
 }
 
@@ -31,21 +33,27 @@ function ShopName({ outlet }: { outlet: PublishedOutletSummary }) {
   );
 }
 
-// The buyer's words go to POST /api/v1/buyer/suggestions. What comes back names registered shops
-// and items only; prices shown here are the shop's published menu prices, and the review page
-// prices the basket again server-side. Any failure points the buyer at the manual list.
+// The buyer's words, request and place together, go to POST /api/v1/buyer/suggestions. What comes
+// back names registered shops and items only; prices shown here are the shop's published menu prices,
+// and the review page prices the basket again server-side. A filled basket is a proposal: nothing is
+// reviewed or paid until the buyer taps Review there. Any failure points the buyer at the manual list.
 export function TextSuggest({ manualListId }: { manualListId: string }) {
+  const router = useRouter();
   const [text, setText] = useState("");
-  const [area, setArea] = useState("");
   const [busy, setBusy] = useState(false);
   const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
   useRestoreFocus(busy);
-  const areaRef = useRef<HTMLInputElement>(null);
 
   function showManual(message: string) {
     setFailure(message);
     document.getElementById(manualListId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // The basket goes to the shop page in memory, and the address names the shop only.
+  function openBasket(outletId: string, lines: BasketLine[]) {
+    holdBasketProposal({ outletId, lines });
+    router.push(shopHref(outletId));
   }
 
   async function submit(event: React.FormEvent) {
@@ -56,16 +64,21 @@ export function TextSuggest({ manualListId }: { manualListId: string }) {
     setSuggestion(null);
     try {
       await ensureBuyerSession();
-      const body = area.trim() ? { text: text.trim(), area: area.trim() } : { text: text.trim() };
-      const result = await postJson<{ suggestion: Suggestion }>("/api/v1/buyer/suggestions", body, AbortSignal.timeout(CLIENT_TIMEOUT_MS));
+      const result = await postJson<{ suggestion: Suggestion }>("/api/v1/buyer/suggestions", { text: text.trim() }, AbortSignal.timeout(CLIENT_TIMEOUT_MS));
       if (!result.ok || !result.data) {
         showManual(result.error?.message ?? "Suggestions are not available right now. Pick a shop from the list instead.");
         return;
       }
       const next = result.data.suggestion;
+      if (next.kind === "basket") {
+        openBasket(
+          next.outletId,
+          next.lines.map((line) => ({ id: line.item.id, quantity: line.quantity })),
+        );
+        return;
+      }
       setSuggestion(next);
       if (next.kind === "budget_exceeded") showManual("Suggestions took too long. Pick a shop from the list instead.");
-      if (next.kind === "clarification" && next.missing.includes("area")) areaRef.current?.focus();
     } catch (err) {
       showManual(
         err instanceof DOMException && err.name === "TimeoutError"
@@ -78,27 +91,71 @@ export function TextSuggest({ manualListId }: { manualListId: string }) {
   }
 
   return (
-    <section className="card" aria-labelledby="request-heading">
-      <h2 id="request-heading">What would you like?</h2>
+    <section className="card">
       <form onSubmit={submit}>
-        <label htmlFor="request">Your request</label>
-        <textarea id="request" value={text} maxLength={MAX_TEXT} rows={3} placeholder="For example: kaya toast and kopi" onChange={(event) => setText(event.target.value)} />
-        <label htmlFor="area">Your area</label>
-        <input id="area" ref={areaRef} value={area} maxLength={MAX_AREA} placeholder="For example: Tanjong Pagar" onChange={(event) => setArea(event.target.value)} />
+        <label htmlFor="request">What would you like, and where?</label>
+        <textarea
+          id="request"
+          value={text}
+          maxLength={MAX_TEXT}
+          rows={3}
+          placeholder="For example: two kaya toast and kopi near Tanjong Pagar"
+          onChange={(event) => setText(event.target.value)}
+        />
         <button className="button full" type="submit" disabled={busy || text.trim().length === 0}>
-          {busy ? "Looking…" : "Find shops and items"}
+          {busy ? "Looking…" : "Find it"}
         </button>
       </form>
       <p className="muted fine">Suggestions come from an AI model and only name shops and items registered on Envoi. Prices come from the shop&apos;s published menu, never from the model.</p>
 
       <div aria-live="polite">
-        {suggestion?.kind === "clarification" && (
-          <div className="status">
-            <strong>{suggestion.missing.includes("area") ? "Where should I look?" : "Tell me a little more"}</strong>
-            <small>
-              {suggestion.question}
-              {suggestion.missing.includes("area") && " Envoi does not know your location and cannot choose the nearest shop."}
-            </small>
+        {suggestion?.kind === "clarification" &&
+          (suggestion.missing.includes("area") ? (
+            <div className="status">
+              <strong>Which area, or which shop?</strong>
+              <small>No area or shop was named, and location is not used. Envoi does not guess the nearest shop.</small>
+            </div>
+          ) : (
+            <div className="status">
+              <strong>Tell me a little more</strong>
+              <small>{suggestion.question}</small>
+            </div>
+          ))}
+
+        {suggestion?.kind === "choose" && (
+          <div className="suggestion">
+            <div className="status">
+              <strong>{chooseHeading(suggestion.matches.map((item) => item.name))}</strong>
+              <small>{chooseSummary(suggestion.matches.length, suggestion.quantity)}</small>
+            </div>
+            <div className="row">
+              <ShopName outlet={suggestion.outlet} />
+              {suggestion.outlet.isDemoFixture && <span className="chip warn">Demo fixture</span>}
+            </div>
+            <div className="actions">
+              {suggestion.matches.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className="button secondary"
+                  onClick={() => openBasket(suggestion.outletId, [{ id: item.id, quantity: suggestion.quantity }])}
+                >
+                  {item.name} · {sgd(item.unitSgdCents)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {suggestion?.kind === "unavailable_item" && (
+          <div className="suggestion">
+            <div className="status">
+              <strong>{unavailableHeading(suggestion.items.map((item) => item.name), suggestion.outlet.name)}</strong>
+              <small>The shop marked it unavailable on its published menu. Envoi does not add it to a basket.</small>
+            </div>
+            <a className="button secondary full" href={shopHref(suggestion.outletId)}>
+              See {suggestion.outlet.name}&apos;s menu
+            </a>
           </div>
         )}
 
@@ -116,7 +173,7 @@ export function TextSuggest({ manualListId }: { manualListId: string }) {
             ))}
             <a
               className="button full"
-              href={shopHref(
+              href={itemsHref(
                 suggestion.outletId,
                 suggestion.matches.map((item) => item.id),
               )}

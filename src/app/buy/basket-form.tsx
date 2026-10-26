@@ -22,6 +22,7 @@ export function BasketForm({
   preselected = [],
   rail = "paypal",
   autoReview = false,
+  note,
 }: {
   outletId: string;
   items: BasketItem[];
@@ -29,6 +30,8 @@ export function BasketForm({
   rail?: "paypal" | "pyusd";
   // Set when the Phantom Browse link named the PYUSD rail: the pre-filled basket is reviewed on PYUSD on landing.
   autoReview?: boolean;
+  // Set when the basket arrived from a sentence, to say that it is still only a proposal.
+  note?: string;
 }) {
   const router = useRouter();
   const [quantities, setQuantities] = useState<Record<string, number>>(() =>
@@ -113,6 +116,7 @@ export function BasketForm({
         <strong>Subtotal</strong>
         <span className="total money">{sgd(subtotal)}</span>
       </div>
+      {note && <p className="muted fine">{note}</p>}
       <button className="button full" type="button" onClick={review} disabled={busy || chosen.length === 0}>
         {busy ? "Preparing review…" : "Review"}
       </button>

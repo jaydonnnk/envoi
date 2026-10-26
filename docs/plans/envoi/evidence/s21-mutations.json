@@ -1,0 +1,575 @@
+{
+ "branch": "envoi/slice-21-one-box-order",
+ "base_commit": "9218d78",
+ "uncommitted_changes": true,
+ "method": "Each definition in s21-mutation-defs.json applied alone by exact text replacement, its whole test file run with the vitest JSON reporter, every touched file restored and compared by SHA-256, then the whole file rerun. A proof needs the named row to fail on an AssertionError, a byte-identical restore and an all-passing rerun; other failing rows are recorded. The integration file runs the real route handler POST /api/v1/buyer/suggestions as envoi_web on a local PostgreSQL database built from the migrations, with DATABASE_URL removed, holding the seeded demo FIXTURE shop and, for one case, two extra FIXTURE shops it removes again; OpenAI is faked at the provider's fetch boundary by tests/support/fake-openai.ts, labeled FIXTURE, so no model is called and PayPal is never reached. The unit file reads src/app/buy/one-box.ts and the two client components that use it. Every definition here is an S21 test recorded in 00-status.md.",
+ "results": [
+  {
+   "id": "m01-basket-keeps-an-invented-id",
+   "test": "a basket holds only published available priced items",
+   "kind": "standalone",
+   "group": "buyer text suggestions",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "Named test 4, published guard: a basket line is built from the proposal's ids with a made-up item for an id the published menu does not hold, so an invented id reaches the buyer with a price of 0.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { kind: 'basket', \u2026(3) } to deeply equal { kind: 'basket', \u2026(3) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 34,
+   "proof": true
+  },
+  {
+   "id": "m02-basket-keeps-an-unpriced-item",
+   "test": "a basket holds only published available priced items",
+   "kind": "standalone",
+   "group": "buyer text suggestions",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "Named test 4, priced guard: the survivor filter stops requiring a price, so an item the shop has not priced reaches the basket.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { kind: 'basket', \u2026(3) } to deeply equal { kind: 'basket', \u2026(3) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 34,
+   "proof": true
+  },
+  {
+   "id": "m03-basket-keeps-an-unasked-item",
+   "test": "a basket holds only published available priced items",
+   "kind": "standalone",
+   "group": "buyer text suggestions",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "Named test 4, asked-for guard: the survivor filter stops requiring that the buyer asked for the item, so the whole menu enters the basket.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { kind: 'basket', \u2026(3) } to deeply equal { kind: 'basket', \u2026(3) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "a quantity outside 1 to 20 asks again",
+    "a shop named in the sentence needs no area",
+    "an outletId puts that shop in scope and nothing else"
+   ],
+   "other_errors": {
+    "a quantity outside 1 to 20 asks again": "AssertionError: expected { kind: 'basket', \u2026(3) } to match object { kind: 'basket', \u2026(1) }",
+    "a shop named in the sentence needs no area": "AssertionError: expected { kind: 'basket', \u2026(3) } to match object { kind: 'basket', \u2026(2) }",
+    "an outletId puts that shop in scope and nothing else": "AssertionError: expected { kind: 'basket', \u2026(3) } to match object { kind: 'basket', \u2026(2) }"
+   },
+   "same_group_others": [
+    "a quantity outside 1 to 20 asks again",
+    "a shop named in the sentence needs no area",
+    "an outletId puts that shop in scope and nothing else"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 34,
+   "proof": true
+  },
+  {
+   "id": "m04-unavailable-needs-two",
+   "test": "an unavailable item is named and never added",
+   "kind": "standalone",
+   "group": "buyer text suggestions",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "Named test 5: the unavailable answer needs two unavailable items, so a single one is dropped silently and the rest becomes a basket.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { kind: 'basket', \u2026(3) } to deeply equal { kind: 'unavailable_item', \u2026(3) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 34,
+   "proof": true
+  },
+  {
+   "id": "m05-unavailable-answer-also-adds",
+   "test": "an unavailable item is named and never added",
+   "kind": "standalone",
+   "group": "buyer text suggestions",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "Named test 5, never added: the unavailable answer also lists the available items the buyer asked for, so the refusal carries a basket with it.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { kind: 'unavailable_item', \u2026(3) } to deeply equal { kind: 'unavailable_item', \u2026(3) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 34,
+   "proof": true
+  },
+  {
+   "id": "m06-quantity-check-skipped",
+   "test": "a quantity outside 1 to 20 asks again",
+   "kind": "standalone",
+   "group": "buyer text suggestions",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "Named test 6: the settle rule 5 check never fires, so an out-of-bound quantity is dropped instead of asked about.",
+   "own_row": "failed",
+   "error": "AssertionError: quantity 0: expected { kind: 'outlets', \u2026(1) } to deeply equal { kind: 'clarification', \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 34,
+   "proof": true
+  },
+  {
+   "id": "m07-quantity-clamped",
+   "test": "a quantity outside 1 to 20 asks again",
+   "kind": "standalone",
+   "group": "buyer text suggestions",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "Named mutation for test 6: an out-of-bound quantity is clamped into 1-20 and rounded, which is exactly the clamped basket settle rule 5 forbids.",
+   "own_row": "failed",
+   "error": "AssertionError: quantity 0: expected { kind: 'basket', \u2026(3) } to deeply equal { kind: 'clarification', \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 34,
+   "proof": true
+  },
+  {
+   "id": "m08-quantity-bound-moved",
+   "test": "a quantity outside 1 to 20 asks again",
+   "kind": "standalone",
+   "group": "buyer text suggestions",
+   "files": [
+    "src/domain/suggestions/types.ts"
+   ],
+   "mutation": "Named test 6, the bound itself: MAX_SUGGESTED_QUANTITY becomes 21, so 21 is a basket rather than a question.",
+   "own_row": "failed",
+   "error": "AssertionError: quantity 21: expected { kind: 'basket', \u2026(3) } to deeply equal { kind: 'clarification', \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 34,
+   "proof": true
+  },
+  {
+   "id": "m09-fractional-quantity-allowed",
+   "test": "a quantity outside 1 to 20 asks again",
+   "kind": "standalone",
+   "group": "buyer text suggestions",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "Named test 6, integrality: the bound keeps 1-20 but a fractional quantity is accepted into a basket.",
+   "own_row": "failed",
+   "error": "AssertionError: quantity 2.5: expected { kind: 'basket', \u2026(3) } to deeply equal { kind: 'clarification', \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 34,
+   "proof": true
+  },
+  {
+   "id": "m10-two-fitting-items-become-a-basket",
+   "test": "two fitting items ask which one",
+   "kind": "standalone",
+   "group": "buyer text suggestions",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "Named test 7: one survivor becomes a basket even when two items fit, so Envoi picks the item the buyer did not.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { kind: 'basket', \u2026(3) } to deeply equal { kind: 'choose', \u2026(4) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 34,
+   "proof": true
+  },
+  {
+   "id": "m11-choice-keeps-an-unpublished-id",
+   "test": "two fitting items ask which one",
+   "kind": "standalone",
+   "group": "buyer text suggestions",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "Named test 7: the choice stops requiring that the id is one the buyer's phrase was offered, so the whole menu is offered.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { kind: 'choose', \u2026(4) } to deeply equal { kind: 'choose', \u2026(4) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "a choice with no survivor is no match",
+    "one surviving choice becomes a basket"
+   ],
+   "other_errors": {
+    "a choice with no survivor is no match": "AssertionError: expected { kind: 'choose', \u2026(4) } to deeply equal { kind: 'no_match' }",
+    "one surviving choice becomes a basket": "AssertionError: expected { kind: 'choose', \u2026(4) } to deeply equal { kind: 'basket', \u2026(3) }"
+   },
+   "same_group_others": [
+    "a choice with no survivor is no match",
+    "one surviving choice becomes a basket"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 34,
+   "proof": true
+  },
+  {
+   "id": "m12-choice-loses-the-quantity",
+   "test": "two fitting items ask which one",
+   "kind": "standalone",
+   "group": "buyer text suggestions",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "Named test 7: the choice always says one, so the buyer's quantity is lost from the question.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { kind: 'choose', \u2026(4) } to deeply equal { kind: 'choose', \u2026(4) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 34,
+   "proof": true
+  },
+  {
+   "id": "m13-one-survivor-stays-a-choice",
+   "test": "one surviving choice becomes a basket",
+   "kind": "standalone",
+   "group": "buyer text suggestions",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "Named test 8: the one-survivor branch never fires, so the buyer is asked to pick between one item.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { kind: 'choose', \u2026(4) } to deeply equal { kind: 'basket', \u2026(3) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 34,
+   "proof": true
+  },
+  {
+   "id": "m14-no-survivor-is-an-empty-choice",
+   "test": "a choice with no survivor is no match",
+   "kind": "standalone",
+   "group": "buyer text suggestions",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "Beyond the named tests, settle rule 6's tail: no survivor returns an empty choice instead of no match.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { kind: 'choose', \u2026(4) } to deeply equal { kind: 'no_match' }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 34,
+   "proof": true
+  },
+  {
+   "id": "m15-first-of-two-quantities-wins",
+   "test": "a choice carrying two quantities asks again",
+   "kind": "standalone",
+   "group": "buyer text suggestions",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "Beyond the named tests: a choice carrying two different quantities takes the first instead of asking again.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { kind: 'choose', \u2026(4) } to deeply equal { kind: 'clarification', \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 34,
+   "proof": true
+  },
+  {
+   "id": "m16-sent-outlet-ignored",
+   "test": "an outletId puts that shop in scope and nothing else",
+   "kind": "standalone",
+   "group": "buyer text suggestions",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "Named test 9, settle rule 1: a sent outletId is ignored, so the shop the buyer is already looking at still asks for an area.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { kind: 'clarification', \u2026(2) } to match object { kind: 'basket', \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 34,
+   "proof": true
+  },
+  {
+   "id": "m17-sent-outlet-not-checked",
+   "test": "an outletId puts that shop in scope and nothing else",
+   "kind": "standalone",
+   "group": "buyer text suggestions",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "Named test 9, settle rule 2: a sent outletId is trusted without being a published outlet, so an unpublished or unknown id stops the area question.",
+   "own_row": "failed",
+   "error": "AssertionError: out_s21unknown: expected { kind: 'no_match' } to deeply equal { kind: 'clarification', \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 34,
+   "proof": true
+  },
+  {
+   "id": "m18-sent-outlet-trusted-for-everything",
+   "test": "an outletId puts that shop in scope and nothing else",
+   "kind": "standalone",
+   "group": "buyer text suggestions",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "Named test 9, and nothing else: any sent outletId puts every published shop in scope, not only that one.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { kind: 'basket', \u2026(3) } to deeply equal { kind: 'no_match' }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 34,
+   "proof": true
+  },
+  {
+   "id": "m19-named-shop-ignored",
+   "test": "a shop named in the sentence needs no area",
+   "kind": "standalone",
+   "group": "buyer text suggestions",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "Named test 10: a shop the buyer named in their own words no longer puts it in scope, so the sentence asks for an area.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { kind: 'clarification', \u2026(2) } to match object { kind: 'basket', \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "a shop the buyer names needs no area"
+   ],
+   "other_errors": {
+    "a shop the buyer names needs no area": "AssertionError: expected { kind: 'clarification', \u2026(2) } to deeply equal { kind: 'outlets', \u2026(1) }"
+   },
+   "same_group_others": [
+    "a shop the buyer names needs no area"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 34,
+   "proof": true
+  },
+  {
+   "id": "m20-suggestion-writes-an-audit-row",
+   "test": "a suggestion writes nothing",
+   "kind": "standalone",
+   "group": "buyer text suggestions",
+   "files": [
+    "src/domain/suggestions/suggest.ts"
+   ],
+   "mutation": "Named test 11, settle rule 7: a basket answer records an audit row, so a proposal that is never reviewed leaves a trace.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { purchases: +0, attempts: +0, \u2026(2) } to deeply equal { purchases: +0, attempts: +0, \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 34,
+   "proof": true
+  },
+  {
+   "id": "m21-basket-in-the-address",
+   "test": "the prefilled basket never reaches a URL",
+   "kind": "standalone",
+   "group": "one-box answers",
+   "files": [
+    "src/app/buy/one-box.ts"
+   ],
+   "mutation": "Named mutation for test 12: the shop address a basket answer opens also carries the held item ids and quantities, which is the mechanism Gate 2 one-box point 5 forbids.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { itemId: true, basket: true } to deeply equal { itemId: false, basket: false }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m22-proposal-crosses-shops",
+   "test": "the prefilled basket never reaches a URL",
+   "kind": "standalone",
+   "group": "one-box answers",
+   "files": [
+    "src/app/buy/one-box.ts"
+   ],
+   "mutation": "Named test 12: a held proposal is returned for any shop, so one shop's basket can prefill another's.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { \u2026(2) } to be null",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m23-storage-carries-the-basket",
+   "test": "no client source of the one-box answers reaches storage",
+   "kind": "standalone",
+   "group": "one-box answers",
+   "files": [
+    "src/app/buy/text-suggest.tsx"
+   ],
+   "mutation": "Beyond the named tests: the basket is also written to sessionStorage before the navigation, which the slice forbids.",
+   "own_row": "failed",
+   "error": "AssertionError: src/app/buy/text-suggest.tsx: expected '\"use client\";\\n\\nimport { useRouter }\u2026' not to match /localStorage|sessionStorage|indexedDB\u2026/",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m24-proposal-module-loses-its-client-boundary",
+   "test": "no client source of the one-box answers reaches storage",
+   "kind": "standalone",
+   "group": "one-box answers",
+   "files": [
+    "src/app/buy/one-box.ts"
+   ],
+   "mutation": "Beyond the named tests: the module holding the proposal loses its client directive, so a server render could share one browser's held basket.",
+   "own_row": "failed",
+   "error": "AssertionError: expected false to be true // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m25-choice-heading-generic",
+   "test": "the one-box answers say the mockup's words",
+   "kind": "standalone",
+   "group": "one-box answers",
+   "files": [
+    "src/app/buy/one-box.ts"
+   ],
+   "mutation": "Beyond the named tests: the choice question stops naming the phrase the buyer used, so the approved mockup copy is lost.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'Which one?' to be 'Which iced tea?' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m26-count-as-a-digit",
+   "test": "the one-box answers say the mockup's words",
+   "kind": "standalone",
+   "group": "one-box answers",
+   "files": [
+    "src/app/buy/one-box.ts"
+   ],
+   "mutation": "Beyond the named tests: the choice summary states the count as a digit, so it no longer reads as the approved copy.",
+   "own_row": "failed",
+   "error": "AssertionError: expected '2 published items fit. Pick one, and \u2026' to be 'Two published items fit. Pick one, an\u2026' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m27-unavailable-always-singular",
+   "test": "the one-box answers say the mockup's words",
+   "kind": "standalone",
+   "group": "one-box answers",
+   "files": [
+    "src/app/buy/one-box.ts"
+   ],
+   "mutation": "Beyond the named tests: the unavailable answer says \"is\" for two named items, so the copy reads wrong when more than one is unavailable.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'Kaya toast set, Mee siam is unavailab\u2026' to be 'Kaya toast set, Mee siam are unavaila\u2026' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  }
+ ]
+}

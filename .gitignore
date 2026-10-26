@@ -14,3 +14,5 @@ test-results/
 next-env.d.ts
 # Archived order receipts exported by the operator (S18); never committed.
 /archive/
+# macOS Finder metadata. It carries nothing the project needs and reappears on its own.
+.DS_Store

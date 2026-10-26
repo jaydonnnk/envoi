@@ -3,26 +3,36 @@ import type { OutletSearch, PublishedItemName, PublishedOutletSummary } from "@/
 // Gate 3 "Suggestions and handoffs". A suggestion names registered outlets and items only; any
 // price shown with it is read from the published registry, never from the model.
 
-export type SuggestionRequest = { text: string; area?: string };
+export type SuggestionRequest = { text: string; area?: string; outletId?: string };
 
 export type PublishedItemSummary = { id: string; name: string; unitSgdCents: number; available: boolean | null };
 
 export type SuggestionGap = "area" | "item" | "outlet";
 
+// The most one sentence may ask for of one item. A quantity outside it asks again rather than being
+// clamped, so the basket the buyer reviews is always one they asked for.
+export const MAX_SUGGESTED_QUANTITY = 20;
+
 export type Suggestion =
   | { kind: "outlets"; matches: PublishedOutletSummary[] }
   | { kind: "items"; outletId: string; outlet: PublishedOutletSummary; matches: PublishedItemSummary[] }
+  | { kind: "basket"; outletId: string; outlet: PublishedOutletSummary; lines: { item: PublishedItemSummary; quantity: number }[] }
+  | { kind: "choose"; outletId: string; outlet: PublishedOutletSummary; quantity: number; matches: PublishedItemSummary[] }
+  | { kind: "unavailable_item"; outletId: string; outlet: PublishedOutletSummary; items: { id: string; name: string }[] }
   | { kind: "clarification"; question: string; missing: SuggestionGap[] }
   | { kind: "no_match" }
   | { kind: "budget_exceeded" };
 
-// What the model may answer: ids and gaps, never names it made up or prices. Every array and the
-// area are re-checked against the registry and the buyer's own words before anything is shown.
+// What the model may answer: ids, quantities and gaps, never names it made up or prices. Every id,
+// quantity and the area are re-checked against the registry and the buyer's own words before
+// anything is shown.
 export type ModelProposal = {
-  kind: "outlets" | "items" | "clarification" | "no_match";
+  kind: "outlets" | "items" | "basket" | "choose" | "clarification" | "no_match";
   outletIds: string[];
   outletId: string | null;
   itemIds: string[];
+  lines: { itemId: string; quantity: number }[];
+  choices: string[];
   area: string | null;
   missing: SuggestionGap[];
 };
