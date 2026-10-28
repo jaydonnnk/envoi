@@ -2,7 +2,8 @@
 
 Updated: 2026-10-28 (Asia/Singapore).
 
-- Gate 1 - Product: **RE-APPROVED 2026-10-25** by the user ("I approve Gate 1.") after being reopened the same day for the continuation slices S19-S22; see the [record](#reopening-2026-10-25-continuation-slices-s19-s22).
+- Gate 1 - Product: **RE-APPROVED 2026-10-28** by the user ("approve gate 1") for the menu photo round 5 allowance of the same day; see the [record](#gate-1-reopening-2026-10-28-menu-photo-round-5-allowance). The allowance is unused: no round 5 ran, Gates 2, 3 and 4 were never reopened for it, and S23 does not exist.
+  Before that it was **RE-APPROVED 2026-10-25** by the user ("I approve Gate 1.") after being reopened the same day for the continuation slices S19-S22; see the [record](#reopening-2026-10-25-continuation-slices-s19-s22).
   Before that it was **RE-APPROVED 2026-10-24** by the user ("I approve Gate 1.") after being reopened the same day for two changes: a shop QR on merchant setup and a delete (archive) action on merchant orders; see the [record](#reopening-2026-10-24-shop-qr-and-order-archive).
   Before that it was **RE-APPROVED 2026-10-21** by the user ("Yep this works for now.  I approve gate 1") after being reopened the same day for one change: a landing page at the site's root address; see the [record](#reopening-2026-10-21-landing-page).
   Before that it was **RE-APPROVED 2026-10-16** by the user ("I approve Gate 1.") after being reopened on 2026-10-15 for one change: menu photo drafting is deferred to "good to have" after the slices, and the merchant enters the menu by hand; see the [record](#reopening-2026-10-15-menu-photo-drafting-deferred).
@@ -111,6 +112,28 @@ Updated: 2026-10-28 (Asia/Singapore).
 - **Limits:** the go decision is not the authorization naming S22, and this amendment starts no slice and authorizes no OpenAI call, spend, photo processing, commit, merge, push or deploy.
 - **Gate 4 approval, 2026-10-28, in the user's words:** "I approve Gate 4."
   It accepts the go date and S22's window from 28 Oct; it authorizes no slice, commit, merge, push or deploy.
+
+### Gate 1 reopening 2026-10-28: menu photo round 5 allowance
+
+- **Outcome: GATE 1 RE-APPROVED 2026-10-28; THE GATE 2, 3 AND 4 DRAFTS WERE WITHDRAWN THE SAME DAY.** Gates 2, 3 and 4 are **not reopened** and keep their approved text; S23 does not exist and was never approved. No round 5 ran, no OpenAI call was made, no spend was incurred, no `src/` file changed and no flag changed.
+- **Trigger, 2026-10-28:** S22 round 4 failed on four wrong filled prices against a limit of two ([record](#s22-round-4-results-2026-10-28)). The user asked for a diagnosis, which is [`photo-import-gap-analysis.md`](photo-import-gap-analysis.md); its verdict is that menu photo import cannot ship before the 13 Nov cutoff, because a pass opens nothing without three further gate approvals and an implementation slice, and that stopping was the recommended course.
+- **The diagnosis in one line (diagnostic, not a result):** of round 4's four wrong filled prices, two were the model filling a price the menu does not print and two were correct prices the registered scorer failed to match, one of them because the round 3 `nameOnlyWhenUnique` fix discards a portion that is a variant's only distinguishing text.
+- **Drafting, 2026-10-28, in the user's words:** "Draft all four gates at once then let me see and im okay with spending more credits for a round 5. I do not have a fresh photo set. Lets just try the same set of photos again (the most recent 4)."
+  It covered drafting only. All four gate drafts were written on `envoi/photo-gap-analysis`, created from `main` at `321cfcd`, and shown to the user.
+- **Gate 1 re-approval, 2026-10-28, in the user's words:** "approve gate 1".
+  It approves the [`01-product.md`](01-product.md) paragraph of 2026-10-28 as product scope: one further pre-registered round may run, with a corrected scorer, a way for the model to mark a price it cannot read with certainty and more than one call per photo; it would run on photos the round 4 diagnosis has already read, so it cannot establish accuracy on unseen menus; and a pass opens nothing, because manual entry stays the only path, no AI-drafting claim is made and the import screen still needs its own Gate 1 and Gate 3 change.
+  The paragraph stays in the document as an **unused allowance**; it schedules nothing and authorizes nothing.
+- **Photo set decided then superseded:** the user chose F1 to F4 ("run round 5 on the four photos"), after the builder recorded twice that this set excludes E3, one of round 4's two real misreads, and that F1 and F2 produced the corrections under test. The stop decision superseded it before any call.
+- **Stop decision, 2026-10-28, in the user's words:** "Okay lets stop photo work and finish s15."
+  The Gate 2, Gate 3 and Gate 4 drafts were therefore withdrawn: [`02-architecture.md`](02-architecture.md), [`03-program-design.md`](03-program-design.md) and [`04-slices.md`](04-slices.md) were restored to their approved text, the `G2_REOPENING_SHA256` and `G3_REOPENING_SHA256` pins in `checks/gate4_check.py` were restored to their approved values, and S23 was removed from the post-release list. Only the Gate 1 body pin moved, for the approved paragraph.
+  The full substance of the withdrawn drafts is preserved in [`photo-import-gap-analysis.md`](photo-import-gap-analysis.md), so reviving them needs no rediscovery.
+- **Falsifier outcome, unchanged from S22:** imports stay closed, `MENU_IMPORTS_ENABLED` stays false, `AI_MENU_MODEL` stays unset, manual entry stays the only path and no AI-drafting claim is made.
+- **Expected-draft correction recorded, not a re-score:** E5's printed name is `Salmon Filet w Lemon Sauce` with one `l`, confirmed on 2026-10-28 by reading the photo [verified], so round 4's expected draft was already correct and the model's `Fillet` was a name error against the prompt's "exactly as printed" rule. Round 4's recorded score does not change.
+- **Known defect left in place, recorded so a later round does not inherit it silently:** the harness's `scoreDraft` still collapses a variant's portion as described above, proved by tracing the registered scorer against round 4's saved F2 rows [verified]. Fixing it is a Gate 3 change and was not approved.
+- **Checks [verified 2026-10-28]:** after the withdrawal, `gate4_check.py ... 5f6ab39` passes, `gate4_prove.py` gives 80/80 with a scratch work folder, `git diff --check` is clean and the value-free secret scan is clean.
+- [x] Explicit user re-approval of Gate 1, 2026-10-28 ("approve gate 1").
+- [x] Gate 2, 3 and 4 drafts withdrawn on the user's stop decision, 2026-10-28; those gates keep their approved text.
+- [x] Substance of the withdrawn drafts preserved in the gap analysis.
 
 ### Gate 3 and 4 reopening 2026-10-25: S19 test 2
 
@@ -293,6 +316,7 @@ Post-release, outside the build order: S18, merchant shop QR and order archive, 
 Proposed 2026-10-25, outside the build order: S19, S21, S20 and S22 from the [continuation plan](continuation-plan.md); Gates 1-3 were re-approved for them on 2026-10-25 and Gate 4 was amended for them on 2026-10-25 ("I approve Gate 4.").
 S19 started 2026-10-25 on `envoi/slice-19-sdk-agent-route` and was done 2026-10-26, on `main` at `4b7fdb7` ([record](#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-2026-10-25)); S21 started 2026-10-26 on `envoi/slice-21-one-box-order` and was done 2026-10-26, on `main` at `9e9f9f1` ([record](#s21-order-from-one-sentence-2026-10-26)); S20 started 2026-10-28 on `envoi/slice-20-reference-agent` and was done 2026-10-28 ([record](#s20-reference-buyer-agent-on-the-generated-sdk-2026-10-28)); S22 started 2026-10-28 on `envoi/slice-22-photo-round-4` and was done 2026-10-28 with a recorded fail, on `main` at `981cb0f`; imports stay closed ([record](#s22-menu-photo-experiment-round-4-2026-10-28)).
 2026-10-28, S22 photos: the round 3 photos were lost from `.maintenance-build/s11-eval-photos/`; the user supplied five again, saved there as E1-E5, and said "Use five photos for S22 and record E6 as dropped." Later the same day the user said "make e6 from e4": E6 was rebuilt as `E6.png`, E4 turned 90 degrees in its pixels (1122x948 to 948x1122), as in round 3, so S22 counts six photos again.
+2026-10-28, menu photo round 5: after round 4 failed, the user had all four gates drafted for a round 5, re-approved Gate 1 for the allowance, then decided "Okay lets stop photo work and finish s15"; the Gate 2, 3 and 4 drafts were withdrawn, S23 does not exist, no round 5 ran and imports stay closed ([record](#gate-1-reopening-2026-10-28-menu-photo-round-5-allowance)).
 
 ### S22 Menu photo experiment, round 4, 2026-10-28
 
@@ -2584,6 +2608,14 @@ All unaffected risk dispositions stand; the 2026-10-11 Gate 3 revision of the af
   It authorizes no Gate 4 change, OpenAI call, commit, merge, push or deploy.
 - 2026-10-28: the user approved the Gate 4 amendment ("I approve Gate 4.") for the same change in S22.
   It authorizes no OpenAI call, commit, merge, push or deploy.
+- 2026-10-28: the user re-approved Gate 1 ("approve gate 1") for the [menu photo round 5 allowance](#gate-1-reopening-2026-10-28-menu-photo-round-5-allowance), and in the same message chose F1 to F4 as the round's photo set ("run round 5 on the four photos").
+  The approval covers the Gate 1 paragraph of 2026-10-28 as product scope: one further pre-registered round may run, it cannot establish accuracy on menus the model has not seen, and a pass opens nothing because manual entry stays the only path and the import screen still needs its own Gate 1 and Gate 3 change.
+  It was not Gate 2, Gate 3 or Gate 4 approval, it did not start S23, and it authorized no OpenAI call, spend, photo processing, `src/` change, commit, merge, push or deploy.
+  The photo-set choice was made after the builder twice recorded that F1 to F4 excludes E3, one of round 4's two real misreads, and that F1 and F2 produced the corrections the round would test.
+- 2026-10-28: the user then said "Okay lets stop photo work and finish s15", which stopped menu photo import before the 13 Nov cutoff.
+  The unapproved Gate 2, Gate 3 and Gate 4 drafts were withdrawn, those three documents and their pins were restored to their approved values, S23 was removed, and no round 5 ran.
+  The approved Gate 1 paragraph stays as an unused allowance, and the withdrawn drafts' substance is preserved in [`photo-import-gap-analysis.md`](photo-import-gap-analysis.md).
+  It authorizes no commit, push, merge or deploy; the user asked to be shown the result first.
 
 ### Initial Gate 2 documentary verification, 2026-10-07 (historical, before free-hosting revision)
 

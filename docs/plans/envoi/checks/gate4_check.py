@@ -421,6 +421,8 @@ G2_REOPENING_SHA256 = "2c2a715f4dfec60961a6d51038fccf6c1d8b7fe485a6f7f7f2428ddec
 # landing page, and on 2026-10-24 for the shop QR and order archive, then reopened and re-approved on 2026-10-25 for S19-S22:
 # the revised and added mockups, and 01-product.md without its closing status line, which keeps changing as slices finish
 # (ce25854b...3dff07 was the 2026-10-16 body, d5c726e8...860dc3 the 2026-10-21 body, d66a34c1...5025f4 the 2026-10-24 body).
+# Current: re-approved 2026-10-28 for the menu photo round 5 allowance, the one part of that reopening the user approved;
+# the Gate 2, 3 and 4 drafts of the same day were withdrawn, so only this pin moved (c11ec26f...24b78e93 was the 2026-10-25 body).
 G1_MOCKUP_SHA256 = {
     os.path.join("mockups", "merchant-onboarding.html"): "d376e4517de5b7f0c4c892675b0e033111cbac0af1b157519f23078ade16f568",
     os.path.join("mockups", "landing.html"): "973c92b63f946b51c9911aa7f8ec75891041e5d0af1c41a086e09f917c923744",
@@ -428,7 +430,7 @@ G1_MOCKUP_SHA256 = {
     os.path.join("mockups", "merchant-orders-delete.html"): "196792d104e832c3887c6213c90811d6e96b22cb8a9057ec6be3a4d97923adf3",
     os.path.join("mockups", "buyer-one-box.html"): "0e4ae5ade8fdd7111b56698d13b0d82d896cace1fbd5b55a5d95109286a61ad8",
 }
-G1_BODY_SHA256 = "c11ec26f19b5a45bdb67ef07a1ee8c358b8af98685752710d54011fe24b78e93"
+G1_BODY_SHA256 = "4718a3f5e457cb68da0af2a43710ad501f9677d6327e393282c432d2701140e2"
 for root, _, files in os.walk(folder):
     for name in sorted(files):
         rel = os.path.relpath(os.path.join(root, name), folder)
