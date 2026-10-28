@@ -1,6 +1,6 @@
 # Status: Envoi
 
-Updated: 2026-10-20 (Asia/Singapore).
+Updated: 2026-10-28 (Asia/Singapore).
 
 - Gate 1 - Product: **RE-APPROVED 2026-10-25** by the user ("I approve Gate 1.") after being reopened the same day for the continuation slices S19-S22; see the [record](#reopening-2026-10-25-continuation-slices-s19-s22).
   Before that it was **RE-APPROVED 2026-10-24** by the user ("I approve Gate 1.") after being reopened the same day for two changes: a shop QR on merchant setup and a delete (archive) action on merchant orders; see the [record](#reopening-2026-10-24-shop-qr-and-order-archive).
@@ -291,7 +291,7 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 Post-release, outside the build order: S18, merchant shop QR and order archive, started and done 2026-10-24 on `envoi/slice-18-shop-qr-archive` ([record](#s18-merchant-shop-qr-and-order-archive-2026-10-24)).
 
 Proposed 2026-10-25, outside the build order: S19, S21, S20 and S22 from the [continuation plan](continuation-plan.md); Gates 1-3 were re-approved for them on 2026-10-25 and Gate 4 was amended for them on 2026-10-25 ("I approve Gate 4.").
-S19 started 2026-10-25 on `envoi/slice-19-sdk-agent-route` and was done 2026-10-26, on `main` at `4b7fdb7` ([record](#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-2026-10-25)); S21 started 2026-10-26 on `envoi/slice-21-one-box-order` and was done 2026-10-26, on `main` at `9e9f9f1` ([record](#s21-order-from-one-sentence-2026-10-26)); S20 started 2026-10-28 on `envoi/slice-20-reference-agent` and was done 2026-10-28 ([record](#s20-reference-buyer-agent-on-the-generated-sdk-2026-10-28)); S22 started 2026-10-28 on `envoi/slice-22-photo-round-4` ([record](#s22-menu-photo-experiment-round-4-2026-10-28)).
+S19 started 2026-10-25 on `envoi/slice-19-sdk-agent-route` and was done 2026-10-26, on `main` at `4b7fdb7` ([record](#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-2026-10-25)); S21 started 2026-10-26 on `envoi/slice-21-one-box-order` and was done 2026-10-26, on `main` at `9e9f9f1` ([record](#s21-order-from-one-sentence-2026-10-26)); S20 started 2026-10-28 on `envoi/slice-20-reference-agent` and was done 2026-10-28 ([record](#s20-reference-buyer-agent-on-the-generated-sdk-2026-10-28)); S22 started 2026-10-28 on `envoi/slice-22-photo-round-4` and was done 2026-10-28 with a recorded fail, on `main` at `981cb0f`; imports stay closed ([record](#s22-menu-photo-experiment-round-4-2026-10-28)).
 2026-10-28, S22 photos: the round 3 photos were lost from `.maintenance-build/s11-eval-photos/`; the user supplied five again, saved there as E1-E5, and said "Use five photos for S22 and record E6 as dropped." Later the same day the user said "make e6 from e4": E6 was rebuilt as `E6.png`, E4 turned 90 degrees in its pixels (1122x948 to 948x1122), as in round 3, so S22 counts six photos again.
 
 ### S22 Menu photo experiment, round 4, 2026-10-28
@@ -351,6 +351,7 @@ Measured spend: US$0.128416 of the US$5 limit.
   The last two are right prices counted as wrong by the registered scorer; setting them aside would leave two wrong prices, within the limit, but the registered score decides and the round is not re-scored.
   The rotated E6, turned upright by the merchant step, scored as E4 with no wrong price.
 - **Timed comparison:** not run; the threshold already fails, so the round fails whatever the timing shows.
+- **Close [verified 2026-10-28]:** committed as `904ca8f`, `dd6ea24`, `c67b6a6` and `981cb0f`; the branch and `main` (fast-forwarded on the user's words "Yes, merge main") pushed to `981cb0f`, checked with `git ls-remote`, and CI succeeded on both; a fresh suite gave typecheck, typecheck:client and lint clean and 571 of 571 tests; the architect-reviewer post-slice cleanup removed one scratch dry-run script outside Git and corrected two stale status lines.
 - **Falsifier outcome:** the round misses the S11 threshold, so imports stay closed, `AI_MENU_MODEL` stays unset on Render, `MENU_IMPORTS_ENABLED` stays false, no AI-drafting claim is made, and the rotate and crop step is not built.
 
 ### S20 Reference buyer agent on the generated SDK, 2026-10-28
