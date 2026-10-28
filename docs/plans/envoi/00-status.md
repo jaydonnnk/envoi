@@ -337,6 +337,22 @@ Written and committed before any round 4 vision call, as the [Gate 3 round 4 pro
 - **Falsifier response:** if the threshold or the timing fails, imports stay closed, `AI_MENU_MODEL` stays unset on Render, no AI-drafting claim is made and nothing is built.
   A pass changes no flag: `MENU_IMPORTS_ENABLED` stays false, the rotate and crop step is built only behind it, and the import screen needs its own Gate 1 and Gate 3 change.
 
+#### S22 round 4 results, 2026-10-28
+
+Run once after the pre-registration commit (`dd6ea24`) and the harness commit (`c67b6a6`); every result and raw output is in [`s22-vision-eval-round4.json`](evidence/s22-vision-eval-round4.json).
+Measured spend: US$0.128416 of the US$5 limit.
+
+| Model | Found (of 239) | Correct prices | Wrong filled (E1-E6, F1-F4) | Median | Slowest | Result |
+| --- | --- | --- | --- | --- | --- | --- |
+| `gpt-6.1-sol` | 237 | 230 | 4 (E3 1, E5 1, F1 1, F2 1) | 13.2 s | 22.6 s | fail |
+
+- **`gpt-6.1-sol` fails** on wrong filled prices (four, limit two); every other condition holds: all ten calls returned a valid draft, 99.2% found, 97.0% of found prices correct.
+- **Reviewer notes, not substituted:** E3 Set B read as S$40 for S$49; F1 Egg Fried Rice Pork Cutlet read as S$6.90 for S$8.90, the cell printed with no visible point; E5 "Salmon Fillet w Lemon Sauce" at the right S$14.90 matched no entry because the expected name is spelled "Filet" and the model added the section note as a portion; F2 "Ebi Fry" with portion "+MENTAIKO" at the right S$5.90 matched no entry.
+  The last two are right prices counted as wrong by the registered scorer; setting them aside would leave two wrong prices, within the limit, but the registered score decides and the round is not re-scored.
+  The rotated E6, turned upright by the merchant step, scored as E4 with no wrong price.
+- **Timed comparison:** not run; the threshold already fails, so the round fails whatever the timing shows.
+- **Falsifier outcome:** the round misses the S11 threshold, so imports stay closed, `AI_MENU_MODEL` stays unset on Render, `MENU_IMPORTS_ENABLED` stays false, no AI-drafting claim is made, and the rotate and crop step is not built.
+
 ### S20 Reference buyer agent on the generated SDK, 2026-10-28
 
 - **Authorization, 2026-10-28, in the user's words:** "okay i pasted the issued s20 reference agent token and replaced the envoi agent token value withit. U alraedy know the gpt model now as well as the working openapi key. U can start s20".

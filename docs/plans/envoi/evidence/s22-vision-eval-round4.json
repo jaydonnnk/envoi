@@ -1,0 +1,5737 @@
+{
+  "round": 4,
+  "ranAt": "2026-10-28T13:51:01.857Z",
+  "promptVersion": "menu-vision-prompt-2026-10-15-english",
+  "limitUsdMicros": 5000000,
+  "spentUsdMicros": 128416,
+  "stopped": null,
+  "threshold": {
+    "minFoundShare": 0.9,
+    "minCorrectPriceShare": 0.9,
+    "maxWrongFilledPrices": 2,
+    "maxMedianLatencyMs": 30000,
+    "maxLatencyMs": 60000
+  },
+  "summary": [
+    {
+      "model": "gpt-6.1-sol",
+      "runs": 10,
+      "complete": true,
+      "required": 239,
+      "found": 237,
+      "correct": 230,
+      "wrongFilled": 4,
+      "medianLatencyMs": 13226,
+      "maxLatencyMs": 22609,
+      "maxInputTokens": 2227,
+      "maxOutputTokens": 1720,
+      "costUsdMicros": 128416,
+      "pass": false
+    }
+  ],
+  "runs": [
+    {
+      "model": "gpt-6.1-sol",
+      "photo": "E1",
+      "sent": {
+        "width": 685,
+        "height": 956,
+        "bytes": 125730
+      },
+      "outcome": "ok",
+      "error": null,
+      "validation": "ok",
+      "latencyMs": 16681,
+      "inputTokens": 1105,
+      "outputTokens": 1416,
+      "rowsReturned": 38,
+      "costUsdMicros": 16370,
+      "score": {
+        "required": 37,
+        "found": 37,
+        "correct": 37,
+        "wrongFilled": 0
+      },
+      "entries": [
+        {
+          "expected": "Mee Hong Kong",
+          "price": "5.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Mee Hong Kong",
+              "portion": "S",
+              "priceSgdCents": 580,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Mee Hong Kong M",
+          "price": "12",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Mee Hong Kong",
+              "portion": "M",
+              "priceSgdCents": 1200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Mee Hong Kong L",
+          "price": "16",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Mee Hong Kong",
+              "portion": "L",
+              "priceSgdCents": 1600,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Kway Teow Hong Kong (Hor Fun)",
+          "price": "5.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Kway Teow Hong Kong (Hor Fun)",
+              "portion": "S",
+              "priceSgdCents": 580,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Kway Teow Hong Kong (Hor Fun) M",
+          "price": "12",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Kway Teow Hong Kong (Hor Fun)",
+              "portion": "M",
+              "priceSgdCents": 1200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Kway Teow Hong Kong (Hor Fun) L",
+          "price": "16",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Kway Teow Hong Kong (Hor Fun)",
+              "portion": "L",
+              "priceSgdCents": 1600,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Bee Hoon Hong Kong",
+          "price": "5.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Bee Hoon Hong Kong",
+              "portion": "S",
+              "priceSgdCents": 580,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Bee Hoon Hong Kong M",
+          "price": "12",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Bee Hoon Hong Kong",
+              "portion": "M",
+              "priceSgdCents": 1200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Bee Hoon Hong Kong L",
+          "price": "16",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Bee Hoon Hong Kong",
+              "portion": "L",
+              "priceSgdCents": 1600,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Hokkien Mee (Kicap & Basah)",
+          "price": "5.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Hokkien Mee Kicap & Basah",
+              "portion": "S",
+              "priceSgdCents": 580,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Hokkien Mee (Kicap & Basah) M",
+          "price": "12",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Hokkien Mee Kicap & Basah",
+              "portion": "M",
+              "priceSgdCents": 1200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Hokkien Mee (Kicap & Basah) L",
+          "price": "16",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Hokkien Mee Kicap & Basah",
+              "portion": "L",
+              "priceSgdCents": 1600,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Mee Goreng",
+          "price": "6.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Mee Goreng",
+              "portion": "S",
+              "priceSgdCents": 650,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Mee Goreng M",
+          "price": "13",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Mee Goreng",
+              "portion": "M",
+              "priceSgdCents": 1300,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Mee Goreng L",
+          "price": "18",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Mee Goreng",
+              "portion": "L",
+              "priceSgdCents": 1800,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Fried Kway Teow (Black)",
+          "price": "6.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Fried Kway Teow (Black)",
+              "portion": "S",
+              "priceSgdCents": 650,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Fried Kway Teow (Black) M",
+          "price": "13",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Fried Kway Teow (Black)",
+              "portion": "M",
+              "priceSgdCents": 1300,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Fried Kway Teow (Black) L",
+          "price": "18",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Fried Kway Teow (Black)",
+              "portion": "L",
+              "priceSgdCents": 1800,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Hong Kong Fried Noodle",
+          "price": "6.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Hong Kong Fried Noodle",
+              "portion": "S",
+              "priceSgdCents": 650,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Hong Kong Fried Noodle M",
+          "price": "13",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Hong Kong Fried Noodle",
+              "portion": "M",
+              "priceSgdCents": 1300,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Hong Kong Fried Noodle L",
+          "price": "18",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Hong Kong Fried Noodle",
+              "portion": "L",
+              "priceSgdCents": 1800,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Crispy Noodle",
+          "price": "6.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Crispy Noodle",
+              "portion": "S",
+              "priceSgdCents": 650,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Crispy Noodle M",
+          "price": "13",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Crispy Noodle",
+              "portion": "M",
+              "priceSgdCents": 1300,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Crispy Noodle L",
+          "price": "18",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Crispy Noodle",
+              "portion": "L",
+              "priceSgdCents": 1800,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Prawn Mee",
+          "price": "6.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Prawn Mee",
+              "portion": "S",
+              "priceSgdCents": 650,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Prawn Mee M",
+          "price": "13",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Prawn Mee",
+              "portion": "M",
+              "priceSgdCents": 1300,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Prawn Mee L",
+          "price": "18",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Prawn Mee",
+              "portion": "L",
+              "priceSgdCents": 1800,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Fried Bee Hoon Singapore Style (No Spicy)",
+          "price": "6.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Fried Bee Hoon Singapore Style (No Spicy)",
+              "portion": "S",
+              "priceSgdCents": 650,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Fried Bee Hoon Singapore Style (No Spicy) M",
+          "price": "13",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Fried Bee Hoon Singapore Style (No Spicy)",
+              "portion": "M",
+              "priceSgdCents": 1300,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Fried Bee Hoon Singapore Style (No Spicy) L",
+          "price": "18",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Fried Bee Hoon Singapore Style (No Spicy)",
+              "portion": "L",
+              "priceSgdCents": 1800,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Beef Mee Hong Kong",
+          "price": "8.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Beef Mee Hong Kong",
+              "portion": "S",
+              "priceSgdCents": 880,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Beef Mee Hong Kong M",
+          "price": "17",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Beef Mee Hong Kong",
+              "portion": "M",
+              "priceSgdCents": 1700,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Beef Mee Hong Kong L",
+          "price": "23",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Beef Mee Hong Kong",
+              "portion": "L",
+              "priceSgdCents": 2300,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Beef Mee Soup",
+          "price": "8.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Beef Mee Soup",
+              "portion": "S",
+              "priceSgdCents": 880,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Mee/Bee Hoon/Kway Teow Soup",
+          "price": "5.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Mee/Bee Hoon/Kway Teow Soup",
+              "portion": "S",
+              "priceSgdCents": 580,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Tom Yam Mee Soup",
+          "price": "8.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Tom Yam Mee Soup",
+              "portion": "S",
+              "priceSgdCents": 880,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Fried Cockles Kway Teow",
+          "price": "6.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Fried Cockles Kway Teow",
+              "portion": "S",
+              "priceSgdCents": 650,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "With Egg Additional",
+          "price": "1.20",
+          "optional": true,
+          "matched": [
+            {
+              "name": "With Egg Additional",
+              "portion": null,
+              "priceSgdCents": 120,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Take away Box additional Small",
+          "price": "0.30",
+          "optional": true,
+          "matched": [],
+          "found": false,
+          "correct": false,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Take away Box additional Large",
+          "price": "1.00",
+          "optional": true,
+          "matched": [],
+          "found": false,
+          "correct": false,
+          "wrongFilled": 0
+        }
+      ],
+      "extras": [],
+      "raw": {
+        "items": [
+          {
+            "name": "Mee Hong Kong",
+            "portion": "S",
+            "priceText": "5.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Mee Hong Kong",
+            "portion": "M",
+            "priceText": "12",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Mee Hong Kong",
+            "portion": "L",
+            "priceText": "16",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Kway Teow Hong Kong (Hor Fun)",
+            "portion": "S",
+            "priceText": "5.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Kway Teow Hong Kong (Hor Fun)",
+            "portion": "M",
+            "priceText": "12",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Kway Teow Hong Kong (Hor Fun)",
+            "portion": "L",
+            "priceText": "16",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Bee Hoon Hong Kong",
+            "portion": "S",
+            "priceText": "5.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Bee Hoon Hong Kong",
+            "portion": "M",
+            "priceText": "12",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Bee Hoon Hong Kong",
+            "portion": "L",
+            "priceText": "16",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Hokkien Mee Kicap & Basah",
+            "portion": "S",
+            "priceText": "5.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Hokkien Mee Kicap & Basah",
+            "portion": "M",
+            "priceText": "12",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Hokkien Mee Kicap & Basah",
+            "portion": "L",
+            "priceText": "16",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Mee Goreng",
+            "portion": "S",
+            "priceText": "6.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Mee Goreng",
+            "portion": "M",
+            "priceText": "13",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Mee Goreng",
+            "portion": "L",
+            "priceText": "18",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Fried Kway Teow (Black)",
+            "portion": "S",
+            "priceText": "6.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Fried Kway Teow (Black)",
+            "portion": "M",
+            "priceText": "13",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Fried Kway Teow (Black)",
+            "portion": "L",
+            "priceText": "18",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Hong Kong Fried Noodle",
+            "portion": "S",
+            "priceText": "6.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Hong Kong Fried Noodle",
+            "portion": "M",
+            "priceText": "13",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Hong Kong Fried Noodle",
+            "portion": "L",
+            "priceText": "18",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Crispy Noodle",
+            "portion": "S",
+            "priceText": "6.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Crispy Noodle",
+            "portion": "M",
+            "priceText": "13",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Crispy Noodle",
+            "portion": "L",
+            "priceText": "18",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Prawn Mee",
+            "portion": "S",
+            "priceText": "6.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Prawn Mee",
+            "portion": "M",
+            "priceText": "13",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Prawn Mee",
+            "portion": "L",
+            "priceText": "18",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Fried Bee Hoon Singapore Style (No Spicy)",
+            "portion": "S",
+            "priceText": "6.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Fried Bee Hoon Singapore Style (No Spicy)",
+            "portion": "M",
+            "priceText": "13",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Fried Bee Hoon Singapore Style (No Spicy)",
+            "portion": "L",
+            "priceText": "18",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Beef Mee Hong Kong",
+            "portion": "S",
+            "priceText": "8.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Beef Mee Hong Kong",
+            "portion": "M",
+            "priceText": "17",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Beef Mee Hong Kong",
+            "portion": "L",
+            "priceText": "23",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Beef Mee Soup",
+            "portion": "S",
+            "priceText": "8.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Mee/Bee Hoon/Kway Teow Soup",
+            "portion": "S",
+            "priceText": "5.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Tom Yam Mee Soup",
+            "portion": "S",
+            "priceText": "8.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Fried Cockles Kway Teow",
+            "portion": "S",
+            "priceText": "6.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "With Egg Additional",
+            "portion": null,
+            "priceText": "1.20",
+            "currency": "sgd_or_unmarked"
+          }
+        ]
+      }
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "photo": "E2",
+      "sent": {
+        "width": 1085,
+        "height": 763,
+        "bytes": 191873
+      },
+      "outcome": "ok",
+      "error": null,
+      "validation": "ok",
+      "latencyMs": 16632,
+      "inputTokens": 1292,
+      "outputTokens": 1720,
+      "rowsReturned": 43,
+      "costUsdMicros": 19784,
+      "score": {
+        "required": 36,
+        "found": 36,
+        "correct": 31,
+        "wrongFilled": 0
+      },
+      "entries": [
+        {
+          "expected": "Chicken Wing (Min 2 Pcs)",
+          "price": "1.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "CHICKEN WING",
+              "portion": "MIN 2 PCS",
+              "priceSgdCents": 150,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Cheesy Chicken Finger",
+          "price": "6.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "CHEESY CHICKEN FINGER",
+              "portion": null,
+              "priceSgdCents": 600,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Fries",
+          "price": "3.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "FRIES",
+              "portion": null,
+              "priceSgdCents": null,
+              "priceBasis": "duplicate_variant"
+            }
+          ],
+          "found": true,
+          "correct": false,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Cheese Fries",
+          "price": "4.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "CHEESE FRIES",
+              "portion": null,
+              "priceSgdCents": 450,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Wasabi Mayo Fries",
+          "price": "5.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "WASABI MAYO FRIES",
+              "portion": null,
+              "priceSgdCents": 550,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Mentaiko Fries",
+          "price": "5.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "MENTAIKO FRIES",
+              "portion": null,
+              "priceSgdCents": 500,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Truffle Fries",
+          "price": "7.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "TRUFFLE FRIES",
+              "portion": null,
+              "priceSgdCents": 700,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Coleslaw",
+          "price": "3.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "COLESLAW",
+              "portion": null,
+              "priceSgdCents": null,
+              "priceBasis": "duplicate_variant"
+            }
+          ],
+          "found": true,
+          "correct": false,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Mac N Cheese",
+          "price": "3.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "MAC N CHEESE",
+              "portion": null,
+              "priceSgdCents": null,
+              "priceBasis": "duplicate_variant"
+            }
+          ],
+          "found": true,
+          "correct": false,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Sunny Side Up",
+          "price": "1.20",
+          "optional": false,
+          "matched": [
+            {
+              "name": "SUNNY SIDE UP",
+              "portion": null,
+              "priceSgdCents": null,
+              "priceBasis": "duplicate_variant"
+            }
+          ],
+          "found": true,
+          "correct": false,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Mushroom Soup",
+          "price": "3.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "MUSHROOM SOUP",
+              "portion": null,
+              "priceSgdCents": 350,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Onion Ring (10pcs)",
+          "price": "4.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "ONION RING",
+              "portion": "10PCS",
+              "priceSgdCents": 450,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Butter Rice",
+          "price": "2.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "BUTTER RICE",
+              "portion": null,
+              "priceSgdCents": null,
+              "priceBasis": "duplicate_variant"
+            }
+          ],
+          "found": true,
+          "correct": false,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Add Nacho Cheese",
+          "price": "1.20",
+          "optional": false,
+          "matched": [
+            {
+              "name": "ADD NACHO CHEESE",
+              "portion": null,
+              "priceSgdCents": 120,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Add Bratwurst",
+          "price": "4.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "ADD BRATWURST",
+              "portion": null,
+              "priceSgdCents": 450,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Value Meal",
+          "price": "3.60",
+          "optional": false,
+          "matched": [
+            {
+              "name": "BUTTER RICE W CHICKEN FINGER & EGG",
+              "portion": null,
+              "priceSgdCents": 360,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Salmon Pasta",
+          "price": "11.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "SALMON PASTA",
+              "portion": null,
+              "priceSgdCents": 1150,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Grilled Chicken Pasta",
+          "price": "7.70",
+          "optional": false,
+          "matched": [
+            {
+              "name": "GRILLED CHICKEN PASTA",
+              "portion": null,
+              "priceSgdCents": 770,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Mushroom Pasta",
+          "price": "7.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "MUSHROOM PASTA",
+              "portion": null,
+              "priceSgdCents": 700,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Prawn Pasta",
+          "price": "8.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "PRAWN PASTA",
+              "portion": null,
+              "priceSgdCents": 800,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Double Chicken Bratwurst Pasta",
+          "price": "8.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "DOUBLE CHICKEN BRATWURST PASTA",
+              "portion": null,
+              "priceSgdCents": 890,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Mushroom & Prawn Pasta",
+          "price": "11.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "MUSHROOM & PRAWN PASTA",
+              "portion": null,
+              "priceSgdCents": 1190,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "XL Chicken Cutlet Pasta",
+          "price": "8.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "XL CHICKEN CUTLET PASTA",
+              "portion": null,
+              "priceSgdCents": 890,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Breaded Dory Pasta",
+          "price": "8.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "BREADED DORY PASTA",
+              "portion": null,
+              "priceSgdCents": 850,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Breaded Seabass Pasta",
+          "price": "11.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "BREADED SEABASS PASTA",
+              "portion": null,
+              "priceSgdCents": 1150,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Cheesy Chicken Chop Pasta",
+          "price": "8.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "CHEESY CHICKEN CHOP PASTA",
+              "portion": null,
+              "priceSgdCents": 890,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Grilled Chicken Chop",
+          "price": "7.70",
+          "optional": false,
+          "matched": [
+            {
+              "name": "GRILLED CHICKEN CHOP",
+              "portion": "BLACK PEPPER/ MUSHROOM/ BROWN SAUCE",
+              "priceSgdCents": 770,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Prime Ribeye Steak",
+          "price": "16.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "PRIME RIBEYE STEAK",
+              "portion": null,
+              "priceSgdCents": 1650,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Double Up Chicken Chop",
+          "price": "12.30",
+          "optional": false,
+          "matched": [
+            {
+              "name": "DOUBLE UP CHICKEN CHOP",
+              "portion": null,
+              "priceSgdCents": 1230,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Cheesy Chicken Chop",
+          "price": "8.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "CHEESY CHICKEN CHOP",
+              "portion": null,
+              "priceSgdCents": 890,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "XL Chicken Cutlet",
+          "price": "8.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "XL CHICKEN CUTLET",
+              "portion": null,
+              "priceSgdCents": 890,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Breaded Dory",
+          "price": "8.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "BREADED DORY",
+              "portion": null,
+              "priceSgdCents": 850,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Breaded Seabass",
+          "price": "11.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "BREADED SEABASS",
+              "portion": null,
+              "priceSgdCents": 1150,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Lime Herb Butter Salmon",
+          "price": "11.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "LIME HERB BUTTER SALMON",
+              "portion": null,
+              "priceSgdCents": 1150,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Salmon & Chicken Combo",
+          "price": "16.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "SALMON & CHICKEN COMBO",
+              "portion": null,
+              "priceSgdCents": 1600,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Double Chicken Bratwurst",
+          "price": "8.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "DOUBLE CHICKEN BRATWURST",
+              "portion": null,
+              "priceSgdCents": 890,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Onion Ring (5pcs)",
+          "price": null,
+          "optional": true,
+          "matched": [
+            {
+              "name": "ONION RING",
+              "portion": "5PCS",
+              "priceSgdCents": null,
+              "priceBasis": "blank"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Saute Garlic Mushroom",
+          "price": null,
+          "optional": true,
+          "matched": [
+            {
+              "name": "SAUTE GARLIC MUSHROOM",
+              "portion": null,
+              "priceSgdCents": null,
+              "priceBasis": "blank"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        }
+      ],
+      "extras": [
+        {
+          "name": "BUTTER RICE",
+          "portion": null,
+          "priceSgdCents": null,
+          "priceBasis": "duplicate_variant"
+        },
+        {
+          "name": "MAC N CHEESE",
+          "portion": null,
+          "priceSgdCents": null,
+          "priceBasis": "duplicate_variant"
+        },
+        {
+          "name": "COLESLAW",
+          "portion": null,
+          "priceSgdCents": null,
+          "priceBasis": "duplicate_variant"
+        },
+        {
+          "name": "FRIES",
+          "portion": null,
+          "priceSgdCents": null,
+          "priceBasis": "duplicate_variant"
+        },
+        {
+          "name": "SUNNY SIDE UP",
+          "portion": null,
+          "priceSgdCents": null,
+          "priceBasis": "duplicate_variant"
+        }
+      ],
+      "raw": {
+        "items": [
+          {
+            "name": "CHICKEN WING",
+            "portion": "MIN 2 PCS",
+            "priceText": "1.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "CHEESY CHICKEN FINGER",
+            "portion": null,
+            "priceText": "6.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "FRIES",
+            "portion": null,
+            "priceText": "3.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "CHEESE FRIES",
+            "portion": null,
+            "priceText": "4.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "WASABI MAYO FRIES",
+            "portion": null,
+            "priceText": "5.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "MENTAIKO FRIES",
+            "portion": null,
+            "priceText": "5.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "TRUFFLE FRIES",
+            "portion": null,
+            "priceText": "7.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "COLESLAW",
+            "portion": null,
+            "priceText": "3.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "MAC N CHEESE",
+            "portion": null,
+            "priceText": "3.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "SUNNY SIDE UP",
+            "portion": null,
+            "priceText": "1.20",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "MUSHROOM SOUP",
+            "portion": null,
+            "priceText": "3.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "ONION RING",
+            "portion": "10PCS",
+            "priceText": "4.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "BUTTER RICE",
+            "portion": null,
+            "priceText": "2.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "ADD NACHO CHEESE",
+            "portion": null,
+            "priceText": "1.20",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "ADD BRATWURST",
+            "portion": null,
+            "priceText": "4.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "BUTTER RICE W CHICKEN FINGER & EGG",
+            "portion": null,
+            "priceText": "3.60",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "SALMON PASTA",
+            "portion": null,
+            "priceText": "11.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "GRILLED CHICKEN PASTA",
+            "portion": null,
+            "priceText": "7.70",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "MUSHROOM PASTA",
+            "portion": null,
+            "priceText": "7.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "PRAWN PASTA",
+            "portion": null,
+            "priceText": "8.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "DOUBLE CHICKEN BRATWURST PASTA",
+            "portion": null,
+            "priceText": "8.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "MUSHROOM & PRAWN PASTA",
+            "portion": null,
+            "priceText": "11.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "XL CHICKEN CUTLET PASTA",
+            "portion": null,
+            "priceText": "8.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "BREADED DORY PASTA",
+            "portion": null,
+            "priceText": "8.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "BREADED SEABASS PASTA",
+            "portion": null,
+            "priceText": "11.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "CHEESY CHICKEN CHOP PASTA",
+            "portion": null,
+            "priceText": "8.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "GRILLED CHICKEN CHOP",
+            "portion": "BLACK PEPPER/ MUSHROOM/ BROWN SAUCE",
+            "priceText": "7.70",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "PRIME RIBEYE STEAK",
+            "portion": null,
+            "priceText": "16.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "DOUBLE UP CHICKEN CHOP",
+            "portion": null,
+            "priceText": "12.30",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "CHEESY CHICKEN CHOP",
+            "portion": null,
+            "priceText": "8.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "XL CHICKEN CUTLET",
+            "portion": null,
+            "priceText": "8.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "BREADED DORY",
+            "portion": null,
+            "priceText": "8.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "BREADED SEABASS",
+            "portion": null,
+            "priceText": "11.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "LIME HERB BUTTER SALMON",
+            "portion": null,
+            "priceText": "11.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "SALMON & CHICKEN COMBO",
+            "portion": null,
+            "priceText": "16.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "DOUBLE CHICKEN BRATWURST",
+            "portion": null,
+            "priceText": "8.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "BUTTER RICE",
+            "portion": null,
+            "priceText": null,
+            "currency": null
+          },
+          {
+            "name": "MAC N CHEESE",
+            "portion": null,
+            "priceText": null,
+            "currency": null
+          },
+          {
+            "name": "COLESLAW",
+            "portion": null,
+            "priceText": null,
+            "currency": null
+          },
+          {
+            "name": "FRIES",
+            "portion": null,
+            "priceText": null,
+            "currency": null
+          },
+          {
+            "name": "SUNNY SIDE UP",
+            "portion": null,
+            "priceText": null,
+            "currency": null
+          },
+          {
+            "name": "ONION RING",
+            "portion": "5PCS",
+            "priceText": null,
+            "currency": null
+          },
+          {
+            "name": "SAUTE GARLIC MUSHROOM",
+            "portion": null,
+            "priceText": null,
+            "currency": null
+          }
+        ]
+      }
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "photo": "E3",
+      "sent": {
+        "width": 600,
+        "height": 799,
+        "bytes": 89705
+      },
+      "outcome": "ok",
+      "error": null,
+      "validation": "ok",
+      "latencyMs": 6320,
+      "inputTokens": 883,
+      "outputTokens": 394,
+      "rowsReturned": 6,
+      "costUsdMicros": 5706,
+      "score": {
+        "required": 6,
+        "found": 6,
+        "correct": 5,
+        "wrongFilled": 1
+      },
+      "entries": [
+        {
+          "expected": "Set A",
+          "price": "31.20",
+          "optional": false,
+          "matched": [
+            {
+              "name": "SET A",
+              "portion": "Chicken 10 sticks, Mutton/Beef 10 sticks, Prawn 6 sticks",
+              "priceSgdCents": 3120,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Set B",
+          "price": "49",
+          "optional": false,
+          "matched": [
+            {
+              "name": "SET B",
+              "portion": "Chicken 15 sticks, Mutton/Beef 15 sticks, Prawn 10 sticks",
+              "priceSgdCents": 4000,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": false,
+          "wrongFilled": 1
+        },
+        {
+          "expected": "Set C",
+          "price": "78",
+          "optional": false,
+          "matched": [
+            {
+              "name": "SET C",
+              "portion": "Chicken 25 sticks, Mutton/Beef 25 sticks, Prawn 15 sticks",
+              "priceSgdCents": 7800,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Set D",
+          "price": "116",
+          "optional": false,
+          "matched": [
+            {
+              "name": "SET D",
+              "portion": "Chicken 40 sticks, Mutton/Beef 40 sticks, Prawn 20 sticks",
+              "priceSgdCents": 11600,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Set E",
+          "price": "156",
+          "optional": false,
+          "matched": [
+            {
+              "name": "SET E",
+              "portion": "Chicken 50 sticks, Mutton/Beef 50 sticks, Prawn 30 sticks",
+              "priceSgdCents": 15600,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Set F",
+          "price": "223",
+          "optional": false,
+          "matched": [
+            {
+              "name": "SET F",
+              "portion": "Chicken 75 sticks, Mutton/Beef 75 sticks, Prawn 40 sticks",
+              "priceSgdCents": 22300,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        }
+      ],
+      "extras": [],
+      "raw": {
+        "items": [
+          {
+            "name": "SET A",
+            "portion": "Chicken 10 sticks, Mutton/Beef 10 sticks, Prawn 6 sticks",
+            "priceText": "31.20",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "SET B",
+            "portion": "Chicken 15 sticks, Mutton/Beef 15 sticks, Prawn 10 sticks",
+            "priceText": "40",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "SET C",
+            "portion": "Chicken 25 sticks, Mutton/Beef 25 sticks, Prawn 15 sticks",
+            "priceText": "78",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "SET D",
+            "portion": "Chicken 40 sticks, Mutton/Beef 40 sticks, Prawn 20 sticks",
+            "priceText": "116",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "SET E",
+            "portion": "Chicken 50 sticks, Mutton/Beef 50 sticks, Prawn 30 sticks",
+            "priceText": "156",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "SET F",
+            "portion": "Chicken 75 sticks, Mutton/Beef 75 sticks, Prawn 40 sticks",
+            "priceText": "223",
+            "currency": "sgd_or_unmarked"
+          }
+        ]
+      }
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "photo": "E4",
+      "sent": {
+        "width": 1078,
+        "height": 642,
+        "bytes": 114905
+      },
+      "outcome": "ok",
+      "error": null,
+      "validation": "ok",
+      "latencyMs": 13639,
+      "inputTokens": 1169,
+      "outputTokens": 1067,
+      "rowsReturned": 31,
+      "costUsdMicros": 13008,
+      "score": {
+        "required": 31,
+        "found": 31,
+        "correct": 31,
+        "wrongFilled": 0
+      },
+      "entries": [
+        {
+          "expected": "Kaya Toast with Butter",
+          "price": "2.40",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Kaya Toast with Butter",
+              "portion": null,
+              "priceSgdCents": 240,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Butter Sugar Toast",
+          "price": "2.40",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Butter Sugar Toast",
+              "portion": null,
+              "priceSgdCents": 240,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "French Toast with Kaya",
+          "price": "2.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "French Toast with Kaya",
+              "portion": null,
+              "priceSgdCents": 200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Kaya Peanut Toast",
+          "price": "2.40",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Kaya Peanut Toast",
+              "portion": null,
+              "priceSgdCents": 240,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Steamed Bread (Kaya Butter / Kaya Peanut)",
+          "price": "2.40",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Steamed Bread",
+              "portion": "Kaya Butter/ Kaya Peanut",
+              "priceSgdCents": 240,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Set A - Kaya Toast with Butter set",
+          "price": "4.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Set A - Kaya Toast with Butter set",
+              "portion": null,
+              "priceSgdCents": 480,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Set B - Butter Sugar Toast set",
+          "price": "4.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Set B - Butter Sugar Toast set",
+              "portion": null,
+              "priceSgdCents": 480,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Set C - French Toast set",
+          "price": "4.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Set C - French Toast set",
+              "portion": null,
+              "priceSgdCents": 450,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Set D - Kaya Peanut Toast set",
+          "price": "4.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Set D - Kaya Peanut Toast set",
+              "portion": null,
+              "priceSgdCents": 480,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Set E - Steamed Bread set (Kaya Butter / Kaya Peanut)",
+          "price": "4.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Set E - Steamed Bread set",
+              "portion": "Kaya Butter/ Kaya Peanut",
+              "priceSgdCents": 480,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Coffee / Tea",
+          "price": "1.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Coffee / Tea",
+              "portion": null,
+              "priceSgdCents": 180,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Coffee-O / Tea-O",
+          "price": "1.60",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Coffee-O / Tea-O",
+              "portion": null,
+              "priceSgdCents": 160,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Coffee-C / Tea-C",
+          "price": "2.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Coffee-C / Tea-C",
+              "portion": null,
+              "priceSgdCents": 200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Milo / Horlicks",
+          "price": "2.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Milo / Horlicks",
+              "portion": null,
+              "priceSgdCents": 200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Chinese Tea",
+          "price": "1.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Chinese Tea",
+              "portion": null,
+              "priceSgdCents": 180,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Iced Coffee / Tea",
+          "price": "2.60",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Iced Coffee / Tea",
+              "portion": null,
+              "priceSgdCents": 260,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Iced Milo / Horlicks",
+          "price": "2.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Iced Milo / Horlicks",
+              "portion": null,
+              "priceSgdCents": 280,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Iced Lemon Tea",
+          "price": "2.60",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Iced Lemon Tea",
+              "portion": null,
+              "priceSgdCents": 260,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Barley",
+          "price": "2.60",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Barley",
+              "portion": null,
+              "priceSgdCents": 260,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Canned Drinks",
+          "price": "2.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Canned Drinks",
+              "portion": null,
+              "priceSgdCents": 200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Lime juice",
+          "price": "2.60",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Lime juice",
+              "portion": null,
+              "priceSgdCents": 260,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Packet Juice/Milk",
+          "price": "1.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Packet Juice/Milk",
+              "portion": null,
+              "priceSgdCents": 150,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Bottled Water",
+          "price": "2.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Bottled Water",
+              "portion": null,
+              "priceSgdCents": 200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Ya Kun Kaya Jar 290g",
+          "price": "4.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Ya Kun Kaya Jar",
+              "portion": "290g",
+              "priceSgdCents": 480,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Ya Kun Kaya Jar Single Gift Pack",
+          "price": "5.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Ya Kun Kaya Jar",
+              "portion": "Single Gift Pack",
+              "priceSgdCents": 580,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Ya Kun Elfin Pack (75g x 2)",
+          "price": "6.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Ya Kun Elfin Pack",
+              "portion": "75g x 2",
+              "priceSgdCents": 600,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Ya Kun Kaya Cookies (80g)",
+          "price": "2.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Ya Kun Kaya Cookies",
+              "portion": "80g; Flavours: Kaya butter, Kaya Pistachio",
+              "priceSgdCents": 250,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Ya Kun Coffee Powder 250g",
+          "price": "6.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Ya Kun Coffee Powder",
+              "portion": "250g",
+              "priceSgdCents": 600,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Ya Kun Coffee Powder 500g",
+          "price": "10.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Ya Kun Coffee Powder",
+              "portion": "500g",
+              "priceSgdCents": 1000,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Soft-Boiled Eggs (2 eggs)",
+          "price": "1.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Soft-boiled Eggs",
+              "portion": "2 eggs",
+              "priceSgdCents": 180,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Kaya Butter Crackers",
+          "price": "2.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Kaya Butter Crackers",
+              "portion": null,
+              "priceSgdCents": 200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        }
+      ],
+      "extras": [],
+      "raw": {
+        "items": [
+          {
+            "name": "Kaya Toast with Butter",
+            "portion": null,
+            "priceText": "2.40",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Butter Sugar Toast",
+            "portion": null,
+            "priceText": "2.40",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "French Toast with Kaya",
+            "portion": null,
+            "priceText": "2.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Kaya Peanut Toast",
+            "portion": null,
+            "priceText": "2.40",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Steamed Bread",
+            "portion": "Kaya Butter/ Kaya Peanut",
+            "priceText": "2.40",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Coffee / Tea",
+            "portion": null,
+            "priceText": "1.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Coffee-O / Tea-O",
+            "portion": null,
+            "priceText": "1.60",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Coffee-C / Tea-C",
+            "portion": null,
+            "priceText": "2.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Milo / Horlicks",
+            "portion": null,
+            "priceText": "2.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Chinese Tea",
+            "portion": null,
+            "priceText": "1.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Ya Kun Kaya Jar",
+            "portion": "290g",
+            "priceText": "4.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Ya Kun Kaya Jar",
+            "portion": "Single Gift Pack",
+            "priceText": "5.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Ya Kun Elfin Pack",
+            "portion": "75g x 2",
+            "priceText": "6.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Ya Kun Kaya Cookies",
+            "portion": "80g; Flavours: Kaya butter, Kaya Pistachio",
+            "priceText": "2.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Ya Kun Coffee Powder",
+            "portion": "250g",
+            "priceText": "6.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Ya Kun Coffee Powder",
+            "portion": "500g",
+            "priceText": "10.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Set A - Kaya Toast with Butter set",
+            "portion": null,
+            "priceText": "4.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Set B - Butter Sugar Toast set",
+            "portion": null,
+            "priceText": "4.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Set C - French Toast set",
+            "portion": null,
+            "priceText": "4.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Set D - Kaya Peanut Toast set",
+            "portion": null,
+            "priceText": "4.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Set E - Steamed Bread set",
+            "portion": "Kaya Butter/ Kaya Peanut",
+            "priceText": "4.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Iced Coffee / Tea",
+            "portion": null,
+            "priceText": "2.60",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Iced Milo / Horlicks",
+            "portion": null,
+            "priceText": "2.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Iced Lemon Tea",
+            "portion": null,
+            "priceText": "2.60",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Barley",
+            "portion": null,
+            "priceText": "2.60",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Canned Drinks",
+            "portion": null,
+            "priceText": "2.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Lime juice",
+            "portion": null,
+            "priceText": "2.60",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Packet Juice/Milk",
+            "portion": null,
+            "priceText": "1.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Bottled Water",
+            "portion": null,
+            "priceText": "2.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Soft-boiled Eggs",
+            "portion": "2 eggs",
+            "priceText": "1.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Kaya Butter Crackers",
+            "portion": null,
+            "priceText": "2.00",
+            "currency": "sgd_or_unmarked"
+          }
+        ]
+      }
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "photo": "E5",
+      "sent": {
+        "width": 761,
+        "height": 1009,
+        "bytes": 168706
+      },
+      "outcome": "ok",
+      "error": null,
+      "validation": "ok",
+      "latencyMs": 22609,
+      "inputTokens": 1234,
+      "outputTokens": 1560,
+      "rowsReturned": 23,
+      "costUsdMicros": 18068,
+      "score": {
+        "required": 23,
+        "found": 22,
+        "correct": 22,
+        "wrongFilled": 1
+      },
+      "entries": [
+        {
+          "expected": "Mussels In Cream w Rice",
+          "price": "10.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Mussels In Cream w Rice",
+              "portion": null,
+              "priceSgdCents": 1000,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Bouillabaisse (Fish Stew) w Rice",
+          "price": "11.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Bouillabaisse (Fish Stew) w Rice",
+              "portion": null,
+              "priceSgdCents": 1100,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Mixed Grill (Fish, Chicken, Sausage, Fried Egg & Fries)",
+          "price": "15.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Mixed Grill (Fish, Chicken, Sausage, Fried Egg & Fries)",
+              "portion": null,
+              "priceSgdCents": 1590,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Margherita Pizza",
+          "price": "10.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Margherita",
+              "portion": "11\"",
+              "priceSgdCents": 1000,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Hawaiian Pizza",
+          "price": "12.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Hawaiian",
+              "portion": "11\"",
+              "priceSgdCents": 1200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Mushroom and Ham Pizza",
+          "price": "13.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Mushroom and Ham",
+              "portion": "11\"",
+              "priceSgdCents": 1390,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Pepperoni Pizza",
+          "price": "13.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Pepperoni",
+              "portion": "11\"",
+              "priceSgdCents": 1390,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Chicken Pizza",
+          "price": "13.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Chicken",
+              "portion": "11\"",
+              "priceSgdCents": 1390,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Ham Carbonara",
+          "price": "8.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Ham Carbonara",
+              "portion": null,
+              "priceSgdCents": 890,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Chicken Aglio Olio",
+          "price": "8.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Chicken Aglio Olio",
+              "portion": null,
+              "priceSgdCents": 890,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Clams in Tomato Sauce",
+          "price": "9.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Clams in Tomato Sauce",
+              "portion": null,
+              "priceSgdCents": 900,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Sizzling Chicken Cheese Burger",
+          "price": "12.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Sizzling Chicken Cheese Burger",
+              "portion": "Choice of Fries / Rice / Pasta",
+              "priceSgdCents": 1200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Sizzling Beef Cheese Burger",
+          "price": "12.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Sizzling Beef Cheese Burger",
+              "portion": "Choice of Fries / Rice / Pasta",
+              "priceSgdCents": 1290,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Striploin w Pepper Sauce",
+          "price": "14.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Striploin w Pepper Sauce",
+              "portion": "Choice of Fries / Rice / Pasta",
+              "priceSgdCents": 1490,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Salmon Filet w Lemon Sauce",
+          "price": "14.90",
+          "optional": false,
+          "matched": [],
+          "found": false,
+          "correct": false,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Boneless Chicken Leg w Mushroom Sauce",
+          "price": "10.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Boneless Chicken Leg w Mushroom Sauce",
+              "portion": "Choice of Fries / Rice / Pasta",
+              "priceSgdCents": 1000,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Chicken Burger",
+          "price": "9.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Chicken Burger",
+              "portion": null,
+              "priceSgdCents": 900,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Beef Burger",
+          "price": "9.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Beef Burger",
+              "portion": null,
+              "priceSgdCents": 990,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Double Beef Burger",
+          "price": "12.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Double Beef Burger",
+              "portion": null,
+              "priceSgdCents": 1290,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Crispy Mid-Wings (5pcs)",
+          "price": "7.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Crispy Mid-Wings",
+              "portion": "5pcs",
+              "priceSgdCents": 700,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Chicken Nuggets (6pcs)",
+          "price": "5.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Chicken Nuggets",
+              "portion": "6pcs",
+              "priceSgdCents": 500,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "French Fries",
+          "price": "5.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "French Fries",
+              "portion": null,
+              "priceSgdCents": 500,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Truffle Fries",
+          "price": "7.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Truffle Fries",
+              "portion": null,
+              "priceSgdCents": 700,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        }
+      ],
+      "extras": [
+        {
+          "name": "Salmon Fillet w Lemon Sauce",
+          "portion": "Choice of Fries / Rice / Pasta",
+          "priceSgdCents": 1490,
+          "priceBasis": "explicit"
+        }
+      ],
+      "raw": {
+        "items": [
+          {
+            "name": "Mussels In Cream w Rice",
+            "portion": null,
+            "priceText": "10.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Bouillabaisse (Fish Stew) w Rice",
+            "portion": null,
+            "priceText": "11.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Mixed Grill (Fish, Chicken, Sausage, Fried Egg & Fries)",
+            "portion": null,
+            "priceText": "15.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Ham Carbonara",
+            "portion": null,
+            "priceText": "8.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Chicken Aglio Olio",
+            "portion": null,
+            "priceText": "8.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Clams in Tomato Sauce",
+            "portion": null,
+            "priceText": "9.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Sizzling Chicken Cheese Burger",
+            "portion": "Choice of Fries / Rice / Pasta",
+            "priceText": "12.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Sizzling Beef Cheese Burger",
+            "portion": "Choice of Fries / Rice / Pasta",
+            "priceText": "12.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Striploin w Pepper Sauce",
+            "portion": "Choice of Fries / Rice / Pasta",
+            "priceText": "14.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Salmon Fillet w Lemon Sauce",
+            "portion": "Choice of Fries / Rice / Pasta",
+            "priceText": "14.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Boneless Chicken Leg w Mushroom Sauce",
+            "portion": "Choice of Fries / Rice / Pasta",
+            "priceText": "10.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Margherita",
+            "portion": "11\"",
+            "priceText": "10.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Hawaiian",
+            "portion": "11\"",
+            "priceText": "12.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Mushroom and Ham",
+            "portion": "11\"",
+            "priceText": "13.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Pepperoni",
+            "portion": "11\"",
+            "priceText": "13.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Chicken",
+            "portion": "11\"",
+            "priceText": "13.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Chicken Burger",
+            "portion": null,
+            "priceText": "9.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Beef Burger",
+            "portion": null,
+            "priceText": "9.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Double Beef Burger",
+            "portion": null,
+            "priceText": "12.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Crispy Mid-Wings",
+            "portion": "5pcs",
+            "priceText": "7.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Chicken Nuggets",
+            "portion": "6pcs",
+            "priceText": "5.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "French Fries",
+            "portion": null,
+            "priceText": "5.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Truffle Fries",
+            "portion": null,
+            "priceText": "7.00",
+            "currency": "sgd_or_unmarked"
+          }
+        ]
+      }
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "photo": "E6",
+      "sent": {
+        "width": 1078,
+        "height": 642,
+        "bytes": 114905
+      },
+      "outcome": "ok",
+      "error": null,
+      "validation": "ok",
+      "latencyMs": 16014,
+      "inputTokens": 1169,
+      "outputTokens": 1127,
+      "rowsReturned": 31,
+      "costUsdMicros": 13608,
+      "score": {
+        "required": 31,
+        "found": 31,
+        "correct": 31,
+        "wrongFilled": 0
+      },
+      "entries": [
+        {
+          "expected": "Kaya Toast with Butter",
+          "price": "2.40",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Kaya Toast with Butter",
+              "portion": null,
+              "priceSgdCents": 240,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Butter Sugar Toast",
+          "price": "2.40",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Butter Sugar Toast",
+              "portion": null,
+              "priceSgdCents": 240,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "French Toast with Kaya",
+          "price": "2.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "French Toast with Kaya",
+              "portion": null,
+              "priceSgdCents": 200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Kaya Peanut Toast",
+          "price": "2.40",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Kaya Peanut Toast",
+              "portion": null,
+              "priceSgdCents": 240,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Steamed Bread (Kaya Butter / Kaya Peanut)",
+          "price": "2.40",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Steamed Bread",
+              "portion": "Kaya Butter/ Kaya Peanut",
+              "priceSgdCents": 240,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Set A - Kaya Toast with Butter set",
+          "price": "4.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Set A - Kaya Toast with Butter set",
+              "portion": null,
+              "priceSgdCents": 480,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Set B - Butter Sugar Toast set",
+          "price": "4.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Set B - Butter Sugar Toast set",
+              "portion": null,
+              "priceSgdCents": 480,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Set C - French Toast set",
+          "price": "4.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Set C - French Toast set",
+              "portion": null,
+              "priceSgdCents": 450,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Set D - Kaya Peanut Toast set",
+          "price": "4.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Set D - Kaya Peanut Toast set",
+              "portion": null,
+              "priceSgdCents": 480,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Set E - Steamed Bread set (Kaya Butter / Kaya Peanut)",
+          "price": "4.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Set E - Steamed Bread set",
+              "portion": "Kaya Butter/ Kaya Peanut",
+              "priceSgdCents": 480,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Coffee / Tea",
+          "price": "1.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Coffee / Tea",
+              "portion": null,
+              "priceSgdCents": 180,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Coffee-O / Tea-O",
+          "price": "1.60",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Coffee-O / Tea-O",
+              "portion": null,
+              "priceSgdCents": 160,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Coffee-C / Tea-C",
+          "price": "2.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Coffee-C / Tea-C",
+              "portion": null,
+              "priceSgdCents": 200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Milo / Horlicks",
+          "price": "2.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Milo / Horlicks",
+              "portion": null,
+              "priceSgdCents": 200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Chinese Tea",
+          "price": "1.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Chinese Tea",
+              "portion": null,
+              "priceSgdCents": 180,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Iced Coffee / Tea",
+          "price": "2.60",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Iced Coffee / Tea",
+              "portion": null,
+              "priceSgdCents": 260,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Iced Milo / Horlicks",
+          "price": "2.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Iced Milo / Horlicks",
+              "portion": null,
+              "priceSgdCents": 280,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Iced Lemon Tea",
+          "price": "2.60",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Iced Lemon Tea",
+              "portion": null,
+              "priceSgdCents": 260,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Barley",
+          "price": "2.60",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Barley",
+              "portion": null,
+              "priceSgdCents": 260,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Canned Drinks",
+          "price": "2.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Canned Drinks",
+              "portion": null,
+              "priceSgdCents": 200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Lime juice",
+          "price": "2.60",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Lime juice",
+              "portion": null,
+              "priceSgdCents": 260,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Packet Juice/Milk",
+          "price": "1.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Packet Juice/Milk",
+              "portion": null,
+              "priceSgdCents": 150,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Bottled Water",
+          "price": "2.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Bottled Water",
+              "portion": null,
+              "priceSgdCents": 200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Ya Kun Kaya Jar 290g",
+          "price": "4.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Ya Kun Kaya Jar",
+              "portion": "290g",
+              "priceSgdCents": 480,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Ya Kun Kaya Jar Single Gift Pack",
+          "price": "5.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Ya Kun Kaya Jar",
+              "portion": "Single Gift Pack",
+              "priceSgdCents": 580,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Ya Kun Elfin Pack (75g x 2)",
+          "price": "6.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Ya Kun Elfin Pack",
+              "portion": "75g x 2",
+              "priceSgdCents": 600,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Ya Kun Kaya Cookies (80g)",
+          "price": "2.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Ya Kun Kaya Cookies",
+              "portion": "80g",
+              "priceSgdCents": 250,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Ya Kun Coffee Powder 250g",
+          "price": "6.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Ya Kun Coffee Powder",
+              "portion": "250g",
+              "priceSgdCents": 600,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Ya Kun Coffee Powder 500g",
+          "price": "10.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Ya Kun Coffee Powder",
+              "portion": "500g",
+              "priceSgdCents": 1000,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Soft-Boiled Eggs (2 eggs)",
+          "price": "1.80",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Soft-Boiled Eggs",
+              "portion": "2 eggs",
+              "priceSgdCents": 180,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Kaya Butter Crackers",
+          "price": "2.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Kaya Butter Crackers",
+              "portion": null,
+              "priceSgdCents": 200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        }
+      ],
+      "extras": [],
+      "raw": {
+        "items": [
+          {
+            "name": "Kaya Toast with Butter",
+            "portion": null,
+            "priceText": "2.40",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Butter Sugar Toast",
+            "portion": null,
+            "priceText": "2.40",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "French Toast with Kaya",
+            "portion": null,
+            "priceText": "2.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Kaya Peanut Toast",
+            "portion": null,
+            "priceText": "2.40",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Steamed Bread",
+            "portion": "Kaya Butter/ Kaya Peanut",
+            "priceText": "2.40",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Coffee / Tea",
+            "portion": null,
+            "priceText": "1.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Coffee-O / Tea-O",
+            "portion": null,
+            "priceText": "1.60",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Coffee-C / Tea-C",
+            "portion": null,
+            "priceText": "2.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Milo / Horlicks",
+            "portion": null,
+            "priceText": "2.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Chinese Tea",
+            "portion": null,
+            "priceText": "1.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Ya Kun Kaya Jar",
+            "portion": "290g",
+            "priceText": "4.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Ya Kun Kaya Jar",
+            "portion": "Single Gift Pack",
+            "priceText": "5.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Ya Kun Elfin Pack",
+            "portion": "75g x 2",
+            "priceText": "6.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Ya Kun Kaya Cookies",
+            "portion": "80g",
+            "priceText": "2.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Ya Kun Coffee Powder",
+            "portion": "250g",
+            "priceText": "6.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Ya Kun Coffee Powder",
+            "portion": "500g",
+            "priceText": "10.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Set A - Kaya Toast with Butter set",
+            "portion": null,
+            "priceText": "4.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Set B - Butter Sugar Toast set",
+            "portion": null,
+            "priceText": "4.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Set C - French Toast set",
+            "portion": null,
+            "priceText": "4.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Set D - Kaya Peanut Toast set",
+            "portion": null,
+            "priceText": "4.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Set E - Steamed Bread set",
+            "portion": "Kaya Butter/ Kaya Peanut",
+            "priceText": "4.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Iced Coffee / Tea",
+            "portion": null,
+            "priceText": "2.60",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Iced Milo / Horlicks",
+            "portion": null,
+            "priceText": "2.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Iced Lemon Tea",
+            "portion": null,
+            "priceText": "2.60",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Barley",
+            "portion": null,
+            "priceText": "2.60",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Canned Drinks",
+            "portion": null,
+            "priceText": "2.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Lime juice",
+            "portion": null,
+            "priceText": "2.60",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Packet Juice/Milk",
+            "portion": null,
+            "priceText": "1.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Bottled Water",
+            "portion": null,
+            "priceText": "2.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Soft-Boiled Eggs",
+            "portion": "2 eggs",
+            "priceText": "1.80",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Kaya Butter Crackers",
+            "portion": null,
+            "priceText": "2.00",
+            "currency": "sgd_or_unmarked"
+          }
+        ]
+      }
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "photo": "F1",
+      "sent": {
+        "width": 1206,
+        "height": 967,
+        "bytes": 269667
+      },
+      "outcome": "ok",
+      "error": null,
+      "validation": "ok",
+      "latencyMs": 8798,
+      "inputTokens": 1726,
+      "outputTokens": 732,
+      "rowsReturned": 20,
+      "costUsdMicros": 10772,
+      "score": {
+        "required": 20,
+        "found": 20,
+        "correct": 19,
+        "wrongFilled": 1
+      },
+      "entries": [
+        {
+          "expected": "Egg Fried Rice Plain",
+          "price": "4.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "EGG FRIED RICE",
+              "portion": "Plain",
+              "priceSgdCents": 450,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Egg Fried Rice Shrimp",
+          "price": "6.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "EGG FRIED RICE",
+              "portion": "Shrimp",
+              "priceSgdCents": 690,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Egg Fried Rice Pork Cutlet",
+          "price": "8.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "EGG FRIED RICE",
+              "portion": "Pork Cutlet",
+              "priceSgdCents": 690,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": false,
+          "wrongFilled": 1
+        },
+        {
+          "expected": "Egg Fried Rice Crabmeat & Tobiko",
+          "price": "10.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "EGG FRIED RICE",
+              "portion": "Crabmeat & Tobiko",
+              "priceSgdCents": 1050,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "X.O. Fried Rice Plain",
+          "price": "6.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "X.O. FRIED RICE",
+              "portion": "Plain",
+              "priceSgdCents": 600,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "X.O. Fried Rice Shrimp",
+          "price": "8.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "X.O. FRIED RICE",
+              "portion": "Shrimp",
+              "priceSgdCents": 850,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "X.O. Fried Rice Pork Cutlet",
+          "price": "8.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "X.O. FRIED RICE",
+              "portion": "Pork Cutlet",
+              "priceSgdCents": 850,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "X.O. Fried Rice Crabmeat & Tobiko",
+          "price": "12.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "X.O. FRIED RICE",
+              "portion": "Crabmeat & Tobiko",
+              "priceSgdCents": 1200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Tom Yum Fried Rice Plain",
+          "price": "5.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "TOM YUM FRIED RICE",
+              "portion": "Plain",
+              "priceSgdCents": 550,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Tom Yum Fried Rice Shrimp",
+          "price": "7.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "TOM YUM FRIED RICE",
+              "portion": "Shrimp",
+              "priceSgdCents": 790,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Tom Yum Fried Rice Pork Cutlet",
+          "price": "7.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "TOM YUM FRIED RICE",
+              "portion": "Pork Cutlet",
+              "priceSgdCents": 790,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Tom Yum Fried Rice Crabmeat & Tobiko",
+          "price": "11.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "TOM YUM FRIED RICE",
+              "portion": "Crabmeat & Tobiko",
+              "priceSgdCents": 1150,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Mala Fried Rice Plain",
+          "price": "5.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "MALA FRIED RICE",
+              "portion": "Plain",
+              "priceSgdCents": 550,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Mala Fried Rice Shrimp",
+          "price": "7.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "MALA FRIED RICE",
+              "portion": "Shrimp",
+              "priceSgdCents": 790,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Mala Fried Rice Pork Cutlet",
+          "price": "7.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "MALA FRIED RICE",
+              "portion": "Pork Cutlet",
+              "priceSgdCents": 790,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Mala Fried Rice Crabmeat & Tobiko",
+          "price": "11.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "MALA FRIED RICE",
+              "portion": "Crabmeat & Tobiko",
+              "priceSgdCents": 1150,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Tobiko",
+          "price": "1.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Tobiko",
+              "portion": null,
+              "priceSgdCents": 100,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Crabmeat",
+          "price": "6.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Crabmeat",
+              "portion": null,
+              "priceSgdCents": 600,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Pork Cutlet",
+          "price": "4.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Pork Cutlet",
+              "portion": null,
+              "priceSgdCents": 450,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Shrimp",
+          "price": "4.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "Shrimp",
+              "portion": null,
+              "priceSgdCents": 450,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        }
+      ],
+      "extras": [],
+      "raw": {
+        "items": [
+          {
+            "name": "EGG FRIED RICE",
+            "portion": "Plain",
+            "priceText": "4.5",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "EGG FRIED RICE",
+            "portion": "Shrimp",
+            "priceText": "6.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "EGG FRIED RICE",
+            "portion": "Pork Cutlet",
+            "priceText": "6.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "EGG FRIED RICE",
+            "portion": "Crabmeat & Tobiko",
+            "priceText": "10.5",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "X.O. FRIED RICE",
+            "portion": "Plain",
+            "priceText": "6.0",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "X.O. FRIED RICE",
+            "portion": "Shrimp",
+            "priceText": "8.5",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "X.O. FRIED RICE",
+            "portion": "Pork Cutlet",
+            "priceText": "8.5",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "X.O. FRIED RICE",
+            "portion": "Crabmeat & Tobiko",
+            "priceText": "12.0",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "TOM YUM FRIED RICE",
+            "portion": "Plain",
+            "priceText": "5.5",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "TOM YUM FRIED RICE",
+            "portion": "Shrimp",
+            "priceText": "7.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "TOM YUM FRIED RICE",
+            "portion": "Pork Cutlet",
+            "priceText": "7.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "TOM YUM FRIED RICE",
+            "portion": "Crabmeat & Tobiko",
+            "priceText": "11.5",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "MALA FRIED RICE",
+            "portion": "Plain",
+            "priceText": "5.5",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "MALA FRIED RICE",
+            "portion": "Shrimp",
+            "priceText": "7.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "MALA FRIED RICE",
+            "portion": "Pork Cutlet",
+            "priceText": "7.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "MALA FRIED RICE",
+            "portion": "Crabmeat & Tobiko",
+            "priceText": "11.5",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Tobiko",
+            "portion": null,
+            "priceText": "1.0",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Crabmeat",
+            "portion": null,
+            "priceText": "6.0",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Pork Cutlet",
+            "portion": null,
+            "priceText": "4.5",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "Shrimp",
+            "portion": null,
+            "priceText": "4.5",
+            "currency": "sgd_or_unmarked"
+          }
+        ]
+      }
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "photo": "F2",
+      "sent": {
+        "width": 910,
+        "height": 1735,
+        "bytes": 216542
+      },
+      "outcome": "ok",
+      "error": null,
+      "validation": "ok",
+      "latencyMs": 12813,
+      "inputTokens": 2227,
+      "outputTokens": 1111,
+      "rowsReturned": 31,
+      "costUsdMicros": 15564,
+      "score": {
+        "required": 31,
+        "found": 30,
+        "correct": 30,
+        "wrongFilled": 1
+      },
+      "entries": [
+        {
+          "expected": "Jofa Truffle Wagyu Don",
+          "price": "13.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "JOFA TRUFFLE WAGYU DON",
+              "portion": null,
+              "priceSgdCents": 1390,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Jofa Sukiyaki Don Pork",
+          "price": "6.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "JOFA SUKIYAKI DON",
+              "portion": "PORK",
+              "priceSgdCents": 690,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Jofa Sukiyaki Don Beef",
+          "price": "8.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "JOFA SUKIYAKI DON",
+              "portion": "BEEF",
+              "priceSgdCents": 890,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Jofa Sinful Seafood Don",
+          "price": "11.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "JOFA SINFUL SEAFOOD DON",
+              "portion": null,
+              "priceSgdCents": 1190,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Jofa Chicken Katsu Don",
+          "price": "6.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "JOFA CHICKEN KATSU DON",
+              "portion": null,
+              "priceSgdCents": 650,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Jofa Teriyaki Chicken Don",
+          "price": "5.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "JOFA TERIYAKI CHICKEN DON",
+              "portion": null,
+              "priceSgdCents": 590,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Jofa Buta Don",
+          "price": "6.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "JOFA BUTA DON",
+              "portion": null,
+              "priceSgdCents": 690,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Jofa Salmon Mentai Don",
+          "price": "9.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "JOFA SALMON MENTAI DON",
+              "portion": null,
+              "priceSgdCents": 990,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Jofa Salmon Teriyaki Don",
+          "price": "8.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "JOFA SALMON TERIYAKI DON",
+              "portion": null,
+              "priceSgdCents": 890,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Jofa Unagi Don",
+          "price": "9.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "JOFA UNAGI DON",
+              "portion": null,
+              "priceSgdCents": 990,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Sukiyaki Beef Shortplate",
+          "price": "4.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "SUKIYAKI BEEF SHORTPLATE",
+              "portion": null,
+              "priceSgdCents": 450,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Sukiyaki Pork Belly",
+          "price": "3.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "SUKIYAKI PORK BELLY",
+              "portion": null,
+              "priceSgdCents": 350,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Chicken Katsu",
+          "price": "3.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "CHICKEN KATSU",
+              "portion": null,
+              "priceSgdCents": 300,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Mentaiko Sauce",
+          "price": "2.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "MENTAIKO SAUCE",
+              "portion": null,
+              "priceSgdCents": 200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Japanese Furikake Rice",
+          "price": "1.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "JAPANESE FURIKAKE RICE",
+              "portion": null,
+              "priceSgdCents": 100,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Onsen Egg",
+          "price": "1.30",
+          "optional": false,
+          "matched": [
+            {
+              "name": "ONSEN EGG",
+              "portion": null,
+              "priceSgdCents": 130,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Tobiko",
+          "price": "2.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "TOBIKO",
+              "portion": null,
+              "priceSgdCents": 200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Takoyaki 4pcs",
+          "price": "3.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "TAKOYAKI",
+              "portion": "4PCS",
+              "priceSgdCents": 390,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Takoyaki 8pcs",
+          "price": "6.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "TAKOYAKI",
+              "portion": "8PCS",
+              "priceSgdCents": 690,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Chicken Karaage",
+          "price": "5.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "CHICKEN KARAAGE",
+              "portion": null,
+              "priceSgdCents": 590,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Tamago Original",
+          "price": "3.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "TAMAGO",
+              "portion": "ORIGINAL",
+              "priceSgdCents": 390,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Tamago +Mentaiko",
+          "price": "4.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "TAMAGO",
+              "portion": "+MENTAIKO",
+              "priceSgdCents": 490,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Japanese Gyoza (4pcs)",
+          "price": "4.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "JAPENESE GYOZA",
+              "portion": "4PCS",
+              "priceSgdCents": 400,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Ebi Fry (3 pcs)",
+          "price": "4.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "EBI FRY",
+              "portion": "3 PCS",
+              "priceSgdCents": 490,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Ebi Fry (3 pcs) +Mentaiko",
+          "price": "5.90",
+          "optional": false,
+          "matched": [],
+          "found": false,
+          "correct": false,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Asari Clam Miso Soup",
+          "price": "3.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "ASARI CLAM MISO SOUP",
+              "portion": null,
+              "priceSgdCents": 390,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Crab Stick Salad",
+          "price": "4.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "CRAB STICK SALAD",
+              "portion": null,
+              "priceSgdCents": 490,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Soft Shell Crab",
+          "price": "6.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "SOFT SHELL CRAB",
+              "portion": null,
+              "priceSgdCents": 690,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Sesame Fried Chicken 2pcs",
+          "price": "3.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "SESAME FRIED CHICKEN",
+              "portion": "2PCS",
+              "priceSgdCents": 390,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Sesame Fried Chicken 4pcs",
+          "price": "7.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "SESAME FRIED CHICKEN",
+              "portion": "4PCS",
+              "priceSgdCents": 750,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Seaweed Bomba Fried Squid",
+          "price": "7.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "SEAWEED BOMBA FRIED SQUID",
+              "portion": null,
+              "priceSgdCents": 790,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        }
+      ],
+      "extras": [
+        {
+          "name": "EBI FRY",
+          "portion": "+MENTAIKO",
+          "priceSgdCents": 590,
+          "priceBasis": "explicit"
+        }
+      ],
+      "raw": {
+        "items": [
+          {
+            "name": "JOFA TRUFFLE WAGYU DON",
+            "portion": null,
+            "priceText": "13.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "JOFA SUKIYAKI DON",
+            "portion": "PORK",
+            "priceText": "6.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "JOFA SUKIYAKI DON",
+            "portion": "BEEF",
+            "priceText": "8.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "JOFA SINFUL SEAFOOD DON",
+            "portion": null,
+            "priceText": "11.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "JOFA CHICKEN KATSU DON",
+            "portion": null,
+            "priceText": "6.5",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "JOFA TERIYAKI CHICKEN DON",
+            "portion": null,
+            "priceText": "5.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "JOFA BUTA DON",
+            "portion": null,
+            "priceText": "6.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "JOFA SALMON MENTAI DON",
+            "portion": null,
+            "priceText": "9.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "JOFA SALMON TERIYAKI DON",
+            "portion": null,
+            "priceText": "8.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "JOFA UNAGI DON",
+            "portion": null,
+            "priceText": "9.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "SUKIYAKI BEEF SHORTPLATE",
+            "portion": null,
+            "priceText": "4.5",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "SUKIYAKI PORK BELLY",
+            "portion": null,
+            "priceText": "3.5",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "CHICKEN KATSU",
+            "portion": null,
+            "priceText": "3.0",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "MENTAIKO SAUCE",
+            "portion": null,
+            "priceText": "2.0",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "JAPANESE FURIKAKE RICE",
+            "portion": null,
+            "priceText": "1.0",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "ONSEN EGG",
+            "portion": null,
+            "priceText": "1.3",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "TOBIKO",
+            "portion": null,
+            "priceText": "2.0",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "TAKOYAKI",
+            "portion": "4PCS",
+            "priceText": "3.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "TAKOYAKI",
+            "portion": "8PCS",
+            "priceText": "6.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "CHICKEN KARAAGE",
+            "portion": null,
+            "priceText": "5.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "TAMAGO",
+            "portion": "ORIGINAL",
+            "priceText": "3.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "TAMAGO",
+            "portion": "+MENTAIKO",
+            "priceText": "4.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "JAPENESE GYOZA",
+            "portion": "4PCS",
+            "priceText": "4.0",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "EBI FRY",
+            "portion": "3 PCS",
+            "priceText": "4.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "EBI FRY",
+            "portion": "+MENTAIKO",
+            "priceText": "5.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "ASARI CLAM MISO SOUP",
+            "portion": null,
+            "priceText": "3.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "CRAB STICK SALAD",
+            "portion": null,
+            "priceText": "4.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "SOFT SHELL CRAB",
+            "portion": null,
+            "priceText": "6.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "SESAME FRIED CHICKEN",
+            "portion": "2PCS",
+            "priceText": "3.9",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "SESAME FRIED CHICKEN",
+            "portion": "4PCS",
+            "priceText": "7.5",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "SEAWEED BOMBA FRIED SQUID",
+            "portion": null,
+            "priceText": "7.9",
+            "currency": "sgd_or_unmarked"
+          }
+        ]
+      }
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "photo": "F3",
+      "sent": {
+        "width": 900,
+        "height": 1240,
+        "bytes": 198862
+      },
+      "outcome": "ok",
+      "error": null,
+      "validation": "ok",
+      "latencyMs": 7791,
+      "inputTokens": 1670,
+      "outputTokens": 579,
+      "rowsReturned": 16,
+      "costUsdMicros": 9130,
+      "score": {
+        "required": 16,
+        "found": 16,
+        "correct": 16,
+        "wrongFilled": 0
+      },
+      "entries": [
+        {
+          "expected": "Mixed Grill",
+          "price": "11.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "MIXED GRILL",
+              "portion": null,
+              "priceSgdCents": 1100,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Sirloin Steak",
+          "price": "12.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "SIRLOIN STEAK",
+              "portion": null,
+              "priceSgdCents": 1200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Lamb Chop",
+          "price": "12.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "LAMB CHOP",
+              "portion": null,
+              "priceSgdCents": 1200,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Pork Chop",
+          "price": "7.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "PORK CHOP",
+              "portion": null,
+              "priceSgdCents": 750,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Pork Cutlet",
+          "price": "8.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "PORK CUTLET",
+              "portion": null,
+              "priceSgdCents": 800,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Chicken Chop",
+          "price": "7.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "CHICKEN CHOP",
+              "portion": null,
+              "priceSgdCents": 700,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Chicken Cutlet",
+          "price": "7.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "CHICKEN CUTLET",
+              "portion": null,
+              "priceSgdCents": 750,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Fish & Chips",
+          "price": "6.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "FISH & CHIPS",
+              "portion": null,
+              "priceSgdCents": 650,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Bacon, Sausage & Egg",
+          "price": "7.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "BACON, SAUSAGE & EGG",
+              "portion": null,
+              "priceSgdCents": 700,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Ham & Egg",
+          "price": "6.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "HAM & EGG",
+              "portion": null,
+              "priceSgdCents": 600,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Chicken Wings 4 Pcs",
+          "price": "7.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "CHICKEN WINGS",
+              "portion": "4 PCS",
+              "priceSgdCents": 700,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Chicken Wings (2 Pcs) with Rice & Egg",
+          "price": "5.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "CHICKEN WINGS with RICE & EGG",
+              "portion": "2 PCS",
+              "priceSgdCents": 550,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Add Extra Egg",
+          "price": "1.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "ADD EXTRA EGG",
+              "portion": null,
+              "priceSgdCents": 100,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Add Extra Rice",
+          "price": "1.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "ADD EXTRA RICE",
+              "portion": null,
+              "priceSgdCents": 100,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Add Extra Pork Chop / Pc",
+          "price": "3.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "ADD EXTRA PORK CHOP",
+              "portion": "/ PC",
+              "priceSgdCents": 350,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Add Extra Lamb Chop / Pc",
+          "price": "4.00",
+          "optional": false,
+          "matched": [
+            {
+              "name": "ADD EXTRA LAMB CHOP",
+              "portion": "/ PC",
+              "priceSgdCents": 400,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        }
+      ],
+      "extras": [],
+      "raw": {
+        "items": [
+          {
+            "name": "MIXED GRILL",
+            "portion": null,
+            "priceText": "11.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "SIRLOIN STEAK",
+            "portion": null,
+            "priceText": "12.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "LAMB CHOP",
+            "portion": null,
+            "priceText": "12.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "PORK CHOP",
+            "portion": null,
+            "priceText": "7.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "PORK CUTLET",
+            "portion": null,
+            "priceText": "8.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "CHICKEN CHOP",
+            "portion": null,
+            "priceText": "7.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "CHICKEN CUTLET",
+            "portion": null,
+            "priceText": "7.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "FISH & CHIPS",
+            "portion": null,
+            "priceText": "6.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "BACON, SAUSAGE & EGG",
+            "portion": null,
+            "priceText": "7.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "HAM & EGG",
+            "portion": null,
+            "priceText": "6.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "CHICKEN WINGS",
+            "portion": "4 PCS",
+            "priceText": "7.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "CHICKEN WINGS with RICE & EGG",
+            "portion": "2 PCS",
+            "priceText": "5.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "ADD EXTRA EGG",
+            "portion": null,
+            "priceText": "1.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "ADD EXTRA RICE",
+            "portion": null,
+            "priceText": "1.00",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "ADD EXTRA PORK CHOP",
+            "portion": "/ PC",
+            "priceText": "3.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "ADD EXTRA LAMB CHOP",
+            "portion": "/ PC",
+            "priceText": "4.00",
+            "currency": "sgd_or_unmarked"
+          }
+        ]
+      }
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "photo": "F4",
+      "sent": {
+        "width": 935,
+        "height": 800,
+        "bytes": 113823
+      },
+      "outcome": "ok",
+      "error": null,
+      "validation": "ok",
+      "latencyMs": 6648,
+      "inputTokens": 1213,
+      "outputTokens": 398,
+      "rowsReturned": 8,
+      "costUsdMicros": 6406,
+      "score": {
+        "required": 8,
+        "found": 8,
+        "correct": 8,
+        "wrongFilled": 0
+      },
+      "entries": [
+        {
+          "expected": "Charcoal Grill Chicken Chop",
+          "price": "8.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "CHARCOAL GRILL CHICKEN CHOP",
+              "portion": null,
+              "priceSgdCents": 890,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Charcoal Grill Pork Chop",
+          "price": "8.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "CHARCOAL GRILL PORK CHOP",
+              "portion": null,
+              "priceSgdCents": 890,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Charcoal Grill Ribeye/Striploin Steak",
+          "price": "14.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "CHARCOAL GRILL RIBEYE/STRIPLOIN STEAK",
+              "portion": null,
+              "priceSgdCents": 1490,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Jofa Bratwurst Sausage (2pcs)",
+          "price": "7.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "JOFA BRATWURST SAUSAGE",
+              "portion": "2pcs",
+              "priceSgdCents": 750,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Jofa Duck Confit",
+          "price": "12.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "JOFA DUCK CONFIT",
+              "portion": null,
+              "priceSgdCents": 1290,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Jofa Salmon Fillet (180g)",
+          "price": "13.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "JOFA SALMON FILLET",
+              "portion": "180g",
+              "priceSgdCents": 1390,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Chicken Cutlet",
+          "price": "8.90",
+          "optional": false,
+          "matched": [
+            {
+              "name": "CHICKEN CUTLET",
+              "portion": null,
+              "priceSgdCents": 890,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        },
+        {
+          "expected": "Fish and Chips",
+          "price": "10.50",
+          "optional": false,
+          "matched": [
+            {
+              "name": "FISH AND CHIPS",
+              "portion": null,
+              "priceSgdCents": 1050,
+              "priceBasis": "explicit"
+            }
+          ],
+          "found": true,
+          "correct": true,
+          "wrongFilled": 0
+        }
+      ],
+      "extras": [],
+      "raw": {
+        "items": [
+          {
+            "name": "CHARCOAL GRILL CHICKEN CHOP",
+            "portion": null,
+            "priceText": "8.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "CHARCOAL GRILL PORK CHOP",
+            "portion": null,
+            "priceText": "8.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "CHARCOAL GRILL RIBEYE/STRIPLOIN STEAK",
+            "portion": null,
+            "priceText": "14.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "JOFA BRATWURST SAUSAGE",
+            "portion": "2pcs",
+            "priceText": "7.50",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "JOFA DUCK CONFIT",
+            "portion": null,
+            "priceText": "12.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "JOFA SALMON FILLET",
+            "portion": "180g",
+            "priceText": "13.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "CHICKEN CUTLET",
+            "portion": null,
+            "priceText": "8.90",
+            "currency": "sgd_or_unmarked"
+          },
+          {
+            "name": "FISH AND CHIPS",
+            "portion": null,
+            "priceText": "10.50",
+            "currency": "sgd_or_unmarked"
+          }
+        ]
+      }
+    }
+  ]
+}
