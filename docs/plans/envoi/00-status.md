@@ -291,8 +291,51 @@ The candidate list in `roadmap.md` remains discussion material and is superseded
 Post-release, outside the build order: S18, merchant shop QR and order archive, started and done 2026-10-24 on `envoi/slice-18-shop-qr-archive` ([record](#s18-merchant-shop-qr-and-order-archive-2026-10-24)).
 
 Proposed 2026-10-25, outside the build order: S19, S21, S20 and S22 from the [continuation plan](continuation-plan.md); Gates 1-3 were re-approved for them on 2026-10-25 and Gate 4 was amended for them on 2026-10-25 ("I approve Gate 4.").
-S19 started 2026-10-25 on `envoi/slice-19-sdk-agent-route` and was done 2026-10-26, on `main` at `4b7fdb7` ([record](#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-2026-10-25)); S21 started 2026-10-26 on `envoi/slice-21-one-box-order` and was done 2026-10-26, on `main` at `9e9f9f1` ([record](#s21-order-from-one-sentence-2026-10-26)); S20 started 2026-10-28 on `envoi/slice-20-reference-agent` and was done 2026-10-28 ([record](#s20-reference-buyer-agent-on-the-generated-sdk-2026-10-28)); S22 has not started.
+S19 started 2026-10-25 on `envoi/slice-19-sdk-agent-route` and was done 2026-10-26, on `main` at `4b7fdb7` ([record](#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-2026-10-25)); S21 started 2026-10-26 on `envoi/slice-21-one-box-order` and was done 2026-10-26, on `main` at `9e9f9f1` ([record](#s21-order-from-one-sentence-2026-10-26)); S20 started 2026-10-28 on `envoi/slice-20-reference-agent` and was done 2026-10-28 ([record](#s20-reference-buyer-agent-on-the-generated-sdk-2026-10-28)); S22 started 2026-10-28 on `envoi/slice-22-photo-round-4` ([record](#s22-menu-photo-experiment-round-4-2026-10-28)).
 2026-10-28, S22 photos: the round 3 photos were lost from `.maintenance-build/s11-eval-photos/`; the user supplied five again, saved there as E1-E5, and said "Use five photos for S22 and record E6 as dropped." Later the same day the user said "make e6 from e4": E6 was rebuilt as `E6.png`, E4 turned 90 degrees in its pixels (1122x948 to 948x1122), as in round 3, so S22 counts six photos again.
+
+### S22 Menu photo experiment, round 4, 2026-10-28
+
+- **Branch:** `envoi/slice-22-photo-round-4`, created from `main` at `e552901` on the user's words "I authorize starting S22 (Menu photo experiment, round 4) now. Create envoi/slice-22-photo-round-4 from main."
+- **Baseline [verified 2026-10-28]:** typecheck, typecheck:client and lint clean; 571 of 571 tests (79 files) on local PostgreSQL with the Neon names unset.
+
+#### S22 round 4 pre-registration (R5), 2026-10-28
+
+Written and committed before any round 4 vision call, as the [Gate 3 round 4 protocol](03-program-design.md#reopening-2026-10-25-continuation-slices-s19-s22) requires.
+
+- **What runs:** the S11 path unchanged (the `sharp` browser-shrink simulation, `normalizeMenuJpeg`, `draftMenuFromPhoto` with prompt `menu-vision-prompt-2026-10-15-english` and the 60-second budget, then `validateVisionDraft`), preceded by the merchant step of Gate 2: a quarter-turn rotation and a crop to the menu, applied by the builder as a merchant would and fixed below before any call.
+- **Round 3 photos, re-made copies:** the round 3 files were lost; on 2026-10-28 the user supplied the same five menus again as uncropped Google Images screenshots, and E6 was remade from the new E4.
+  On the user's decision ("Crop, accept copies") each was cropped to the menu as round 3 was, with the uncropped files kept.
+  They are copies, not the round 3 pixels, so round 3 and round 4 scores are not comparable pixel for pixel.
+  E1 has a green block over part of its footnote, and E2 and E4 keep part of a Google Lens icon over a food picture; neither covers a price.
+- **E6 and the rotate step:** the merchant step turns E6 upright, which makes it the same pixels as E4; it is still run and scored as its own photo, so E4's menu counts twice, and the rotate step is tested only by this one synthetic case.
+  No fresh photo is sideways.
+- **Fresh unseen photos:** F1, F2 and F4, menus photographed in Singapore and supplied by the user on 2026-10-28, cropped to the menu board; none was used in rounds 1-3.
+- **Demo merchant's photo:** F3 Tokyo Western Food, chosen by the user ("Yes, F3").
+  The owner's permission is verbal, reported by the user on 2026-10-28 ("It was a verbal permission."), under the [2026-10-28 reopening](#gate-3-and-4-reopening-2026-10-28-s22-verbal-permission); the date the owner gave it was not stated, and it is recorded without personal details.
+  F3 is also scored with the set.
+- **OpenAI permission:** E1-E6, the user's 2026-10-15 permission, confirmed for the copies on 2026-10-28 ("Yes, it covers them"); F1-F4, "Yes, permission" on 2026-10-28.
+- **Storage:** every photo stays in the git-ignored `.maintenance-build/s22-eval-photos/`, never committed and never shown on the site.
+- **Expected drafts:** E1-E6 exactly as in the [S11 pre-registration](#s11-vision-evaluation-pre-registration-r5) (164 required entries).
+  F1-F4 below, read by the builder and confirmed correct by the user on 2026-10-28 ("the menu items are correct"); a portion follows its name.
+
+  | Photo | Challenge | Required entries | Expected draft |
+  | --- | --- | --- | --- |
+  | F1 | four dishes with options A-D; prices without a trailing zero, one with no visible point; Chinese beside English; the last add-on cut by the edge | 20 | Egg Fried Rice Plain 4.50; Egg Fried Rice Shrimp 6.90; Egg Fried Rice Pork Cutlet 8.90; Egg Fried Rice Crabmeat & Tobiko 10.50; X.O. Fried Rice Plain 6.00; X.O. Fried Rice Shrimp 8.50; X.O. Fried Rice Pork Cutlet 8.50; X.O. Fried Rice Crabmeat & Tobiko 12.00; Tom Yum Fried Rice Plain 5.50; Tom Yum Fried Rice Shrimp 7.90; Tom Yum Fried Rice Pork Cutlet 7.90; Tom Yum Fried Rice Crabmeat & Tobiko 11.50; Mala Fried Rice Plain 5.50; Mala Fried Rice Shrimp 7.90; Mala Fried Rice Pork Cutlet 7.90; Mala Fried Rice Crabmeat & Tobiko 11.50; Add on Tobiko 1.00; Add on Crabmeat 6.00; Add on Pork Cutlet 4.50; Add on Shrimp 4.50 (cut by the photo's bottom edge; required) |
+  | F2 | angled board; pork and beef prices on one item; slash prices for piece counts; dotted leaders | 31 | Jofa Truffle Wagyu Don 13.90; Jofa Sukiyaki Don Pork 6.90; Jofa Sukiyaki Don Beef 8.90; Jofa Sinful Seafood Don 11.90; Jofa Chicken Katsu Don 6.50; Jofa Teriyaki Chicken Don 5.90; Jofa Buta Don 6.90; Jofa Salmon Mentai Don 9.90; Jofa Salmon Teriyaki Don 8.90; Jofa Unagi Don 9.90; Sukiyaki Beef Shortplate (add on) 4.50; Sukiyaki Pork Belly (add on) 3.50; Chicken Katsu (add on) 3.00; Mentaiko Sauce (add on) 2.00; Japanese Furikake Rice (add on) 1.00; Onsen Egg (add on) 1.30; Tobiko (add on) 2.00; Takoyaki 4pcs 3.90; Takoyaki 8pcs 6.90; Chicken Karaage 5.90; Tamago Original 3.90; Tamago +Mentaiko 4.90; Japanese Gyoza (4pcs) 4.00; Ebi Fry (3 pcs) Plain 4.90; Ebi Fry (3 pcs) +Mentaiko 5.90; Asari Clam Miso Soup 3.90; Crab Stick Salad 4.90; Soft Shell Crab 6.90; Sesame Fried Chicken 2pcs 3.90; Sesame Fried Chicken 4pcs 7.50; Seaweed Bomba Fried Squid 7.90 |
+  | F3 | a bag hides the start of three names, which also accept "Extra Rice", "Extra Pork Chop" and "Extra Lamb Chop"; a queue counter that is not a price | 16 | Mixed Grill 11.00; Sirloin Steak 12.00; Lamb Chop 12.00; Pork Chop 7.50; Pork Cutlet 8.00; Chicken Chop 7.00; Chicken Cutlet 7.50; Fish & Chips 6.50; Bacon, Sausage & Egg 7.00; Ham & Egg 6.00; Chicken Wings 4 Pcs 7.00; Chicken Wings (2 Pcs) with Rice & Egg 5.50; Add Extra Egg 1.00; Add Extra Rice 1.00 (start of name hidden by a bag; "Extra Rice" also accepted); Add Extra Pork Chop / Pc 3.50 (start hidden; "Extra Pork Chop" also accepted); Add Extra Lamb Chop / Pc 4.00 (start hidden; "Extra Lamb Chop" also accepted) |
+  | F4 | angled board from below; "Includes 2 Side Dishes" beside every price; one price for two cuts | 8 | Charcoal Grill Chicken Chop 8.90; Charcoal Grill Pork Chop 8.90; Charcoal Grill Ribeye/Striploin Steak 14.90; Jofa Bratwurst Sausage (2pcs) 7.50; Jofa Duck Confit 12.90; Jofa Salmon Fillet (180g) 13.90; Chicken Cutlet 8.90; Fish and Chips 10.50 |
+
+- **Scoring:** the round 3 scorer unchanged, including `nameOnlyWhenUnique`; the automatic score decides, and reviewer notes are reported beside it, not substituted.
+- **Pass threshold, S11 unchanged, over all ten photos (239 required entries):** every call returns a valid draft; at least 90% of required entries found; at least 90% of found entries with the correct price outcome; at most two wrong filled prices; median latency at most 30 seconds and every call inside the 60-second budget.
+- **Candidate:** `gpt-6.1-sol` only, one fresh call per photo.
+- **Spend limit:** US$5 for round 4, the user's answer "Up to 5" read as US$5; the builder's estimate [hypothesis] is about US$0.15.
+- **Timed comparison, the second pass condition:** the user alone, timed with a stopwatch, on F3 only.
+  First, correcting `gpt-6.1-sol`'s F3 draft in a plain text file beside the photo until it matches F3's expected draft; then typing F3's 16 entries by hand into the manual entry on `/merchant/setup` of a local build against a disposable database.
+  Correction goes first, so any familiarity gained helps typing, not correction.
+  One trial each [hypothesis: n=1 is a prototype measurement, not a general claim]; the round passes only if correction takes less time than typing.
+- **Falsifier response:** if the threshold or the timing fails, imports stay closed, `AI_MENU_MODEL` stays unset on Render, no AI-drafting claim is made and nothing is built.
+  A pass changes no flag: `MENU_IMPORTS_ENABLED` stays false, the rotate and crop step is built only behind it, and the import screen needs its own Gate 1 and Gate 3 change.
 
 ### S20 Reference buyer agent on the generated SDK, 2026-10-28
 
