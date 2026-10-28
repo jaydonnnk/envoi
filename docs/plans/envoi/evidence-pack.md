@@ -1,6 +1,6 @@
 # Envoi evidence pack
 
-Status: draft, 2026-10-21, on `envoi/slice-15-release`; completed when S15 closes.
+Status: draft, 2026-10-21, extended 2026-10-29 for S19, S20, S21 and the S22 round 4 outcome; completed when S15 closes.
 Every claim made in the README, the video or the submission is listed here with its label and the record that supports it.
 A claim with no record here is not made.
 
@@ -30,8 +30,14 @@ Every payment below used PayPal sandbox money or Solana devnet test tokens; none
 | A merchant sees only paid orders as paid and acknowledges them separately | [verified] | [S8](00-status.md#s8-merchant-orders-and-separate-acknowledgment-2026-10-15) |
 | A merchant's setup page shows an Envoi shop QR that opens the shop's buy page; it is not a payment code and the SGQR itself is never stored | [verified] locally; [user-reported] on the deployed site | [S18](00-status.md#s18-merchant-shop-qr-and-order-archive-2026-10-24) |
 | A merchant can delete any order; it is archived as a record, never erased, and an order paid after its archive comes back as Paid | [verified] | [S18](00-status.md#s18-merchant-shop-qr-and-order-archive-2026-10-24), [mutations](evidence/s18-mutations.json) |
-| Menu photo import drafts menus with AI | **not claimed**: no model met the pre-registered threshold, so import ships closed | [S11](00-status.md#s11-menu-photo-import-with-direct-vision-2026-10-15) |
+| A buyer can type one sentence and get a basket they can still change, holding only published, priced, available items, with nothing reviewed or paid until they tap Review | [verified] on a local production build at 390 px and 1280 px; the deployed screen is [unknown] | [S21](00-status.md#s21-order-from-one-sentence-2026-10-26) |
+| The model that fills that basket met a pre-registered threshold of 24 of 25 sentences | [verified], with the limit that run 2 followed a prompt fix informed by run 1, so four of the 25 are not out-of-sample | [S21 evaluation](00-status.md#s21-model-evaluation-results-2026-10-26) |
+| An AI agent running on a person's own machine, built on the generated SDK, turned one sentence into a link that the person then paid with PayPal sandbox money on the deployed site; the agent never sent an amount and never saw the link's token | [verified] on the deployed app; the merchant's order view [user-reported] | [S20](00-status.md#s20-reference-buyer-agent-on-the-generated-sdk-2026-10-28), [S20 on Render](00-status.md#s20-on-render-2026-10-28) |
+| That agent refuses an item the menu did not return and a quantity outside 1 to 20 before making any call | [verified] | [S20](00-status.md#s20-reference-buyer-agent-on-the-generated-sdk-2026-10-28) |
+| Menu photo import drafts menus with AI | **not claimed**: no model met the pre-registered threshold in four rounds, the last on 2026-10-28, so import ships closed and the work stopped | [S11](00-status.md#s11-menu-photo-import-with-direct-vision-2026-10-15), [S22 round 4](00-status.md#s22-round-4-results-2026-10-28), [gap analysis](photo-import-gap-analysis.md) |
 | The public read API matches its OpenAPI document, and an APIMatic-generated TypeScript client reads it | [verified] | [S14](00-status.md#s14-apimatic-client-and-docs-2026-10-19) |
+| The agent's purchase request route is in that same OpenAPI document, and the client APIMatic regenerated from it is committed byte-identical to the generator's output | [verified] | [S19](00-status.md#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-2026-10-25) |
+| The generated client reaches no receipt or payment route | [verified] | [S19](00-status.md#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-2026-10-25) |
 
 ## Operations and release
 
