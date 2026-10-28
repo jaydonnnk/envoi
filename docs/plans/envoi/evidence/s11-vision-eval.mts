@@ -1,7 +1,8 @@
 // Slice S11 vision model evaluation (R5), pre-registered in 00-status.md "S11 vision evaluation, pre-registration".
 // Run from the repository root:
 //   npx tsx --tsconfig tsconfig.json docs/plans/envoi/evidence/s11-vision-eval.mts [--round=2] <spend-limit-usd> <model> [<model> ...]
-// Round 1 wrote s11-vision-eval.json; --round=N writes s11-vision-eval-roundN.json. Every round uses
+// Round 1 wrote s11-vision-eval.json; --round=N writes s11-vision-eval-roundN.json, and round 4 (S22) writes
+// s22-vision-eval-round4.json from its own photo set, ROUND4_PHOTOS. Rounds 1-3 use
 // the same photos, expected drafts, threshold and provisional bounds; round 3 adds the scorer fix
 // in scoreDraft.
 // It reads OPENAI_API_KEY from .env.local and never prints it. Each evaluation photo, from the
@@ -200,6 +201,113 @@ export const PHOTOS: Photo[] = [
   { id: "E6", file: "E6-kopitiam-rotated.jpg", challenge: "E4 turned 90 degrees in its pixels", entries: KOPITIAM },
 ];
 
+// Round 4 (S22, pre-registered 2026-10-28 in 00-status.md): the re-made E1-E6 copies cropped to the menu
+// as PNG, plus F1-F4, in the git-ignored folder .maintenance-build/s22-eval-photos. `turn` is the
+// merchant's quarter-turn step of Gate 2, applied before the existing shrink; E6 is turned back upright.
+type Round4Photo = Photo & { turn: 0 | 90 | 180 | 270 };
+const pair = (name: string, portion: string, price: string) => e([`${name} ${portion}`, `${name} (${portion})`], price);
+const fourWays = (name: string, prices: [string, string, string, string]) =>
+  ["Plain", "Shrimp", "Pork Cutlet", "Crabmeat & Tobiko"].map((portion, i) => pair(name, portion, prices[i]));
+const addOn = (name: string, price: string) => e([name, `Add on ${name}`, `Add ons ${name}`, `Add-on ${name}`], price);
+export const ROUND4_PHOTOS: Round4Photo[] = [
+  ...PHOTOS.map((photo) => ({ ...photo, file: `${photo.id}.png`, turn: photo.id === "E6" ? (270 as const) : (0 as const) })),
+  {
+    id: "F1",
+    file: "F1.png",
+    challenge: "four dishes with options A-D; prices without a trailing zero, one with no visible point; the last add-on cut by the edge",
+    turn: 0,
+    entries: [
+      ...fourWays("Egg Fried Rice", ["4.50", "6.90", "8.90", "10.50"]),
+      ...fourWays("X.O. Fried Rice", ["6.00", "8.50", "8.50", "12.00"]),
+      ...fourWays("Tom Yum Fried Rice", ["5.50", "7.90", "7.90", "11.50"]),
+      ...fourWays("Mala Fried Rice", ["5.50", "7.90", "7.90", "11.50"]),
+      addOn("Tobiko", "1.00"),
+      addOn("Crabmeat", "6.00"),
+      addOn("Pork Cutlet", "4.50"),
+      addOn("Shrimp", "4.50"),
+    ],
+  },
+  {
+    id: "F2",
+    file: "F2.png",
+    challenge: "angled board; pork and beef prices on one item; slash prices for piece counts; dotted leaders",
+    turn: 0,
+    entries: [
+      e("Jofa Truffle Wagyu Don", "13.90"),
+      pair("Jofa Sukiyaki Don", "Pork", "6.90"),
+      pair("Jofa Sukiyaki Don", "Beef", "8.90"),
+      e("Jofa Sinful Seafood Don", "11.90"),
+      e("Jofa Chicken Katsu Don", "6.50"),
+      e("Jofa Teriyaki Chicken Don", "5.90"),
+      e("Jofa Buta Don", "6.90"),
+      e("Jofa Salmon Mentai Don", "9.90"),
+      e("Jofa Salmon Teriyaki Don", "8.90"),
+      e("Jofa Unagi Don", "9.90"),
+      addOn("Sukiyaki Beef Shortplate", "4.50"),
+      addOn("Sukiyaki Pork Belly", "3.50"),
+      addOn("Chicken Katsu", "3.00"),
+      addOn("Mentaiko Sauce", "2.00"),
+      addOn("Japanese Furikake Rice", "1.00"),
+      addOn("Onsen Egg", "1.30"),
+      addOn("Tobiko", "2.00"),
+      pair("Takoyaki", "4pcs", "3.90"),
+      pair("Takoyaki", "8pcs", "6.90"),
+      e("Chicken Karaage", "5.90"),
+      pair("Tamago", "Original", "3.90"),
+      e(["Tamago +Mentaiko", "Tamago Mentaiko", "Tamago (+Mentaiko)"], "4.90"),
+      e("Japanese Gyoza (4pcs)", "4.00"),
+      e(["Ebi Fry (3 pcs)", "Ebi Fry (3 pcs) Plain", "Ebi Fry Original"], "4.90"),
+      e(["Ebi Fry (3 pcs) +Mentaiko", "Ebi Fry +Mentaiko", "Ebi Fry Mentaiko"], "5.90"),
+      e("Asari Clam Miso Soup", "3.90"),
+      e("Crab Stick Salad", "4.90"),
+      e("Soft Shell Crab", "6.90"),
+      pair("Sesame Fried Chicken", "2pcs", "3.90"),
+      pair("Sesame Fried Chicken", "4pcs", "7.50"),
+      e("Seaweed Bomba Fried Squid", "7.90"),
+    ],
+  },
+  {
+    id: "F3",
+    file: "F3.png",
+    challenge: "the demo merchant's photo; a bag hides the start of three names; a queue counter that is not a price",
+    turn: 0,
+    entries: [
+      e("Mixed Grill", "11.00"),
+      e("Sirloin Steak", "12.00"),
+      e("Lamb Chop", "12.00"),
+      e("Pork Chop", "7.50"),
+      e("Pork Cutlet", "8.00"),
+      e("Chicken Chop", "7.00"),
+      e("Chicken Cutlet", "7.50"),
+      e("Fish & Chips", "6.50"),
+      e("Bacon, Sausage & Egg", "7.00"),
+      e("Ham & Egg", "6.00"),
+      e("Chicken Wings 4 Pcs", "7.00"),
+      e("Chicken Wings (2 Pcs) with Rice & Egg", "5.50"),
+      e("Add Extra Egg", "1.00"),
+      e(["Add Extra Rice", "Extra Rice"], "1.00"),
+      e(["Add Extra Pork Chop / Pc", "Extra Pork Chop", "Extra Pork Chop / Pc"], "3.50"),
+      e(["Add Extra Lamb Chop / Pc", "Extra Lamb Chop", "Extra Lamb Chop / Pc"], "4.00"),
+    ],
+  },
+  {
+    id: "F4",
+    file: "F4.png",
+    challenge: "angled board from below; 'Includes 2 Side Dishes' beside every price; one price for two cuts",
+    turn: 0,
+    entries: [
+      e("Charcoal Grill Chicken Chop", "8.90"),
+      e("Charcoal Grill Pork Chop", "8.90"),
+      e("Charcoal Grill Ribeye/Striploin Steak", "14.90"),
+      e("Jofa Bratwurst Sausage (2pcs)", "7.50"),
+      e("Jofa Duck Confit", "12.90"),
+      e("Jofa Salmon Fillet (180g)", "13.90"),
+      e("Chicken Cutlet", "8.90"),
+      e("Fish and Chips", "10.50"),
+    ],
+  },
+];
+
 // Pre-registered thresholds (00-status.md). A candidate passes only if every one holds.
 export const THRESHOLD = {
   minFoundShare: 0.9, // required entries matched, over all six photos
@@ -349,7 +457,8 @@ export function scoreDraft(entries: Entry[], rows: DraftRow[], options: { nameOn
   };
 }
 
-async function browserShrink(file: Uint8Array): Promise<Uint8Array> {
+async function browserShrink(original: Uint8Array, turn = 0): Promise<Uint8Array> {
+  const file = turn ? new Uint8Array(await sharp(original).rotate(turn).png().toBuffer()) : original;
   const meta = await sharp(file).metadata();
   const scale = Math.min(1, 2_048 / Math.max(meta.width ?? 1, meta.height ?? 1));
   for (const quality of [90, 80, 70, 60, 50]) {
@@ -379,9 +488,11 @@ async function main() {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("OPENAI_API_KEY is not set in .env.local");
 
+  const set: Round4Photo[] = round >= 4 ? ROUND4_PHOTOS : PHOTOS.map((photo) => ({ ...photo, turn: 0 }));
+  const dir = round >= 4 ? ".maintenance-build/s22-eval-photos" : ".maintenance-build/s11-eval-photos";
   const photos = [];
-  for (const photo of PHOTOS) {
-    const shrunk = await browserShrink(readFileSync(join(".maintenance-build/s11-eval-photos", photo.file)));
+  for (const photo of set) {
+    const shrunk = await browserShrink(readFileSync(join(dir, photo.file)), photo.turn);
     const normalized = await normalizeMenuJpeg(shrunk);
     if (!normalized.ok) throw new Error(`${photo.id} refused by normalizeMenuJpeg: ${normalized.reason}`);
     photos.push({ photo, jpeg: normalized.jpeg, width: normalized.width, height: normalized.height, bytes: normalized.jpeg.byteLength });
@@ -440,7 +551,7 @@ async function main() {
     const correct = mine.reduce((n, r) => n + r.score.correct, 0);
     const wrongFilled = mine.reduce((n, r) => n + r.score.wrongFilled, 0);
     const latencies = mine.map((r) => r.latencyMs);
-    const complete = mine.length === PHOTOS.length && mine.every((r) => r.validation === "ok");
+    const complete = mine.length === set.length && mine.every((r) => r.validation === "ok");
     const pass =
       complete &&
       found / required >= THRESHOLD.minFoundShare &&
@@ -465,7 +576,7 @@ async function main() {
     };
   });
   const out = { round, ranAt: new Date().toISOString(), promptVersion: MENU_VISION_PROMPT_VERSION, limitUsdMicros, spentUsdMicros, stopped, threshold: THRESHOLD, summary, runs };
-  writeFileSync(join(dirname(fileURLToPath(import.meta.url)), round === 1 ? "s11-vision-eval.json" : `s11-vision-eval-round${round}.json`), `${JSON.stringify(out, null, 2)}\n`);
+  writeFileSync(join(dirname(fileURLToPath(import.meta.url)), round === 1 ? "s11-vision-eval.json" : round >= 4 ? `s22-vision-eval-round${round}.json` : `s11-vision-eval-round${round}.json`), `${JSON.stringify(out, null, 2)}\n`);
   console.log(JSON.stringify({ spentUsdMicros, stopped, summary }, null, 2));
 }
 
