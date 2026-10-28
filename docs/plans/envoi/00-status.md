@@ -34,6 +34,7 @@ Updated: 2026-10-20 (Asia/Singapore).
   The OpenAI provider pin does not change, and the completed R11 action/R12 region decision are not reopened.
   **Reopened and RE-APPROVED 2026-10-18** ("Yea sure i approve the gates then make the relevant changes and push to main thnaks"): the same change in the Browse link, the `/buy` landing and one renamed case; no count changes; see the [record](#reopening-2026-10-18-phantom-landing).
 - Gate 4 - Slice plan: **APPROVED 2026-10-12** by the user ("I approve both pls publish the branches and commit all the changes to main so that we can proceed with the first slice"), on branch `envoi/gate-4-vision-pyusd`.
+  **Amended 2026-10-28** for the S22 go date, approved by the user ("I approve Gate 4."): S22's go decision was given on 2026-10-28 instead of 6 Nov; drafted on `envoi/gate4-s22-go-date`; it starts no slice; see the [record](#gate-4-reopening-2026-10-28-s22-go-date).
   **Amended 2026-10-26** for the S19 test 2 retirement, approved by the user ("I approve Gate 4."): S19 carries named tests 1 and 3 and the continuation count drops from 16 to 15; see the [record](#gate-3-and-4-reopening-2026-10-25-s19-test-2).
   **Amended 2026-10-22** for one addition to S15, approved by the user ("I approve"): the [landing page](04-slices.md#s15-amendment-2026-10-21-landing-page) of the 2026-10-21 Gate 1 reopening; no build order, test count or cut order changes.
   **Amended 2026-10-25**, approved by the user ("I approve Gate 4."): [S19](04-slices.md#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-added-2026-10-25), S21, S20 and S22 for the continuation reopening, after S18 and outside the build-order table; no count of the original plan changes; it starts no slice and authorizes no install, upload, model call, merge, push or deploy.
@@ -86,6 +87,16 @@ Updated: 2026-10-20 (Asia/Singapore).
 - **Checker [verified 2026-10-25]:** `gate4_check.py` pins the new `01-product.md` body, `02-architecture.md`, `03-program-design.md` and the new mockup, and passes against `main`; `gate4_prove.py` gives 79/79, including one new planted fault for the mockup pin; `git diff --check` is clean.
   The Gate 1, 2 and 3 pins were moved again for their approval records.
 - **Mockup [verified 2026-10-25]:** checked in a browser at 390 px and 1280 px with no horizontal scroll; at 390 px the quantity stepper was squeezed and cut off its plus button, fixed with `flex:none` before pinning.
+
+### Gate 4 reopening 2026-10-28: S22 go date
+
+- **Trigger, 2026-10-28, in the user's words:** "Okay so we can do s22 first then s15?"; S20 was done on 2026-10-28 instead of in its 2-6 Nov window.
+- **Go decision, 2026-10-28, in the user's words:** "I give the go decision for S22 today, 2026-10-28. Draft the Gate 4 go-date amendment on envoi/gate4-s22-go-date."
+- **Changed:** [S22](04-slices.md#s22-menu-photo-experiment-round-4-added-2026-10-25) records the go decision as given on 2026-10-28 in place of 6 Nov; the [continuation schedule](04-slices.md#continuation-schedule-and-cuts-s19-s22) gives S22's window from 28 Oct; the [continuation plan](continuation-plan.md) table row and S22 start line mirror it.
+- **Unchanged:** S22's contract, protocol, threshold, falsifiers and authorizations to request; S22 stays first in the cut order; the S15 usability study stays never cut; `MENU_IMPORTS_ENABLED` stays false; Gates 1-3.
+- **Limits:** the go decision is not the authorization naming S22, and this amendment starts no slice and authorizes no OpenAI call, spend, photo processing, commit, merge, push or deploy.
+- **Gate 4 approval, 2026-10-28, in the user's words:** "I approve Gate 4."
+  It accepts the go date and S22's window from 28 Oct; it authorizes no slice, commit, merge, push or deploy.
 
 ### Gate 3 and 4 reopening 2026-10-25: S19 test 2
 
@@ -267,6 +278,7 @@ Post-release, outside the build order: S18, merchant shop QR and order archive, 
 
 Proposed 2026-10-25, outside the build order: S19, S21, S20 and S22 from the [continuation plan](continuation-plan.md); Gates 1-3 were re-approved for them on 2026-10-25 and Gate 4 was amended for them on 2026-10-25 ("I approve Gate 4.").
 S19 started 2026-10-25 on `envoi/slice-19-sdk-agent-route` and was done 2026-10-26, on `main` at `4b7fdb7` ([record](#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-2026-10-25)); S21 started 2026-10-26 on `envoi/slice-21-one-box-order` and was done 2026-10-26, on `main` at `9e9f9f1` ([record](#s21-order-from-one-sentence-2026-10-26)); S20 started 2026-10-28 on `envoi/slice-20-reference-agent` and was done 2026-10-28 ([record](#s20-reference-buyer-agent-on-the-generated-sdk-2026-10-28)); S22 has not started.
+2026-10-28, S22 photos: the round 3 photos were lost from `.maintenance-build/s11-eval-photos/`; the user supplied five again, saved there as E1-E5, and said "Use five photos for S22 and record E6 as dropped." Later the same day the user said "make e6 from e4": E6 was rebuilt as `E6.png`, E4 turned 90 degrees in its pixels (1122x948 to 948x1122), as in round 3, so S22 counts six photos again.
 
 ### S20 Reference buyer agent on the generated SDK, 2026-10-28
 
@@ -2492,6 +2504,8 @@ All unaffected risk dispositions stand; the 2026-10-11 Gate 3 revision of the af
   It authorizes no Gate 4 change, commit, merge, push or deploy.
 - 2026-10-26: the user approved the Gate 4 amendment ("I approve Gate 4.") for the [S19 test 2 retirement](#gate-3-and-4-reopening-2026-10-25-s19-test-2): S19 carries tests 1 and 3.
   It authorizes no commit, merge, push or deploy.
+- 2026-10-28: the user approved the Gate 4 amendment ("I approve Gate 4.") for the [S22 go date](#gate-4-reopening-2026-10-28-s22-go-date): the go decision was given on 2026-10-28 ("I give the go decision for S22 today, 2026-10-28.") in place of 6 Nov.
+  It starts no slice and authorizes no OpenAI call, spend, commit, merge, push or deploy.
 
 ### Initial Gate 2 documentary verification, 2026-10-07 (historical, before free-hosting revision)
 

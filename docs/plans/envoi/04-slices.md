@@ -884,7 +884,7 @@ You perform: issuing an agent token for the reference agent with `npm run operat
 
 ### S22 Menu photo experiment, round 4 (added 2026-10-25)
 
-Drafted 2026-10-25 with S19 and approved the same day ("I approve Gate 4."); it starts only on an authorization naming it, given after a go decision on 6 Nov.
+Drafted 2026-10-25 with S19 and approved the same day ("I approve Gate 4."); it starts only on an authorization naming it, given after a go decision; the user gave the go decision on 2026-10-28 ("I give the go decision for S22 today, 2026-10-28."), in place of the planned 6 Nov.
 Branch: `envoi/slice-22-photo-round-4`.
 Depends on: S11 (the import boundary and its earlier rounds).
 
@@ -911,7 +911,7 @@ You perform: the demo merchant's photo and its written permission.
 ### Continuation schedule and cuts (S19-S22)
 
 - **Order:** S19, then S21, then S20, then S22, all after S18 and outside the build-order table; S15 stays open and closes last.
-- **Target windows [hypothesis]:** S19 on 27 Oct, S21 28 Oct-1 Nov, S20 2-6 Nov, S22 7-11 Nov only on go; submission cutoff 13 Nov 2026 04:00 SGT.
+- **Target windows [hypothesis]:** S19 on 27 Oct, S21 28 Oct-1 Nov, S20 2-6 Nov (done 28 Oct), S22 from 28 Oct after the go decision given that day; submission cutoff 13 Nov 2026 04:00 SGT.
 - **Cut sequence for these four:** S22 first, then S21 if it is not deployed by 1 Nov, then S20; S19's regenerated client and contract still ship if S20 is cut.
 - **Never cut:** the S15 usability study, every payment, approval and recipient guard of the earlier slices, and the human approval of every payment.
 - **Counts:** the 92 named tests, 231 cases and 39 additions of the original plan and S18's 12 tests are unchanged; S19-S21 carry the 15 named tests of the Gate 3 reopening (test 2 retired on 2026-10-25), counted here.

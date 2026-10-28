@@ -56,7 +56,7 @@ A score moves only if the result exists, works and is shown; this plan only make
 | 1 | S19 Agent route in the OpenAPI document and a regenerated client | The generated TypeScript client lists shops, reads a menu and creates a one-time purchase link with an agent token, and the contract check covers all three. | S13, S14 | 3 | 27 Oct |
 | 2 | S21 Order from one sentence | On `/buy`, one box takes "two iced teas at Test Shop"; Envoi fills the basket with quantities, asks which tea when two fit, says when an item is unavailable, and the buyer still reviews and approves. | S4, S7 | 1, 3 | 28 Oct-1 Nov |
 | 3 | S20 Reference buyer agent on the generated SDK | A command-line agent turns a buyer's sentence into a basket through the generated client, hands back a link, and a human pays it in PayPal sandbox; a trace shows every SDK call. | S19 | 2, 3 | 2-6 Nov |
-| 4 | S22 Menu photo experiment, round 4 | A pre-registered round on old hard cases and fresh unseen photos either passes and opens a measured import, or fails and the import stays closed. | S11 | 1, 2, 3 | 7-11 Nov, only on go |
+| 4 | S22 Menu photo experiment, round 4 | A pre-registered round on old hard cases and fresh unseen photos either passes and opens a measured import, or fails and the import stays closed. | S11 | 1, 2, 3 | from 28 Oct, on the go decision given that day |
 
 S20 runs during the usability window because it changes nothing a tester sees.
 S15 stays open throughout and closes last; its remaining work items are unchanged.
@@ -173,7 +173,7 @@ Starting S20 by ID; adding the agent's script and any new direct dependency (an 
 
 Branch: `envoi/slice-22-photo-round-4`.
 
-Starts only on a go decision on 6 Nov, after S21 and S20, and only if the photos below exist.
+Starts only on a go decision, after S21 and S20, and only if the photos below exist; the go decision was given on 2026-10-28, in place of the planned 6 Nov.
 
 **Visible result.**
 Either a recorded pass, with a merchant photo becoming a draft that the merchant corrects and confirms faster than entering it by hand, or a recorded fail and imports still closed.
