@@ -15,6 +15,7 @@ Updated: 2026-10-20 (Asia/Singapore).
   **Reopened and RE-APPROVED 2026-10-15** for one change, approved by the user in advance: menu photos are English only, so the consented test photos and the vision falsifier samples no longer require Chinese text; see the [record](#reopening-2026-10-15-english-only-menu-photos).
   **Reopened and RE-APPROVED 2026-10-18** ("Yea sure i approve the gates then make the relevant changes and push to main thnaks"): the phone path's Browse link also names the PYUSD rail and Phantom's browser opens the PYUSD review directly; see the [record](#reopening-2026-10-18-phantom-landing).
 - Gate 3 - Program Design: **RE-APPROVED 2026-10-25** by the user ("I approve Gate 3.") after being reopened the same day during S19 to retire named test 2, by the user's decision ("Retire test 2 (Recommended)"); see the [record](#gate-3-and-4-reopening-2026-10-25-s19-test-2).
+  **RE-APPROVED 2026-10-28** by the user ("I approve Gate 3.") for one change only: the S22 demo merchant's photo may carry the owner's verbal permission, recorded with its date; drafted on `envoi/slice-22-photo-round-4`; `gate4_check.py` pins the new `03-program-design.md`; see the [record](#gate-3-and-4-reopening-2026-10-28-s22-verbal-permission).
   Before that it was **RE-APPROVED 2026-10-25** by the user ("I approve Gate 3.") for the [continuation reopening](03-program-design.md#reopening-2026-10-25-continuation-slices-s19-s22), after Gates 1 and 2 were re-approved the same day; it approves the proposal, not building it.
   Before that it was **RE-APPROVED 2026-10-24** by the user ("I approve Gate 3.") for the [shop QR and order archive](03-program-design.md#reopening-2026-10-24-shop-qr-and-order-archive), after Gates 1 and 2 were re-approved the same day.
   Before that it was **RE-APPROVED 2026-10-12** by the user a second time, in advance, for one pin change found by the S1 boot check: `typescript@7.0.2` becomes `typescript@6.0.3`, because `typescript-eslint` refuses TypeScript 7 ("for this change gate 3( i pre approve it)").
@@ -34,6 +35,7 @@ Updated: 2026-10-20 (Asia/Singapore).
   The OpenAI provider pin does not change, and the completed R11 action/R12 region decision are not reopened.
   **Reopened and RE-APPROVED 2026-10-18** ("Yea sure i approve the gates then make the relevant changes and push to main thnaks"): the same change in the Browse link, the `/buy` landing and one renamed case; no count changes; see the [record](#reopening-2026-10-18-phantom-landing).
 - Gate 4 - Slice plan: **APPROVED 2026-10-12** by the user ("I approve both pls publish the branches and commit all the changes to main so that we can proceed with the first slice"), on branch `envoi/gate-4-vision-pyusd`.
+  **Amended 2026-10-28** for the same change in S22's evidence and user tasks, approved by the user ("I approve Gate 4."); it starts no slice; see the [record](#gate-3-and-4-reopening-2026-10-28-s22-verbal-permission).
   **Amended 2026-10-28** for the S22 go date, approved by the user ("I approve Gate 4."): S22's go decision was given on 2026-10-28 instead of 6 Nov; drafted on `envoi/gate4-s22-go-date`; it starts no slice; see the [record](#gate-4-reopening-2026-10-28-s22-go-date).
   **Amended 2026-10-26** for the S19 test 2 retirement, approved by the user ("I approve Gate 4."): S19 carries named tests 1 and 3 and the continuation count drops from 16 to 15; see the [record](#gate-3-and-4-reopening-2026-10-25-s19-test-2).
   **Amended 2026-10-22** for one addition to S15, approved by the user ("I approve"): the [landing page](04-slices.md#s15-amendment-2026-10-21-landing-page) of the 2026-10-21 Gate 1 reopening; no build order, test count or cut order changes.
@@ -87,6 +89,18 @@ Updated: 2026-10-20 (Asia/Singapore).
 - **Checker [verified 2026-10-25]:** `gate4_check.py` pins the new `01-product.md` body, `02-architecture.md`, `03-program-design.md` and the new mockup, and passes against `main`; `gate4_prove.py` gives 79/79, including one new planted fault for the mockup pin; `git diff --check` is clean.
   The Gate 1, 2 and 3 pins were moved again for their approval records.
 - **Mockup [verified 2026-10-25]:** checked in a browser at 390 px and 1280 px with no horizontal scroll; at 390 px the quantity stepper was squeezed and cut off its plus button, fixed with `flex:none` before pinning.
+
+### Gate 3 and 4 reopening 2026-10-28: S22 verbal permission
+
+- **Trigger, 2026-10-28:** the user chose F3 Tokyo Western Food as the demo merchant's photo ("Yes, F3"); its owner's permission was verbal ("It was a verbal permission. Besides, people snap pics of their menu all the time. Its public for a reason"), and the approved protocol required written permission.
+- **Decision, 2026-10-28, in the user's words:** "Reopen gates", after being offered a written message from the owner as the recommended alternative.
+- **Changed:** the [Gate 3 round 4 protocol](03-program-design.md#reopening-2026-10-25-continuation-slices-s19-s22), [S22](04-slices.md#s22-menu-photo-experiment-round-4-added-2026-10-25) evidence and user tasks, and the [continuation plan](continuation-plan.md) accept the owner's permission written or verbal; verbal permission is recorded with its date and the user's words, without personal details.
+- **Unchanged:** Gates 1 and 2 (neither names the form of permission); the photo set rules, threshold, falsifiers, flags and every other S22 term.
+- **Weaker evidence, stated:** a verbal permission is recorded only through the user's report; Envoi holds no record from the owner.
+- **Gate 3 re-approval, 2026-10-28, in the user's words:** "I approve Gate 3."
+  It accepts the permission wording as a proposal; it authorizes no Gate 4 change, OpenAI call, commit, merge, push or deploy.
+- **Gate 4 approval, 2026-10-28, in the user's words:** "I approve Gate 4."
+  It accepts S22's amended evidence and user-task wording; it authorizes no OpenAI call, commit, merge, push or deploy.
 
 ### Gate 4 reopening 2026-10-28: S22 go date
 
@@ -2506,6 +2520,10 @@ All unaffected risk dispositions stand; the 2026-10-11 Gate 3 revision of the af
   It authorizes no commit, merge, push or deploy.
 - 2026-10-28: the user approved the Gate 4 amendment ("I approve Gate 4.") for the [S22 go date](#gate-4-reopening-2026-10-28-s22-go-date): the go decision was given on 2026-10-28 ("I give the go decision for S22 today, 2026-10-28.") in place of 6 Nov.
   It starts no slice and authorizes no OpenAI call, spend, commit, merge, push or deploy.
+- 2026-10-28: the user re-approved Gate 3 ("I approve Gate 3.") for the [S22 verbal permission change](#gate-3-and-4-reopening-2026-10-28-s22-verbal-permission).
+  It authorizes no Gate 4 change, OpenAI call, commit, merge, push or deploy.
+- 2026-10-28: the user approved the Gate 4 amendment ("I approve Gate 4.") for the same change in S22.
+  It authorizes no OpenAI call, commit, merge, push or deploy.
 
 ### Initial Gate 2 documentary verification, 2026-10-07 (historical, before free-hosting revision)
 

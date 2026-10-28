@@ -71,7 +71,7 @@ const MAX_SUGGESTED_QUANTITY = 20;
   - At most six tool calls and 60 seconds per buyer turn; then the agent stops and says so.
   - The trace is one JSON line per client call: operation, HTTP status, outlet and item ids, purchase request expiry, milliseconds; never a token, key, link token or model prompt.
   - The printed link is shown to the person only, never written to the trace.
-- **Round 4 protocol (S22):** written into `00-status.md` before any call: the photo set with every round 3 photo kept and at least three fresh unseen ones, the demo merchant's photo with its written permission, the expected names, portions and prices for each, the S11 threshold unchanged, and the timed comparison of correcting the draft against typing the same menu. A pass changes no flag.
+- **Round 4 protocol (S22):** written into `00-status.md` before any call: the photo set with every round 3 photo kept and at least three fresh unseen ones, the demo merchant's photo with the owner's permission, written or verbal (verbal recorded with its date and the user's words, amended 2026-10-28), the expected names, portions and prices for each, the S11 threshold unchanged, and the timed comparison of correcting the draft against typing the same menu. A pass changes no flag.
 - **Authorization:** unchanged. The suggestion route stays a buyer-session route; the agent route stays agent-token only; the reference agent gains no scope.
 - **Named tests (15, all new in the slice that builds them; test 2 retired 2026-10-25, see below):**
   - S19:

@@ -182,7 +182,7 @@ Either a recorded pass, with a merchant photo becoming a draft that the merchant
 Orientation correction in the merchant's browser before upload, a crop or retake step, and abstention: an unreadable cell stays blank and is marked, never guessed.
 
 **Evaluation, pre-registered before any call.**
-- The demo merchant's own test photo, with written permission for processing, and its correct names, portions and prices established before any model call.
+- The demo merchant's own test photo, with the owner's permission for processing, written or verbal (amended 2026-10-28), and its correct names, portions and prices established before any model call.
 - All round 3 hard cases, kept in the set, plus at least three fresh unseen photos; no failure is removed after the fact.
 - Pass needs the S11 threshold on the whole set, and a timed comparison: correcting the draft takes less time than manual entry of the same menu.
 

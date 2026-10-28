@@ -899,14 +899,14 @@ No named test unless the round passes; the import screen's tests then come with 
 The existing S11 tests keep passing.
 
 **Evidence.**
-Every result of round 4, with no photo removed after the fact; the timed comparison; the written permission for the demo merchant's photo, recorded without personal details.
+Every result of round 4, with no photo removed after the fact; the timed comparison; the owner's permission for the demo merchant's photo, written or verbal (verbal recorded with its date and the user's words, amended 2026-10-28), recorded without personal details.
 
 **Falsifiers.**
 - The round misses the S11 threshold, or correcting the draft takes longer than typing the menu: imports stay closed and no AI-drafting claim is made.
 
 **Authorizations to request at start.**
 Starting S22 by ID; sending the consented photos to OpenAI; the evaluation spend.
-You perform: the demo merchant's photo and its written permission.
+You perform: the demo merchant's photo and the owner's permission, written or verbal.
 
 ### Continuation schedule and cuts (S19-S22)
 
