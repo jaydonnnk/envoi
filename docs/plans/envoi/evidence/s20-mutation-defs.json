@@ -1,0 +1,310 @@
+[
+ {
+  "id": "m01-a-tool-calls-fetch-itself",
+  "test_file": "tests/unit/buyer-agent.test.ts",
+  "test": "agent tools call only the generated client",
+  "kind": "standalone",
+  "mutation": "Named test 13: list_shops reads the shop list with fetch itself instead of the generated client.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/tools.ts",
+    "old": "options.reader.outlets.listOutlets({ signal: gate.signal }).asApiResult(),",
+    "new": "fetch(\"https://fixture.envoi.test/api/v1/outlets\", { signal: gate.signal }).then(async (response) => ({ ok: true as const, status: response.status, value: (await response.json()) as never })),"
+   }
+  ]
+ },
+ {
+  "id": "m02-the-agent-imports-mcp",
+  "test_file": "tests/unit/buyer-agent.test.ts",
+  "test": "agent tools call only the generated client",
+  "kind": "standalone",
+  "mutation": "Named test 13, the S20 falsifier: tools.ts imports the MCP client SDK, so the write step could go over MCP.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/tools.ts",
+    "old": "import { z } from \"zod\";",
+    "new": "import { z } from \"zod\";\nimport { Client } from \"@modelcontextprotocol/sdk/client/index.js\";\nvoid Client;"
+   }
+  ]
+ },
+ {
+  "id": "m03-a-side-effect-http-import",
+  "test_file": "tests/unit/buyer-agent.test.ts",
+  "test": "agent tools call only the generated client",
+  "kind": "standalone",
+  "mutation": "Named test 13: tools.ts gains a bare side-effect import of node:https.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/tools.ts",
+    "old": "import { z } from \"zod\";",
+    "new": "import { z } from \"zod\";\nimport \"node:https\";"
+   }
+  ]
+ },
+ {
+  "id": "m04-read-menu-makes-two-client-calls",
+  "test_file": "tests/unit/buyer-agent.test.ts",
+  "test": "agent tools call only the generated client",
+  "kind": "standalone",
+  "mutation": "Named test 13: read_menu also lists the shops first, so one tool makes two client calls.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/tools.ts",
+    "old": "    const result = await traced(\"getOutletMenu\"",
+    "new": "    await options.reader.outlets.listOutlets({ signal: gate.signal }).asApiResult();\n    const result = await traced(\"getOutletMenu\""
+   }
+  ]
+ },
+ {
+  "id": "m06-no-item-id-check",
+  "test_file": "tests/unit/buyer-agent.test.ts",
+  "test": "agent refuses an item id or quantity the menu did not allow",
+  "kind": "standalone",
+  "mutation": "Named test 14: propose_basket no longer checks the item id against the last read_menu.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/tools.ts",
+    "old": "      if (!allowed.has(line.menuItemId)) return { refused: `Item ${line.menuItemId} is not on the menu read_menu last returned for this shop.` };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "m07-upper-bound-21",
+  "test_file": "tests/unit/buyer-agent.test.ts",
+  "test": "agent refuses an item id or quantity the menu did not allow",
+  "kind": "standalone",
+  "mutation": "Named test 14: the quantity upper bound moves to 21.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/tools.ts",
+    "old": "line.quantity > MAX_QUANTITY)",
+    "new": "line.quantity > MAX_QUANTITY + 1)"
+   }
+  ]
+ },
+ {
+  "id": "m08-fractional-quantity",
+  "test_file": "tests/unit/buyer-agent.test.ts",
+  "test": "agent refuses an item id or quantity the menu did not allow",
+  "kind": "standalone",
+  "mutation": "Named test 14: a fractional quantity is accepted.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/tools.ts",
+    "old": "!Number.isInteger(line.quantity) || ",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "m09-lower-bound-0",
+  "test_file": "tests/unit/buyer-agent.test.ts",
+  "test": "agent refuses an item id or quantity the menu did not allow",
+  "kind": "standalone",
+  "mutation": "Named test 14: the quantity lower bound moves to 0.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/tools.ts",
+    "old": "line.quantity < MIN_QUANTITY",
+    "new": "line.quantity < 0"
+   }
+  ]
+ },
+ {
+  "id": "m10-no-menu-read-needed",
+  "test_file": "tests/unit/buyer-agent.test.ts",
+  "test": "agent refuses an item id or quantity the menu did not allow",
+  "kind": "standalone",
+  "mutation": "Named test 14: a shop whose menu was never read allows every id.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/tools.ts",
+    "old": "const allowed = menus.get(input.outletId);",
+    "new": "const allowed = menus.get(input.outletId) ?? { has: () => true };"
+   }
+  ]
+ },
+ {
+  "id": "m11-any-read-menu-opens-any-shop",
+  "test_file": "tests/unit/buyer-agent.test.ts",
+  "test": "agent refuses an item id or quantity the menu did not allow",
+  "kind": "standalone",
+  "mutation": "Named test 14: the ids of whichever menu was read first are accepted for any shop.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/tools.ts",
+    "old": "const allowed = menus.get(input.outletId);",
+    "new": "const allowed = [...menus.values()][0];"
+   }
+  ]
+ },
+ {
+  "id": "m12-only-the-first-line-checked",
+  "test_file": "tests/unit/buyer-agent.test.ts",
+  "test": "agent refuses an item id or quantity the menu did not allow",
+  "kind": "standalone",
+  "mutation": "Named test 14: only a basket's first line is checked.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/tools.ts",
+    "old": "for (const line of input.lines) {",
+    "new": "for (const line of input.lines.slice(0, 1)) {"
+   }
+  ]
+ },
+ {
+  "id": "m13-body-spreads-the-model-input",
+  "test_file": "tests/unit/buyer-agent.test.ts",
+  "test": "agent never sends an amount",
+  "kind": "standalone",
+  "mutation": "Named test 15: the request body spreads everything the model sent, top level and lines.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/tools.ts",
+    "old": "const body = { outletId: input.outletId, lines: input.lines.map((line) => ({ menuItemId: line.menuItemId, quantity: line.quantity })) };",
+    "new": "const body = { ...input, lines: input.lines.map((line) => ({ ...line })) };"
+   }
+  ]
+ },
+ {
+  "id": "m14-lines-spread-the-model-input",
+  "test_file": "tests/unit/buyer-agent.test.ts",
+  "test": "agent never sends an amount",
+  "kind": "standalone",
+  "mutation": "Named test 15: each line spreads what the model sent, so a unit price rides along.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/tools.ts",
+    "old": "lines: input.lines.map((line) => ({ menuItemId: line.menuItemId, quantity: line.quantity })) };",
+    "new": "lines: input.lines.map((line) => ({ ...line })) };"
+   }
+  ]
+ },
+ {
+  "id": "m15-link-in-the-trace",
+  "test_file": "tests/unit/buyer-agent.test.ts",
+  "test": "agent trace holds no token, key or link",
+  "kind": "standalone",
+  "mutation": "Named test 16: the created link is written to the trace.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/agent.ts",
+    "old": "      link = created;\n",
+    "new": "      link = created;\n      config.writeTrace(JSON.stringify({ operation: \"createPurchaseRequest\", link: created.url }));\n"
+   }
+  ]
+ },
+ {
+  "id": "m16-link-token-in-the-trace",
+  "test_file": "tests/unit/buyer-agent.test.ts",
+  "test": "agent trace holds no token, key or link",
+  "kind": "standalone",
+  "mutation": "Named test 16: the link's one-time token alone is written to the trace.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/agent.ts",
+    "old": "      link = created;\n",
+    "new": "      link = created;\n      config.writeTrace(JSON.stringify({ operation: \"createPurchaseRequest\", ref: created.url.split(\"/\").pop() }));\n"
+   }
+  ]
+ },
+ {
+  "id": "m17-agent-token-in-the-trace",
+  "test_file": "tests/unit/buyer-agent.test.ts",
+  "test": "agent trace holds no token, key or link",
+  "kind": "standalone",
+  "mutation": "Named test 16: every trace line carries the agent token.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/agent.ts",
+    "old": "    trace: createTrace(config.writeTrace),",
+    "new": "    trace: createTrace((line) => config.writeTrace(line.replace(\"{\", `{\"agent\":${JSON.stringify(config.agentToken)},`))),"
+   }
+  ]
+ },
+ {
+  "id": "m18-openai-key-in-the-trace",
+  "test_file": "tests/unit/buyer-agent.test.ts",
+  "test": "agent trace holds no token, key or link",
+  "kind": "standalone",
+  "mutation": "Named test 16: every trace line carries the OpenAI key.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/agent.ts",
+    "old": "    trace: createTrace(config.writeTrace),",
+    "new": "    trace: createTrace((line) => config.writeTrace(line.replace(\"{\", `{\"model\":${JSON.stringify(config.openaiApiKey)},`))),"
+   }
+  ]
+ },
+ {
+  "id": "m19-prompt-in-the-trace",
+  "test_file": "tests/unit/buyer-agent.test.ts",
+  "test": "agent trace holds no token, key or link",
+  "kind": "standalone",
+  "mutation": "Named test 16: every trace line carries the buyer's latest prompt.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/agent.ts",
+    "old": "    trace: createTrace(config.writeTrace),",
+    "new": "    trace: createTrace((line) => config.writeTrace(line.replace(\"{\", `{\"prompt\":${JSON.stringify(messages.at(-1)?.content)},`))),"
+   }
+  ]
+ },
+ {
+  "id": "m20-seventh-tool-call-allowed",
+  "test_file": "tests/unit/buyer-agent.test.ts",
+  "test": "agent stops after six tool calls in a turn",
+  "kind": "standalone",
+  "mutation": "Budget guard: a seventh tool call is allowed.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/agent.ts",
+    "old": "if (calls > MAX_TOOL_CALLS) {",
+    "new": "if (calls > MAX_TOOL_CALLS + 1) {"
+   }
+  ]
+ },
+ {
+  "id": "m21-turn-runs-61-seconds",
+  "test_file": "tests/unit/buyer-agent.test.ts",
+  "test": "agent stops a turn after 60 seconds",
+  "kind": "standalone",
+  "mutation": "Budget guard: the turn timer is 61 seconds.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/agent.ts",
+    "old": "    }, TURN_BUDGET_MS);",
+    "new": "    }, TURN_BUDGET_MS + 1000);"
+   }
+  ]
+ },
+ {
+  "id": "m22-localhost-prefix",
+  "test_file": "tests/unit/buyer-agent.test.ts",
+  "test": "agent accepts only an https or local base URL",
+  "kind": "standalone",
+  "mutation": "Base URL guard: any host starting with localhost is accepted over http.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/agent.ts",
+    "old": "url.hostname === \"localhost\"",
+    "new": "url.hostname.startsWith(\"localhost\")"
+   }
+  ]
+ },
+ {
+  "id": "m23-any-http-host",
+  "test_file": "tests/unit/buyer-agent.test.ts",
+  "test": "agent accepts only an https or local base URL",
+  "kind": "standalone",
+  "mutation": "Base URL guard: plain http is accepted for any host.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/agent.ts",
+    "old": "const local = url.protocol === \"http:\" && url.hostname === \"localhost\";",
+    "new": "const local = url.protocol === \"http:\";"
+   }
+  ]
+ }
+]

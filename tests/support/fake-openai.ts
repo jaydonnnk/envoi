@@ -6,6 +6,8 @@ export const FIXTURE_AI_ENV = { OPENAI_API_KEY: "fixture-openai-key", AI_MODEL: 
 export type FakeTurn =
   | { kind: "tools"; calls: { name: string; args: Record<string, unknown> }[] }
   | { kind: "answer"; proposal: Record<string, unknown> }
+  // S20: a plain text reply, as the reference agent's model gives.
+  | { kind: "text"; text: string }
   | { kind: "hang" }
   | { kind: "status"; status: number };
 
@@ -58,8 +60,9 @@ export function createFakeOpenAI(script: (index: number, body: FakeOpenAICall["b
         index,
       );
     }
+    const text = turn.kind === "text" ? turn.text : JSON.stringify(turn.proposal);
     return answer(
-      [{ type: "message", id: `FIXTURE-msg-${index}`, role: "assistant", status: "completed", content: [{ type: "output_text", text: JSON.stringify(turn.proposal), annotations: [] }] }],
+      [{ type: "message", id: `FIXTURE-msg-${index}`, role: "assistant", status: "completed", content: [{ type: "output_text", text, annotations: [] }] }],
       index,
     );
   }) as typeof globalThis.fetch;

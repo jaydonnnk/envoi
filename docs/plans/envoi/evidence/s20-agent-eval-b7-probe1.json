@@ -1,0 +1,69 @@
+{
+ "summary": {
+  "model": "gpt-6-luna",
+  "baseUrl": "http://localhost:3100",
+  "ran": 1,
+  "correct": 0,
+  "basketsB1toB8": 0,
+  "falsifiers": [],
+  "medianMs": 5515,
+  "spentUsd": 0.000345,
+  "limitUsd": 0.994
+ },
+ "results": [
+  {
+   "id": "B7",
+   "sentence": "two soft boiled eggs and a kopi o near Tanjong Pagar",
+   "expected": {
+    "shop": "Lorong Demo Kopi",
+    "lines": [
+     [
+      "Soft-boiled eggs (2)",
+      2
+     ],
+     [
+      "Kopi O",
+      1
+     ]
+    ]
+   },
+   "expectedSequence": "list_shops, read_menu(Lorong Demo Kopi), propose_basket",
+   "turns": [
+    {
+     "said": "two soft boiled eggs and a kopi o near Tanjong Pagar",
+     "kind": "reply",
+     "text": "How many Kopi O would you like? I found “Soft-boiled eggs (2)” at Lorong Demo Kopi, and I’ll treat your “two” as quantity 2 of that menu item."
+    }
+   ],
+   "clientCalls": [
+    {
+     "operation": "listOutlets",
+     "status": 200,
+     "outletId": null,
+     "itemIds": [],
+     "expiresAt": null,
+     "ms": 11
+    },
+    {
+     "operation": "getOutletMenu",
+     "status": 200,
+     "outletId": "out_zwocjarjhs6watbudum2wkklcu",
+     "itemIds": [],
+     "expiresAt": null,
+     "ms": 10
+    }
+   ],
+   "linkCreatedFor": null,
+   "bodiesSent": 0,
+   "correct": false,
+   "falsifier": false,
+   "ms": 5515,
+   "usage": {
+    "input": 2336,
+    "cached": 0,
+    "output": 223
+   },
+   "costUsd": 0.000345
+  }
+ ]
+}

@@ -1,0 +1,457 @@
+{
+ "branch": "envoi/slice-20-reference-agent",
+ "base_commit": "fb63469",
+ "uncommitted_changes": true,
+ "method": "Each definition in s20-mutation-defs.json applied alone by exact text replacement, its whole test file run with the vitest JSON reporter, every touched file restored and compared by SHA-256, then the whole file rerun. A proof needs the named row to fail on an AssertionError, a byte-identical restore and an all-passing rerun; other failing rows are recorded. The unit file tests/unit/buyer-agent.test.ts drives clients/buyer-agent with Envoi's API faked at the generated client's fetch boundary by tests/support/fake-envoi-api.ts and OpenAI faked at the provider's fetch boundary by tests/support/fake-openai.ts, both labeled FIXTURE, so no deployment or model is called. Every definition here is an S20 test recorded in 00-status.md.",
+ "results": [
+  {
+   "id": "m01-a-tool-calls-fetch-itself",
+   "test": "agent tools call only the generated client",
+   "kind": "standalone",
+   "group": "reference buyer agent",
+   "files": [
+    "clients/buyer-agent/tools.ts"
+   ],
+   "mutation": "Named test 13: list_shops reads the shop list with fetch itself instead of the generated client.",
+   "own_row": "failed",
+   "error": "AssertionError: tools.ts: expected [ 'fetch(' ] to be null",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "agent stops after six tool calls in a turn",
+    "agent trace holds no token, key or link"
+   ],
+   "other_errors": {
+    "agent stops after six tool calls in a turn": "AssertionError: expected [] to have a length of 6 but got +0",
+    "agent trace holds no token, key or link": "AssertionError: expected [ [ 'listOutlets', null ], \u2026(2) ] to deeply equal [ [ 'listOutlets', 200 ], \u2026(2) ]"
+   },
+   "same_group_others": [
+    "agent stops after six tool calls in a turn",
+    "agent trace holds no token, key or link"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "m02-the-agent-imports-mcp",
+   "test": "agent tools call only the generated client",
+   "kind": "standalone",
+   "group": "reference buyer agent",
+   "files": [
+    "clients/buyer-agent/tools.ts"
+   ],
+   "mutation": "Named test 13, the S20 falsifier: tools.ts imports the MCP client SDK, so the write step could go over MCP.",
+   "own_row": "failed",
+   "error": "AssertionError: tools.ts: expected [ Array(1) ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "m03-a-side-effect-http-import",
+   "test": "agent tools call only the generated client",
+   "kind": "standalone",
+   "group": "reference buyer agent",
+   "files": [
+    "clients/buyer-agent/tools.ts"
+   ],
+   "mutation": "Named test 13: tools.ts gains a bare side-effect import of node:https.",
+   "own_row": "failed",
+   "error": "AssertionError: tools.ts: expected [ 'node:https' ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "m04-read-menu-makes-two-client-calls",
+   "test": "agent tools call only the generated client",
+   "kind": "standalone",
+   "group": "reference buyer agent",
+   "files": [
+    "clients/buyer-agent/tools.ts"
+   ],
+   "mutation": "Named test 13: read_menu also lists the shops first, so one tool makes two client calls.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'GET /api/v1/outlets', \u2026(3) ] to deeply equal [ 'GET /api/v1/outlets', \u2026(2) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "m06-no-item-id-check",
+   "test": "agent refuses an item id or quantity the menu did not allow",
+   "kind": "standalone",
+   "group": "reference buyer agent",
+   "files": [
+    "clients/buyer-agent/tools.ts"
+   ],
+   "mutation": "Named test 14: propose_basket no longer checks the item id against the last read_menu.",
+   "own_row": "failed",
+   "error": "AssertionError: {\"menuItemId\":\"itm_invented\",\"quantity\":1}: expected { created: true, \u2026(2) } to have property \"refused\"",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "m07-upper-bound-21",
+   "test": "agent refuses an item id or quantity the menu did not allow",
+   "kind": "standalone",
+   "group": "reference buyer agent",
+   "files": [
+    "clients/buyer-agent/tools.ts"
+   ],
+   "mutation": "Named test 14: the quantity upper bound moves to 21.",
+   "own_row": "failed",
+   "error": "AssertionError: {\"menuItemId\":\"itm_kopic\",\"quantity\":21}: expected { created: true, \u2026(2) } to have property \"refused\"",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "m08-fractional-quantity",
+   "test": "agent refuses an item id or quantity the menu did not allow",
+   "kind": "standalone",
+   "group": "reference buyer agent",
+   "files": [
+    "clients/buyer-agent/tools.ts"
+   ],
+   "mutation": "Named test 14: a fractional quantity is accepted.",
+   "own_row": "failed",
+   "error": "AssertionError: {\"menuItemId\":\"itm_kopic\",\"quantity\":1.5}: expected { error: 'unreachable' } to have property \"refused\"",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "m09-lower-bound-0",
+   "test": "agent refuses an item id or quantity the menu did not allow",
+   "kind": "standalone",
+   "group": "reference buyer agent",
+   "files": [
+    "clients/buyer-agent/tools.ts"
+   ],
+   "mutation": "Named test 14: the quantity lower bound moves to 0.",
+   "own_row": "failed",
+   "error": "AssertionError: {\"menuItemId\":\"itm_kopic\",\"quantity\":0}: expected { created: true, \u2026(2) } to have property \"refused\"",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "m10-no-menu-read-needed",
+   "test": "agent refuses an item id or quantity the menu did not allow",
+   "kind": "standalone",
+   "group": "reference buyer agent",
+   "files": [
+    "clients/buyer-agent/tools.ts"
+   ],
+   "mutation": "Named test 14: a shop whose menu was never read allows every id.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { created: true, \u2026(2) } to have property \"refused\"",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "m11-any-read-menu-opens-any-shop",
+   "test": "agent refuses an item id or quantity the menu did not allow",
+   "kind": "standalone",
+   "group": "reference buyer agent",
+   "files": [
+    "clients/buyer-agent/tools.ts"
+   ],
+   "mutation": "Named test 14: the ids of whichever menu was read first are accepted for any shop.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { created: true, \u2026(2) } to have property \"refused\"",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "m12-only-the-first-line-checked",
+   "test": "agent refuses an item id or quantity the menu did not allow",
+   "kind": "standalone",
+   "group": "reference buyer agent",
+   "files": [
+    "clients/buyer-agent/tools.ts"
+   ],
+   "mutation": "Named test 14: only a basket's first line is checked.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { created: true, \u2026(2) } to have property \"refused\"",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "m13-body-spreads-the-model-input",
+   "test": "agent never sends an amount",
+   "kind": "standalone",
+   "group": "reference buyer agent",
+   "files": [
+    "clients/buyer-agent/tools.ts"
+   ],
+   "mutation": "Named test 15: the request body spreads everything the model sent, top level and lines.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { \u2026(3) } to deeply equal { \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "m14-lines-spread-the-model-input",
+   "test": "agent never sends an amount",
+   "kind": "standalone",
+   "group": "reference buyer agent",
+   "files": [
+    "clients/buyer-agent/tools.ts"
+   ],
+   "mutation": "Named test 15: each line spreads what the model sent, so a unit price rides along.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { \u2026(2) } to deeply equal { \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "m15-link-in-the-trace",
+   "test": "agent trace holds no token, key or link",
+   "kind": "standalone",
+   "group": "reference buyer agent",
+   "files": [
+    "clients/buyer-agent/agent.ts"
+   ],
+   "mutation": "Named test 16: the created link is written to the trace.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'link', 'linkToken' ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "m16-link-token-in-the-trace",
+   "test": "agent trace holds no token, key or link",
+   "kind": "standalone",
+   "group": "reference buyer agent",
+   "files": [
+    "clients/buyer-agent/agent.ts"
+   ],
+   "mutation": "Named test 16: the link's one-time token alone is written to the trace.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'linkToken' ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "m17-agent-token-in-the-trace",
+   "test": "agent trace holds no token, key or link",
+   "kind": "standalone",
+   "group": "reference buyer agent",
+   "files": [
+    "clients/buyer-agent/agent.ts"
+   ],
+   "mutation": "Named test 16: every trace line carries the agent token.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'agentToken' ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "m18-openai-key-in-the-trace",
+   "test": "agent trace holds no token, key or link",
+   "kind": "standalone",
+   "group": "reference buyer agent",
+   "files": [
+    "clients/buyer-agent/agent.ts"
+   ],
+   "mutation": "Named test 16: every trace line carries the OpenAI key.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'openaiKey' ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "m19-prompt-in-the-trace",
+   "test": "agent trace holds no token, key or link",
+   "kind": "standalone",
+   "group": "reference buyer agent",
+   "files": [
+    "clients/buyer-agent/agent.ts"
+   ],
+   "mutation": "Named test 16: every trace line carries the buyer's latest prompt.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'firstPrompt', 'secondPrompt' ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "m20-seventh-tool-call-allowed",
+   "test": "agent stops after six tool calls in a turn",
+   "kind": "standalone",
+   "group": "reference buyer agent",
+   "files": [
+    "clients/buyer-agent/agent.ts"
+   ],
+   "mutation": "Budget guard: a seventh tool call is allowed.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ { method: 'GET', \u2026(3) }, \u2026(6) ] to have a length of 6 but got 7",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "m21-turn-runs-61-seconds",
+   "test": "agent stops a turn after 60 seconds",
+   "kind": "standalone",
+   "group": "reference buyer agent",
+   "files": [
+    "clients/buyer-agent/agent.ts"
+   ],
+   "mutation": "Budget guard: the turn timer is 61 seconds.",
+   "own_row": "failed",
+   "error": "AssertionError: expected false to be true // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "m22-localhost-prefix",
+   "test": "agent accepts only an https or local base URL",
+   "kind": "standalone",
+   "group": "reference buyer agent",
+   "files": [
+    "clients/buyer-agent/agent.ts"
+   ],
+   "mutation": "Base URL guard: any host starting with localhost is accepted over http.",
+   "own_row": "failed",
+   "error": "AssertionError: http://localhost.envoi.example: expected 'http://localhost.envoi.example' to be null",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  },
+  {
+   "id": "m23-any-http-host",
+   "test": "agent accepts only an https or local base URL",
+   "kind": "standalone",
+   "group": "reference buyer agent",
+   "files": [
+    "clients/buyer-agent/agent.ts"
+   ],
+   "mutation": "Base URL guard: plain http is accepted for any host.",
+   "own_row": "failed",
+   "error": "AssertionError: http://envoi.example: expected 'http://envoi.example' to be null",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 7,
+   "proof": true
+  }
+ ]
+}

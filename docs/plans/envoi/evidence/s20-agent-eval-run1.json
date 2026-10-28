@@ -1,0 +1,511 @@
+{
+ "summary": {
+  "model": "gpt-6-luna",
+  "baseUrl": "http://localhost:3100",
+  "ran": 7,
+  "correct": 6,
+  "basketsB1toB8": 6,
+  "falsifiers": [
+   "B7"
+  ],
+  "medianMs": 7081,
+  "spentUsd": 0.002988,
+  "limitUsd": 1
+ },
+ "results": [
+  {
+   "id": "B1",
+   "sentence": "Two Kopi C at Test Shop",
+   "expected": {
+    "shop": "Test Shop",
+    "lines": [
+     [
+      "Kopi C",
+      2
+     ]
+    ]
+   },
+   "expectedSequence": "list_shops, read_menu(Test Shop), propose_basket",
+   "turns": [
+    {
+     "said": "Two Kopi C at Test Shop",
+     "kind": "link",
+     "text": "I’ve created a one-time link for two Kopi C at Test Shop. Envoi will show its price for you to review."
+    }
+   ],
+   "clientCalls": [
+    {
+     "operation": "listOutlets",
+     "status": 200,
+     "outletId": null,
+     "itemIds": [],
+     "expiresAt": null,
+     "ms": 10
+    },
+    {
+     "operation": "getOutletMenu",
+     "status": 200,
+     "outletId": "out_er6rian4ijqzawoyp7hfgctgji",
+     "itemIds": [],
+     "expiresAt": null,
+     "ms": 16
+    },
+    {
+     "operation": "createPurchaseRequest",
+     "status": 201,
+     "outletId": "out_er6rian4ijqzawoyp7hfgctgji",
+     "itemIds": [
+      "itm_w46lb4h7i73ssladkiviaiadji"
+     ],
+     "expiresAt": "2026-10-28T01:56:58.825Z",
+     "ms": 65
+    }
+   ],
+   "linkCreatedFor": {
+    "shop": "Test Shop",
+    "lines": [
+     [
+      "Kopi C",
+      2
+     ]
+    ]
+   },
+   "bodiesSent": 1,
+   "correct": true,
+   "falsifier": false,
+   "ms": 7313,
+   "usage": {
+    "input": 3223,
+    "cached": 0,
+    "output": 148
+   },
+   "costUsd": 0.000396
+  },
+  {
+   "id": "B2",
+   "sentence": "3 kopi o near Tanjong Pagar",
+   "expected": {
+    "shop": "Lorong Demo Kopi",
+    "lines": [
+     [
+      "Kopi O",
+      3
+     ]
+    ]
+   },
+   "expectedSequence": "list_shops, read_menu(Lorong Demo Kopi), propose_basket",
+   "turns": [
+    {
+     "said": "3 kopi o near Tanjong Pagar",
+     "kind": "link",
+     "text": "I requested a one-time Envoi link for 3 Kopi O from Lorong Demo Kopi in Tanjong Pagar; it’s been shown to you. Envoi will calculate the price when you open the link."
+    }
+   ],
+   "clientCalls": [
+    {
+     "operation": "listOutlets",
+     "status": 200,
+     "outletId": null,
+     "itemIds": [],
+     "expiresAt": null,
+     "ms": 8
+    },
+    {
+     "operation": "getOutletMenu",
+     "status": 200,
+     "outletId": "out_zwocjarjhs6watbudum2wkklcu",
+     "itemIds": [],
+     "expiresAt": null,
+     "ms": 8
+    },
+    {
+     "operation": "createPurchaseRequest",
+     "status": 201,
+     "outletId": "out_zwocjarjhs6watbudum2wkklcu",
+     "itemIds": [
+      "itm_6qova5pzdyuny42qsy4gtgapda"
+     ],
+     "expiresAt": "2026-10-28T01:57:05.460Z",
+     "ms": 17
+    }
+   ],
+   "linkCreatedFor": {
+    "shop": "Lorong Demo Kopi",
+    "lines": [
+     [
+      "Kopi O",
+      3
+     ]
+    ]
+   },
+   "bodiesSent": 1,
+   "correct": true,
+   "falsifier": false,
+   "ms": 7121,
+   "usage": {
+    "input": 3176,
+    "cached": 0,
+    "output": 164
+   },
+   "costUsd": 0.0004
+  },
+  {
+   "id": "B3",
+   "sentence": "one kaya toast set and two kopi o at Lorong Demo Kopi",
+   "expected": {
+    "shop": "Lorong Demo Kopi",
+    "lines": [
+     [
+      "Kaya toast set",
+      1
+     ],
+     [
+      "Kopi O",
+      2
+     ]
+    ]
+   },
+   "expectedSequence": "list_shops, read_menu(Lorong Demo Kopi), propose_basket",
+   "turns": [
+    {
+     "said": "one kaya toast set and two kopi o at Lorong Demo Kopi",
+     "kind": "link",
+     "text": "Envoi has shown you a one-time link for 1 kaya toast set and 2 kopi o. Review the price there and approve if you want to proceed."
+    }
+   ],
+   "clientCalls": [
+    {
+     "operation": "listOutlets",
+     "status": 200,
+     "outletId": null,
+     "itemIds": [],
+     "expiresAt": null,
+     "ms": 24
+    },
+    {
+     "operation": "getOutletMenu",
+     "status": 200,
+     "outletId": "out_zwocjarjhs6watbudum2wkklcu",
+     "itemIds": [],
+     "expiresAt": null,
+     "ms": 13
+    },
+    {
+     "operation": "createPurchaseRequest",
+     "status": 201,
+     "outletId": "out_zwocjarjhs6watbudum2wkklcu",
+     "itemIds": [
+      "itm_5i4s6q36gfvqbkunbf7xgno4ji",
+      "itm_6qova5pzdyuny42qsy4gtgapda"
+     ],
+     "expiresAt": "2026-10-28T01:57:12.596Z",
+     "ms": 23
+    }
+   ],
+   "linkCreatedFor": {
+    "shop": "Lorong Demo Kopi",
+    "lines": [
+     [
+      "Kaya toast set",
+      1
+     ],
+     [
+      "Kopi O",
+      2
+     ]
+    ]
+   },
+   "bodiesSent": 1,
+   "correct": true,
+   "falsifier": false,
+   "ms": 7516,
+   "usage": {
+    "input": 3303,
+    "cached": 0,
+    "output": 297
+   },
+   "costUsd": 0.000479
+  },
+  {
+   "id": "B4",
+   "sentence": "5 teh c peng near Tanjong Pagar",
+   "expected": {
+    "shop": "Lorong Demo Kopi",
+    "lines": [
+     [
+      "Teh C peng",
+      5
+     ]
+    ]
+   },
+   "expectedSequence": "list_shops, read_menu(Lorong Demo Kopi), propose_basket",
+   "turns": [
+    {
+     "said": "5 teh c peng near Tanjong Pagar",
+     "kind": "link",
+     "text": "I’ve requested a one-time Envoi link for 5 Teh C pengs from Lorong Demo Kopi in Tanjong Pagar. The link is shown to you directly; Envoi will calculate the price when you open it."
+    }
+   ],
+   "clientCalls": [
+    {
+     "operation": "listOutlets",
+     "status": 200,
+     "outletId": null,
+     "itemIds": [],
+     "expiresAt": null,
+     "ms": 11
+    },
+    {
+     "operation": "getOutletMenu",
+     "status": 200,
+     "outletId": "out_zwocjarjhs6watbudum2wkklcu",
+     "itemIds": [],
+     "expiresAt": null,
+     "ms": 12
+    },
+    {
+     "operation": "createPurchaseRequest",
+     "status": 201,
+     "outletId": "out_zwocjarjhs6watbudum2wkklcu",
+     "itemIds": [
+      "itm_bc3uzm6tckxgrfpyc7fsumox2e"
+     ],
+     "expiresAt": "2026-10-28T01:57:19.457Z",
+     "ms": 19
+    }
+   ],
+   "linkCreatedFor": {
+    "shop": "Lorong Demo Kopi",
+    "lines": [
+     [
+      "Teh C peng",
+      5
+     ]
+    ]
+   },
+   "bodiesSent": 1,
+   "correct": true,
+   "falsifier": false,
+   "ms": 6541,
+   "usage": {
+    "input": 3297,
+    "cached": 0,
+    "output": 216
+   },
+   "costUsd": 0.000438
+  },
+  {
+   "id": "B5",
+   "sentence": "twenty kopi o at Lorong Demo Kopi",
+   "expected": {
+    "shop": "Lorong Demo Kopi",
+    "lines": [
+     [
+      "Kopi O",
+      20
+     ]
+    ]
+   },
+   "expectedSequence": "list_shops, read_menu(Lorong Demo Kopi), propose_basket",
+   "turns": [
+    {
+     "said": "twenty kopi o at Lorong Demo Kopi",
+     "kind": "link",
+     "text": "I’ve prepared a one-time Envoi link for 20 Kopi O at Lorong Demo Kopi; it’s shown to you to review. Envoi calculates the price when you open it."
+    }
+   ],
+   "clientCalls": [
+    {
+     "operation": "listOutlets",
+     "status": 200,
+     "outletId": null,
+     "itemIds": [],
+     "expiresAt": null,
+     "ms": 8
+    },
+    {
+     "operation": "getOutletMenu",
+     "status": 200,
+     "outletId": "out_zwocjarjhs6watbudum2wkklcu",
+     "itemIds": [],
+     "expiresAt": null,
+     "ms": 11
+    },
+    {
+     "operation": "createPurchaseRequest",
+     "status": 201,
+     "outletId": "out_zwocjarjhs6watbudum2wkklcu",
+     "itemIds": [
+      "itm_6qova5pzdyuny42qsy4gtgapda"
+     ],
+     "expiresAt": "2026-10-28T01:57:24.841Z",
+     "ms": 19
+    }
+   ],
+   "linkCreatedFor": {
+    "shop": "Lorong Demo Kopi",
+    "lines": [
+     [
+      "Kopi O",
+      20
+     ]
+    ]
+   },
+   "bodiesSent": 1,
+   "correct": true,
+   "falsifier": false,
+   "ms": 5050,
+   "usage": {
+    "input": 3180,
+    "cached": 0,
+    "output": 158
+   },
+   "costUsd": 0.000397
+  },
+  {
+   "id": "B6",
+   "sentence": "2 iced lemon tea at Test Shop",
+   "expected": {
+    "shop": "Test Shop",
+    "lines": [
+     [
+      "Iced lemon tea",
+      2
+     ]
+    ]
+   },
+   "expectedSequence": "list_shops, read_menu(Test Shop), propose_basket",
+   "turns": [
+    {
+     "said": "2 iced lemon tea at Test Shop",
+     "kind": "link",
+     "text": "Envoi’s one-time link for 2 iced lemon teas is ready. The listed menu price is S$2.20 each; Envoi will calculate the price when you open the link."
+    }
+   ],
+   "clientCalls": [
+    {
+     "operation": "listOutlets",
+     "status": 200,
+     "outletId": null,
+     "itemIds": [],
+     "expiresAt": null,
+     "ms": 12
+    },
+    {
+     "operation": "getOutletMenu",
+     "status": 200,
+     "outletId": "out_er6rian4ijqzawoyp7hfgctgji",
+     "itemIds": [],
+     "expiresAt": null,
+     "ms": 10
+    },
+    {
+     "operation": "createPurchaseRequest",
+     "status": 201,
+     "outletId": "out_er6rian4ijqzawoyp7hfgctgji",
+     "itemIds": [
+      "itm_cdtjf7mtsjeufc7sykl4bf7o2q"
+     ],
+     "expiresAt": "2026-10-28T01:57:30.385Z",
+     "ms": 18
+    }
+   ],
+   "linkCreatedFor": {
+    "shop": "Test Shop",
+    "lines": [
+     [
+      "Iced lemon tea",
+      2
+     ]
+    ]
+   },
+   "bodiesSent": 1,
+   "correct": true,
+   "falsifier": false,
+   "ms": 5367,
+   "usage": {
+    "input": 3226,
+    "cached": 0,
+    "output": 163
+   },
+   "costUsd": 0.000404
+  },
+  {
+   "id": "B7",
+   "sentence": "two soft boiled eggs and a kopi o near Tanjong Pagar",
+   "expected": {
+    "shop": "Lorong Demo Kopi",
+    "lines": [
+     [
+      "Soft-boiled eggs (2)",
+      2
+     ],
+     [
+      "Kopi O",
+      1
+     ]
+    ]
+   },
+   "expectedSequence": "list_shops, read_menu(Lorong Demo Kopi), propose_basket",
+   "turns": [
+    {
+     "said": "two soft boiled eggs and a kopi o near Tanjong Pagar",
+     "kind": "link",
+     "text": "I requested 1 order of soft-boiled eggs (2) and 1 kopi o from Lorong Demo Kopi. Envoi has shown you the one-time link to review."
+    }
+   ],
+   "clientCalls": [
+    {
+     "operation": "listOutlets",
+     "status": 200,
+     "outletId": null,
+     "itemIds": [],
+     "expiresAt": null,
+     "ms": 9
+    },
+    {
+     "operation": "getOutletMenu",
+     "status": 200,
+     "outletId": "out_zwocjarjhs6watbudum2wkklcu",
+     "itemIds": [],
+     "expiresAt": null,
+     "ms": 9
+    },
+    {
+     "operation": "createPurchaseRequest",
+     "status": 201,
+     "outletId": "out_zwocjarjhs6watbudum2wkklcu",
+     "itemIds": [
+      "itm_5vortcjfjzvispbgrfm3v5okbe",
+      "itm_6qova5pzdyuny42qsy4gtgapda"
+     ],
+     "expiresAt": "2026-10-28T01:57:37.080Z",
+     "ms": 17
+    }
+   ],
+   "linkCreatedFor": {
+    "shop": "Lorong Demo Kopi",
+    "lines": [
+     [
+      "Soft-boiled eggs (2)",
+      1
+     ],
+     [
+      "Kopi O",
+      1
+     ]
+    ]
+   },
+   "bodiesSent": 1,
+   "correct": false,
+   "falsifier": true,
+   "ms": 7081,
+   "usage": {
+    "input": 3349,
+    "cached": 0,
+    "output": 280
+   },
+   "costUsd": 0.000475
+  }
+ ]
+}

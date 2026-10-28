@@ -1,0 +1,8 @@
+{"operation":"listOutlets","status":200,"outletId":null,"itemIds":[],"expiresAt":null,"ms":24159}
+{"operation":"getOutletMenu","status":200,"outletId":"out_vrlbnc3zylbrr6g2drovaiqkfu","itemIds":[],"expiresAt":null,"ms":332}
+{"operation":"listOutlets","status":200,"outletId":null,"itemIds":[],"expiresAt":null,"ms":322}
+{"operation":"listOutlets","status":200,"outletId":null,"itemIds":[],"expiresAt":null,"ms":24489}
+{"operation":"getOutletMenu","status":200,"outletId":"out_vrlbnc3zylbrr6g2drovaiqkfu","itemIds":[],"expiresAt":null,"ms":312}
+{"operation":"listOutlets","status":200,"outletId":null,"itemIds":[],"expiresAt":null,"ms":362}
+{"operation":"getOutletMenu","status":200,"outletId":"out_vrlbnc3zylbrr6g2drovaiqkfu","itemIds":[],"expiresAt":null,"ms":801}
+{"operation":"createPurchaseRequest","status":201,"outletId":"out_vrlbnc3zylbrr6g2drovaiqkfu","itemIds":["itm_orkwjxszkbnw4lbm25ydfmdwwm"],"expiresAt":"2026-10-28T02:25:17.906Z","ms":716}

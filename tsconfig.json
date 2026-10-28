@@ -44,6 +44,8 @@
     "node_modules",
     ".next",
     "clients",
-    "tests/e2e/apimatic-client.ts"
+    "tests/e2e/apimatic-client.ts",
+    "tests/unit/buyer-agent.test.ts",
+    "tests/support/fake-envoi-api.ts"
   ]
 }

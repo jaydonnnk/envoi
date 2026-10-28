@@ -1,0 +1,92 @@
+{
+ "summary": {
+  "model": "gpt-6-luna",
+  "baseUrl": "http://localhost:3100",
+  "ran": 1,
+  "correct": 1,
+  "basketsB1toB8": 1,
+  "falsifiers": [],
+  "medianMs": 7315,
+  "spentUsd": 0.000461,
+  "limitUsd": 0.994
+ },
+ "results": [
+  {
+   "id": "B7",
+   "sentence": "two soft boiled eggs and a kopi o near Tanjong Pagar",
+   "expected": {
+    "shop": "Lorong Demo Kopi",
+    "lines": [
+     [
+      "Soft-boiled eggs (2)",
+      2
+     ],
+     [
+      "Kopi O",
+      1
+     ]
+    ]
+   },
+   "expectedSequence": "list_shops, read_menu(Lorong Demo Kopi), propose_basket",
+   "turns": [
+    {
+     "said": "two soft boiled eggs and a kopi o near Tanjong Pagar",
+     "kind": "link",
+     "text": "I’ve prepared the Envoi link for two portions of soft-boiled eggs and one kopi o from Lorong Demo Kopi. Review Envoi’s prices and approve payment there if you wish."
+    }
+   ],
+   "clientCalls": [
+    {
+     "operation": "listOutlets",
+     "status": 200,
+     "outletId": null,
+     "itemIds": [],
+     "expiresAt": null,
+     "ms": 10
+    },
+    {
+     "operation": "getOutletMenu",
+     "status": 200,
+     "outletId": "out_zwocjarjhs6watbudum2wkklcu",
+     "itemIds": [],
+     "expiresAt": null,
+     "ms": 10
+    },
+    {
+     "operation": "createPurchaseRequest",
+     "status": 201,
+     "outletId": "out_zwocjarjhs6watbudum2wkklcu",
+     "itemIds": [
+      "itm_5vortcjfjzvispbgrfm3v5okbe",
+      "itm_6qova5pzdyuny42qsy4gtgapda"
+     ],
+     "expiresAt": "2026-10-28T01:59:09.382Z",
+     "ms": 51
+    }
+   ],
+   "linkCreatedFor": {
+    "shop": "Lorong Demo Kopi",
+    "lines": [
+     [
+      "Soft-boiled eggs (2)",
+      2
+     ],
+     [
+      "Kopi O",
+      1
+     ]
+    ]
+   },
+   "bodiesSent": 1,
+   "correct": true,
+   "falsifier": false,
+   "ms": 7315,
+   "usage": {
+    "input": 2745,
+    "cached": 1082,
+    "output": 352
+   },
+   "costUsd": 0.000461
+  }
+ ]
+}

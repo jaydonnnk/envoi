@@ -19,6 +19,7 @@
     "db:generate": "drizzle-kit generate --config config/drizzle.config.ts",
     "db:migrate": "tsx src/lib/db/migrate.ts",
     "operator": "tsx src/operator/cli.ts",
+    "agent": "tsx clients/buyer-agent/agent.ts",
     "runner:build": "tsc -p config/tsconfig.runner.json",
     "runner:start": "node --import ./.maintenance-build/src/maintenance/resolve-hook.js ./.maintenance-build/src/maintenance/run.js"
   },
