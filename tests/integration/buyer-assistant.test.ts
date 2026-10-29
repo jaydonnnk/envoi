@@ -132,6 +132,47 @@ describe("Ask Envoi route", () => {
     expect(input.filter((item) => item.type === "function_call_output")).toEqual([]);
   });
 
+  // S25 review fix: the route's own counted body read, at both sides of each bound. The FIXTURE body
+  // is padded with JSON whitespace, so a body at the byte limit is still a valid request.
+  async function send(cookie: string, body: string | ReadableStream<Uint8Array>): Promise<{ status: number; code?: string; reason?: string }> {
+    const init = { method: "POST", headers: { cookie, "content-type": "application/json", origin: TEST_BASE_URL }, body, duplex: "half" };
+    const response = await routes.assistant.POST(new Request(`${TEST_BASE_URL}/api/v1/buyer/assistant`, init as RequestInit));
+    const envelope = (await response.json()) as { error?: { code: string; details: { reason?: string } } };
+    return { status: response.status, code: envelope.error?.code, reason: envelope.error?.details.reason };
+  }
+  const json = JSON.stringify(buyer("FIXTURE kopi"));
+  const padded = (bytes: number) => json + " ".repeat(bytes - Buffer.byteLength(json));
+
+  it("the assistant reads a body of at most 16 KiB", async () => {
+    const cookie = await anonymousCookie(routes.auth.POST);
+    expect(Buffer.byteLength(padded(16_384))).toBe(16_384);
+    expect(await send(cookie, padded(16_384))).toMatchObject({ status: 200 });
+    expect(openai.calls).toHaveLength(1);
+    expect(await send(cookie, padded(16_385))).toMatchObject({ status: 400, code: "validation_failed", reason: "too_large" });
+    // Refused unread: no model call and no limiter row.
+    expect(openai.calls).toHaveLength(1);
+    expect(await hits()).toBe(1);
+  });
+
+  it("the assistant reads its body within 5 seconds", async () => {
+    const cookie = await anonymousCookie(routes.auth.POST);
+    // A FIXTURE body that arrives whole after a delay, as a slow client sends it.
+    const late = (ms: number) =>
+      new ReadableStream<Uint8Array>({
+        start: (controller) => {
+          setTimeout(() => {
+            controller.enqueue(new TextEncoder().encode(json));
+            controller.close();
+          }, ms);
+        },
+      });
+    expect(await send(cookie, late(4_500))).toMatchObject({ status: 200 });
+    expect(openai.calls).toHaveLength(1);
+    expect(await send(cookie, late(5_500))).toMatchObject({ status: 400, code: "validation_failed", reason: "timeout" });
+    expect(openai.calls).toHaveLength(1);
+    expect(await hits()).toBe(1);
+  }, 20_000);
+
   it("the assistant's link never reaches the model, its reply or its steps", async () => {
     const cookie = await anonymousCookie(routes.auth.POST);
     script = (index) =>
