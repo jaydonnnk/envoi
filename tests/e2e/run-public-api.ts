@@ -69,10 +69,13 @@ try {
     PAYMENTS_ENABLED: "false",
     PYUSD_ENABLED: "false",
     MENU_IMPORTS_ENABLED: "false",
-    // Fixture values: no route this run calls reaches OpenAI or Solana.
+    WEB_IMPORTS_ENABLED: "false",
+    // Fixture values: no route this run calls reaches OpenAI, Kernel or Solana.
     OPENAI_API_KEY: "fixture-unused",
     AI_MODEL: "fixture-unused",
     AI_MENU_MODEL: "fixture-unused",
+    AI_WEB_MENU_MODEL: "fixture-unused",
+    KERNEL_API_KEY: "fixture-unused",
     SOLANA_RPC_URL: "http://127.0.0.1:9/fixture-unused",
     // The disposable database only, so no local .env.local can supply a real one.
     MIGRATION_DATABASE_URL: database.adminUrl,
