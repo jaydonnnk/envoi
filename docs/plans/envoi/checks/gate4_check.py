@@ -440,7 +440,8 @@ G1_MOCKUP_SHA256 = {
 # Current: the web menu import reopening, re-approved by the user on 2026-10-29, on top of the usability-study removal,
 # which is still DRAFTED AND NOT APPROVED (631a626b...3632271aa9 was the draft of both, 4718a3f5...701140e2 was the 2026-10-28 body with the approved round 5 allowance,
 # 4a4e9020...4ece559a the usability-removal draft alone).
-G1_BODY_SHA256 = "be5395a0bc2443e18b85dae873109780e8ca3a4299a51c9c70d45a0c95210c0a"
+# 2026-10-29: the web import audience reopening, re-approved by the user the same day ("Approve Gate 1"); be5395a0...0c0a was the body before it.
+G1_BODY_SHA256 = "be9105a2ac5e0786a8a243bb95a13be714dc7a20c443b058503b458d82e9a2da"
 for root, _, files in os.walk(folder):
     for name in sorted(files):
         rel = os.path.relpath(os.path.join(root, name), folder)

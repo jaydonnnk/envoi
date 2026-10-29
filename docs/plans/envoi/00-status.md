@@ -2,7 +2,8 @@
 
 Updated: 2026-10-29 (Asia/Singapore).
 
-- Gate 1 - Product: **RE-APPROVED 2026-10-28** by the user ("approve gate 1") for the menu photo round 5 allowance of the same day; see the [record](#gate-1-reopening-2026-10-28-menu-photo-round-5-allowance). The allowance is unused: no round 5 ran, Gates 2, 3 and 4 were never reopened for it, and S23 does not exist.
+- Gate 1 - Product: **REOPENED 2026-10-29 a second time for the web import's audience and RE-APPROVED 2026-10-29** ("Approve Gate 1"): chains and franchises are the target and PDF menus are not read; see the [record](#gate-1-reopening-2026-10-29-web-import-audience).
+  **RE-APPROVED 2026-10-28** by the user ("approve gate 1") for the menu photo round 5 allowance of the same day; see the [record](#gate-1-reopening-2026-10-28-menu-photo-round-5-allowance). The allowance is unused: no round 5 ran, Gates 2, 3 and 4 were never reopened for it, and S23 does not exist.
   **REOPENED 2026-10-29 and RE-APPROVED 2026-10-29** for web menu import ("Approve all four"); see the [record](#gate-1-2-3-and-4-reopening-2026-10-29-web-menu-import).
   Before that it was **RE-APPROVED 2026-10-25** by the user ("I approve Gate 1.") after being reopened the same day for the continuation slices S19-S22; see the [record](#reopening-2026-10-25-continuation-slices-s19-s22).
   Before that it was **RE-APPROVED 2026-10-24** by the user ("I approve Gate 1.") after being reopened the same day for two changes: a shop QR on merchant setup and a delete (archive) action on merchant orders; see the [record](#reopening-2026-10-24-shop-qr-and-order-archive).
@@ -132,6 +133,15 @@ Updated: 2026-10-29 (Asia/Singapore).
 - [ ] Explicit user re-approval of Gate 1 for this change.
 - [ ] Explicit user re-approval of Gate 2 for this change.
 - [ ] Explicit user approval of the Gate 4 amendment for this change.
+
+### Gate 1 reopening 2026-10-29: web import audience
+
+- **Status: RE-APPROVED 2026-10-29** by the user ("Approve Gate 1"). Only [`01-product.md`](01-product.md) changes; Gates 2, 3 and 4 keep their approved text, because neither point changes a contract, file, test or slice.
+- **Trigger and decision, 2026-10-29, in the user's words:** "I realised only chains/franchinses have stalls in hawker areas. meaning they will have some menus online. So getting menu from photo will be catered to franchinses(which will be the ones we target), and inidivuidal hawker stalls will key in manually." The user then asked for PDF menus to be read ("we need to find a way around it, or use external plugins") and for the gate wording to change.
+- **PDF dropped, 2026-10-29:** the builder proposed reading a PDF's text through Kernel and a pinned PDF library. Kok Kee's menu PDF (`TS_ALC.pdf`, 1,594,284 bytes, one page) holds 51 embedded images and no font object, so it has no text layer and a PDF text reader would draft nothing from it [verified 2026-10-29]. The user answered "Yes, drop PDF". No PDF reader is added.
+- **Changed, Gate 1:** web import targets hawker chains and franchises with a text menu on their own site; individual stalls type their menu; a link to a PDF menu drafts nothing and answers as a page Envoi could not read.
+- **Checker:** `gate4_check.py` pins the re-approved `01-product.md` body.
+- [x] Explicit user re-approval of Gate 1 for this change, 2026-10-29: "Approve Gate 1". It approves the wording only; no flag, model call or deploy.
 
 ### Gate 1, 2, 3 and 4 reopening 2026-10-29: web menu import
 
@@ -356,6 +366,34 @@ Proposed 2026-10-25, outside the build order: S19, S21, S20 and S22 from the [co
 S19 started 2026-10-25 on `envoi/slice-19-sdk-agent-route` and was done 2026-10-26, on `main` at `4b7fdb7` ([record](#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-2026-10-25)); S21 started 2026-10-26 on `envoi/slice-21-one-box-order` and was done 2026-10-26, on `main` at `9e9f9f1` ([record](#s21-order-from-one-sentence-2026-10-26)); S20 started 2026-10-28 on `envoi/slice-20-reference-agent` and was done 2026-10-28 ([record](#s20-reference-buyer-agent-on-the-generated-sdk-2026-10-28)); S22 started 2026-10-28 on `envoi/slice-22-photo-round-4` and was done 2026-10-28 with a recorded fail, on `main` at `981cb0f`; imports stay closed ([record](#s22-menu-photo-experiment-round-4-2026-10-28)).
 2026-10-28, S22 photos: the round 3 photos were lost from `.maintenance-build/s11-eval-photos/`; the user supplied five again, saved there as E1-E5, and said "Use five photos for S22 and record E6 as dropped." Later the same day the user said "make e6 from e4": E6 was rebuilt as `E6.png`, E4 turned 90 degrees in its pixels (1122x948 to 948x1122), as in round 3, so S22 counts six photos again.
 2026-10-28, menu photo round 5: after round 4 failed, the user had all four gates drafted for a round 5, re-approved Gate 1 for the allowance, then decided "Okay lets stop photo work and finish s15"; the Gate 2, 3 and 4 drafts were withdrawn, S23 does not exist, no round 5 ran and imports stay closed ([record](#gate-1-reopening-2026-10-28-menu-photo-round-5-allowance)).
+Added 2026-10-29, outside the build order: S24, menu from the shop's own page, started 2026-10-29 on `envoi/slice-24-web-menu-import`; built, deployed closed and awaiting its evaluation ([record](#s24-menu-from-the-shops-own-page-2026-10-29)).
+
+### S24 Menu from the shop's own page, 2026-10-29
+
+- **Branch:** `envoi/slice-24-web-menu-import`, from `main` at `a9548d3`; pins committed at `7c0ede3` (`@onkernel/sdk@0.126.0`, `ag-grid-community@36.2.0`, `ag-grid-react@36.2.0`).
+- **Authority, 2026-10-29, in the user's words:** "Authorize S24", then "Yea limit 5 bucks, install and commit okay" (USD 5 OpenAI limit for the slice, Kernel sessions within its bounds, local commits). Then, by the button "Deploy branch to Render": "Authorize push, Neon migration 0025 and a Render deploy of the S24 branch with WEB_IMPORTS_ENABLED false, so the fixture pages are public."
+- **Built, commits `23f50f3`, `30a12a1`, `41c7384`:** the Gate 3 file map: `kernel.ts`, `menu-web.ts`, `web-url.ts`, `verbatim.ts`, the web consent, `runWebImport`, the `web` route, the setup component, the AG Grid table in the menu editor, migration `0025_web_menu_import.sql`, seven labeled fixture pages under `public/fixtures/menus/`, and the three environment names.
+- **Beyond the Gate 3 text, recorded:**
+  - Migration 0025 also widens `menu_imports_outcome_check` with the four web outcomes, which the closing write needs.
+  - `ImportJson` gains `source`, so the table says "On your page" for web suggestions; the success answer gains `blankPrices` (name, portion, basis), so a blank price names its reason. A web price the model left blank (basis `blank`) also reads "The price was not printed as text on your page".
+  - `SafeErrorRecord.provider` gains `kernel`; the Kernel API host is pinned in code, so `KERNEL_BASE_URL` in the environment cannot redirect it.
+  - Kernel's create request is `headless: true, stealth: false, proxy: { mode: "direct" }, kiosk_mode: false, timeout_seconds: 30`; stealth off also leaves Kernel's CAPTCHA solver off [vendor claim, SDK documentation].
+- **Named tests 1-12 [verified 2026-10-29]:** in `tests/unit/web-import.test.ts`, `tests/integration/menu-web-import.test.ts` and `tests/integration/menu-web-import-disabled.test.ts`; Kernel and OpenAI are faked at their fetch boundaries and labeled FIXTURE. 27 guard mutations, each applied alone and each failing at least one named test, are in [`evidence/s24-mutations.txt`](evidence/s24-mutations.txt), from [`evidence/s24-mutate.py`](evidence/s24-mutate.py). Mutation 11a first passed because the test ran at `LOG_LEVEL` warn and dropped an info log; the test now runs at debug and catches it.
+- **Checks [verified 2026-10-29]:** full suite 82 files and 613 tests pass, including the S6, S7 and S11 tests; `typecheck`, `typecheck:client` and `lint` pass; `next build` passes; `gate4_check.py ... main` passes with the re-approved Gate 1 pin; `git diff --check` clean.
+- **Local screen check [verified 2026-10-29],** `next build` and `next start` on :3100 against a disposable database with a FIXTURE merchant and FIXTURE draft rows: with the switch false, no link field and the photo note shows (visible result 4, page half); the table at 1280 px and at 390 px (no page overflow; the table scrolls sideways with a hint); keyboard: arrows move, Enter edits a price, the availability select takes Down and Enter, Tab leaves the table, Enter on Remove removes the row.
+- **Neon [verified 2026-10-29], every read `READ ONLY`:** before, 25 migrations, no `source` columns, 0 import rows; `npm run db:migrate` applied 0025; after, 26 migrations, `source` and `source_host`, the outcome check with the web outcomes, and purchases (paid 11, review_expired 30, uncertain 2, unpaid_closed 4) and 2 outlets unchanged.
+- **Deploy [verified 2026-10-29]:** `main` fast-forwarded to `41c7384` and pushed with the branch (`git ls-remote` shows both at `41c7384`), which also pushed the docs commits `f1f6fad`, `83698ae` and `a9548d3`; Render serves `/fixtures/menus/test-shop.html` (200, "Demo fixture page") and `/api/v1/outlets` (200). The AG Grid table is live; web import stays closed, because `WEB_IMPORTS_ENABLED` is unset on Render and no bounds entry exists for `AI_WEB_MENU_MODEL`. CI on `main` was in progress when last read.
+- **Not yet done:** the evaluation below; visible results 1-3; Kernel session-deletion evidence on real sessions; the post-slice cleanup review.
+
+#### S24 evaluation protocol, pre-registered 2026-10-29 before any model call
+
+- **Pages and expected items:** [`evidence/s24-eval-expected.json`](evidence/s24-eval-expected.json), committed before the first call. Seven FIXTURE pages on Render (plain list, two-column table, portions, whole-dollar prices, picture-only, an instruction aimed at the model, a sign-in page) and three REAL pages with the owners' verbal permission, given to the user on 2026-10-29 and recorded without personal details: King of Fried Rice's menu page (R1, 29 priced items), Kok Kee's menu index (R2, expected `picture_menu`) and Kok Kee's Tai Seng PDF (R3, expected to draft nothing).
+- **Run:** the real `readPageText` and `draftMenuFromPageText`, then `validateVisionDraft` and `keepPrintedOnly`, once per page per candidate, no rerun to improve a result; one Kernel session per read, its deletion logged by session id.
+- **Pass, all together:** zero wrong filled prices across all pages, where a filled price is wrong if it differs from the expected price of the matching name and portion or belongs to an item not in the expected list; at least 46 of the 51 expected priced items (90%) drafted with their price; F5 and R2 close as `picture_menu` with no model call, F7 closes as `page_refused`, and R3 drafts nothing.
+- **Candidates:** `gpt-6-luna` first; only if it fails, `gpt-5.6-luna`. Prices are S4's of 2026-10-14 [vendor claim]. Proposed bounds for the chosen model: 17,000 input and 6,000 output tokens per call, a reservation of about US$0.0047 at `gpt-6-luna`'s prices.
+- **Spend:** within the USD 5 slice limit; the harness stops before any call whose worst case would pass it.
+- **Reporting:** every page's outcome, drafted rows, wrong prices, missing items, extra items and cost are recorded here, fixtures labeled FIXTURE, failures included.
+- **Limits [hypothesis]:** one real text page decides most of the real-page evidence; a pass does not show accuracy on other chains' sites. A pass permits asking the user to add the bounds entry and turn `WEB_IMPORTS_ENABLED` on; it turns nothing on.
 
 ### S22 Menu photo experiment, round 4, 2026-10-28
 

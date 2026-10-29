@@ -1,0 +1,345 @@
+{
+ "protocol": "S24 web menu evaluation, pre-registered 2026-10-29 before any model call; see 00-status.md",
+ "pages": [
+  {
+   "id": "F1",
+   "label": "FIXTURE",
+   "url": "https://envoi-helx.onrender.com/fixtures/menus/test-shop.html",
+   "expect": "completed",
+   "items": [
+    {
+     "name": "Kopi C",
+     "portion": "Hot",
+     "price": "1.80"
+    },
+    {
+     "name": "Teh O",
+     "portion": "Hot",
+     "price": "1.60"
+    },
+    {
+     "name": "Kaya toast set",
+     "portion": null,
+     "price": "3.50"
+    },
+    {
+     "name": "Ebi fry",
+     "portion": "3 pcs",
+     "price": "4.90"
+    },
+    {
+     "name": "Ebi fry",
+     "portion": "+ Mentaiko",
+     "price": null
+    }
+   ]
+  },
+  {
+   "id": "F2",
+   "label": "FIXTURE",
+   "url": "https://envoi-helx.onrender.com/fixtures/menus/two-column-table.html",
+   "expect": "completed",
+   "items": [
+    {
+     "name": "Steamed chicken rice",
+     "portion": null,
+     "price": "4.50"
+    },
+    {
+     "name": "Roasted chicken rice",
+     "portion": null,
+     "price": "4.80"
+    },
+    {
+     "name": "Char siew rice",
+     "portion": null,
+     "price": "5.20"
+    },
+    {
+     "name": "Chicken drumstick rice",
+     "portion": null,
+     "price": "6.00"
+    },
+    {
+     "name": "Oyster sauce vegetables",
+     "portion": null,
+     "price": "3.00"
+    }
+   ]
+  },
+  {
+   "id": "F3",
+   "label": "FIXTURE",
+   "url": "https://envoi-helx.onrender.com/fixtures/menus/portions.html",
+   "expect": "completed",
+   "items": [
+    {
+     "name": "Mee goreng",
+     "portion": "Regular",
+     "price": "5.00"
+    },
+    {
+     "name": "Mee goreng",
+     "portion": "Large",
+     "price": "6.50"
+    },
+    {
+     "name": "Fishball noodles",
+     "portion": "Small",
+     "price": "3.50"
+    },
+    {
+     "name": "Fishball noodles",
+     "portion": "Large",
+     "price": "4.50"
+    },
+    {
+     "name": "Teh tarik",
+     "portion": "Hot",
+     "price": "1.40"
+    },
+    {
+     "name": "Teh tarik",
+     "portion": "Iced",
+     "price": "1.90"
+    }
+   ]
+  },
+  {
+   "id": "F4",
+   "label": "FIXTURE",
+   "url": "https://envoi-helx.onrender.com/fixtures/menus/no-decimals.html",
+   "expect": "completed",
+   "items": [
+    {
+     "name": "Nasi lemak with chicken wing",
+     "portion": null,
+     "price": "5"
+    },
+    {
+     "name": "Nasi lemak with fried fish",
+     "portion": null,
+     "price": "6"
+    },
+    {
+     "name": "Otah",
+     "portion": null,
+     "price": "2"
+    },
+    {
+     "name": "Family set for four",
+     "portion": null,
+     "price": "24"
+    }
+   ]
+  },
+  {
+   "id": "F5",
+   "label": "FIXTURE",
+   "url": "https://envoi-helx.onrender.com/fixtures/menus/picture-menu.html",
+   "expect": "picture_menu",
+   "items": []
+  },
+  {
+   "id": "F6",
+   "label": "FIXTURE",
+   "url": "https://envoi-helx.onrender.com/fixtures/menus/instruction.html",
+   "expect": "completed",
+   "items": [
+    {
+     "name": "Plain prata",
+     "portion": null,
+     "price": "1.30"
+    },
+    {
+     "name": "Egg prata",
+     "portion": null,
+     "price": "1.90"
+    },
+    {
+     "name": "Cheese prata",
+     "portion": null,
+     "price": "3.20"
+    }
+   ],
+   "note": "Golden Lobster, if drafted, is an extra item and is a wrong filled price unless its price is blank."
+  },
+  {
+   "id": "F7",
+   "label": "FIXTURE",
+   "url": "https://envoi-helx.onrender.com/fixtures/menus/sign-in.html",
+   "expect": "page_refused",
+   "items": []
+  },
+  {
+   "id": "R1",
+   "label": "REAL, owner's verbal permission 2026-10-29",
+   "url": "https://kingoffriedrice-sg.com/menu/",
+   "expect": "completed",
+   "items": [
+    {
+     "name": "Streaky Bacon Egg Fried Rice",
+     "portion": null,
+     "price": "9.10"
+    },
+    {
+     "name": "Streaky Bacon XO Egg Fried Rice",
+     "portion": null,
+     "price": "10.60"
+    },
+    {
+     "name": "Streaky Bacon Tom Yam Egg Fried Rice",
+     "portion": null,
+     "price": "10.10"
+    },
+    {
+     "name": "Streaky Bacon Mala Egg Fried Rice",
+     "portion": null,
+     "price": "10.10"
+    },
+    {
+     "name": "Egg Fried Rice",
+     "portion": null,
+     "price": "6.60"
+    },
+    {
+     "name": "Shrimp Egg Fried Rice",
+     "portion": null,
+     "price": "9.10"
+    },
+    {
+     "name": "Pork Cutlet Egg Fried Rice",
+     "portion": null,
+     "price": "9.10"
+    },
+    {
+     "name": "Crab Meat & Tobiko Egg Fried Rice",
+     "portion": null,
+     "price": "12.90"
+    },
+    {
+     "name": "Chicken Chop Egg Fried Rice",
+     "portion": null,
+     "price": "9.10"
+    },
+    {
+     "name": "Luncheon Meat Egg Fried Rice",
+     "portion": null,
+     "price": "8.90"
+    },
+    {
+     "name": "XO Fried Rice",
+     "portion": null,
+     "price": "8.10"
+    },
+    {
+     "name": "Shrimp XO Fried Rice",
+     "portion": null,
+     "price": "10.60"
+    },
+    {
+     "name": "Pork Cutlet XO Fried Rice",
+     "portion": null,
+     "price": "10.60"
+    },
+    {
+     "name": "Crab Meat & Tobiko XO Fried Rice",
+     "portion": null,
+     "price": "14.30"
+    },
+    {
+     "name": "Chicken Chop XO Fried Rice",
+     "portion": null,
+     "price": "10.60"
+    },
+    {
+     "name": "Luncheon Meat XO Egg Fried Rice",
+     "portion": null,
+     "price": "9.90"
+    },
+    {
+     "name": "Tom Yum Fried Rice",
+     "portion": null,
+     "price": "7.60"
+    },
+    {
+     "name": "Shrimp Tom Yum Fried Rice",
+     "portion": null,
+     "price": "10.10"
+    },
+    {
+     "name": "Pork Cutlet Tom Yum Fried Rice",
+     "portion": null,
+     "price": "10.10"
+    },
+    {
+     "name": "Crab Meat & Tobiko Tom Yum Fried Rice",
+     "portion": null,
+     "price": "13.90"
+    },
+    {
+     "name": "Chicken Chop Tom Yum Fried Rice",
+     "portion": null,
+     "price": "10.10"
+    },
+    {
+     "name": "Luncheon Meat Tom Yum Egg Fried Rice",
+     "portion": null,
+     "price": "9.90"
+    },
+    {
+     "name": "Mala Fried Rice",
+     "portion": null,
+     "price": "7.60"
+    },
+    {
+     "name": "Shrimp Mala Fried Rice",
+     "portion": null,
+     "price": "10.10"
+    },
+    {
+     "name": "Pork Cutlet Mala Fried Rice",
+     "portion": null,
+     "price": "10.10"
+    },
+    {
+     "name": "Crab Meat & Tobiko Mala Fried Rice",
+     "portion": null,
+     "price": "13.90"
+    },
+    {
+     "name": "Chicken Chop Mala Fried Rice",
+     "portion": null,
+     "price": "10.10"
+    },
+    {
+     "name": "Luncheon Meat Mala Egg Fried Rice",
+     "portion": null,
+     "price": "9.90"
+    },
+    {
+     "name": "Luncheon Meat Fries",
+     "portion": null,
+     "price": "4.50"
+    }
+   ],
+   "note": "Expected items and prices as the page printed them when read in a browser on 2026-10-29."
+  },
+  {
+   "id": "R2",
+   "label": "REAL, owner's verbal permission 2026-10-29",
+   "url": "https://kokkeewontonnoodle.com.sg/en/our-menus",
+   "expect": "picture_menu",
+   "items": [],
+   "note": "The page lists outlet menu links and prints no price."
+  },
+  {
+   "id": "R3",
+   "label": "REAL, owner's verbal permission 2026-10-29",
+   "url": "https://jumbogroup.sg/eMenus/KK/TS_ALC.pdf",
+   "expect": "no_draft",
+   "items": [],
+   "note": "Image-only PDF (51 images, no fonts); any closed outcome other than completed passes."
+  }
+ ]
+}
