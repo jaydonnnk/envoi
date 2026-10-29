@@ -418,7 +418,8 @@ for f, text in current.items():
 # (55850890...4d24b59f was the text before it).
 # 2026-10-29: next raised to 16.4.2 for security advisories by the user's instruction (4fc6fdbc...5daf963a was the text before it).
 # 2026-10-29: the PDF answer, by the user's decision "Add a PDF answer" (c1178173...5d155f9c was the text before it).
-G3_REOPENING_SHA256 = "09bbb22c398abb0dacc4147a65dae08a59bad7f0884f0ab55c46e34d22da59cb"
+# 2026-10-29: the second build plan reopening, re-approved by the user ("Approve Gate 3"); 09bbb22c...22da59cb was the text before it.
+G3_REOPENING_SHA256 = "04e8995ffeaf95db71af5d5011dcf5041cfea51ea7f6a9281b17b945c3c1aed5"
 # 02-architecture.md may likewise equal its continuation amendment text, re-approved by the user on 2026-10-25
 # (bc504e10...d0e47a9f was the shop QR and order archive text, re-approved on 2026-10-24,
 # 28d54654...45561154 the Phantom landing text of 2026-10-18, 938d0a99...f3bf30a6 the English-only text of 2026-10-15).
@@ -429,7 +430,8 @@ G3_REOPENING_SHA256 = "09bbb22c398abb0dacc4147a65dae08a59bad7f0884f0ab55c46e34d2
 # correction (c05097d3...7ddc8448 was the text before it).
 # 2026-10-29: the usability-study removal, R19 falsifier revised to the user's own checks, re-approved by the user
 # ("Approve Gate 2"); 3ef84d7b...a16a was the text before it.
-G2_REOPENING_SHA256 = "caa653f199be1eaba902ac27791f65a45aaebab86920c367fde63358a8e2182d"
+# 2026-10-29: the second build plan amendment, re-approved by the user ("Approve Gate 2"); caa653f1...a8e2182d was the text before it.
+G2_REOPENING_SHA256 = "b1c2513fb889402e5161a3f27c8069292cfc3a8a7187de16372b93d2948b08f2"
 # Gate 1, re-approved 2026-10-16 after deferring menu photo drafting and again on 2026-10-21 for the
 # landing page, and on 2026-10-24 for the shop QR and order archive, then reopened and re-approved on 2026-10-25 for S19-S22:
 # the revised and added mockups, and 01-product.md without its closing status line, which keeps changing as slices finish
@@ -444,13 +446,22 @@ G1_MOCKUP_SHA256 = {
     os.path.join("mockups", "buyer-one-box.html"): "0e4ae5ade8fdd7111b56698d13b0d82d896cace1fbd5b55a5d95109286a61ad8",
     # Approved 2026-10-29 for web menu import.
     os.path.join("mockups", "merchant-web-import.html"): "3535093c00094324e6adea23cfbe2a45dc74854887f07e19b32acb11de129ded",
+    # Approved 2026-10-29 for the second build plan ("Approve Gate 1"); index.html gained links to these screens.
+    os.path.join("mockups", "index.html"): "717ab77feea8e9e132b40b006951f692a05f105f7ba8904d816399723f1f057c",
+    os.path.join("mockups", "buyer-ask-envoi.html"): "7eaa8bf7b0bb0be032b97b1067824da4d68e252d68644c6f7b60e7ee55e080ff",
+    os.path.join("mockups", "buyer-menu-explained.html"): "9144c60650ef7e2c081393693fd2cb12025844f0717f5e1fb4bee22534ad1274",
+    os.path.join("mockups", "review-us-shop.html"): "593d95562d04bc0e77a69d6192e11f125f1d74e42a59cecd9731835c57cfb826",
+    os.path.join("mockups", "merchant-country.html"): "03bd22f1e4b6c214c8685ce51e3019d3fa717cf4112aaa7d0044e8c2269a62f8",
+    os.path.join("mockups", "merchant-rewards.html"): "13c51061a482af064d67cedd2b3103997b72fc3a1e561564aab939855d2a346a",
+    os.path.join("mockups", "merchant-web-import-review.html"): "83cb171c64d30ad4658e9cd04dc0d94b9d5c0094332c4a5c6d9aa203b2d75656",
 }
 # Current: the web menu import reopening, re-approved by the user on 2026-10-29, on top of the usability-study removal,
 # which is still DRAFTED AND NOT APPROVED (631a626b...3632271aa9 was the draft of both, 4718a3f5...701140e2 was the 2026-10-28 body with the approved round 5 allowance,
 # 4a4e9020...4ece559a the usability-removal draft alone).
 # 2026-10-29: the web import audience reopening, re-approved by the user the same day ("Approve Gate 1"); be5395a0...0c0a was the body before it.
 # 2026-10-29: the PDF answer, by the user's decision "Add a PDF answer" (be9105a2...82e9a2da was the text before it).
-G1_BODY_SHA256 = "74f101fc973514f4846fcd332fb35df1639044b7804861e9098bb4dfc52418d3"
+# 2026-10-29: the second build plan, re-approved by the user ("Approve Gate 1"); 74f101fc...c52418d3 was the body before it.
+G1_BODY_SHA256 = "5c7f78c6dc0bb180fbc0b631a006cd2ea3bf03b9ad399efd3024cff902d0ac9e"
 for root, _, files in os.walk(folder):
     for name in sorted(files):
         rel = os.path.relpath(os.path.join(root, name), folder)

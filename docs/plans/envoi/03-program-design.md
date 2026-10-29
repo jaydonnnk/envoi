@@ -8,6 +8,7 @@
 **Reopened 2026-10-24 for the shop QR and order archive, after Gates 1 and 2 were re-approved the same day, and RE-APPROVED by the user the same day ("I approve Gate 3."):** see [Reopening 2026-10-24](#reopening-2026-10-24-shop-qr-and-order-archive).
 **Reopened 2026-10-25 for the continuation slices S19-S22, after Gates 1 and 2 were re-approved the same day, and RE-APPROVED by the user the same day ("I approve Gate 3."):** see [Reopening 2026-10-25](#reopening-2026-10-25-continuation-slices-s19-s22).
 **Reopened 2026-10-29 for web menu import and re-approved the same day ("Approve all four"):** see [Reopening 2026-10-29](#reopening-2026-10-29-web-menu-import).
+**Reopened 2026-10-29 for the second build plan, after Gates 1 and 2 were re-approved the same day, and RE-APPROVED by the user the same day ("Approve Gate 3"):** see [Reopening 2026-10-29: second build plan](#reopening-2026-10-29-second-build-plan).
 Approval accepts these contracts as a proposal; it establishes no runtime, account, model, wallet or usability evidence and authorizes no implementation or Gate 4 approval.
 The user removed Zapier because it is paid and reopened Gates 1, 2 and 3.
 Gate 1 was re-approved on 2026-10-10 and Gate 2 on 2026-10-11.
@@ -17,6 +18,177 @@ Every other contract below stays as approved on 2026-10-07.
 See [Revision 2026-10-11](#revision-2026-10-11-direct-vision-and-pyusd), [`00-status.md`](00-status.md#reopening-2026-10-10-zapier-removed) and [`handoff.md`](handoff.md#gate-3-handover-2026-10-11).
 
 Gate 3 program design, 2026-10-07 (Asia/Singapore). **APPROVED by the user 2026-10-07** ("gate 3 is approved"), together with a separate authorization to commit these planning documents and push `main`. Authorities: [approved Gate 1 product](01-product.md) and [approved Gate 2 architecture](02-architecture.md). Approval accepts the contracts below and the disposition of the eight Gate 2 review findings; it establishes no runtime, account, integration or usability evidence, and it does not authorize implementation or Gate 4. A separate, narrowly scoped authorization on the same day covered the R11 flag flip, its redeploy and a read-only schema inspection, all now complete. This document contains contracts only: file map, types and signatures without bodies, call stacks, state transitions, race rules, capacity budgets and named failure tests. No application implementation, no installed application packages and no approved slices exist.
+
+## Reopening 2026-10-29: second build plan
+
+Drafted 2026-10-29 for the [second build plan](01-product.md#second-build-plan-proposed-2026-10-29) ("Approve Gate 1") and its [Gate 2 amendment](02-architecture.md#second-build-plan-amendment-2026-10-29) ("Approve Gate 2"), with the six mockups listed in Gate 1's Screens; **APPROVED 2026-10-29** ("Approve Gate 3").
+Approval accepts these contracts as a proposal; it establishes no runtime, model, PayPal, APIMatic or evaluation evidence and authorizes no Gate 4 change, slice, install, migration, upload, model call, merge, push or deploy.
+Slice ids S25 to S31 are proposed here so each file and test has a home; Gate 4 sets their order and may rename them.
+
+- **Proposed slices:** S25 Ask Envoi in the site (with the AI-off copy and the two iced teas); S26 the connected run (evidence only, plus the web-import fixture shop's PayPal sandbox destination); S27 US shops and currency-explicit money; S28 the PayPal PYUSD rewards card; S29 the menu explained and translated; S30 draft review aids; S31 PayPal approval over the review page.
+- **Version pins:** nothing is installed. PayPal's JavaScript SDK is loaded as a script from PayPal at run time, not as a package; the assistant uses the pinned `ai` and `@ai-sdk/openai`; the regenerated client keeps its `zod` range.
+- **Environment names:** `ASSISTANT_AGENT_TOKEN` (server only, optional; the assistant is off without it) and `AI_MENU_TRANSLATION_MODEL` (optional; translation is off without it) in `src/env.ts` and `.env.example`; no value is committed. `APP_BASE_URL` already exists and is the assistant's base URL. `PAYPAL_CLIENT_ID` already exists and is passed to the review page, never the secret.
+- **Files:**
+
+| File | Slice | Change |
+| --- | --- | --- |
+| `src/integrations/assistant/agent.ts`, `tools.ts`, `trace.ts` | S25 | New home of the S20 agent: instructions, the three tools, the turn gate and the trace, moved unchanged in behaviour from `clients/buyer-agent/`. `runAssistantTurn` below. |
+| `clients/buyer-agent/agent.ts` | S25 | Keeps only the terminal `main`, importing the moved module; `tools.ts` and `trace.ts` there are deleted. |
+| `src/app/api/v1/buyer/assistant/route.ts` | S25 | New Node route `POST`: buyer session, counted body of at most 16 KiB read within 5 s, `admit(db, "buyer_assistant", ...)` before any model call. |
+| `src/lib/ratelimit.ts` | S25, S29 | `ASSISTANT_LIMITS` (per buyer 20 per 10 minutes, global 150 per hour) and `TRANSLATION_LIMITS` (per buyer 30 per 10 minutes, global 120 per hour) [hypothesis: starting values, changed only by a Gate 3 wording update]. |
+| `src/app/buy/ask/page.tsx`, `ask-envoi.tsx` | S25 | The Ask Envoi screen in the mockup's words: conversation, the steps panel, Review and pay. Linked from `/buy` only while the assistant is on. |
+| `src/app/buy/page.tsx` | S25 | With text suggestions off, the sticker card's heading reads "Scan the sticker" with no "Or". |
+| `src/operator/cli.ts` | S25 | New idempotent command `add-demo-iced-teas`: adds Iced lemon tea (S$2.20) and Iced milk tea (S$2.50) to the demo fixture Test Shop through the existing draft, confirm and publish domain functions, never by direct table writes. |
+| `src/lib/money.ts` | S27 | Currency-explicit money below; the SGD-only names go. |
+| every file naming `SgdCents`, `sgd_cents` or a `formatSgd` call (about 62, found by `rg`) | S27 | Renamed to the currency-neutral names below, the currency carried beside every amount. PYUSD code keeps SGD by calling `requireSgd`. |
+| `drizzle/0026_currency_and_country.sql` | S27 | `outlets.country` (`SG` or `US`, not null, default `SG`, check); every `*_sgd_cents` column renamed to `*_minor`; `purchases.currency` (`SGD` or `USD`, not null, default `SGD`, check); a trigger refusing a change of `outlets.country` once any revision of that outlet has been published. No grant changes. |
+| `src/domain/outlets/merchant.ts`, `src/app/api/v1/merchant/outlets/[id]/route.ts` | S27 | The merchant sets `country` before first publication; a later change answers the new code `country_locked` (409). |
+| `src/integrations/paypal/orders.ts`, `map.ts`, `verify.ts` | S27 | Orders use the purchase's currency; a captured or webhook currency unlike the purchase's is a verification failure, never paid. |
+| `src/domain/pyusd/*` | S27 | Preparation refuses a purchase whose currency is not SGD, with the new unavailable reason `not_sgd_shop`. |
+| `src/domain/sgqr/resolve.ts` | S27 | Resolves only outlets with `country = 'SG'`. |
+| `openapi/envoi-public.yaml`, `clients/typescript/`, `src/app/mcp/route.ts` | S27 | `unitSgdCents` becomes `unitMinor` with `currency` on the outlet and menu; the client is regenerated by APIMatic and committed unchanged; the MCP tools' outputs change the same way. |
+| `src/app/merchant/setup/country.tsx` | S27 | The country choice in the mockup's words, before the SGQR step, which is shown for SG only. |
+| `src/domain/rewards/paypal-pyusd.ts` | S28 | New; the reviewed constant and `rewardsCard` below. |
+| `src/app/merchant/setup/rewards-card.tsx` | S28 | New; the card in the mockup's words, rendered from the server. |
+| `drizzle/0027_menu_translations.sql` | S29 | `menu_translations` (`menu_revision_id` referencing `menu_revisions`, `language`, `items` jsonb, `model`, `created_at`; unique on revision and language); the web role may select and insert, never update or delete. |
+| `src/integrations/ai/menu-translate.ts` | S29 | New; the one tool-free text call and `MENU_TRANSLATION_PROMPT_VERSION`. |
+| `src/domain/menu/translate.ts` | S29 | New; `keepSafeTranslations` and `getOrCreateTranslation` below. |
+| `src/app/api/v1/buyer/menu-translations/route.ts` | S29 | New Node route `POST`: buyer session, counted body of at most 1 KiB, `admit(db, "menu_translation", ...)`. |
+| `src/app/buy/shop-basket.tsx` | S29 | Translated names and explanations beside the original names, "AI translation" label and "Show the shop's original menu". |
+| `src/domain/imports/verbatim.ts`, `request.ts` | S30 | `excerptFor` below; the web import's success answer gains `excerpts`. |
+| `src/app/merchant/setup/menu-grid.tsx`, `menu-editor.tsx` | S30 | The needs-review filter, Next problem and the excerpt column, using AG Grid Community modules only. |
+| `src/domain/payments/attempts.ts`, `src/app/api/v1/purchases/[id]/paypal/start/route.ts` | S31 | `StartResult` gains `orderId`. |
+| `src/app/review/[purchaseId]/paypal-buttons.tsx`, `continue-to-paypal.tsx` | S31 | New buttons component; the existing redirect link stays as the fallback when the script fails or the buttons report an error. |
+
+- **Types and signatures:**
+
+```ts
+// src/integrations/assistant/agent.ts (S25)
+type AssistantTurn = { role: "buyer" | "assistant"; text: string };          // text only, 1-280 characters
+const MAX_ASSISTANT_TURNS = 8;
+type AssistantStep = TraceEntry;                                              // operation, status, outletId, itemIds, expiresAt, ms
+type AssistantTurnResult =
+  | { kind: "reply"; text: string; steps: AssistantStep[] }
+  | { kind: "link"; text: string; steps: AssistantStep[]; link: CreatedLink }
+  | { kind: "stopped"; reason: "tool_calls" | "time"; steps: AssistantStep[] }
+  | { kind: "failed"; steps: AssistantStep[] };
+type AssistantConfig = { baseUrl: string; agentToken: string; openaiApiKey: string; model: string; envoiFetch?: typeof fetch; openaiFetch?: typeof fetch; now?: () => number };
+// One buyer turn. The earlier turns are text; no tool result is replayed, so the model re-reads the menu
+// in the turn that proposes a basket, and the unread-item refusal holds whatever the browser sends.
+function runAssistantTurn(config: AssistantConfig, turns: readonly AssistantTurn[]): Promise<AssistantTurnResult>;
+// Route answer: { reply, steps, link: { url, expiresAt } | null }; the link never appears in reply or steps.
+
+// src/lib/money.ts (S27)
+type Currency = "SGD" | "USD";
+type Country = "SG" | "US";
+const CURRENCY_BY_COUNTRY: Record<Country, Currency> = { SG: "SGD", US: "USD" };
+type Money = { readonly currency: Currency; readonly minor: number };       // integer minor units, no float path
+function money(currency: Currency, minor: number): Money;                   // RangeError on a non-safe integer
+function multiply(value: Money, quantity: number): Money;
+function sum(currency: Currency, values: readonly Money[]): Money;          // CurrencyMismatchError on any other currency
+function sameAmount(a: Money, b: Money): boolean;                           // CurrencyMismatchError when currencies differ
+function fromDecimalString(currency: Currency, value: string): Money | null;
+function toDecimalString(value: Money): string;                             // provider form, "11.25"
+function formatMoney(value: Money): string;                                  // "S$4.40", "US$11.25"
+function requireSgd(value: Money): Money;                                    // PYUSD entry points only; CurrencyMismatchError otherwise
+
+// src/domain/rewards/paypal-pyusd.ts (S28)
+const PAYPAL_PYUSD_REWARDS = {
+  advertisedAnnualRateBasisPoints: 400,                                     // [vendor claim], variable, PayPal's
+  eligibleCountry: "US",
+  checkedOn: "2026-10-29",
+  sourceUrl: "https://www.paypal.com/us/business/accept-crypto-payments",
+} as const;
+const OUTLET_TIME_ZONE: Record<Country, string> = { SG: "Asia/Singapore", US: "America/New_York" };
+type RewardsCard = { country: Country; paidThisMonth: Money; eligible: boolean; illustration: Money | null };
+function rewardsCard(db: Pick<Db, "select">, outletId: string, now: Date): Promise<RewardsCard>;
+function illustrateOneYear(paid: Money, basisPoints: number): Money;        // floor(paid.minor * basisPoints / 10_000)
+
+// src/domain/menu/translate.ts (S29)
+const LANGUAGE_SUBTAG = /^[a-z]{2,3}$/;                                      // from navigator.language, lower-cased primary subtag
+type TranslatedItem = { itemId: string; name: string; explanation: string | null }; // name <= 80, explanation <= 160 characters
+// Drops an item whose id is not on the revision, whose text is over its bound, or whose text holds a digit or a
+// currency sign ($, S$, US$, ¥, €, £, 元) that the original name does not hold.
+function keepSafeTranslations(original: readonly { id: string; name: string }[], proposed: readonly TranslatedItem[]): TranslatedItem[];
+type TranslationResult =
+  | { kind: "ok"; menuRevisionId: string; language: string; items: TranslatedItem[] }
+  | { kind: "not_found" } | { kind: "unavailable" };
+// Reads (revision, language); on a miss makes one model call, keeps the safe items and inserts with
+// on conflict do nothing, then reads again, so two concurrent misses store one row.
+function getOrCreateTranslation(db: Db, outletId: string, language: string, now: Date): Promise<TranslationResult>;
+
+// src/domain/imports/verbatim.ts (S30)
+function excerptFor(pageText: string, name: string, price: Money | null): string | null; // at most 120 characters of the page around the name
+
+// src/domain/payments/attempts.ts (S31)
+type StartResult = { attemptId: string; approvalUrl: string; orderId: string };
+```
+
+- **Call stacks:**
+  - Ask Envoi: `ask-envoi.tsx` sends the turns, then the route checks the session, reads the body, validates turns (count, length, roles `buyer` and `assistant` only, no other key), admits, checks the three settings, then `runAssistantTurn`; tools call the generated client at `APP_BASE_URL`; the purchase request's link is captured by `onLink`; the route answers with reply, steps and link. The browser opens the link, and `/approve/[handoffToken]` redeems it as today.
+  - Translation: `shop-basket.tsx` sends the outlet id and `navigator.language`'s primary subtag, then the route checks session, body and subtag, admits, then `getOrCreateTranslation`; the screen draws prices, availability and original names from the published menu it already holds and only adds the translated text.
+  - US purchase: review and pricing read the outlet's country and currency; the purchase stores its currency; `paypal/start` creates the order in that currency; capture and webhook verification compare currencies before any paid state.
+  - Rewards: the merchant setup server page calls `rewardsCard` and renders `rewards-card.tsx`; nothing runs in the browser.
+  - In-page approval: `paypal-buttons.tsx` loads `https://www.paypal.com/sdk/js` with `client-id`, `currency` and `intent=capture`; `createOrder` posts to `paypal/start` and returns `orderId`; `onApprove` posts to `paypal/complete`; `onCancel` uses the existing cancel route; `onError` shows the redirect link.
+- **Error codes:** one new code, `country_locked` (409). The translation and assistant routes reuse `validation_failed`, `rate_limited`, `provider_unreachable` and `not_found`; `not_sgd_shop` is a new PYUSD unavailable reason, not a code.
+- **Evaluation protocols, each written into `00-status.md` before any model call:**
+  - Ask Envoi: the S21 25-sentence set and the "two iced teas" sentence, through the route on a local production build; pass at 24 of 25, plus the iced tea question asked rather than answered; every result reported.
+  - Translation: every published fixture menu, in Chinese, Japanese, Korean, German and English (English gets explanations only); pass at zero displayed prices changed and zero translated items not on the menu, the threshold set before the run; the builder reads every explanation and reports, without a pass mark, any that is wrong about what the dish is.
+- **Named tests (35, all new in the slice that builds them):**
+  - S25:
+    1. `the assistant is off unless the key, the model and the agent token are set`.
+    2. `the assistant is refused by its limiter before any model call`.
+    3. `the assistant accepts text turns only`: a tool role, an extra key, a ninth turn or a 281-character turn is refused with no model call.
+    4. `the assistant's link never reaches the model, its reply or its steps`: a needle self-test plants a marker link and proves the scanner finds it on each serialized surface first.
+    5. `the assistant's steps come from the trace, not from model text`: a model reply that describes a fake call adds no step.
+    6. `the assistant reaches Envoi only through the generated client`: a static check, proved by a planted `fetch` in the tools module.
+    7. `the terminal agent and the site run one agent module`: a static check that `clients/buyer-agent/` holds no tool or instruction text of its own.
+    8. `the buyer page reads correctly with text suggestions off`.
+    9. `the demo iced teas are added once and published through the menu rules`.
+    The S20 tests re-run unchanged against the moved module.
+  - S27:
+    10. `money of two currencies cannot be summed or compared`.
+    11. `an outlet's country cannot change after its first publication`: the domain check and the database trigger are each mutated separately.
+    12. `a US purchase creates a USD PayPal order`.
+    13. `a capture in another currency never marks a purchase paid`: through the return, reconcile, webhook and maintenance paths.
+    14. `PYUSD preparation refuses a purchase that is not in SGD`.
+    15. `SGQR resolution never returns a US outlet`.
+    16. `public menu answers carry the currency and match the OpenAPI document`.
+    17. `the regenerated client reads a USD menu`.
+    18. `the currency migration keeps every amount and marks existing outlets SG`.
+    19. `the MCP tools answer with the currency beside every price`.
+    Every existing payment, PYUSD and pricing test re-runs on the renamed code; a renamed test keeps its old name in its description.
+  - S28:
+    20. `the rewards card counts confirmed captures this month in the outlet's time zone`.
+    21. `the rewards illustration appears for US outlets only and rounds down`.
+    22. `the rewards card makes no network call`.
+  - S29:
+    23. `a translation language must be a primary language subtag`.
+    24. `a cached translation makes no model call`.
+    25. `a translated item not on the menu revision is dropped`.
+    26. `a translation holding a digit or currency sign the original lacks is dropped`.
+    27. `a translation never changes a displayed price, availability or original name`.
+    28. `a new menu revision gets new translations`.
+    29. `two concurrent misses store one translation`.
+    30. `the translation route is refused by its limiter before any model call`.
+  - S30:
+    31. `needs review and Next problem reach every row that still needs the merchant`.
+    32. `page excerpts never reach the database, a log or a trace`: needle self-test as in S24 test 11.
+  - S31:
+    33. `PayPal start returns the order id with the approval link`.
+    34. `the PayPal buttons set no amount, payee or item`: a static check, proved by a planted amount field.
+    35. `the redirect path still completes a payment when the buttons do not load`.
+  Each guard in tests 1-35 gets its own mutation, recorded in its slice.
+- **Least confident decisions:**
+  1. The assistant calls its own public API over HTTP at `APP_BASE_URL` rather than through an in-process `fetch`; this is what makes the generated client real on the live path, at the cost of a round trip through Render's edge per call.
+  2. The public API renames `unitSgdCents` instead of adding beside it. No outside client is known, so a clean rename now costs less than two fields forever, but it breaks any copy of the old client.
+  3. Text-only history means the model re-reads the menu in the turn that proposes; more tool calls, but no forged tool result can widen what it may propose.
+  4. The rewards rate is a constant with a checked date, not a fetch; it can go stale, and the card shows the date so a reader can see how old it is.
+  5. PayPal's SDK is a script tag, not a package, so no version pin exists for it; PayPal serves whatever version it serves.
+  6. Page excerpts live in browser memory only, so they disappear on reload; the alternative, storing them, would break Gate 2's rule that page text is never stored.
+  7. English-speaking visitors get explanations but no translation; the explanation is the useful part for "Kopi C siew dai".
+  8. The limiter numbers are starting guesses.
+- **Unchanged:** auth, roles, the scan rules for SG outlets, maintenance, the photo and web import boundaries other than the excerpt answer, and every named test not listed as renamed; these 35 are additions counted in Gate 4.
 
 ## Reopening 2026-10-29: web menu import
 

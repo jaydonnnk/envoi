@@ -1,5 +1,12 @@
 # Product: Envoi
 
+**Reopened 2026-10-29 a third time for the second build plan and RE-APPROVED by the user the same day** ("Approve Gate 1").
+On 2026-10-29 two external reviews scored Envoi about 30 and 33 of 50 [hypothesis: model judgements, not official scores], both finding that the AI is real but hard for a judge to see and that the merchant's reason to join is weak.
+The user consolidated both reviews into one list and asked to "start on the second build plan to improve Envoi".
+The user then decided, in their own answers on 2026-10-29: shops in the United States may join, "US merchants only(linked to Paypal yield which is why i wanna add this)"; menus are explained and translated into the visitor's language ("Explain + translate"); and the PayPal rewards point goes into both the pitch and the app ("Do the pitch +in app card. UK was wrong, just US will do").
+The full proposal is in [Second build plan](#second-build-plan-proposed-2026-10-29); points that change earlier sections are marked *Added 2026-10-29 (second plan)* where they land.
+Nothing here approves an architecture, contract, slice, model call, PayPal or APIMatic action, merge, push or deploy.
+
 **Reopened 2026-10-29 a second time for the web import's audience and RE-APPROVED by the user the same day** ("Approve Gate 1").
 On 2026-10-29 the user found that the hawker stalls with menus online are chains and franchises, and decided: "getting menu from photo will be catered to franchinses(which will be the ones we target), and inidivuidal hawker stalls will key in manually."
 The user first asked for PDF menus to be read; the builder then found that Kok Kee's menu PDF holds 51 images and no fonts, so it carries no text to read [verified 2026-10-29], and the user answered "Yes, drop PDF".
@@ -51,6 +58,8 @@ Buyer: "I am visiting Singapore. I want to buy something from this shop, but I d
 Merchant: "I want visitors to find my shop and pay using a method I have chosen to accept, without sending the money through another company's account."
 
 These are hypotheses, not interview findings. The initial audience is a visitor who already has PayPal or a compatible wallet, purchasing in person from an explicitly enrolled merchant. Envoi does not make an arbitrary SGQR sticker payable through PayPal.
+
+*Added 2026-10-29 (second plan):* the merchant's reason to join, as a hypothesis in the merchant's words: "Visitors walk past because they cannot read my menu or pay me the way they want. Their AI assistants cannot find me either. I want those orders, paid straight into my own PayPal." A shop in the United States has the same reason, and its PayPal balance can also earn PayPal's PYUSD rewards, which PayPal offers to US businesses and not yet to Singapore ones [vendor claim]. No merchant has said any of this to us.
 
 ## Success metric
 
@@ -171,6 +180,69 @@ Menu-image import with AI drafting is deferred, decided by the user on 2026-10-1
 
 Negotiation may be added only after the payment paths work: a merchant chooses explicit discount rules, the buyer sees the authorized discount, and changing the resulting price triggers a fresh review. A simpler rule-based offer is acceptable; two talking agents are not a requirement.
 
+## Second build plan (proposed 2026-10-29)
+
+Status: approved 2026-10-29 ("Approve Gate 1"); not built.
+It adds to the approved product; every earlier rule, journey and failure state still holds unless a point below says otherwise.
+
+### What changes for the buyer
+
+- **Ask Envoi.** Envoi's own assistant moves from a terminal into the site.
+  The visitor types what they want; the assistant finds the shop, reads its published menu, asks which one when a phrase fits two items, and hands over a review.
+  Beside the conversation, the visitor sees each step the assistant took through Envoi's published API.
+  It cannot pay, approve or read a receipt, and the shop list and menu stay available if it fails.
+- **The AI is switched on where judges look.** The hosted site shows the one-sentence box and Ask Envoi; when the AI is off, the buyer page reads correctly without it rather than opening on "Or scan the sticker".
+- **A menu the visitor can read.** The shop's menu can be shown in the visitor's browser language, with local dish names explained (for example "Kopi C siew dai": coffee with evaporated milk, less sugar).
+  The original name is always shown under the translation, the text is labeled as AI translation, and the item and price always come from the shop's published menu.
+  The review, the receipt and the PayPal approval show the shop's original names.
+  If a translation cannot be made, the original name is shown alone.
+- **Approve without leaving the review.** PayPal approval opens in a PayPal window over the review page; closing it keeps the purchase unpaid.
+  This point depends on the APIMatic answer in "What changes for the demo" below and may be cut without changing anything else.
+
+### What changes for the merchant
+
+- **Shops in the United States.** A merchant chooses Singapore or the United States before publishing, and cannot change it after.
+  A US shop prices its menu in US dollars, takes PayPal only and has no SGQR step; visitors find it by text, by Ask Envoi or by its Envoi shop QR.
+  PYUSD stays a Singapore option. Money still goes straight to the shop's own PayPal account.
+- **PayPal PYUSD rewards card.** Merchant setup shows what the shop was paid through Envoi (paid orders only) and what PayPal offers on PYUSD.
+  For a US shop it states PayPal's advertised rate as PayPal's, variable and not set by Envoi, with one labeled illustration on the shop's own paid total.
+  For a Singapore shop it says plainly that Singapore businesses cannot earn it yet, with no illustration.
+  Envoi never converts, holds or invests money; the merchant opts in inside PayPal. The card says it is not available in this test environment.
+- **Draft review aids.** The table that checks a draft from the shop's menu page can show only the rows that still need the merchant, jump to the next one, and show the words on the page each drafted row came from.
+
+### What changes for the demo and the pitch
+
+- **Two ambiguous items on the demo menu.** Test Shop gets Iced lemon tea and Iced milk tea, so "two iced teas" shows the assistant asking which one.
+- **One connected run on record.** Menu from the shop's page, checked in the table, published, ordered through Ask Envoi, paid with PayPal sandbox money, seen by the merchant.
+- **APIMatic.** The organizers are asked whether the generated API client alone qualifies for the APIMatic prize or whether PayPal Context Plugin use is required.
+  If it is required, the Context Plugin is used for one new PayPal task and its use is recorded; it is never claimed for work done before.
+- **Pitch.** "Singapore merchants cannot earn PayPal's PYUSD rewards yet; US merchants can" is stated as PayPal's offer [vendor claim], never as Envoi's.
+  Merchant demand stays a hypothesis.
+
+### Success measure for this plan
+
+- **Translation never changes a purchase:** across every evaluation menu, the translated view shows zero changed prices and zero items not on the shop's menu. The threshold is written down before the run.
+- **Ask Envoi meets the one-sentence threshold already set for the basket** (24 of 25 sentences), run again through the site, plus the "two iced teas" question.
+- No usability, completion-rate, timing, adoption or yield claim is made. A rewards illustration is never a measured or promised return.
+
+### Flagged for review, beyond the user's words
+
+- **US shops weaken the buyer problem [hypothesis].** US shops already take cards, so a US visitor rarely cannot pay. The US case rests on the merchant reasons (assistant orders, explained menu, PayPal rewards), not on a payment gap. A judge may ask why a US shop needs Envoi.
+- US shops are PayPal-only, so the PYUSD per-S$1 rate design is not reopened.
+- Translation follows the browser's language, so no language list is fixed. English-to-Chinese alone was considered and not chosen: visitors from China mostly pay through Alipay or WeChat Pay at SGQR stalls already, and few hold PayPal [hypothesis].
+- PayPal's rewards eligibility for US businesses is a [vendor claim]; UK eligibility is [unknown] and is not mentioned.
+- Merchant quiet-hour offers were considered and left out, because a separate project of the user's already covers off-peak discounts.
+- A merchant sales dashboard, AG Studio, DeFi yield (Kamino) and Pay Later are out of this plan.
+
+### Cuts, in order, if time runs short
+
+1. Approval without leaving the review.
+2. Draft review aids.
+3. The menu explained and translated.
+4. US shops and the rewards card, together.
+
+Ask Envoi, the AI switched on, the two ambiguous items and the connected run are never cut.
+
 ## Screens
 
 Each `.html` file in `mockups/` is a plain, throwaway product mockup. The directory is the location convention required by software-factory, not an implementation design. `mockups/review-preview.jpg` is a superseded historical image and not a current screen; review the HTML.
@@ -185,6 +257,13 @@ Each `.html` file in `mockups/` is a plain, throwaway product mockup. The direct
 - `mockups/merchant-orders-delete.html`: added 2026-10-24 (approved 2026-10-24): Delete on every merchant order; a deleted order is archived as a record, never erased, and an order still being checked returns if it becomes paid.
 - `mockups/buyer-one-box.html`: added 2026-10-25 (approved 2026-10-25): one box for the request and the place, with four example answers (basket filled with quantities, "Which iced tea?", an unavailable item, and "Which area, or which shop?"); the sample iced teas are not on Test Shop's live menu.
 - `mockups/merchant-web-import.html`: added 2026-10-29, approved 2026-10-29: the link field and ownership tick, the draft table with one blank price, and the picture-menu and page-not-reached answers.
+- *Added 2026-10-29 (second plan), proposed:*
+  - `mockups/buyer-ask-envoi.html`: Ask Envoi with the "two iced teas" question, a basket handed to the review, and the three API steps the assistant took.
+  - `mockups/buyer-menu-explained.html`: a demo fixture shop's menu in Simplified Chinese as one example browser language, each item with its original name, an explanation and the shop's own price.
+  - `mockups/review-us-shop.html`: the review for a US demo fixture shop in US dollars, PYUSD unavailable there, and PayPal approval in a window over the page.
+  - `mockups/merchant-country.html`: the merchant chooses Singapore or the United States, which sets currency and payment methods.
+  - `mockups/merchant-rewards.html`: the PayPal PYUSD rewards card for a US shop, with a labeled illustration, and for a Singapore shop, which cannot earn it yet.
+  - `mockups/merchant-web-import-review.html`: the draft table showing only rows that need review, a next-problem button and the page text behind each row.
 - `mockups/index.html`: review navigation for the five screens above it; not a product screen. The landing page is opened directly.
 
 No mockup uploads an image, extracts data, publishes a shop or performs a payment. Sample prices and local interactions are fixture demonstrations, not market or integration evidence.
@@ -201,6 +280,7 @@ No mockup uploads an image, extracts data, publishes a shop or performs a paymen
 - External approval, single-method payment, honest cost uncertainty, and order acknowledgment are explicit.
 - Seeded merchants and test transactions cannot be mistaken for live adoption or live money.
 - *Added 2026-10-29 (web import):* a draft from the merchant's page is visibly a draft, shows every blank price with its reason, cannot be confirmed while a price is blank, and cannot be mistaken for photo import.
+- *Added 2026-10-29 (second plan):* Ask Envoi visibly cannot pay, shows its steps, and ends in a review the buyer approves; a translated menu cannot be mistaken for the shop's own words or change a price; a US shop's currency and PayPal-only payment are explicit; the rewards card cannot be mistaken for an Envoi product, a measured return or a feature of this test environment.
 - *Added 2026-10-25:* a basket filled from one sentence is visibly a proposal the buyer can change, holds only published available items, and is never reviewed or paid without the buyer's tap.
 
 **Gate 1 approved 2026-10-07, reopened 2026-10-10, revised and re-approved 2026-10-10, reopened again on 2026-10-15 to defer menu photo drafting, revised and re-approved on 2026-10-16, and reopened and re-approved on 2026-10-21 to add the landing page, and on 2026-10-24 to add the merchant shop QR and order archive. Gates 2 and 3, approved 2026-10-07, were also reopened for the Zapier removal and re-approved on 2026-10-11; Gate 3 was reopened again on 2026-10-12 for one PayPal kill-switch check and for the TypeScript pin found by the S1 boot check, and re-approved both times the same day.** The slice plan in `04-slices.md` was revised and approved on 2026-10-12 and amended on 2026-10-14 for one S6 receipt sentence; S1, the tracer bullet, was done on 2026-10-12, S2, the PayPal sandbox happy path, and S3, PayPal recovery, on 2026-10-13, S4, text entry with AI suggestions, on 2026-10-14, S13, agent handoff over MCP, also on 2026-10-14, S6, merchant sign-in and manual menu draft, also on 2026-10-14, with its review fixes the same day, S5, the maintenance runner with manual runs and the operator health view, also on 2026-10-14, S7, merchant destination and publication, also on 2026-10-14, and S8, merchant orders and separate acknowledgment, on 2026-10-15, with its review fixes the same day; S11, menu photo import, was done on 2026-10-16 and ships with imports closed after no vision model met its threshold; no later slice has started. The status text near the top of this file, including the "(2026-10-10)" draft date and the 2026-10-07 approvals, is dated history; this line is the current status. Current source corrections are in `research.md`; `stack-recommendation.md` mirrors the approved architecture proposal and the Gate 3 pins. These approvals do not establish runtime/account or usability evidence. The eight Gate 2 review findings are closed as dispositioned by Gate 3; the residual risks that disposition names remain open.

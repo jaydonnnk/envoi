@@ -486,6 +486,68 @@ Approval would accept this amendment as a proposal; it establishes no Kernel, AG
 - **R6 does not grow:** no image is decoded on Render for a web import.
 - R21 was the withdrawn round 5 draft's risk, preserved in [`photo-import-gap-analysis.md`](photo-import-gap-analysis.md), and stays unused so the two are never confused.
 
+### Second build plan amendment, 2026-10-29
+
+Drafted 2026-10-29 for the [second build plan](01-product.md#second-build-plan-proposed-2026-10-29), approved in Gate 1 the same day ("Approve Gate 1"); **APPROVED 2026-10-29** ("Approve Gate 2").
+Approval accepts this amendment as a proposal; it establishes no runtime, model, PayPal or APIMatic evidence and authorizes no Gate 3 or 4 change, install, upload, migration, model call, merge, push or deploy.
+
+**Ask Envoi in the site.**
+1. A new buyer route, `POST /buyer/assistant`, beside `POST /buyer/suggestions`, with the same buyer session, counted and time-bounded body read and database limiter, under a new limiter key with its own per-buyer and global daily caps.
+2. The browser holds the conversation in memory and sends at most the last 8 turns, each at most 280 characters; the server stores no conversation. Turns from the browser are text only: no tool result is ever accepted from the browser.
+3. The server runs the S20 agent loop: the same instructions, the same three tools, at most 6 tool calls and 60 seconds per turn, the same refusals of an unread item id and a quantity outside 1 to 20 before any call.
+   The loop moves from `clients/buyer-agent/` into a module both the terminal agent and the route import, so there is one agent, not two.
+4. Each tool calls Envoi's own public API through the APIMatic-generated client, over HTTP to the site's own public origin, with an agent token issued by the existing operator command and held in a new `ASSISTANT_AGENT_TOKEN`.
+   This reverses the S14 rule that the app never calls the generated client: the assistant route is now its one caller in the app, so the client is on the live path a judge sees.
+5. A created purchase request's one-time link goes from the server to the browser, never to the model, exactly as in S20; the browser opens it, and the existing redemption, fresh server price and human PayPal or wallet approval follow unchanged.
+6. The response carries the reply and a list of the calls made (operation, HTTP status, returned shop and item ids, duration), built from the existing trace records rather than from model text; it never carries a token or a link inside that list.
+7. Provider and model stay OpenAI and `AI_MODEL`. The assistant is on only when `OPENAI_API_KEY`, `AI_MODEL` and `ASSISTANT_AGENT_TOKEN` are all set; otherwise the screen offers the one-sentence box or the shop list.
+
+**The AI switched on where judges look.** No architecture change: the user sets `OPENAI_API_KEY`, `AI_MODEL` and, for the assistant, `ASSISTANT_AGENT_TOKEN` on Render. The buyer page's copy is corrected for the AI-off case.
+
+**Menu explained and translated.**
+1. A new buyer route, `POST /buyer/menu-translations`, takes a published outlet id and a language tag read from the browser, validated as a well-formed BCP 47 primary language subtag; it grants nothing and is admitted by the same limiter pattern before any model call.
+2. A new table, `menu_translations`, keeps one row per published menu revision and language: each item's id, translated name and short explanation, the model name and the creation time. A menu revision is immutable once confirmed, so a row never goes stale; a new revision gets new rows.
+   A cache hit makes no model call, so spend grows with menus and languages, not with visitors.
+3. On a miss: one text model call with no tools and no retries, `store: false`, through the existing AI SDK pins, to the model named by a new `AI_MENU_TRANSLATION_MODEL` that the evaluation chooses. The menu's names are sent as data.
+4. Envoi keeps an item's translation only if its id is one of that revision's item ids, its text is within bounds, and it contains no digit or currency sign that is not in the original name; otherwise that item shows its original name alone.
+5. The screen always renders the price, availability and original name from the published menu, and the translated text beside them. The review, receipt, PayPal order lines and merchant views keep the original names.
+
+**PayPal approval over the review page.**
+1. The review page loads PayPal's JavaScript SDK in the browser with the existing sandbox `PAYPAL_CLIENT_ID`, which is public, passed from the server at render time.
+2. The SDK's create step calls the existing `paypal/start` route, which keeps every check and returns the PayPal order id beside the approval link it returns now; the approve step calls the existing `paypal/complete` route.
+3. The redirect return and cancel pages stay as the fallback when the SDK does not load. No amount, payee or item is set in the browser.
+4. The APIMatic PayPal Context Plugin may be used while building this, as development tooling only, with its use recorded.
+
+**Shops in the United States.**
+1. `outlets` gains `country`, `SG` or `US`, set by the merchant before the first publication and refused as a change after it. The currency follows from the country: `SGD` or `USD`. Existing outlets become `SG` in the migration.
+2. Money becomes currency-explicit everywhere it is SGD-only today: the money module carries a currency with every integer minor-unit amount, and columns, types and API fields named for SGD cents are renamed to currency-neutral minor units with a currency beside them. A purchase copies its outlet's currency at review, and the review's hash already covers currency.
+   Mixing two currencies in one sum or comparison throws; there is no conversion anywhere.
+3. PayPal orders use the purchase's currency, and capture, read and webhook verification compare the captured currency with the purchase's, so a USD capture can never settle an SGD purchase or the reverse.
+4. A US outlet has no SGQR step and no PYUSD destination: PYUSD preparation refuses any purchase whose currency is not SGD, and SGQR resolution only ever returns SG outlets.
+5. The public OpenAPI document's menu and purchase-request schemas change with the rename and gain the currency field, so the generated client must be regenerated through one more APIMatic upload, and the MCP tools' outputs change the same way. Nothing else about the public routes changes.
+6. A US shop needs a PayPal sandbox business account in the United States as its destination, connected exactly as a Singapore one is.
+
+**PayPal PYUSD rewards card.**
+1. Read-only, no external call. The merchant setup page reads the outlet's paid total for the current calendar month (Asia/Singapore for SG outlets, America/New_York for US outlets) from confirmed captures only, in the outlet's currency.
+2. PayPal's offer is a reviewed constant in code: the advertised rate, the eligible country (`US`), the date it was checked and the source link. It is shown as PayPal's, with that date; Envoi never fetches, changes or promises it.
+3. The illustration is the paid total times the advertised rate for one year, rounded down to the minor unit, shown only for a US outlet and labeled as an illustration not available in this test environment.
+
+**Draft review aids.** Client-side only, inside the existing AG Grid table: a filter to rows that still need the merchant, a button that moves focus to the next such row, and, for rows from a web import, the page text each row came from.
+The web import returns a short excerpt per drafted row, at most 120 characters, in its response only; the browser holds it in memory, and it is never written to the database, a log or a trace, so Gate 2's rule that page text is never stored stands. After a reload the excerpt is gone and the row keeps its existing note.
+
+**Demo data.** The demo fixture Test Shop gains two published items, Iced lemon tea and Iced milk tea, through the existing operator command path, and the web-import fixture shop gains a PayPal sandbox destination supplied by the user.
+
+**Not changed.** Hosting, the rule that Render is never pre-warmed, auth, roles, PYUSD for Singapore shops, scan for Singapore shops, the photo and web imports' boundaries, maintenance and every route not named above.
+
+**Risks.**
+- **New, R25:** the assistant route spends model money on every turn and calls Envoi's public routes from Envoi's own address. Its limiter caps spend before any model call; the public routes' own limits must not count all assistant traffic as one client and lock it out, or let it lock out others [hypothesis until measured].
+- **New, R26:** a translation or explanation can be wrong in a way that matters, for example a missing allergen. The original name is always shown and the text is labeled AI translation, but nothing proves an explanation is right; the evaluation measures prices and items only.
+- **New, R27:** the currency rename touches every money path. A missed SGD assumption could misprice or mis-settle a US purchase. Currency-mixing throws, and capture verification compares currencies, but the falsifier is a US purchase settled end to end in PayPal sandbox.
+- **New, R28:** the rewards card can be read as Envoi's product or a promised return, and PayPal's rate can change after the checked date. The card names PayPal, shows the date and labels the illustration; it is still a [vendor claim].
+- **New, R29:** PayPal's JavaScript SDK is third-party code running on the review page. It sees the review page, not Envoi's server state, and sets no amount; the redirect path remains.
+- **R5 extends:** the assistant's accuracy in the site and translation accuracy are unmeasured until their pre-registered evaluations.
+- **Estimate [hypothesis]:** US shops are the largest item, about 4 to 6 days because SGD is named in about 62 files, against about 2 to 3 days for Ask Envoi and about 2 days for translation.
+
 ## External
 
 Names below are **proposed configuration names only**, never values. No credentials were read or provisioned. Database/auth/provider secrets remain server-side.

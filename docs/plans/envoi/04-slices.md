@@ -949,6 +949,153 @@ The four visible results at 390 px and 1280 px on a local production build and o
 Starting S24 by ID; installing the three packages; OpenAI evaluation spend within a limit you state as a number; Kernel sessions for the evaluation; the migration on Neon; the merge, push and deploy; turning `WEB_IMPORTS_ENABLED` on after a pass.
 You perform: creating the Kernel account and placing `KERNEL_API_KEY` in your local `.env` and on Render; the owners' permission for the real pages.
 
+### Second build plan: S25 to S31 (added 2026-10-29)
+
+Drafted 2026-10-29 for the second build plan's Gate 1, 2 and 3 reopenings, each re-approved the same day ("Approve Gate 1", "Approve Gate 2", "Approve Gate 3"); **APPROVED 2026-10-29** ("I approve gate 4").
+Approval accepts this order, the test assignment and the cut order; it starts no slice and authorizes no install, migration, upload, model call, merge, push or deploy.
+All seven come after S24 and outside the build-order table. Each has its own branch from the current tip of `main`, named below, and each shows a working result before the next starts.
+
+**Plan-wide rules.**
+- Every guard named in a slice's tests gets its own mutation, recorded in `00-status.md` with the slice.
+- Every model, PayPal and Kernel call in a test is faked at its boundary and labeled as a fixture; real calls happen only in evaluations and recorded runs you authorize.
+- Every screen keeps the test-environment badge and wording; nothing is shown as real money, a real merchant or a measured return.
+- A slice is done when it is merged to `main` and deployed with your authorization, its evidence is in `00-status.md`, and the post-slice cleanup review has run.
+
+#### S25 Ask Envoi in the site
+
+Branch: `envoi/slice-25-ask-envoi`. Depends on: S20 (the agent), S21 (the one box) and S13 (the purchase request route and redemption).
+
+**Visible result.**
+1. On Render with the assistant on, `/buy/ask` matches [`mockups/buyer-ask-envoi.html`](mockups/buyer-ask-envoi.html): "Two iced teas at Test Shop" gets "Which one?" with both teas and their menu prices; "Lemon" gets a basket and Review and pay; the steps panel lists `listOutlets`, `getOutletMenu` and `createPurchaseRequest` with their statuses.
+2. Review and pay opens Envoi's review with Envoi's own price, and PayPal sandbox approval completes as today.
+3. With the assistant off, `/buy` shows no Ask Envoi link; with text suggestions off, the sticker card reads "Scan the sticker".
+
+**Builds.** The S25 rows of the [Gate 3 reopening](03-program-design.md#reopening-2026-10-29-second-build-plan)'s file map: the moved agent module, the assistant route and limiter, the `/buy/ask` screen, the `/buy` copy fix and the `add-demo-iced-teas` operator command; `ASSISTANT_AGENT_TOKEN` in `src/env.ts` and `.env.example`.
+
+**Tests.** Named tests 1-9 of the Gate 3 reopening; the S20 and S21 tests keep passing.
+
+**Evaluation, pre-registered.** The Gate 3 Ask Envoi protocol, written into `00-status.md` before the first model call: 24 of 25, plus the iced tea question.
+
+**Evidence.** The three visible results at 390 px and 1280 px, locally and on Render; the evaluation results; one assistant answer's steps beside the matching server log lines.
+
+**Falsifiers.** The evaluation misses its threshold: the assistant stays off on Render and no assistant claim is made, and S26 records the terminal agent instead. Not deployed by 2 Nov: stop and re-plan.
+
+**Authorizations to request at start.** Starting S25; OpenAI evaluation spend within a limit you state as a number; running `add-demo-iced-teas` on Neon; the merge, push and deploy.
+You perform: issuing the assistant's agent token with the operator command and setting `OPENAI_API_KEY`, `AI_MODEL` and `ASSISTANT_AGENT_TOKEN` on Render.
+
+#### S26 The connected run
+
+Branch: `envoi/slice-26-connected-run`. Depends on: S24 and S25. Builds no application code.
+
+**Visible result.** One recording on Render: the merchant reads the web-import fixture shop's menu page, checks it in the table, confirms and publishes; a buyer orders through Ask Envoi with the iced tea question; PayPal sandbox approval; the receipt reads Paid; the merchant's orders show it as Paid.
+
+**Builds.** The web-import fixture shop's PayPal sandbox destination, connected through the existing merchant flow, and the record in `00-status.md` and the [evidence pack](evidence-pack.md).
+
+**Tests.** None new; the full suite runs on the deployed commit.
+
+**Evidence.** The recording, the PayPal sandbox capture id, the merchant order screen, and the evidence pack row turned from [not run] to [verified].
+
+**Falsifiers.** Any step fails on Render: record the failure, fix it as a defect in its own slice's code under this branch, and do not claim the run until it passes end to end.
+
+**Authorizations to request at start.** Starting S26; turning `WEB_IMPORTS_ENABLED` on for the recording; the record's merge and push.
+You perform: creating the fixture shop's PayPal sandbox seller account; the recording.
+
+#### S27 US shops and currency-explicit money
+
+Branch: `envoi/slice-27-us-shops`. Depends on: S26 (so the connected run is on record before the money rename), S2, S7, S16 and S19.
+
+**Visible result.**
+1. A merchant chooses the United States, as in [`mockups/merchant-country.html`](mockups/merchant-country.html), prices in US dollars, connects a US PayPal sandbox seller and publishes; trying to change the country afterwards says it is locked.
+2. A buyer's review matches [`mockups/review-us-shop.html`](mockups/review-us-shop.html) apart from the in-page button, which is S31's: US dollars, PYUSD unavailable with its reason; PayPal sandbox approval completes in USD and the receipt reads Paid.
+3. Every Singapore journey of the earlier slices still works on Render: an SGD PayPal purchase, a PYUSD devnet purchase if PYUSD is switched on for the check, and a scan.
+
+**Builds.** The S27 rows of the [Gate 3 reopening](03-program-design.md#reopening-2026-10-29-second-build-plan)'s file map, including migration `0026_currency_and_country.sql` and the regenerated client.
+
+**Tests.** Named tests 10-19 of the Gate 3 reopening; every existing payment, PYUSD, pricing and public API test passes on the renamed code.
+
+**Evidence.** The three visible results; the migration run on Neon with row counts and a sum of every amount column before and after, equal; the APIMatic regeneration record as in S19.
+
+**Falsifiers.** Not merged and deployed by 8 Nov: revert to `main` before S27, cut S27 and S28 together, and say Envoi is Singapore-only. Any SGD purchase misbehaves after the migration: roll the deploy back first, then fix.
+
+**Authorizations to request at start.** Starting S27; one APIMatic upload of the changed `openapi/envoi-public.yaml` with the generated client committed unchanged; migration 0026 on Neon; the merge, push and deploy.
+You perform: creating a US PayPal sandbox business account for the US fixture shop.
+
+#### S28 PayPal PYUSD rewards card
+
+Branch: `envoi/slice-28-rewards-card`. Depends on: S27.
+
+**Visible result.** Merchant setup shows the card as in [`mockups/merchant-rewards.html`](mockups/merchant-rewards.html): a US shop sees its paid total this month, PayPal's advertised rate with the date it was checked and the labeled illustration; a Singapore shop sees that it cannot earn it yet.
+
+**Builds.** The S28 rows of the [Gate 3 reopening](03-program-design.md#reopening-2026-10-29-second-build-plan)'s file map.
+
+**Tests.** Named tests 20-22 of the Gate 3 reopening.
+
+**Evidence.** Both cards at 390 px and 1280 px on Render; PayPal's page as read on the checked date, cited in the evidence pack as a [vendor claim].
+
+**Falsifiers.** PayPal's page no longer offers the rewards to US businesses when S28 starts: change the constant only by reopening Gate 3, or cut S28.
+
+**Authorizations to request at start.** Starting S28; the merge, push and deploy.
+
+#### S29 The menu explained and translated
+
+Branch: `envoi/slice-29-menu-translation`. Depends on: S25 and S27 (so prices render currency-explicit).
+
+**Visible result.** With a Chinese browser language, a shop's menu on `/buy` matches [`mockups/buyer-menu-explained.html`](mockups/buyer-menu-explained.html); "Show the shop's original menu" restores it; the review and receipt keep the original names; a second visit makes no model call.
+
+**Builds.** The S29 rows of the [Gate 3 reopening](03-program-design.md#reopening-2026-10-29-second-build-plan)'s file map, including migration `0027_menu_translations.sql`; `AI_MENU_TRANSLATION_MODEL` in `src/env.ts` and `.env.example`.
+
+**Tests.** Named tests 23-30 of the Gate 3 reopening.
+
+**Evaluation, pre-registered.** The Gate 3 translation protocol, written into `00-status.md` before the first model call.
+
+**Evidence.** The visible result in Chinese and one other language at 390 px and 1280 px on Render; the evaluation results; the builder's notes on any wrong explanation.
+
+**Falsifiers.** The evaluation misses its threshold: translation stays off and no translation claim is made. Not deployed by 10 Nov: cut it.
+
+**Authorizations to request at start.** Starting S29; OpenAI evaluation spend within a limit you state as a number; migration 0027 on Neon; the merge, push and deploy.
+You perform: setting `AI_MENU_TRANSLATION_MODEL` on Render after a pass.
+
+#### S30 Draft review aids
+
+Branch: `envoi/slice-30-review-aids`. Depends on: S24 and S27.
+
+**Visible result.** After a web import, the table matches [`mockups/merchant-web-import-review.html`](mockups/merchant-web-import-review.html): Needs review shows only the rows that need the merchant, Next problem moves focus to each in turn, and each imported row shows its page excerpt until reload.
+
+**Builds.** The S30 rows of the [Gate 3 reopening](03-program-design.md#reopening-2026-10-29-second-build-plan)'s file map.
+
+**Tests.** Named tests 31-32 of the Gate 3 reopening; the S24 tests keep passing.
+
+**Evidence.** The visible result at 390 px and 1280 px with the keyboard alone.
+
+**Falsifiers.** Not deployed by 10 Nov: cut it.
+
+**Authorizations to request at start.** Starting S30; one web import against a fixture page for the evidence; the merge, push and deploy.
+
+#### S31 PayPal approval over the review page
+
+Branch: `envoi/slice-31-paypal-buttons`. Depends on: S27 (so the buttons carry the purchase's currency).
+
+**Visible result.** The review shows PayPal's button; it opens PayPal sandbox in a window over the page; approving completes the purchase and shows the receipt; closing the window keeps it unpaid; with the script blocked, the existing Continue to PayPal link still completes a payment.
+
+**Builds.** The S31 rows of the [Gate 3 reopening](03-program-design.md#reopening-2026-10-29-second-build-plan)'s file map. If the organizers say Context Plugin use is required for the APIMatic prize, the APIMatic PayPal Context Plugin is used while building it, and what it contributed is recorded.
+
+**Tests.** Named tests 33-35 of the Gate 3 reopening; the S2 and S3 tests keep passing.
+
+**Evidence.** The four outcomes above for an SGD and a USD shop on Render; the Context Plugin record, if used.
+
+**Falsifiers.** Not deployed by 11 Nov: cut it; the redirect path is the product.
+
+**Authorizations to request at start.** Starting S31; the merge, push and deploy.
+You perform: asking the organizers the APIMatic question before S31 starts.
+
+#### Schedule and cuts (S25-S31)
+
+- **Order:** S25, S26, S27, S28, S29, S30, S31.
+- **Target windows [hypothesis]:** S25 30 Oct-1 Nov, S26 2 Nov, S27 3-7 Nov, S28 8 Nov, S29 8-10 Nov, S30 10 Nov, S31 10-11 Nov; the video, your task, 12 Nov; submission cutoff 13 Nov 2026 04:00 SGT.
+- **Cut order, as approved in Gate 1:** S31 first, then S30, then S29, then S27 and S28 together.
+- **Never cut:** S25 and S26, every payment, approval and recipient guard of earlier slices, and the human approval of every payment.
+- **Counts:** the second build plan carries the 35 named tests of its Gate 3 reopening, counted here; every earlier count is unchanged.
+
 ### Continuation schedule and cuts (S19-S22)
 
 - **Order:** S19, then S21, then S20, then S22, all after S18 and outside the build-order table; S15 stays open and closes last.
