@@ -131,6 +131,8 @@ select { font: inherit; color: var(--ink); padding: 12px; background: var(--pape
 .menu-grid .ag-row.row-flagged .ag-cell.cell-note { color: var(--amber); }
 .menu-grid .ag-cell.cell-note { line-height: 1.4; padding-top: 12px; padding-bottom: 12px; }
 .menu-grid .ag-cell.cell-remove { display: flex; align-items: center; }
+/* A wrapped note makes its row taller; the other cells stay centred on the row, beside Remove. */
+.menu-grid .ag-cell.ag-cell-not-inline-editing:not(.cell-note):not(.cell-remove) { display: flex; align-items: center; }
 .menu-grid .grid-remove { font-family: inherit; font-size: 14px; font-weight: 600; line-height: 1.3; color: var(--ink); background: var(--paper); border: 1px solid #8da3bb; border-radius: 7px; padding: 5px 12px; cursor: pointer; }
 .web-import { border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 0 0 18px; background: var(--pale); }
 .web-import h3 { margin: 0 0 8px; font-size: 1.05rem; }
