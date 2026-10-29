@@ -8,7 +8,7 @@ export const FIXTURE_SESSION_ID = "FIXTURE-kernel-session";
 export type KernelCall = { method: string; path: string; body: Record<string, unknown> | null };
 
 export type PageTurn =
-  | { kind: "page"; text: string; status?: number; signIn?: boolean; host?: string }
+  | { kind: "page"; text: string; status?: number; signIn?: boolean; host?: string; pdf?: boolean }
   | { kind: "vm_error"; error: string } // the VM's goto failed, for example net::ERR_NAME_NOT_RESOLVED
   | { kind: "create_fails"; status: number }
   | { kind: "hang" }; // the execute call never answers until aborted
@@ -43,7 +43,7 @@ export function createFakeKernel(turn: () => PageTurn, options: { deleteStatus?:
         });
       }
       if (current.kind === "vm_error") return Response.json({ success: false, error: current.error });
-      if (current.kind === "page") return Response.json({ success: true, result: { status: current.status ?? 200, text: current.text, host: current.host ?? "fixture-shop.example", signIn: current.signIn ?? false } });
+      if (current.kind === "page") return Response.json({ success: true, result: { status: current.status ?? 200, text: current.text, host: current.host ?? "fixture-shop.example", signIn: current.signIn ?? false, pdf: current.pdf ?? false } });
     }
     if (method === "DELETE" && url.pathname === `/browsers/${FIXTURE_SESSION_ID}`) {
       if (options.deleteStatus !== undefined) return Response.json({ code: "FIXTURE", message: "FIXTURE delete failure" }, { status: options.deleteStatus });

@@ -173,6 +173,19 @@ describe("a page with no printed price makes no model call", () => {
     expect(row).toMatchObject({ closed_outcome: "picture_menu", model_dispatched_at: null });
   });
 
+  it("a PDF link answers as a PDF menu, closes as picture_menu and makes no model call", async () => {
+    // FIXTURE: the browser reports a PDF document whose text holds a price, so only the PDF check stops it.
+    page = { kind: "page", text: FIXTURE_PAGE_TEXT, pdf: true };
+    const shop = await api.newShop("pdf-menu");
+    const result = await sendWeb(shop);
+    expect(result.status).toBe(422);
+    expect(result.body.error).toMatchObject({ code: "import_rejected", message: "Envoi cannot read PDF menus. Type the menu instead.", details: { outcome: "picture_menu", reason: "pdf_menu" } });
+    expect(openai.calls).toEqual([]);
+    expect(kernel.deletes()).toBe(1);
+    const [row] = await attempts(shop.outletId);
+    expect(row).toMatchObject({ closed_outcome: "picture_menu", model_dispatched_at: null });
+  });
+
   it("a refused, timed-out or unreachable page closes with its outcome and no model call", async () => {
     for (const [turn, outcome, code] of [
       [{ kind: "page", text: "Sign in", signIn: true }, "page_refused", "import_rejected"],

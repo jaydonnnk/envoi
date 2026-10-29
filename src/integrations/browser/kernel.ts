@@ -16,7 +16,8 @@ export const PAGE_READ_BOUNDS = { timeoutMs: 20_000, maxTextBytes: 65_536 } as c
 export const KERNEL_API_BASE_URL = "https://api.onkernel.com";
 
 export type PageRead =
-  | { kind: "ok"; text: string; finalHost: string }
+  // pdf: the link opened a PDF document; Envoi reads no PDF, so its text is never used.
+  | { kind: "ok"; text: string; finalHost: string; pdf: boolean }
   | { kind: "refused" | "timeout" | "unreachable"; error: SafeErrorRecord };
 
 type FetchFunction = typeof globalThis.fetch;
@@ -37,7 +38,8 @@ const pageScript = (url: string, timeoutMs: number) => `
 const response = await page.goto(${JSON.stringify(url)}, { waitUntil: "load", timeout: ${timeoutMs} });
 const text = await page.evaluate(() => (document.body ? document.body.innerText : ""));
 const signIn = await page.evaluate(() => document.querySelector('input[type="password"]') !== null);
-return { status: response ? response.status() : null, text: text.slice(0, ${PAGE_READ_BOUNDS.maxTextBytes}), host: new URL(page.url()).hostname, signIn };
+const pdf = await page.evaluate(() => document.contentType === "application/pdf");
+return { status: response ? response.status() : null, text: text.slice(0, ${PAGE_READ_BOUNDS.maxTextBytes}), host: new URL(page.url()).hostname, signIn, pdf };
 `;
 
 const record = (name: string, status: number | null = null): SafeErrorRecord => ({ name, status, retryable: null, provider: "kernel" });
@@ -56,7 +58,7 @@ export function cutToBytes(text: string, maxBytes: number): string {
   return new TextDecoder().decode(bytes.subarray(0, maxBytes)).replace(/�$/, "");
 }
 
-type ScriptResult = { status: number | null; text: string; host: string; signIn: boolean };
+type ScriptResult = { status: number | null; text: string; host: string; signIn: boolean; pdf?: boolean };
 
 function isScriptResult(value: unknown): value is ScriptResult {
   const candidate = value as Partial<ScriptResult> | null;
@@ -79,10 +81,11 @@ export async function readPageText(url: URL, signal: AbortSignal, options: { api
       // The VM's error text can carry the URL, so only its class is kept.
       return /timeout/i.test(run.error ?? "") ? { kind: "timeout", error: record("TimeoutError") } : { kind: "unreachable", error: record("Error") };
     }
-    const { status, text, host, signIn } = run.result;
+    const { status, text, host, signIn, pdf } = run.result;
     if (status !== null && status >= 400) return { kind: "refused", error: record("Error", status) };
     if (signIn || !isSameShopHost(host, url.hostname)) return { kind: "refused", error: record("Error") };
-    return { kind: "ok", text: cutToBytes(text, PAGE_READ_BOUNDS.maxTextBytes), finalHost: host };
+    if (pdf === true) return { kind: "ok", text: "", finalHost: host, pdf: true };
+    return { kind: "ok", text: cutToBytes(text, PAGE_READ_BOUNDS.maxTextBytes), finalHost: host, pdf: false };
   } catch (err) {
     if (budget.signal.aborted && !signal.aborted) return { kind: "timeout", error: record("TimeoutError") };
     const status = (err as { status?: unknown } | null)?.status;

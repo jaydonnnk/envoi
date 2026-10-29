@@ -6,7 +6,7 @@ The user first asked for PDF menus to be read; the builder then found that Kok K
 Approval accepts this wording as product scope; it approves no contract, slice, model call or deploy, and changes no approved architecture or test.
 Two points, marked *Added 2026-10-29 (audience)* where they land:
 - **Who web import is for.** Web import targets hawker chains and franchises, which publish their menu as text on their own site. An individual stall, which usually has no menu page, types its menu by hand as before.
-- **PDF menus are not read.** A link to a PDF menu drafts nothing and answers as a page Envoi could not read; the merchant types the menu. No PDF reader is added.
+- **PDF menus are not read.** A link to a PDF menu drafts nothing and answers "Envoi cannot read PDF menus" (changed 2026-10-29 by the user's decision, "Add a PDF answer"); the merchant types the menu. No PDF reader is added.
 
 **Reopened 2026-10-29 for web menu import and RE-APPROVED by the user the same day** ("Approve all four").
 On 2026-10-29, after the photo diagnosis, the builder proposed importing the menu from the shop's existing web page with Kernel and having the merchant check it in an AG Grid table; the user answered "this sounds good", then "Yep. Hoenstly reopen all the gates that need approving and ill approve them at one shot".
@@ -146,7 +146,7 @@ No complete-onboarding speed claim is established. Neither SGQR extraction nor a
 - Unreadable sticker or no usable business identifier: manual entry, with no invented extracted value.
 - Menu photo import requested: say it is not available in this release and keep manual entry; never imply a photo was read.
 - *Added 2026-10-29 (web import):* menu page shows its menu as a picture, needs a sign-in, does not load in time or is not a public https link: say which, draft nothing and leave the menu unchanged.
-- *Added 2026-10-29 (audience):* the link is a PDF menu: draft nothing, answer with one of the answers above and leave the menu unchanged.
+- *Added 2026-10-29 (audience):* the link is a PDF menu: draft nothing, answer "Envoi cannot read PDF menus" and leave the menu unchanged.
 - *Added 2026-10-29 (web import):* a drafted price whose digits are not printed on the page, or an item name not on the page: leave the price blank or the item out; never repair it.
 - Unreadable price, missing availability or ambiguous currency: leave the entry incomplete until the merchant supplies and confirms it.
 - Menu edited after confirmation, unverified merchant authorization or disconnected destination: keep publication blocked.

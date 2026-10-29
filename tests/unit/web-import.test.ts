@@ -114,6 +114,12 @@ describe("readPageText reads only the merchant's own host, once, and keeps the U
     expect(fake.deletes()).toBe(1);
   });
 
+  it("a PDF document reads as a PDF with no text, and its session is deleted", async () => {
+    const { fake, result } = read({ kind: "page", text: FIXTURE_PAGE_TEXT, pdf: true });
+    expect(await result).toEqual({ kind: "ok", text: "", finalHost: "fixture-shop.example", pdf: true });
+    expect(fake.deletes()).toBe(1);
+  });
+
   it("a failed create is not retried, so one import makes at most one session", async () => {
     const { fake, result } = read({ kind: "create_fails", status: 503 });
     expect((await result).kind).toBe("unreachable");

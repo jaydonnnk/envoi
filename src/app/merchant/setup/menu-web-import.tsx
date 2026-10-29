@@ -18,6 +18,7 @@ type Imported = { import: { rowsDrafted: number; rowsBlankPrice: number; dropped
 type Answer =
   | { kind: "drafted"; host: string; drafted: number; blank: number }
   | { kind: "picture" }
+  | { kind: "pdf" }
   | { kind: "not_opened" }
   | { kind: "error"; text: string };
 
@@ -62,7 +63,8 @@ export function MenuWebImport({
       return;
     }
     const error = result.error;
-    if (error?.details?.outcome === "picture_menu") setAnswer({ kind: "picture" });
+    if (error?.details?.reason === "pdf_menu") setAnswer({ kind: "pdf" });
+    else if (error?.details?.outcome === "picture_menu") setAnswer({ kind: "picture" });
     else if (error?.code === "validation_failed" || ["page_refused", "page_timeout", "page_unreachable"].includes(String(error?.details?.outcome))) setAnswer({ kind: "not_opened" });
     else setAnswer({ kind: "error", text: error?.message ?? "The connection was lost. Reload the draft to check whether it finished before trying again." });
   }
@@ -106,6 +108,12 @@ export function MenuWebImport({
           <div className="status warn" role="alert">
             <strong>Your page shows its menu as a picture</strong>
             <small>Envoi reads text only, so nothing was drafted. Type the menu instead.</small>
+          </div>
+        )}
+        {answer?.kind === "pdf" && (
+          <div className="status warn" role="alert">
+            <strong>Envoi cannot read PDF menus</strong>
+            <small>Nothing was drafted, and your menu is unchanged. Type the menu instead.</small>
           </div>
         )}
         {answer?.kind === "not_opened" && (

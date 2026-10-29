@@ -417,7 +417,8 @@ for f, text in current.items():
 # 2026-10-29, S24 review: the section's status line now records that approval, a wording correction
 # (55850890...4d24b59f was the text before it).
 # 2026-10-29: next raised to 16.4.2 for security advisories by the user's instruction (4fc6fdbc...5daf963a was the text before it).
-G3_REOPENING_SHA256 = "c1178173813d92b910ffb370104b34e3538e9e8ed03ca12769a3dc115d155f9c"
+# 2026-10-29: the PDF answer, by the user's decision "Add a PDF answer" (c1178173...5d155f9c was the text before it).
+G3_REOPENING_SHA256 = "09bbb22c398abb0dacc4147a65dae08a59bad7f0884f0ab55c46e34d22da59cb"
 # 02-architecture.md may likewise equal its continuation amendment text, re-approved by the user on 2026-10-25
 # (bc504e10...d0e47a9f was the shop QR and order archive text, re-approved on 2026-10-24,
 # 28d54654...45561154 the Phantom landing text of 2026-10-18, 938d0a99...f3bf30a6 the English-only text of 2026-10-15).
@@ -440,13 +441,14 @@ G1_MOCKUP_SHA256 = {
     os.path.join("mockups", "merchant-orders-delete.html"): "196792d104e832c3887c6213c90811d6e96b22cb8a9057ec6be3a4d97923adf3",
     os.path.join("mockups", "buyer-one-box.html"): "0e4ae5ade8fdd7111b56698d13b0d82d896cace1fbd5b55a5d95109286a61ad8",
     # Approved 2026-10-29 for web menu import.
-    os.path.join("mockups", "merchant-web-import.html"): "cdd28ffe2b8663cbf1503790be965081df74584d50bc630f11f21b068ed248ac",
+    os.path.join("mockups", "merchant-web-import.html"): "3535093c00094324e6adea23cfbe2a45dc74854887f07e19b32acb11de129ded",
 }
 # Current: the web menu import reopening, re-approved by the user on 2026-10-29, on top of the usability-study removal,
 # which is still DRAFTED AND NOT APPROVED (631a626b...3632271aa9 was the draft of both, 4718a3f5...701140e2 was the 2026-10-28 body with the approved round 5 allowance,
 # 4a4e9020...4ece559a the usability-removal draft alone).
 # 2026-10-29: the web import audience reopening, re-approved by the user the same day ("Approve Gate 1"); be5395a0...0c0a was the body before it.
-G1_BODY_SHA256 = "be9105a2ac5e0786a8a243bb95a13be714dc7a20c443b058503b458d82e9a2da"
+# 2026-10-29: the PDF answer, by the user's decision "Add a PDF answer" (be9105a2...82e9a2da was the text before it).
+G1_BODY_SHA256 = "74f101fc973514f4846fcd332fb35df1639044b7804861e9098bb4dfc52418d3"
 for root, _, files in os.walk(folder):
     for name in sorted(files):
         rel = os.path.relpath(os.path.join(root, name), folder)

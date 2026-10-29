@@ -1,10 +1,12 @@
-R1 delete tied to the request signal | FAILED (caught) | Tests  1 failed | 48 passed (49) | × abort ends with one delete call 54ms
-R2 SDK retries on | FAILED (caught) | Tests  2 failed | 47 passed (49) | × a failed create is not retried, so one import makes at most one session 1324ms ; × a failed delete still answers the read and logs the session id 1295ms
-R3 URL quoted by hand | FAILED (caught) | Tests  1 failed | 48 passed (49) | × the link reaches the browser as one string literal, whatever it holds 6ms
-R4 final host not checked | FAILED (caught) | Tests  2 failed | 47 passed (49) | × a page that lands on other-shop.example reads as refused 2ms ; × a page that lands on fixture-shop.example.other.example reads as refused 1ms
-R4b www not allowed | FAILED (caught) | Tests  1 failed | 48 passed (49) | × a page that lands on www.fixture-shop.example reads as ok 3ms
-R4c suffix match | FAILED (caught) | Tests  1 failed | 48 passed (49) | × a page that lands on fixture-shop.example.other.example reads as refused 3ms
-R5 sign-in check removed | FAILED (caught) | Tests  2 failed | 47 passed (49) | × refused by a sign-in ends with one delete call 3ms ; × a refused, timed-out or unreachable page closes with its outcome and no model call 100ms
-R6 status check removed | FAILED (caught) | Tests  1 failed | 48 passed (49) | × refused by status ends with one delete call 3ms
-R7 SDK logger from env | FAILED (caught) | Tests  1 failed | 48 passed (49) | × the Kernel SDK writes no request body to the console, even with KERNEL_LOG=debug 4ms
-R8 delete failure thrown | FAILED (caught) | Tests  1 failed | 48 passed (49) | × a failed delete still answers the read and logs the session id 2ms
+R1 delete tied to the request signal | FAILED (caught) | Tests  1 failed | 50 passed (51) | × abort ends with one delete call 54ms
+R2 SDK retries on | FAILED (caught) | Tests  2 failed | 49 passed (51) | × a failed create is not retried, so one import makes at most one session 1379ms ; × a failed delete still answers the read and logs the session id 1393ms
+R3 URL quoted by hand | FAILED (caught) | Tests  1 failed | 50 passed (51) | × the link reaches the browser as one string literal, whatever it holds 6ms
+R4 final host not checked | FAILED (caught) | Tests  2 failed | 49 passed (51) | × a page that lands on other-shop.example reads as refused 3ms ; × a page that lands on fixture-shop.example.other.example reads as refused 1ms
+R4b www not allowed | FAILED (caught) | Tests  1 failed | 50 passed (51) | × a page that lands on www.fixture-shop.example reads as ok 3ms
+R4c suffix match | FAILED (caught) | Tests  1 failed | 50 passed (51) | × a page that lands on fixture-shop.example.other.example reads as refused 3ms
+R5 sign-in check removed | FAILED (caught) | Tests  2 failed | 49 passed (51) | × refused by a sign-in ends with one delete call 3ms ; × a refused, timed-out or unreachable page closes with its outcome and no model call 103ms
+R6 status check removed | FAILED (caught) | Tests  1 failed | 50 passed (51) | × refused by status ends with one delete call 3ms
+R7 SDK logger from env | FAILED (caught) | Tests  1 failed | 50 passed (51) | × the Kernel SDK writes no request body to the console, even with KERNEL_LOG=debug 3ms
+R9 PDF check removed from the route | FAILED (caught) | Tests  1 failed | 50 passed (51) | × a PDF link answers as a PDF menu, closes as picture_menu and makes no model call 103ms
+R9b PDF text passed on | FAILED (caught) | Tests  1 failed | 50 passed (51) | × a PDF document reads as a PDF with no text, and its session is deleted 3ms
+R8 delete failure thrown | FAILED (caught) | Tests  1 failed | 50 passed (51) | × a failed delete still answers the read and logs the session id 2ms

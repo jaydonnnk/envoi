@@ -217,6 +217,7 @@ const WEB_BODY_READ_MS = 5_000;
 
 const WEB_CLOSED_COPY = "Reading a menu page is not available in this release. You can still enter your menu by hand.";
 const PAGE_NOT_OPENED_COPY = "We could not open that page. It needs a sign-in, did not load in time, or is not a public https link. Nothing was drafted, and your menu is unchanged.";
+const PDF_MENU_COPY = "Envoi cannot read PDF menus. Type the menu instead.";
 const PICTURE_MENU_COPY = "Your page shows its menu as a picture. Envoi reads text only, so nothing was drafted. Type the menu instead.";
 
 // Whether a web import could be admitted at all now; the setup page renders the link field only
@@ -291,6 +292,12 @@ export async function runWebImport(db: Db, request: Request, principal: OutletMe
       await closeImportFailed(db, importId, request.signal.aborted ? "aborted" : outcome, usageAt(null), importRuntime.now());
       if (page.kind === "timeout") return refused(importId, "provider_unreachable", PAGE_NOT_OPENED_COPY, outcome, undefined, true);
       return refused(importId, "import_rejected", PAGE_NOT_OPENED_COPY, outcome);
+    }
+    // A PDF menu closes like a picture menu, with no model call, under its own answer (Gate 1,
+    // 2026-10-29: "Add a PDF answer").
+    if (page.pdf) {
+      await closeImportFailed(db, importId, "picture_menu", usageAt(null), importRuntime.now());
+      return refused(importId, "import_rejected", PDF_MENU_COPY, "picture_menu", "pdf_menu");
     }
     if (!hasPrintedPrice(page.text)) {
       await closeImportFailed(db, importId, "picture_menu", usageAt(null), importRuntime.now());

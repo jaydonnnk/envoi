@@ -1,4 +1,6 @@
 # S24 review additions, 2026-10-29: each guard the review added a test for, mutated alone.
+# The browser-side PDF check (document.contentType) runs in Kernel's VM, which the fake cannot run; a
+# real Kernel read of the R3 PDF proves it instead, recorded in 00-status.md.
 # Run from anywhere: python3 docs/plans/envoi/evidence/s24-review-mutate.py
 import subprocess, os
 ROOT=os.path.abspath(os.path.join(os.path.dirname(__file__),"..","..","..",".."))
@@ -14,6 +16,8 @@ M=[
  ("R5 sign-in check removed",K,'if (signIn || !isSameShopHost','if (false || !isSameShopHost',[U,I]),
  ("R6 status check removed",K,'if (status !== null && status >= 400) return { kind: "refused", error: record("Error", status) };','',[U,I]),
  ("R7 SDK logger from env",K,'logLevel: "off", ','',[U,I]),
+ ("R9 PDF check removed from the route","src/domain/imports/request.ts",'    if (page.pdf) {','    if (false) {',[U,I]),
+ ("R9b PDF text passed on",K,'if (pdf === true) return { kind: "ok", text: "", finalHost: host, pdf: true };','if (pdf === true) return { kind: "ok", text: cutToBytes(text, PAGE_READ_BOUNDS.maxTextBytes), finalHost: host, pdf: true };',[U,I]),
  ("R8 delete failure thrown",K,'''        (err: unknown) => {
           const status''','''        (err: unknown) => { throw err;
           const status''',[U,I]),
