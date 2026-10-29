@@ -20,6 +20,6 @@ Everything under `clients/typescript/` is generated and committed unchanged; do 
 ## Hand-written files under `clients/`
 
 - `clients/README.md` (this file).
-- `clients/buyer-agent/`, the S20 reference buyer agent: `agent.ts`, `tools.ts` and `trace.ts`. It calls Envoi only through the generated client above and is run with `npm run agent -- "<sentence>"`; the hosted app never imports it.
+- `clients/buyer-agent/agent.ts`, the terminal entry point of the S20 reference buyer agent, run with `npm run agent -- "<sentence>"`. Since S25 the agent itself (`agent.ts`, `tools.ts` and `trace.ts`) lives in `src/integrations/assistant/`, where the hosted Ask Envoi route also uses it; it calls Envoi only through the generated client above.
 
 No other file under `clients/` is hand-written.
