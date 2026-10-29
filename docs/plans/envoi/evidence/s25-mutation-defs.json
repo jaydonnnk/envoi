@@ -1,0 +1,394 @@
+[
+ {
+  "id": "m01-on-without-key",
+  "test_file": "tests/unit/assistant.test.ts",
+  "test": "the assistant is off unless the key, the model and the agent token are set",
+  "kind": "standalone",
+  "mutation": "Named test 1, key guard: the assistant is on without OPENAI_API_KEY.",
+  "edits": [
+   {
+    "file": "src/integrations/ai/openai.ts",
+    "old": "  if (!env.OPENAI_API_KEY || !env.AI_MODEL || !env.ASSISTANT_AGENT_TOKEN) return null;",
+    "new": "  if (!env.AI_MODEL || !env.ASSISTANT_AGENT_TOKEN) return null;"
+   }
+  ]
+ },
+ {
+  "id": "m02-on-without-model",
+  "test_file": "tests/unit/assistant.test.ts",
+  "test": "the assistant is off unless the key, the model and the agent token are set",
+  "kind": "standalone",
+  "mutation": "Named test 1, model guard: the assistant is on without AI_MODEL.",
+  "edits": [
+   {
+    "file": "src/integrations/ai/openai.ts",
+    "old": "  if (!env.OPENAI_API_KEY || !env.AI_MODEL || !env.ASSISTANT_AGENT_TOKEN) return null;",
+    "new": "  if (!env.OPENAI_API_KEY || !env.ASSISTANT_AGENT_TOKEN) return null;"
+   }
+  ]
+ },
+ {
+  "id": "m03-on-without-token",
+  "test_file": "tests/unit/assistant.test.ts",
+  "test": "the assistant is off unless the key, the model and the agent token are set",
+  "kind": "standalone",
+  "mutation": "Named test 1, token guard: the assistant is on without ASSISTANT_AGENT_TOKEN.",
+  "edits": [
+   {
+    "file": "src/integrations/ai/openai.ts",
+    "old": "  if (!env.OPENAI_API_KEY || !env.AI_MODEL || !env.ASSISTANT_AGENT_TOKEN) return null;",
+    "new": "  if (!env.OPENAI_API_KEY || !env.AI_MODEL) return null;"
+   }
+  ]
+ },
+ {
+  "id": "m04-on-with-plain-http",
+  "test_file": "tests/unit/assistant.test.ts",
+  "test": "the assistant is off unless the key, the model and the agent token are set",
+  "kind": "standalone",
+  "mutation": "Named test 1, address guard: an APP_BASE_URL the agent may not call is used anyway.",
+  "edits": [
+   {
+    "file": "src/integrations/ai/openai.ts",
+    "old": "  const baseUrl = checkBaseUrl(env.APP_BASE_URL);\n  if (!baseUrl) return null;",
+    "new": "  const baseUrl = checkBaseUrl(env.APP_BASE_URL) ?? env.APP_BASE_URL;"
+   }
+  ]
+ },
+ {
+  "id": "m05-no-limiter",
+  "test_file": "tests/integration/buyer-assistant.test.ts",
+  "test": "the assistant is refused by its limiter before any model call",
+  "kind": "standalone",
+  "mutation": "Named test 2, limiter guard: the route never admits a turn through the limiter.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/buyer/assistant/route.ts",
+    "old": "  const admission = await admit(webDb(), \"buyer_assistant\", principal.userId, ASSISTANT_LIMITS, now);\n  if (admission.kind === \"rate_limited\") {\n    return httpErr(appError(\"rate_limited\", \"Too many messages to Ask Envoi. Pick a shop from the list instead.\", { retryable: true, details: { window: admission.window } }));\n  }\n\n  const settings = assistantSettings();\n  if (!settings) return httpErr(appError(\"provider_unreachable\", \"Ask Envoi is not available. Pick a shop from the list instead.\"));\n\n  const result = await runAssistantTurn(settings, parsed.data.turns);\n",
+    "new": "  const settings = assistantSettings();\n  if (!settings) return httpErr(appError(\"provider_unreachable\", \"Ask Envoi is not available. Pick a shop from the list instead.\"));\n\n  const result = await runAssistantTurn(settings, parsed.data.turns);\n"
+   }
+  ]
+ },
+ {
+  "id": "m06-limiter-after-model",
+  "test_file": "tests/integration/buyer-assistant.test.ts",
+  "test": "the assistant is refused by its limiter before any model call",
+  "kind": "standalone",
+  "mutation": "Named test 2, order guard: the limiter admits a turn only after its model call.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/buyer/assistant/route.ts",
+    "old": "  const admission = await admit(webDb(), \"buyer_assistant\", principal.userId, ASSISTANT_LIMITS, now);\n  if (admission.kind === \"rate_limited\") {\n    return httpErr(appError(\"rate_limited\", \"Too many messages to Ask Envoi. Pick a shop from the list instead.\", { retryable: true, details: { window: admission.window } }));\n  }\n\n  const settings = assistantSettings();\n  if (!settings) return httpErr(appError(\"provider_unreachable\", \"Ask Envoi is not available. Pick a shop from the list instead.\"));\n\n  const result = await runAssistantTurn(settings, parsed.data.turns);\n",
+    "new": "  const settings = assistantSettings();\n  if (!settings) return httpErr(appError(\"provider_unreachable\", \"Ask Envoi is not available. Pick a shop from the list instead.\"));\n\n  const result = await runAssistantTurn(settings, parsed.data.turns);\n  const admission = await admit(webDb(), \"buyer_assistant\", principal.userId, ASSISTANT_LIMITS, now);\n  if (admission.kind === \"rate_limited\") {\n    return httpErr(appError(\"rate_limited\", \"Too many messages to Ask Envoi. Pick a shop from the list instead.\", { retryable: true, details: { window: admission.window } }));\n  }\n"
+   }
+  ]
+ },
+ {
+  "id": "m07-per-buyer-21",
+  "test_file": "tests/integration/buyer-assistant.test.ts",
+  "test": "the assistant is refused by its limiter before any model call",
+  "kind": "standalone",
+  "mutation": "Named test 2, per-buyer window: 21 turns per buyer in 10 minutes.",
+  "edits": [
+   {
+    "file": "src/lib/ratelimit.ts",
+    "old": "  perSubject: { max: 20, windowMs: 10 * 60_000 },\n  global: { max: 150, windowMs: 60 * 60_000 },",
+    "new": "  perSubject: { max: 21, windowMs: 10 * 60_000 },\n  global: { max: 150, windowMs: 60 * 60_000 },"
+   }
+  ]
+ },
+ {
+  "id": "m08-per-buyer-11-minutes",
+  "test_file": "tests/integration/buyer-assistant.test.ts",
+  "test": "the assistant is refused by its limiter before any model call",
+  "kind": "standalone",
+  "mutation": "Named test 2, per-buyer window length: 11 minutes instead of 10.",
+  "edits": [
+   {
+    "file": "src/lib/ratelimit.ts",
+    "old": "  perSubject: { max: 20, windowMs: 10 * 60_000 },\n  global: { max: 150, windowMs: 60 * 60_000 },",
+    "new": "  perSubject: { max: 20, windowMs: 11 * 60_000 },\n  global: { max: 150, windowMs: 60 * 60_000 },"
+   }
+  ]
+ },
+ {
+  "id": "m09-global-151",
+  "test_file": "tests/integration/buyer-assistant.test.ts",
+  "test": "the assistant is refused by its limiter before any model call",
+  "kind": "standalone",
+  "mutation": "Named test 2, global window: 151 turns across buyers in an hour.",
+  "edits": [
+   {
+    "file": "src/lib/ratelimit.ts",
+    "old": "  perSubject: { max: 20, windowMs: 10 * 60_000 },\n  global: { max: 150, windowMs: 60 * 60_000 },",
+    "new": "  perSubject: { max: 20, windowMs: 10 * 60_000 },\n  global: { max: 151, windowMs: 60 * 60_000 },"
+   }
+  ]
+ },
+ {
+  "id": "m10-shares-suggestion-bucket",
+  "test_file": "tests/integration/buyer-assistant.test.ts",
+  "test": "the assistant is refused by its limiter before any model call",
+  "kind": "standalone",
+  "mutation": "Named test 2, own bucket: the assistant counts under the one box's buyer_suggestion key.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/buyer/assistant/route.ts",
+    "old": "admit(webDb(), \"buyer_assistant\",",
+    "new": "admit(webDb(), \"buyer_suggestion\","
+   }
+  ]
+ },
+ {
+  "id": "m11-tool-role",
+  "test_file": "tests/integration/buyer-assistant.test.ts",
+  "test": "the assistant accepts text turns only",
+  "kind": "standalone",
+  "mutation": "Named test 3, role guard: tool and system roles are accepted.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/buyer/assistant/route.ts",
+    "old": "z.enum([\"buyer\", \"assistant\"])",
+    "new": "z.enum([\"buyer\", \"assistant\", \"tool\", \"system\"])"
+   }
+  ]
+ },
+ {
+  "id": "m12-turn-extra-key",
+  "test_file": "tests/integration/buyer-assistant.test.ts",
+  "test": "the assistant accepts text turns only",
+  "kind": "standalone",
+  "mutation": "Named test 3, turn key guard: an extra key on a turn is dropped instead of refused.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/buyer/assistant/route.ts",
+    "old": "text: z.string().trim().min(1).max(MAX_ASSISTANT_TURN_CHARS) }).strict())",
+    "new": "text: z.string().trim().min(1).max(MAX_ASSISTANT_TURN_CHARS) }))"
+   }
+  ]
+ },
+ {
+  "id": "m13-body-extra-key",
+  "test_file": "tests/integration/buyer-assistant.test.ts",
+  "test": "the assistant accepts text turns only",
+  "kind": "standalone",
+  "mutation": "Named test 3, body key guard: an extra key on the body is dropped instead of refused.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/buyer/assistant/route.ts",
+    "old": "      .refine((turns) => turns.at(-1)?.role === \"buyer\"),\n  })\n  .strict();",
+    "new": "      .refine((turns) => turns.at(-1)?.role === \"buyer\"),\n  });"
+   }
+  ]
+ },
+ {
+  "id": "m14-nine-turns",
+  "test_file": "tests/integration/buyer-assistant.test.ts",
+  "test": "the assistant accepts text turns only",
+  "kind": "standalone",
+  "mutation": "Named test 3, turn count: nine turns are accepted.",
+  "edits": [
+   {
+    "file": "src/integrations/assistant/agent.ts",
+    "old": "export const MAX_ASSISTANT_TURNS = 8;",
+    "new": "export const MAX_ASSISTANT_TURNS = 9;"
+   }
+  ]
+ },
+ {
+  "id": "m15-281-characters",
+  "test_file": "tests/integration/buyer-assistant.test.ts",
+  "test": "the assistant accepts text turns only",
+  "kind": "standalone",
+  "mutation": "Named test 3, turn length: a 281-character turn is accepted.",
+  "edits": [
+   {
+    "file": "src/integrations/assistant/agent.ts",
+    "old": "export const MAX_ASSISTANT_TURN_CHARS = 280;",
+    "new": "export const MAX_ASSISTANT_TURN_CHARS = 281;"
+   }
+  ]
+ },
+ {
+  "id": "m16-last-turn-not-buyer",
+  "test_file": "tests/integration/buyer-assistant.test.ts",
+  "test": "the assistant accepts text turns only",
+  "kind": "standalone",
+  "mutation": "Named test 3, last turn guard: a history ending on the assistant's turn is sent to the model.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/buyer/assistant/route.ts",
+    "old": "      .max(MAX_ASSISTANT_TURNS)\n      .refine((turns) => turns.at(-1)?.role === \"buyer\"),",
+    "new": "      .max(MAX_ASSISTANT_TURNS),"
+   }
+  ]
+ },
+ {
+  "id": "m17-link-in-reply",
+  "test_file": "tests/integration/buyer-assistant.test.ts",
+  "test": "the assistant's link never reaches the model, its reply or its steps",
+  "kind": "standalone",
+  "mutation": "Named test 4, reply surface: the link is appended to the reply.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/buyer/assistant/route.ts",
+    "old": "  const reply = result.kind === \"stopped\" ? STOPPED[result.reason] : result.text;",
+    "new": "  const reply = result.kind === \"stopped\" ? STOPPED[result.reason] : result.kind === \"link\" ? `${result.text} ${result.link.url}` : result.text;"
+   }
+  ]
+ },
+ {
+  "id": "m18-link-to-model",
+  "test_file": "tests/integration/buyer-assistant.test.ts",
+  "test": "the assistant's link never reaches the model, its reply or its steps",
+  "kind": "standalone",
+  "mutation": "Named test 4, model surface: propose_basket tells the model the link.",
+  "edits": [
+   {
+    "file": "src/integrations/assistant/tools.ts",
+    "old": "    return { created: true, expiresAt: result.value.data.expiresAt, shownToBuyer: \"Envoi's one-time link was shown to the buyer directly.\" };",
+    "new": "    return { created: true, url: result.value.data.url, expiresAt: result.value.data.expiresAt, shownToBuyer: \"Envoi's one-time link was shown to the buyer directly.\" };"
+   }
+  ]
+ },
+ {
+  "id": "m19-link-in-steps",
+  "test_file": "tests/integration/buyer-assistant.test.ts",
+  "test": "the assistant's link never reaches the model, its reply or its steps",
+  "kind": "standalone",
+  "mutation": "Named test 4, steps surface: the link is added to the steps.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/buyer/assistant/route.ts",
+    "old": "  return httpOk({ reply, steps: result.steps, link });",
+    "new": "  return httpOk({ reply, steps: link ? [...result.steps, { operation: \"createPurchaseRequest\", url: link.url }] : result.steps, link });"
+   }
+  ]
+ },
+ {
+  "id": "m20-step-from-model-text",
+  "test_file": "tests/unit/assistant.test.ts",
+  "test": "the assistant's steps come from the trace, not from model text",
+  "kind": "standalone",
+  "mutation": "Named test 5: a step is added when the model's reply names a call.",
+  "edits": [
+   {
+    "file": "src/integrations/assistant/agent.ts",
+    "old": "  const { result } = await loop.run(messages);\n  return { ...result, steps };",
+    "new": "  const { result } = await loop.run(messages);\n  if (\"text\" in result && result.text.includes(\"createPurchaseRequest\")) steps.push({ operation: \"createPurchaseRequest\", status: 201, outletId: null, itemIds: [], expiresAt: null, ms: 0 });\n  return { ...result, steps };"
+   }
+  ]
+ },
+ {
+  "id": "m21-planted-fetch",
+  "test_file": "tests/unit/assistant.test.ts",
+  "test": "the assistant reaches Envoi only through the generated client",
+  "kind": "standalone",
+  "mutation": "Named test 6: the tools module gains a direct fetch.",
+  "edits": [
+   {
+    "file": "src/integrations/assistant/tools.ts",
+    "old": "export type CreatedLink = { url: string; expiresAt: string };",
+    "new": "export type CreatedLink = { url: string; expiresAt: string };\nexport const plantedFetch = () => fetch(\"https://fixture.invalid/\");"
+   }
+  ]
+ },
+ {
+  "id": "m22-terminal-instructions",
+  "test_file": "tests/unit/assistant.test.ts",
+  "test": "the terminal agent and the site run one agent module",
+  "kind": "standalone",
+  "mutation": "Named test 7: the terminal agent gains instruction text of its own.",
+  "edits": [
+   {
+    "file": "clients/buyer-agent/agent.ts",
+    "old": "const STOPPED: Record<",
+    "new": "export const INSTRUCTIONS = \"You are Envoi's terminal agent.\";\n\nconst STOPPED: Record<"
+   }
+  ]
+ },
+ {
+  "id": "m23-sticker-or",
+  "test_file": "tests/integration/buy-page-text-off.test.ts",
+  "test": "the buyer page reads correctly with text suggestions off",
+  "kind": "standalone",
+  "mutation": "Named test 8, heading: the sticker card always reads \"Or scan the sticker\".",
+  "edits": [
+   {
+    "file": "src/app/buy/page.tsx",
+    "old": "{textEnabled ? \"Or scan the sticker\" : \"Scan the sticker\"}",
+    "new": "\"Or scan the sticker\""
+   }
+  ]
+ },
+ {
+  "id": "m24-ask-link-always",
+  "test_file": "tests/integration/buy-page-text-off.test.ts",
+  "test": "the buyer page reads correctly with text suggestions off",
+  "kind": "standalone",
+  "mutation": "Named test 8, link: the Ask Envoi link shows with the assistant off.",
+  "edits": [
+   {
+    "file": "src/app/buy/page.tsx",
+    "old": "      {askEnabled && (",
+    "new": "      {(askEnabled || textEnabled === false) && ("
+   }
+  ]
+ },
+ {
+  "id": "m25-not-idempotent",
+  "test_file": "tests/integration/demo-iced-teas.test.ts",
+  "test": "the demo iced teas are added once and published through the menu rules",
+  "kind": "standalone",
+  "mutation": "Named test 9, idempotence: a second run publishes again.",
+  "edits": [
+   {
+    "file": "src/operator/cli.ts",
+    "old": "  if (missing.length === 0) return { status: \"unchanged\", outletId, revisionId: draft.revisionId };\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "m26-bypasses-publish",
+  "test_file": "tests/integration/demo-iced-teas.test.ts",
+  "test": "the demo iced teas are added once and published through the menu rules",
+  "kind": "standalone",
+  "mutation": "Named test 9, menu rules: the revision is published by a direct table write.",
+  "edits": [
+   {
+    "file": "src/operator/cli.ts",
+    "old": "  const published = await publishOutlet(db, { outletId, revisionId: confirmed.revisionId, version: confirmed.version, actorUserId: owner.userId, now });\n  if (isAppError(published)) throw new Error(`The draft ${confirmed.revisionId} was confirmed but not published: ${published.message}`);",
+    "new": "  await db.update(schema.outlets).set({ publishedMenuRevisionId: confirmed.revisionId }).where(eq(schema.outlets.id, outletId));\n  const published = { revisionId: confirmed.revisionId };"
+   }
+  ]
+ },
+ {
+  "id": "m27-publishes-merchant-draft",
+  "test_file": "tests/integration/demo-iced-teas.test.ts",
+  "test": "the demo iced teas never publish a merchant's own unpublished changes",
+  "kind": "standalone",
+  "mutation": "Test 9 guard: the shop's own unpublished draft is used and published.",
+  "edits": [
+   {
+    "file": "src/operator/cli.ts",
+    "old": "  if (!draft.published) throw new Error(`${DEMO_TEST_SHOP_NAME} has unpublished menu changes; publish or discard them first. Nothing changed.`);\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "m28-ignores-other-price",
+  "test_file": "tests/integration/demo-iced-teas.test.ts",
+  "test": "the demo iced teas never change a price the shop already set",
+  "kind": "standalone",
+  "mutation": "Test 9 guard: a tea already listed at another price counts as present.",
+  "edits": [
+   {
+    "file": "src/operator/cli.ts",
+    "old": "    else if (found.priceSgdCents !== tea.priceSgdCents) throw new Error(`${DEMO_TEST_SHOP_NAME} already lists ${tea.name} at another price; inspect it by hand. Nothing changed.`);\n",
+    "new": ""
+   }
+  ]
+ }
+]

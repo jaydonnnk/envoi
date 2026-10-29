@@ -1,0 +1,568 @@
+{
+ "branch": "envoi/slice-25-ask-envoi",
+ "base_commit": "617cf40",
+ "uncommitted_changes": true,
+ "method": "Each definition in s25-mutation-defs.json applied alone by exact text replacement, its whole test file run with the vitest JSON reporter, every touched file restored and compared by SHA-256, then the whole file rerun. A proof needs the named row to fail on an AssertionError, a byte-identical restore and an all-passing rerun; other failing rows are recorded. The integration files run the real route handler POST /api/v1/buyer/assistant, the /buy page and the add-demo-iced-teas operator function on local PostgreSQL databases built from the migrations through 0026, with DATABASE_URL removed; OpenAI and Envoi's public API are faked at the fetch boundary by tests/support/fake-openai.ts and fake-envoi-api.ts, labeled FIXTURE, so no model is called and PayPal is never reached. The unit file reads src/integrations/assistant, the route and clients/buyer-agent. Every definition here is an S25 test recorded in 00-status.md.",
+ "results": [
+  {
+   "id": "m01-on-without-key",
+   "test": "the assistant is off unless the key, the model and the agent token are set",
+   "kind": "standalone",
+   "group": "Ask Envoi",
+   "files": [
+    "src/integrations/ai/openai.ts"
+   ],
+   "mutation": "Named test 1, key guard: the assistant is on without OPENAI_API_KEY.",
+   "own_row": "failed",
+   "error": "AssertionError: OPENAI_API_KEY: expected { \u2026(4) } to be null",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 4,
+   "proof": true
+  },
+  {
+   "id": "m02-on-without-model",
+   "test": "the assistant is off unless the key, the model and the agent token are set",
+   "kind": "standalone",
+   "group": "Ask Envoi",
+   "files": [
+    "src/integrations/ai/openai.ts"
+   ],
+   "mutation": "Named test 1, model guard: the assistant is on without AI_MODEL.",
+   "own_row": "failed",
+   "error": "AssertionError: AI_MODEL: expected { \u2026(4) } to be null",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 4,
+   "proof": true
+  },
+  {
+   "id": "m03-on-without-token",
+   "test": "the assistant is off unless the key, the model and the agent token are set",
+   "kind": "standalone",
+   "group": "Ask Envoi",
+   "files": [
+    "src/integrations/ai/openai.ts"
+   ],
+   "mutation": "Named test 1, token guard: the assistant is on without ASSISTANT_AGENT_TOKEN.",
+   "own_row": "failed",
+   "error": "AssertionError: ASSISTANT_AGENT_TOKEN: expected { \u2026(4) } to be null",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 4,
+   "proof": true
+  },
+  {
+   "id": "m04-on-with-plain-http",
+   "test": "the assistant is off unless the key, the model and the agent token are set",
+   "kind": "standalone",
+   "group": "Ask Envoi",
+   "files": [
+    "src/integrations/ai/openai.ts"
+   ],
+   "mutation": "Named test 1, address guard: an APP_BASE_URL the agent may not call is used anyway.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { \u2026(4) } to be null",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 4,
+   "proof": true
+  },
+  {
+   "id": "m05-no-limiter",
+   "test": "the assistant is refused by its limiter before any model call",
+   "kind": "standalone",
+   "group": "Ask Envoi route",
+   "files": [
+    "src/app/api/v1/buyer/assistant/route.ts"
+   ],
+   "mutation": "Named test 2, limiter guard: the route never admits a turn through the limiter.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { status: 200, code: undefined, \u2026(3) } to match object { status: 429, \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m06-limiter-after-model",
+   "test": "the assistant is refused by its limiter before any model call",
+   "kind": "standalone",
+   "group": "Ask Envoi route",
+   "files": [
+    "src/app/api/v1/buyer/assistant/route.ts"
+   ],
+   "mutation": "Named test 2, order guard: the limiter admits a turn only after its model call.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ { \u2026(2) }, { \u2026(2) }, { \u2026(2) }, \u2026(18) ] to have a length of 20 but got 21",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m07-per-buyer-21",
+   "test": "the assistant is refused by its limiter before any model call",
+   "kind": "standalone",
+   "group": "Ask Envoi route",
+   "files": [
+    "src/lib/ratelimit.ts"
+   ],
+   "mutation": "Named test 2, per-buyer window: 21 turns per buyer in 10 minutes.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { status: 200, code: undefined, \u2026(3) } to match object { status: 429, \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m08-per-buyer-11-minutes",
+   "test": "the assistant is refused by its limiter before any model call",
+   "kind": "standalone",
+   "group": "Ask Envoi route",
+   "files": [
+    "src/lib/ratelimit.ts"
+   ],
+   "mutation": "Named test 2, per-buyer window length: 11 minutes instead of 10.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 429 to be 200 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m09-global-151",
+   "test": "the assistant is refused by its limiter before any model call",
+   "kind": "standalone",
+   "group": "Ask Envoi route",
+   "files": [
+    "src/lib/ratelimit.ts"
+   ],
+   "mutation": "Named test 2, global window: 151 turns across buyers in an hour.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { status: 200, code: undefined, \u2026(3) } to match object { status: 429, \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m10-shares-suggestion-bucket",
+   "test": "the assistant is refused by its limiter before any model call",
+   "kind": "standalone",
+   "group": "Ask Envoi route",
+   "files": [
+    "src/app/api/v1/buyer/assistant/route.ts"
+   ],
+   "mutation": "Named test 2, own bucket: the assistant counts under the one box's buyer_suggestion key.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { status: 200, code: undefined, \u2026(3) } to match object { status: 429, \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m11-tool-role",
+   "test": "the assistant accepts text turns only",
+   "kind": "standalone",
+   "group": "Ask Envoi route",
+   "files": [
+    "src/app/api/v1/buyer/assistant/route.ts"
+   ],
+   "mutation": "Named test 3, role guard: tool and system roles are accepted.",
+   "own_row": "failed",
+   "error": "AssertionError: a tool role: expected { status: 200, code: undefined, \u2026(3) } to match object { status: 400, \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m12-turn-extra-key",
+   "test": "the assistant accepts text turns only",
+   "kind": "standalone",
+   "group": "Ask Envoi route",
+   "files": [
+    "src/app/api/v1/buyer/assistant/route.ts"
+   ],
+   "mutation": "Named test 3, turn key guard: an extra key on a turn is dropped instead of refused.",
+   "own_row": "failed",
+   "error": "AssertionError: an extra key on a turn: expected { status: 200, code: undefined, \u2026(3) } to match object { status: 400, \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m13-body-extra-key",
+   "test": "the assistant accepts text turns only",
+   "kind": "standalone",
+   "group": "Ask Envoi route",
+   "files": [
+    "src/app/api/v1/buyer/assistant/route.ts"
+   ],
+   "mutation": "Named test 3, body key guard: an extra key on the body is dropped instead of refused.",
+   "own_row": "failed",
+   "error": "AssertionError: an extra key on the body: expected { status: 200, code: undefined, \u2026(3) } to match object { status: 400, \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m14-nine-turns",
+   "test": "the assistant accepts text turns only",
+   "kind": "standalone",
+   "group": "Ask Envoi route",
+   "files": [
+    "src/integrations/assistant/agent.ts"
+   ],
+   "mutation": "Named test 3, turn count: nine turns are accepted.",
+   "own_row": "failed",
+   "error": "AssertionError: a ninth turn: expected { status: 200, code: undefined, \u2026(3) } to match object { status: 400, \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m15-281-characters",
+   "test": "the assistant accepts text turns only",
+   "kind": "standalone",
+   "group": "Ask Envoi route",
+   "files": [
+    "src/integrations/assistant/agent.ts"
+   ],
+   "mutation": "Named test 3, turn length: a 281-character turn is accepted.",
+   "own_row": "failed",
+   "error": "AssertionError: a 281-character turn: expected { status: 200, code: undefined, \u2026(3) } to match object { status: 400, \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m16-last-turn-not-buyer",
+   "test": "the assistant accepts text turns only",
+   "kind": "standalone",
+   "group": "Ask Envoi route",
+   "files": [
+    "src/app/api/v1/buyer/assistant/route.ts"
+   ],
+   "mutation": "Named test 3, last turn guard: a history ending on the assistant's turn is sent to the model.",
+   "own_row": "failed",
+   "error": "AssertionError: the last turn not the buyer's: expected { status: 200, code: undefined, \u2026(3) } to match object { status: 400, \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m17-link-in-reply",
+   "test": "the assistant's link never reaches the model, its reply or its steps",
+   "kind": "standalone",
+   "group": "Ask Envoi route",
+   "files": [
+    "src/app/api/v1/buyer/assistant/route.ts"
+   ],
+   "mutation": "Named test 4, reply surface: the link is appended to the reply.",
+   "own_row": "failed",
+   "error": "AssertionError: reply: expected [ 'link', 'linkToken' ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m18-link-to-model",
+   "test": "the assistant's link never reaches the model, its reply or its steps",
+   "kind": "standalone",
+   "group": "Ask Envoi route",
+   "files": [
+    "src/integrations/assistant/tools.ts"
+   ],
+   "mutation": "Named test 4, model surface: propose_basket tells the model the link.",
+   "own_row": "failed",
+   "error": "AssertionError: model: expected [ 'link', 'linkToken' ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m19-link-in-steps",
+   "test": "the assistant's link never reaches the model, its reply or its steps",
+   "kind": "standalone",
+   "group": "Ask Envoi route",
+   "files": [
+    "src/app/api/v1/buyer/assistant/route.ts"
+   ],
+   "mutation": "Named test 4, steps surface: the link is added to the steps.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ [ 'listOutlets', 200 ], \u2026(3) ] to deeply equal [ [ 'listOutlets', 200 ], \u2026(2) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m20-step-from-model-text",
+   "test": "the assistant's steps come from the trace, not from model text",
+   "kind": "standalone",
+   "group": "Ask Envoi",
+   "files": [
+    "src/integrations/assistant/agent.ts"
+   ],
+   "mutation": "Named test 5: a step is added when the model's reply names a call.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ [ 'listOutlets', 200 ], \u2026(1) ] to deeply equal [ [ 'listOutlets', 200 ] ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 4,
+   "proof": true
+  },
+  {
+   "id": "m21-planted-fetch",
+   "test": "the assistant reaches Envoi only through the generated client",
+   "kind": "standalone",
+   "group": "Ask Envoi",
+   "files": [
+    "src/integrations/assistant/tools.ts"
+   ],
+   "mutation": "Named test 6: the tools module gains a direct fetch.",
+   "own_row": "failed",
+   "error": "AssertionError: tools.ts: expected [ 'fetch(' ] to be null",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 4,
+   "proof": true
+  },
+  {
+   "id": "m22-terminal-instructions",
+   "test": "the terminal agent and the site run one agent module",
+   "kind": "standalone",
+   "group": "Ask Envoi",
+   "files": [
+    "clients/buyer-agent/agent.ts"
+   ],
+   "mutation": "Named test 7: the terminal agent gains instruction text of its own.",
+   "own_row": "failed",
+   "error": "AssertionError: You are Envoi: expected true to be false // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 4,
+   "proof": true
+  },
+  {
+   "id": "m23-sticker-or",
+   "test": "the buyer page reads correctly with text suggestions off",
+   "kind": "standalone",
+   "group": "buyer page without the AI",
+   "files": [
+    "src/app/buy/page.tsx"
+   ],
+   "mutation": "Named test 8, heading: the sticker card always reads \"Or scan the sticker\".",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'Buy', \u2026(8) ] to include 'Scan the sticker'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 1,
+   "proof": true
+  },
+  {
+   "id": "m24-ask-link-always",
+   "test": "the buyer page reads correctly with text suggestions off",
+   "kind": "standalone",
+   "group": "buyer page without the AI",
+   "files": [
+    "src/app/buy/page.tsx"
+   ],
+   "mutation": "Named test 8, link: the Ask Envoi link shows with the assistant off.",
+   "own_row": "failed",
+   "error": "AssertionError: expected '<main data-server-ms=\"11\" data-db-ms=\u2026' not to contain 'href=\"/buy/ask\"'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 1,
+   "proof": true
+  },
+  {
+   "id": "m25-not-idempotent",
+   "test": "the demo iced teas are added once and published through the menu rules",
+   "kind": "standalone",
+   "group": "demo iced teas",
+   "files": [
+    "src/operator/cli.ts"
+   ],
+   "mutation": "Named test 9, idempotence: a second run publishes again.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { status: 'added', \u2026(2) } to deeply equal { status: 'unchanged', \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m26-bypasses-publish",
+   "test": "the demo iced teas are added once and published through the menu rules",
+   "kind": "standalone",
+   "group": "demo iced teas",
+   "files": [
+    "src/operator/cli.ts"
+   ],
+   "mutation": "Named test 9, menu rules: the revision is published by a direct table write.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ \u2026(3) ] to deeply equal [ \u2026(4) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m27-publishes-merchant-draft",
+   "test": "the demo iced teas never publish a merchant's own unpublished changes",
+   "kind": "standalone",
+   "group": "demo iced teas",
+   "files": [
+    "src/operator/cli.ts"
+   ],
+   "mutation": "Test 9 guard: the shop's own unpublished draft is used and published.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'resolved' to match /unpublished menu changes/",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  },
+  {
+   "id": "m28-ignores-other-price",
+   "test": "the demo iced teas never change a price the shop already set",
+   "kind": "standalone",
+   "group": "demo iced teas",
+   "files": [
+    "src/operator/cli.ts"
+   ],
+   "mutation": "Test 9 guard: a tea already listed at another price counts as present.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'resolved' to match /Iced milk tea at another price/",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 3,
+   "proof": true
+  }
+ ]
+}
