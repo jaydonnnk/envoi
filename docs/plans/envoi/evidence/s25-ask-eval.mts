@@ -134,10 +134,17 @@ function startProxy(limit: number, price: { input: number; cached: number; outpu
   );
 }
 
+// Better Auth limits /sign-in to 3 requests per 10 seconds per address, and the window only resets after
+// 10 quiet seconds, so the first run stopped at case 4 on a 429. A refused sign-in waits out the window
+// and tries again; no model call is made before a session exists, so this changes no scored outcome.
 async function session(): Promise<string> {
-  const response = await fetch(`${BASE_URL}/api/auth/sign-in/anonymous`, { method: "POST", headers: { "content-type": "application/json", origin: BASE_URL }, body: "{}" });
-  if (!response.ok) throw new Error(`anonymous sign-in answered ${response.status}`);
-  return response.headers.getSetCookie().map((cookie) => cookie.split(";")[0]).join("; ");
+  for (let attempt = 1; ; attempt += 1) {
+    const response = await fetch(`${BASE_URL}/api/auth/sign-in/anonymous`, { method: "POST", headers: { "content-type": "application/json", origin: BASE_URL }, body: "{}" });
+    if (response.ok) return response.headers.getSetCookie().map((cookie) => cookie.split(";")[0]).join("; ");
+    if (response.status !== 429 || attempt >= 5) throw new Error(`anonymous sign-in answered ${response.status}`);
+    const wait = Number(response.headers.get("x-retry-after")) || 10;
+    await new Promise((resolve) => setTimeout(resolve, (wait + 1) * 1000));
+  }
 }
 
 async function ask(cookie: string, turns: { role: "buyer" | "assistant"; text: string }[]) {

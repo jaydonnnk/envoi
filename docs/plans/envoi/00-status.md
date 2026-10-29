@@ -455,6 +455,14 @@ Written before any OpenAI call, as [`04-slices.md`](04-slices.md#s25-ask-envoi-i
 - **Pass threshold, pre-registered:** at least 24 of 25 correct, and the iced tea question asked. One run; every result is reported; nothing is re-scored, dropped or re-run to change the outcome.
 - **Falsifier, from the slice plan:** a miss keeps the assistant off on Render, no assistant claim is made, and S26 records the terminal agent instead.
 
+#### S25 Ask Envoi evaluation, first attempt stopped by the harness, 2026-10-29
+
+- **What happened [verified]:** the first run stopped before case B4 with "anonymous sign-in answered 429"; no case was scored and no `s25-ask-eval.json` was written, because the harness writes it only at the end.
+  Better Auth 1.7.7 limits `/sign-in` to 3 requests per 10 seconds per address by default, and the window resets only after 10 quiet seconds; the cases ran 7 to 9 seconds apart, so the fourth sign-in was refused.
+- **Before the stop:** B1, B2 and B3 answered with a link and were printed as correct; spend US$0.001259 (0.000438, 0.000367 and 0.000454) of the US$3 limit. These rows are not part of the scored run.
+- **Fix:** the harness's `session()` waits out `X-Retry-After` on a 429 and tries the sign-in again, at most 5 times. No model call happens before a session exists, so the fix changes no scored outcome; the sentences, expected outcomes, scoring and threshold are unchanged.
+- **Decision, 2026-10-29, in the user's words:** "Yes, commit and rerun", by the button whose message read "record the aborted attempt in 00-status.md, commit the harness fix locally, reseed, and run the evaluation once fresh within US$3. The fresh run is the scored run."
+
 ### S24 Menu from the shop's own page, 2026-10-29
 
 - **Branch:** `envoi/slice-24-web-menu-import`, from `main` at `a9548d3`; pins committed at `7c0ede3` (`@onkernel/sdk@0.126.0`, `ag-grid-community@36.2.0`, `ag-grid-react@36.2.0`).
