@@ -1,5 +1,5 @@
 import { admitMenuImport } from "@/domain/imports/admission";
-import { MENU_CONSENT_VERSION } from "@/domain/imports/consent";
+import { MENU_CONSENT_VERSION, WEB_MENU_CONSENT_VERSION } from "@/domain/imports/consent";
 import { closeImportFailed, commitImport, markModelDispatched, type ImportCommit } from "@/domain/imports/lifecycle";
 import {
   DEFAULT_ADMISSION_LIMITS,
@@ -15,9 +15,13 @@ import {
 } from "@/domain/imports/types";
 import { parseSinglePhotoPart } from "@/domain/imports/upload";
 import { validateVisionDraft } from "@/domain/imports/validate-result";
+import { hasPrintedPrice, keepPrintedOnly } from "@/domain/imports/verbatim";
+import { checkMenuPageUrl } from "@/domain/imports/web-url";
 import { draftJson } from "@/domain/menu/serialize";
 import { webEnv } from "@/env";
 import { draftMenuFromPhoto } from "@/integrations/ai/menu-vision";
+import { draftMenuFromPageText, MENU_WEB_PROMPT_VERSION } from "@/integrations/ai/menu-web";
+import { readPageText } from "@/integrations/browser/kernel";
 import { normalizeMenuJpeg } from "@/integrations/image/normalize";
 import type { OutletMemberPrincipal } from "@/lib/auth-context";
 import type { Db } from "@/lib/db/web";
@@ -39,11 +43,15 @@ import { durationMs, menuModelBudgetMs } from "@/lib/time";
 export const importRuntime: {
   now: () => Date;
   draft: typeof draftMenuFromPhoto;
+  readPage: typeof readPageText;
+  draftWeb: typeof draftMenuFromPageText;
   limits: AdmissionLimits;
   policy: MenuSpendPolicy;
 } = {
   now: () => new Date(),
   draft: draftMenuFromPhoto,
+  readPage: readPageText,
+  draftWeb: draftMenuFromPageText,
   limits: DEFAULT_ADMISSION_LIMITS,
   policy: MENU_SPEND_POLICY,
 };
@@ -195,6 +203,157 @@ export async function runMenuImport(db: Db, request: Request, principal: OutletM
     return httpErr(commitRefusal(importId, commit.outcome));
   } catch (err) {
     log("error", "menu_import_failed", { importId, error: toSafeErrorRecord(err, "internal") });
+    await closeImportFailed(db, importId, "aborted", null, importRuntime.now()).catch(() => {});
+    return refused(importId, "import_rejected", "The import stopped unexpectedly, so nothing was added. Reload the draft before trying again.", "aborted", "internal");
+  }
+}
+
+// ---- Web menu import (S24) -----------------------------------------------------------------------
+
+// The JSON body of a web import: the link, the consent version and the base revision. Small enough
+// that anything longer is refused before parsing.
+const WEB_BODY_MAX_BYTES = 8_192;
+const WEB_BODY_READ_MS = 5_000;
+
+const WEB_CLOSED_COPY = "Reading a menu page is not available in this release. You can still enter your menu by hand.";
+const PAGE_NOT_OPENED_COPY = "We could not open that page. It needs a sign-in, did not load in time, or is not a public https link. Nothing was drafted, and your menu is unchanged.";
+const PICTURE_MENU_COPY = "Your page shows its menu as a picture. Envoi reads text only, so nothing was drafted. Type the menu instead.";
+
+// Whether a web import could be admitted at all now; the setup page renders the link field only
+// while this holds. Admission still checks everything itself.
+export function webImportsOpen(): boolean {
+  const env = webEnv();
+  if (!env.WEB_IMPORTS_ENABLED || !env.OPENAI_API_KEY || !env.AI_WEB_MENU_MODEL || !env.KERNEL_API_KEY) return false;
+  return MENU_SPEND_POLICY.dailyCeilingUsdMicros !== null && boundsFor(MENU_SPEND_POLICY, env.AI_WEB_MENU_MODEL) !== null;
+}
+
+type WebBody = { url: string; consentVersion: string; baseRevisionId: string };
+
+function parseWebBody(bytes: Uint8Array): WebBody | null {
+  try {
+    const value = JSON.parse(new TextDecoder().decode(bytes)) as Partial<Record<keyof WebBody, unknown>> | null;
+    if (typeof value?.url !== "string" || typeof value.consentVersion !== "string" || typeof value.baseRevisionId !== "string") return null;
+    return { url: value.url, consentVersion: value.consentVersion, baseRevisionId: value.baseRevisionId };
+  } catch {
+    return null;
+  }
+}
+
+// One synchronous web menu import (Gate 3 reopening 2026-10-29), after the route's membership guard
+// and origin check, in the contract's order: the switch, the consent version, the link check, the S11
+// admission, the one Kernel read, the printed-price check, the dispatch mark, the one text call,
+// validation, the verbatim rule and the commit. The page text and the full URL live only in this
+// request's memory: the row keeps the host, and no response, log or error record carries either.
+export async function runWebImport(db: Db, request: Request, principal: OutletMemberPrincipal): Promise<Response> {
+  const env = webEnv();
+  if (!env.WEB_IMPORTS_ENABLED || !env.OPENAI_API_KEY || !env.AI_WEB_MENU_MODEL || !env.KERNEL_API_KEY) {
+    return httpErr(appError("admission_rejected", WEB_CLOSED_COPY, { details: { reason: "web_imports_disabled" } }));
+  }
+  const read = await readCountedBody(request.body, WEB_BODY_MAX_BYTES, WEB_BODY_READ_MS, request.signal);
+  const body = read.ok ? parseWebBody(read.bytes) : null;
+  if (!body) return httpErr(appError("validation_failed", "Paste the link to your shop's menu page and try again.", { details: { reason: "malformed" } }));
+  if (body.consentVersion !== WEB_MENU_CONSENT_VERSION) {
+    return httpErr(appError("consent_required", "Tick the box to confirm the page is your shop's own before reading it.", { details: { consentVersion: WEB_MENU_CONSENT_VERSION } }));
+  }
+  const link = checkMenuPageUrl(body.url);
+  if (!link.ok) return httpErr(appError("validation_failed", PAGE_NOT_OPENED_COPY, { details: { reason: link.reason } }));
+
+  const admission = await admitMenuImport(db, {
+    outletId: principal.outletId,
+    actorUserId: principal.userId,
+    consentVersion: WEB_MENU_CONSENT_VERSION,
+    baseRevisionId: body.baseRevisionId,
+    model: env.AI_WEB_MENU_MODEL,
+    web: { promptVersion: MENU_WEB_PROMPT_VERSION, host: link.host },
+    limits: importRuntime.limits,
+    policy: importRuntime.policy,
+    now: importRuntime.now(),
+  });
+  if (!admission.ok) {
+    const retryable = RETRYABLE_REJECTIONS.has(admission.reason);
+    const message = retryable ? "A menu import cannot start right now. You can still enter your menu by hand." : WEB_CLOSED_COPY;
+    return httpErr(appError("admission_rejected", message, { retryable, details: { reason: admission.reason } }));
+  }
+  const { importId, admittedAt } = admission;
+  const bounds = boundsFor(importRuntime.policy, env.AI_WEB_MENU_MODEL) as MenuModelBounds;
+  const usageAt = (tokens: { inputTokens: number | null; outputTokens: number | null } | null): ImportUsage => ({
+    inputTokens: tokens?.inputTokens ?? null,
+    outputTokens: tokens?.outputTokens ?? null,
+    actualUsdMicros: tokens === null ? 0 : actualUsdMicros(bounds, tokens),
+    latencyMs: importRuntime.now().getTime() - admittedAt.getTime(),
+    peakRssBytes: peakRssBytes(),
+  });
+
+  try {
+    const page = await importRuntime.readPage(link.url, request.signal, { apiKey: env.KERNEL_API_KEY });
+    if (page.kind !== "ok") {
+      const outcome = page.kind === "refused" ? "page_refused" : page.kind === "timeout" ? "page_timeout" : "page_unreachable";
+      await closeImportFailed(db, importId, request.signal.aborted ? "aborted" : outcome, usageAt(null), importRuntime.now());
+      if (page.kind === "timeout") return refused(importId, "provider_unreachable", PAGE_NOT_OPENED_COPY, outcome, undefined, true);
+      return refused(importId, "import_rejected", PAGE_NOT_OPENED_COPY, outcome);
+    }
+    if (!hasPrintedPrice(page.text)) {
+      await closeImportFailed(db, importId, "picture_menu", usageAt(null), importRuntime.now());
+      return refused(importId, "import_rejected", PICTURE_MENU_COPY, "picture_menu");
+    }
+
+    const { marked } = await markModelDispatched(db, importId, importRuntime.now());
+    if (!marked) {
+      await closeImportFailed(db, importId, "aborted", usageAt(null), importRuntime.now());
+      return refused(importId, "import_expired", "This import ran out of time before drafting started. Try again.", "aborted");
+    }
+
+    const call = await importRuntime.draftWeb({
+      text: page.text,
+      model: env.AI_WEB_MENU_MODEL,
+      apiKey: env.OPENAI_API_KEY,
+      bounds,
+      budgetMs: menuModelBudgetMs(admittedAt, importRuntime.now()),
+      signal: request.signal,
+    });
+    const usage = usageAt(call.kind === "ok" ? call : { inputTokens: null, outputTokens: null });
+    if (call.kind === "timeout") {
+      await closeImportFailed(db, importId, "model_timeout", usage, importRuntime.now());
+      return refused(importId, "provider_unreachable", "Drafting took too long, so nothing was added. Try again or enter the menu by hand.", "model_timeout", undefined, true);
+    }
+    if (call.kind === "aborted") {
+      await closeImportFailed(db, importId, "aborted", usage, importRuntime.now());
+      return refused(importId, "import_rejected", "The connection was lost. Reload the draft to check whether it finished before trying again.", "aborted", "aborted");
+    }
+    if (call.kind === "provider_error") {
+      await closeImportFailed(db, importId, "model_failed", usage, importRuntime.now());
+      return refused(importId, "provider_unreachable", "Drafting failed, so no item was added. Try again or enter the menu by hand.", "model_failed", undefined, true);
+    }
+
+    const validated = validateVisionDraft(call.raw);
+    const kept = validated.ok ? keepPrintedOnly(validated, page.text) : null;
+    if (!validated.ok || !kept || kept.draft.items.length === 0) {
+      await closeImportFailed(db, importId, "output_invalid", usage, importRuntime.now());
+      return refused(importId, "import_rejected", "No menu item could be drafted from that page, so nothing was added. Type the menu instead.", "output_invalid", validated.ok ? "empty" : validated.reason);
+    }
+
+    const commit = await commitImport(db, importId, kept.draft, usage, importRuntime.now());
+    if (commit.committed) {
+      return httpOk({
+        import: {
+          id: importId,
+          outcome: "completed",
+          rowsDrafted: kept.draft.items.length,
+          rowsBlankPrice: kept.draft.blankPriceCount,
+          droppedNames: kept.droppedNames,
+          added: commit.merge.addedItemIds.length,
+          preservedMerchantEdits: commit.merge.preservedMerchantEditIds.length,
+          skippedForCapacity: commit.merge.skippedForCapacity,
+          // Why each drafted price is blank, so the table can say it in words; names and portions
+          // come from the merchant's own page, already in the draft below.
+          blankPrices: kept.draft.items.filter((item) => item.priceSgdCents === null).map((item) => ({ name: item.name, portion: item.portion, basis: item.priceBasis })),
+        },
+        draft: draftJson(commit.draft),
+      });
+    }
+    return httpErr(commitRefusal(importId, commit.outcome));
+  } catch (err) {
+    log("error", "menu_web_import_failed", { importId, error: toSafeErrorRecord(err, "internal") });
     await closeImportFailed(db, importId, "aborted", null, importRuntime.now()).catch(() => {});
     return refused(importId, "import_rejected", "The import stopped unexpectedly, so nothing was added. Reload the draft before trying again.", "aborted", "internal");
   }

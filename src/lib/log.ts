@@ -6,7 +6,7 @@ export type SafeErrorRecord = {
   name: string;
   status: number | null;
   retryable: boolean | null;
-  provider: "openai" | "paypal" | "solana_rpc" | "internal";
+  provider: "openai" | "paypal" | "solana_rpc" | "kernel" | "internal";
 };
 
 const ALLOWED_ERROR_NAMES = new Set(["Error", "TypeError", "RangeError", "SyntaxError", "AbortError", "TimeoutError", "PostgresError", "AI_APICallError", "AI_NoObjectGeneratedError"]);

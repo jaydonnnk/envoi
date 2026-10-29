@@ -54,6 +54,10 @@ const OUTCOME_COPY: Record<ImportJson["outcome"], string> = {
   output_invalid: "The draft from your last photo was unusable, so nothing was added.",
   aborted: "Your last photo import stopped before it finished, so nothing was added.",
   expired: "Your last photo import did not finish in time, so nothing was added.",
+  page_refused: "We could not open your last menu page, so nothing was added.",
+  page_timeout: "We could not open your last menu page, so nothing was added.",
+  page_unreachable: "We could not open your last menu page, so nothing was added.",
+  picture_menu: "Your last menu page shows its menu as a picture, so nothing was added.",
 };
 
 type ApiError = { code: string; message: string; details?: Record<string, string | number | boolean> };

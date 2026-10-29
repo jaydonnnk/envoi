@@ -716,12 +716,16 @@ export const menuImports = pgTable(
     resultFingerprint: text("result_fingerprint"),
     latencyMs: integer("latency_ms"),
     peakRssBytes: bigint("peak_rss_bytes", { mode: "number" }),
+    // S24: what the import read. A web import keeps only the link's host, never the full URL.
+    source: text("source").notNull().default("photo"),
+    sourceHost: text("source_host"),
   },
   (t) => [
     check(
       "menu_imports_outcome_check",
-      sql`${t.closedOutcome} is null or ${t.closedOutcome} in ('completed', 'conflict_base_revision', 'conflict_confirmed', 'membership_revoked', 'rejected_upload', 'rejected_photo', 'model_failed', 'model_timeout', 'output_invalid', 'aborted')`,
+      sql`${t.closedOutcome} is null or ${t.closedOutcome} in ('completed', 'conflict_base_revision', 'conflict_confirmed', 'membership_revoked', 'rejected_upload', 'rejected_photo', 'model_failed', 'model_timeout', 'output_invalid', 'aborted', 'page_refused', 'page_timeout', 'page_unreachable', 'picture_menu')`,
     ),
+    check("menu_imports_source_check", sql`${t.source} in ('photo', 'web_page') and (${t.sourceHost} is null or length(${t.sourceHost}) <= 253)`),
     check("menu_imports_closed_check", sql`(${t.closedAt} is null) = (${t.closedOutcome} is null)`),
     check("menu_imports_reserved_check", sql`${t.reservedUsdMicros} >= 0`),
     check("menu_imports_deadline_check", sql`${t.deadlineAt} > ${t.admittedAt}`),

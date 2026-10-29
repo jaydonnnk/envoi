@@ -15,7 +15,7 @@ import type { VisionDraftValidation } from "./validate-result";
 type Row = typeof menuImports.$inferSelect;
 
 export function toImportRow(row: Row): MenuImportRow {
-  return { ...row, closedOutcome: row.closedOutcome as ClosedImportOutcome | null };
+  return { ...row, closedOutcome: row.closedOutcome as ClosedImportOutcome | null, source: row.source as MenuImportRow["source"] };
 }
 
 export function deriveImportOutcome(row: Pick<MenuImportRow, "closedOutcome" | "deadlineAt">, now: Date): ImportOutcome {
@@ -73,7 +73,7 @@ async function closeIn(tx: Tx, row: Row, outcome: ClosedImportOutcome, usage: Im
 export async function closeImportFailed(
   db: Db,
   importId: string,
-  outcome: "rejected_upload" | "rejected_photo" | "model_failed" | "model_timeout" | "output_invalid" | "aborted",
+  outcome: "rejected_upload" | "rejected_photo" | "model_failed" | "model_timeout" | "output_invalid" | "aborted" | "page_refused" | "page_timeout" | "page_unreachable" | "picture_menu",
   usage: ImportUsage | null,
   now: Date,
 ): Promise<{ closed: boolean }> {
@@ -209,6 +209,7 @@ export type ImportJson = {
   deadlineAt: string;
   rowsDrafted: number | null;
   rowsBlankPrice: number | null;
+  source: MenuImportRow["source"];
 };
 
 export function importJson(row: MenuImportRow & { outcome: ImportOutcome }): ImportJson {
@@ -219,5 +220,6 @@ export function importJson(row: MenuImportRow & { outcome: ImportOutcome }): Imp
     deadlineAt: row.deadlineAt.toISOString(),
     rowsDrafted: row.rowsDrafted,
     rowsBlankPrice: row.rowsBlankPrice,
+    source: row.source,
   };
 }

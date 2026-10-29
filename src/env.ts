@@ -37,6 +37,13 @@ const webSchema = z.object({
   // imports stay closed until it is stated "true".
   AI_MENU_MODEL: z.string().min(1).optional(),
   MENU_IMPORTS_ENABLED: z.enum(["true", "false"]).default("false").transform((value) => value === "true"),
+  // Web menu import (S24). KERNEL_API_KEY is server only; AI_WEB_MENU_MODEL is the text model chosen
+  // by the pre-registered web evaluation in 00-status.md and needs its own reviewed bounds entry in
+  // MENU_SPEND_POLICY. WEB_IMPORTS_ENABLED is separate from MENU_IMPORTS_ENABLED: unset reads as
+  // false, so web imports stay closed until it is stated "true".
+  KERNEL_API_KEY: z.string().min(1).optional(),
+  AI_WEB_MENU_MODEL: z.string().min(1).optional(),
+  WEB_IMPORTS_ENABLED: z.enum(["true", "false"]).default("false").transform((value) => value === "true"),
   // PYUSD on Solana devnet (S16). These are the rail's only two settings: the cluster, genesis hash,
   // mint, token program and decimals are reviewed code constants in src/domain/pyusd/constants.ts,
   // and any other PYUSD_ or SOLANA_ name refuses to boot. The RPC URL is checked against the pinned

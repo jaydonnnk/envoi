@@ -49,7 +49,7 @@ export type DraftItemSuggestion = {
   name: string; // "" when unreadable; completeness then blocks confirmation
   portion: string | null;
   priceSgdCents: SgdCents | null;
-  priceBasis: "explicit" | "ambiguous" | "blank" | "other_currency" | "duplicate_variant";
+  priceBasis: "explicit" | "ambiguous" | "blank" | "other_currency" | "duplicate_variant" | "not_on_page";
 };
 
 // The result of merging suggestions into a draft. `added` holds the new items, in order, with the

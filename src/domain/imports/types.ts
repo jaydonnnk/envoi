@@ -17,7 +17,7 @@ export type AdmissionLimits = { outletInFlight: number; globalInFlight: number; 
 export const DEFAULT_ADMISSION_LIMITS: AdmissionLimits = { outletInFlight: 1, globalInFlight: 1, outletDaily: 10, globalDaily: 50 };
 
 export type MenuModelBounds = {
-  model: string; // must equal AI_MENU_MODEL
+  model: string; // must equal AI_MENU_MODEL, or AI_WEB_MENU_MODEL for a web import
   inputUsdMicrosPerMillionTokens: number;
   outputUsdMicrosPerMillionTokens: number;
   maxInputTokens: number; // reviewed worst case for one shrunk photo plus the prompt
@@ -57,8 +57,10 @@ export function boundsFor(policy: MenuSpendPolicy, model: string): MenuModelBoun
   return policy.modelBounds.find((entry) => entry.model === model) ?? null;
 }
 
+export type ImportSource = "photo" | "web_page";
+
 export type ImportRejection =
-  | "imports_disabled" | "consent_required"
+  | "imports_disabled" | "web_imports_disabled" | "consent_required"
   | "in_flight_outlet" | "in_flight_global" | "daily_cap_outlet" | "daily_cap_global"
   | "spend_ceiling_unset" | "model_bounds_missing" | "model_bounds_exceeded" | "spend_ceiling_reached";
 
@@ -69,7 +71,11 @@ export type ImportAdmission =
 export type ImportOutcome =
   | "in_flight" | "completed" | "conflict_base_revision" | "conflict_confirmed" | "membership_revoked"
   | "rejected_upload" | "rejected_photo" | "model_failed" | "model_timeout" | "output_invalid"
-  | "aborted" | "expired";
+  | "aborted" | "expired"
+  // S24 web import: Kernel reached the host but the page needs a sign-in or answered an error
+  // status; no visible text within PAGE_READ_BOUNDS.timeoutMs; DNS, TLS, connection or session
+  // start failure; the text holds no SGD-like price, closed with no model call.
+  | "page_refused" | "page_timeout" | "page_unreachable" | "picture_menu";
 
 export type ClosedImportOutcome = Exclude<ImportOutcome, "in_flight" | "expired">;
 
@@ -94,6 +100,8 @@ export type MenuImportRow = {
   resultFingerprint: string | null;
   latencyMs: number | null;
   peakRssBytes: number | null;
+  source: ImportSource;
+  sourceHost: string | null;
 };
 
 // Gate 3's ImportUsage plus the call's actual cost, computed from its bounds entry, so the closing

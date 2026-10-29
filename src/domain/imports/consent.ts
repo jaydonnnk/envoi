@@ -29,3 +29,20 @@ function fnv1a(text: string): string {
 }
 
 export const MENU_CONSENT_VERSION = `menu-consent-${fnv1a(JSON.stringify(MENU_CONSENT_TEXT))}`;
+
+// The versioned notice for a web menu import (S24), derived the same way: the merchant confirms the
+// page is their shop's own, and is told what is sent where. Any change to the text changes the
+// version, and a request made under an older text is refused with consent_required.
+export const WEB_MENU_CONSENT_TEXT = {
+  short: [
+    "This page belongs to my shop, and Envoi may read its text once to draft my menu.",
+    "Envoi opens the page once in a Kernel cloud browser, reads its text and sends that text to OpenAI to draft item names, portions and SGD prices.",
+    "Envoi keeps only the page's host name, never the page text or the full link.",
+  ],
+  details: [
+    "Envoi sends the text with OpenAI's store: false setting; OpenAI may keep it for up to 30 days for abuse monitoring.",
+    "The Kernel browser session is deleted when the read ends. These are Kernel's and OpenAI's published terms; Envoi has not verified their deletion.",
+  ],
+} as const;
+
+export const WEB_MENU_CONSENT_VERSION = `web-menu-consent-${fnv1a(JSON.stringify(WEB_MENU_CONSENT_TEXT))}`;

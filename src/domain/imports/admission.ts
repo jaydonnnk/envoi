@@ -17,8 +17,8 @@ const SCHEMA_DIGEST = createHash("sha256").update(JSON.stringify(z.toJSONSchema(
 
 // Identifies the model, its reviewed bounds, the prompt and the output schema together: usage above a
 // reservation stops imports for this configuration until one of them changes in a reviewed diff.
-export function modelConfigVersion(bounds: MenuModelBounds): string {
-  return createHash("sha256").update(JSON.stringify({ bounds, prompt: MENU_VISION_PROMPT_VERSION, schema: SCHEMA_DIGEST })).digest("hex").slice(0, 32);
+export function modelConfigVersion(bounds: MenuModelBounds, prompt: string = MENU_VISION_PROMPT_VERSION): string {
+  return createHash("sha256").update(JSON.stringify({ bounds, prompt, schema: SCHEMA_DIGEST })).digest("hex").slice(0, 32);
 }
 
 const DAY_MS = 24 * 60 * 60_000;
@@ -30,7 +30,9 @@ export async function admitMenuImport(
     actorUserId: string;
     consentVersion: string; // the route has already checked it equals MENU_CONSENT_VERSION
     baseRevisionId: string;
-    model: string; // AI_MENU_MODEL
+    model: string; // AI_MENU_MODEL, or AI_WEB_MENU_MODEL for a web import
+    // S24: a web import names its prompt and the link's host; a photo import leaves both out.
+    web?: { promptVersion: string; host: string };
     limits: AdmissionLimits;
     policy: MenuSpendPolicy;
     now: Date;
@@ -43,7 +45,7 @@ export async function admitMenuImport(
     if (policy.dailyCeilingUsdMicros === null) return { ok: false, reason: "spend_ceiling_unset" };
     const bounds = boundsFor(policy, input.model);
     if (!bounds) return { ok: false, reason: "model_bounds_missing" };
-    const configVersion = modelConfigVersion(bounds);
+    const configVersion = modelConfigVersion(bounds, input.web?.promptVersion);
 
     const [overrun] = await tx
       .select({ id: menuImports.id })
@@ -88,6 +90,7 @@ export async function admitMenuImport(
       admittedAt: now,
       deadlineAt,
       reservedUsdMicros: reserved,
+      ...(input.web ? { source: "web_page", sourceHost: input.web.host } : {}),
     });
     await tx.update(menuImportAdmission).set({ lastAdmittedAt: now }).where(eq(menuImportAdmission.id, "global"));
     await recordAudit(tx, {
@@ -96,7 +99,7 @@ export async function admitMenuImport(
       action: "menu_import_admitted",
       outletId: input.outletId,
       operatorVisible: false,
-      details: { importId, baseRevisionId: input.baseRevisionId, reservedUsdMicros: reserved, modelConfigVersion: configVersion },
+      details: { importId, baseRevisionId: input.baseRevisionId, reservedUsdMicros: reserved, modelConfigVersion: configVersion, source: input.web ? "web_page" : "photo" },
     });
     return { ok: true, importId, admittedAt: now, deadlineAt, reservedUsdMicros: reserved };
   });
