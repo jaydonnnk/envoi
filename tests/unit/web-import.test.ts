@@ -101,6 +101,21 @@ describe("the Kernel session asks for no stealth, proxy, profile or CAPTCHA solv
   });
 });
 
+// Review additions, 2026-10-29: guards of readPageText that no named test covered.
+describe("readPageText reads only the merchant's own host, once, and keeps the URL out of logs", () => {
+  it.each([
+    ["fixture-shop.example", "ok"],
+    ["www.fixture-shop.example", "ok"],
+    ["other-shop.example", "refused"],
+    ["fixture-shop.example.other.example", "refused"],
+  ])("a page that lands on %s reads as %s", async (host, kind) => {
+    const { fake, result } = read({ kind: "page", text: FIXTURE_PAGE_TEXT, host });
+    expect((await result).kind).toBe(kind);
+    expect(fake.deletes()).toBe(1);
+  });
+
+});
+
 describe("a page with no printed price makes no model call (the price check)", () => {
   it("opening hours and a phone number are not prices; a marked or two-decimal price is", () => {
     expect(hasPrintedPrice("Open 8am to 10pm. Call 6123 4567.")).toBe(false);

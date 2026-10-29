@@ -41,6 +41,13 @@ return { status: response ? response.status() : null, text: text.slice(0, ${PAGE
 
 const record = (name: string, status: number | null = null): SafeErrorRecord => ({ name, status, retryable: null, provider: "kernel" });
 
+// The page must end on the host the merchant vouched for. A redirect elsewhere is a page that is not
+// theirs, so it reads as refused; only a leading "www." may differ.
+export function isSameShopHost(finalHost: string, requestedHost: string): boolean {
+  const bare = (host: string) => host.toLowerCase().replace(/\.$/, "").replace(/^www\./, "");
+  return bare(finalHost) === bare(requestedHost);
+}
+
 // Cuts the text to at most maxBytes of UTF-8 without splitting a character.
 export function cutToBytes(text: string, maxBytes: number): string {
   const bytes = new TextEncoder().encode(text);
@@ -73,7 +80,7 @@ export async function readPageText(url: URL, signal: AbortSignal, options: { api
     }
     const { status, text, host, signIn } = run.result;
     if (status !== null && status >= 400) return { kind: "refused", error: record("Error", status) };
-    if (signIn) return { kind: "refused", error: record("Error") };
+    if (signIn || !isSameShopHost(host, url.hostname)) return { kind: "refused", error: record("Error") };
     return { kind: "ok", text: cutToBytes(text, PAGE_READ_BOUNDS.maxTextBytes), finalHost: host };
   } catch (err) {
     if (budget.signal.aborted && !signal.aborted) return { kind: "timeout", error: record("TimeoutError") };
