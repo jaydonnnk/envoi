@@ -33,8 +33,10 @@ M=[
 results=[]
 for name,path,old,new,tests in M:
     p=f"{ROOT}/{path}"; orig=open(p).read()
-    if orig.count(old)!=1: results.append((name,"MUTATION NOT APPLIED",0)); continue
-    open(p,"w").write(orig.replace(old,new))
+    # 11c's line is shared with the photo path; the web path's copy is the last one in the file.
+    last=name.startswith("11c")
+    if orig.count(old)!=(2 if last else 1): results.append((name,"MUTATION NOT APPLIED",0)); continue
+    open(p,"w").write(orig[:orig.rindex(old)]+new+orig[orig.rindex(old)+len(old):] if last else orig.replace(old,new))
     try:
         r=subprocess.run(["npx","vitest","run","--config","config/vitest.config.ts",*tests],cwd=ROOT,capture_output=True,text=True,timeout=300)
         out=r.stdout+r.stderr
