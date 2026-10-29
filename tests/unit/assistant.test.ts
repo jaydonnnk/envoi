@@ -110,4 +110,14 @@ describe("Ask Envoi", () => {
       expect(moved.includes(needle), needle).toBe(true);
     }
   });
+
+  // S25 review fix: the generated client resolves only through next.config.ts's webpack rule, which
+  // Turbopack ignores, so a Next.js dev server or build without --webpack fails on "./client.js".
+  it("every Next.js dev server and build applies the generated client rule", () => {
+    const scripts = (JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")) as { scripts: Record<string, string> }).scripts;
+    const bundled = Object.entries(scripts).filter(([, command]) => /\bnext (dev|build)\b/.test(command));
+    expect(bundled.map(([name]) => name).sort()).toEqual(["build", "dev"]);
+    for (const [name, command] of bundled) expect(command.split(/\s+/), name).toContain("--webpack");
+    expect(readFileSync(join(process.cwd(), "next.config.ts"), "utf8")).toContain('extensionAlias: { ".js": [".ts", ".js"] }');
+  });
 });

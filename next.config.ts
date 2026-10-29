@@ -24,6 +24,7 @@ const nextConfig: NextConfig = {
   images: { unoptimized: true },
   // S25: Ask Envoi's route runs the APIMatic-generated client from source. Its modules import each
   // other as "./client.js" for client.ts, so inside that folder alone a .js import also tries .ts.
+  // Turbopack ignores this rule, so both next dev and next build run with --webpack (S25 review).
   webpack(config) {
     config.module.rules.push({ include: GENERATED_CLIENT_SOURCE, resolve: { extensionAlias: { ".js": [".ts", ".js"] } } });
     return config;
