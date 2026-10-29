@@ -416,7 +416,8 @@ for f, text in current.items():
 # (fb9511ab...ea23ea38 was its draft, 3a09621d...1af955d7 was the approved text of 2026-10-28).
 # 2026-10-29, S24 review: the section's status line now records that approval, a wording correction
 # (55850890...4d24b59f was the text before it).
-G3_REOPENING_SHA256 = "4fc6fdbc515fbb703a6afeb7737126289ca1e30e0c49916ccfddfc1a5daf963a"
+# 2026-10-29: next raised to 16.4.2 for security advisories by the user's instruction (4fc6fdbc...5daf963a was the text before it).
+G3_REOPENING_SHA256 = "c1178173813d92b910ffb370104b34e3538e9e8ed03ca12769a3dc115d155f9c"
 # 02-architecture.md may likewise equal its continuation amendment text, re-approved by the user on 2026-10-25
 # (bc504e10...d0e47a9f was the shop QR and order archive text, re-approved on 2026-10-24,
 # 28d54654...45561154 the Phantom landing text of 2026-10-18, 938d0a99...f3bf30a6 the English-only text of 2026-10-15).

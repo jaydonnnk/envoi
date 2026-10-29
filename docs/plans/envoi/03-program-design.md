@@ -432,7 +432,7 @@ Versions below were read from the npm registry on 2026-10-07 with `npm view <pkg
 
 | Package | Proposed pin | Role |
 | --- | --- | --- |
-| `next` | `16.4.0` | App Router, Node runtime on Render Free |
+| `next` | `16.4.2` | App Router, Node runtime on Render Free. Raised from `16.4.0` on 2026-10-29 by the user's instruction, with `eslint-config-next`, for advisories affecting `<=16.4.0`; `16.4.2` is the newest release at least two weeks old. |
 | `react`, `react-dom` | `19.3.0` | UI |
 | `typescript` | `6.0.3` | Type checking; also builds the maintenance runner. Pinned at `7.0.2` until the S1 boot check; see the resolved set below. |
 | `drizzle-orm` | `0.45.3` | Queries and row types |
