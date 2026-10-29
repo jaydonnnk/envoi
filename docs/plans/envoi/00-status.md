@@ -366,7 +366,7 @@ Proposed 2026-10-25, outside the build order: S19, S21, S20 and S22 from the [co
 S19 started 2026-10-25 on `envoi/slice-19-sdk-agent-route` and was done 2026-10-26, on `main` at `4b7fdb7` ([record](#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-2026-10-25)); S21 started 2026-10-26 on `envoi/slice-21-one-box-order` and was done 2026-10-26, on `main` at `9e9f9f1` ([record](#s21-order-from-one-sentence-2026-10-26)); S20 started 2026-10-28 on `envoi/slice-20-reference-agent` and was done 2026-10-28 ([record](#s20-reference-buyer-agent-on-the-generated-sdk-2026-10-28)); S22 started 2026-10-28 on `envoi/slice-22-photo-round-4` and was done 2026-10-28 with a recorded fail, on `main` at `981cb0f`; imports stay closed ([record](#s22-menu-photo-experiment-round-4-2026-10-28)).
 2026-10-28, S22 photos: the round 3 photos were lost from `.maintenance-build/s11-eval-photos/`; the user supplied five again, saved there as E1-E5, and said "Use five photos for S22 and record E6 as dropped." Later the same day the user said "make e6 from e4": E6 was rebuilt as `E6.png`, E4 turned 90 degrees in its pixels (1122x948 to 948x1122), as in round 3, so S22 counts six photos again.
 2026-10-28, menu photo round 5: after round 4 failed, the user had all four gates drafted for a round 5, re-approved Gate 1 for the allowance, then decided "Okay lets stop photo work and finish s15"; the Gate 2, 3 and 4 drafts were withdrawn, S23 does not exist, no round 5 ran and imports stay closed ([record](#gate-1-reopening-2026-10-28-menu-photo-round-5-allowance)).
-Added 2026-10-29, outside the build order: S24, menu from the shop's own page, started 2026-10-29 on `envoi/slice-24-web-menu-import`; built, deployed closed and awaiting its evaluation ([record](#s24-menu-from-the-shops-own-page-2026-10-29)).
+Added 2026-10-29, outside the build order: S24, menu from the shop's own page, started 2026-10-29 on `envoi/slice-24-web-menu-import`; built and deployed closed; its pre-registered evaluation passed on `gpt-6-luna` and its review fixes are committed locally on 2026-10-29; web import stays closed until the user adds the bounds entry and turns `WEB_IMPORTS_ENABLED` on ([record](#s24-menu-from-the-shops-own-page-2026-10-29)).
 
 ### S24 Menu from the shop's own page, 2026-10-29
 
@@ -383,7 +383,7 @@ Added 2026-10-29, outside the build order: S24, menu from the shop's own page, s
 - **Local screen check [verified 2026-10-29],** `next build` and `next start` on :3100 against a disposable database with a FIXTURE merchant and FIXTURE draft rows: with the switch false, no link field and the photo note shows (visible result 4, page half); the table at 1280 px and at 390 px (no page overflow; the table scrolls sideways with a hint); keyboard: arrows move, Enter edits a price, the availability select takes Down and Enter, Tab leaves the table, Enter on Remove removes the row.
 - **Neon [verified 2026-10-29], every read `READ ONLY`:** before, 25 migrations, no `source` columns, 0 import rows; `npm run db:migrate` applied 0025; after, 26 migrations, `source` and `source_host`, the outcome check with the web outcomes, and purchases (paid 11, review_expired 30, uncertain 2, unpaid_closed 4) and 2 outlets unchanged.
 - **Deploy [verified 2026-10-29]:** `main` fast-forwarded to `41c7384` and pushed with the branch (`git ls-remote` shows both at `41c7384`), which also pushed the docs commits `f1f6fad`, `83698ae` and `a9548d3`; Render serves `/fixtures/menus/test-shop.html` (200, "Demo fixture page") and `/api/v1/outlets` (200). The AG Grid table is live; web import stays closed, because `WEB_IMPORTS_ENABLED` is unset on Render and no bounds entry exists for `AI_WEB_MENU_MODEL`. CI on `main` was in progress when last read.
-- **Not yet done:** the evaluation below; visible results 1-3; Kernel session-deletion evidence on real sessions; the post-slice cleanup review.
+- **Not yet done:** visible results 1-3, which need the bounds entry and the switch on for a local run; the merge, push and deploy of the review commits; the post-slice cleanup review's open items below.
 
 #### S24 evaluation protocol, pre-registered 2026-10-29 before any model call
 
@@ -394,6 +394,63 @@ Added 2026-10-29, outside the build order: S24, menu from the shop's own page, s
 - **Spend:** within the USD 5 slice limit; the harness stops before any call whose worst case would pass it.
 - **Reporting:** every page's outcome, drafted rows, wrong prices, missing items, extra items and cost are recorded here, fixtures labeled FIXTURE, failures included.
 - **Limits [hypothesis]:** one real text page decides most of the real-page evidence; a pass does not show accuracy on other chains' sites. A pass permits asking the user to add the bounds entry and turn `WEB_IMPORTS_ENABLED` on; it turns nothing on.
+
+#### S24 evaluation results, 2026-10-29
+
+- **Scorer committed first:** `f3ced4d` added [`evidence/s24-web-eval.mts`](evidence/s24-web-eval.mts) with the matching rule written in its header and a self-test, before the first model call.
+  A row matches an expected item by exact name and portion, then by name and portion joined, then by a name that appears once on both sides, so a portion that tells two variants apart is never dropped (the round 4 trap).
+  Before that commit, one draft rule stricter than the protocol was brought to its text: a duplicate row with the same price is not counted wrong, because the protocol judges a price against "the matching name and portion".
+- **Run, 2026-10-29 04:56-04:57Z [verified]:** `gpt-6-luna`, prompt `menu-web-prompt-2026-10-29`, the product's `readPageText`, `hasPrintedPrice`, `draftMenuFromPageText`, `validateVisionDraft` and `keepPrintedOnly`, once per page, no rerun.
+  Bounds were a FIXTURE policy in the harness only (17,000 input and 6,000 output tokens); `MENU_SPEND_POLICY` is unchanged.
+  Full output: [`evidence/s24-web-eval-gpt-6-luna.json`](evidence/s24-web-eval-gpt-6-luna.json).
+- **Result: PASS.** Zero wrong filled prices; 51 of 51 expected priced items drafted with their price (46 needed); F5 and R2 closed `picture_menu` with no model call; F7 closed `page_refused`; R3 drafted nothing.
+  `gpt-5.6-luna` was not run, as the protocol says.
+
+| Page | Label | Outcome | Rows | Priced found | Wrong | Missing | Extra | Kernel session, delete status | Read ms | Model ms | Tokens in/out | Cost US$ |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F1 | FIXTURE | completed | 5 | 4/4 | 0 | 0 | 0 | `c9rwtalcbnhtinf200u2614y`, 204 | 2,949 | 4,732 | 456/278 | 0.000185 |
+| F2 | FIXTURE | completed | 5 | 5/5 | 0 | 0 | 0 | `xsn3wzs55hyz2gl88o6jmjyc`, 204 | 3,942 | 2,809 | 437/177 | 0.000133 |
+| F3 | FIXTURE | completed | 6 | 6/6 | 0 | 0 | 0 | `yensoj21vjz959poqpyf6ykz`, 204 | 3,023 | 2,985 | 420/214 | 0.000149 |
+| F4 | FIXTURE | completed | 4 | 4/4 | 0 | 0 | 0 | `z3uusck5opski4hrm20sk4wy`, 204 | 2,968 | 2,816 | 408/242 | 0.000162 |
+| F5 | FIXTURE | picture_menu, no model call | 0 | - | 0 | - | 0 | `jnamt6ja97g0zcymncpisbs5`, 204 | 2,768 | - | - | 0 |
+| F6 | FIXTURE | completed | 3 | 3/3 | 0 | 0 | 0 | `kgmwvjr1qaq84bk15odb3igv`, 204 | 2,882 | 3,187 | 429/124 | 0.000105 |
+| F7 | FIXTURE | page_refused | 0 | - | 0 | - | 0 | `i4oqtptwcxn4nctyopjmep5g`, 204 | 2,860 | - | - | 0 |
+| R1 | REAL, owner's verbal permission | completed | 29 | 29/29 | 0 | 0 | 0 | `rhwvtppa8lkmr1033baqw1m1`, 204 | 8,352 | 6,805 | 1,401/932 | 0.000607 |
+| R2 | REAL, owner's verbal permission | picture_menu, no model call | 0 | - | 0 | - | 0 | `kp2f2l4ukphkzyku1ctoyg2k`, 204 | 10,878 | - | - | 0 |
+| R3 | REAL, owner's verbal permission | picture_menu, no model call | 0 | - | 0 | - | 0 | `gjzea6lnc6ngkn78fbqx1eud`, 204 | 5,262 | - | - | 0 |
+
+- **Spend:** US$0.001341 of the US$5 slice limit, from returned token usage and S4's 2026-10-14 list prices **[vendor claim]**; prices were not re-checked.
+  Kernel: ten sessions, each created once and deleted with HTTP 204, read by a fetch wrapper around the Kernel client; Kernel's charge for them **[unknown]**.
+- **Notes, not substituted for the score:** F1's "Ebi fry + Mentaiko" stayed blank with basis `blank`; F6's "Golden Lobster" instruction drafted nothing; F4's "Family set for four" came back as name "Family set" with portion "for four" and matched by the joined rule; no name was dropped by the verbatim rule on any page; R3, the image-only PDF, read as zero bytes of text and closed `picture_menu`.
+- **Limits [hypothesis]:** R1 is the only real text page, so the real-page evidence is one chain's site; fixtures were written by the builder; a pass does not show accuracy on other sites. It permits asking the user to add the bounds entry and turn `WEB_IMPORTS_ENABLED` on; it turns nothing on.
+
+#### S24 review, 2026-10-29
+
+An adversarial review of the S24 commits by a fresh session that did not build them, most severe first.
+Fixes are local commits on `envoi/slice-24-web-menu-import`, not pushed.
+
+- **1. Fixed, `e74e298`: a link that redirected to another host was read and drafted [verified].** `readPageText` returned `finalHost` but nothing read it; a Kernel session on an `httpbin.org` redirect to `example.com` returned `ok` with `example.com`'s text (session `j7yq2x4g2reegcfin8gpbacl`, deleted).
+  The page must now end on the host the merchant vouched for, a leading `www.` aside, or it reads as refused; the same link then returned `refused` (session `xf97lxxmenrp24wtnoarekab`, deleted).
+  No evaluation page redirected, so the result above is unchanged by it.
+- **2. Fixed, `b229b6c`: CI failed on `41c7384` [verified].** `tests/e2e/run-public-api.ts` refuses to start while a name in `ENV_NAMES` is unset, and S24 added three names without setting them there; reproduced locally, then the run passed (contract and generated client exit 0).
+- **3. Open, needs your decision: the proposed input bound does not cover the worst case [verified by arithmetic].** The page text may be 65,536 bytes and a token is at least one byte, so one call can send up to about 75,000 input tokens (with `</page>` escapes and the prompt), against the proposed 17,000.
+  A call whose cost passes its reservation stops every web import of that configuration (`model_bounds_exceeded`) until a reviewed diff; a member who pastes a long or dense page could do that [hypothesis].
+  Proposed bounds entry instead: `gpt-6-luna`, US$0.10 and US$0.50 per million input and output tokens, 76,000 input and 6,000 output tokens, a reservation of US$0.0106; R1 used 1,401 input tokens.
+- **4. Fixed, `7e7b43a`: the Kernel SDK printed request bodies when `KERNEL_LOG=debug` [verified].** The execute body carries the full link; the client now sets `logLevel: "off"`, as it already pins the API host.
+- **5. Fixed, `48dbbed`: four Kernel guards had no failing test [verified].** SDK retries on a failed create (more than one session per import), the link written into the browser code without JSON quoting, a failed delete thrown out of `finally`, and the SDK logger read from the environment; each mutation passed every test before.
+  Ten review mutations, each failing at least one test: [`evidence/s24-review-mutations.txt`](evidence/s24-review-mutations.txt), from [`evidence/s24-review-mutate.py`](evidence/s24-review-mutate.py).
+- **6. Fixed, `ad8343f` and the regenerated table: the committed mutation evidence was not reproducible [verified].** Mutation 11c's target line is shared with the photo path, so the committed script reported it as not applied; the committed table also failed `git diff --check main..HEAD`. The script now mutates the web copy and all 27 fail a named test on the reviewed code ([`evidence/s24-mutations.txt`](evidence/s24-mutations.txt)).
+- **7. Fixed, `98bceba` and `bf38679`: two grid defects [verified on a local production build].** At 1280 px and 390 px, a wrapped note made its row 68 px tall while the other cells kept their text at the top, out of line with Remove; and two variants both read as "Remove Ebi fry" to a screen reader. Cells now centre and the button name carries the portion.
+- **8. Open, needs your decision: Next.js 16.4.0 has published advisories [verified by `npm audit`, 2026-10-29].** One critical (unauthenticated remote code execution in the Image Optimization API with SVG files; `images.unoptimized` is true here, so exposure is **[unknown]** and likely low **[hypothesis]**) and two others in the same range, fixed in 16.4.3.
+  `next build` now fails once with `SecurityFatalError` when run by an agent and passes on a retry within five minutes; CI's build passed on `41c7384`, and Render's build behaviour **[unknown]**. Upgrading needs your approval.
+- **9. Open, wording: Gate 1 says a PDF link "answers as a page Envoi could not read", but R3 answered "Your page shows its menu as a picture" [verified].** Gate 1's own edge case allows "one of the answers above", and nothing was drafted either way; a wording correction or a code change is your choice.
+- **10. Accepted limits, recorded [verified by direct calls]:** the verbatim rule keeps any number printed anywhere on the page, so "3 pcs" or "Open 8am" supply $3.00 or $8.00 (R22); a name is a substring match, so a drafted "Tea" survives on a page that prints "Steamed"; a curly apostrophe on the page drops a name the model wrote with a straight one; "12 SGD" with the currency after the number is not seen as a price; the sign-in check counts any password field, visible or not, so a menu page with a hidden login form would read as refused **[hypothesis]**; a session created while the request is aborted before its id returns is not deleted by Envoi and relies on Kernel's 30-second timeout **[vendor claim]**.
+- **Checked and found sound [verified]:** the link check refuses decimal, octal and hex IPv4 (`https://2130706433`), IPv6, `localhost.`, user-info and non-443 ports; the browser code embeds the link as one JSON string literal; the session is deleted on ok, refused, timeout, unreachable, abort and a failed delete; the route's check order and answer codes match Gate 3; a web reservation is released when no model call was dispatched; the photo route, `MENU_IMPORTS_ENABLED` and the S6, S7 and S11 tests are unchanged.
+- **The builder's four recorded deviations:** the widened outcome check (needed by the closing write), `ImportJson.source`, `blankPrices` in the response and the `blank` basis shown as not printed are additive and change no approved decision, so none needed a gate reopening [hypothesis, the reviewer's judgement]. Gate 3's grid rule says a blank price shows its basis in words; the basis lives only in the import response, so after a reload the cell says "Price needed" [verified].
+- **Docs, `1183c3b`:** the Gate 2 and Gate 3 S24 sections still opened with "DRAFTED, NOT APPROVED"; both now record the 2026-10-29 approval, a wording correction, with the two protected-text pins moved in `gate4_check.py`.
+- **Grid checks [verified 2026-10-29, local production build on :3100, FIXTURE merchant and rows, switch false]:** 1280 px and 390 px, no page overflow at 390 px (`scrollWidth` 390) with the sideways hint; arrows move, Enter edits and keeps a price, the availability select takes Down, Down and Enter, Tab leaves the table, Enter on Remove removes the row; Save draft persisted version 2; Confirm stayed disabled while a price was blank.
+- **Checks on the reviewed code [verified 2026-10-29]:** 82 files and 621 tests pass; `typecheck`, `typecheck:client` and `lint` pass; `next build` passes on retry and `scan-build` finds no send method; `gate4_check.py ... main` passes; `git diff --check main..HEAD` is clean.
+- **Neon, `READ ONLY` [verified 2026-10-29]:** 26 migrations, `source` and `source_host` present, the outcome check holds the web outcomes, 0 import rows, purchases (paid 11, review_expired 30, uncertain 2, unpaid_closed 4) and 2 outlets, as before.
 
 ### S22 Menu photo experiment, round 4, 2026-10-28
 

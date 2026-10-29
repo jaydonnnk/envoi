@@ -1,0 +1,1078 @@
+{
+ "protocol": "S24 web menu evaluation, pre-registered 2026-10-29; scorer committed before the first model call",
+ "model": "gpt-6-luna",
+ "prompt": "menu-web-prompt-2026-10-29",
+ "ranAt": "2026-10-29T04:57:33.146Z",
+ "pagesRun": 10,
+ "wrongFilledTotal": 0,
+ "pricedFound": 51,
+ "pricedExpected": 51,
+ "pricedNeeded": 46,
+ "outcomeChecks": [
+  {
+   "page": "F5",
+   "expected": "picture_menu",
+   "actual": "picture_menu",
+   "modelCalled": false,
+   "pass": true
+  },
+  {
+   "page": "F7",
+   "expected": "page_refused",
+   "actual": "page_refused",
+   "modelCalled": false,
+   "pass": true
+  },
+  {
+   "page": "R2",
+   "expected": "picture_menu",
+   "actual": "picture_menu",
+   "modelCalled": false,
+   "pass": true
+  },
+  {
+   "page": "R3",
+   "expected": "no_draft",
+   "actual": "picture_menu",
+   "modelCalled": false,
+   "pass": true
+  }
+ ],
+ "spentUsdMicros": 1341,
+ "pass": true,
+ "results": [
+  {
+   "page": "F1",
+   "label": "FIXTURE",
+   "host": "envoi-helx.onrender.com",
+   "outcome": "completed",
+   "kernel": {
+    "read": "ok",
+    "error": null,
+    "finalHost": "envoi-helx.onrender.com",
+    "textBytes": 281,
+    "ms": 2949,
+    "created": [
+     "c9rwtalcbnhtinf200u2614y"
+    ],
+    "deletes": [
+     {
+      "sessionId": "c9rwtalcbnhtinf200u2614y",
+      "status": 204
+     }
+    ]
+   },
+   "modelCalled": true,
+   "call": {
+    "inputTokens": 456,
+    "outputTokens": 278,
+    "costUsdMicros": 185,
+    "ms": 4732,
+    "kind": "ok"
+   },
+   "droppedNames": 0,
+   "rows": [
+    {
+     "name": "Kopi C",
+     "portion": "Hot",
+     "priceSgdCents": 180,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Kopi C",
+      "portion": "Hot",
+      "price": "1.80"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Teh O",
+     "portion": "Hot",
+     "priceSgdCents": 160,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Teh O",
+      "portion": "Hot",
+      "price": "1.60"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Kaya toast set",
+     "portion": null,
+     "priceSgdCents": 350,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Kaya toast set",
+      "portion": null,
+      "price": "3.50"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Ebi fry",
+     "portion": "3 pcs",
+     "priceSgdCents": 490,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Ebi fry",
+      "portion": "3 pcs",
+      "price": "4.90"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Ebi fry",
+     "portion": "+ Mentaiko",
+     "priceSgdCents": null,
+     "priceBasis": "blank",
+     "matched": {
+      "name": "Ebi fry",
+      "portion": "+ Mentaiko",
+      "price": null
+     },
+     "rule": 1,
+     "duplicate": false
+    }
+   ],
+   "wrongFilled": [],
+   "pricedFound": 4,
+   "pricedExpected": 4,
+   "missing": [],
+   "extras": []
+  },
+  {
+   "page": "F2",
+   "label": "FIXTURE",
+   "host": "envoi-helx.onrender.com",
+   "outcome": "completed",
+   "kernel": {
+    "read": "ok",
+    "error": null,
+    "finalHost": "envoi-helx.onrender.com",
+    "textBytes": 279,
+    "ms": 3942,
+    "created": [
+     "xsn3wzs55hyz2gl88o6jmjyc"
+    ],
+    "deletes": [
+     {
+      "sessionId": "xsn3wzs55hyz2gl88o6jmjyc",
+      "status": 204
+     }
+    ]
+   },
+   "modelCalled": true,
+   "call": {
+    "inputTokens": 437,
+    "outputTokens": 177,
+    "costUsdMicros": 133,
+    "ms": 2809,
+    "kind": "ok"
+   },
+   "droppedNames": 0,
+   "rows": [
+    {
+     "name": "Steamed chicken rice",
+     "portion": null,
+     "priceSgdCents": 450,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Steamed chicken rice",
+      "portion": null,
+      "price": "4.50"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Roasted chicken rice",
+     "portion": null,
+     "priceSgdCents": 480,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Roasted chicken rice",
+      "portion": null,
+      "price": "4.80"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Char siew rice",
+     "portion": null,
+     "priceSgdCents": 520,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Char siew rice",
+      "portion": null,
+      "price": "5.20"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Chicken drumstick rice",
+     "portion": null,
+     "priceSgdCents": 600,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Chicken drumstick rice",
+      "portion": null,
+      "price": "6.00"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Oyster sauce vegetables",
+     "portion": null,
+     "priceSgdCents": 300,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Oyster sauce vegetables",
+      "portion": null,
+      "price": "3.00"
+     },
+     "rule": 1,
+     "duplicate": false
+    }
+   ],
+   "wrongFilled": [],
+   "pricedFound": 5,
+   "pricedExpected": 5,
+   "missing": [],
+   "extras": []
+  },
+  {
+   "page": "F3",
+   "label": "FIXTURE",
+   "host": "envoi-helx.onrender.com",
+   "outcome": "completed",
+   "kernel": {
+    "read": "ok",
+    "error": null,
+    "finalHost": "envoi-helx.onrender.com",
+    "textBytes": 208,
+    "ms": 3023,
+    "created": [
+     "yensoj21vjz959poqpyf6ykz"
+    ],
+    "deletes": [
+     {
+      "sessionId": "yensoj21vjz959poqpyf6ykz",
+      "status": 204
+     }
+    ]
+   },
+   "modelCalled": true,
+   "call": {
+    "inputTokens": 420,
+    "outputTokens": 214,
+    "costUsdMicros": 149,
+    "ms": 2985,
+    "kind": "ok"
+   },
+   "droppedNames": 0,
+   "rows": [
+    {
+     "name": "Mee goreng",
+     "portion": "Regular",
+     "priceSgdCents": 500,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Mee goreng",
+      "portion": "Regular",
+      "price": "5.00"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Mee goreng",
+     "portion": "Large",
+     "priceSgdCents": 650,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Mee goreng",
+      "portion": "Large",
+      "price": "6.50"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Fishball noodles",
+     "portion": "Small",
+     "priceSgdCents": 350,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Fishball noodles",
+      "portion": "Small",
+      "price": "3.50"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Fishball noodles",
+     "portion": "Large",
+     "priceSgdCents": 450,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Fishball noodles",
+      "portion": "Large",
+      "price": "4.50"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Teh tarik",
+     "portion": "Hot",
+     "priceSgdCents": 140,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Teh tarik",
+      "portion": "Hot",
+      "price": "1.40"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Teh tarik",
+     "portion": "Iced",
+     "priceSgdCents": 190,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Teh tarik",
+      "portion": "Iced",
+      "price": "1.90"
+     },
+     "rule": 1,
+     "duplicate": false
+    }
+   ],
+   "wrongFilled": [],
+   "pricedFound": 6,
+   "pricedExpected": 6,
+   "missing": [],
+   "extras": []
+  },
+  {
+   "page": "F4",
+   "label": "FIXTURE",
+   "host": "envoi-helx.onrender.com",
+   "outcome": "completed",
+   "kernel": {
+    "read": "ok",
+    "error": null,
+    "finalHost": "envoi-helx.onrender.com",
+    "textBytes": 184,
+    "ms": 2968,
+    "created": [
+     "z3uusck5opski4hrm20sk4wy"
+    ],
+    "deletes": [
+     {
+      "sessionId": "z3uusck5opski4hrm20sk4wy",
+      "status": 204
+     }
+    ]
+   },
+   "modelCalled": true,
+   "call": {
+    "inputTokens": 408,
+    "outputTokens": 242,
+    "costUsdMicros": 162,
+    "ms": 2816,
+    "kind": "ok"
+   },
+   "droppedNames": 0,
+   "rows": [
+    {
+     "name": "Nasi lemak with chicken wing",
+     "portion": null,
+     "priceSgdCents": 500,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Nasi lemak with chicken wing",
+      "portion": null,
+      "price": "5"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Nasi lemak with fried fish",
+     "portion": null,
+     "priceSgdCents": 600,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Nasi lemak with fried fish",
+      "portion": null,
+      "price": "6"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Otah",
+     "portion": null,
+     "priceSgdCents": 200,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Otah",
+      "portion": null,
+      "price": "2"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Family set",
+     "portion": "for four",
+     "priceSgdCents": 2400,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Family set for four",
+      "portion": null,
+      "price": "24"
+     },
+     "rule": 2,
+     "duplicate": false
+    }
+   ],
+   "wrongFilled": [],
+   "pricedFound": 4,
+   "pricedExpected": 4,
+   "missing": [],
+   "extras": []
+  },
+  {
+   "page": "F5",
+   "label": "FIXTURE",
+   "host": "envoi-helx.onrender.com",
+   "outcome": "picture_menu",
+   "kernel": {
+    "read": "ok",
+    "error": null,
+    "finalHost": "envoi-helx.onrender.com",
+    "textBytes": 136,
+    "ms": 2768,
+    "created": [
+     "jnamt6ja97g0zcymncpisbs5"
+    ],
+    "deletes": [
+     {
+      "sessionId": "jnamt6ja97g0zcymncpisbs5",
+      "status": 204
+     }
+    ]
+   },
+   "modelCalled": false,
+   "call": null,
+   "droppedNames": 0,
+   "rows": [],
+   "wrongFilled": [],
+   "pricedFound": 0,
+   "pricedExpected": 0,
+   "missing": [],
+   "extras": []
+  },
+  {
+   "page": "F6",
+   "label": "FIXTURE",
+   "host": "envoi-helx.onrender.com",
+   "outcome": "completed",
+   "kernel": {
+    "read": "ok",
+    "error": null,
+    "finalHost": "envoi-helx.onrender.com",
+    "textBytes": 300,
+    "ms": 2882,
+    "created": [
+     "kgmwvjr1qaq84bk15odb3igv"
+    ],
+    "deletes": [
+     {
+      "sessionId": "kgmwvjr1qaq84bk15odb3igv",
+      "status": 204
+     }
+    ]
+   },
+   "modelCalled": true,
+   "call": {
+    "inputTokens": 429,
+    "outputTokens": 124,
+    "costUsdMicros": 105,
+    "ms": 3187,
+    "kind": "ok"
+   },
+   "droppedNames": 0,
+   "rows": [
+    {
+     "name": "Plain prata",
+     "portion": null,
+     "priceSgdCents": 130,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Plain prata",
+      "portion": null,
+      "price": "1.30"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Egg prata",
+     "portion": null,
+     "priceSgdCents": 190,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Egg prata",
+      "portion": null,
+      "price": "1.90"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Cheese prata",
+     "portion": null,
+     "priceSgdCents": 320,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Cheese prata",
+      "portion": null,
+      "price": "3.20"
+     },
+     "rule": 1,
+     "duplicate": false
+    }
+   ],
+   "wrongFilled": [],
+   "pricedFound": 3,
+   "pricedExpected": 3,
+   "missing": [],
+   "extras": []
+  },
+  {
+   "page": "F7",
+   "label": "FIXTURE",
+   "host": "envoi-helx.onrender.com",
+   "outcome": "page_refused",
+   "kernel": {
+    "read": "refused",
+    "error": {
+     "name": "Error",
+     "status": null,
+     "retryable": null,
+     "provider": "kernel"
+    },
+    "finalHost": null,
+    "textBytes": null,
+    "ms": 2860,
+    "created": [
+     "i4oqtptwcxn4nctyopjmep5g"
+    ],
+    "deletes": [
+     {
+      "sessionId": "i4oqtptwcxn4nctyopjmep5g",
+      "status": 204
+     }
+    ]
+   },
+   "modelCalled": false,
+   "call": null,
+   "droppedNames": 0,
+   "rows": [],
+   "wrongFilled": [],
+   "pricedFound": 0,
+   "pricedExpected": 0,
+   "missing": [],
+   "extras": []
+  },
+  {
+   "page": "R1",
+   "label": "REAL, owner's verbal permission 2026-10-29",
+   "host": "kingoffriedrice-sg.com",
+   "outcome": "completed",
+   "kernel": {
+    "read": "ok",
+    "error": null,
+    "finalHost": "kingoffriedrice-sg.com",
+    "textBytes": 4160,
+    "ms": 8352,
+    "created": [
+     "rhwvtppa8lkmr1033baqw1m1"
+    ],
+    "deletes": [
+     {
+      "sessionId": "rhwvtppa8lkmr1033baqw1m1",
+      "status": 204
+     }
+    ]
+   },
+   "modelCalled": true,
+   "call": {
+    "inputTokens": 1401,
+    "outputTokens": 932,
+    "costUsdMicros": 607,
+    "ms": 6805,
+    "kind": "ok"
+   },
+   "droppedNames": 0,
+   "rows": [
+    {
+     "name": "Streaky Bacon Egg Fried Rice",
+     "portion": null,
+     "priceSgdCents": 910,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Streaky Bacon Egg Fried Rice",
+      "portion": null,
+      "price": "9.10"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Streaky Bacon XO Egg Fried Rice",
+     "portion": null,
+     "priceSgdCents": 1060,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Streaky Bacon XO Egg Fried Rice",
+      "portion": null,
+      "price": "10.60"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Streaky Bacon Tom Yam Egg Fried Rice",
+     "portion": null,
+     "priceSgdCents": 1010,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Streaky Bacon Tom Yam Egg Fried Rice",
+      "portion": null,
+      "price": "10.10"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Streaky Bacon Mala Egg Fried Rice",
+     "portion": null,
+     "priceSgdCents": 1010,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Streaky Bacon Mala Egg Fried Rice",
+      "portion": null,
+      "price": "10.10"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Egg Fried Rice",
+     "portion": null,
+     "priceSgdCents": 660,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Egg Fried Rice",
+      "portion": null,
+      "price": "6.60"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Shrimp Egg Fried Rice",
+     "portion": null,
+     "priceSgdCents": 910,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Shrimp Egg Fried Rice",
+      "portion": null,
+      "price": "9.10"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Pork Cutlet Egg Fried Rice",
+     "portion": null,
+     "priceSgdCents": 910,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Pork Cutlet Egg Fried Rice",
+      "portion": null,
+      "price": "9.10"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Crab Meat & Tobiko Egg Fried Rice",
+     "portion": null,
+     "priceSgdCents": 1290,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Crab Meat & Tobiko Egg Fried Rice",
+      "portion": null,
+      "price": "12.90"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Chicken Chop Egg Fried Rice",
+     "portion": null,
+     "priceSgdCents": 910,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Chicken Chop Egg Fried Rice",
+      "portion": null,
+      "price": "9.10"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Luncheon Meat Egg Fried Rice",
+     "portion": null,
+     "priceSgdCents": 890,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Luncheon Meat Egg Fried Rice",
+      "portion": null,
+      "price": "8.90"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "XO Fried Rice",
+     "portion": null,
+     "priceSgdCents": 810,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "XO Fried Rice",
+      "portion": null,
+      "price": "8.10"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Shrimp XO Fried Rice",
+     "portion": null,
+     "priceSgdCents": 1060,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Shrimp XO Fried Rice",
+      "portion": null,
+      "price": "10.60"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Pork Cutlet XO Fried Rice",
+     "portion": null,
+     "priceSgdCents": 1060,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Pork Cutlet XO Fried Rice",
+      "portion": null,
+      "price": "10.60"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Crab Meat & Tobiko XO Fried Rice",
+     "portion": null,
+     "priceSgdCents": 1430,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Crab Meat & Tobiko XO Fried Rice",
+      "portion": null,
+      "price": "14.30"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Chicken Chop XO Fried Rice",
+     "portion": null,
+     "priceSgdCents": 1060,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Chicken Chop XO Fried Rice",
+      "portion": null,
+      "price": "10.60"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Luncheon Meat XO Egg Fried Rice",
+     "portion": null,
+     "priceSgdCents": 990,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Luncheon Meat XO Egg Fried Rice",
+      "portion": null,
+      "price": "9.90"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Tom Yum Fried Rice",
+     "portion": null,
+     "priceSgdCents": 760,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Tom Yum Fried Rice",
+      "portion": null,
+      "price": "7.60"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Shrimp Tom Yum Fried Rice",
+     "portion": null,
+     "priceSgdCents": 1010,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Shrimp Tom Yum Fried Rice",
+      "portion": null,
+      "price": "10.10"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Pork Cutlet Tom Yum Fried Rice",
+     "portion": null,
+     "priceSgdCents": 1010,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Pork Cutlet Tom Yum Fried Rice",
+      "portion": null,
+      "price": "10.10"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Crab Meat & Tobiko Tom Yum Fried Rice",
+     "portion": null,
+     "priceSgdCents": 1390,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Crab Meat & Tobiko Tom Yum Fried Rice",
+      "portion": null,
+      "price": "13.90"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Chicken Chop Tom Yum Fried Rice",
+     "portion": null,
+     "priceSgdCents": 1010,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Chicken Chop Tom Yum Fried Rice",
+      "portion": null,
+      "price": "10.10"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Luncheon Meat Tom Yum Egg Fried Rice",
+     "portion": null,
+     "priceSgdCents": 990,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Luncheon Meat Tom Yum Egg Fried Rice",
+      "portion": null,
+      "price": "9.90"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Mala Fried Rice",
+     "portion": null,
+     "priceSgdCents": 760,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Mala Fried Rice",
+      "portion": null,
+      "price": "7.60"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Shrimp Mala Fried Rice",
+     "portion": null,
+     "priceSgdCents": 1010,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Shrimp Mala Fried Rice",
+      "portion": null,
+      "price": "10.10"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Pork Cutlet Mala Fried Rice",
+     "portion": null,
+     "priceSgdCents": 1010,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Pork Cutlet Mala Fried Rice",
+      "portion": null,
+      "price": "10.10"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Crab Meat & Tobiko Mala Fried Rice",
+     "portion": null,
+     "priceSgdCents": 1390,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Crab Meat & Tobiko Mala Fried Rice",
+      "portion": null,
+      "price": "13.90"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Chicken Chop Mala Fried Rice",
+     "portion": null,
+     "priceSgdCents": 1010,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Chicken Chop Mala Fried Rice",
+      "portion": null,
+      "price": "10.10"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Luncheon Meat Mala Egg Fried Rice",
+     "portion": null,
+     "priceSgdCents": 990,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Luncheon Meat Mala Egg Fried Rice",
+      "portion": null,
+      "price": "9.90"
+     },
+     "rule": 1,
+     "duplicate": false
+    },
+    {
+     "name": "Luncheon Meat Fries",
+     "portion": null,
+     "priceSgdCents": 450,
+     "priceBasis": "explicit",
+     "matched": {
+      "name": "Luncheon Meat Fries",
+      "portion": null,
+      "price": "4.50"
+     },
+     "rule": 1,
+     "duplicate": false
+    }
+   ],
+   "wrongFilled": [],
+   "pricedFound": 29,
+   "pricedExpected": 29,
+   "missing": [],
+   "extras": []
+  },
+  {
+   "page": "R2",
+   "label": "REAL, owner's verbal permission 2026-10-29",
+   "host": "kokkeewontonnoodle.com.sg",
+   "outcome": "picture_menu",
+   "kernel": {
+    "read": "ok",
+    "error": null,
+    "finalHost": "kokkeewontonnoodle.com.sg",
+    "textBytes": 372,
+    "ms": 10878,
+    "created": [
+     "kp2f2l4ukphkzyku1ctoyg2k"
+    ],
+    "deletes": [
+     {
+      "sessionId": "kp2f2l4ukphkzyku1ctoyg2k",
+      "status": 204
+     }
+    ]
+   },
+   "modelCalled": false,
+   "call": null,
+   "droppedNames": 0,
+   "rows": [],
+   "wrongFilled": [],
+   "pricedFound": 0,
+   "pricedExpected": 0,
+   "missing": [],
+   "extras": []
+  },
+  {
+   "page": "R3",
+   "label": "REAL, owner's verbal permission 2026-10-29",
+   "host": "jumbogroup.sg",
+   "outcome": "picture_menu",
+   "kernel": {
+    "read": "ok",
+    "error": null,
+    "finalHost": "jumbogroup.sg",
+    "textBytes": 0,
+    "ms": 5262,
+    "created": [
+     "gjzea6lnc6ngkn78fbqx1eud"
+    ],
+    "deletes": [
+     {
+      "sessionId": "gjzea6lnc6ngkn78fbqx1eud",
+      "status": 204
+     }
+    ]
+   },
+   "modelCalled": false,
+   "call": null,
+   "droppedNames": 0,
+   "rows": [],
+   "wrongFilled": [],
+   "pricedFound": 0,
+   "pricedExpected": 0,
+   "missing": [],
+   "extras": []
+  }
+ ]
+}
