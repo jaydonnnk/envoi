@@ -457,7 +457,34 @@ APIMatic stays development tooling: the document is uploaded to generate the cli
 **Risks.**
 - **R5 extends:** sentence-to-basket accuracy, quantity accuracy and the reference agent's tool choices are unmeasured until their pre-registered evaluations.
 - **New, R19:** a filled basket can be wrong in a way the buyer does not notice; the review shows every line and quantity before payment, and the falsifier is a usability failure where a tester pays for a basket they did not mean.
+  *Added 2026-10-29:* the five-tester study that would have exercised this falsifier is not run, by the user's decision, so **R19 stays open and unfalsified**; the review screen's line-by-line display is the only mitigation on record, and no claim is made that a buyer notices a wrong basket.
 - **New, R20:** the reference agent runs outside Envoi's control on a person's machine; its spend and key are that person's, and Envoi's guards do not depend on it behaving.
+
+### Web menu import amendment, 2026-10-29
+
+Drafted 2026-10-29 for the Gate 1 reopening of the same day; **DRAFTED, NOT APPROVED**.
+Approval would accept this amendment as a proposal; it establishes no Kernel, AG Grid, model or page evidence and authorizes no Gate 3 or 4 change, sign-up, install, Kernel session, model call or deploy.
+
+**Web menu import (S24).**
+1. The merchant sends one https link and the ownership tick to a new route beside the photo route; the import runs inside the request, as a photo import does, and returns the outcome.
+2. The URL is checked before anything is admitted: `https` only, port 443, no user or password part, a host name rather than an IP literal, no `localhost` or single-label host, at most 2,048 characters. Kernel's browser runs in Kernel's cloud, not inside Render, so it cannot reach Envoi's own network [hypothesis, from Kernel's documentation].
+3. Admission reuses the S11 table, caps, spend ceiling, membership recheck and request-memory boundary unchanged; a web import counts toward the same per-outlet and global daily caps as a photo import, so the existing caps bound both Kernel sessions and model spend.
+4. One Kernel session per import: headless, no stealth mode, no proxy, no saved profile or login, no CAPTCHA solving, one navigation to the given URL with no link following, a 20-second bound, then the visible text of the page, capped at 64 KB, and the session is deleted on every path.
+5. If the text holds no SGD-like price, the import closes as a picture menu with no model call.
+6. Otherwise one text model call with no tools and no retries, `store: false`, through the existing AI SDK pins, to the model named by a new `AI_WEB_MENU_MODEL` that the evaluation chooses, returns the same item shape as a photo draft. The page text is untrusted input and is sent only as data.
+7. Envoi then keeps a drafted price only if the same digits are printed on the page, and keeps an item only if its name is on the page; everything else goes blank or out. The result merges through the existing `commitImport` into the unpublished draft as import suggestions; confirmation and publication are unchanged.
+8. Page text and the full URL are held in request memory only: neither is written to the database, a log or a trace. The import row records the source kind and the host.
+9. A new switch, `WEB_IMPORTS_ENABLED`, default false and separate from `MENU_IMPORTS_ENABLED`, turns the route and the setup-page link on only after the pre-registered evaluation passes and the user approves it.
+10. The draft is reviewed in an AG Grid Community table that replaces the item list of the existing menu editor, for typed and imported drafts alike; the editor's save, blank-price and confirmation rules stay on the server.
+
+**Not changed.** Photo import stays closed, hosting, auth, PayPal, PYUSD, scan, MCP, roles and every buyer route. No crawl, search or scheduled re-read of a merchant's page.
+
+**Risks.**
+- **New, R22:** a page can print a price that is not the shop's current price, or the model can pair a printed price with the wrong printed item. The verbatim rule stops invented digits, not wrong pairings; the merchant's table review and confirmation are the only guard against pairing errors, and the evaluation measures them.
+- **New, R23:** Kernel is a new external dependency whose free allowance, rate limits, pricing and availability through judging are **[unknown]** until the user's account exists. Losing it closes web import only; manual entry is unaffected.
+- **New, R24:** the page is untrusted text that may try to steer the model. The call has no tools, the output is a closed schema, the verbatim rule bounds prices, and nothing publishes without the merchant; a page can still add a wrongly paired item to the draft.
+- **R6 does not grow:** no image is decoded on Render for a web import.
+- R21 was the withdrawn round 5 draft's risk, preserved in [`photo-import-gap-analysis.md`](photo-import-gap-analysis.md), and stays unused so the two are never confused.
 
 ## External
 
@@ -471,6 +498,8 @@ Names below are **proposed configuration names only**, never values. No credenti
 | GitHub Actions | Finite scheduled Node maintenance; `MAINTENANCE_DATABASE_URL`, sandbox provider secrets and enabled-rail RPC config needed for reads only. | Redacted logs, no migration credentials/image artifacts. Preserve quota-gated cadence and zero-spend controls. No new Git, visibility, workflow or deployment authority exists in this revision. |
 | PayPal | Orders/capture/read + webhook; `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_PARTNER_ATTRIBUTION_ID`, `PAYPAL_WEBHOOK_ID`. | Allowlisted sandbox host is code/environment-controlled; no arbitrary base URL input, platform fees or default recipient. Per-outlet seller IDs are verified data, not secrets granting permission. |
 | OpenAI through AI SDK | Text suggestions and direct menu vision; `OPENAI_API_KEY`, `AI_MODEL`, proposed `AI_MENU_MODEL`. | Server-side key; explicit `store: false` for menu calls, no persistent image upload, tools or retries. Separate task evaluations, bounded spend and retention consent; model/account proof through judging outstanding. Provider and dependency pin unchanged. |
+| Kernel (added and approved 2026-10-29) | One cloud browser session per web menu import; `KERNEL_API_KEY`, `WEB_IMPORTS_ENABLED`, `AI_WEB_MENU_MODEL`. | Server-side key; headless, no stealth, proxy, profile or CAPTCHA solving; one navigation, session deleted on every path. Account, allowance and pricing unverified. |
+| AG Grid Community (added and approved 2026-10-29) | Browser table for the menu draft; no environment name. | Client-side display and editing only; the server keeps every menu rule. Licence terms read before install. |
 | Supported MCP clients | Hash-stored scoped demo tokens configured out of band. | Registry/proposal tools only. No token value in repository/testing instructions; no production OAuth promise. |
 | APIMatic | PayPal Context Plugin; own-API clients/docs if actual tier supports them. | Development tooling, not payment authority. No runtime dependency or credential assumed. Entitlements and prize qualification unverified. [Sponsor offer](https://paypalaihackathon.devpost.com/details/apimatic). |
 | Solana devnet / Phantom | Proposed independently gated PYUSD rail; `SOLANA_RPC_URL`, `PYUSD_ENABLED`. | Pinned public devnet identity/mint constants; merchant-set rate, no FX service. Wallet Standard signs/broadcasts; Envoi builds unsigned bytes and performs reads only. No private-key env name, account access or enablement claimed. |
@@ -526,3 +555,4 @@ Then revise Gate 4, preserving the user-decided S13 placement and PYUSD first-cu
 Next is the Gate 3 revision described in the [Gate 3 handover](handoff.md#gate-3-handover-2026-10-11).
 **Reopened 2026-10-24 for the [shop QR and order archive amendment](#shop-qr-and-order-archive-amendment-2026-10-24); re-approved by the user on 2026-10-24 ("I approve Gate 2.").**
 **Reopened 2026-10-25 for the [continuation amendment](#continuation-amendment-2026-10-25); re-approved by the user on 2026-10-25 ("I approve Gate 2.").**
+**Reopened 2026-10-29 for the [web menu import amendment](#web-menu-import-amendment-2026-10-29) and re-approved the same day ("Approve all four").**

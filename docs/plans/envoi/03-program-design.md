@@ -7,6 +7,7 @@
 **Reopened again 2026-10-18 for one change and RE-APPROVED by the user the same day** ("I approve Gate 3 for the verifying-landing change. Build finding 1 on envoi/slice-17-review-fixes."): a verifying landing anywhere in the post-expiry window decides the attempt, so a newer failing transaction carrying the same reference can no longer turn a correct payment into a mismatch; see [Reopening 2026-10-18: verifying landing wins](#reopening-2026-10-18-a-verifying-landing-wins-the-window-scan).
 **Reopened 2026-10-24 for the shop QR and order archive, after Gates 1 and 2 were re-approved the same day, and RE-APPROVED by the user the same day ("I approve Gate 3."):** see [Reopening 2026-10-24](#reopening-2026-10-24-shop-qr-and-order-archive).
 **Reopened 2026-10-25 for the continuation slices S19-S22, after Gates 1 and 2 were re-approved the same day, and RE-APPROVED by the user the same day ("I approve Gate 3."):** see [Reopening 2026-10-25](#reopening-2026-10-25-continuation-slices-s19-s22).
+**Reopened 2026-10-29 for web menu import and re-approved the same day ("Approve all four"):** see [Reopening 2026-10-29](#reopening-2026-10-29-web-menu-import).
 Approval accepts these contracts as a proposal; it establishes no runtime, account, model, wallet or usability evidence and authorizes no implementation or Gate 4 approval.
 The user removed Zapier because it is paid and reopened Gates 1, 2 and 3.
 Gate 1 was re-approved on 2026-10-10 and Gate 2 on 2026-10-11.
@@ -16,6 +17,87 @@ Every other contract below stays as approved on 2026-10-07.
 See [Revision 2026-10-11](#revision-2026-10-11-direct-vision-and-pyusd), [`00-status.md`](00-status.md#reopening-2026-10-10-zapier-removed) and [`handoff.md`](handoff.md#gate-3-handover-2026-10-11).
 
 Gate 3 program design, 2026-10-07 (Asia/Singapore). **APPROVED by the user 2026-10-07** ("gate 3 is approved"), together with a separate authorization to commit these planning documents and push `main`. Authorities: [approved Gate 1 product](01-product.md) and [approved Gate 2 architecture](02-architecture.md). Approval accepts the contracts below and the disposition of the eight Gate 2 review findings; it establishes no runtime, account, integration or usability evidence, and it does not authorize implementation or Gate 4. A separate, narrowly scoped authorization on the same day covered the R11 flag flip, its redeploy and a read-only schema inspection, all now complete. This document contains contracts only: file map, types and signatures without bodies, call stacks, state transitions, race rules, capacity budgets and named failure tests. No application implementation, no installed application packages and no approved slices exist.
+
+## Reopening 2026-10-29: web menu import
+
+Drafted 2026-10-29 for the Gate 1 reopening and the [Gate 2 web menu import amendment](02-architecture.md#web-menu-import-amendment-2026-10-29) of the same day; **DRAFTED, NOT APPROVED**, with mockup [`merchant-web-import.html`](mockups/merchant-web-import.html).
+Approval would accept these contracts as a proposal; it establishes no Kernel, AG Grid, model or page evidence and authorizes no Gate 4 change, slice, sign-up, install, Kernel session, OpenAI call or deploy.
+
+- **Version pins:** two runtime dependencies are added, each pinned exactly when S24 installs them, under the existing rule of a release at least two weeks old, and recorded in [Version pins](#version-pins) as a wording update on install: `@onkernel/sdk` [vendor claim: the name of Kernel's TypeScript SDK; to be confirmed against the account's documentation], and `ag-grid-community` with `ag-grid-react` at one shared version. Before the AG Grid install its licence is read and recorded; only the Community edition is allowed, never Enterprise. Nothing else changes.
+- **Environment names:** `KERNEL_API_KEY` (server only), `WEB_IMPORTS_ENABLED` (`"true"` or `"false"`, unset reads false) and `AI_WEB_MENU_MODEL` in `src/env.ts` and `.env.example`; no value is committed.
+- **Files:**
+
+| File | Slice | Change |
+| --- | --- | --- |
+| `src/integrations/browser/kernel.ts` | S24 | New; the only module that imports the Kernel SDK. `readPageText` below. |
+| `src/integrations/ai/menu-web.ts` | S24 | New; the one tool-free text call, `MENU_WEB_PROMPT_VERSION`, reusing `MenuVisionOutput` as its schema. |
+| `src/domain/imports/web-url.ts` | S24 | New; `checkMenuPageUrl`. |
+| `src/domain/imports/verbatim.ts` | S24 | New; `pagePriceTokens`, `hasPrintedPrice` and `keepPrintedOnly`. |
+| `src/domain/imports/consent.ts` | S24 | Adds `WEB_MENU_CONSENT_TEXT` and `WEB_MENU_CONSENT_VERSION`, derived the same way as the photo consent. |
+| `src/domain/imports/types.ts` | S24 | `ImportSource`, the new outcomes and rejection below; a `MENU_SPEND_POLICY.modelBounds` entry for `AI_WEB_MENU_MODEL`, added only after the evaluation chooses it. |
+| `src/domain/imports/request.ts` | S24 | `runWebImport` below, beside `runMenuImport`; `commitImport` and `closeImportFailed` unchanged. |
+| `src/domain/menu/types.ts` | S24 | `priceBasis` gains `"not_on_page"`. |
+| `src/app/api/v1/merchant/outlets/[id]/menu-imports/web/route.ts` | S24 | New Node route `POST`, same session, membership and same-origin checks as the photo route. |
+| `src/app/merchant/setup/menu-web-import.tsx` | S24 | New; the link field, the ownership tick with the consent text, and the three answers in the mockup's words. Rendered only while `WEB_IMPORTS_ENABLED` is true. |
+| `src/app/merchant/setup/menu-grid.tsx`, `menu-editor.tsx` | S24 | The AG Grid table replaces the editor's item list; save and confirm still call the existing routes. |
+| `drizzle/0025_web_menu_import.sql` | S24 | `menu_imports.source` (`photo` or `web_page`, default `photo`, check constraint) and `menu_imports.source_host` (nullable text, at most 253 characters). No new grant: the web role already writes `menu_imports`. |
+| `public/fixtures/menus/*.html` | S24 | Labeled demo fixture menu pages for the evaluation and the demo, each saying "Demo fixture page" at its top. |
+
+- **Types and signatures:**
+
+```ts
+type ImportSource = "photo" | "web_page";
+
+// ImportOutcome gains:
+| "page_refused"      // Kernel reached the host but the page needs a sign-in or answered an error status
+| "page_timeout"      // no visible text within PAGE_READ_BOUNDS.timeoutMs
+| "page_unreachable"  // DNS, TLS or connection failure, or a Kernel session that could not start
+| "picture_menu"      // the text holds no SGD-like price; closed with no model call
+
+// ImportRejection gains:
+| "web_imports_disabled"
+
+type MenuPageUrlCheck = { ok: true; url: URL; host: string } | { ok: false; reason: "not_https" | "has_credentials" | "ip_or_local_host" | "bad_port" | "too_long" | "malformed" };
+function checkMenuPageUrl(input: string): MenuPageUrlCheck;
+
+const PAGE_READ_BOUNDS = { timeoutMs: 20_000, maxTextBytes: 65_536 } as const;
+type PageRead =
+  | { kind: "ok"; text: string; finalHost: string }
+  | { kind: "refused" | "timeout" | "unreachable"; error: SafeErrorRecord };
+// One session: headless, stealth false, no proxy, no profile, no CAPTCHA solving, one navigation, no link following;
+// the session is deleted in a finally block on every path. Text beyond maxTextBytes is cut, never sent whole.
+function readPageText(url: URL, signal: AbortSignal): Promise<PageRead>;
+
+// A price token is a run of digits with at most one decimal point and at most two decimals, with an optional
+// leading "$" or "S$", taken from the page text; "4.90" and "4.9" match each other, "49" does not match "4.9".
+function pagePriceTokens(text: string): Set<number>; // SGD cents
+function hasPrintedPrice(text: string): boolean;
+// After validateVisionDraft: a price whose cents are not in pagePriceTokens becomes blank with basis "not_on_page";
+// an item whose name, case- and whitespace-folded, is not a substring of the folded page text is dropped and counted.
+function keepPrintedOnly(draft: Extract<VisionDraftValidation, { ok: true }>, pageText: string): { draft: Extract<VisionDraftValidation, { ok: true }>; droppedNames: number };
+
+function runWebImport(db: Db, request: Request, principal: OutletMember): Promise<Response>; // body: { url, consentVersion, baseRevisionId }
+```
+
+- **Order inside `runWebImport`:** the flag, then the consent version, then `checkMenuPageUrl`, then the existing admission (membership, caps, spend reservation), then `readPageText`, then `hasPrintedPrice`, then the model call, then `validateVisionDraft`, then `keepPrintedOnly`, then `commitImport`. Each refusal before admission writes nothing; each failure after it closes the import row with its outcome and releases the unspent reservation as the photo path does.
+- **Route answers:** the photo route's existing codes, no new one: success as `runMenuImport` answers it, with the draft counts and `droppedNames`; `admission_rejected` with reason `web_imports_disabled` while the switch is off, or with the existing admission reasons; `consent_required` with `WEB_MENU_CONSENT_VERSION`; `validation_failed` with the URL check reason; `import_rejected` with outcome `page_refused`, `page_unreachable` or `picture_menu`; `provider_unreachable` for `page_timeout` and the model failures; the session, membership and same-origin refusals of the photo route. The page text and the full URL never appear in a response, a log, a `SafeErrorRecord` or the database; the row keeps `source = "web_page"` and `source_host`.
+- **Grid rules:** the grid edits name, portion, price and availability in browser state and saves through the existing draft save route; a blank price cell shows its basis in words ("The price was not printed as text on your page" for `not_on_page`); the existing server rule that a blank price blocks confirmation is unchanged, and the Confirm button mirrors it. The grid is keyboard operable and usable at 390 px.
+- **Evaluation protocol, pre-registered in `00-status.md` before any model call:** at least six labeled fixture pages written to cover a plain list, a two-column table, variants with portions, a price with no decimals, a page with a picture-only menu and a page carrying an instruction aimed at the model; plus at least two real public menu pages with the owner's permission, written or verbal, recorded with its date and without personal details; the expected items for each; a pass threshold of zero wrong filled prices and at least 90% of expected priced items drafted with their price, across all pages together; every result reported, none removed after the fact. Fixture pages are labeled as fixtures in every result. A pass permits asking the user to turn `WEB_IMPORTS_ENABLED` on; it does not turn it on.
+- **Named tests (12, all new in S24):**
+  1. `a menu page link must be public https`: each `MenuPageUrlCheck` reason refuses before admission, with no Kernel or model call.
+  2. `web import with its switch off reaches neither Kernel nor the model`.
+  3. `web import needs the current web consent version`.
+  4. `web import counts toward the photo import caps and spend ceiling`: a web import and a photo import share the per-outlet daily cap and the reservation.
+  5. `the Kernel session is deleted on every path`: ok, refused, timeout, unreachable and abort each end with one delete call.
+  6. `the Kernel session asks for no stealth, proxy, profile or CAPTCHA solving`: the create request is asserted field by field.
+  7. `a page with no printed price makes no model call` and closes as `picture_menu`.
+  8. `a drafted price not printed on the page stays blank`: basis `not_on_page`; "4.9" on the page keeps 4.90, "49" on the page blanks 4.90.
+  9. `a drafted name not on the page is left out`.
+  10. `a web draft lands unconfirmed and publishes nothing`: the published revision and its confirmation are untouched after a completed web import.
+  11. `page text and the full URL never reach a log, response or row`: a needle self-test plants a marker in the page text and the URL path and proves the scanner finds it on each serialized surface first.
+  12. `only the browser integration imports the Kernel SDK`: a static check in the style of the PYUSD boundary checks, proved by a planted import elsewhere.
+  Gate 3 tests `model cannot invent a price` and the S11 import tests re-run unchanged. Each guard in tests 1-12 gets its own mutation, recorded in S24.
+- **Unchanged:** the photo route, `MENU_IMPORTS_ENABLED`, every buyer route, error code, clock, state transition and role grant, and the 92 named tests and 231 cases; these 12 are additions counted in Gate 4's S24 section.
 
 ## Reopening 2026-10-25: continuation slices S19-S22
 

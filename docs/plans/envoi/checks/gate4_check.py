@@ -169,7 +169,7 @@ s4 = md["04-slices.md"]
 section_list, assigned, additions = parse_slices(s4)
 # Slices added after the judged release (S18 on 2026-10-24; S19, S21, S20 and S22 on 2026-10-25) sit after S15 and outside the build-order table,
 # the test assignment and the counts; every other rule reads only the planned slices.
-POST_RELEASE = ["S18", "S19", "S21", "S20", "S22"]
+POST_RELEASE = ["S18", "S19", "S21", "S20", "S22", "S24"]  # S24 approved 2026-10-29
 post_release = [s for s, _ in section_list if s in POST_RELEASE]
 if post_release != POST_RELEASE or [s for s, _ in section_list][-len(POST_RELEASE):] != POST_RELEASE:
     fail("R6", f"post-release slices {post_release} must follow every planned slice, in the order {POST_RELEASE}")
@@ -412,11 +412,16 @@ for f, text in current.items():
 # list and request body line field corrected the same day as wording corrections by the user's decision
 # (7389910834...e8bf3aa), then reopened during S19 to retire named test 2 and re-approved the same day
 # (b766e7ee...3338cbb7), then reopened on 2026-10-28 to accept the S22 demo owner's verbal permission and re-approved.
-G3_REOPENING_SHA256 = "3a09621dbe038315ec51bb61c060d4a38d67df66058076624028371b1af955d7"
+# Current: the web menu import reopening, re-approved by the user on 2026-10-29
+# (fb9511ab...ea23ea38 was its draft, 3a09621d...1af955d7 was the approved text of 2026-10-28).
+G3_REOPENING_SHA256 = "55850890db58d727ffc3bd78fcfe0f92691ba81bdf653fb6acf705a64d24b59f"
 # 02-architecture.md may likewise equal its continuation amendment text, re-approved by the user on 2026-10-25
 # (bc504e10...d0e47a9f was the shop QR and order archive text, re-approved on 2026-10-24,
 # 28d54654...45561154 the Phantom landing text of 2026-10-18, 938d0a99...f3bf30a6 the English-only text of 2026-10-15).
-G2_REOPENING_SHA256 = "2c2a715f4dfec60961a6d51038fccf6c1d8b7fe485a6f7f7f2428ddec2a8c4f3"
+# Current: the web menu import amendment, re-approved by the user on 2026-10-29, on top of the usability-study removal,
+# which is still DRAFTED AND NOT APPROVED (535a22ee...ea3819327 was the draft of both, 2c2a715f...ec2a8c4f3 was the approved continuation amendment text of 2026-10-25,
+# 48495bf1...cb87e5 the usability-removal draft alone).
+G2_REOPENING_SHA256 = "c05097d3e5eadbafe651a2e3495d3bda219a0deb6f9adca660cc89d77ddc8448"
 # Gate 1, re-approved 2026-10-16 after deferring menu photo drafting and again on 2026-10-21 for the
 # landing page, and on 2026-10-24 for the shop QR and order archive, then reopened and re-approved on 2026-10-25 for S19-S22:
 # the revised and added mockups, and 01-product.md without its closing status line, which keeps changing as slices finish
@@ -429,8 +434,13 @@ G1_MOCKUP_SHA256 = {
     os.path.join("mockups", "merchant-shop-qr.html"): "15fb8ab1666648de1a1ca102901d3bb01efe73bb4f2c4a27b748dc0fe75b54ce",
     os.path.join("mockups", "merchant-orders-delete.html"): "196792d104e832c3887c6213c90811d6e96b22cb8a9057ec6be3a4d97923adf3",
     os.path.join("mockups", "buyer-one-box.html"): "0e4ae5ade8fdd7111b56698d13b0d82d896cace1fbd5b55a5d95109286a61ad8",
+    # Approved 2026-10-29 for web menu import.
+    os.path.join("mockups", "merchant-web-import.html"): "cdd28ffe2b8663cbf1503790be965081df74584d50bc630f11f21b068ed248ac",
 }
-G1_BODY_SHA256 = "4718a3f5e457cb68da0af2a43710ad501f9677d6327e393282c432d2701140e2"
+# Current: the web menu import reopening, re-approved by the user on 2026-10-29, on top of the usability-study removal,
+# which is still DRAFTED AND NOT APPROVED (631a626b...3632271aa9 was the draft of both, 4718a3f5...701140e2 was the 2026-10-28 body with the approved round 5 allowance,
+# 4a4e9020...4ece559a the usability-removal draft alone).
+G1_BODY_SHA256 = "be5395a0bc2443e18b85dae873109780e8ca3a4299a51c9c70d45a0c95210c0a"
 for root, _, files in os.walk(folder):
     for name in sorted(files):
         rel = os.path.relpath(os.path.join(root, name), folder)

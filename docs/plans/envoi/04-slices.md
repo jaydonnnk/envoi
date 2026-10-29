@@ -11,6 +11,7 @@ Its one contract change, delta D10, is made in Gate 3 itself, which you reopened
 **Reopened 2026-10-18 for one change and RE-APPROVED by the user the same day** ("Yea sure i approve the gates then make the relevant changes and push to main thnaks"): the [S16 amendment](#s16-amendment-2026-10-18-phantom-landing) builds the Phantom landing that Gates 2 and 3 now describe, on its own branch before S14; no build order, test count or cut order changes.
 **Amended 2026-10-24 and approved by the user the same day ("I approve Gate 4."):** [S18](#s18-merchant-shop-qr-and-order-archive-added-2026-10-24) builds the shop QR and order archive of the Gate 1, 2 and 3 reopenings of 2026-10-24, after S15; the build-order table, the cut order and the counts of the original plan are unchanged, and S18's 12 named tests are counted in its own section.
 **Amended 2026-10-25 and approved by the user the same day ("I approve Gate 4."):** [S19](#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-added-2026-10-25), [S21](#s21-order-from-one-sentence-added-2026-10-25), [S20](#s20-reference-buyer-agent-on-the-generated-sdk-added-2026-10-25) and [S22](#s22-menu-photo-experiment-round-4-added-2026-10-25) build the continuation reopening of Gates 1, 2 and 3, re-approved on 2026-10-25, after S18 and outside the build-order table; the original plan's counts are unchanged.
+**Amended 2026-10-29 and approved the same day ("Approve all four"):** [S24](#s24-menu-from-the-shops-own-page-added-2026-10-29) builds web menu import from the Gate 1, 2 and 3 reopenings of 2026-10-29, after S22 and outside the build-order table; the original plan's counts are unchanged.
 Where a slice needs something Gate 3 did not specify, the gap is named in [Gate 3 deltas](#gate-3-deltas) instead of being decided silently.
 Drafting and revising this plan installed, provisioned, deployed and spent nothing, and it contains no application code.
 
@@ -91,7 +92,7 @@ Target windows are the planning windows recorded in `roadmap.md`; they are targe
 | 13 | S16 PYUSD devnet purchase | The merchant proves a devnet wallet and sets a dated rate; a buyer pays the rounded-up PYUSD amount in Phantom and the receipt says transferred and finalized on devnet. PayPal keeps working when PYUSD is off. | S3, S4, S5, S7, S8, S11 | 26 Oct-1 Nov |
 | 14 | S17 PYUSD recovery | A lost wallet response stays "checking payment" until a complete history scan decides it; an extra transfer is shown, never hidden; the operator closes a mismatch only as unpaid. | S5, S8, S16 | 26 Oct-1 Nov |
 | 15 | S14 APIMatic client and docs (account-conditional) | A generated client calls the running public API and passes a contract check. | S13 | 26 Oct-1 Nov |
-| 16 | S15 Judged release | Public licensed repository, scheduled maintenance, the usability result, the video and an evidence pack. | All included slices | 2-8 Nov, buffer 9-12 Nov |
+| 16 | S15 Judged release | Public licensed repository, scheduled maintenance, the video and an evidence pack. | All included slices | 2-8 Nov, buffer 9-12 Nov |
 
 S12 is retired: it was merged into S11 on 2026-10-12.
 Submission cutoff is 13 Nov 2026 04:00 SGT, and access must last through judging, which ends 16 Dec 2026 00:00 SGT ([research](research.md#hackathon-dates-and-deliverables)).
@@ -718,15 +719,16 @@ Push; any APIMatic upload of the OpenAPI document, since it sends repository con
 Branch: `envoi/slice-15-release`.
 
 **Visible result.**
-A public repository with an open-source license; a README with setup, reset and the fixture, sandbox and devnet labels; scheduled maintenance running on public runners; the usability result; a public video under three minutes; an evidence pack linking every claim to its record.
+A public repository with an open-source license; a README with setup, reset and the fixture, sandbox and devnet labels; scheduled maintenance running on public runners; a public video under three minutes; an evidence pack linking every claim to its record.
+*Changed 2026-10-29, by the user's decision:* the usability result is no longer part of the visible result, because the five-tester study is not run; the evidence pack records the target as never measured and Envoi makes no usability claim.
 
 **Work.**
 - Scan the full Git history for secrets, including Solana secret-key arrays, with an injected self-test before visibility changes, and review non-secret identifiers in the documents, such as the Neon project and organization ids, before they become public.
 - Create `maintenance.yml` at hourly minute 17, if S5 did not.
-- R2 decision: approve an operator runbook for storage exhaustion, rehearsed on a separate throwaway Neon project or branch, or explicitly accept residual risk R2; recorded in `00-status.md` before the usability test.
+- R2 decision: approve an operator runbook for storage exhaustion, rehearsed on a separate throwaway Neon project or branch, or explicitly accept residual risk R2; recorded in `00-status.md` before the release closes.
 - Re-measure an idle cold first visit on the release build.
 - Run the full suite and the mobile and keyboard checks.
-- Run the Gate 1 usability test with five first-time buyers, recording each tester's entry point and payment rail and keeping every failure and help request.
+- *Removed 2026-10-29, by the user's decision* ("remove the usability test. Its a hackathon we dont need them"): the Gate 1 usability test with five first-time buyers. The prepared kit stays in `usability/`, marked not run, and the evidence pack records the target as never measured.
 - Confirm Render, Neon, Actions and OpenAI access and capacity through 16 Dec 2026, and, if PYUSD shipped, the devnet RPC, the mint identity and test-token access, because devnet can reset (R17).
 
 **Authorizations to request at start.**
@@ -908,13 +910,52 @@ Every result of round 4, with no photo removed after the fact; the timed compari
 Starting S22 by ID; sending the consented photos to OpenAI; the evaluation spend.
 You perform: the demo merchant's photo and the owner's permission, written or verbal.
 
+### S24 Menu from the shop's own page (added 2026-10-29)
+
+Drafted 2026-10-29 for the Gate 1, 2 and 3 reopenings of the same day; **DRAFTED, NOT APPROVED**; it starts only on an authorization naming it.
+S23 is not used: it was the withdrawn round 5 draft, preserved in [`photo-import-gap-analysis.md`](photo-import-gap-analysis.md).
+Branch: `envoi/slice-24-web-menu-import`.
+Depends on: S6 (the menu editor and draft), S11 (the import boundary, admission and `commitImport`) and S7 (confirmation and publication).
+
+**Visible result.**
+1. With `WEB_IMPORTS_ENABLED` true on a local production build, the merchant pastes the Test Shop fixture page link, ticks ownership and taps "Read my page"; the draft table fills, as in [`mockups/merchant-web-import.html`](mockups/merchant-web-import.html), with one blank price named "The price was not printed as text on your page".
+2. Confirm stays disabled until that price is typed; then the merchant confirms and publishes as today, and `/buy` shows the menu.
+3. The picture-only fixture page says "Your page shows its menu as a picture" and drafts nothing; a sign-in page or an unreachable link says "We could not open that page".
+4. With the switch false, the setup page shows no link field and the route refuses with `web_imports_disabled`.
+
+**Builds.**
+The S24 rows of the [Gate 3 reopening](03-program-design.md#reopening-2026-10-29-web-menu-import)'s file map: `src/integrations/browser/kernel.ts`, `src/integrations/ai/menu-web.ts`, `src/domain/imports/web-url.ts` and `verbatim.ts`, the web consent, `runWebImport`, the `web` route, the setup component, the AG Grid table in the menu editor, migration `0025_web_menu_import.sql` and the labeled fixture pages; `KERNEL_API_KEY`, `WEB_IMPORTS_ENABLED` and `AI_WEB_MENU_MODEL` in `src/env.ts` and `.env.example`.
+Installs `@onkernel/sdk`, `ag-grid-community` and `ag-grid-react`, each pinned exactly, only after you authorize the install.
+
+**Tests.**
+Named tests 1-12 of the Gate 3 reopening, each new here, each guard with its own mutation recorded in `00-status.md`; Kernel and the model are faked at their boundaries and labeled as fixtures.
+The S6, S7 and S11 tests keep passing with the grid in place.
+
+**Evaluation, pre-registered.**
+The Gate 3 protocol written into `00-status.md` before the first model call: the fixture pages, at least two consented real pages, the expected items and the threshold of zero wrong filled prices and at least 90% of expected priced items drafted.
+Every result is reported, including failures.
+
+**Evidence.**
+The four visible results at 390 px and 1280 px on a local production build and on Render, with the switch on only for the recording if you approve that; the evaluation results; one Kernel session record per page read, showing the session was deleted; the grid's keyboard check.
+
+**Falsifiers.**
+- No Kernel account or no free allowance by 2 Nov: stop S24, keep manual entry, make no web-import claim.
+- The evaluation misses its threshold: `WEB_IMPORTS_ENABLED` stays false and no web-import claim is made.
+- The AG Grid table fails the 390 px or keyboard check: keep the existing editor list, record it, and ship web import without the grid.
+- Not merged and deployed by 9 Nov: stop S24 so S15 can close before the 13 Nov cutoff.
+
+**Authorizations to request at start.**
+Starting S24 by ID; installing the three packages; OpenAI evaluation spend within a limit you state as a number; Kernel sessions for the evaluation; the migration on Neon; the merge, push and deploy; turning `WEB_IMPORTS_ENABLED` on after a pass.
+You perform: creating the Kernel account and placing `KERNEL_API_KEY` in your local `.env` and on Render; the owners' permission for the real pages.
+
 ### Continuation schedule and cuts (S19-S22)
 
 - **Order:** S19, then S21, then S20, then S22, all after S18 and outside the build-order table; S15 stays open and closes last.
 - **Target windows [hypothesis]:** S19 on 27 Oct, S21 28 Oct-1 Nov, S20 2-6 Nov (done 28 Oct), S22 from 28 Oct after the go decision given that day; submission cutoff 13 Nov 2026 04:00 SGT.
 - **Cut sequence for these four:** S22 first, then S21 if it is not deployed by 1 Nov, then S20; S19's regenerated client and contract still ship if S20 is cut.
-- **Never cut:** the S15 usability study, every payment, approval and recipient guard of the earlier slices, and the human approval of every payment.
-- **Counts:** the 92 named tests, 231 cases and 39 additions of the original plan and S18's 12 tests are unchanged; S19-S21 carry the 15 named tests of the Gate 3 reopening (test 2 retired on 2026-10-25), counted here.
+- *Added and approved 2026-10-29:* **S24** follows S22, with a target window of 30 Oct-9 Nov [hypothesis], and is first in the cut order ahead of every other open slice; S15 stays open and closes last.
+- **Never cut:** every payment, approval and recipient guard of the earlier slices, and the human approval of every payment. *Changed 2026-10-29, by the user's decision:* the S15 usability study was previously never cut and is now removed outright, so no study runs and no usability claim is made; every other item in this list stands.
+- **Counts:** the 92 named tests, 231 cases and 39 additions of the original plan and S18's 12 tests are unchanged; S19-S21 carry the 15 named tests of the Gate 3 reopening (test 2 retired on 2026-10-25), counted here. *Added and approved 2026-10-29:* S24 carries the 12 named tests of the 2026-10-29 Gate 3 reopening, counted here.
 
 ## Test assignment
 
