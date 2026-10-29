@@ -14,8 +14,8 @@ import { createFakeKernel, FIXTURE_PAGE_TEXT, type PageTurn } from "../support/f
 // SDK's fetch boundary (FIXTURE); no session is started.
 
 const URL_OK = new URL("https://fixture-shop.example/menu");
-const read = (turn: PageTurn, signal = new AbortController().signal) => {
-  const fake = createFakeKernel(() => turn);
+const read = (turn: PageTurn, signal = new AbortController().signal, options: { deleteStatus?: number } = {}) => {
+  const fake = createFakeKernel(() => turn, options);
   return { fake, result: readPageText(URL_OK, signal, { apiKey: "FIXTURE-kernel-key", fetch: fake.fetch }) };
 };
 
@@ -112,6 +112,44 @@ describe("readPageText reads only the merchant's own host, once, and keeps the U
     const { fake, result } = read({ kind: "page", text: FIXTURE_PAGE_TEXT, host });
     expect((await result).kind).toBe(kind);
     expect(fake.deletes()).toBe(1);
+  });
+
+  it("a failed create is not retried, so one import makes at most one session", async () => {
+    const { fake, result } = read({ kind: "create_fails", status: 503 });
+    expect((await result).kind).toBe("unreachable");
+    expect(fake.creates()).toHaveLength(1);
+  });
+
+  it("a failed delete still answers the read and logs the session id", async () => {
+    const lines: string[] = [];
+    vi.spyOn(console, "error").mockImplementation((line: unknown) => void lines.push(String(line)));
+    vi.stubEnv("LOG_LEVEL", "debug");
+    try {
+      const { fake, result } = read({ kind: "page", text: FIXTURE_PAGE_TEXT }, undefined, { deleteStatus: 500 });
+      expect((await result).kind).toBe("ok");
+      expect(fake.deletes()).toBe(1);
+      expect(lines.some((line) => line.includes("kernel_session_delete_failed") && line.includes("FIXTURE-kernel-session"))).toBe(true);
+    } finally {
+      vi.unstubAllEnvs();
+      vi.restoreAllMocks();
+    }
+  });
+
+  it("the link reaches the browser as one string literal, whatever it holds", async () => {
+    const tricky = new URL("https://fixture-shop.example/it's'+globalThis.x+'/menu?q=${globalThis.y}`);//");
+    const fake = createFakeKernel(() => ({ kind: "page", text: FIXTURE_PAGE_TEXT }));
+    await readPageText(tricky, new AbortController().signal, { apiKey: "FIXTURE-kernel-key", fetch: fake.fetch });
+    const code = String(fake.calls.find((call) => call.path.endsWith("/playwright/execute"))?.body?.code);
+    const source = ts.createSourceFile("vm.ts", `async function vm(page) {${code}}`, ts.ScriptTarget.Latest, true);
+    const gotos: ts.CallExpression[] = [];
+    const visit = (node: ts.Node) => {
+      if (ts.isCallExpression(node) && node.expression.getText(source) === "page.goto") gotos.push(node);
+      ts.forEachChild(node, visit);
+    };
+    visit(source);
+    expect(gotos).toHaveLength(1);
+    const [first] = gotos[0]!.arguments;
+    expect(first && ts.isStringLiteral(first) && first.text).toBe(tricky.href);
   });
 
   it("the Kernel SDK writes no request body to the console, even with KERNEL_LOG=debug", async () => {

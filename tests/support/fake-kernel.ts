@@ -19,7 +19,8 @@ export function isKernelUrl(url: string): boolean {
   return url.startsWith(`${KERNEL_API}/`);
 }
 
-export function createFakeKernel(turn: () => PageTurn): FakeKernel {
+// `deleteStatus` answers the delete call with that status instead of 204, for a failed delete.
+export function createFakeKernel(turn: () => PageTurn, options: { deleteStatus?: number } = {}): FakeKernel {
   const calls: KernelCall[] = [];
   const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = new URL(input instanceof Request ? input.url : String(input));
@@ -44,7 +45,10 @@ export function createFakeKernel(turn: () => PageTurn): FakeKernel {
       if (current.kind === "vm_error") return Response.json({ success: false, error: current.error });
       if (current.kind === "page") return Response.json({ success: true, result: { status: current.status ?? 200, text: current.text, host: current.host ?? "fixture-shop.example", signIn: current.signIn ?? false } });
     }
-    if (method === "DELETE" && url.pathname === `/browsers/${FIXTURE_SESSION_ID}`) return new Response(null, { status: 204 });
+    if (method === "DELETE" && url.pathname === `/browsers/${FIXTURE_SESSION_ID}`) {
+      if (options.deleteStatus !== undefined) return Response.json({ code: "FIXTURE", message: "FIXTURE delete failure" }, { status: options.deleteStatus });
+      return new Response(null, { status: 204 });
+    }
     throw new Error(`FIXTURE fake Kernel has no answer for ${method} ${url.pathname}`);
   }) as typeof globalThis.fetch;
   return {
