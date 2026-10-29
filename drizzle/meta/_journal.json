@@ -183,6 +183,13 @@
       "when": 1793243564416,
       "tag": "0025_web_menu_import",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1793284576446,
+      "tag": "0026_assistant_rate_limit_bucket",
+      "breakpoints": true
     }
   ]
 }

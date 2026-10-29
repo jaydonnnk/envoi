@@ -1,6 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
-import type { EnvoiPublicApiClient } from "../typescript/src/index";
+import type { EnvoiPublicApiClient } from "../../../clients/typescript/src/index";
 import type { Trace, TraceOperation } from "./trace";
 
 // S20: the reference agent's three tools. Each one is one call of the APIMatic-generated client;

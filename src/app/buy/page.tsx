@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { outletPyusdAvailability } from "@/app/pyusd-availability";
 import { outletRails } from "@/domain/outlets/destination";
 import { getPublishedMenu, listPublishedOutlets } from "@/domain/outlets/search";
-import { textSuggestionsEnabled } from "@/integrations/ai/openai";
+import { assistantEnabled, textSuggestionsEnabled } from "@/integrations/ai/openai";
 import { webDb } from "@/lib/db/web";
 import { landsOnPyusd } from "./landing";
 import { ShopBasket } from "./shop-basket";
@@ -76,6 +76,7 @@ const PyusdOnlyPending = () => (
 export default async function BuyPage({ searchParams }: { searchParams: Promise<BuySearchParams> }) {
   const { outletId, preselected, menu, shops, rail, autoReview, dbMs, serverMs } = await loadBuyData(searchParams);
   const textEnabled = textSuggestionsEnabled();
+  const askEnabled = assistantEnabled();
 
   if (menu) {
     return (
@@ -117,9 +118,15 @@ export default async function BuyPage({ searchParams }: { searchParams: Promise<
       <p className="eyebrow">Buy</p>
       <h1>Find a participating shop</h1>
       <p className="lead">{textEnabled ? "Tell Envoi what you want, scan the shop's sticker, or pick a shop to see its menu." : "Scan the shop's sticker, or pick a shop to see its menu."}</p>
+      {askEnabled && (
+        <p className="ask-link">
+          Prefer a conversation? <a href="/buy/ask">Ask Envoi</a>, the assistant that reads shops and menus and hands you a review.
+        </p>
+      )}
       {textEnabled && <TextSuggest manualListId={MANUAL_LIST_ID} />}
       <section className="card scan-entry" aria-labelledby="scan-heading">
-        <h2 id="scan-heading">Or scan the sticker</h2>
+        {/* With text suggestions off the sticker is the first way in, so it is not an alternative (S25). */}
+        <h2 id="scan-heading">{textEnabled ? "Or scan the sticker" : "Scan the sticker"}</h2>
         <p className="muted">Standing at the counter? Scan the shop&apos;s SGQR sticker to open that exact outlet. No area needed.</p>
         {/* A plain link, so the scan page loads as its own document with the camera permission. */}
         <a className="button full" href="/buy/scan">

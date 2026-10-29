@@ -31,6 +31,10 @@ const webSchema = z.object({
   // AI_MODEL is the model chosen by the pre-registered R5 evaluation recorded in 00-status.md.
   OPENAI_API_KEY: z.string().min(1).optional(),
   AI_MODEL: z.string().min(1).optional(),
+  // Ask Envoi in the site (S25). An agent token issued by the operator command, server only; the
+  // assistant is off unless it, OPENAI_API_KEY and AI_MODEL are all set. APP_BASE_URL above is the
+  // address its tools call through the generated client.
+  ASSISTANT_AGENT_TOKEN: z.string().min(1).optional(),
   // Menu photo import (S11). AI_MENU_MODEL is the vision model chosen by the pre-registered R5
   // evaluation in 00-status.md, never AI_MODEL; it also needs a reviewed bounds entry in
   // MENU_SPEND_POLICY. MENU_IMPORTS_ENABLED is the import kill switch: unset reads as false, so

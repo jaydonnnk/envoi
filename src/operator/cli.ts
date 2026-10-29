@@ -5,6 +5,9 @@ import postgres from "postgres";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { recordAudit } from "@/domain/audit/events";
+import { confirmMenuDraft } from "@/domain/menu/confirm";
+import { getMenuDraft, saveMenuDraft } from "@/domain/menu/draft";
+import { publishOutlet } from "@/domain/outlets/publish";
 import { archivedOrderReceipts } from "@/domain/purchases/orders";
 import { transitionPurchase } from "@/domain/purchases/state";
 import { canTransitionPyusdAttempt, OPERATOR_RESOLUTION } from "@/domain/pyusd/state";
@@ -13,6 +16,7 @@ import * as schema from "@/lib/db/schema";
 import { pgConnection } from "@/lib/db/web";
 import { isEntrypoint } from "@/lib/entrypoint";
 import { hashToken, newId, newSecretToken } from "@/lib/ids";
+import { isAppError } from "@/lib/errors";
 import { redact } from "@/lib/log";
 
 // Operator acts (Gate 4 delta D1), run locally by the human operator with MIGRATION_DATABASE_URL.
@@ -545,8 +549,68 @@ const COMMANDS = [
   "export-archived-orders",
 ];
 
+// S25: the two iced teas Ask Envoi's "which one?" question needs, on the demo fixture Test Shop
+// (Gate 3 reopening 2026-10-29). They go through the merchant's own draft, confirm and publish rules,
+// never a direct table write, acting for the shop's owner and recorded as an operator act. Run again,
+// it changes nothing. It refuses, changing nothing, when the shop has unpublished menu changes of its
+// own or holds an item of either name at another price.
+export const DEMO_TEST_SHOP_NAME = "Test Shop";
+export const DEMO_ICED_TEAS = [
+  { name: "Iced lemon tea", priceSgdCents: 220 },
+  { name: "Iced milk tea", priceSgdCents: 250 },
+] as const;
+
+export type IcedTeasResult = { status: "added" | "unchanged"; outletId: string; revisionId: string };
+
+export async function addDemoIcedTeas(db: OperatorDb, now: Date = new Date()): Promise<IcedTeasResult> {
+  const shops = await db
+    .select({ id: schema.outlets.id })
+    .from(schema.outlets)
+    .where(and(eq(schema.outlets.name, DEMO_TEST_SHOP_NAME), eq(schema.outlets.isDemoFixture, true)));
+  if (shops.length !== 1) throw new Error(`Expected one demo fixture named ${DEMO_TEST_SHOP_NAME}, found ${shops.length}; nothing changed.`);
+  const outletId = shops[0]!.id;
+
+  const draft = await getMenuDraft(db, outletId);
+  if (!draft) throw new Error(`${DEMO_TEST_SHOP_NAME} has no menu; nothing changed.`);
+  if (!draft.published) throw new Error(`${DEMO_TEST_SHOP_NAME} has unpublished menu changes; publish or discard them first. Nothing changed.`);
+
+  const missing: (typeof DEMO_ICED_TEAS)[number][] = [];
+  for (const tea of DEMO_ICED_TEAS) {
+    const found = draft.items.find((item) => item.name === tea.name);
+    if (!found) missing.push(tea);
+    else if (found.priceSgdCents !== tea.priceSgdCents) throw new Error(`${DEMO_TEST_SHOP_NAME} already lists ${tea.name} at another price; inspect it by hand. Nothing changed.`);
+  }
+  if (missing.length === 0) return { status: "unchanged", outletId, revisionId: draft.revisionId };
+
+  const [owner] = await db
+    .select({ userId: schema.merchantMemberships.userId })
+    .from(schema.merchantMemberships)
+    .where(and(eq(schema.merchantMemberships.outletId, outletId), isNull(schema.merchantMemberships.revokedAt)));
+  if (!owner) throw new Error(`${DEMO_TEST_SHOP_NAME} has no live owner membership; nothing changed.`);
+
+  const items = [
+    ...draft.items.map((item) => ({ id: item.id, name: item.name, portion: item.portion, priceSgdCents: item.priceSgdCents, availability: item.availability })),
+    ...missing.map((tea) => ({ name: tea.name, portion: null, priceSgdCents: tea.priceSgdCents, availability: "available" as const })),
+  ];
+  const saved = await saveMenuDraft(db, { outletId, revisionId: draft.revisionId, baseVersion: draft.version, items, actorUserId: owner.userId, now });
+  if (isAppError(saved)) throw new Error(`The draft was refused: ${saved.message}`);
+  const confirmed = await confirmMenuDraft(db, { outletId, revisionId: saved.revisionId, version: saved.version, actorUserId: owner.userId, now });
+  if (isAppError(confirmed)) throw new Error(`The draft ${saved.revisionId} was saved but not confirmed: ${confirmed.message}`);
+  const published = await publishOutlet(db, { outletId, revisionId: confirmed.revisionId, version: confirmed.version, actorUserId: owner.userId, now });
+  if (isAppError(published)) throw new Error(`The draft ${confirmed.revisionId} was confirmed but not published: ${published.message}`);
+  await recordAudit(db, {
+    at: now,
+    actor: "operator:cli",
+    action: "demo_iced_teas_added",
+    outletId,
+    operatorVisible: true,
+    details: { revisionId: published.revisionId, added: missing.map((tea) => tea.name).join(",") },
+  });
+  return { status: "added", outletId, revisionId: published.revisionId };
+}
+
 const USAGE =
-  "usage: npm run operator -- seed-demo-fixture | assign-paypal-destination <outletId> <sellerMerchantId> | issue-agent-token <label> | create-merchant <email> <name> | approve-membership <email> [evidenceRef] | approve-enrollment <outletId> [evidenceRef] | approve-identifier [identifierId [evidenceRef]] | grant-operator <email> [evidenceRef] | resolve-pyusd-mismatch <operatorEmail> <attemptId> <reason> <evidenceRef> | record-extra-transfer-refund <operatorEmail> <attemptId> <signature> <reason> <refundReference> | unarchive-order <purchaseId> | export-archived-orders [outletId]";
+  "usage: npm run operator -- seed-demo-fixture | assign-paypal-destination <outletId> <sellerMerchantId> | issue-agent-token <label> | create-merchant <email> <name> | approve-membership <email> [evidenceRef] | approve-enrollment <outletId> [evidenceRef] | approve-identifier [identifierId [evidenceRef]] | grant-operator <email> [evidenceRef] | resolve-pyusd-mismatch <operatorEmail> <attemptId> <reason> <evidenceRef> | record-extra-transfer-refund <operatorEmail> <attemptId> <signature> <reason> <refundReference> | unarchive-order <purchaseId> | export-archived-orders [outletId] | add-demo-iced-teas";
 
 async function run(db: OperatorDb, argv: string[]): Promise<number> {
   const [command, ...args] = argv;
@@ -556,6 +620,15 @@ async function run(db: OperatorDb, argv: string[]): Promise<number> {
       result.status === "created"
         ? `created demo fixture: outlet ${result.outletId}, menu revision ${result.menuRevisionId}`
         : `demo fixture already exists, nothing changed: outlet ${result.outletId}, menu revision ${result.menuRevisionId}`,
+    );
+    return 0;
+  }
+  if (command === "add-demo-iced-teas" && args.length === 0) {
+    const result = await addDemoIcedTeas(db);
+    console.log(
+      result.status === "added"
+        ? `added the demo iced teas to ${DEMO_TEST_SHOP_NAME} (outlet ${result.outletId}) and published menu revision ${result.revisionId}`
+        : `${DEMO_TEST_SHOP_NAME} (outlet ${result.outletId}) already has both iced teas at their prices; nothing changed`,
     );
     return 0;
   }

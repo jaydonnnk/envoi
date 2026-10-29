@@ -1,9 +1,9 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { checkBaseUrl, createAgent, TURN_BUDGET_MS } from "../../clients/buyer-agent/agent";
-import { createAgentTools, MAX_TOOL_CALLS, type TurnGate } from "../../clients/buyer-agent/tools";
-import { createTrace } from "../../clients/buyer-agent/trace";
+import { checkBaseUrl, createAgent, TURN_BUDGET_MS } from "../../src/integrations/assistant/agent";
+import { createAgentTools, MAX_TOOL_CALLS, type TurnGate } from "../../src/integrations/assistant/tools";
+import { createTrace } from "../../src/integrations/assistant/trace";
 import { EnvoiPublicApiClient } from "../../clients/typescript/src/index";
 import {
   createFakeEnvoiApi,
@@ -18,14 +18,15 @@ import {
 } from "../support/fake-envoi-api";
 import { createFakeOpenAI, FIXTURE_AI_ENV, type FakeTurn } from "../support/fake-openai";
 
-// S20: the reference buyer agent in clients/buyer-agent, Gate 3 named tests 13-16. Envoi's API and
+// S20: the reference buyer agent, Gate 3 named tests 13-16. Since S25 it lives in
+// src/integrations/assistant, and only the imports and AGENT_DIR below moved with it. Envoi's API and
 // OpenAI are both faked at their fetch boundaries and labeled FIXTURE; no deployment or model is
 // called.
 
-const AGENT_DIR = join(process.cwd(), "clients/buyer-agent");
-// The only modules the agent may import: the model SDK, its schema library, three Node built-ins
-// for the command line, the generated client and its own two files.
-const ALLOWED_IMPORTS = new Set(["ai", "@ai-sdk/openai", "zod", "node:fs", "node:readline/promises", "node:url", "../typescript/src/index", "./tools", "./trace"]);
+const AGENT_DIR = join(process.cwd(), "src/integrations/assistant");
+// The only modules the agent may import: the model SDK, its schema library, the generated client and
+// its own two files. The command line's Node built-ins stayed in clients/buyer-agent/agent.ts.
+const ALLOWED_IMPORTS = new Set(["ai", "@ai-sdk/openai", "zod", "../../../clients/typescript/src/index", "./tools", "./trace"]);
 
 function agentSources(): { file: string; text: string }[] {
   return readdirSync(AGENT_DIR)

@@ -2,7 +2,8 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { generateText, Output, stepCountIs, tool } from "ai";
 import { z } from "zod";
 import type { ModelOutcome, SuggestionModel, SuggestionTools } from "@/domain/suggestions/types";
-import { webEnv } from "@/env";
+import { webEnv, type WebEnv } from "@/env";
+import { checkBaseUrl } from "@/integrations/assistant/agent";
 import { log, toSafeErrorRecord } from "@/lib/log";
 
 // Gate 3 named clock T_AI_BUDGET: 30 seconds from the suggestion request start, enforced here.
@@ -117,6 +118,21 @@ export function createOpenAISuggestionModel(config: OpenAISuggestionConfig): Sug
 export function textSuggestionsEnabled(): boolean {
   const env = webEnv();
   return Boolean(env.OPENAI_API_KEY && env.AI_MODEL);
+}
+
+// Ask Envoi (S25) is on only when the key, the evaluated AI_MODEL and the assistant's agent token are
+// all configured, and APP_BASE_URL is an address the agent may call.
+export type AssistantSettings = { baseUrl: string; agentToken: string; openaiApiKey: string; model: string };
+
+export function assistantSettings(env: WebEnv = webEnv()): AssistantSettings | null {
+  if (!env.OPENAI_API_KEY || !env.AI_MODEL || !env.ASSISTANT_AGENT_TOKEN) return null;
+  const baseUrl = checkBaseUrl(env.APP_BASE_URL);
+  if (!baseUrl) return null;
+  return { baseUrl, agentToken: env.ASSISTANT_AGENT_TOKEN, openaiApiKey: env.OPENAI_API_KEY, model: env.AI_MODEL };
+}
+
+export function assistantEnabled(): boolean {
+  return assistantSettings() !== null;
 }
 
 // The configured model, or null when text suggestions are off.
