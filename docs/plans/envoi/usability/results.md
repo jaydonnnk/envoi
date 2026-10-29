@@ -1,7 +1,9 @@
 # S15 usability results
 
-Status: not run.
-Filled in during and after the 2-8 Nov 2026 sessions; see the [kit](README.md) for the method.
+Status: **not run, and removed from S15 on 2026-10-29** by the user's decision ("remove the usability test. Its a hackathon we dont need them").
+No session was held, no tester was recruited and no timing was taken, so every table below is empty and stays empty.
+This file is kept as the record of the method that was prepared and of the decision not to run it; see the [kit](README.md).
+Envoi makes no completion-rate, timing, usability or ease-of-use claim, and the target below may not be quoted as a result or an expectation.
 
 ## Declared before the first session
 

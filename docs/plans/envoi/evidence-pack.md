@@ -1,10 +1,10 @@
 # Envoi evidence pack
 
-Status: draft, 2026-10-21, extended 2026-10-29 for S19, S20, S21 and the S22 round 4 outcome; completed when S15 closes.
+Status: draft, 2026-10-21, extended 2026-10-29 for S19, S20, S21, the S22 round 4 outcome, S24 and the removal of the usability study; completed when S15 closes.
 Every claim made in the README, the video or the submission is listed here with its label and the record that supports it.
 A claim with no record here is not made.
 
-Labels: **[verified]** means supported by the linked record; **[user-reported]** means the user observed it and the record says so; **[unknown]** means not established; **[not run]** means planned and not yet done.
+Labels: **[verified]** means supported by the linked record; **[user-reported]** means the user observed it and the record says so; **[vendor claim]** means advertised by a provider and not independently checked; **[hypothesis]** means our judgment; **[unknown]** means not established; **[not run]** means planned and not yet done.
 Every payment below used PayPal sandbox money or Solana devnet test tokens; none is real money, real adoption or a real merchant.
 
 ## Payments
@@ -35,6 +35,11 @@ Every payment below used PayPal sandbox money or Solana devnet test tokens; none
 | An AI agent running on a person's own machine, built on the generated SDK, turned one sentence into a link that the person then paid with PayPal sandbox money on the deployed site; the agent never sent an amount and never saw the link's token | [verified] on the deployed app; the merchant's order view [user-reported] | [S20](00-status.md#s20-reference-buyer-agent-on-the-generated-sdk-2026-10-28), [S20 on Render](00-status.md#s20-on-render-2026-10-28) |
 | That agent refuses an item the menu did not return and a quantity outside 1 to 20 before making any call | [verified] | [S20](00-status.md#s20-reference-buyer-agent-on-the-generated-sdk-2026-10-28) |
 | Menu photo import drafts menus with AI | **not claimed**: no model met the pre-registered threshold in four rounds, the last on 2026-10-28, so import ships closed and the work stopped | [S11](00-status.md#s11-menu-photo-import-with-direct-vision-2026-10-15), [S22 round 4](00-status.md#s22-round-4-results-2026-10-28), [gap analysis](photo-import-gap-analysis.md) |
+| A merchant can paste their own shop's public menu page and get an editable draft table; a price is filled only when the page prints it as text with the same digits, and the draft never publishes itself | [verified] on a local production build with real Kernel and OpenAI calls; web import is switched on on the deployed site by the user's settings [user-reported], and a signed-in import there is [unknown] | [S24](00-status.md#s24-menu-from-the-shops-own-page-2026-10-29) |
+| The web import model met a pre-registered threshold: zero wrong filled prices and 51 of 51 expected priced items drafted, across seven FIXTURE pages and three real pages used with the owners' verbal permission | [verified], with the limit that only one real page had a text menu and the fixture pages were written by the builder, so it does not show accuracy on other sites [hypothesis] | [S24 evaluation](00-status.md#s24-evaluation-results-2026-10-29), [output](evidence/s24-web-eval-gpt-6-luna.json) |
+| That evaluation cost US$0.001341 in model calls, and every one of its ten browser sessions was deleted after the read | [verified] token counts and deletions; the prices behind the cost are a [vendor claim] and Kernel's charge is [unknown] | [S24 evaluation](00-status.md#s24-evaluation-results-2026-10-29) |
+| A picture menu, a sign-in page or a PDF menu link drafts nothing; a PDF link answers "Envoi cannot read PDF menus" | [verified] | [S24 evaluation](00-status.md#s24-evaluation-results-2026-10-29), [S24 review](00-status.md#s24-review-2026-10-29) |
+| A shop published and bought from after a web import | [not run]: the FIXTURE shop has no PayPal sandbox destination, so publication and the buy page were not shown after a web import | [S24](00-status.md#s24-menu-from-the-shops-own-page-2026-10-29) |
 | The public read API matches its OpenAPI document, and an APIMatic-generated TypeScript client reads it | [verified] | [S14](00-status.md#s14-apimatic-client-and-docs-2026-10-19) |
 | The agent's purchase request route is in that same OpenAPI document, and the client APIMatic regenerated from it is committed byte-identical to the generator's output | [verified] | [S19](00-status.md#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-2026-10-25) |
 | The generated client reaches no receipt or payment route | [verified] | [S19](00-status.md#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-2026-10-25) |
@@ -43,14 +48,17 @@ Every payment below used PayPal sandbox money or Solana devnet test tokens; none
 
 | Claim | Label | Record |
 | --- | --- | --- |
-| Maintenance runs on a public GitHub runner on a schedule | [verified]; hourly in the workflow, about every three hours in practice | [S15](00-status.md#s15-judged-release-2026-10-20) |
+| Maintenance runs on a public GitHub runner on a schedule | [verified]; hourly in the workflow, and in practice every 4 to 7 hours over the five runs to 2026-10-29, all successful | [S15](00-status.md#s15-judged-release-2026-10-20) |
 | The repository's whole Git history was scanned for secrets before it became public | [verified] | [S15](00-status.md#s15-judged-release-2026-10-20), [scan](evidence/s15-history-scan.txt) |
 | An idle cold first visit on Render Free takes about 28 s from Singapore, about 2 s of it the database | [verified] | [S15](00-status.md#s15-judged-release-2026-10-20), [S15 latency](evidence/s15-cold-visit.json), [S1 latency](evidence/s1-r12-latency.json) |
 | Storage exhaustion risk R2 is accepted at 35 MB of 1 GB | [user-reported] storage reading | [S15](00-status.md#s15-judged-release-2026-10-20) |
-| Render, Neon, Actions and OpenAI stay available through 16 Dec 2026 | [unknown] | to be confirmed in S15 |
+| Render, Neon, Actions and OpenAI stay available through 16 Dec 2026 | OpenAI credit lasts to 2026-12-24 across two grants [user-reported]; Neon's margin is [unknown], so availability through 16 Dec is not claimed; Render and Neon usage on 2026-10-29 was well inside its free allowance [user-reported] | [S15](00-status.md#s15-judged-release-2026-10-20) |
 
 ## Success metric
 
 | Claim | Label | Record |
 | --- | --- | --- |
-| 4 of 5 first-time buyers complete an eligible test-environment purchase within 3 minutes, without coaching, with a matching external record | [not run] | [usability results](usability/results.md), [kit](usability/README.md) |
+| 4 of 5 first-time buyers complete an eligible test-environment purchase within 3 minutes, without coaching, with a matching external record | **not claimed**: the five-tester study was removed from S15 on 2026-10-29 by the user's decision, so the target is never measured | [usability results](usability/results.md), [kit](usability/README.md), [Gate 1 success metric](01-product.md#success-metric) |
+
+No usability, completion-rate, timing or ease-of-use claim is made anywhere in the README, the video or the submission.
+What exists instead is a set of single observed end-to-end runs, each listed above with its own record, and one observed journey is not a sample of first-time buyers.

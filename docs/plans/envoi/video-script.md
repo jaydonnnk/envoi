@@ -16,11 +16,11 @@ Each spoken claim must appear in the [evidence pack](evidence-pack.md); cut any 
 | 1:45-2:00 | The scan page: scanning a labeled fixture sticker opens that shop (needs an approved identifier mapping where it is filmed; Neon has none on 2026-10-21) | "At the counter you can scan the shop's sticker instead. It only identifies the shop; it's never a payment destination." |
 | 2:00-2:15 | Merchant orders: a paid order and a separate acknowledgment; a pending order not shown as paid | "The merchant sees paid orders as paid, and nothing else. Pending or uncertain payments are checked, never shown as paid." |
 | 2:15-2:30 | An agent in a chat creates a purchase link; the buyer opens a fresh, server-priced review | "AI agents can hand a buyer a one-time link to a review. They can't pay or read your receipt." |
-| 2:30-2:45 | The README and evidence pack on GitHub; the usability result line | "Everything here runs on test money, with every claim linked to its record. [State the usability result exactly as recorded, or say it was not run.]" |
+| 2:30-2:45 | The README and evidence pack on GitHub | "Everything here runs on test money, with every claim linked to its record." |
 
 ## Do not show or say
 
 - A real merchant's name or logo without their permission.
 - Any secret: `.env.local`, Render or GitHub settings, a PayPal or Neon console with credentials, a wallet seed phrase.
 - AI menu drafting from photos, which is not claimed.
-- A usability result that was not measured, or a reshaped target.
+- Any usability, completion-rate, timing or ease-of-use claim: the usability study was removed on 2026-10-29 and its target is never measured.

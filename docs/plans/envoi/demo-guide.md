@@ -265,4 +265,4 @@ Integration tests create and drop their own databases, so point `TEST_DATABASE_U
 | 11 API | Matches OpenAPI |
 | 12 Checks | All exit 0 |
 
-The usability target (4 of 5 first-time buyers within 3 minutes) is not run yet; follow [`usability/README.md`](usability/README.md) for it and never claim it from this guide.
+The usability target (4 of 5 first-time buyers within 3 minutes) is never measured: the study was removed on 2026-10-29 by the user's decision, so never claim it, or any usability, timing or ease-of-use result, from this guide.
