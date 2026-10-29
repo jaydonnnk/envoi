@@ -76,6 +76,8 @@ try {
     AI_MENU_MODEL: "fixture-unused",
     AI_WEB_MENU_MODEL: "fixture-unused",
     KERNEL_API_KEY: "fixture-unused",
+    // S25: no route this run calls is the assistant's, so its agent token is a placeholder too.
+    ASSISTANT_AGENT_TOKEN: "fixture-unused",
     SOLANA_RPC_URL: "http://127.0.0.1:9/fixture-unused",
     // The disposable database only, so no local .env.local can supply a real one.
     MIGRATION_DATABASE_URL: database.adminUrl,
