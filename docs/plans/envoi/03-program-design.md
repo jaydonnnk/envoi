@@ -24,6 +24,7 @@ Gate 3 program design, 2026-10-07 (Asia/Singapore). **APPROVED by the user 2026-
 Drafted 2026-10-29 for the [second build plan](01-product.md#second-build-plan-proposed-2026-10-29) ("Approve Gate 1") and its [Gate 2 amendment](02-architecture.md#second-build-plan-amendment-2026-10-29) ("Approve Gate 2"), with the six mockups listed in Gate 1's Screens; **APPROVED 2026-10-29** ("Approve Gate 3").
 Approval accepts these contracts as a proposal; it establishes no runtime, model, PayPal, APIMatic or evaluation evidence and authorizes no Gate 4 change, slice, install, migration, upload, model call, merge, push or deploy.
 Slice ids S25 to S31 are proposed here so each file and test has a home; Gate 4 sets their order and may rename them.
+**REOPENED 2026-10-29 for the S25 limiter bucket and RE-APPROVED 2026-10-29** ("Approve Gate 3"): S25 gains migration `0026_assistant_rate_limit_bucket.sql` and the `RATE_LIMIT_BUCKETS` entry, because `admit(db, "buyer_assistant", ...)` inserts a key the `rate_limit_hits` check constraint refuses; S27's migration becomes `0027`; S29's becomes `0028` and also allows `menu_translation`, which `admit(db, "menu_translation", ...)` needs for the same reason; no type, call stack, test name or test count changes; see the [record](00-status.md#gate-2-3-and-4-reopening-2026-10-29-s25-limiter-bucket).
 
 - **Proposed slices:** S25 Ask Envoi in the site (with the AI-off copy and the two iced teas); S26 the connected run (evidence only, plus the web-import fixture shop's PayPal sandbox destination); S27 US shops and currency-explicit money; S28 the PayPal PYUSD rewards card; S29 the menu explained and translated; S30 draft review aids; S31 PayPal approval over the review page.
 - **Version pins:** nothing is installed. PayPal's JavaScript SDK is loaded as a script from PayPal at run time, not as a package; the assistant uses the pinned `ai` and `@ai-sdk/openai`; the regenerated client keeps its `zod` range.
@@ -35,13 +36,15 @@ Slice ids S25 to S31 are proposed here so each file and test has a home; Gate 4 
 | `src/integrations/assistant/agent.ts`, `tools.ts`, `trace.ts` | S25 | New home of the S20 agent: instructions, the three tools, the turn gate and the trace, moved unchanged in behaviour from `clients/buyer-agent/`. `runAssistantTurn` below. |
 | `clients/buyer-agent/agent.ts` | S25 | Keeps only the terminal `main`, importing the moved module; `tools.ts` and `trace.ts` there are deleted. |
 | `src/app/api/v1/buyer/assistant/route.ts` | S25 | New Node route `POST`: buyer session, counted body of at most 16 KiB read within 5 s, `admit(db, "buyer_assistant", ...)` before any model call. |
+| `drizzle/0026_assistant_rate_limit_bucket.sql` | S25 | Widens `rate_limit_hits_bucket_check` to `('buyer_suggestion', 'wallet_challenge', 'buyer_assistant')`; no table, column, index or grant changes. |
+| `src/lib/db/schema.ts` | S25, S29 | `RATE_LIMIT_BUCKETS` gains `buyer_assistant` (S25) and `menu_translation` (S29), matching the check constraint. |
 | `src/lib/ratelimit.ts` | S25, S29 | `ASSISTANT_LIMITS` (per buyer 20 per 10 minutes, global 150 per hour) and `TRANSLATION_LIMITS` (per buyer 30 per 10 minutes, global 120 per hour) [hypothesis: starting values, changed only by a Gate 3 wording update]. |
 | `src/app/buy/ask/page.tsx`, `ask-envoi.tsx` | S25 | The Ask Envoi screen in the mockup's words: conversation, the steps panel, Review and pay. Linked from `/buy` only while the assistant is on. |
 | `src/app/buy/page.tsx` | S25 | With text suggestions off, the sticker card's heading reads "Scan the sticker" with no "Or". |
 | `src/operator/cli.ts` | S25 | New idempotent command `add-demo-iced-teas`: adds Iced lemon tea (S$2.20) and Iced milk tea (S$2.50) to the demo fixture Test Shop through the existing draft, confirm and publish domain functions, never by direct table writes. |
 | `src/lib/money.ts` | S27 | Currency-explicit money below; the SGD-only names go. |
 | every file naming `SgdCents`, `sgd_cents` or a `formatSgd` call (about 62, found by `rg`) | S27 | Renamed to the currency-neutral names below, the currency carried beside every amount. PYUSD code keeps SGD by calling `requireSgd`. |
-| `drizzle/0026_currency_and_country.sql` | S27 | `outlets.country` (`SG` or `US`, not null, default `SG`, check); every `*_sgd_cents` column renamed to `*_minor`; `purchases.currency` (`SGD` or `USD`, not null, default `SGD`, check); a trigger refusing a change of `outlets.country` once any revision of that outlet has been published. No grant changes. |
+| `drizzle/0027_currency_and_country.sql` | S27 | `outlets.country` (`SG` or `US`, not null, default `SG`, check); every `*_sgd_cents` column renamed to `*_minor`; `purchases.currency` (`SGD` or `USD`, not null, default `SGD`, check); a trigger refusing a change of `outlets.country` once any revision of that outlet has been published. No grant changes. |
 | `src/domain/outlets/merchant.ts`, `src/app/api/v1/merchant/outlets/[id]/route.ts` | S27 | The merchant sets `country` before first publication; a later change answers the new code `country_locked` (409). |
 | `src/integrations/paypal/orders.ts`, `map.ts`, `verify.ts` | S27 | Orders use the purchase's currency; a captured or webhook currency unlike the purchase's is a verification failure, never paid. |
 | `src/domain/pyusd/*` | S27 | Preparation refuses a purchase whose currency is not SGD, with the new unavailable reason `not_sgd_shop`. |
@@ -50,7 +53,7 @@ Slice ids S25 to S31 are proposed here so each file and test has a home; Gate 4 
 | `src/app/merchant/setup/country.tsx` | S27 | The country choice in the mockup's words, before the SGQR step, which is shown for SG only. |
 | `src/domain/rewards/paypal-pyusd.ts` | S28 | New; the reviewed constant and `rewardsCard` below. |
 | `src/app/merchant/setup/rewards-card.tsx` | S28 | New; the card in the mockup's words, rendered from the server. |
-| `drizzle/0027_menu_translations.sql` | S29 | `menu_translations` (`menu_revision_id` referencing `menu_revisions`, `language`, `items` jsonb, `model`, `created_at`; unique on revision and language); the web role may select and insert, never update or delete. |
+| `drizzle/0028_menu_translations.sql` | S29 | `menu_translations` (`menu_revision_id` referencing `menu_revisions`, `language`, `items` jsonb, `model`, `created_at`; unique on revision and language); the web role may select and insert, never update or delete; `rate_limit_hits_bucket_check` also allows `menu_translation`. |
 | `src/integrations/ai/menu-translate.ts` | S29 | New; the one tool-free text call and `MENU_TRANSLATION_PROMPT_VERSION`. |
 | `src/domain/menu/translate.ts` | S29 | New; `keepSafeTranslations` and `getOrCreateTranslation` below. |
 | `src/app/api/v1/buyer/menu-translations/route.ts` | S29 | New Node route `POST`: buyer session, counted body of at most 1 KiB, `admit(db, "menu_translation", ...)`. |
@@ -137,7 +140,7 @@ type StartResult = { attemptId: string; approvalUrl: string; orderId: string };
 - **Named tests (35, all new in the slice that builds them):**
   - S25:
     1. `the assistant is off unless the key, the model and the agent token are set`.
-    2. `the assistant is refused by its limiter before any model call`.
+    2. `the assistant is refused by its limiter before any model call`. It runs on the migrated disposable database, so a bucket the check constraint refuses fails it.
     3. `the assistant accepts text turns only`: a tool role, an extra key, a ninth turn or a 281-character turn is refused with no model call.
     4. `the assistant's link never reaches the model, its reply or its steps`: a needle self-test plants a marker link and proves the scanner finds it on each serialized surface first.
     5. `the assistant's steps come from the trace, not from model text`: a model reply that describes a fake call adds no step.

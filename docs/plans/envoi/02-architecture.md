@@ -490,9 +490,11 @@ Approval would accept this amendment as a proposal; it establishes no Kernel, AG
 
 Drafted 2026-10-29 for the [second build plan](01-product.md#second-build-plan-proposed-2026-10-29), approved in Gate 1 the same day ("Approve Gate 1"); **APPROVED 2026-10-29** ("Approve Gate 2").
 Approval accepts this amendment as a proposal; it establishes no runtime, model, PayPal or APIMatic evidence and authorizes no Gate 3 or 4 change, install, upload, migration, model call, merge, push or deploy.
+**REOPENED 2026-10-29 for the S25 limiter bucket and RE-APPROVED 2026-10-29** ("Approve Gate 2"): point 1 below now names the database change the new limiter key needs and no longer calls its caps daily; see the [record](00-status.md#gate-2-3-and-4-reopening-2026-10-29-s25-limiter-bucket).
 
 **Ask Envoi in the site.**
-1. A new buyer route, `POST /buyer/assistant`, beside `POST /buyer/suggestions`, with the same buyer session, counted and time-bounded body read and database limiter, under a new limiter key with its own per-buyer and global daily caps.
+1. A new buyer route, `POST /buyer/assistant`, beside `POST /buyer/suggestions`, with the same buyer session, counted and time-bounded body read and database limiter, under a new limiter key with its own per-buyer and global caps, whose windows Gate 3 sets.
+   The limiter's table, `rate_limit_hits`, has a check constraint that lists every allowed key, so the new key needs one migration that widens that check; no table, column, index or grant changes.
 2. The browser holds the conversation in memory and sends at most the last 8 turns, each at most 280 characters; the server stores no conversation. Turns from the browser are text only: no tool result is ever accepted from the browser.
 3. The server runs the S20 agent loop: the same instructions, the same three tools, at most 6 tool calls and 60 seconds per turn, the same refusals of an unread item id and a quantity outside 1 to 20 before any call.
    The loop moves from `clients/buyer-agent/` into a module both the terminal agent and the route import, so there is one agent, not two.

@@ -953,6 +953,7 @@ You perform: creating the Kernel account and placing `KERNEL_API_KEY` in your lo
 
 Drafted 2026-10-29 for the second build plan's Gate 1, 2 and 3 reopenings, each re-approved the same day ("Approve Gate 1", "Approve Gate 2", "Approve Gate 3"); **APPROVED 2026-10-29** ("I approve gate 4").
 Approval accepts this order, the test assignment and the cut order; it starts no slice and authorizes no install, migration, upload, model call, merge, push or deploy.
+**REOPENED 2026-10-29 for the S25 limiter bucket and APPROVED 2026-10-29** ("Approve Gate 4"): S25 builds migration `0026_assistant_rate_limit_bucket.sql`, S27's migration becomes `0027` and S29's `0028`; no order, test assignment, count, date or cut order changes; see the [record](00-status.md#gate-2-3-and-4-reopening-2026-10-29-s25-limiter-bucket).
 All seven come after S24 and outside the build-order table. Each has its own branch from the current tip of `main`, named below, and each shows a working result before the next starts.
 
 **Plan-wide rules.**
@@ -970,7 +971,7 @@ Branch: `envoi/slice-25-ask-envoi`. Depends on: S20 (the agent), S21 (the one bo
 2. Review and pay opens Envoi's review with Envoi's own price, and PayPal sandbox approval completes as today.
 3. With the assistant off, `/buy` shows no Ask Envoi link; with text suggestions off, the sticker card reads "Scan the sticker".
 
-**Builds.** The S25 rows of the [Gate 3 reopening](03-program-design.md#reopening-2026-10-29-second-build-plan)'s file map: the moved agent module, the assistant route and limiter, the `/buy/ask` screen, the `/buy` copy fix and the `add-demo-iced-teas` operator command; `ASSISTANT_AGENT_TOKEN` in `src/env.ts` and `.env.example`.
+**Builds.** The S25 rows of the [Gate 3 reopening](03-program-design.md#reopening-2026-10-29-second-build-plan)'s file map: the moved agent module, the assistant route and limiter, the `/buy/ask` screen, the `/buy` copy fix, the `add-demo-iced-teas` operator command and migration `0026_assistant_rate_limit_bucket.sql` with its `RATE_LIMIT_BUCKETS` entry; `ASSISTANT_AGENT_TOKEN` in `src/env.ts` and `.env.example`.
 
 **Tests.** Named tests 1-9 of the Gate 3 reopening; the S20 and S21 tests keep passing.
 
@@ -980,7 +981,7 @@ Branch: `envoi/slice-25-ask-envoi`. Depends on: S20 (the agent), S21 (the one bo
 
 **Falsifiers.** The evaluation misses its threshold: the assistant stays off on Render and no assistant claim is made, and S26 records the terminal agent instead. Not deployed by 2 Nov: stop and re-plan.
 
-**Authorizations to request at start.** Starting S25; OpenAI evaluation spend within a limit you state as a number; running `add-demo-iced-teas` on Neon; the merge, push and deploy.
+**Authorizations to request at start.** Starting S25; OpenAI evaluation spend within a limit you state as a number; running `add-demo-iced-teas` on Neon; migration 0026 on Neon, applied before the deploy; the merge, push and deploy.
 You perform: issuing the assistant's agent token with the operator command and setting `OPENAI_API_KEY`, `AI_MODEL` and `ASSISTANT_AGENT_TOKEN` on Render.
 
 #### S26 The connected run
@@ -1009,7 +1010,7 @@ Branch: `envoi/slice-27-us-shops`. Depends on: S26 (so the connected run is on r
 2. A buyer's review matches [`mockups/review-us-shop.html`](mockups/review-us-shop.html) apart from the in-page button, which is S31's: US dollars, PYUSD unavailable with its reason; PayPal sandbox approval completes in USD and the receipt reads Paid.
 3. Every Singapore journey of the earlier slices still works on Render: an SGD PayPal purchase, a PYUSD devnet purchase if PYUSD is switched on for the check, and a scan.
 
-**Builds.** The S27 rows of the [Gate 3 reopening](03-program-design.md#reopening-2026-10-29-second-build-plan)'s file map, including migration `0026_currency_and_country.sql` and the regenerated client.
+**Builds.** The S27 rows of the [Gate 3 reopening](03-program-design.md#reopening-2026-10-29-second-build-plan)'s file map, including migration `0027_currency_and_country.sql` and the regenerated client.
 
 **Tests.** Named tests 10-19 of the Gate 3 reopening; every existing payment, PYUSD, pricing and public API test passes on the renamed code.
 
@@ -1017,7 +1018,7 @@ Branch: `envoi/slice-27-us-shops`. Depends on: S26 (so the connected run is on r
 
 **Falsifiers.** Not merged and deployed by 8 Nov: revert to `main` before S27, cut S27 and S28 together, and say Envoi is Singapore-only. Any SGD purchase misbehaves after the migration: roll the deploy back first, then fix.
 
-**Authorizations to request at start.** Starting S27; one APIMatic upload of the changed `openapi/envoi-public.yaml` with the generated client committed unchanged; migration 0026 on Neon; the merge, push and deploy.
+**Authorizations to request at start.** Starting S27; one APIMatic upload of the changed `openapi/envoi-public.yaml` with the generated client committed unchanged; migration 0027 on Neon; the merge, push and deploy.
 You perform: creating a US PayPal sandbox business account for the US fixture shop.
 
 #### S28 PayPal PYUSD rewards card
@@ -1042,7 +1043,7 @@ Branch: `envoi/slice-29-menu-translation`. Depends on: S25 and S27 (so prices re
 
 **Visible result.** With a Chinese browser language, a shop's menu on `/buy` matches [`mockups/buyer-menu-explained.html`](mockups/buyer-menu-explained.html); "Show the shop's original menu" restores it; the review and receipt keep the original names; a second visit makes no model call.
 
-**Builds.** The S29 rows of the [Gate 3 reopening](03-program-design.md#reopening-2026-10-29-second-build-plan)'s file map, including migration `0027_menu_translations.sql`; `AI_MENU_TRANSLATION_MODEL` in `src/env.ts` and `.env.example`.
+**Builds.** The S29 rows of the [Gate 3 reopening](03-program-design.md#reopening-2026-10-29-second-build-plan)'s file map, including migration `0028_menu_translations.sql`; `AI_MENU_TRANSLATION_MODEL` in `src/env.ts` and `.env.example`.
 
 **Tests.** Named tests 23-30 of the Gate 3 reopening.
 
@@ -1052,7 +1053,7 @@ Branch: `envoi/slice-29-menu-translation`. Depends on: S25 and S27 (so prices re
 
 **Falsifiers.** The evaluation misses its threshold: translation stays off and no translation claim is made. Not deployed by 10 Nov: cut it.
 
-**Authorizations to request at start.** Starting S29; OpenAI evaluation spend within a limit you state as a number; migration 0027 on Neon; the merge, push and deploy.
+**Authorizations to request at start.** Starting S29; OpenAI evaluation spend within a limit you state as a number; migration 0028 on Neon; the merge, push and deploy.
 You perform: setting `AI_MENU_TRANSLATION_MODEL` on Render after a pass.
 
 #### S30 Draft review aids

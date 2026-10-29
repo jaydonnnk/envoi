@@ -419,7 +419,8 @@ for f, text in current.items():
 # 2026-10-29: next raised to 16.4.2 for security advisories by the user's instruction (4fc6fdbc...5daf963a was the text before it).
 # 2026-10-29: the PDF answer, by the user's decision "Add a PDF answer" (c1178173...5d155f9c was the text before it).
 # 2026-10-29: the second build plan reopening, re-approved by the user ("Approve Gate 3"); 09bbb22c...22da59cb was the text before it.
-G3_REOPENING_SHA256 = "04e8995ffeaf95db71af5d5011dcf5041cfea51ea7f6a9281b17b945c3c1aed5"
+# 2026-10-29: the S25 limiter bucket reopening, re-approved by the user ("Approve Gate 3"); 04e8995f...c1aed5 was the approved text before it, fe423865...856b85a4 the draft.
+G3_REOPENING_SHA256 = "bfa13baae80d0de11649f2c0ccde71279b41cd39fa114a47fd1917047f048499"
 # 02-architecture.md may likewise equal its continuation amendment text, re-approved by the user on 2026-10-25
 # (bc504e10...d0e47a9f was the shop QR and order archive text, re-approved on 2026-10-24,
 # 28d54654...45561154 the Phantom landing text of 2026-10-18, 938d0a99...f3bf30a6 the English-only text of 2026-10-15).
@@ -431,7 +432,8 @@ G3_REOPENING_SHA256 = "04e8995ffeaf95db71af5d5011dcf5041cfea51ea7f6a9281b17b945c
 # 2026-10-29: the usability-study removal, R19 falsifier revised to the user's own checks, re-approved by the user
 # ("Approve Gate 2"); 3ef84d7b...a16a was the text before it.
 # 2026-10-29: the second build plan amendment, re-approved by the user ("Approve Gate 2"); caa653f1...a8e2182d was the text before it.
-G2_REOPENING_SHA256 = "b1c2513fb889402e5161a3f27c8069292cfc3a8a7187de16372b93d2948b08f2"
+# 2026-10-29: the S25 limiter bucket reopening, re-approved by the user ("Approve Gate 2"); b1c2513f...b08f2 was the approved text before it, 63c408aa...2254ba78 the draft.
+G2_REOPENING_SHA256 = "a2f88604bf6201ef6fcad181526333a3312a8edc6a7c1ecb2c59209293a5bd06"
 # Gate 1, re-approved 2026-10-16 after deferring menu photo drafting and again on 2026-10-21 for the
 # landing page, and on 2026-10-24 for the shop QR and order archive, then reopened and re-approved on 2026-10-25 for S19-S22:
 # the revised and added mockups, and 01-product.md without its closing status line, which keeps changing as slices finish
