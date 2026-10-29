@@ -414,14 +414,18 @@ for f, text in current.items():
 # (b766e7ee...3338cbb7), then reopened on 2026-10-28 to accept the S22 demo owner's verbal permission and re-approved.
 # Current: the web menu import reopening, re-approved by the user on 2026-10-29
 # (fb9511ab...ea23ea38 was its draft, 3a09621d...1af955d7 was the approved text of 2026-10-28).
-G3_REOPENING_SHA256 = "55850890db58d727ffc3bd78fcfe0f92691ba81bdf653fb6acf705a64d24b59f"
+# 2026-10-29, S24 review: the section's status line now records that approval, a wording correction
+# (55850890...4d24b59f was the text before it).
+G3_REOPENING_SHA256 = "4fc6fdbc515fbb703a6afeb7737126289ca1e30e0c49916ccfddfc1a5daf963a"
 # 02-architecture.md may likewise equal its continuation amendment text, re-approved by the user on 2026-10-25
 # (bc504e10...d0e47a9f was the shop QR and order archive text, re-approved on 2026-10-24,
 # 28d54654...45561154 the Phantom landing text of 2026-10-18, 938d0a99...f3bf30a6 the English-only text of 2026-10-15).
 # Current: the web menu import amendment, re-approved by the user on 2026-10-29, on top of the usability-study removal,
 # which is still DRAFTED AND NOT APPROVED (535a22ee...ea3819327 was the draft of both, 2c2a715f...ec2a8c4f3 was the approved continuation amendment text of 2026-10-25,
 # 48495bf1...cb87e5 the usability-removal draft alone).
-G2_REOPENING_SHA256 = "c05097d3e5eadbafe651a2e3495d3bda219a0deb6f9adca660cc89d77ddc8448"
+# 2026-10-29, S24 review: the web menu import amendment's status line now records its approval, a wording
+# correction (c05097d3...7ddc8448 was the text before it).
+G2_REOPENING_SHA256 = "3ef84d7b71a5b115a985d7321a6ad66ce029a7dfd1d5fe559a0d46fa7252a16a"
 # Gate 1, re-approved 2026-10-16 after deferring menu photo drafting and again on 2026-10-21 for the
 # landing page, and on 2026-10-24 for the shop QR and order archive, then reopened and re-approved on 2026-10-25 for S19-S22:
 # the revised and added mockups, and 01-product.md without its closing status line, which keeps changing as slices finish

@@ -20,7 +20,7 @@ Gate 3 program design, 2026-10-07 (Asia/Singapore). **APPROVED by the user 2026-
 
 ## Reopening 2026-10-29: web menu import
 
-Drafted 2026-10-29 for the Gate 1 reopening and the [Gate 2 web menu import amendment](02-architecture.md#web-menu-import-amendment-2026-10-29) of the same day; **DRAFTED, NOT APPROVED**, with mockup [`merchant-web-import.html`](mockups/merchant-web-import.html).
+Drafted 2026-10-29 for the Gate 1 reopening and the [Gate 2 web menu import amendment](02-architecture.md#web-menu-import-amendment-2026-10-29) of the same day; **APPROVED 2026-10-29** ("Approve all four"), with mockup [`merchant-web-import.html`](mockups/merchant-web-import.html).
 Approval would accept these contracts as a proposal; it establishes no Kernel, AG Grid, model or page evidence and authorizes no Gate 4 change, slice, sign-up, install, Kernel session, OpenAI call or deploy.
 
 - **Version pins:** two runtime dependencies are added, each pinned exactly when S24 installs them, under the existing rule of a release at least two weeks old, and recorded in [Version pins](#version-pins) as a wording update on install: `@onkernel/sdk` [vendor claim: the name of Kernel's TypeScript SDK; to be confirmed against the account's documentation], and `ag-grid-community` with `ag-grid-react` at one shared version. Before the AG Grid install its licence is read and recorded; only the Community edition is allowed, never Enterprise. Nothing else changes.

@@ -462,7 +462,7 @@ APIMatic stays development tooling: the document is uploaded to generate the cli
 
 ### Web menu import amendment, 2026-10-29
 
-Drafted 2026-10-29 for the Gate 1 reopening of the same day; **DRAFTED, NOT APPROVED**.
+Drafted 2026-10-29 for the Gate 1 reopening of the same day; **APPROVED 2026-10-29** ("Approve all four").
 Approval would accept this amendment as a proposal; it establishes no Kernel, AG Grid, model or page evidence and authorizes no Gate 3 or 4 change, sign-up, install, Kernel session, model call or deploy.
 
 **Web menu import (S24).**
