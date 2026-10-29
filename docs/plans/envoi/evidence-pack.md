@@ -1,6 +1,6 @@
 # Envoi evidence pack
 
-Status: draft, 2026-10-21, extended 2026-10-29 for S19, S20, S21, the S22 round 4 outcome, S24 and the removal of the usability study; completed when S15 closes.
+Status: complete, 2026-10-29, when S15 closed; drafted 2026-10-21 and extended 2026-10-29 for S19, S20, S21, the S22 round 4 outcome, S24 and the removal of the usability study. The video is the user's and is not part of S15; anything it says must already be listed here.
 Every claim made in the README, the video or the submission is listed here with its label and the record that supports it.
 A claim with no record here is not made.
 

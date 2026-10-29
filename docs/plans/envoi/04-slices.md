@@ -92,7 +92,7 @@ Target windows are the planning windows recorded in `roadmap.md`; they are targe
 | 13 | S16 PYUSD devnet purchase | The merchant proves a devnet wallet and sets a dated rate; a buyer pays the rounded-up PYUSD amount in Phantom and the receipt says transferred and finalized on devnet. PayPal keeps working when PYUSD is off. | S3, S4, S5, S7, S8, S11 | 26 Oct-1 Nov |
 | 14 | S17 PYUSD recovery | A lost wallet response stays "checking payment" until a complete history scan decides it; an extra transfer is shown, never hidden; the operator closes a mismatch only as unpaid. | S5, S8, S16 | 26 Oct-1 Nov |
 | 15 | S14 APIMatic client and docs (account-conditional) | A generated client calls the running public API and passes a contract check. | S13 | 26 Oct-1 Nov |
-| 16 | S15 Judged release | Public licensed repository, scheduled maintenance, the video and an evidence pack. | All included slices | 2-8 Nov, buffer 9-12 Nov |
+| 16 | S15 Judged release | Public licensed repository, scheduled maintenance and an evidence pack; the video is separate, by the user's decision of 2026-10-29. | All included slices | 2-8 Nov, buffer 9-12 Nov |
 
 S12 is retired: it was merged into S11 on 2026-10-12.
 Submission cutoff is 13 Nov 2026 04:00 SGT, and access must last through judging, which ends 16 Dec 2026 00:00 SGT ([research](research.md#hackathon-dates-and-deliverables)).
@@ -721,6 +721,7 @@ Branch: `envoi/slice-15-release`.
 **Visible result.**
 A public repository with an open-source license; a README with setup, reset and the fixture, sandbox and devnet labels; scheduled maintenance running on public runners; a public video under three minutes; an evidence pack linking every claim to its record.
 *Changed 2026-10-29, by the user's decision:* the usability result is no longer part of the visible result, because the five-tester study is not run; the evidence pack records the target as never measured and Envoi makes no usability claim.
+*Changed 2026-10-29, by the user's decision* ("Separate the video from the slice ... Video is separate"): the public video is no longer part of S15's visible result or exit; the user records and uploads it, and submits on Devpost, on their own schedule after S15 closes. The video script stays bound to the evidence pack, so it may say only what the pack supports.
 
 **Work.**
 - Scan the full Git history for secrets, including Solana secret-key arrays, with an injected self-test before visibility changes, and review non-secret identifiers in the documents, such as the Neon project and organization ids, before they become public.
