@@ -912,7 +912,7 @@ You perform: the demo merchant's photo and the owner's permission, written or ve
 
 ### S24 Menu from the shop's own page (added 2026-10-29)
 
-Drafted 2026-10-29 for the Gate 1, 2 and 3 reopenings of the same day; **DRAFTED, NOT APPROVED**; it starts only on an authorization naming it.
+Drafted 2026-10-29 for the Gate 1, 2 and 3 reopenings of the same day; **APPROVED 2026-10-29** ("Approve all four") and authorized the same day with a USD 5 OpenAI limit (see [`00-status.md`](00-status.md#gate-1-2-3-and-4-reopening-2026-10-29-web-menu-import)).
 S23 is not used: it was the withdrawn round 5 draft, preserved in [`photo-import-gap-analysis.md`](photo-import-gap-analysis.md).
 Branch: `envoi/slice-24-web-menu-import`.
 Depends on: S6 (the menu editor and draft), S11 (the import boundary, admission and `commitImport`) and S7 (confirmation and publication).
