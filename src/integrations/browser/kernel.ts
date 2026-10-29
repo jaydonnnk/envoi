@@ -11,7 +11,8 @@ import { log, type SafeErrorRecord } from "@/lib/log";
 export const PAGE_READ_BOUNDS = { timeoutMs: 20_000, maxTextBytes: 65_536 } as const;
 
 // The API host is a reviewed code constant, never configuration: the SDK would otherwise read
-// KERNEL_BASE_URL from the environment.
+// KERNEL_BASE_URL from the environment. Its logger is off for the same reason: KERNEL_LOG=debug would
+// otherwise print each request body, and the execute body carries the full URL.
 export const KERNEL_API_BASE_URL = "https://api.onkernel.com";
 
 export type PageRead =
@@ -63,7 +64,7 @@ function isScriptResult(value: unknown): value is ScriptResult {
 }
 
 export async function readPageText(url: URL, signal: AbortSignal, options: { apiKey: string; fetch?: FetchFunction }): Promise<PageRead> {
-  const client = new Kernel({ apiKey: options.apiKey, baseURL: KERNEL_API_BASE_URL, maxRetries: 0, timeout: PAGE_READ_BOUNDS.timeoutMs, fetch: options.fetch });
+  const client = new Kernel({ apiKey: options.apiKey, baseURL: KERNEL_API_BASE_URL, logLevel: "off", maxRetries: 0, timeout: PAGE_READ_BOUNDS.timeoutMs, fetch: options.fetch });
   const budget = new AbortController();
   const timer = setTimeout(() => budget.abort(), PAGE_READ_BOUNDS.timeoutMs);
   const joined = AbortSignal.any([signal, budget.signal]);

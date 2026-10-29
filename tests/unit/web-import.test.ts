@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import ts from "typescript";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { validateVisionDraft } from "@/domain/imports/validate-result";
 import { hasPrintedPrice, keepPrintedOnly, pagePriceTokens } from "@/domain/imports/verbatim";
 import { checkMenuPageUrl } from "@/domain/imports/web-url";
@@ -114,6 +114,26 @@ describe("readPageText reads only the merchant's own host, once, and keeps the U
     expect(fake.deletes()).toBe(1);
   });
 
+  it("the Kernel SDK writes no request body to the console, even with KERNEL_LOG=debug", async () => {
+    const NEEDLE = "FIXTURENEEDLEKERNELLOG5K";
+    const lines: string[] = [];
+    for (const method of ["log", "info", "debug", "warn", "error"] as const) {
+      vi.spyOn(console, method).mockImplementation((...args: unknown[]) => void lines.push(args.map((arg) => (typeof arg === "string" ? arg : JSON.stringify(arg))).join(" ")));
+    }
+    vi.stubEnv("KERNEL_LOG", "debug");
+    try {
+      const fake = createFakeKernel(() => ({ kind: "page", text: FIXTURE_PAGE_TEXT }));
+      await readPageText(new URL(`https://fixture-shop.example/${NEEDLE}/menu`), new AbortController().signal, { apiKey: "FIXTURE-kernel-key", fetch: fake.fetch });
+      const surface = lines.join("\n");
+      // Self-test first: the scanner finds the needle once it is planted on this surface.
+      expect(`${surface}\n${JSON.stringify({ url: `https://fixture-shop.example/${NEEDLE}/menu` })}`.includes(NEEDLE)).toBe(true);
+      expect(JSON.stringify(fake.calls).includes(NEEDLE)).toBe(true);
+      expect(surface.includes(NEEDLE)).toBe(false);
+    } finally {
+      vi.unstubAllEnvs();
+      vi.restoreAllMocks();
+    }
+  });
 });
 
 describe("a page with no printed price makes no model call (the price check)", () => {
