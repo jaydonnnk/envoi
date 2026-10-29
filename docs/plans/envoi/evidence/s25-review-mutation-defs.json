@@ -1,0 +1,100 @@
+[
+ {
+  "id": "r01-dev-turbopack",
+  "test_file": "tests/unit/assistant.test.ts",
+  "test": "every Next.js dev server and build applies the generated client rule",
+  "kind": "standalone",
+  "mutation": "Fix 2, dev script: next dev runs on Turbopack, which ignores the generated client rule.",
+  "edits": [
+   {
+    "file": "package.json",
+    "old": "\"dev\": \"next dev --webpack\",",
+    "new": "\"dev\": \"next dev\","
+   }
+  ]
+ },
+ {
+  "id": "r02-build-turbopack",
+  "test_file": "tests/unit/assistant.test.ts",
+  "test": "every Next.js dev server and build applies the generated client rule",
+  "kind": "standalone",
+  "mutation": "Fix 2, build script: next build runs on Turbopack.",
+  "edits": [
+   {
+    "file": "package.json",
+    "old": "\"build\": \"next build --webpack\",",
+    "new": "\"build\": \"next build\","
+   }
+  ]
+ },
+ {
+  "id": "r03-rule-without-ts",
+  "test_file": "tests/unit/assistant.test.ts",
+  "test": "every Next.js dev server and build applies the generated client rule",
+  "kind": "standalone",
+  "mutation": "Fix 2, the rule itself: a .js import no longer tries .ts.",
+  "edits": [
+   {
+    "file": "next.config.ts",
+    "old": "extensionAlias: { \".js\": [\".ts\", \".js\"] }",
+    "new": "extensionAlias: { \".js\": [\".js\"] }"
+   }
+  ]
+ },
+ {
+  "id": "r04-body-limit-raised",
+  "test_file": "tests/integration/buyer-assistant.test.ts",
+  "test": "the assistant reads a body of at most 16 KiB",
+  "kind": "standalone",
+  "mutation": "Fix 4, byte limit: 16,385 bytes are read.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/buyer/assistant/route.ts",
+    "old": "const MAX_BODY_BYTES = 16_384;",
+    "new": "const MAX_BODY_BYTES = 16_385;"
+   }
+  ]
+ },
+ {
+  "id": "r05-body-limit-lowered",
+  "test_file": "tests/integration/buyer-assistant.test.ts",
+  "test": "the assistant reads a body of at most 16 KiB",
+  "kind": "standalone",
+  "mutation": "Fix 4, byte limit: a 16,384-byte body is refused.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/buyer/assistant/route.ts",
+    "old": "const MAX_BODY_BYTES = 16_384;",
+    "new": "const MAX_BODY_BYTES = 16_383;"
+   }
+  ]
+ },
+ {
+  "id": "r06-read-time-raised",
+  "test_file": "tests/integration/buyer-assistant.test.ts",
+  "test": "the assistant reads its body within 5 seconds",
+  "kind": "standalone",
+  "mutation": "Fix 4, read time: a body may take 6 seconds.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/buyer/assistant/route.ts",
+    "old": "const BODY_READ_MS = 5_000;",
+    "new": "const BODY_READ_MS = 6_000;"
+   }
+  ]
+ },
+ {
+  "id": "r07-read-time-lowered",
+  "test_file": "tests/integration/buyer-assistant.test.ts",
+  "test": "the assistant reads its body within 5 seconds",
+  "kind": "standalone",
+  "mutation": "Fix 4, read time: a body must arrive within 4 seconds.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/buyer/assistant/route.ts",
+    "old": "const BODY_READ_MS = 5_000;",
+    "new": "const BODY_READ_MS = 4_000;"
+   }
+  ]
+ }
+]

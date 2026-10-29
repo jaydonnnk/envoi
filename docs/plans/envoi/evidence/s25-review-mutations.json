@@ -1,0 +1,148 @@
+{
+ "branch": "envoi/slice-25-review-fixes",
+ "base_commit": "5fdc1fb",
+ "uncommitted_changes": true,
+ "method": "Each definition in s25-review-mutation-defs.json applied alone by exact text replacement, its whole test file run with the vitest JSON reporter, every touched file restored and compared by SHA-256, then the whole file rerun. A proof needs the named row to fail on an AssertionError, a byte-identical restore and an all-passing rerun; other failing rows are recorded. The integration files run the real route handler POST /api/v1/buyer/assistant, the /buy page and the add-demo-iced-teas operator function on local PostgreSQL databases built from the migrations through 0026, with DATABASE_URL removed; OpenAI and Envoi's public API are faked at the fetch boundary by tests/support/fake-openai.ts and fake-envoi-api.ts, labeled FIXTURE, so no model is called and PayPal is never reached. The unit file reads src/integrations/assistant, the route and clients/buyer-agent. Every definition here is an S25 review fix test recorded in 00-status.md. Run 2026-10-30 in a copy of this branch's working tree outside the repository, with node_modules cloned and no env file, so branch and base_commit are written here by hand.",
+ "results": [
+  {
+   "id": "r01-dev-turbopack",
+   "test": "every Next.js dev server and build applies the generated client rule",
+   "kind": "standalone",
+   "group": "Ask Envoi",
+   "files": [
+    "package.json"
+   ],
+   "mutation": "Fix 2, dev script: next dev runs on Turbopack, which ignores the generated client rule.",
+   "own_row": "failed",
+   "error": "AssertionError: dev: expected [ 'next', 'dev' ] to include '--webpack'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "r02-build-turbopack",
+   "test": "every Next.js dev server and build applies the generated client rule",
+   "kind": "standalone",
+   "group": "Ask Envoi",
+   "files": [
+    "package.json"
+   ],
+   "mutation": "Fix 2, build script: next build runs on Turbopack.",
+   "own_row": "failed",
+   "error": "AssertionError: build: expected [ 'next', 'build' ] to include '--webpack'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "r03-rule-without-ts",
+   "test": "every Next.js dev server and build applies the generated client rule",
+   "kind": "standalone",
+   "group": "Ask Envoi",
+   "files": [
+    "next.config.ts"
+   ],
+   "mutation": "Fix 2, the rule itself: a .js import no longer tries .ts.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'import { fileURLToPath } from \"node:u\u2026' to contain 'extensionAlias: { \".js\": [\".ts\", \".js\u2026'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "r04-body-limit-raised",
+   "test": "the assistant reads a body of at most 16 KiB",
+   "kind": "standalone",
+   "group": "Ask Envoi route",
+   "files": [
+    "src/app/api/v1/buyer/assistant/route.ts"
+   ],
+   "mutation": "Fix 4, byte limit: 16,385 bytes are read.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { status: 200, code: undefined, \u2026(1) } to match object { status: 400, \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "r05-body-limit-lowered",
+   "test": "the assistant reads a body of at most 16 KiB",
+   "kind": "standalone",
+   "group": "Ask Envoi route",
+   "files": [
+    "src/app/api/v1/buyer/assistant/route.ts"
+   ],
+   "mutation": "Fix 4, byte limit: a 16,384-byte body is refused.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { status: 400, \u2026(2) } to match object { status: 200 }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "r06-read-time-raised",
+   "test": "the assistant reads its body within 5 seconds",
+   "kind": "standalone",
+   "group": "Ask Envoi route",
+   "files": [
+    "src/app/api/v1/buyer/assistant/route.ts"
+   ],
+   "mutation": "Fix 4, read time: a body may take 6 seconds.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { status: 200, code: undefined, \u2026(1) } to match object { status: 400, \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "r07-read-time-lowered",
+   "test": "the assistant reads its body within 5 seconds",
+   "kind": "standalone",
+   "group": "Ask Envoi route",
+   "files": [
+    "src/app/api/v1/buyer/assistant/route.ts"
+   ],
+   "mutation": "Fix 4, read time: a body must arrive within 4 seconds.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { status: 400, \u2026(2) } to match object { status: 200 }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  }
+ ]
+}
