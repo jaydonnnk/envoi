@@ -427,7 +427,9 @@ G3_REOPENING_SHA256 = "09bbb22c398abb0dacc4147a65dae08a59bad7f0884f0ab55c46e34d2
 # 48495bf1...cb87e5 the usability-removal draft alone).
 # 2026-10-29, S24 review: the web menu import amendment's status line now records its approval, a wording
 # correction (c05097d3...7ddc8448 was the text before it).
-G2_REOPENING_SHA256 = "3ef84d7b71a5b115a985d7321a6ad66ce029a7dfd1d5fe559a0d46fa7252a16a"
+# 2026-10-29: the usability-study removal, R19 falsifier revised to the user's own checks, re-approved by the user
+# ("Approve Gate 2"); 3ef84d7b...a16a was the text before it.
+G2_REOPENING_SHA256 = "caa653f199be1eaba902ac27791f65a45aaebab86920c367fde63358a8e2182d"
 # Gate 1, re-approved 2026-10-16 after deferring menu photo drafting and again on 2026-10-21 for the
 # landing page, and on 2026-10-24 for the shop QR and order archive, then reopened and re-approved on 2026-10-25 for S19-S22:
 # the revised and added mockups, and 01-product.md without its closing status line, which keeps changing as slices finish

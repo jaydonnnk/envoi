@@ -457,7 +457,7 @@ APIMatic stays development tooling: the document is uploaded to generate the cli
 **Risks.**
 - **R5 extends:** sentence-to-basket accuracy, quantity accuracy and the reference agent's tool choices are unmeasured until their pre-registered evaluations.
 - **New, R19:** a filled basket can be wrong in a way the buyer does not notice; the review shows every line and quantity before payment, and the falsifier is a usability failure where a tester pays for a basket they did not mean.
-  *Added 2026-10-29:* the five-tester study that would have exercised this falsifier is not run, by the user's decision, so **R19 stays open and unfalsified**; the review screen's line-by-line display is the only mitigation on record, and no claim is made that a buyer notices a wrong basket.
+  *Added 2026-10-29, revised the same day at the user's direction:* the five-tester study is not run, by the user's decision. The falsifier is instead exercised by the builder: the user checks, before and after each production deploy, that a one-sentence basket's review screen shows every line and quantity and that a wrong line can be changed or removed before payment. Those runs check the screen, not whether a first-time buyer who did not write the sentence would notice a wrong line, so **R19 stays open** and no claim is made that a buyer notices a wrong basket.
 - **New, R20:** the reference agent runs outside Envoi's control on a person's machine; its spend and key are that person's, and Envoi's guards do not depend on it behaving.
 
 ### Web menu import amendment, 2026-10-29
