@@ -77,8 +77,10 @@ const theme = themeQuartz.withParams({
 function RemoveCell(params: ICellRendererParams<GridRow> & { onRemove: (key: string) => void }) {
   const row = params.data;
   if (!row) return null;
+  // The portion is part of the name, so two variants of one item never share a button name.
+  const label = [row.name.trim() || "this item", row.portion.trim()].filter(Boolean).join(", ");
   return (
-    <button className="grid-remove" type="button" tabIndex={-1} onClick={() => params.onRemove(row.key)} aria-label={`Remove ${row.name.trim() || "this item"}`}>
+    <button className="grid-remove" type="button" tabIndex={-1} onClick={() => params.onRemove(row.key)} aria-label={`Remove ${label}`}>
       Remove
     </button>
   );
