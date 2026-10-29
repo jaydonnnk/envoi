@@ -463,6 +463,18 @@ Written before any OpenAI call, as [`04-slices.md`](04-slices.md#s25-ask-envoi-i
 - **Fix:** the harness's `session()` waits out `X-Retry-After` on a 429 and tries the sign-in again, at most 5 times. No model call happens before a session exists, so the fix changes no scored outcome; the sentences, expected outcomes, scoring and threshold are unchanged.
 - **Decision, 2026-10-29, in the user's words:** "Yes, commit and rerun", by the button whose message read "record the aborted attempt in 00-status.md, commit the harness fix locally, reseed, and run the evaluation once fresh within US$3. The fresh run is the scored run."
 
+#### S25 Ask Envoi evaluation results, 2026-10-29
+
+- **Run [verified]:** after commit `70704b7`, on a freshly seeded `envoi_s21_local` with a new FIXTURE agent token, the local production build of this branch on `http://localhost:3100`, `gpt-6-luna`, every case once. Full output: [`evidence/s25-ask-eval.json`](evidence/s25-ask-eval.json).
+- **Result: FAIL.** 22 of 25 correct, below the pre-registered 24. The iced tea question was asked: C1's first reply was "Which iced tea would you like: Iced lemon tea (S$2.20) or Iced milk tea (S$2.50)?", with both menu prices (reported, not scored).
+- **The three misses, scored exactly as registered:**
+  - B7 "two soft boiled eggs and a kopi o near Tanjong Pagar": no link; the model asked "How many Kopi O would you like?" although the sentence says "a kopi o". Steps `listOutlets`, `getOutletMenu`.
+  - L2 "two kaya toast": a link was created for 2 Kaya toast set at Lorong Demo Kopi, the only shop with kaya toast available; the protocol expects no link when no shop or area is named.
+  - N3 "kopi from Nowhere Shop": no link, and the reply "Nowhere Shop isn’t on Envoi, so I can’t arrange the kopi order." lacks the registered word "not on envoi". The reply's meaning is right [hypothesis], but it is scored wrong as registered and is not re-scored.
+- **Other results:** C2 asked the same question and then linked three Iced milk tea; I1 linked five Kaya toast set and said "They aren’t free"; X1 answered in Chinese with a Kopi O link; B9 refused 100 and asked again. Median 7,007 ms per case; 91 model requests; none refused by the spend limit or as another model.
+- **Spend [verified]:** US$0.009104 for the scored run, plus US$0.001259 for the stopped attempt: US$0.010363 of the US$3 limit, at S4's prices [vendor claim].
+- **Falsifier applies:** the assistant stays off on Render and no assistant claim is made; S26 records the terminal agent instead, unless the user re-plans.
+
 ### S24 Menu from the shop's own page, 2026-10-29
 
 - **Branch:** `envoi/slice-24-web-menu-import`, from `main` at `a9548d3`; pins committed at `7c0ede3` (`@onkernel/sdk@0.126.0`, `ag-grid-community@36.2.0`, `ag-grid-react@36.2.0`).
