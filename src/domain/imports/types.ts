@@ -20,7 +20,7 @@ export type MenuModelBounds = {
   model: string; // must equal AI_MENU_MODEL, or AI_WEB_MENU_MODEL for a web import
   inputUsdMicrosPerMillionTokens: number;
   outputUsdMicrosPerMillionTokens: number;
-  maxInputTokens: number; // reviewed worst case for one shrunk photo plus the prompt
+  maxInputTokens: number; // reviewed worst case for one shrunk photo, or one cut page text, plus the prompt
   maxOutputTokens: number; // also sent as the call's maxOutputTokens
 };
 
@@ -29,12 +29,15 @@ export type MenuSpendPolicy = {
   readonly modelBounds: readonly MenuModelBounds[]; // no entry for AI_MENU_MODEL fails closed
 };
 
-// The daily ceiling is the user's decision of 2026-10-15: US$1 a UTC day across all imports. The
-// bounds list stays empty until the pre-registered vision evaluation (R5) chooses a model, so until
-// then every admission is refused with model_bounds_missing.
+// The daily ceiling is the user's decision of 2026-10-15: US$1 a UTC day across all imports. No vision
+// model has passed its evaluation (R5), so no entry names one and photo admission stays refused with
+// model_bounds_missing.
+// gpt-6-luna passed the pre-registered S24 web evaluation on 2026-10-29 and the user added its entry
+// ("Yes, 76,000 input"): S4's 2026-10-14 list prices, and an input bound of one token per byte of the
+// 65,536-byte page cut plus its </page> escapes and the prompt, a reservation of US$0.0106.
 export const MENU_SPEND_POLICY: MenuSpendPolicy = {
   dailyCeilingUsdMicros: 1_000_000,
-  modelBounds: [],
+  modelBounds: [{ model: "gpt-6-luna", inputUsdMicrosPerMillionTokens: 100_000, outputUsdMicrosPerMillionTokens: 500_000, maxInputTokens: 76_000, maxOutputTokens: 6_000 }],
 };
 
 // The integer ceiling of the worst-case input plus output cost of one call, in US$ micros.
