@@ -122,15 +122,21 @@ form > .button.full { margin-top: 18px; }
    an availability choice before the menu can be confirmed. */
 select { font: inherit; color: var(--ink); padding: 12px; background: var(--paper); border: 1px solid #8da3bb; border-radius: 7px; width: 100%; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.draft-item { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 1.45fr) auto; gap: 10px 12px; align-items: start; border: 1px solid var(--line); border-radius: 10px; padding: 14px; margin: 0 0 12px; }
-.draft-item.flagged { border-color: #e3c17f; background: #fffaf0; }
-.draft-item .field label { margin: 0 0 6px; font-size: 14px; line-height: 20px; }
-/* Lines the button up with the inputs, below the 20px label and its 6px gap, whatever hint sits under them. */
-.draft-item .remove { padding-top: 26px; }
-.draft-item .remove .button { padding: 12px 14px; }
-.draft-item select { padding-right: 8px; }
 [aria-live] > p { margin: 12px 0 0; }
 .status.draft-status { margin: 16px 0 0; }
+/* S24: the menu draft table (AG Grid Community) and the web import block. */
+.menu-grid { margin: 0 0 6px; }
+.menu-grid .grid-swipe { display: none; margin: 0 0 8px; }
+.menu-grid .ag-cell.cell-needs { background: var(--warn); color: var(--amber); }
+.menu-grid .ag-row.row-flagged .ag-cell.cell-note { color: var(--amber); }
+.menu-grid .ag-cell.cell-note { line-height: 1.4; padding-top: 12px; padding-bottom: 12px; }
+.menu-grid .ag-cell.cell-remove { display: flex; align-items: center; }
+.menu-grid .grid-remove { font-family: inherit; font-size: 14px; font-weight: 600; line-height: 1.3; color: var(--ink); background: var(--paper); border: 1px solid #8da3bb; border-radius: 7px; padding: 5px 12px; cursor: pointer; }
+.web-import { border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 0 0 18px; background: var(--pale); }
+.web-import h3 { margin: 0 0 8px; font-size: 1.05rem; }
+.web-import input[type=url] { width: 100%; }
+.web-import .status { margin: 16px 0 0; }
+.web-import .status strong, .web-import .status small { display: block; }
 input[aria-invalid="true"], select[aria-invalid="true"] { border-color: #c98a1d; }
 .hint { color: var(--amber); margin-top: 4px; }
 label.check { display: flex; gap: 10px; align-items: flex-start; font-weight: 600; margin: 18px 0 0; }
@@ -171,6 +177,7 @@ footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; 
 .chip.inline { margin-left: 8px; font-weight: 400; vertical-align: 1px; }
 
 @media (max-width: 640px) {
+  .menu-grid .grid-swipe { display: block; }
   .top { padding: 14px 16px; }
   .badge { font-size: 10px; }
   .notice { padding: 9px 16px; }
@@ -179,9 +186,6 @@ footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; 
   .card { padding: 18px; }
   .layout { grid-template-columns: 1fr; }
   .order-list { grid-template-columns: 1fr; }
-  .draft-item { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-  .draft-item .wide { grid-column: 1 / -1; }
-  .draft-item .remove { padding-top: 0; grid-column: 1 / -1; }
   /* A warning that must be read before acting comes first in the single column. */
   .layout > .first-on-phone { order: -1; }
 }

@@ -255,7 +255,17 @@ function PublishCard({ outlet, onPublished }: { outlet: MerchantOutlet; onPublis
 // its error with "Try again".
 const fetchDraft = async (outletId: string) => (await requestJson<DraftWithImport>("GET", `/api/v1/merchant/outlets/${encodeURIComponent(outletId)}/menu-draft`)).data ?? null;
 
-export function Workspace({ initial, initialDraft, importsOpen }: { initial: MerchantOutlets; initialDraft: DraftWithImport | null; importsOpen: boolean }) {
+export function Workspace({
+  initial,
+  initialDraft,
+  importsOpen,
+  webImportsOpen,
+}: {
+  initial: MerchantOutlets;
+  initialDraft: DraftWithImport | null;
+  importsOpen: boolean;
+  webImportsOpen: boolean;
+}) {
   const [outlets, setOutlets] = useState(initial.outlets);
   const [canCreate, setCanCreate] = useState(initial.canCreateOutlet);
   const [selected, setSelected] = useState<{ id: string; draft: DraftWithImport | null } | null>(
@@ -352,6 +362,7 @@ export function Workspace({ initial, initialDraft, importsOpen }: { initial: Mer
           outletId={outlet.id}
           outletPublished={outlet.published}
           importsOpen={importsOpen}
+          webImportsOpen={webImportsOpen}
           initialDraft={selected.draft}
           onDraftChange={refreshOutlets}
         />

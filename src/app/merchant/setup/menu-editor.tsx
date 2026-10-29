@@ -4,10 +4,25 @@ import { useState } from "react";
 import type { DraftJson } from "@/domain/menu/serialize";
 import type { MenuItemDraft } from "@/domain/menu/types";
 import { requestJson } from "@/lib/browser/session";
+import { MenuGrid, type GridRow } from "./menu-grid";
 import { MenuPhotoImport, type DraftWithImport } from "./menu-import";
+import { MenuWebImport, type BlankPrice } from "./menu-web-import";
 import { useRestoreFocus } from "@/lib/browser/focus";
 
-type Row = { key: string; id?: string; name: string; portion: string; price: string; availability: MenuItemDraft["availability"]; fromPhoto?: boolean };
+type Row = { key: string; id?: string; name: string; portion: string; price: string; availability: MenuItemDraft["availability"]; fromImport?: boolean };
+
+// Why a web-imported price is blank, in the merchant's words (Gate 3 grid rules). Only a web import
+// reports reasons, so a price the model found no digits for was not printed as text on the page.
+const BLANK_REASON: Record<BlankPrice["basis"], string> = {
+  not_on_page: "The price was not printed as text on your page",
+  blank: "The price was not printed as text on your page",
+  ambiguous: "The drafted price could not be read",
+  other_currency: "The price was not in SGD",
+  duplicate_variant: "Two rows share this name and portion",
+  explicit: "Price needed",
+};
+
+const variantKey = (name: string, portion: string | null) => `${name.trim().toLowerCase()}\u0000${(portion ?? "").trim().toLowerCase()}`;
 
 const SINGAPORE = new Intl.DateTimeFormat("en-SG", { timeZone: "Asia/Singapore", dateStyle: "medium", timeStyle: "short" });
 
@@ -37,7 +52,7 @@ function rowsOf(draft: DraftJson): Row[] {
     portion: item.portion ?? "",
     price: priceText(item.priceSgdCents),
     availability: item.availability,
-    fromPhoto: item.source === "import_suggestion",
+    fromImport: item.source === "import_suggestion",
   }));
 }
 
@@ -48,12 +63,14 @@ export function MenuEditor({
   outletId,
   outletPublished,
   importsOpen,
+  webImportsOpen,
   initialDraft,
   onDraftChange,
 }: {
   outletId: string;
   outletPublished: boolean;
   importsOpen: boolean;
+  webImportsOpen: boolean;
   initialDraft: DraftWithImport | null;
   onDraftChange: () => void;
 }) {
@@ -67,6 +84,8 @@ export function MenuEditor({
   const [message, setMessage] = useState<{ tone: "error" | "ok"; text: string } | null>(null);
   const [conflict, setConflict] = useState(false);
   const [attested, setAttested] = useState(false);
+  // The last web import's blank-price reasons, by name and portion; a reload forgets them.
+  const [blankReasons, setBlankReasons] = useState<Map<string, string>>(new Map());
 
   async function load() {
     const result = await requestJson<DraftWithImport>("GET", `${url}/menu-draft`);
@@ -80,9 +99,11 @@ export function MenuEditor({
     setConflict(false);
     setAttested(false);
     setMessage(null);
+    setBlankReasons(new Map());
   }
 
-  function imported(merged: DraftWithImport) {
+  function imported(merged: DraftWithImport, blankPrices: BlankPrice[] = []) {
+    setBlankReasons(new Map(blankPrices.map((blank) => [variantKey(blank.name, blank.portion), BLANK_REASON[blank.basis]])));
     setDraft(merged);
     setRows(rowsOf(merged));
     setDirty(false);
@@ -92,7 +113,7 @@ export function MenuEditor({
   }
 
   function edit(key: string, patch: Partial<Row>) {
-    setRows((current) => current.map((row) => (row.key === key ? { ...row, ...patch, fromPhoto: false } : row)));
+    setRows((current) => current.map((row) => (row.key === key ? { ...row, ...patch, fromImport: false } : row)));
     setDirty(true);
     setAttested(false);
     setMessage(null);
@@ -175,6 +196,20 @@ export function MenuEditor({
   }
 
   const incomplete = new Set(draft.completeness.complete ? [] : draft.completeness.incompleteItemIds);
+  const origin = draft.latestImport?.source === "web_page" ? "On your page" : "From photo";
+  const gridRows: GridRow[] = parsed.map(({ row, price }) => ({
+    key: row.key,
+    id: row.id,
+    name: row.name,
+    portion: row.portion,
+    price: row.price,
+    availability: row.availability,
+    blankReason: row.fromImport ? blankReasons.get(variantKey(row.name, row.portion)) : undefined,
+    origin: row.fromImport ? origin : undefined,
+    priceInvalid: "invalid" in price,
+    priceMissing: "cents" in price && price.cents === null,
+    flagged: row.id !== undefined && incomplete.has(row.id),
+  }));
   const confirmed = draft.status === "confirmed" && !dirty;
   const live = draft.published && !dirty;
   const canConfirm = !dirty && !confirmed && !conflict && rows.length > 0 && draft.completeness.complete && attested && !busy;
@@ -189,61 +224,10 @@ export function MenuEditor({
 
       <MenuPhotoImport outletId={outletId} open={importsOpen} draft={draft} dirty={dirty} onImported={imported} onReload={load} />
 
-      {rows.length === 0 && <p className="muted">No items yet.</p>}
-      {parsed.map(({ row, price }, index) => {
-        const priceInvalid = "invalid" in price;
-        const priceMissing = "cents" in price && price.cents === null;
-        const nameMissing = row.name.trim() === "";
-        const availabilityMissing = row.availability === "unknown";
-        const flagged = row.id !== undefined && incomplete.has(row.id);
-        return (
-          <div className={`draft-item${flagged ? " flagged" : ""}`} role="group" aria-label={`Item ${index + 1}`} key={row.key}>
-            <div className="field wide">
-              <label htmlFor={`${row.key}-name`}>
-                Item {index + 1} name{row.fromPhoto && <span className="chip warn inline">From photo</span>}
-              </label>
-              <input id={`${row.key}-name`} value={row.name} maxLength={120} onChange={(event) => edit(row.key, { name: event.target.value })} aria-invalid={nameMissing} />
-              {nameMissing && <small className="hint">Name needed</small>}
-            </div>
-            <div className="field">
-              <label htmlFor={`${row.key}-portion`}>Portion</label>
-              <input id={`${row.key}-portion`} value={row.portion} maxLength={120} placeholder="Optional" onChange={(event) => edit(row.key, { portion: event.target.value })} />
-            </div>
-            <div className="field">
-              <label htmlFor={`${row.key}-price`}>Price (S$)</label>
-              <input
-                id={`${row.key}-price`}
-                value={row.price}
-                inputMode="decimal"
-                placeholder="Blank"
-                onChange={(event) => edit(row.key, { price: event.target.value })}
-                aria-invalid={priceInvalid || priceMissing}
-              />
-              {priceInvalid && <small className="hint">Use a price like 4.50</small>}
-              {priceMissing && <small className="hint">Price needed</small>}
-            </div>
-            <div className="field wide">
-              <label htmlFor={`${row.key}-availability`}>Availability</label>
-              <select
-                id={`${row.key}-availability`}
-                value={row.availability}
-                onChange={(event) => edit(row.key, { availability: event.target.value as Row["availability"] })}
-                aria-invalid={availabilityMissing}
-              >
-                <option value="unknown">Choose availability</option>
-                <option value="available">Available</option>
-                <option value="unavailable">Unavailable</option>
-              </select>
-              {availabilityMissing && <small className="hint">Your choice needed</small>}
-            </div>
-            <div className="field remove">
-              <button className="button secondary" type="button" onClick={() => remove(row.key)} aria-label={`Remove item ${index + 1}`}>
-                Remove
-              </button>
-            </div>
-          </div>
-        );
-      })}
+      {webImportsOpen && <MenuWebImport outletId={outletId} draft={draft} dirty={dirty} onImported={imported} />}
+
+      <MenuGrid rows={gridRows} onEdit={edit} onRemove={remove} />
+      <p className="fine">Every cell can be edited: use the arrow keys to move, Enter to edit and Enter again to keep the change. A blank price stays blank until you type it, and the menu cannot be confirmed while one is blank.</p>
 
       <div className="actions">
         <button className="button secondary" type="button" onClick={add} disabled={rows.length >= 100}>
