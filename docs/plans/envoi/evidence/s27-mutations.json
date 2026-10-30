@@ -1,0 +1,20 @@
+{
+ "m10a": "mut_rc=1 assertion=True restored=True rerun_rc=0 AssertionError: expected function to throw an error, but it didn't",
+ "m10b": "mut_rc=1 assertion=True restored=True rerun_rc=0 AssertionError: expected function to throw an error, but it didn't",
+ "m10c": "mut_rc=1 assertion=True restored=True rerun_rc=0 AssertionError: expected function to throw an error, but it didn't",
+ "m11a": "mut_rc=1 assertion=True restored=True rerun_rc=0 AssertionError: expected undefined to be 409 // Object.is equality",
+ "m11b": "mut_rc=1 assertion=True restored=True rerun_rc=0 AssertionError: expected undefined to be '23514' // Object.is equality",
+ "m12a": "mut_rc=1 assertion=True restored=True rerun_rc=0 AssertionError: expected 'SGD' to be 'USD' // Object.is equality",
+ "m12b": "mut_rc=1 assertion=True restored=True rerun_rc=0 AssertionError: expected { currency: 'SGD', total_minor: 360 } to deeply equal { currency: 'USD', total_minor:",
+ "m13a": "mut_rc=1 assertion=True restored=True rerun_rc=0 AssertionError: expected { purchase: 'paid', \u2026(3) } to match object { purchase: 'uncertain', \u2026(1) }",
+ "m13b": "mut_rc=1 assertion=True restored=True rerun_rc=0 AssertionError: expected 409 to be 200 // Object.is equality",
+ "m14a": "mut_rc=1 assertion=True restored=True rerun_rc=0 AssertionError: expected { eligible: true, \u2026(2) } to match object { eligible: false, error: { \u2026(2) } }",
+ "m14b": "mut_rc=1 assertion=True restored=True rerun_rc=0 AssertionError: expected { ok: false, error: { \u2026(4) } } to match object { ok: false, error: { \u2026(2) } }",
+ "m14c": "mut_rc=1 assertion=True restored=True rerun_rc=0 AssertionError: expected { available: false, \u2026(2) } to match object { available: false, \u2026(1) }",
+ "m15": "mut_rc=1 assertion=True restored=True rerun_rc=0 AssertionError: expected { kind: 'ambiguous', \u2026(1) } to match object { kind: 'single', outlet: { \u2026(3) } }",
+ "m16": "mut_rc=1 assertion=True restored=True rerun_rc=0 AssertionError: expected [ '$.data: missing required currency' ] to deeply equal []",
+ "m18a": "mut_rc=1 assertion=True restored=True rerun_rc=0 AssertionError: expected { outlets: 2, menu_items: 4, \u2026(10) } to deeply equal { outlets: 2, menu_items: 4, \u2026(1",
+ "m18b": "mut_rc=1 assertion=True restored=True rerun_rc=0 AssertionError: expected [ \u2026(2) ] to deeply equal [ \u2026(2) ]",
+ "m19": "mut_rc=1 assertion=True restored=True rerun_rc=0 AssertionError: expected { \u2026(4) } to match object { unitMinor: Any<Number>, \u2026(1) }",
+ "m18a_first_attempt": "crashed the migration SQL (no AssertionError); not counted; replaced by the wrong-value mutation above"
+}
