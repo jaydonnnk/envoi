@@ -5,6 +5,7 @@ import { webEnv } from "@/env";
 import { enrollments, menuRevisions, outlets, paymentDestinations } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
+import type { Country } from "@/lib/money";
 
 // Publication (Gate 3 "POST /merchant/outlets/{id}/publish"; S7). One transaction rechecks all four
 // preconditions under locks and switches the published pointer; the database then marks the
@@ -22,6 +23,8 @@ export type PublicationFacts = {
   // while PYUSD_ENABLED is true, so a PYUSD-only shop cannot publish while the rail is off.
   pyusdVerified: boolean;
   pyusdEnabled: boolean;
+  // S27: PYUSD is priced in SGD, so a wallet counts only for a Singapore shop; a US shop needs PayPal.
+  country: Country;
 };
 
 // Each precondition blocks on its own.
@@ -30,7 +33,7 @@ export function missingPreconditions(facts: PublicationFacts): PublicationCheck[
   if (!facts.enrollmentApproved) missing.push("enrollment");
   if (!facts.detailsConfirmed) missing.push("outlet_details");
   if (facts.draft?.status !== "confirmed") missing.push("menu_confirmation");
-  if (!facts.destinationAccepted && !(facts.pyusdVerified && facts.pyusdEnabled)) missing.push("destination");
+  if (!facts.destinationAccepted && !(facts.country === "SG" && facts.pyusdVerified && facts.pyusdEnabled)) missing.push("destination");
   return missing;
 }
 
@@ -41,7 +44,7 @@ type Conn = Pick<Db, "select">;
 // without a lock: no path changes its status or clears its acceptance, and an acceptance that
 // commits after this read only makes this publication refuse, changing nothing.
 async function publicationFacts(db: Conn, outletId: string, lock: boolean): Promise<PublicationFacts | null> {
-  const [outlet] = await db.select({ detailsConfirmedAt: outlets.detailsConfirmedAt }).from(outlets).where(eq(outlets.id, outletId));
+  const [outlet] = await db.select({ detailsConfirmedAt: outlets.detailsConfirmedAt, country: outlets.country }).from(outlets).where(eq(outlets.id, outletId));
   if (!outlet) return null;
   const [enrollment] = await db
     .select({ id: enrollments.id })
@@ -77,6 +80,7 @@ async function publicationFacts(db: Conn, outletId: string, lock: boolean): Prom
     destinationAccepted: destination !== undefined,
     pyusdVerified: pyusd !== undefined,
     pyusdEnabled: webEnv().PYUSD_ENABLED,
+    country: outlet.country,
   };
 }
 

@@ -5,6 +5,7 @@ import { MENU_CONSENT_TEXT, MENU_CONSENT_VERSION } from "@/domain/imports/consen
 import type { ImportJson } from "@/domain/imports/lifecycle";
 import type { DraftJson } from "@/domain/menu/serialize";
 import { useRestoreFocus } from "@/lib/browser/focus";
+import type { Currency } from "@/lib/money";
 
 // Menu photo import on the setup page (S11). The merchant reads and accepts the versioned OpenAI
 // notice, picks a photo, and this tab shrinks it to one JPEG of at most 2,048 pixels per side and
@@ -64,6 +65,7 @@ type ApiError = { code: string; message: string; details?: Record<string, string
 
 export function MenuPhotoImport({
   outletId,
+  currency,
   open,
   draft,
   dirty,
@@ -71,6 +73,7 @@ export function MenuPhotoImport({
   onReload,
 }: {
   outletId: string;
+  currency: Currency;
   open: boolean;
   draft: DraftWithImport;
   dirty: boolean;
@@ -93,7 +96,7 @@ export function MenuPhotoImport({
   if (!open) {
     return (
       <p className="status" role="note">
-        Menu photo import is not available in this release. Enter each item and its SGD price below.
+        Menu photo import is not available in this release. Enter each item and its {currency} price below.
       </p>
     );
   }

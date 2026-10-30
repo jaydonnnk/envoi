@@ -182,6 +182,9 @@ const CHECKS: { check: PublicationCheck; label: string }[] = [
   { check: "destination", label: "PayPal sandbox connection in use, or a verified PYUSD devnet wallet while PYUSD is on" },
 ];
 
+// S27: PYUSD is offered at Singapore shops only, so a US shop's only payment check is PayPal.
+const US_DESTINATION_LABEL = "PayPal sandbox connection in use";
+
 function PublishCard({ outlet, onPublished }: { outlet: MerchantOutlet; onPublished: (saved: Saved) => void }) {
   const [busy, setBusy] = useState(false);
   useRestoreFocus(busy);
@@ -227,7 +230,7 @@ function PublishCard({ outlet, onPublished }: { outlet: MerchantOutlet; onPublis
               return (
                 <li key={check} className={done ? "done" : undefined}>
                   <span className={`chip ${done ? "ok" : "warn"}`}>{done ? "Done" : "Needed"}</span>
-                  {label}
+                  {check === "destination" && outlet.country !== "SG" ? US_DESTINATION_LABEL : label}
                 </li>
               );
             })}
@@ -373,7 +376,7 @@ export function Workspace({
         />
       )}
       {outlet && <PayPalCard outlet={outlet} onSaved={updated} />}
-      {outlet && <PyusdWalletCard key={outlet.id} outlet={outlet} onSaved={updated} />}
+      {outlet && outlet.country === "SG" && <PyusdWalletCard key={outlet.id} outlet={outlet} onSaved={updated} />}
       {outlet && <PublishCard outlet={outlet} onPublished={published} />}
     </div>
   );

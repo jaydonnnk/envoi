@@ -273,6 +273,29 @@ describe("US shops (S27)", () => {
     expect(await assertPyusdEligible(web.db, purchaseId!, principal, new Date())).toMatchObject({ eligible: false, error: { code: "pyusd_unavailable", details: { reason: "not_sgd_shop" } } });
   });
 
+  // Beyond the named tests (found in the S27 browser check): PYUSD is priced in SGD, so a verified
+  // devnet wallet lets only a Singapore shop publish without PayPal; a US shop would have no rail.
+  it("a US shop's PYUSD wallet never stands in for its PayPal connection", async () => {
+    state.env = { PYUSD_ENABLED: true };
+    const wallet = (shop: Shop) =>
+      seedPyusdDestination(fixture.database, shop.outletId, {
+        wallet: "FXTRMerchant1111111111111111111111111111111" as Address,
+        tokenAccount: "FXTRToken11111111111111111111111111111111111" as Address,
+        atomicPerSgd: 742_115n,
+        confirmedAt: new Date(Date.now() - 60_000),
+      });
+    // Control: the same setup at a Singapore shop publishes on the wallet alone.
+    const sg = await api.readyShop("wallet_only_sg", "destination");
+    await wallet(sg.shop);
+    expect((await api.publish(sg.shop, sg.draft)).status).toBe(200);
+
+    const usOnly = await api.readyShop("wallet_only_us", "destination", FIXTURE_MENU, "US");
+    await wallet(usOnly.shop);
+    const refused = await api.publish(usOnly.shop, usOnly.draft);
+    expect(refused.status).toBe(400);
+    expect((await envelope(refused)).error).toMatchObject({ code: "validation_failed", details: { reason: "preconditions", missing: "destination" } });
+  });
+
   it("SGQR resolution never returns a US outlet", async () => {
     const uen = FIXTURE_UEN;
     const sg = await api.publishedShop("sgqr_sg");

@@ -226,7 +226,7 @@ export function MenuEditor({
         <p className="muted">Changes you save here become a new draft. Buyers keep seeing the published menu until you confirm and publish the new version.</p>
       )}
 
-      <MenuPhotoImport outletId={outletId} open={importsOpen} draft={draft} dirty={dirty} onImported={imported} onReload={load} />
+      <MenuPhotoImport outletId={outletId} currency={currency} open={importsOpen} draft={draft} dirty={dirty} onImported={imported} onReload={load} />
 
       {webImportsOpen && <MenuWebImport outletId={outletId} draft={draft} dirty={dirty} onImported={imported} />}
 

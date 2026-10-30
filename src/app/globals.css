@@ -258,7 +258,8 @@ footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; 
 .country legend { padding: 0; }
 .country h3 { margin: 0 0 8px; font-size: 17px; }
 .country .rail { border: 1px solid var(--line); cursor: pointer; }
-.country .rail:has(input:checked) { border: 2px solid var(--blue); }
+.country .rail:has(input:checked) { border-color: var(--blue); box-shadow: inset 0 0 0 1px var(--blue); }
 .country .rail input { width: auto; margin: 0 10px 0 0; accent-color: var(--blue); }
 .country .rail small { display: block; }
-.shop-qr-only { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); max-width: 320px; }
+.shop-qr-only { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
+.shop-qr-only .shop-qr { max-width: 320px; }
