@@ -52,7 +52,7 @@ describe("buyer text suggestions", () => {
   };
 
   // Read inside a case: the fixture's ids exist only after beforeAll has built the database.
-  const outlet = () => ({ id: fixture.outletId, name: "Lorong Demo Kopi", area: "Tanjong Pagar", isDemoFixture: true });
+  const outlet = () => ({ id: fixture.outletId, name: "Lorong Demo Kopi", area: "Tanjong Pagar", isDemoFixture: true, country: "SG", currency: "SGD" });
 
   // A second FIXTURE shop, published or not, so a sent outletId can be shown to widen the scope of
   // that shop alone. Removed by the case that adds it; no other case sees it. Real id shapes, because
@@ -63,7 +63,7 @@ describe("buyer text suggestions", () => {
     const itemId = newId("itm");
     await fixture.database.admin`insert into outlets (id, name, area, is_demo_fixture, fixture_key, created_at) values (${outletId}, ${name}, ${"Bugis"}, true, ${key}, now())`;
     await fixture.database.admin`insert into menu_revisions (id, outlet_id, status, confirmed_at, created_at) values (${revision}, ${outletId}, 'confirmed', now(), now())`;
-    await fixture.database.admin`insert into menu_items (id, item_key, menu_revision_id, position, name, unit_sgd_cents, available) values (${itemId}, ${itemId}, ${revision}, 0, ${name}, 100, true)`;
+    await fixture.database.admin`insert into menu_items (id, item_key, menu_revision_id, position, name, unit_minor, available) values (${itemId}, ${itemId}, ${revision}, 0, ${name}, 100, true)`;
     if (published) await fixture.database.admin`update outlets set published_menu_revision_id = ${revision} where id = ${outletId}`;
     return { outletId, itemId };
   }
@@ -103,7 +103,7 @@ describe("buyer text suggestions", () => {
     script = (index) =>
       index === 0
         ? { kind: "tools", calls: [{ name: "get_published_menu", args: { outletId: fixture.outletId } }] }
-        : { kind: "answer", proposal: { ...proposal({ kind: "items", outletId: fixture.outletId, itemIds: [kaya.id, "itm_inventedbythemodel"], area: "Tanjong Pagar" }), unitSgdCents: 1 } };
+        : { kind: "answer", proposal: { ...proposal({ kind: "items", outletId: fixture.outletId, itemIds: [kaya.id, "itm_inventedbythemodel"], area: "Tanjong Pagar" }), unitMinor: 1 } };
 
     const result = await suggest({ text: "kaya toast near Tanjong Pagar" });
 
@@ -111,8 +111,8 @@ describe("buyer text suggestions", () => {
     expect(result.suggestion).toEqual({
       kind: "items",
       outletId: fixture.outletId,
-      outlet: { id: fixture.outletId, name: "Lorong Demo Kopi", area: "Tanjong Pagar", isDemoFixture: true },
-      matches: [{ id: kaya.id, name: "Kaya toast set", unitSgdCents: 450, available: true }],
+      outlet: { id: fixture.outletId, name: "Lorong Demo Kopi", area: "Tanjong Pagar", isDemoFixture: true, country: "SG", currency: "SGD" },
+      matches: [{ id: kaya.id, name: "Kaya toast set", unitMinor: 450, available: true }],
     });
   });
 
@@ -121,7 +121,7 @@ describe("buyer text suggestions", () => {
 
     const result = await suggest({ text: "coffee near Tanjong Pagar" });
 
-    expect(result.suggestion).toEqual({ kind: "outlets", matches: [{ id: fixture.outletId, name: "Lorong Demo Kopi", area: "Tanjong Pagar", isDemoFixture: true }] });
+    expect(result.suggestion).toEqual({ kind: "outlets", matches: [{ id: fixture.outletId, name: "Lorong Demo Kopi", area: "Tanjong Pagar", isDemoFixture: true, country: "SG", currency: "SGD" }] });
   });
 
   it("no tool output carries a price", async () => {
@@ -143,7 +143,7 @@ describe("buyer text suggestions", () => {
     expect(outputs).toHaveLength(3);
     expect(outputs.join("\n")).toContain("Kaya toast set");
     for (const output of outputs) {
-      expect(output).not.toMatch(/unitSgdCents|price|S\$|\b(160|450|220|200)\b/i);
+      expect(output).not.toMatch(/unitMinor|price|S\$|\b(160|450|220|200)\b/i);
     }
   });
 
@@ -202,8 +202,8 @@ describe("buyer text suggestions", () => {
       kind: "items",
       outletId: fixture.outletId,
       matches: [
-        { id: kopi.id, name: "Kopi O", unitSgdCents: 160 },
-        { id: kaya.id, name: "Kaya toast set", unitSgdCents: 450 },
+        { id: kopi.id, name: "Kopi O", unitMinor: 160 },
+        { id: kaya.id, name: "Kaya toast set", unitMinor: 450 },
       ],
     });
   });
@@ -257,7 +257,7 @@ describe("buyer text suggestions", () => {
 
     const result = await suggest({ text: "kopi", area: "Tanjong Pagar MRT" });
 
-    expect(result.suggestion).toEqual({ kind: "outlets", matches: [{ id: fixture.outletId, name: "Lorong Demo Kopi", area: "Tanjong Pagar", isDemoFixture: true }] });
+    expect(result.suggestion).toEqual({ kind: "outlets", matches: [{ id: fixture.outletId, name: "Lorong Demo Kopi", area: "Tanjong Pagar", isDemoFixture: true, country: "SG", currency: "SGD" }] });
   });
 
   it("a shop the buyer names needs no area", async () => {
@@ -265,7 +265,7 @@ describe("buyer text suggestions", () => {
 
     const result = await suggest({ text: "breakfast at Lorong Demo Kopi" });
 
-    expect(result.suggestion).toEqual({ kind: "outlets", matches: [{ id: fixture.outletId, name: "Lorong Demo Kopi", area: "Tanjong Pagar", isDemoFixture: true }] });
+    expect(result.suggestion).toEqual({ kind: "outlets", matches: [{ id: fixture.outletId, name: "Lorong Demo Kopi", area: "Tanjong Pagar", isDemoFixture: true, country: "SG", currency: "SGD" }] });
   });
 
   it("an item marked unavailable is not suggested", async () => {
@@ -287,14 +287,14 @@ describe("buyer text suggestions", () => {
     const teh = item("Teh C peng");
     const kaya = item("Kaya toast set");
     script = () => ({ kind: "answer", proposal: proposal({ kind: "items", outletId: fixture.outletId, itemIds: [teh.id, kaya.id], area: "Tanjong Pagar" }) });
-    await handEditPublishedMenu(fixture.database.admin, (sql) => sql`update menu_items set unit_sgd_cents = null where id = ${teh.id}`);
+    await handEditPublishedMenu(fixture.database.admin, (sql) => sql`update menu_items set unit_minor = null where id = ${teh.id}`);
     try {
       const result = await suggest({ text: "kaya toast and teh near Tanjong Pagar" });
 
       expect(result.suggestion).toMatchObject({ kind: "items", matches: [{ id: kaya.id }] });
       expect(JSON.stringify(result.suggestion)).not.toContain(teh.id);
     } finally {
-      await handEditPublishedMenu(fixture.database.admin, (sql) => sql`update menu_items set unit_sgd_cents = 220 where id = ${teh.id}`);
+      await handEditPublishedMenu(fixture.database.admin, (sql) => sql`update menu_items set unit_minor = 220 where id = ${teh.id}`);
     }
   });
 
@@ -318,7 +318,7 @@ describe("buyer text suggestions", () => {
         area: "Tanjong Pagar",
       }),
     });
-    await handEditPublishedMenu(fixture.database.admin, (sql) => sql`update menu_items set unit_sgd_cents = null where id = ${teh.id}`);
+    await handEditPublishedMenu(fixture.database.admin, (sql) => sql`update menu_items set unit_minor = null where id = ${teh.id}`);
     try {
       const result = await suggest({ text: "two kopi o and kaya toast near Tanjong Pagar" });
 
@@ -327,12 +327,12 @@ describe("buyer text suggestions", () => {
         outletId: fixture.outletId,
         outlet: outlet(),
         lines: [
-          { item: { id: kopi.id, name: "Kopi O", unitSgdCents: 160, available: true }, quantity: 2 },
-          { item: { id: kaya.id, name: "Kaya toast set", unitSgdCents: 450, available: true }, quantity: 1 },
+          { item: { id: kopi.id, name: "Kopi O", unitMinor: 160, available: true }, quantity: 2 },
+          { item: { id: kaya.id, name: "Kaya toast set", unitMinor: 450, available: true }, quantity: 1 },
         ],
       });
     } finally {
-      await handEditPublishedMenu(fixture.database.admin, (sql) => sql`update menu_items set unit_sgd_cents = 220 where id = ${teh.id}`);
+      await handEditPublishedMenu(fixture.database.admin, (sql) => sql`update menu_items set unit_minor = 220 where id = ${teh.id}`);
     }
   });
 
@@ -390,8 +390,8 @@ describe("buyer text suggestions", () => {
       outlet: outlet(),
       quantity: 2,
       matches: [
-        { id: kopi.id, name: "Kopi O", unitSgdCents: 160, available: true },
-        { id: teh.id, name: "Teh C peng", unitSgdCents: 220, available: true },
+        { id: kopi.id, name: "Kopi O", unitMinor: 160, available: true },
+        { id: teh.id, name: "Teh C peng", unitMinor: 220, available: true },
       ],
     });
   });
@@ -412,7 +412,7 @@ describe("buyer text suggestions", () => {
         kind: "basket",
         outletId: fixture.outletId,
         outlet: outlet(),
-        lines: [{ item: { id: kopi.id, name: "Kopi O", unitSgdCents: 160, available: true }, quantity: 3 }],
+        lines: [{ item: { id: kopi.id, name: "Kopi O", unitMinor: 160, available: true }, quantity: 3 }],
       });
     } finally {
       await handEditPublishedMenu(fixture.database.admin, (sql) => sql`update menu_items set available = true where id = ${teh.id}`);

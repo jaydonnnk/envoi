@@ -11,14 +11,14 @@ export const FIXTURE_EXPIRES_AT = "2026-10-28T03:10:00.000Z";
 export const TEST_SHOP = { id: "out_fixturetestshop", name: "FIXTURE Test Shop", area: "Test Area", isDemoFixture: true };
 export const OTHER_SHOP = { id: "out_fixtureothershop", name: "FIXTURE Other Shop", area: "Other Area", isDemoFixture: true };
 
-export const MENUS: Record<string, { id: string; name: string; unitSgdCents: number | null; available: boolean | null }[]> = {
+export const MENUS: Record<string, { id: string; name: string; unitMinor: number | null; available: boolean | null }[]> = {
   [TEST_SHOP.id]: [
-    { id: "itm_kopic", name: "Kopi C", unitSgdCents: 180, available: true },
-    { id: "itm_kaya", name: "Kaya toast set", unitSgdCents: 450, available: false },
-    { id: "itm_lemontea", name: "Iced lemon tea", unitSgdCents: 220, available: true },
-    { id: "itm_milktea", name: "Iced milk tea", unitSgdCents: 250, available: true },
+    { id: "itm_kopic", name: "Kopi C", unitMinor: 180, available: true },
+    { id: "itm_kaya", name: "Kaya toast set", unitMinor: 450, available: false },
+    { id: "itm_lemontea", name: "Iced lemon tea", unitMinor: 220, available: true },
+    { id: "itm_milktea", name: "Iced milk tea", unitMinor: 250, available: true },
   ],
-  [OTHER_SHOP.id]: [{ id: "itm_otherkopi", name: "Kopi O", unitSgdCents: 160, available: true }],
+  [OTHER_SHOP.id]: [{ id: "itm_otherkopi", name: "Kopi O", unitMinor: 160, available: true }],
 };
 
 export type FakeEnvoiRequest = { method: string; path: string; headers: Headers; body: unknown };

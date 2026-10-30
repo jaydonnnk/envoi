@@ -11,7 +11,7 @@ import { webEnv } from "@/env";
 import { getAuth } from "@/lib/auth";
 import { isPrincipal, requireBuyerSession } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
-import { formatSgd, sgdFromCents } from "@/lib/money";
+import { formatMoney, money } from "@/lib/money";
 import { ContinueToPayPal } from "./continue-to-paypal";
 import { PyusdPay } from "./pyusd-pay";
 import { SwitchRail } from "./switch-rail";
@@ -77,7 +77,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ purchas
   const payable = pyusd
     ? open
     : purchase.view.state === "review_open" || (purchase.view.state === "pending_payment" && (purchase.view.paypalAttempt === "order_created" || purchase.view.paypalAttempt === "create_unknown"));
-  const total = formatSgd(sgdFromCents(purchase.totalSgdCents));
+  const total = formatMoney(money(purchase.currency, purchase.totalMinor));
   const pyusdAmount = pyusd ? formatPyusdAtomic(pyusd.atomicAmount) : null;
   const paypalRail = pyusd ? (await outletRails(webDb(), purchase.outletId)).paypal : true;
 
@@ -100,9 +100,9 @@ export default async function ReviewPage({ params }: { params: Promise<{ purchas
               <div className="row" key={line.menuItemId}>
                 <span>
                   {line.quantity} × {line.name}
-                  <small>{formatSgd(sgdFromCents(line.unitSgdCents))} each</small>
+                  <small>{formatMoney(money(purchase.currency, line.unitMinor))} each</small>
                 </span>
-                <span className="money">{formatSgd(sgdFromCents(line.lineSgdCents))}</span>
+                <span className="money">{formatMoney(money(purchase.currency, line.lineMinor))}</span>
               </div>
             ))}
             <div className="row total-row">

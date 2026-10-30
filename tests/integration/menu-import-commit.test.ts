@@ -97,7 +97,7 @@ describe("import commit merges nothing unless every recheck passes", () => {
       outletId: shop.outletId,
       revisionId: shop.revisionId,
       baseVersion: 1,
-      items: [{ name: "Teh", portion: null, priceSgdCents: 160, availability: "available" }],
+      items: [{ name: "Teh", portion: null, priceMinor: 160, availability: "available" }],
       actorUserId: shop.merchant.userId,
       now: new Date(),
     });
@@ -148,8 +148,8 @@ describe("merchant edits survive a merge", () => {
       revisionId: shop.revisionId,
       baseVersion: 1,
       items: [
-        { name: "Kopi O", portion: null, priceSgdCents: 180, availability: "available" },
-        { name: "House kaya toast set", portion: "2 slices", priceSgdCents: 420, availability: "available" },
+        { name: "Kopi O", portion: null, priceMinor: 180, availability: "available" },
+        { name: "House kaya toast set", portion: "2 slices", priceMinor: 420, availability: "available" },
       ],
       actorUserId: shop.merchant.userId,
       now: new Date(),
@@ -171,9 +171,9 @@ describe("merchant edits survive a merge", () => {
     expect(result.committed).toBe(true);
     if (!result.committed) return;
     const byName = new Map(result.draft.items.map((item) => [item.name, item]));
-    expect(byName.get("Kopi O")).toMatchObject({ priceSgdCents: 180, availability: "available", source: "merchant" });
-    expect(byName.get("House kaya toast set")).toMatchObject({ portion: "2 slices", priceSgdCents: 420, source: "merchant" });
-    expect(byName.get("Teh C")).toMatchObject({ priceSgdCents: 170, availability: "unknown", source: "import_suggestion" });
+    expect(byName.get("Kopi O")).toMatchObject({ priceMinor: 180, availability: "available", source: "merchant" });
+    expect(byName.get("House kaya toast set")).toMatchObject({ portion: "2 slices", priceMinor: 420, source: "merchant" });
+    expect(byName.get("Teh C")).toMatchObject({ priceMinor: 170, availability: "unknown", source: "import_suggestion" });
     expect(byName.has("kopi o")).toBe(false);
     expect(result.draft.items).toHaveLength(3);
     expect(result.merge.preservedMerchantEditIds).toEqual([saved.items[0]!.id]);

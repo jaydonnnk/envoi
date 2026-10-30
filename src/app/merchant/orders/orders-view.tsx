@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { SINGAPORE_TIME } from "@/app/purchase-copy";
 import type { MerchantOrder, OutletOrders } from "@/domain/purchases/orders";
 import { requestJson } from "@/lib/browser/session";
-import { formatSgd, sgdFromCents } from "@/lib/money";
+import { formatMoney, money } from "@/lib/money";
 import { archivedCountLine, DELETE_COPY, extraTransferNote, mayStillBePaid, orderStatus } from "./order-copy";
 import { startOrdersPolling, withNewest, withOlder, type PolledOrder } from "./polling";
 import { useRestoreFocus } from "@/lib/browser/focus";
@@ -66,7 +66,7 @@ function OrderCard({
           ))}
           <small>{SINGAPORE_TIME.format(new Date(order.createdAt))}</small>
         </div>
-        <strong className="money">{formatSgd(sgdFromCents(paid ? (order.payment?.captureGrossSgdCents ?? order.totalSgdCents) : order.totalSgdCents))}</strong>
+        <strong className="money">{formatMoney(money(order.currency, paid ? (order.payment?.captureGrossMinor ?? order.totalMinor) : order.totalMinor))}</strong>
       </div>
       <div className="row">
         <strong>Payment</strong>

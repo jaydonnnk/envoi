@@ -5,19 +5,17 @@ import { useEffect, useRef, useState } from "react";
 import { ensureBuyerSession, postJson } from "@/lib/browser/session";
 import { landingReview, requestReview, reviewNavigation, type Rail, type ReviewLine } from "./landing";
 import { useRestoreFocus } from "@/lib/browser/focus";
+import { formatMoney, money, type Currency } from "@/lib/money";
 
-export type BasketItem = { id: string; name: string; unitSgdCents: number | null; available: boolean | null };
+export type BasketItem = { id: string; name: string; unitMinor: number | null; available: boolean | null };
 
 const MAX_QUANTITY = 20;
-
-function sgd(cents: number): string {
-  return `S$${Math.floor(cents / 100)}.${String(cents % 100).padStart(2, "0")}`;
-}
 
 // The browser sends item ids and quantities only. The server prices them from the published menu
 // on the next page; the subtotal here is a preview of the same menu prices.
 export function BasketForm({
   outletId,
+  currency,
   items,
   preselected = [],
   rail = "paypal",
@@ -25,6 +23,8 @@ export function BasketForm({
   note,
 }: {
   outletId: string;
+  // The shop's currency: every price on the form is in it.
+  currency: Currency;
   items: BasketItem[];
   preselected?: { id: string; quantity: number }[];
   rail?: "paypal" | "pyusd";
@@ -38,7 +38,7 @@ export function BasketForm({
     Object.fromEntries(
       preselected.flatMap((line) => {
         const item = items.find((candidate) => candidate.id === line.id);
-        return item && item.unitSgdCents !== null && item.available !== false ? [[item.id, line.quantity]] : [];
+        return item && item.unitMinor !== null && item.available !== false ? [[item.id, line.quantity]] : [];
       }),
     ),
   );
@@ -54,7 +54,7 @@ export function BasketForm({
   useRestoreFocus(busy);
 
   const chosen = items.filter((item) => (quantities[item.id] ?? 0) > 0);
-  const subtotal = chosen.reduce((sum, item) => sum + (item.unitSgdCents ?? 0) * (quantities[item.id] ?? 0), 0);
+  const subtotal = chosen.reduce((sum, item) => sum + (item.unitMinor ?? 0) * (quantities[item.id] ?? 0), 0);
 
   function change(id: string, delta: number) {
     setQuantities((current) => ({ ...current, [id]: Math.min(MAX_QUANTITY, Math.max(0, (current[id] ?? 0) + delta)) }));
@@ -91,12 +91,12 @@ export function BasketForm({
     <>
       {items.map((item) => {
         const quantity = quantities[item.id] ?? 0;
-        const buyable = item.unitSgdCents !== null && item.available !== false;
+        const buyable = item.unitMinor !== null && item.available !== false;
         return (
           <div className="row item-row" key={item.id}>
             <span>
               {item.name}
-              <small>{item.unitSgdCents === null ? "Price not set, cannot be bought yet" : item.available === false ? "Not available" : `${sgd(item.unitSgdCents)} each`}</small>
+              <small>{item.unitMinor === null ? "Price not set, cannot be bought yet" : item.available === false ? "Not available" : `${formatMoney(money(currency, item.unitMinor))} each`}</small>
             </span>
             <span className="stepper" role="group" aria-label={`Quantity of ${item.name}`}>
               <button type="button" className="step" onClick={() => change(item.id, -1)} disabled={!buyable || quantity === 0 || busy} aria-label={`One fewer ${item.name}`}>
@@ -114,7 +114,7 @@ export function BasketForm({
       })}
       <div className="row total-row">
         <strong>Subtotal</strong>
-        <span className="total money">{sgd(subtotal)}</span>
+        <span className="total money">{formatMoney(money(currency, subtotal))}</span>
       </div>
       {note && <p className="muted fine">{note}</p>}
       <button className="button full" type="button" onClick={review} disabled={busy || chosen.length === 0}>

@@ -1,13 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { assessMenuCompleteness } from "@/domain/menu/draft";
 import type { MenuItemDraft } from "@/domain/menu/types";
-import { sgdFromCents } from "@/lib/money";
 
 const item = (id: string, patch: Partial<MenuItemDraft> = {}): MenuItemDraft => ({
   id,
   name: `Item ${id}`,
   portion: null,
-  priceSgdCents: sgdFromCents(250),
+  priceMinor: 250,
   availability: "available",
   source: "merchant",
   ...patch,
@@ -24,7 +23,7 @@ describe("menu completeness", () => {
   });
 
   it("a blank price or a blank name is incomplete and named first", () => {
-    expect(assessMenuCompleteness([item("a", { priceSgdCents: null }), item("b", { name: "  " }), item("c")])).toEqual({
+    expect(assessMenuCompleteness([item("a", { priceMinor: null }), item("b", { name: "  " }), item("c")])).toEqual({
       complete: false,
       incompleteItemIds: ["a", "b"],
       reason: "missing_price",

@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import type { DraftItemSuggestion } from "@/domain/menu/types";
 import { MenuVisionOutput } from "@/integrations/ai/menu-vision";
 import { MENU_LIMITS } from "@/domain/menu/types";
-import { sgdFromCents, sgdFromDecimalString } from "@/lib/money";
+import { minorFromDecimalString } from "@/lib/money";
 import { MENU_IMPORT_LIMITS } from "./types";
 
 // Model output to draft suggestions (Gate 3 "Menu and imports"). The whole result is refused only
@@ -13,15 +13,15 @@ export type VisionDraftValidation =
   | { ok: true; items: DraftItemSuggestion[]; fingerprint: string; blankPriceCount: number }
   | { ok: false; reason: "malformed" | "empty" | "too_many_rows" | "text_too_long" | "oversize" };
 
-type Priced = Pick<DraftItemSuggestion, "priceSgdCents" | "priceBasis">;
+type Priced = Pick<DraftItemSuggestion, "priceMinor" | "priceBasis">;
 
 function priceOf(priceText: string | null, currency: "sgd_or_unmarked" | "other" | null): Priced {
-  if (priceText === null) return { priceSgdCents: null, priceBasis: "blank" };
-  if (currency === "other") return { priceSgdCents: null, priceBasis: "other_currency" };
-  const cents = currency === "sgd_or_unmarked" ? sgdFromDecimalString(priceText.trim()) : null;
+  if (priceText === null) return { priceMinor: null, priceBasis: "blank" };
+  if (currency === "other") return { priceMinor: null, priceBasis: "other_currency" };
+  const cents = currency === "sgd_or_unmarked" ? minorFromDecimalString(priceText.trim()) : null;
   // Zero, too many decimals, signs, exponents and anything above the menu's price cap stay blank.
-  if (cents === null || cents <= 0 || cents > MENU_LIMITS.maxPriceSgdCents) return { priceSgdCents: null, priceBasis: "ambiguous" };
-  return { priceSgdCents: sgdFromCents(cents), priceBasis: "explicit" };
+  if (cents === null || cents <= 0 || cents > MENU_LIMITS.maxPriceMinor) return { priceMinor: null, priceBasis: "ambiguous" };
+  return { priceMinor: cents, priceBasis: "explicit" };
 }
 
 const variantKey = (item: { name: string; portion: string | null }) => `${item.name.trim().toLowerCase()}\u0000${(item.portion ?? "").trim().toLowerCase()}`;
@@ -50,7 +50,7 @@ export function validateVisionDraft(raw: unknown): VisionDraftValidation {
   for (const item of items) if (item.name !== "") counts.set(variantKey(item), (counts.get(variantKey(item)) ?? 0) + 1);
   for (const item of items) {
     if (item.name !== "" && (counts.get(variantKey(item)) ?? 0) > 1) {
-      item.priceSgdCents = null;
+      item.priceMinor = null;
       item.priceBasis = "duplicate_variant";
     }
   }
@@ -61,6 +61,6 @@ export function validateVisionDraft(raw: unknown): VisionDraftValidation {
     ok: true,
     items,
     fingerprint: createHash("sha256").update(serialized).digest("hex"),
-    blankPriceCount: items.filter((item) => item.priceSgdCents === null).length,
+    blankPriceCount: items.filter((item) => item.priceMinor === null).length,
   };
 }

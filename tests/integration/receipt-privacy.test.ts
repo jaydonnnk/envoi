@@ -39,7 +39,7 @@ describe("receipt is private to its session", () => {
 
     const mine = await readPurchase(data.purchaseId, owner);
     expect(mine.status).toBe(200);
-    expect(await mine.json()).toMatchObject({ ok: true, data: { id: data.purchaseId, state: "review_open", payment: null, totalSgdCents: 2 * kopi!.unitSgdCents } });
+    expect(await mine.json()).toMatchObject({ ok: true, data: { id: data.purchaseId, state: "review_open", payment: null, totalMinor: 2 * kopi!.unitMinor } });
 
     const theirs = await readPurchase(data.purchaseId, other);
     expect(theirs.status).toBe(404);

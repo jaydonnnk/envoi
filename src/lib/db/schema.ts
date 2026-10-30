@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import { bigint, boolean, check, customType, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex, type AnyPgColumn } from "drizzle-orm/pg-core";
+import type { Country, Currency } from "@/lib/money";
 
 // Every table lives in public. drizzle-orm refuses pgSchema("public"), so the schema pin is the
 // web role's search_path, set per database in migration 0001 (R11 containment).
@@ -95,7 +96,10 @@ export const outlets = pgTable("outlets", {
   // either clears it, and publication requires it.
   detailsConfirmedAt: timestamp("details_confirmed_at", { withTimezone: true }),
   createdAt: createdAt(),
-});
+  // The shop's country (S27) sets its menu's currency. It may change only until the outlet's first
+  // publication; after that the trigger in migration 0027 refuses any change.
+  country: text("country").$type<Country>().notNull().default("SG"),
+}, (t) => [check("outlets_country_check", sql`${t.country} in ('SG', 'US')`)]);
 
 export const menuRevisions = pgTable(
   "menu_revisions",
@@ -135,7 +139,7 @@ export const menuItems = pgTable(
     name: text("name").notNull(),
     portion: text("portion"),
     // Unknown price stays null; it never becomes zero.
-    unitSgdCents: integer("unit_sgd_cents"),
+    unitMinor: integer("unit_minor"),
     // Merchant-supplied availability; null is unknown, which blocks confirmation (S6).
     available: boolean("available"),
     source: text("source").notNull().default("merchant"),
@@ -145,7 +149,7 @@ export const menuItems = pgTable(
     itemKey: text("item_key").notNull(),
   },
   (t) => [
-    check("menu_items_price_check", sql`${t.unitSgdCents} is null or ${t.unitSgdCents} > 0`),
+    check("menu_items_price_check", sql`${t.unitMinor} is null or ${t.unitMinor} > 0`),
     check("menu_items_source_check", sql`${t.source} in ('merchant', 'import_suggestion')`),
     index("menu_items_revision_idx").on(t.menuRevisionId, t.position),
     uniqueIndex("menu_items_revision_item_key_unique").on(t.menuRevisionId, t.itemKey),
@@ -291,7 +295,7 @@ export const paymentDestinations = pgTable(
 // Purchases. Tracer rows from S1 keep entry point fixture_tracer and carry no payment binding;
 // every later review is bound to its rail, destination version and checkout key.
 
-export type StoredLine = { menuItemId: string; name: string; quantity: number; unitSgdCents: number; lineSgdCents: number };
+export type StoredLine = { menuItemId: string; name: string; quantity: number; unitMinor: number; lineMinor: number };
 
 export const PURCHASE_STATES = [
   "review_open",
@@ -320,8 +324,8 @@ export const purchases = pgTable(
     state: text("state").notNull(),
     entryPoint: text("entry_point").notNull(),
     lines: jsonb("lines").$type<StoredLine[]>().notNull(),
-    totalSgdCents: integer("total_sgd_cents").notNull(),
-    currency: text("currency").notNull(),
+    totalMinor: integer("total_minor").notNull(),
+    currency: text("currency").$type<Currency>().notNull().default("SGD"),
     reviewExpiresAt: timestamp("review_expires_at", { withTimezone: true }).notNull(),
     createdAt: createdAt(),
     rail: text("rail"),
@@ -353,8 +357,8 @@ export const purchases = pgTable(
       sql`${t.state} in ('review_open', 'review_expired', 'review_invalidated', 'superseded', 'pending_payment', 'paid', 'unpaid_closed', 'uncertain')`,
     ),
     check("purchases_entry_point_check", sql`${t.entryPoint} in ('fixture_tracer', 'manual', 'agent_handoff')`),
-    check("purchases_currency_check", sql`${t.currency} = 'SGD'`),
-    check("purchases_total_check", sql`${t.totalSgdCents} > 0`),
+    check("purchases_currency_check", sql`${t.currency} in ('SGD', 'USD')`),
+    check("purchases_total_check", sql`${t.totalMinor} > 0`),
     check("purchases_rail_check", sql`${t.rail} is null or ${t.rail} in ('paypal', 'pyusd')`),
     check(
       "purchases_binding_check",
@@ -429,14 +433,14 @@ export const paymentAttempts = pgTable(
     state: text("state").notNull(),
     // Snapshot of what the order must carry, taken from the purchase and its destination. PayPal only.
     payeeMerchantId: text("payee_merchant_id"),
-    totalSgdCents: integer("total_sgd_cents").notNull(),
-    currency: text("currency").notNull(),
+    totalMinor: integer("total_minor").notNull(),
+    currency: text("currency").$type<Currency>().notNull(),
     createRequestId: text("create_request_id").unique(),
     orderId: text("order_id").unique(),
     approvalUrl: text("approval_url"),
     captureRequestId: text("capture_request_id").unique(),
     captureId: text("capture_id").unique(),
-    captureGrossSgdCents: integer("capture_gross_sgd_cents"),
+    captureGrossMinor: integer("capture_gross_minor"),
     captureVerifiedAt: timestamp("capture_verified_at", { withTimezone: true }),
     outcomeReason: text("outcome_reason"),
     leaseOwner: text("lease_owner"),
@@ -492,8 +496,8 @@ export const paymentAttempts = pgTable(
     // One PYUSD attempt per purchase, ever: its bytes are released once, and a lost response leaves
     // the attempt locked until recovery, never a second preparation.
     uniqueIndex("payment_attempts_one_pyusd").on(t.purchaseId).where(sql`${t.rail} = 'pyusd'`),
-    check("payment_attempts_currency_check", sql`${t.currency} = 'SGD'`),
-    check("payment_attempts_total_check", sql`${t.totalSgdCents} > 0`),
+    check("payment_attempts_currency_check", sql`${t.currency} in ('SGD', 'USD')`),
+    check("payment_attempts_total_check", sql`${t.totalMinor} > 0`),
     // A capture is never dispatched without its request id persisted first.
     check(
       "payment_attempts_capture_key_check",

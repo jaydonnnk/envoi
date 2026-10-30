@@ -52,7 +52,7 @@ describe("merchant destination and publication", () => {
 
   const publicMenu = async (outletId: string) => {
     const response = await routes.publicMenu.GET(new Request(`http://localhost/api/v1/outlets/${outletId}/menu`), routeParams(outletId));
-    return { status: response.status, body: (await response.json()) as { data?: { menuRevisionId: string; items: { id: string; name: string; unitSgdCents: number }[] } } };
+    return { status: response.status, body: (await response.json()) as { data?: { menuRevisionId: string; items: { id: string; name: string; unitMinor: number }[] } } };
   };
 
   async function openReview(cookie: string, outletId: string, lines: { menuItemId: string; quantity: number }[]) {
@@ -101,7 +101,7 @@ describe("merchant destination and publication", () => {
       api.putDraft(
         shop,
         published,
-        published.items.map((item) => ({ id: item.id, name: item.name, priceSgdCents: item.name === "FIXTURE Kopi" ? 220 : item.priceSgdCents })),
+        published.items.map((item) => ({ id: item.id, name: item.name, priceMinor: item.name === "FIXTURE Kopi" ? 220 : item.priceMinor })),
       ),
     );
     expect(edited?.status).toBe(200);
@@ -113,12 +113,12 @@ describe("merchant destination and publication", () => {
     expect(await publishedItems(fixture.database, shop.outletId)).toEqual(before);
     const menu = await publicMenu(shop.outletId);
     expect(menu.body.data!.menuRevisionId).toBe(published.revisionId);
-    expect(menu.body.data!.items.map((item) => item.unitSgdCents)).toEqual([180, 400]);
+    expect(menu.body.data!.items.map((item) => item.unitMinor)).toEqual([180, 400]);
     const buyer = await anonymousCookie(routes.auth.POST);
     const review = await openReview(buyer, shop.outletId, [{ menuItemId: before[0]!.id, quantity: 1 }]);
     expect(review.status).toBe(201);
-    const [priced] = await fixture.database.admin`select total_sgd_cents, menu_revision_id from purchases where id = ${review.body.data.purchaseId}`;
-    expect(priced).toMatchObject({ total_sgd_cents: 180, menu_revision_id: published.revisionId });
+    const [priced] = await fixture.database.admin`select total_minor, menu_revision_id from purchases where id = ${review.body.data.purchaseId}`;
+    expect(priced).toMatchObject({ total_minor: 180, menu_revision_id: published.revisionId });
 
     // The new revision keeps each item's key, so the same items are the same basket after republication.
     const keys = await fixture.database.admin<{ itemKey: string }[]>`select item_key as "itemKey" from menu_items where menu_revision_id = ${draft.revisionId} order by position`;
@@ -128,7 +128,7 @@ describe("merchant destination and publication", () => {
   it("two first edits of a published menu make one draft", async () => {
     const { shop } = await api.publishedShop("edit-concurrent");
     const published = await api.getDraft(shop);
-    const priced = (cents: number) => published.items.map((item) => ({ id: item.id, name: item.name, priceSgdCents: cents }));
+    const priced = (cents: number) => published.items.map((item) => ({ id: item.id, name: item.name, priceMinor: cents }));
     const admin = fixture.database.admin;
     const lockWaiters = async () =>
       (await admin<{ n: number }[]>`select count(*)::int as n from pg_stat_activity where datname = ${fixture.database.name} and wait_event_type = 'Lock'`)[0]!.n;
@@ -153,7 +153,7 @@ describe("merchant destination and publication", () => {
     const old = await openReview(buyer, shop.outletId, [{ menuItemId: kopi!.id, quantity: 1 }]);
     expect(old.status).toBe(201);
 
-    await api.republish(shop, (items) => items.map((item) => ({ id: item.id, name: item.name, priceSgdCents: item.name === "FIXTURE Kopi" ? 260 : item.priceSgdCents })));
+    await api.republish(shop, (items) => items.map((item) => ({ id: item.id, name: item.name, priceMinor: item.name === "FIXTURE Kopi" ? 260 : item.priceMinor })));
 
     const writesBefore = fake.writes().length;
     const refused = await start(buyer, old.body.data.purchaseId);
@@ -168,8 +168,8 @@ describe("merchant destination and publication", () => {
     const [newKopi] = await publishedItems(fixture.database, shop.outletId);
     const fresh = await openReview(buyer, shop.outletId, [{ menuItemId: newKopi!.id, quantity: 1 }]);
     expect(fresh.status).toBe(201);
-    const [repriced] = await fixture.database.admin`select total_sgd_cents from purchases where id = ${fresh.body.data.purchaseId}`;
-    expect(repriced!.total_sgd_cents).toBe(260);
+    const [repriced] = await fixture.database.admin`select total_minor from purchases where id = ${fresh.body.data.purchaseId}`;
+    expect(repriced!.total_minor).toBe(260);
     expect((await start(buyer, fresh.body.data.purchaseId)).status).toBe(200);
   });
 
@@ -295,9 +295,9 @@ describe("merchant destination and publication", () => {
       const before = await publishedItems(fixture.database, shop.outletId);
       const kopi = before[0];
       const refused = /belongs to a published revision/;
-      expect(await outcome(web`update menu_items set unit_sgd_cents = 1 where id = ${kopi!.id}`)).toMatch(refused);
+      expect(await outcome(web`update menu_items set unit_minor = 1 where id = ${kopi!.id}`)).toMatch(refused);
       expect(await outcome(web`delete from menu_items where id = ${kopi!.id}`)).toMatch(refused);
-      expect(await outcome(web`insert into menu_items (id, menu_revision_id, position, name, unit_sgd_cents, available) values ('itm_guard_insert', ${kopi!.revisionId}, 9, 'Extra', 100, true)`)).toMatch(refused);
+      expect(await outcome(web`insert into menu_items (id, menu_revision_id, position, name, unit_minor, available) values ('itm_guard_insert', ${kopi!.revisionId}, 9, 'Extra', 100, true)`)).toMatch(refused);
       expect(await publishedItems(fixture.database, shop.outletId)).toEqual(before);
     });
 
@@ -327,7 +327,7 @@ describe("merchant destination and publication", () => {
       // The web role holds TEMP on the database, and pg_temp comes first in its search path.
       await web`create temp table menu_revisions (id text, published_at timestamptz)`;
       try {
-        expect(await outcome(web`update menu_items set unit_sgd_cents = 1 where id = ${before[0]!.id}`)).toMatch(/belongs to a published revision/);
+        expect(await outcome(web`update menu_items set unit_minor = 1 where id = ${before[0]!.id}`)).toMatch(/belongs to a published revision/);
       } finally {
         await web`drop table pg_temp.menu_revisions`;
       }

@@ -104,8 +104,9 @@ function agentServer(db: Db, agent: AgentPrincipal): McpServer {
       return json({
         notice: TEST_NOTICE,
         outlet: outletView(menu.outlet),
-        currency: "SGD",
-        items: menu.items.map((item) => ({ id: item.id, name: item.name, unitSgdCents: item.unitSgdCents, available: item.available })),
+        currency: menu.currency,
+        // The currency sits beside every price, so no agent reads a USD price as SGD (S27).
+        items: menu.items.map((item) => ({ id: item.id, name: item.name, unitMinor: item.unitMinor, currency: menu.currency, available: item.available })),
       });
     },
   );

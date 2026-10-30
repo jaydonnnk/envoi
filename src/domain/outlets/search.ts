@@ -2,21 +2,26 @@ import { and, asc, eq, isNotNull, sql } from "drizzle-orm";
 import { menuItems, menuRevisions, outlets } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { isId } from "@/lib/ids";
+import { CURRENCY_BY_COUNTRY, type Country, type Currency } from "@/lib/money";
 
-export type PublishedOutletSummary = { id: string; name: string; area: string; isDemoFixture: boolean };
+// The shop's country and its currency travel with the outlet, so every price read beside it has one.
+export type PublishedOutletSummary = { id: string; name: string; area: string; isDemoFixture: boolean; country: Country; currency: Currency };
 
-export type PublishedMenuItem = { id: string; name: string; unitSgdCents: number | null; available: boolean | null };
+export type PublishedMenuItem = { id: string; name: string; unitMinor: number | null; available: boolean | null };
 
-export type PublishedMenu = { outlet: PublishedOutletSummary; menuRevisionId: string; items: PublishedMenuItem[] };
+export type PublishedMenu = { outlet: PublishedOutletSummary; menuRevisionId: string; currency: Currency; items: PublishedMenuItem[] };
+
+const withCurrency = <T extends { country: Country }>(outlet: T): T & { currency: Currency } => ({ ...outlet, currency: CURRENCY_BY_COUNTRY[outlet.country] });
 
 // Only outlets with a published, confirmed revision are buyer-readable.
 export async function listPublishedOutlets(db: Db, limit = 50): Promise<PublishedOutletSummary[]> {
-  return db
-    .select({ id: outlets.id, name: outlets.name, area: outlets.area, isDemoFixture: outlets.isDemoFixture })
+  const rows = await db
+    .select({ id: outlets.id, name: outlets.name, area: outlets.area, isDemoFixture: outlets.isDemoFixture, country: outlets.country })
     .from(outlets)
     .where(isNotNull(outlets.publishedMenuRevisionId))
     .orderBy(asc(outlets.name), asc(outlets.id))
     .limit(limit);
+  return rows.map(withCurrency);
 }
 
 export async function getPublishedMenu(db: Pick<Db, "select">, outletId: string): Promise<PublishedMenu | null> {
@@ -24,9 +29,9 @@ export async function getPublishedMenu(db: Pick<Db, "select">, outletId: string)
   if (!isId("out", outletId)) return null;
   const rows = await db
     .select({
-      outlet: { id: outlets.id, name: outlets.name, area: outlets.area, isDemoFixture: outlets.isDemoFixture },
+      outlet: { id: outlets.id, name: outlets.name, area: outlets.area, isDemoFixture: outlets.isDemoFixture, country: outlets.country },
       menuRevisionId: menuRevisions.id,
-      item: { id: menuItems.id, name: menuItems.name, unitSgdCents: menuItems.unitSgdCents, available: menuItems.available },
+      item: { id: menuItems.id, name: menuItems.name, unitMinor: menuItems.unitMinor, available: menuItems.available },
     })
     .from(outlets)
     .innerJoin(menuRevisions, and(eq(menuRevisions.id, outlets.publishedMenuRevisionId), eq(menuRevisions.status, "confirmed")))
@@ -35,9 +40,11 @@ export async function getPublishedMenu(db: Pick<Db, "select">, outletId: string)
     .orderBy(asc(menuItems.position));
   const first = rows[0];
   if (!first) return null;
+  const outlet = withCurrency(first.outlet);
   return {
-    outlet: first.outlet,
+    outlet,
     menuRevisionId: first.menuRevisionId,
+    currency: outlet.currency,
     items: rows.flatMap((row) => (row.item ? [row.item] : [])),
   };
 }
@@ -57,12 +64,13 @@ function overlapsInsensitive(column: typeof outlets.area | typeof outlets.name, 
 }
 
 export async function searchPublishedOutlets(db: Db, search: OutletSearch, limit = 10): Promise<PublishedOutletSummary[]> {
-  return db
-    .select({ id: outlets.id, name: outlets.name, area: outlets.area, isDemoFixture: outlets.isDemoFixture })
+  const rows = await db
+    .select({ id: outlets.id, name: outlets.name, area: outlets.area, isDemoFixture: outlets.isDemoFixture, country: outlets.country })
     .from(outlets)
     .where(and(isNotNull(outlets.publishedMenuRevisionId), overlapsInsensitive(outlets.area, search.area), overlapsInsensitive(outlets.name, search.name)))
     .orderBy(asc(outlets.name), asc(outlets.id))
     .limit(limit);
+  return rows.map(withCurrency);
 }
 
 export async function listPublishedItemNames(db: Db, area: string | null, limit = 50): Promise<PublishedItemName[]> {

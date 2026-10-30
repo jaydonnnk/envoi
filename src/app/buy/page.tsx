@@ -95,7 +95,7 @@ export default async function BuyPage({ searchParams }: { searchParams: Promise<
               <PyusdOnlyStatus outletId={menu.outlet.id} />
             </Suspense>
           )}
-          <ShopBasket outletId={menu.outlet.id} items={menu.items} preselected={preselected} rail={rail} autoReview={autoReview} />
+          <ShopBasket outletId={menu.outlet.id} currency={menu.currency} items={menu.items} preselected={preselected} rail={rail} autoReview={autoReview} />
         </section>
       </main>
     );

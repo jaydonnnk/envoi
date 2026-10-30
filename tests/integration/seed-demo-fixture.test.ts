@@ -19,7 +19,7 @@ describe("re-seeding never changes an existing fixture", () => {
     select o.id, o.name, o.published_menu_revision_id,
       (select count(*)::int from outlets) as outlets,
       (select count(*)::int from menu_revisions) as revisions,
-      (select json_agg(json_build_object('id', i.id, 'name', i.name, 'cents', i.unit_sgd_cents) order by i.position)
+      (select json_agg(json_build_object('id', i.id, 'name', i.name, 'cents', i.unit_minor) order by i.position)
          from menu_items i) as items
     from outlets o`;
 

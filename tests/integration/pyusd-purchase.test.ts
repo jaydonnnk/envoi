@@ -6,7 +6,7 @@ import { pyusdAtomicFor } from "@/domain/pyusd/rate";
 import { getAuth } from "@/lib/auth";
 import { isPrincipal, requireBuyerSession, type BuyerPrincipal } from "@/lib/auth-context";
 import { connectWeb } from "@/lib/db/web";
-import { sgdFromCents } from "@/lib/money";
+import { money } from "@/lib/money";
 import { durationMs } from "@/lib/time";
 import { createTestDatabase, type TestDatabase } from "../support/db";
 import { createFakeChain, fakeRpcFetch, fundWallet, MAINNET_GENESIS, mintData, reviewedExtensions, testWallet, type FakeChain, type TestWallet } from "../support/fake-solana";
@@ -48,7 +48,7 @@ type Routes = {
   rate: typeof import("@/app/api/v1/merchant/outlets/[id]/pyusd-rate/route");
 };
 
-type PyusdShop = { outletId: string; itemId: string; unitSgdCents: number; merchant: TestWallet; tokenAccount: Address; rateVersionId: string; memberUserId: string; memberCookie: string };
+type PyusdShop = { outletId: string; itemId: string; unitMinor: number; merchant: TestWallet; tokenAccount: Address; rateVersionId: string; memberUserId: string; memberCookie: string };
 type Review = { cookie: string; purchaseId: string; buyer: TestWallet; amount: bigint };
 type AttemptRow = {
   id: string;
@@ -111,7 +111,7 @@ describe("PYUSD purchase", () => {
     const merchant = await testWallet();
     const tokenAccount = await fundWallet(chain, merchant.address, 0n);
     const { rateVersionId } = await seedPyusdDestination(database, shop.outletId, { wallet: merchant.address, tokenAccount, atomicPerSgd: RATE, confirmedAt: rateAt });
-    return { outletId: shop.outletId, itemId: item!.id, unitSgdCents: item!.unitSgdCents, merchant, tokenAccount, rateVersionId, memberUserId: shop.merchant.userId, memberCookie: shop.cookie };
+    return { outletId: shop.outletId, itemId: item!.id, unitMinor: item!.unitMinor, merchant, tokenAccount, rateVersionId, memberUserId: shop.merchant.userId, memberCookie: shop.cookie };
   }
 
   const reviewRequest = (cookie: string, shop: PyusdShop, rail: "pyusd" | "paypal" = "pyusd") =>
@@ -123,7 +123,7 @@ describe("PYUSD purchase", () => {
     const response = await reviewRequest(cookie, shop);
     expect(response.status).toBe(201);
     const purchaseId = (await envelope<{ purchaseId: string }>(response)).data.purchaseId;
-    const amount = pyusdAtomicFor(sgdFromCents(shop.unitSgdCents), RATE);
+    const amount = pyusdAtomicFor(money("SGD", shop.unitMinor), RATE);
     const buyer = await testWallet();
     if (funds !== null) await fundWallet(chain, buyer.address, funds ?? amount);
     return { cookie, purchaseId, buyer, amount };
@@ -274,7 +274,7 @@ describe("PYUSD purchase", () => {
       const missing = await pyusdReview(shop, null);
       expect(await refusal(await prepare(missing))).toMatchObject({ code: "pyusd_unavailable", details: { reason: "buyer_insufficient" } });
       expect(await attemptCount(missing.purchaseId)).toBe(0);
-      const short = await pyusdReview(shop, pyusdAtomicFor(sgdFromCents(shop.unitSgdCents), RATE) - 1n);
+      const short = await pyusdReview(shop, pyusdAtomicFor(money("SGD", shop.unitMinor), RATE) - 1n);
       expect(await refusal(await prepare(short))).toMatchObject({ code: "pyusd_unavailable", details: { reason: "buyer_insufficient" } });
       expect(await attemptCount(short.purchaseId)).toBe(0);
     });
@@ -358,10 +358,10 @@ describe("PYUSD purchase", () => {
       const [first, second] = await twoPrepared("constraint-ref");
       const attempt = await attemptOf(first);
       const error = await database.admin`
-        insert into payment_attempts (id, purchase_id, rail, state, total_sgd_cents, currency, pyusd_buyer_wallet, pyusd_source_token_account,
+        insert into payment_attempts (id, purchase_id, rail, state, total_minor, currency, pyusd_buyer_wallet, pyusd_source_token_account,
           pyusd_destination_token_account, pyusd_atomic_amount, pyusd_rate_version_id, pyusd_reference, pyusd_message_fingerprint, pyusd_blockhash,
           pyusd_last_valid_block_height, pyusd_preparation_slot, pyusd_fee, pyusd_hints)
-        select 'att_fixture_copy', ${second}, rail, state, total_sgd_cents, currency, pyusd_buyer_wallet, pyusd_source_token_account,
+        select 'att_fixture_copy', ${second}, rail, state, total_minor, currency, pyusd_buyer_wallet, pyusd_source_token_account,
           pyusd_destination_token_account, pyusd_atomic_amount, pyusd_rate_version_id, pyusd_reference, pyusd_message_fingerprint, pyusd_blockhash,
           pyusd_last_valid_block_height, pyusd_preparation_slot, pyusd_fee, '[]'::jsonb
         from payment_attempts where id = ${attempt.id}`.catch((caught: unknown) => caught);

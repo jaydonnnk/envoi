@@ -42,16 +42,16 @@ export type DraftJson = {
   version: number;
   status: "draft" | "confirmed";
   published: boolean;
-  items: { id: string; name: string; portion: string | null; priceSgdCents: number | null; availability: string; source: string }[];
+  items: { id: string; name: string; portion: string | null; priceMinor: number | null; availability: string; source: string }[];
 };
 
-export type ItemInput = { id?: string; name: string; priceSgdCents: number | null; availability?: "available" | "unavailable" | "unknown" };
+export type ItemInput = { id?: string; name: string; priceMinor: number | null; availability?: "available" | "unavailable" | "unknown" };
 
 export type Shop = { merchant: TestMerchant; cookie: string; outletId: string };
 
 export const FIXTURE_MENU: ItemInput[] = [
-  { name: "FIXTURE Kopi", priceSgdCents: 180 },
-  { name: "FIXTURE Kaya toast", priceSgdCents: 400 },
+  { name: "FIXTURE Kopi", priceMinor: 180 },
+  { name: "FIXTURE Kaya toast", priceMinor: 400 },
 ];
 
 export type PublicationCheck = "enrollment" | "outlet_details" | "menu_confirmation" | "destination";
@@ -117,8 +117,10 @@ export function shopApi(database: TestDatabase, routes: MerchantRoutes) {
 
   // A shop with every precondition in place except `omit`, its menu saved (and confirmed unless
   // omitted). A destination omission leaves the operator's connection prepared but not accepted.
-  async function readyShop(label: string, omit: PublicationCheck | null = null, items: ItemInput[] = FIXTURE_MENU): Promise<{ shop: Shop; draft: DraftJson }> {
+  async function readyShop(label: string, omit: PublicationCheck | null = null, items: ItemInput[] = FIXTURE_MENU, country: "SG" | "US" = "SG"): Promise<{ shop: Shop; draft: DraftJson }> {
     const shop = await newShop(label);
+    // S27: a US shop chooses its country before anything is published.
+    if (country !== "SG") expect((await patchOutlet(shop, { country })).status).toBe(200);
     let draft = await saveDraft(shop, await getDraft(shop), items);
     if (omit !== "menu_confirmation") draft = await confirmDraft(shop, draft);
     if (omit !== "outlet_details") await confirmDetails(shop);
@@ -128,8 +130,8 @@ export function shopApi(database: TestDatabase, routes: MerchantRoutes) {
     return { shop, draft };
   }
 
-  async function publishedShop(label: string, items: ItemInput[] = FIXTURE_MENU): Promise<{ shop: Shop; draft: DraftJson }> {
-    const { shop, draft } = await readyShop(label, null, items);
+  async function publishedShop(label: string, items: ItemInput[] = FIXTURE_MENU, country: "SG" | "US" = "SG"): Promise<{ shop: Shop; draft: DraftJson }> {
+    const { shop, draft } = await readyShop(label, null, items, country);
     expect((await publish(shop, draft)).status).toBe(200);
     return { shop, draft: await getDraft(shop) };
   }
@@ -148,8 +150,8 @@ export function shopApi(database: TestDatabase, routes: MerchantRoutes) {
 
 // The published menu's items as buyers read them, with their keys across revisions.
 export async function publishedItems(database: TestDatabase, outletId: string) {
-  return database.admin<{ revisionId: string; id: string; itemKey: string; name: string; unitSgdCents: number }[]>`
-    select r.id as "revisionId", i.id, i.item_key as "itemKey", i.name, i.unit_sgd_cents as "unitSgdCents"
+  return database.admin<{ revisionId: string; id: string; itemKey: string; name: string; unitMinor: number }[]>`
+    select r.id as "revisionId", i.id, i.item_key as "itemKey", i.name, i.unit_minor as "unitMinor"
     from outlets o join menu_revisions r on r.id = o.published_menu_revision_id join menu_items i on i.menu_revision_id = r.id
     where o.id = ${outletId} order by i.position`;
 }

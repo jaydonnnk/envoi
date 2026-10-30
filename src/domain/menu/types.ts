@@ -1,5 +1,3 @@
-import type { SgdCents } from "@/lib/money";
-
 // Menu drafts (Gate 3 "Menu and imports"). A draft revision belongs to one outlet; buyers read only
 // a published, confirmed revision.
 
@@ -7,7 +5,7 @@ export type MenuItemDraft = {
   id: string;
   name: string;
   portion: string | null;
-  priceSgdCents: SgdCents | null;
+  priceMinor: number | null;
   availability: "available" | "unavailable" | "unknown";
   source: "merchant" | "import_suggestion";
 };
@@ -37,18 +35,18 @@ export type MenuItemInput = {
   id?: string;
   name: string;
   portion: string | null;
-  priceSgdCents: number | null;
+  priceMinor: number | null;
   availability: MenuItemDraft["availability"];
 };
 
 // The same bounds the photo import uses (Gate 3 MENU_IMPORT_LIMITS: 100 rows, 120 characters).
-export const MENU_LIMITS = { maxItems: 100, maxTextChars: 120, maxPriceSgdCents: 100_000 } as const;
+export const MENU_LIMITS = { maxItems: 100, maxTextChars: 120, maxPriceMinor: 100_000 } as const;
 
 // One row a menu photo import suggests (S11). A blank price says why it is blank; it is never zero.
 export type DraftItemSuggestion = {
   name: string; // "" when unreadable; completeness then blocks confirmation
   portion: string | null;
-  priceSgdCents: SgdCents | null;
+  priceMinor: number | null;
   priceBasis: "explicit" | "ambiguous" | "blank" | "other_currency" | "duplicate_variant" | "not_on_page";
 };
 

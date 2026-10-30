@@ -120,7 +120,7 @@ describe("paypal/start", () => {
     await expect(
       fixture.database.admin.begin(async (sql) => {
         const insert = (state: string) => sql`
-          insert into payment_attempts (id, purchase_id, state, payee_merchant_id, total_sgd_cents, currency, create_request_id)
+          insert into payment_attempts (id, purchase_id, state, payee_merchant_id, total_minor, currency, create_request_id)
           values (${`att_${randomUUID()}`}, ${purchaseId}, ${state}, 'FXTRSELLER2AB', 160, 'SGD', ${randomUUID()})`;
         await insert("abandoned");
         await insert("created");

@@ -369,7 +369,7 @@ describe("PYUSD merchant routes", () => {
     it("a PYUSD-only shop cannot publish while PYUSD is disabled", async () => {
       // Every precondition but the PayPal connection, which this shop never has.
       const shop = await api.newShop("pyusd-only");
-      const draft = await api.confirmDraft(shop, await api.saveDraft(shop, await api.getDraft(shop), [{ name: "FIXTURE Kopi", priceSgdCents: 180 }]));
+      const draft = await api.confirmDraft(shop, await api.saveDraft(shop, await api.getDraft(shop), [{ name: "FIXTURE Kopi", priceMinor: 180 }]));
       await api.confirmDetails(shop);
       await api.approve(shop);
       const wallet = await merchantWallet();

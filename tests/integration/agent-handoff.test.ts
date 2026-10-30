@@ -280,15 +280,15 @@ describe("agent handoff over MCP", () => {
     const menu = JSON.parse((await callTool("get_menu", { outletId: fixture.outletId })).text) as { items: { id: string; name: string }[] };
     const kopi = menu.items.find((entry) => entry.name === "Kopi O")!;
 
-    const created = await callTool("create_purchase_request", { outletId: fixture.outletId, lines: [{ menuItemId: kopi.id, quantity: 2 }], totalSgdCents: 1 });
+    const created = await callTool("create_purchase_request", { outletId: fixture.outletId, lines: [{ menuItemId: kopi.id, quantity: 2 }], totalMinor: 1 });
     expect(created.isError).toBe(false);
     expect(created.text).not.toMatch(/cents|total|amount|purchaseId|pur_/i);
     const { url } = JSON.parse(created.text) as { url: string };
     expect(url.startsWith(`${TEST_BASE_URL}/approve/`)).toBe(true);
 
     const redeemed = await redeem(tokenOf(url), (await buyer()).cookie);
-    const [purchase] = await fixture.database.admin`select total_sgd_cents from purchases where id = ${redeemed.body.data!.purchaseId!}`;
-    expect(purchase!.total_sgd_cents).toBe(2 * item("Kopi O").unitSgdCents);
+    const [purchase] = await fixture.database.admin`select total_minor from purchases where id = ${redeemed.body.data!.purchaseId!}`;
+    expect(purchase!.total_minor).toBe(2 * item("Kopi O").unitMinor);
 
     const unknown = await callTool("create_purchase_request", { outletId: fixture.outletId, lines: [{ menuItemId: "itm_made_up", quantity: 1 }] });
     expect(unknown.isError).toBe(true);

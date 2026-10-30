@@ -4,7 +4,7 @@ import type { OutletMemberPrincipal } from "@/lib/auth-context";
 import { pyusdRates } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { newId } from "@/lib/ids";
-import type { SgdCents } from "@/lib/money";
+import { requireSgd, type Money } from "@/lib/money";
 import { isExpired } from "@/lib/time";
 
 // The shop's own PYUSD rate (Gate 1; Gate 2 "Identity, destination and rate"). A rate is PYUSD atomic
@@ -34,9 +34,10 @@ export function isRateExpired(rate: Pick<PyusdRate, "confirmedAt">, now: Date): 
   return isExpired("T_RATE_AGE", rate.confirmedAt, now);
 }
 
-// ceil(cents * atomicPerSgd / 100), in BigInt only. Accepts any positive SGD amount sgdFromCents
-// allows (a safe integer of cents) and any rate inside the bounds.
-export function pyusdAtomicFor(sgdCents: SgdCents, atomicPerSgd: bigint): bigint {
+// ceil(cents * atomicPerSgd / 100), in BigInt only. Accepts any positive SGD amount money allows
+// (a safe integer of cents) and any rate inside the bounds; any other currency throws.
+export function pyusdAtomicFor(amount: Money, atomicPerSgd: bigint): bigint {
+  const sgdCents = requireSgd(amount).minor;
   if (!Number.isSafeInteger(sgdCents) || sgdCents <= 0) throw new RangeError("SGD amount must be a positive whole number of cents");
   if (atomicPerSgd < PYUSD_RATE_BOUNDS.minAtomicPerSgd || atomicPerSgd > PYUSD_RATE_BOUNDS.maxAtomicPerSgd) throw new RangeError("rate outside its bounds");
   const product = BigInt(sgdCents) * atomicPerSgd;

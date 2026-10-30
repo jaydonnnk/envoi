@@ -251,3 +251,14 @@ footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; 
 .ask-rules li:last-child { padding-bottom: 0; }
 @media (max-width: 640px) { .bubble { max-width: 92%; } .ask .actions .button { flex: 1; } }
 .ask-link { margin: -4px 0 18px; }
+
+/* S27: the country choice in shop details, before the SGQR step. */
+.country { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
+.country fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+.country legend { padding: 0; }
+.country h3 { margin: 0 0 8px; font-size: 17px; }
+.country .rail { border: 1px solid var(--line); cursor: pointer; }
+.country .rail:has(input:checked) { border: 2px solid var(--blue); }
+.country .rail input { width: auto; margin: 0 10px 0 0; accent-color: var(--blue); }
+.country .rail small { display: block; }
+.shop-qr-only { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); max-width: 320px; }

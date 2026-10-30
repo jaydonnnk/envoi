@@ -106,13 +106,13 @@ async function settle(db: Db, req: SuggestionRequest, proposal: ModelProposal): 
 
   const wanted = new Set(proposal.itemIds);
   const matches: PublishedItemSummary[] = summarize(
-    menu.items.filter((item) => wanted.has(item.id) && item.unitSgdCents !== null && item.available !== false).slice(0, MAX_MATCHES),
+    menu.items.filter((item) => wanted.has(item.id) && item.unitMinor !== null && item.available !== false).slice(0, MAX_MATCHES),
   );
   return matches.length > 0 ? { kind: "items", outletId: outlet.id, outlet, matches } : { kind: "outlets", matches: [outlet] };
 }
 
 function summarize(items: readonly PublishedMenuItem[]): PublishedItemSummary[] {
-  return items.map((item) => ({ id: item.id, name: item.name, unitSgdCents: item.unitSgdCents as number, available: item.available }));
+  return items.map((item) => ({ id: item.id, name: item.name, unitMinor: item.unitMinor as number, available: item.available }));
 }
 
 function suggestedQuantity(quantity: number): boolean {
@@ -131,7 +131,7 @@ function settleBasket(outlet: PublishedOutletSummary, items: readonly PublishedM
   if ([...asked.values()].some((quantity) => !suggestedQuantity(quantity))) return clarify(["item"]);
 
   const kept = summarize(
-    items.filter((item) => asked.has(item.id) && item.unitSgdCents !== null && item.available !== false && suggestedQuantity(asked.get(item.id) as number)).slice(0, MAX_MATCHES),
+    items.filter((item) => asked.has(item.id) && item.unitMinor !== null && item.available !== false && suggestedQuantity(asked.get(item.id) as number)).slice(0, MAX_MATCHES),
   ).map((item) => ({ item, quantity: asked.get(item.id) as number }));
   // Nothing the buyer asked for is on this menu: show the shop so they can pick from it, as the item
   // answer does, rather than claiming no shop matched.
@@ -148,7 +148,7 @@ function settleChoice(outlet: PublishedOutletSummary, items: readonly PublishedM
   const quantity = asked[0] as number;
   const offered = new Set(choices);
   const matches = summarize(
-    items.filter((item) => offered.has(item.id) && item.unitSgdCents !== null && item.available !== false).slice(0, MAX_MATCHES),
+    items.filter((item) => offered.has(item.id) && item.unitMinor !== null && item.available !== false).slice(0, MAX_MATCHES),
   );
   if (matches.length === 0) return { kind: "no_match" };
   const [only] = matches;

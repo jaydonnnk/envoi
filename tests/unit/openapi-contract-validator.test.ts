@@ -9,9 +9,9 @@ import { assertSupported, checkResponse, loadDocument, validate, type OpenApiDoc
 const document = loadDocument();
 const menuResponse = { $ref: "#/components/schemas/MenuResponse" };
 
-const outlet = { id: `out_${"a".repeat(26)}`, name: "FIXTURE shop", area: "Bugis", isDemoFixture: true };
-const item = { id: `itm_${"b".repeat(26)}`, name: "Kaya toast", unitSgdCents: 250, available: true };
-const menu = () => ({ ok: true, data: { outlet: { ...outlet }, menuRevisionId: `mrv_${"c".repeat(26)}`, items: [{ ...item }] } });
+const outlet = { id: `out_${"a".repeat(26)}`, name: "FIXTURE shop", area: "Bugis", isDemoFixture: true, country: "SG", currency: "SGD" };
+const item = { id: `itm_${"b".repeat(26)}`, name: "Kaya toast", unitMinor: 250, available: true };
+const menu = () => ({ ok: true, data: { outlet: { ...outlet }, menuRevisionId: `mrv_${"c".repeat(26)}`, currency: "SGD", items: [{ ...item }] } });
 
 const json = (body: unknown, status: number, headers: Record<string, string>) =>
   new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json", ...headers } });
@@ -20,7 +20,7 @@ describe("OpenAPI contract validator", () => {
   it("accepts a fitting menu, including unknown price and availability", () => {
     const body = menu();
     expect(validate(document, menuResponse, body)).toEqual([]);
-    body.data.items[0] = { ...item, unitSgdCents: null as never, available: null as never };
+    body.data.items[0] = { ...item, unitMinor: null as never, available: null as never };
     expect(validate(document, menuResponse, body)).toEqual([]);
   });
 
@@ -29,9 +29,9 @@ describe("OpenAPI contract validator", () => {
     ["renamed field", (b: ReturnType<typeof menu>) => Object.assign(b.data.items[0]!, { price: 1 }), "$.data.items[0]: unexpected property price"],
     ["wrong type", (b: ReturnType<typeof menu>) => Object.assign(b.data.outlet, { isDemoFixture: "yes" }), "$.data.outlet.isDemoFixture: expected boolean, got string"],
     ["null where not allowed", (b: ReturnType<typeof menu>) => Object.assign(b.data.outlet, { name: null }), "$.data.outlet.name: expected string, got null"],
-    ["fractional cents", (b: ReturnType<typeof menu>) => Object.assign(b.data.items[0]!, { unitSgdCents: 2.5 }), "$.data.items[0].unitSgdCents: expected integer or null, got number"],
+    ["fractional cents", (b: ReturnType<typeof menu>) => Object.assign(b.data.items[0]!, { unitMinor: 2.5 }), "$.data.items[0].unitMinor: expected integer or null, got number"],
     // S14 review fix 6: the database refuses a price of 0 (menu_items_price_check), so the document does too.
-    ["zero cents", (b: ReturnType<typeof menu>) => Object.assign(b.data.items[0]!, { unitSgdCents: 0 }), "$.data.items[0].unitSgdCents: 0 is below 1"],
+    ["zero cents", (b: ReturnType<typeof menu>) => Object.assign(b.data.items[0]!, { unitMinor: 0 }), "$.data.items[0].unitMinor: 0 is below 1"],
     ["pattern", (b: ReturnType<typeof menu>) => Object.assign(b.data.outlet, { id: "pur_x" }), '$.data.outlet.id: "pur_x" does not match ^out_[a-z2-7]{26}$'],
   ])("rejects %s", (_name, corrupt, message) => {
     const body = menu();
@@ -99,10 +99,10 @@ describe("OpenAPI document support check", () => {
     ["an unknown keyword on a header", (d: Doc) => Object.assign(d.components.headers.NoStore!.schema, { const: "no-store" }), "#/components/headers/NoStore: keyword const"],
     ["a sibling of $ref", (d: Doc) => Object.assign(schemas(d).Menu!.properties.outlet!, { required: ["id"] }), "#/components/schemas/Menu.properties.outlet: $ref has a sibling keyword other than description"],
     ["an additionalProperties schema", (d: Doc) => Object.assign(schemas(d).OutletSummary!, { additionalProperties: { type: "string" } }), "#/components/schemas/OutletSummary: additionalProperties is not false"],
-    ["an unknown type", (d: Doc) => Object.assign(schemas(d).MenuItem!.properties.unitSgdCents!, { type: ["int", "null"] }), "#/components/schemas/MenuItem.properties.unitSgdCents: type is missing or unknown"],
+    ["an unknown type", (d: Doc) => Object.assign(schemas(d).MenuItem!.properties.unitMinor!, { type: ["int", "null"] }), "#/components/schemas/MenuItem.properties.unitMinor: type is missing or unknown"],
     ["an enum that is not a list", (d: Doc) => Object.assign(d.components.headers.NoStore!.schema, { enum: "no-store" }), "#/components/headers/NoStore: enum is not an array"],
     ["a pattern that is not a string", (d: Doc) => Object.assign(schemas(d).OutletSummary!.properties.id!, { pattern: 7 }), "#/components/schemas/OutletSummary.properties.id: pattern is not a string"],
-    ["a minimum that is not a number", (d: Doc) => Object.assign(schemas(d).MenuItem!.properties.unitSgdCents!, { minimum: "1" }), "#/components/schemas/MenuItem.properties.unitSgdCents: minimum is not a number"],
+    ["a minimum that is not a number", (d: Doc) => Object.assign(schemas(d).MenuItem!.properties.unitMinor!, { minimum: "1" }), "#/components/schemas/MenuItem.properties.unitMinor: minimum is not a number"],
     ["required that is not a list of names", (d: Doc) => Object.assign(schemas(d).MenuItem!, { required: "id" }), "#/components/schemas/MenuItem: required is not a list of names"],
     // S19: the agent route's request body is checked too.
     ["an unknown keyword on a request body schema", (d: Doc) => Object.assign((d.paths["/api/v1/purchase-requests"]!.post as unknown as { requestBody: { content: Record<string, { schema: unknown }> } }).requestBody.content["application/json"]!, { schema: { type: "object", minProperties: 1 } }), "post /api/v1/purchase-requests request application/json: keyword minProperties"],

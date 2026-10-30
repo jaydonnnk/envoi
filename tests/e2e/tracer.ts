@@ -41,8 +41,8 @@ async function start(baseUrl: string, jarFile: string): Promise<void> {
   const buy = await (await fetch(`${baseUrl}/buy`)).text();
   if (!buy.includes("Demo fixture")) fail("/buy does not label the demo fixture");
 
-  const menu = (await (await fetch(`${baseUrl}/api/v1/outlets/${fixture.id}/menu`)).json()) as { data: { items: { id: string; unitSgdCents: number | null }[] } };
-  const item = menu.data.items.find((candidate) => candidate.unitSgdCents !== null);
+  const menu = (await (await fetch(`${baseUrl}/api/v1/outlets/${fixture.id}/menu`)).json()) as { data: { items: { id: string; unitMinor: number | null }[] } };
+  const item = menu.data.items.find((candidate) => candidate.unitMinor !== null);
   if (!item) fail("the demo fixture has no priced item");
 
   const cookie = await anonymous(baseUrl);

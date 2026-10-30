@@ -32,7 +32,7 @@ import { paymentAttempts, paymentDestinations, PURCHASE_STATES, purchases, type 
 import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
 import { newId } from "@/lib/ids";
-import { sgdFromCents } from "@/lib/money";
+import type { Currency } from "@/lib/money";
 import { deadlineOf, durationMs, type Now } from "@/lib/time";
 
 // PayPal execution (Gate 3, Call stacks: paypal/start and paypal/complete). One active attempt per
@@ -68,7 +68,7 @@ function isUniqueViolation(err: unknown): boolean {
   return false;
 }
 
-type AttemptChanges = Partial<Pick<PaymentAttemptRow, "orderId" | "approvalUrl" | "captureRequestId" | "captureId" | "captureGrossSgdCents" | "captureVerifiedAt" | "outcomeReason">>;
+type AttemptChanges = Partial<Pick<PaymentAttemptRow, "orderId" | "approvalUrl" | "captureRequestId" | "captureId" | "captureGrossMinor" | "captureVerifiedAt" | "outcomeReason">>;
 
 // Compare-and-set on the attempt. Throws on a transition the table forbids; returns whether this
 // call moved the row.
@@ -87,7 +87,7 @@ export async function transitionAttempt(db: Conn, attemptId: string, from: reado
 // Claims the purchase's one non-terminal attempt slot with a fresh create request id. A unique
 // violation is an error, never a reason to re-read: the purchase row lock keeps it unreachable,
 // and the partial unique index is only the backstop.
-async function claimSlot(tx: Tx, input: { purchaseId: string; payeeMerchantId: string; totalSgdCents: number; now: Date }): Promise<PaymentAttemptRow> {
+async function claimSlot(tx: Tx, input: { purchaseId: string; payeeMerchantId: string; totalMinor: number; currency: Currency; now: Date }): Promise<PaymentAttemptRow> {
   try {
     const [attempt] = await tx
       .insert(paymentAttempts)
@@ -96,8 +96,8 @@ async function claimSlot(tx: Tx, input: { purchaseId: string; payeeMerchantId: s
         purchaseId: input.purchaseId,
         state: "created",
         payeeMerchantId: input.payeeMerchantId,
-        totalSgdCents: input.totalSgdCents,
-        currency: "SGD",
+        totalMinor: input.totalMinor,
+        currency: input.currency,
         createRequestId: randomUUID(),
         createdAt: input.now,
         updatedAt: input.now,
@@ -123,7 +123,7 @@ function existingStartAnswer(attempt: PaymentAttemptRow): StartResult | AppError
   return appError("payment_uncertain", "We are still confirming the PayPal order for this review. Do not pay again.");
 }
 
-type LockedPurchase = { id: string; totalSgdCents: number; lines: StoredLine[] };
+type LockedPurchase = { id: string; totalMinor: number; currency: Currency; lines: StoredLine[] };
 
 // The order is built from the stored purchase and the attempt's payee snapshot only, so a replay
 // sends exactly what the first request sent.
@@ -135,8 +135,9 @@ function createOrderFor(deps: PayPalDeps, purchase: LockedPurchase, attempt: Pay
       attemptId: attempt.id,
       correlationId: purchase.id,
       payeeMerchantId: paypalField(attempt.payeeMerchantId, "payee"),
-      lines: purchase.lines.map((line) => ({ name: line.name, quantity: line.quantity, unitSgdCents: line.unitSgdCents })),
-      totalSgdCents: purchase.totalSgdCents,
+      lines: purchase.lines.map((line) => ({ name: line.name, quantity: line.quantity, unitMinor: line.unitMinor })),
+      totalMinor: purchase.totalMinor,
+      currency: purchase.currency,
       returnUrl: `${deps.appBaseUrl}/paypal/return?${query}`,
       cancelUrl: `${deps.appBaseUrl}/paypal/cancel?${query}`,
     },
@@ -198,7 +199,7 @@ async function recoverCreate(tx: Tx, deps: PayPalDeps, purchase: LockedPurchase,
   if (decision === "safe_to_recreate") {
     const now = deps.now();
     await transitionAttempt(tx, current.id, ["create_unknown"], "abandoned", now, { outcomeReason: "create_recreated" });
-    const next = await claimSlot(tx, { purchaseId: purchase.id, payeeMerchantId: paypalField(current.payeeMerchantId, "payee"), totalSgdCents: purchase.totalSgdCents, now });
+    const next = await claimSlot(tx, { purchaseId: purchase.id, payeeMerchantId: paypalField(current.payeeMerchantId, "payee"), totalMinor: purchase.totalMinor, currency: purchase.currency, now });
     await recordAudit(tx, { at: now, actor: "system", action: "paypal_create_recreated", purchaseId: purchase.id, attemptId: next.id, operatorVisible: true, details: { replaces: current.id } });
     return createAndRecord(tx, deps, purchase, next);
   }
@@ -214,7 +215,7 @@ export async function startPayPal(deps: PayPalDeps, principal: BuyerPrincipal, p
       // finds the first start's attempt and returns the same approval link. It also serializes
       // create replays, so one key is never in flight twice.
       const [locked] = await tx
-        .select({ id: purchases.id, state: purchases.state, totalSgdCents: purchases.totalSgdCents, lines: purchases.lines, destinationId: purchases.destinationId })
+        .select({ id: purchases.id, state: purchases.state, totalMinor: purchases.totalMinor, currency: purchases.currency, lines: purchases.lines, destinationId: purchases.destinationId })
         .from(purchases)
         .where(and(eq(purchases.id, purchaseId), eq(purchases.buyerUserId, principal.userId)))
         .for("update");
@@ -253,7 +254,7 @@ export async function startPayPal(deps: PayPalDeps, principal: BuyerPrincipal, p
       if (!destination) return appError("review_invalidated", "The shop changed how it is paid since you reviewed. Nothing was charged.");
 
       const now = deps.now();
-      const attempt = await claimSlot(tx, { purchaseId, payeeMerchantId: paypalField(destination.sellerMerchantId, "seller"), totalSgdCents: locked.totalSgdCents, now });
+      const attempt = await claimSlot(tx, { purchaseId, payeeMerchantId: paypalField(destination.sellerMerchantId, "seller"), totalMinor: locked.totalMinor, currency: locked.currency, now });
       await transitionPurchase(tx, purchaseId, ["review_open"], "pending_payment", "paypal_start");
       await recordAudit(tx, { at: now, actor: buyerActor(principal.userId), action: "paypal_attempt_created", purchaseId, attemptId: attempt.id, operatorVisible: false });
       return createAndRecord(tx, deps, locked, attempt);
@@ -299,22 +300,23 @@ async function dispatchCapture(db: Db, attemptId: string, captureRequestId: stri
   return moved.length === 1;
 }
 
-type PurchaseFacts = Pick<OwnPurchase, "id" | "outletId" | "lines" | "totalSgdCents">;
+type PurchaseFacts = Pick<OwnPurchase, "id" | "outletId" | "lines" | "totalMinor" | "currency">;
 
 function expectedPurchase(purchase: PurchaseFacts, attempt: PaymentAttemptRow): ExpectedPurchase {
   const lines: PricedLine[] = purchase.lines.map((line) => ({
     menuItemId: line.menuItemId,
     name: line.name,
     quantity: line.quantity,
-    unitSgdCents: sgdFromCents(line.unitSgdCents),
-    lineSgdCents: sgdFromCents(line.lineSgdCents),
+    unitMinor: line.unitMinor,
+    lineMinor: line.lineMinor,
   }));
   return {
     purchaseId: purchase.id,
     outletId: purchase.outletId,
     payeeId: paypalField(attempt.payeeMerchantId, "payee"),
-    totalSgdCents: sgdFromCents(purchase.totalSgdCents),
-    currency: "SGD",
+    totalMinor: purchase.totalMinor,
+    // The stored purchase's currency: a capture or order in any other currency is never paid.
+    currency: purchase.currency,
     lines,
     correlationId: purchase.id,
   };
@@ -333,7 +335,7 @@ async function recordOutcome(db: Db, purchase: OwnPurchase, attempt: PaymentAtte
       const { evidence } = decision;
       await transitionAttempt(tx, attempt.id, ["capture_dispatched"], "capture_confirmed", now, {
         captureId: evidence.captureId,
-        captureGrossSgdCents: evidence.grossSgdCents,
+        captureGrossMinor: evidence.grossMinor,
         captureVerifiedAt: evidence.verifiedAt,
       });
       await transitionPurchase(tx, purchase.id, ["pending_payment"], "paid", "capture_confirmed");
@@ -344,7 +346,7 @@ async function recordOutcome(db: Db, purchase: OwnPurchase, attempt: PaymentAtte
         purchaseId: purchase.id,
         attemptId: attempt.id,
         operatorVisible: false,
-        details: { orderId: evidence.orderId, captureId: evidence.captureId, grossSgdCents: evidence.grossSgdCents, payeeId: evidence.payeeId },
+        details: { orderId: evidence.orderId, captureId: evidence.captureId, grossMinor: evidence.grossMinor, payeeId: evidence.payeeId },
       });
       return;
     }
@@ -527,7 +529,7 @@ async function applyVerdict(deps: ReconcileDeps, purchaseId: string, purchaseSta
       const { evidence } = verdict.decision;
       const moved = await transitionAttempt(tx, attempt.id, ["capture_dispatched", "capture_unknown"], "capture_confirmed", now, {
         captureId: evidence.captureId,
-        captureGrossSgdCents: evidence.grossSgdCents,
+        captureGrossMinor: evidence.grossMinor,
         captureVerifiedAt: evidence.verifiedAt,
       });
       if (!moved) {
@@ -536,7 +538,7 @@ async function applyVerdict(deps: ReconcileDeps, purchaseId: string, purchaseSta
         return;
       }
       await transitionPurchase(tx, purchaseId, purchaseStatesInto("paid", "capture_confirmed"), "paid", "capture_confirmed");
-      await audit("paypal_capture_confirmed", false, { captureId: evidence.captureId, grossSgdCents: evidence.grossSgdCents, payeeId: evidence.payeeId, recovered: true });
+      await audit("paypal_capture_confirmed", false, { captureId: evidence.captureId, grossMinor: evidence.grossMinor, payeeId: evidence.payeeId, recovered: true });
       return;
     }
 
@@ -630,7 +632,7 @@ export async function reconcileAttempt(deps: ReconcileDeps, attemptId: string, h
     if (!(await claimProviderRead(deps.db, attemptId, deps.now()))) return "debounced";
     const [attempt] = await deps.db.select().from(paymentAttempts).where(eq(paymentAttempts.id, attemptId));
     const [purchase] = await deps.db
-      .select({ id: purchases.id, outletId: purchases.outletId, lines: purchases.lines, totalSgdCents: purchases.totalSgdCents, state: purchases.state })
+      .select({ id: purchases.id, outletId: purchases.outletId, lines: purchases.lines, totalMinor: purchases.totalMinor, currency: purchases.currency, state: purchases.state })
       .from(purchases)
       .where(eq(purchases.id, initial.purchaseId));
     if (!attempt?.orderId || !purchase) throw new Error(`attempt ${attemptId} lost its order or purchase`);

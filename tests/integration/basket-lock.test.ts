@@ -70,8 +70,8 @@ describe("PayPal basket lock across republication", () => {
   const post = (cookie: string, purchaseId: string, path: string, handler: (request: Request, params: ReturnType<typeof routeParams>) => Promise<Response>) =>
     handler(jsonPost(`/api/v1/purchases/${purchaseId}/${path}`, cookie), routeParams(purchaseId));
 
-  const raisePrice = (items: { id: string; name: string; priceSgdCents: number | null }[]) =>
-    items.map((item) => ({ id: item.id, name: item.name, priceSgdCents: (item.priceSgdCents ?? 0) + 20 }));
+  const raisePrice = (items: { id: string; name: string; priceMinor: number | null }[]) =>
+    items.map((item) => ({ id: item.id, name: item.name, priceMinor: (item.priceMinor ?? 0) + 20 }));
 
   async function principalOf(cookie: string): Promise<BuyerPrincipal> {
     const principal = await requireBuyerSession(getAuth(), new Headers({ cookie }));

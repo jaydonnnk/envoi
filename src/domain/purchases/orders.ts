@@ -1,3 +1,4 @@
+import type { Currency } from "@/lib/money";
 import { and, count, desc, eq, inArray, isNotNull, isNull, ne, not, or, sql } from "drizzle-orm";
 import { recordAudit } from "@/domain/audit/events";
 import { derivePurchaseView, applyDerivedTransitions, type PaymentAttemptRow, type PurchaseRow, type PurchaseState } from "@/domain/purchases/state";
@@ -25,8 +26,8 @@ export type MerchantOrder = {
   entryPoint: string;
   rail: string | null;
   lines: StoredLine[];
-  totalSgdCents: number;
-  currency: string;
+  totalMinor: number;
+  currency: Currency;
   state: PurchaseState;
   recipient: { environment: "sandbox"; sellerMerchantId: string } | null;
   // PYUSD (S16): the devnet amount and recipient account, and the verified finalized signature only
@@ -49,7 +50,7 @@ export type MerchantOrder = {
     attemptState: string | null;
     orderId: string | null;
     captureId: string | null;
-    captureGrossSgdCents: number | null;
+    captureGrossMinor: number | null;
     captureVerifiedAt: string | null;
   } | null;
   acknowledgedAt: string | null;
@@ -95,7 +96,7 @@ function orderJson({ purchase, sellerMerchantId, tokenAccount }: OrderRow, attem
     entryPoint: purchase.entryPoint,
     rail: purchase.rail,
     lines: purchase.lines,
-    totalSgdCents: purchase.totalSgdCents,
+    totalMinor: purchase.totalMinor,
     currency: purchase.currency,
     state: view.state,
     recipient: sellerMerchantId ? { environment: "sandbox", sellerMerchantId } : null,
@@ -118,7 +119,7 @@ function orderJson({ purchase, sellerMerchantId, tokenAccount }: OrderRow, attem
           orderId: attempt.orderId,
           // Capture evidence is shown only beside a verified payment.
           captureId: paid ? attempt.captureId : null,
-          captureGrossSgdCents: paid ? attempt.captureGrossSgdCents : null,
+          captureGrossMinor: paid ? attempt.captureGrossMinor : null,
           captureVerifiedAt: paid ? (attempt.captureVerifiedAt?.toISOString() ?? null) : null,
         }
       : null,
@@ -271,8 +272,8 @@ export type ArchivedOrderReceipt = {
   purchaseId: string;
   outlet: { id: string; name: string; isDemoFixture: boolean };
   lines: StoredLine[];
-  totalSgdCents: number;
-  currency: string;
+  totalMinor: number;
+  currency: Currency;
   rail: string | null;
   state: PurchaseState;
   payment: MerchantOrder["payment"];
@@ -304,7 +305,7 @@ export async function archivedOrderReceipts(db: Pick<Db, "select">, outletId: st
       purchaseId: order.id,
       outlet: { id: row.purchase.outletId, name: row.outletName, isDemoFixture: row.isDemoFixture },
       lines: order.lines,
-      totalSgdCents: order.totalSgdCents,
+      totalMinor: order.totalMinor,
       currency: order.currency,
       rail: order.rail,
       state: order.state,

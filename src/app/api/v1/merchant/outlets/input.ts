@@ -44,7 +44,7 @@ const item = z.object({
     .transform((value) => (value ? value : null)),
   // Whole cents above zero, or null when the merchant has not supplied a price. Zero is refused,
   // so a missing price can never be saved as free.
-  priceSgdCents: z.number().int().min(1).max(MENU_LIMITS.maxPriceSgdCents).nullable(),
+  priceMinor: z.number().int().min(1).max(MENU_LIMITS.maxPriceMinor).nullable(),
   availability: z.enum(["available", "unavailable", "unknown"]),
 });
 
@@ -59,3 +59,7 @@ export const confirmBody = z.object({ revisionId: id, version: z.number().int().
 // The merchant names the seller id of the connection it selects; only the operator-prepared one is
 // accepted. Nothing else in the body is read.
 export const paypalConnectionBody = z.object({ sellerMerchantId: z.string().trim().min(1).max(64) });
+
+// S27: the country choice, alone in its body like an identifier submission, so it is never half
+// applied with a name or area edit.
+export const countryBody = z.object({ country: z.enum(["SG", "US"]) }).strict();

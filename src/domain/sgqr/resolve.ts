@@ -2,6 +2,7 @@ import { and, asc, eq, inArray, isNotNull } from "drizzle-orm";
 import type { PublishedOutletSummary } from "@/domain/outlets/search";
 import { outletIdentifiers, outlets } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
+import { CURRENCY_BY_COUNTRY } from "@/lib/money";
 import type { SgqrDecode } from "./decode";
 import { isMappable, mappableIdentifier } from "./validate";
 
@@ -34,13 +35,15 @@ export async function resolveSgqr(db: Db, decoded: SgqrDecode): Promise<SgqrReso
   if (identifiers.length === 0) return { kind: "unsupported_payload", unrecognizedCount: decoded.unrecognized.length };
 
   // Only an operator-approved mapping on an outlet that is published right now counts. Candidates
-  // are ordered by name, never by any notion of distance.
+  // are ordered by name, never by any notion of distance. An SGQR sticker is a Singapore code, so a US
+  // outlet is never a candidate (S27), whatever identifier it holds.
   const rows = await db
     .selectDistinctOn([outlets.name, outlets.id], {
       id: outlets.id,
       name: outlets.name,
       area: outlets.area,
       isDemoFixture: outlets.isDemoFixture,
+      country: outlets.country,
       distinguisher: outletIdentifiers.distinguisher,
     })
     .from(outletIdentifiers)
@@ -51,13 +54,15 @@ export async function resolveSgqr(db: Db, decoded: SgqrDecode): Promise<SgqrReso
         inArray(outletIdentifiers.identifier, identifiers),
         isNotNull(outletIdentifiers.approvedAt),
         isNotNull(outlets.publishedMenuRevisionId),
+        eq(outlets.country, "SG"),
       ),
     )
     .orderBy(asc(outlets.name), asc(outlets.id), asc(outletIdentifiers.distinguisher))
     .limit(MAX_CANDIDATES);
 
-  const [first] = rows;
+  const candidates = rows.map((row) => ({ ...row, currency: CURRENCY_BY_COUNTRY[row.country] }));
+  const [first] = candidates;
   if (!first) return { kind: "no_match" };
-  if (rows.length === 1) return { kind: "single", outlet: { id: first.id, name: first.name, area: first.area, isDemoFixture: first.isDemoFixture } };
-  return { kind: "ambiguous", candidates: rows };
+  if (candidates.length === 1) return { kind: "single", outlet: { id: first.id, name: first.name, area: first.area, isDemoFixture: first.isDemoFixture, country: first.country, currency: first.currency } };
+  return { kind: "ambiguous", candidates };
 }

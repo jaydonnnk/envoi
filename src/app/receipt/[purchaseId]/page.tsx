@@ -6,7 +6,7 @@ import { applyDerivedTransitions } from "@/domain/purchases/state";
 import { getAuth } from "@/lib/auth";
 import { isPrincipal, requireBuyerSession } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
-import { formatSgd, sgdFromCents } from "@/lib/money";
+import { formatMoney, money } from "@/lib/money";
 import { formatPyusdAtomic, formatPyusdPerSgd } from "@/domain/pyusd/rate";
 import { OPERATOR_RESOLUTION } from "@/domain/pyusd/state";
 import { LiveStatus } from "./live-status";
@@ -122,12 +122,12 @@ export default async function ReceiptPage({ params }: { params: Promise<{ purcha
             <span>
               {line.quantity} × {line.name}
             </span>
-            <span className="money">{formatSgd(sgdFromCents(line.lineSgdCents))}</span>
+            <span className="money">{formatMoney(money(purchase.currency, line.lineMinor))}</span>
           </div>
         ))}
         <div className="row total-row">
           <strong>{paid ? "Paid total" : "Reviewed total"}</strong>
-          <span className="total money">{formatSgd(sgdFromCents(paid ? (purchase.attempt?.captureGrossSgdCents ?? purchase.totalSgdCents) : purchase.totalSgdCents))}</span>
+          <span className="total money">{formatMoney(money(purchase.currency, paid ? (purchase.attempt?.captureGrossMinor ?? purchase.totalMinor) : purchase.totalMinor))}</span>
         </div>
         {purchase.rail === "paypal" && (
           <div className="row">

@@ -5,7 +5,6 @@ import { getAuth } from "@/lib/auth";
 import { isPrincipal, requireBuyerSession } from "@/lib/auth-context";
 import { connectWeb } from "@/lib/db/web";
 import type { AppError } from "@/lib/errors";
-import { sgdFromCents } from "@/lib/money";
 import { createFakePayPal, type FakePayPal } from "../support/fake-paypal";
 import { createPaymentsFixture, FIXTURE_SELLER, jsonPost, routeParams, type PaymentsFixture } from "../support/payments";
 import { anonymousCookie, TEST_BASE_URL } from "../support/session";
@@ -119,8 +118,8 @@ describe("paypal/complete", () => {
     // The provider's record after capture shows one cent more than the stored snapshot.
     fake.tamper = (order, phase) => {
       if (phase !== "post_capture") return order;
-      const plusOne = sgdFromCents(order.amount!.cents! + 1);
-      return { ...order, amount: { currency: "SGD", cents: plusOne }, captures: order.captures.map((capture) => ({ ...capture, amount: { currency: "SGD", cents: plusOne } })) };
+      const plusOne = order.amount!.minor! + 1;
+      return { ...order, amount: { currency: "SGD", minor: plusOne }, captures: order.captures.map((capture) => ({ ...capture, amount: { currency: "SGD", minor: plusOne } })) };
     };
     const response = await complete(cookie, purchaseId);
     expect(await response.json()).toMatchObject({ ok: true, data: { status: "uncertain", view: { state: "uncertain" } } });

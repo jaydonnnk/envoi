@@ -2,7 +2,7 @@ import type { Address } from "@solana/kit";
 import { and, eq, sql } from "drizzle-orm";
 import { buyerActor, recordAudit } from "@/domain/audit/events";
 import { PYUSD_HINT_CAP } from "@/domain/pyusd/constants";
-import { checkPyusdIdentity, checkPyusdTokenAccounts, type TokenAccountCheck } from "@/domain/pyusd/identity";
+import { checkPyusdIdentity, checkPyusdTokenAccounts, NOT_SGD_SHOP, NOT_SGD_SHOP_MESSAGE, type TokenAccountCheck } from "@/domain/pyusd/identity";
 import { assessMintForTransfer } from "@/domain/pyusd/mint";
 import { isRateExpired, latestPyusdRate } from "@/domain/pyusd/rate";
 import { reconcilePyusdAttempt, type PyusdCheck } from "@/domain/pyusd/reconcile";
@@ -69,6 +69,8 @@ export async function assertPyusdEligible(db: Conn, purchaseId: string, principa
   if (!row) return notEligible(appError("not_found", "Purchase not found."));
   const { purchase, destination } = row;
   if (purchase.rail !== "pyusd") return notEligible(appError("validation_failed", "This review is for PayPal.", { details: { reason: "other_rail" } }));
+  // PYUSD is priced in SGD; a purchase in any other currency is never prepared (S27).
+  if (purchase.currency !== "SGD") return notEligible(appError("pyusd_unavailable", NOT_SGD_SHOP_MESSAGE, { details: { reason: NOT_SGD_SHOP } }));
   if (now.getTime() >= purchase.reviewExpiresAt.getTime()) return notEligible(appError("review_expired", "This review has expired. Review the basket again to pay."));
   switch (purchase.state as PurchaseState) {
     case "review_open":
@@ -210,7 +212,7 @@ export async function preparePyusdPayment(deps: PyusdDeps, principal: BuyerPrinc
         purchaseId,
         rail: "pyusd",
         state: "prepared",
-        totalSgdCents: again.purchase.totalSgdCents,
+        totalMinor: again.purchase.totalMinor,
         currency: "SGD",
         pyusdBuyerWallet: buyerWallet,
         pyusdSourceTokenAccount: source,

@@ -1,10 +1,10 @@
 import type { PricedLine } from "@/domain/purchases/price";
-import type { SgdCents } from "@/lib/money";
+import type { Currency } from "@/lib/money";
 
 // Provider-read decisions (Gate 3, Purchases, attempts and provider decisions). Pure: the PayPal
 // integration maps its payloads into PayPalOrder, and these functions decide what they prove.
 
-export type ProviderAmount = { currency: string; cents: SgdCents | null }; // cents null: unreadable value
+export type ProviderAmount = { currency: string; minor: number | null }; // minor null: unreadable value
 export type ProviderItem = { name: string; quantity: string; unit: ProviderAmount | null };
 export type ProviderCapture = { id: string | null; status: string; amount: ProviderAmount | null };
 
@@ -24,8 +24,8 @@ export type ExpectedPurchase = {
   purchaseId: string;
   outletId: string;
   payeeId: string;
-  totalSgdCents: SgdCents;
-  currency: "SGD";
+  totalMinor: number;
+  currency: Currency;
   lines: readonly PricedLine[];
   correlationId: string;
 };
@@ -33,8 +33,8 @@ export type ExpectedPurchase = {
 export type CaptureEvidence = {
   orderId: string;
   captureId: string;
-  grossSgdCents: SgdCents;
-  currency: "SGD";
+  grossMinor: number;
+  currency: Currency;
   payeeId: string;
   verifiedAt: Date;
 };
@@ -47,7 +47,7 @@ export type CaptureDecision =
   | { decision: "failed"; reason: string };
 
 // The order must describe exactly the stored basket: one purchase unit, our correlation id and the
-// same item names, quantities and unit prices.
+// same item names, quantities and unit prices, in the purchase's currency.
 function basketMatches(order: PayPalOrder, expected: ExpectedPurchase): boolean {
   if (order.purchaseUnitCount !== 1 || order.customId !== expected.correlationId) return false;
   const items = order.items;
@@ -58,8 +58,8 @@ function basketMatches(order: PayPalOrder, expected: ExpectedPurchase): boolean 
       item !== undefined &&
       item.name === line.name &&
       item.quantity === String(line.quantity) &&
-      item.unit?.currency === "SGD" &&
-      item.unit.cents === line.unitSgdCents
+      item.unit?.currency === expected.currency &&
+      item.unit.minor === line.unitMinor
     );
   });
 }
@@ -74,13 +74,13 @@ export function verifyApprovedOrder(order: PayPalOrder, orderId: string, expecte
   if (order.status !== "APPROVED") return { ok: false, waiting: false, reason: "not_approved" };
   if (order.payeeMerchantId !== expected.payeeId) return { ok: false, waiting: false, reason: "payee_mismatch" };
   if (order.amount?.currency !== expected.currency) return { ok: false, waiting: false, reason: "currency_mismatch" };
-  if (order.amount.cents !== expected.totalSgdCents) return { ok: false, waiting: false, reason: "amount_mismatch" };
+  if (order.amount.minor !== expected.totalMinor) return { ok: false, waiting: false, reason: "amount_mismatch" };
   if (!basketMatches(order, expected)) return { ok: false, waiting: false, reason: "basket_mismatch" };
   return { ok: true };
 }
 
 // After the capture call: paid only when one completed capture of exactly the stored total, in
-// SGD, reached the bound payee for the stored basket. No tolerance anywhere; a mismatch is
+// the purchase's currency, reached the bound payee for the stored basket. No tolerance anywhere; a mismatch is
 // quarantined as uncertain, never shown as paid.
 export function decideCaptureOutcome(order: PayPalOrder, expected: ExpectedPurchase, verifiedAt: Date): CaptureDecision {
   if (order.captures.length !== 1) return order.captures.length === 0 ? { decision: "uncertain", reason: "missing_capture_id" } : { decision: "uncertain", reason: "basket_mismatch" };
@@ -89,11 +89,11 @@ export function decideCaptureOutcome(order: PayPalOrder, expected: ExpectedPurch
   if (capture.status !== "COMPLETED" || order.status !== "COMPLETED") return { decision: "uncertain", reason: "status_not_complete" };
   if (order.payeeMerchantId !== expected.payeeId) return { decision: "uncertain", reason: "payee_mismatch" };
   if (order.amount?.currency !== expected.currency || capture.amount?.currency !== expected.currency) return { decision: "uncertain", reason: "currency_mismatch" };
-  if (order.amount.cents !== expected.totalSgdCents || capture.amount.cents !== expected.totalSgdCents) return { decision: "uncertain", reason: "amount_mismatch" };
+  if (order.amount.minor !== expected.totalMinor || capture.amount.minor !== expected.totalMinor) return { decision: "uncertain", reason: "amount_mismatch" };
   if (!basketMatches(order, expected)) return { decision: "uncertain", reason: "basket_mismatch" };
   return {
     decision: "confirmed",
-    evidence: { orderId: order.id, captureId: capture.id, grossSgdCents: expected.totalSgdCents, currency: "SGD", payeeId: expected.payeeId, verifiedAt },
+    evidence: { orderId: order.id, captureId: capture.id, grossMinor: expected.totalMinor, currency: expected.currency, payeeId: expected.payeeId, verifiedAt },
   };
 }
 

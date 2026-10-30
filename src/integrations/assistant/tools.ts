@@ -82,7 +82,7 @@ export function createAgentTools(options: AgentToolsOptions) {
     menus.set(outlet.id, new Set(items.map((item) => item.id)));
     return {
       shop: { id: outlet.id, name: outlet.name, area: outlet.area, isDemoFixture: outlet.isDemoFixture },
-      items: items.map(({ id, name, unitSgdCents, available }) => ({ id, name, unitSgdCents, available })),
+      items: items.map(({ id, name, unitMinor, available }) => ({ id, name, unitMinor, available })),
     };
   }
 

@@ -11,7 +11,7 @@ export const FIXTURE_SELLER = "FXTRSELLER2AB";
 export type PaymentsFixture = {
   database: TestDatabase;
   outletId: string;
-  items: { id: string; name: string; unitSgdCents: number }[];
+  items: { id: string; name: string; unitMinor: number }[];
 };
 
 // A migrated disposable database holding the seeded demo fixture with a PayPal destination, and
@@ -21,8 +21,8 @@ export async function createPaymentsFixture(label: string, env: Record<string, s
   const db = drizzle(database.admin, { schema });
   const { outletId } = await seedDemoFixture(db);
   await assignPayPalDestination(db, outletId, FIXTURE_SELLER);
-  const items = await database.admin<{ id: string; name: string; unitSgdCents: number }[]>`
-    select i.id, i.name, i.unit_sgd_cents as "unitSgdCents" from menu_items i order by i.position`;
+  const items = await database.admin<{ id: string; name: string; unitMinor: number }[]>`
+    select i.id, i.name, i.unit_minor as "unitMinor" from menu_items i order by i.position`;
   Object.assign(process.env, webEnvFor(database.webUrl), env);
   return { database, outletId, items: [...items] };
 }

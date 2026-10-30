@@ -193,14 +193,14 @@ describe("a page with no printed price makes no model call (the price check)", (
 describe("a drafted price not printed on the page stays blank", () => {
   it('"4.9" on the page keeps 4.90; "49" on the page blanks 4.90', () => {
     const draft = draftOf([{ name: "Ebi fry", priceText: "4.90" }]);
-    expect(keepPrintedOnly(draft, "Ebi fry 4.9").draft.items[0]).toMatchObject({ priceSgdCents: 490, priceBasis: "explicit" });
-    expect(keepPrintedOnly(draft, "Ebi fry 49").draft.items[0]).toMatchObject({ priceSgdCents: null, priceBasis: "not_on_page" });
+    expect(keepPrintedOnly(draft, "Ebi fry 4.9").draft.items[0]).toMatchObject({ priceMinor: 490, priceBasis: "explicit" });
+    expect(keepPrintedOnly(draft, "Ebi fry 49").draft.items[0]).toMatchObject({ priceMinor: null, priceBasis: "not_on_page" });
   });
 
   it("an invented price is blanked with basis not_on_page and counted blank", () => {
     const draft = draftOf([{ name: "Kopi C", priceText: "1.80" }, { name: "Ebi fry", priceText: "6.40" }]);
     const kept = keepPrintedOnly(draft, FIXTURE_PAGE_TEXT);
-    expect(kept.draft.items.map((item) => [item.priceSgdCents, item.priceBasis])).toEqual([[180, "explicit"], [null, "not_on_page"]]);
+    expect(kept.draft.items.map((item) => [item.priceMinor, item.priceBasis])).toEqual([[180, "explicit"], [null, "not_on_page"]]);
     expect(kept.draft.blankPriceCount).toBe(1);
     expect(kept.draft.fingerprint).not.toBe(draft.fingerprint);
   });

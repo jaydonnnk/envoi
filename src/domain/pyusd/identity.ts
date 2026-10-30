@@ -5,6 +5,7 @@ import type { WebEnv } from "@/env";
 import { decodeMintAccount, decodeTokenAccount } from "@/integrations/solana/decode";
 import type { SolanaReadClient } from "@/integrations/solana/rpc";
 import { appError, type AppError } from "@/lib/errors";
+import type { Currency } from "@/lib/money";
 
 // The devnet identity check and token-account checks (Gate 2 enable condition; Gate 3 "PYUSD").
 // checkPyusdIdentity is exactly Gate 2's condition: the RPC's genesis hash, the mint's owner program
@@ -79,6 +80,9 @@ function assessPyusdTokenAccount(owner: Address, address: Address, account: Enco
 
 export type PyusdAvailability = { available: true } | { available: false; reason: string; message: string };
 
+export const NOT_SGD_SHOP = "not_sgd_shop";
+export const NOT_SGD_SHOP_MESSAGE = "PYUSD is offered at Singapore shops only in this release.";
+
 const IDENTITY_COPY: Record<Exclude<PyusdIdentity, { ok: true }>["reason"], string> = {
   rpc_unconfigured: "Envoi's Solana devnet connection is not configured.",
   rpc_unavailable: "Envoi cannot reach Solana devnet right now.",
@@ -91,9 +95,11 @@ const IDENTITY_COPY: Record<Exclude<PyusdIdentity, { ok: true }>["reason"], stri
 // static option). The enable flag, the shop's verified wallet and dated rate are read first, and the
 // devnet identity is checked only when they all pass. Any failure makes only PYUSD unavailable.
 export async function pyusdAvailability(
-  input: { enabled: boolean; hasWallet: boolean; rate: { expired: boolean } | null },
+  input: { currency: Currency; enabled: boolean; hasWallet: boolean; rate: { expired: boolean } | null },
   rpc: () => SolanaReadClient | null,
 ): Promise<PyusdAvailability> {
+  // PYUSD is priced in SGD at the shop's rate, so a shop in another currency never offers it (S27).
+  if (input.currency !== "SGD") return { available: false, reason: NOT_SGD_SHOP, message: NOT_SGD_SHOP_MESSAGE };
   if (!input.enabled) return { available: false, reason: "rail_disabled", message: "PYUSD is switched off in this test environment." };
   if (!input.hasWallet) return { available: false, reason: "no_destination", message: "This shop has not connected a PYUSD devnet wallet." };
   if (!input.rate) return { available: false, reason: "no_rate", message: "This shop has not set a PYUSD rate." };

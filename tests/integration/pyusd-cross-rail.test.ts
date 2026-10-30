@@ -9,7 +9,7 @@ import { getAuth } from "@/lib/auth";
 import { isPrincipal, requireBuyerSession, type BuyerPrincipal } from "@/lib/auth-context";
 import { connectWeb } from "@/lib/db/web";
 import type { AppError } from "@/lib/errors";
-import { sgdFromCents } from "@/lib/money";
+import { money } from "@/lib/money";
 import { durationMs } from "@/lib/time";
 import { createTestDatabase, type TestDatabase } from "../support/db";
 import { createFakePayPal, type FakePayPal } from "../support/fake-paypal";
@@ -88,7 +88,7 @@ describe("PYUSD across rails", () => {
     const merchant = await testWallet();
     const tokenAccount = await fundWallet(chain, merchant.address, 0n);
     await seedPyusdDestination(database, shop.outletId, { wallet: merchant.address, tokenAccount, atomicPerSgd: RATE, confirmedAt: new Date(T0.getTime() - 60_000) });
-    return { outletId: shop.outletId, itemId: item!.id, unitSgdCents: item!.unitSgdCents };
+    return { outletId: shop.outletId, itemId: item!.id, unitMinor: item!.unitMinor };
   }
 
   async function review(cookie: string, shop: { outletId: string; itemId: string }, rail: "paypal" | "pyusd") {
@@ -124,7 +124,7 @@ describe("PYUSD across rails", () => {
     const pyusd = await review(pyusdBuyer, shop, "pyusd");
     expect(pyusd.status).toBe(201);
     const wallet = await testWallet();
-    await fundWallet(chain, wallet.address, pyusdAtomicFor(sgdFromCents(shop.unitSgdCents), RATE));
+    await fundWallet(chain, wallet.address, pyusdAtomicFor(money("SGD", shop.unitMinor), RATE));
     const prepared = await r.prepare.POST(
       new Request(`${TEST_BASE_URL}/api/v1/purchases/${pyusd.body.data.purchaseId}/pyusd/prepare`, {
         method: "POST",
@@ -167,7 +167,7 @@ describe("PYUSD across rails", () => {
     const paypalId = (await review(buyer, shop, "paypal")).body.data.purchaseId;
     const pyusdId = (await review(buyer, shop, "pyusd")).body.data.purchaseId;
     const wallet = await testWallet();
-    await fundWallet(chain, wallet.address, pyusdAtomicFor(sgdFromCents(shop.unitSgdCents), RATE));
+    await fundWallet(chain, wallet.address, pyusdAtomicFor(money("SGD", shop.unitMinor), RATE));
 
     const web = connectWeb(database.webUrl, 4);
     const admin = database.admin;
@@ -222,7 +222,7 @@ describe("PYUSD across rails", () => {
       expect(loaded.ok, `${reason}: the app modules load`).toBe(true);
       if (!loaded.ok) return;
       const r = loaded.value;
-      const availability = await pyusdAvailability({ enabled: true, hasWallet: true, rate: { expired: false } }, (await import("@/integrations/solana/rpc")).webSolanaClient);
+      const availability = await pyusdAvailability({ currency: "SGD", enabled: true, hasWallet: true, rate: { expired: false } }, (await import("@/integrations/solana/rpc")).webSolanaClient);
       expect(availability, reason).toMatchObject({ available: false, reason });
 
       // The labeled PayPal fixture journey starts and completes.

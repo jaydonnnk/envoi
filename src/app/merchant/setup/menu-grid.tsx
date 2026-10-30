@@ -1,5 +1,6 @@
 "use client";
 
+import type { Currency } from "@/lib/money";
 import {
   CellStyleModule,
   ClientSideRowModelModule,
@@ -87,10 +88,12 @@ function RemoveCell(params: ICellRendererParams<GridRow> & { onRemove: (key: str
 }
 
 export function MenuGrid({
+  currency,
   rows,
   onEdit,
   onRemove,
 }: {
+  currency: Currency;
   rows: GridRow[];
   onEdit: (key: string, patch: Partial<Pick<GridRow, "name" | "portion" | "price" | "availability">>) => void;
   onRemove: (key: string) => void;
@@ -100,7 +103,7 @@ export function MenuGrid({
     { field: "portion", headerName: "Portion", editable: true, minWidth: 110, flex: 1, cellEditorParams: { maxLength: 120 } },
     {
       field: "price",
-      headerName: "Price (S$)",
+      headerName: `Price (${currency === "USD" ? "US$" : "S$"})`,
       editable: true,
       minWidth: 104,
       flex: 1,

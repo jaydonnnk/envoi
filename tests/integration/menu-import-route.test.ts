@@ -41,7 +41,7 @@ import {
 // in-flight and daily limits are raised so cases never block each other; the admission tests prove
 // those limits.
 
-type Envelope = { ok: boolean; data?: Record<string, unknown> & { draft?: { items: { name: string; priceSgdCents: number | null; source: string }[] }; latestImport?: { outcome: string } | null }; error?: { code: string; message: string; details: Record<string, string | number | boolean> } };
+type Envelope = { ok: boolean; data?: Record<string, unknown> & { draft?: { items: { name: string; priceMinor: number | null; source: string }[] }; latestImport?: { outcome: string } | null }; error?: { code: string; message: string; details: Record<string, string | number | boolean> } };
 
 const ISOLATED = { outletInFlight: 1, globalInFlight: 100, outletDaily: 10, globalDaily: 1_000 };
 const DRAFT_OUTPUT = { items: [visionItem("FIXTURE Kopi O", "1.80"), visionItem("FIXTURE Teh", "1.60"), visionItem("FIXTURE Kaya toast", null)] };
@@ -483,8 +483,8 @@ describe("draft reload reports the latest import outcome", () => {
     expect(draft.data?.latestImport).toMatchObject({ outcome: "completed", rowsDrafted: 3, rowsBlankPrice: 1 });
     expect(draft.data?.items).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ name: "FIXTURE Kopi O", priceSgdCents: 180, source: "import_suggestion" }),
-        expect.objectContaining({ name: "FIXTURE Kaya toast", priceSgdCents: null, source: "import_suggestion" }),
+        expect.objectContaining({ name: "FIXTURE Kopi O", priceMinor: 180, source: "import_suggestion" }),
+        expect.objectContaining({ name: "FIXTURE Kaya toast", priceMinor: null, source: "import_suggestion" }),
       ]),
     );
   });

@@ -12,6 +12,7 @@ import { enrollments, merchantMemberships, outletIdentifiers, outlets, paymentDe
 import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
 import { newId } from "@/lib/ids";
+import { CURRENCY_BY_COUNTRY, type Country, type Currency } from "@/lib/money";
 
 // Merchant-side outlet drafts (Gate 2 "POST /merchant/outlets, PATCH /merchant/outlets/{id}").
 // An outlet created here is unpublished: buyers read only outlets with a published revision.
@@ -35,6 +36,9 @@ export type MerchantOutlet = {
   name: string;
   area: string;
   isDemoFixture: boolean;
+  // S27: the shop's country and its currency; the country is locked once the outlet has published.
+  country: Country;
+  currency: Currency;
   published: boolean;
   enrollment: "pending" | "approved" | null;
   // S7: the merchant confirmed exactly the current name and area.
@@ -78,6 +82,7 @@ const outletColumns = {
   name: outlets.name,
   area: outlets.area,
   isDemoFixture: outlets.isDemoFixture,
+  country: outlets.country,
   publishedMenuRevisionId: outlets.publishedMenuRevisionId,
   detailsConfirmedAt: outlets.detailsConfirmedAt,
   enrollment: enrollments.status,
@@ -88,6 +93,7 @@ type OutletRow = {
   name: string;
   area: string;
   isDemoFixture: boolean;
+  country: Country;
   publishedMenuRevisionId: string | null;
   detailsConfirmedAt: Date | null;
   enrollment: string | null;
@@ -125,6 +131,8 @@ async function toMerchantOutlet(db: Pick<Db, "select">, row: OutletRow): Promise
     name: row.name,
     area: row.area,
     isDemoFixture: row.isDemoFixture,
+    country: row.country,
+    currency: CURRENCY_BY_COUNTRY[row.country],
     published: row.publishedMenuRevisionId !== null,
     enrollment: row.enrollment === "approved" ? "approved" : row.enrollment === "pending" ? "pending" : null,
     detailsConfirmed: row.detailsConfirmedAt !== null,
@@ -237,6 +245,37 @@ export async function updateMerchantOutlet(db: Db, input: OutletUpdate & { outle
       operatorVisible: false,
       details: { nameChanged: current.name !== input.name, areaChanged: current.area !== input.area, detailsConfirmed: input.detailsConfirmed },
     });
+    const outlet = await describeOutlet(tx, input.outletId);
+    if (!outlet) throw new Error("the outlet vanished in its own transaction");
+    return outlet;
+  });
+}
+
+// S27: the merchant chooses the shop's country before its first publication. Once the outlet has
+// published, its prices are in that country's currency, so a change answers country_locked and
+// changes nothing; the trigger of migration 0027 refuses the same change in the database.
+export async function setOutletCountry(db: Db, input: { outletId: string; userId: string; country: Country; now: Date }): Promise<MerchantOutlet | AppError> {
+  return db.transaction(async (tx) => {
+    const [current] = await tx
+      .select({ country: outlets.country, publishedMenuRevisionId: outlets.publishedMenuRevisionId })
+      .from(outlets)
+      .where(eq(outlets.id, input.outletId))
+      .for("update");
+    if (!current) return appError("not_found", "Shop not found.");
+    if (current.country !== input.country) {
+      if (current.publishedMenuRevisionId !== null) {
+        return appError("country_locked", "Your shop's country cannot change after you publish, because published prices are in its currency.");
+      }
+      await tx.update(outlets).set({ country: input.country }).where(eq(outlets.id, input.outletId));
+      await recordAudit(tx, {
+        at: input.now,
+        actor: merchantActor(input.userId),
+        action: "outlet_country_set",
+        outletId: input.outletId,
+        operatorVisible: false,
+        details: { from: current.country, to: input.country },
+      });
+    }
     const outlet = await describeOutlet(tx, input.outletId);
     if (!outlet) throw new Error("the outlet vanished in its own transaction");
     return outlet;

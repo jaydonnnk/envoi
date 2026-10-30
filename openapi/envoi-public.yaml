@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Envoi public API",
-    "version": "1.1.0",
+    "version": "2.0.0",
     "description": "Hand-written description of Envoi's public API: two read routes, the list of published shops and one shop's published menu, and the agent's purchase request route. Envoi is a test environment: shops marked isDemoFixture are seeded demo fixtures, and payments use PayPal sandbox test money only. The purchase request route needs an agent token and answers a one-time link that a human buyer opens to review Envoi's price and approve payment themselves. Nothing in this API pays, approves or prices a purchase or reads a receipt; a buyer's price is always recalculated by Envoi at review. Prices are whole Singapore cents, and an unknown price or availability is null, never zero or false. This file is written in JSON syntax, which is valid YAML 1.2, so it can be read without a YAML library. The envelope flag ok and the error flag retryable are typed boolean without a literal value because the APIMatic TypeScript generator (CLI 2.0.0-beta.6, codegen v4) turns a boolean enum or const into the string \"True\" or \"False\"."
   },
   "servers": [
@@ -114,22 +114,26 @@
       "OutletSummary": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "name", "area", "isDemoFixture"],
+        "required": ["id", "name", "area", "isDemoFixture", "country", "currency"],
         "properties": {
           "id": { "type": "string", "pattern": "^out_[a-z2-7]{26}$" },
           "name": { "type": "string" },
           "area": { "type": "string" },
-          "isDemoFixture": { "type": "boolean", "description": "True for a seeded demo fixture shop, which is not a real business." }
+          "isDemoFixture": { "type": "boolean", "description": "True for a seeded demo fixture shop, which is not a real business." },
+          "country": { "$ref": "#/components/schemas/Country" },
+          "currency": { "$ref": "#/components/schemas/Currency" }
         }
       },
+      "Country": { "type": "string", "enum": ["SG", "US"], "description": "The shop's country: Singapore or the United States. It sets the shop's currency and cannot change after the shop publishes." },
+      "Currency": { "type": "string", "enum": ["SGD", "USD"], "description": "ISO 4217 code of every price at this shop: SGD for a Singapore shop, USD for a United States shop. Both have two decimal places, so 100 minor units are 1.00." },
       "MenuItem": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "name", "unitSgdCents", "available"],
+        "required": ["id", "name", "unitMinor", "available"],
         "properties": {
           "id": { "type": "string", "pattern": "^itm_[a-z2-7]{26}$" },
           "name": { "type": "string" },
-          "unitSgdCents": { "type": ["integer", "null"], "minimum": 1, "description": "Unit price in Singapore cents, at least 1; null when the price is unknown. A menu is confirmed only with every price known, so a published menu currently never carries null." },
+          "unitMinor": { "type": ["integer", "null"], "minimum": 1, "description": "Unit price in minor units of the menu's currency (cents), at least 1; null when the price is unknown. A menu is confirmed only with every price known, so a published menu currently never carries null." },
           "available": { "type": ["boolean", "null"], "description": "Merchant-supplied availability; null when unknown. A menu is confirmed only with every availability known, so a published menu currently never carries null." }
         }
       },
@@ -144,10 +148,11 @@
       "Menu": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["outlet", "menuRevisionId", "items"],
+        "required": ["outlet", "menuRevisionId", "currency", "items"],
         "properties": {
           "outlet": { "$ref": "#/components/schemas/OutletSummary" },
           "menuRevisionId": { "type": "string", "pattern": "^mrv_[a-z2-7]{26}$" },
+          "currency": { "$ref": "#/components/schemas/Currency" },
           "items": { "type": "array", "items": { "$ref": "#/components/schemas/MenuItem" } }
         }
       },

@@ -170,7 +170,7 @@ export async function commitImport(
         position: existingRows.length + offset,
         name: item.name,
         portion: item.portion,
-        unitSgdCents: item.priceSgdCents,
+        unitMinor: item.priceMinor,
         available: null,
       });
     }

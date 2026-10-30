@@ -31,7 +31,7 @@ const PAGE_DRAFT = {
   ],
 };
 
-type Envelope = { ok: boolean; data?: Record<string, unknown> & { import?: Record<string, unknown>; draft?: { items: { name: string; portion: string | null; priceSgdCents: number | null; source: string }[]; status: string; published: boolean } }; error?: { code: string; details: Record<string, string | number | boolean> } };
+type Envelope = { ok: boolean; data?: Record<string, unknown> & { import?: Record<string, unknown>; draft?: { items: { name: string; portion: string | null; priceMinor: number | null; source: string }[]; status: string; published: boolean } }; error?: { code: string; details: Record<string, string | number | boolean> } };
 
 let fixture: PaymentsFixture;
 let routes: MerchantRoutes & { web: typeof import("@/app/api/v1/merchant/outlets/[id]/menu-imports/web/route"); photo: typeof import("@/app/api/v1/merchant/outlets/[id]/menu-imports/route") };
@@ -209,7 +209,7 @@ describe("a completed web import", () => {
     expect(result.status).toBe(200);
     expect(result.body.data?.import).toMatchObject({ outcome: "completed", rowsDrafted: 4, rowsBlankPrice: 1, droppedNames: 1, added: 4 });
     expect(result.body.data?.import?.blankPrices).toEqual([{ name: "Ebi fry", portion: "+ Mentaiko", basis: "not_on_page" }]);
-    expect(result.body.data?.draft?.items.map((item) => [item.name, item.portion, item.priceSgdCents, item.source])).toEqual([
+    expect(result.body.data?.draft?.items.map((item) => [item.name, item.portion, item.priceMinor, item.source])).toEqual([
       ["Kopi C", "Hot", 180, "import_suggestion"],
       ["Kaya toast set", null, 350, "import_suggestion"],
       ["Ebi fry", "3 pcs", 490, "import_suggestion"],

@@ -5,7 +5,7 @@ import type { OutletSearch, PublishedItemName, PublishedOutletSummary } from "@/
 
 export type SuggestionRequest = { text: string; area?: string; outletId?: string };
 
-export type PublishedItemSummary = { id: string; name: string; unitSgdCents: number; available: boolean | null };
+export type PublishedItemSummary = { id: string; name: string; unitMinor: number; available: boolean | null };
 
 export type SuggestionGap = "area" | "item" | "outlet";
 

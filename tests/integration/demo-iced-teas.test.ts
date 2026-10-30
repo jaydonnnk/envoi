@@ -23,7 +23,7 @@ describe("demo iced teas", () => {
     await fixture?.database.drop();
   });
 
-  type Item = { name: string; priceSgdCents: number };
+  type Item = { name: string; priceMinor: number };
 
   const operatorDb = () => drizzle(fixture.database.admin, { schema });
   const revisions = async (outletId: string) => Number((await fixture.database.admin<{ n: string }[]>`select count(*) as n from menu_revisions where outlet_id = ${outletId}`)[0]!.n);
@@ -50,7 +50,7 @@ describe("demo iced teas", () => {
     );
 
   it("the demo iced teas are added once and published through the menu rules", () =>
-    withDemoTestShop([{ name: "FIXTURE Kopi C", priceSgdCents: 180 }], async (shop) => {
+    withDemoTestShop([{ name: "FIXTURE Kopi C", priceMinor: 180 }], async (shop) => {
       const before = await publishedItems(fixture.database, shop.outletId);
       const auditsBefore = (await audits(shop.outletId)).length;
 
@@ -61,7 +61,7 @@ describe("demo iced teas", () => {
       // follow it at their prices.
       expect(after[0]!.revisionId).toBe(added.revisionId);
       expect(added.revisionId).not.toBe(before[0]!.revisionId);
-      expect(after.map((item) => [item.name, item.unitSgdCents])).toEqual([
+      expect(after.map((item) => [item.name, item.unitMinor])).toEqual([
         ["FIXTURE Kopi C", 180],
         ["Iced lemon tea", 220],
         ["Iced milk tea", 250],
@@ -89,8 +89,8 @@ describe("demo iced teas", () => {
     }));
 
   it("the demo iced teas never publish a merchant's own unpublished changes", () =>
-    withDemoTestShop([{ name: "FIXTURE Kopi C", priceSgdCents: 180 }], async (shop) => {
-      await api.saveDraft(shop, await api.getDraft(shop), [{ name: "FIXTURE merchant's unpublished item", priceSgdCents: 300 }]);
+    withDemoTestShop([{ name: "FIXTURE Kopi C", priceMinor: 180 }], async (shop) => {
+      await api.saveDraft(shop, await api.getDraft(shop), [{ name: "FIXTURE merchant's unpublished item", priceMinor: 300 }]);
       const count = await revisions(shop.outletId);
       const before = await publishedItems(fixture.database, shop.outletId);
 
@@ -102,8 +102,8 @@ describe("demo iced teas", () => {
   it("the demo iced teas never change a price the shop already set", () =>
     withDemoTestShop(
       [
-        { name: "Iced lemon tea", priceSgdCents: 220 },
-        { name: "Iced milk tea", priceSgdCents: 300 },
+        { name: "Iced lemon tea", priceMinor: 220 },
+        { name: "Iced milk tea", priceMinor: 300 },
       ],
       async (shop) => {
         const count = await revisions(shop.outletId);

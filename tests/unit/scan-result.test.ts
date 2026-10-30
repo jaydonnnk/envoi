@@ -8,7 +8,7 @@ import type { SgqrResolution } from "@/domain/sgqr/resolve";
 // Every outlet here is a FIXTURE.
 type Shown = Exclude<SgqrResolution, { kind: "single" }>;
 
-const fixtureOutlet = (id: string, distinguisher: string) => ({ id, name: "FIXTURE Scan Kopi", area: "FIXTURE area", isDemoFixture: true, distinguisher });
+const fixtureOutlet = (id: string, distinguisher: string) => ({ id, name: "FIXTURE Scan Kopi", area: "FIXTURE area", isDemoFixture: true, country: "SG" as const, currency: "SGD" as const, distinguisher });
 
 const render = (resolution: Shown) => renderToStaticMarkup(createElement(ScanResult, { resolution }));
 

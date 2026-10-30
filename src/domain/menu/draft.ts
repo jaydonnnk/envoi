@@ -4,7 +4,6 @@ import { menuItems, menuRevisions, outlets } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
 import { newId } from "@/lib/ids";
-import { sgdFromCents } from "@/lib/money";
 import { MENU_LIMITS, type DraftItemSuggestion, type DraftMerge, type MenuCompleteness, type MenuDraft, type MenuItemDraft, type MenuItemInput } from "./types";
 
 // A menu can be confirmed only when every item has a name, a price and a merchant-chosen
@@ -12,7 +11,7 @@ import { MENU_LIMITS, type DraftItemSuggestion, type DraftMerge, type MenuComple
 // as zero. incompleteItemIds lists every incomplete item; reason names the first failing check in
 // the order price, name, availability.
 export function assessMenuCompleteness(items: readonly MenuItemDraft[]): MenuCompleteness {
-  const missingPrice = items.filter((item) => item.priceSgdCents === null);
+  const missingPrice = items.filter((item) => item.priceMinor === null);
   const missingName = items.filter((item) => item.name.trim() === "");
   const missingAvailability = items.filter((item) => item.availability === "unknown");
   const incomplete = new Set([...missingPrice, ...missingName, ...missingAvailability].map((item) => item.id));
@@ -29,7 +28,7 @@ export function toDraftItem(row: ItemRow): MenuItemDraft {
     id: row.id,
     name: row.name,
     portion: row.portion,
-    priceSgdCents: row.unitSgdCents === null ? null : sgdFromCents(row.unitSgdCents),
+    priceMinor: row.unitMinor,
     availability: row.available === null ? "unknown" : row.available ? "available" : "unavailable",
     source: row.source === "import_suggestion" ? "import_suggestion" : "merchant",
   };
@@ -124,8 +123,8 @@ async function draftFromPublished(tx: Tx, published: RevisionRow, write: DraftWr
   for (const [position, item] of write.items.entries()) {
     const before = item.id === undefined ? undefined : base.get(item.id);
     const id = newId("itm");
-    const values = { position, name: item.name, portion: item.portion, unitSgdCents: item.priceSgdCents, available: availableColumn(item.availability) };
-    const edited = !before || before.name !== values.name || before.portion !== values.portion || before.unitSgdCents !== values.unitSgdCents || before.available !== values.available;
+    const values = { position, name: item.name, portion: item.portion, unitMinor: item.priceMinor, available: availableColumn(item.availability) };
+    const edited = !before || before.name !== values.name || before.portion !== values.portion || before.unitMinor !== values.unitMinor || before.available !== values.available;
     await tx.insert(menuItems).values({ id, menuRevisionId: revisionId, itemKey: before?.itemKey ?? id, source: before && !edited ? before.source : "merchant", ...values });
   }
   await recordAudit(tx, {
@@ -174,7 +173,7 @@ export async function saveMenuDraft(db: Db, write: DraftWrite): Promise<MenuDraf
         position,
         name: item.name,
         portion: item.portion,
-        unitSgdCents: item.priceSgdCents,
+        unitMinor: item.priceMinor,
         available: availableColumn(item.availability),
       };
       const before = item.id === undefined ? undefined : byId.get(item.id);
@@ -184,7 +183,7 @@ export async function saveMenuDraft(db: Db, write: DraftWrite): Promise<MenuDraf
         continue;
       }
       // An import suggestion stays marked as one until the merchant changes it.
-      const edited = before.name !== values.name || before.portion !== values.portion || before.unitSgdCents !== values.unitSgdCents || before.available !== values.available;
+      const edited = before.name !== values.name || before.portion !== values.portion || before.unitMinor !== values.unitMinor || before.available !== values.available;
       await tx
         .update(menuItems)
         .set({ ...values, source: edited ? "merchant" : before.source })
@@ -240,7 +239,7 @@ export function mergeImportSuggestions(
       id: newId("itm"),
       name: suggestion.name,
       portion: suggestion.portion,
-      priceSgdCents: suggestion.priceSgdCents,
+      priceMinor: suggestion.priceMinor,
       availability: "unknown",
       source: "import_suggestion",
     });

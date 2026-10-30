@@ -13,7 +13,7 @@ type DraftJson = {
   version: number;
   status: "draft" | "confirmed";
   confirmedAt: string | null;
-  items: { id: string; name: string; portion: string | null; priceSgdCents: number | null; availability: string; source: string }[];
+  items: { id: string; name: string; portion: string | null; priceMinor: number | null; availability: string; source: string }[];
   completeness: { complete: boolean; incompleteItemIds?: string[]; reason?: string; itemCount?: number };
 };
 
@@ -218,7 +218,7 @@ describe("merchant sign-in and manual menu draft", () => {
     const refused = [
       await patchOutlet(b.outletId, a.cookie, { name: "Taken over", area: "Elsewhere" }),
       await getDraft(b.outletId, a.cookie),
-      await putDraft(b.outletId, a.cookie, { revisionId: bDraft.revisionId, version: bDraft.version, items: [{ name: "Intruder item", portion: null, priceSgdCents: 100, availability: "available" }] }),
+      await putDraft(b.outletId, a.cookie, { revisionId: bDraft.revisionId, version: bDraft.version, items: [{ name: "Intruder item", portion: null, priceMinor: 100, availability: "available" }] }),
       await confirm(b.outletId, a.cookie, { revisionId: bDraft.revisionId, version: bDraft.version }),
     ];
     await expectForbidden(refused);
@@ -266,16 +266,16 @@ describe("merchant sign-in and manual menu draft", () => {
       revisionId: empty.revisionId,
       version: 1,
       items: [
-        { name: "Kopi C", portion: "Hot", priceSgdCents: 180, availability: "available" },
-        { name: "Mee siam", portion: null, priceSgdCents: null, availability: "available" },
+        { name: "Kopi C", portion: "Hot", priceMinor: 180, availability: "available" },
+        { name: "Mee siam", portion: null, priceMinor: null, availability: "available" },
       ],
     });
     expect(saved.status).toBe(200);
     const draft = (await body<DraftJson>(saved)).data;
     const meeSiam = draft.items.find((item) => item.name === "Mee siam")!;
-    expect(meeSiam.priceSgdCents).toBeNull();
-    const [stored] = await fixture.database.admin<{ unit_sgd_cents: number | null }[]>`select unit_sgd_cents from menu_items where id = ${meeSiam.id}`;
-    expect(stored!.unit_sgd_cents).toBeNull();
+    expect(meeSiam.priceMinor).toBeNull();
+    const [stored] = await fixture.database.admin<{ unit_minor: number | null }[]>`select unit_minor from menu_items where id = ${meeSiam.id}`;
+    expect(stored!.unit_minor).toBeNull();
     expect(draft.completeness).toEqual({ complete: false, incompleteItemIds: [meeSiam.id], reason: "missing_price" });
 
     const refused = await confirm(outletId, cookie, { revisionId: draft.revisionId, version: draft.version });
@@ -287,7 +287,7 @@ describe("merchant sign-in and manual menu draft", () => {
     const filled = await putDraft(outletId, cookie, {
       revisionId: draft.revisionId,
       version: draft.version,
-      items: draft.items.map((item) => ({ id: item.id, name: item.name, portion: item.portion, priceSgdCents: item.priceSgdCents ?? 550, availability: item.availability })),
+      items: draft.items.map((item) => ({ id: item.id, name: item.name, portion: item.portion, priceMinor: item.priceMinor ?? 550, availability: item.availability })),
     });
     const complete = (await body<DraftJson>(filled)).data;
     expect(complete.completeness).toEqual({ complete: true, itemCount: 2 });
@@ -307,7 +307,7 @@ describe("merchant sign-in and manual menu draft", () => {
     const before = await merchantState();
     // The request schema refuses it with a 400 answer; a route that let it through to the database
     // would throw instead, which this test reports as a failed assertion.
-    const refused = await putDraft(outletId, cookie, { revisionId: draft.revisionId, version: draft.version, items: [{ name: "Free kopi", portion: null, priceSgdCents: 0, availability: "available" }] }).catch((err: unknown) => err);
+    const refused = await putDraft(outletId, cookie, { revisionId: draft.revisionId, version: draft.version, items: [{ name: "Free kopi", portion: null, priceMinor: 0, availability: "available" }] }).catch((err: unknown) => err);
     expect(refused).toBeInstanceOf(Response);
     expect((refused as Response).status).toBe(400);
     expect((await body(refused as Response)).error.code).toBe("validation_failed");
@@ -320,7 +320,7 @@ describe("merchant sign-in and manual menu draft", () => {
       const { outletId } = await merchantWithOutlet("db-zero-price");
       const [revision] = await fixture.database.admin<{ id: string }[]>`select id from menu_revisions where outlet_id = ${outletId}`;
       const insert = (id: string, position: number, cents: number | null) =>
-        web`insert into menu_items (id, menu_revision_id, position, name, unit_sgd_cents, available, portion, source)
+        web`insert into menu_items (id, menu_revision_id, position, name, unit_minor, available, portion, source)
           values (${id}, ${revision!.id}, ${position}, 'FIXTURE kopi', ${cents}, true, null, 'merchant')`.then(() => "inserted", (err: { message: string }) => err.message);
       // The same insert with a blank price succeeds, so the refusal below is the price check, not a grant.
       expect(await insert("itm_zero_control", 0, null)).toBe("inserted");
@@ -336,11 +336,11 @@ describe("merchant sign-in and manual menu draft", () => {
     const loaded = await draftOf(outletId, cookie);
 
     // Two tabs loaded version 1; the first saves.
-    const first = await putDraft(outletId, cookie, { revisionId: loaded.revisionId, version: loaded.version, items: [{ name: "Roti prata", portion: "Plain", priceSgdCents: 150, availability: "available" }] });
+    const first = await putDraft(outletId, cookie, { revisionId: loaded.revisionId, version: loaded.version, items: [{ name: "Roti prata", portion: "Plain", priceMinor: 150, availability: "available" }] });
     expect(first.status).toBe(200);
     const afterFirst = await merchantState();
 
-    const second = await putDraft(outletId, cookie, { revisionId: loaded.revisionId, version: loaded.version, items: [{ name: "Overwritten", portion: null, priceSgdCents: 999, availability: "unavailable" }] });
+    const second = await putDraft(outletId, cookie, { revisionId: loaded.revisionId, version: loaded.version, items: [{ name: "Overwritten", portion: null, priceMinor: 999, availability: "unavailable" }] });
     expect(second.status).toBe(409);
     expect((await body(second)).error).toMatchObject({ code: "revision_conflict", details: { revisionId: loaded.revisionId, currentVersion: loaded.version + 1 } });
     expect(await merchantState()).toEqual(afterFirst);
@@ -350,9 +350,9 @@ describe("merchant sign-in and manual menu draft", () => {
   it("a confirmation of an older version is rejected", async () => {
     const { cookie, outletId } = await merchantWithOutlet("stale-confirm");
     const loaded = await draftOf(outletId, cookie);
-    const v2 = (await body<DraftJson>(await putDraft(outletId, cookie, { revisionId: loaded.revisionId, version: 1, items: [{ name: "Teh", portion: null, priceSgdCents: 140, availability: "available" }] }))).data;
+    const v2 = (await body<DraftJson>(await putDraft(outletId, cookie, { revisionId: loaded.revisionId, version: 1, items: [{ name: "Teh", portion: null, priceMinor: 140, availability: "available" }] }))).data;
     // Another tab changed the price after this one reviewed version 2.
-    await putDraft(outletId, cookie, { revisionId: v2.revisionId, version: v2.version, items: [{ id: v2.items[0]!.id, name: "Teh", portion: null, priceSgdCents: 990, availability: "available" }] });
+    await putDraft(outletId, cookie, { revisionId: v2.revisionId, version: v2.version, items: [{ id: v2.items[0]!.id, name: "Teh", portion: null, priceMinor: 990, availability: "available" }] });
 
     const stale = await confirm(outletId, cookie, { revisionId: v2.revisionId, version: v2.version });
     expect(stale.status).toBe(409);
@@ -364,10 +364,10 @@ describe("merchant sign-in and manual menu draft", () => {
   it("editing a confirmed draft invalidates its confirmation", async () => {
     const { cookie, outletId } = await merchantWithOutlet("reconfirm");
     const loaded = await draftOf(outletId, cookie);
-    const saved = (await body<DraftJson>(await putDraft(outletId, cookie, { revisionId: loaded.revisionId, version: 1, items: [{ name: "Milo", portion: "Iced", priceSgdCents: 200, availability: "available" }] }))).data;
+    const saved = (await body<DraftJson>(await putDraft(outletId, cookie, { revisionId: loaded.revisionId, version: 1, items: [{ name: "Milo", portion: "Iced", priceMinor: 200, availability: "available" }] }))).data;
     expect((await confirm(outletId, cookie, { revisionId: saved.revisionId, version: saved.version })).status).toBe(200);
 
-    const edited = await putDraft(outletId, cookie, { revisionId: saved.revisionId, version: saved.version, items: [{ id: saved.items[0]!.id, name: "Milo", portion: "Iced", priceSgdCents: 220, availability: "available" }] });
+    const edited = await putDraft(outletId, cookie, { revisionId: saved.revisionId, version: saved.version, items: [{ id: saved.items[0]!.id, name: "Milo", portion: "Iced", priceMinor: 220, availability: "available" }] });
     expect(edited.status).toBe(200);
     expect((await body<DraftJson>(edited)).data).toMatchObject({ status: "draft", confirmedAt: null, version: saved.version + 1 });
     const [revision] = await fixture.database.admin<{ status: string; confirmed_at: Date | null }[]>`select status, confirmed_at from menu_revisions where id = ${saved.revisionId}`;
@@ -377,7 +377,7 @@ describe("merchant sign-in and manual menu draft", () => {
   it("a confirmed draft stays invisible to buyers", async () => {
     const { cookie, outletId } = await merchantWithOutlet("invisible");
     const loaded = await draftOf(outletId, cookie);
-    const saved = (await body<DraftJson>(await putDraft(outletId, cookie, { revisionId: loaded.revisionId, version: 1, items: [{ name: "Chendol", portion: null, priceSgdCents: 300, availability: "available" }] }))).data;
+    const saved = (await body<DraftJson>(await putDraft(outletId, cookie, { revisionId: loaded.revisionId, version: 1, items: [{ name: "Chendol", portion: null, priceMinor: 300, availability: "available" }] }))).data;
     expect((await confirm(outletId, cookie, { revisionId: saved.revisionId, version: saved.version })).status).toBe(200);
 
     const listed = (await body<{ outlets: { id: string }[] }>(await routes.publicOutlets.GET())).data.outlets.map((outlet) => outlet.id);

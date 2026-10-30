@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import type { Currency } from "@/lib/money";
 
 // Logical checkout identity (Gate 3, Checkout identity). Two requests that differ in any priced or
 // routed input get different keys: a changed menu revision is a different checkout, never a
@@ -13,7 +14,7 @@ export type CheckoutKeyInput = {
   menuRevisionId: string;
   destinationId: string;
   rail: RailId;
-  currency: "SGD";
+  currency: Currency;
   lines: readonly PurchaseLine[];
   pyusdRateVersionId: string | null; // required for "pyusd", null for "paypal"
 };

@@ -6,6 +6,7 @@ import type { PublishedOutletSummary } from "@/domain/outlets/search";
 import type { Suggestion } from "@/domain/suggestions/types";
 import { ensureBuyerSession, postJson } from "@/lib/browser/session";
 import { useRestoreFocus } from "@/lib/browser/focus";
+import { formatMoney, money } from "@/lib/money";
 import { chooseHeading, chooseSummary, holdBasketProposal, shopHref, unavailableHeading, type BasketLine } from "./one-box";
 
 const MAX_TEXT = 280;
@@ -13,9 +14,7 @@ const MAX_TEXT = 280;
 // leave the request open with no answer, so the page gives up after 40 seconds and offers the list.
 const CLIENT_TIMEOUT_MS = 40_000;
 
-function sgd(cents: number): string {
-  return `S$${Math.floor(cents / 100)}.${String(cents % 100).padStart(2, "0")}`;
-}
+const price = (outlet: PublishedOutletSummary, minor: number) => formatMoney(money(outlet.currency, minor));
 
 // The item answer keeps its own address, which names the items and starts each at quantity 1. A
 // basket answer never uses it: its quantities travel in memory instead (see one-box.ts).
@@ -140,7 +139,7 @@ export function TextSuggest({ manualListId }: { manualListId: string }) {
                   className="button secondary"
                   onClick={() => openBasket(suggestion.outletId, [{ id: item.id, quantity: suggestion.quantity }])}
                 >
-                  {item.name} · {sgd(item.unitSgdCents)}
+                  {item.name} · {price(suggestion.outlet, item.unitMinor)}
                 </button>
               ))}
             </div>
@@ -168,7 +167,7 @@ export function TextSuggest({ manualListId }: { manualListId: string }) {
             {suggestion.matches.map((item) => (
               <div className="row" key={item.id}>
                 <span>{item.name}</span>
-                <span className="money">{sgd(item.unitSgdCents)}</span>
+                <span className="money">{price(suggestion.outlet, item.unitMinor)}</span>
               </div>
             ))}
             <a

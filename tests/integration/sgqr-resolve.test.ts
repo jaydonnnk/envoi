@@ -69,8 +69,8 @@ describe("buyer SGQR resolution", () => {
   }
 
   const summaryOf = async (shop: Shop) => {
-    const [row] = await fixture.database.admin<{ id: string; name: string; area: string; isDemoFixture: boolean }[]>`
-      select id, name, area, is_demo_fixture as "isDemoFixture" from outlets where id = ${shop.outletId}`;
+    const [row] = await fixture.database.admin<{ id: string; name: string; area: string; isDemoFixture: boolean; country: string; currency: string }[]>`
+      select id, name, area, is_demo_fixture as "isDemoFixture", country, case country when 'US' then 'USD' else 'SGD' end as currency from outlets where id = ${shop.outletId}`;
     return row!;
   };
 
@@ -137,8 +137,8 @@ describe("buyer SGQR resolution", () => {
       expect(text).not.toContain(FIXTURE_SELLER);
       expect(keysOf(resolution).filter((key) => /payee|destination|rail|seller|merchant|enrol|paypal|pyusd|price|amount/i.test(key))).toEqual([]);
     }
-    expect(new Set(keysOf(single))).toEqual(new Set(["kind", "outlet", "id", "name", "area", "isDemoFixture"]));
-    expect(new Set(keysOf(ambiguous))).toEqual(new Set(["kind", "candidates", "id", "name", "area", "isDemoFixture", "distinguisher"]));
+    expect(new Set(keysOf(single))).toEqual(new Set(["kind", "outlet", "id", "name", "area", "isDemoFixture", "country", "currency"]));
+    expect(new Set(keysOf(ambiguous))).toEqual(new Set(["kind", "candidates", "id", "name", "area", "isDemoFixture", "country", "currency", "distinguisher"]));
   });
 
   it("a pending mapping does not resolve", async () => {

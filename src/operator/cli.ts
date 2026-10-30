@@ -31,10 +31,10 @@ export const DEMO_FIXTURE = {
   name: "Lorong Demo Kopi",
   area: "Tanjong Pagar",
   items: [
-    { name: "Kopi O", unitSgdCents: 160 },
-    { name: "Kaya toast set", unitSgdCents: 450 },
-    { name: "Teh C peng", unitSgdCents: 220 },
-    { name: "Soft-boiled eggs (2)", unitSgdCents: 200 },
+    { name: "Kopi O", unitMinor: 160 },
+    { name: "Kaya toast set", unitMinor: 450 },
+    { name: "Teh C peng", unitMinor: 220 },
+    { name: "Soft-boiled eggs (2)", unitMinor: 200 },
   ],
 } as const;
 
@@ -65,7 +65,7 @@ export async function seedDemoFixture(db: OperatorDb, now: Date = new Date()): P
     await tx.insert(schema.menuItems).values(
       DEMO_FIXTURE.items.map((item, position) => {
         const id = newId("itm");
-        return { id, itemKey: id, menuRevisionId, position, name: item.name, unitSgdCents: item.unitSgdCents, available: true };
+        return { id, itemKey: id, menuRevisionId, position, name: item.name, unitMinor: item.unitMinor, available: true };
       }),
     );
     await tx.update(schema.outlets).set({ publishedMenuRevisionId: menuRevisionId }).where(eq(schema.outlets.id, outletId));
@@ -560,8 +560,8 @@ const COMMANDS = [
 // own or holds an item of either name at another price.
 export const DEMO_TEST_SHOP_NAME = "Test Shop";
 export const DEMO_ICED_TEAS = [
-  { name: "Iced lemon tea", priceSgdCents: 220 },
-  { name: "Iced milk tea", priceSgdCents: 250 },
+  { name: "Iced lemon tea", priceMinor: 220 },
+  { name: "Iced milk tea", priceMinor: 250 },
 ] as const;
 
 export type IcedTeasResult = { status: "added" | "unchanged"; outletId: string; revisionId: string };
@@ -582,7 +582,7 @@ export async function addDemoIcedTeas(db: OperatorDb, now: Date = new Date()): P
   for (const tea of DEMO_ICED_TEAS) {
     const found = draft.items.find((item) => item.name === tea.name);
     if (!found) missing.push(tea);
-    else if (found.priceSgdCents !== tea.priceSgdCents) throw new Error(`${DEMO_TEST_SHOP_NAME} already lists ${tea.name} at another price; inspect it by hand. Nothing changed.`);
+    else if (found.priceMinor !== tea.priceMinor) throw new Error(`${DEMO_TEST_SHOP_NAME} already lists ${tea.name} at another price; inspect it by hand. Nothing changed.`);
   }
   if (missing.length === 0) return { status: "unchanged", outletId, revisionId: draft.revisionId };
 
@@ -593,8 +593,8 @@ export async function addDemoIcedTeas(db: OperatorDb, now: Date = new Date()): P
   if (!owner) throw new Error(`${DEMO_TEST_SHOP_NAME} has no live owner membership; nothing changed.`);
 
   const items = [
-    ...draft.items.map((item) => ({ id: item.id, name: item.name, portion: item.portion, priceSgdCents: item.priceSgdCents, availability: item.availability })),
-    ...missing.map((tea) => ({ name: tea.name, portion: null, priceSgdCents: tea.priceSgdCents, availability: "available" as const })),
+    ...draft.items.map((item) => ({ id: item.id, name: item.name, portion: item.portion, priceMinor: item.priceMinor, availability: item.availability })),
+    ...missing.map((tea) => ({ name: tea.name, portion: null, priceMinor: tea.priceMinor, availability: "available" as const })),
   ];
   const saved = await saveMenuDraft(db, { outletId, revisionId: draft.revisionId, baseVersion: draft.version, items, actorUserId: owner.userId, now });
   if (isAppError(saved)) throw new Error(`The draft was refused: ${saved.message}`);

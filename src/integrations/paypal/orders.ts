@@ -1,6 +1,6 @@
 import type { PayPalOrder } from "@/domain/purchases/reconcile";
 import { webEnv } from "@/env";
-import { sgdFromCents, sgdToDecimalString } from "@/lib/money";
+import { money, toDecimalString, type Currency } from "@/lib/money";
 import { createPayPalHttp, paypalConfigFromEnv, type PayPalConfig, type ProviderResult } from "./client";
 import { mapOrderResult, orderPath } from "./map";
 
@@ -14,8 +14,9 @@ export type CreateOrderInput = {
   attemptId: string;
   correlationId: string;
   payeeMerchantId: string;
-  lines: ReadonlyArray<{ name: string; quantity: number; unitSgdCents: number }>;
-  totalSgdCents: number;
+  lines: ReadonlyArray<{ name: string; quantity: number; unitMinor: number }>;
+  totalMinor: number;
+  currency: Currency;
   returnUrl: string;
   cancelUrl: string;
 };
@@ -29,7 +30,8 @@ export type PayPalWriteClient = {
   captureOrder(orderId: string, requestId: string): Promise<ProviderResult<CapturedOrder>>;
 };
 
-const sgd = (cents: number) => ({ currency_code: "SGD", value: sgdToDecimalString(sgdFromCents(cents)) });
+// Every amount of one order is in the purchase's currency.
+const amount = (currency: Currency, minor: number) => ({ currency_code: currency, value: toDecimalString(money(currency, minor)) });
 
 export function createOrderBody(input: CreateOrderInput): unknown {
   return {
@@ -42,8 +44,8 @@ export function createOrderBody(input: CreateOrderInput): unknown {
         invoice_id: input.attemptId,
         // Always explicit: without it PayPal would pay the API caller, Envoi's own account.
         payee: { merchant_id: input.payeeMerchantId },
-        amount: { ...sgd(input.totalSgdCents), breakdown: { item_total: sgd(input.totalSgdCents) } },
-        items: input.lines.map((line) => ({ name: line.name, quantity: String(line.quantity), unit_amount: sgd(line.unitSgdCents) })),
+        amount: { ...amount(input.currency, input.totalMinor), breakdown: { item_total: amount(input.currency, input.totalMinor) } },
+        items: input.lines.map((line) => ({ name: line.name, quantity: String(line.quantity), unit_amount: amount(input.currency, line.unitMinor) })),
       },
     ],
     payment_source: {

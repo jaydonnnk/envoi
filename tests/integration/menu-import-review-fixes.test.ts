@@ -98,7 +98,7 @@ describe("menu import lifecycle, review fixes", () => {
 
   it("an import never grows a menu past 100 items", async () => {
     const shop = await newImportShop(fixture.database, "capacity");
-    const items = Array.from({ length: 99 }, (_, n) => ({ name: `FIXTURE item ${n}`, portion: null, priceSgdCents: 100 + n, availability: "available" as const }));
+    const items = Array.from({ length: 99 }, (_, n) => ({ name: `FIXTURE item ${n}`, portion: null, priceMinor: 100 + n, availability: "available" as const }));
     const saved = await saveMenuDraft(db, { outletId: shop.outletId, revisionId: shop.revisionId, baseVersion: 1, items, actorUserId: shop.merchant.userId, now: new Date() });
     if (isAppError(saved)) throw new Error(`FIXTURE draft was not saved: ${saved.code}`);
 

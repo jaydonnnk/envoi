@@ -1,5 +1,6 @@
 "use client";
 
+import type { Currency } from "@/lib/money";
 import { useState } from "react";
 import type { DraftJson } from "@/domain/menu/serialize";
 import type { MenuItemDraft } from "@/domain/menu/types";
@@ -17,7 +18,7 @@ const BLANK_REASON: Record<BlankPrice["basis"], string> = {
   not_on_page: "The price was not printed as text on your page",
   blank: "The price was not printed as text on your page",
   ambiguous: "The drafted price could not be read",
-  other_currency: "The price was not in SGD",
+  other_currency: "The price was in another currency",
   duplicate_variant: "Two rows share this name and portion",
   explicit: "Price needed",
 };
@@ -50,7 +51,7 @@ function rowsOf(draft: DraftJson): Row[] {
     id: item.id,
     name: item.name,
     portion: item.portion ?? "",
-    price: priceText(item.priceSgdCents),
+    price: priceText(item.priceMinor),
     availability: item.availability,
     fromImport: item.source === "import_suggestion",
   }));
@@ -61,6 +62,7 @@ function rowsOf(draft: DraftJson): Row[] {
 // edit of it creates a new draft, and buyers keep the published menu until the next publication.
 export function MenuEditor({
   outletId,
+  currency,
   outletPublished,
   importsOpen,
   webImportsOpen,
@@ -68,6 +70,8 @@ export function MenuEditor({
   onDraftChange,
 }: {
   outletId: string;
+  // S27: the shop's currency; every price typed here is in it.
+  currency: Currency;
   outletPublished: boolean;
   importsOpen: boolean;
   webImportsOpen: boolean;
@@ -142,7 +146,7 @@ export function MenuEditor({
       ...(row.id ? { id: row.id } : {}),
       name: row.name,
       portion: row.portion.trim() === "" ? null : row.portion,
-      priceSgdCents: "cents" in price ? price.cents : null,
+      priceMinor: "cents" in price ? price.cents : null,
       availability: row.availability,
     }));
     const result = await requestJson<DraftJson>("PUT", `${url}/menu-draft`, { revisionId: draft.revisionId, version: draft.version, items });
@@ -217,7 +221,7 @@ export function MenuEditor({
   return (
     <section className="card" aria-labelledby="menu-heading">
       <h2 id="menu-heading">2. Menu</h2>
-      <p className="muted">Type each item with its SGD price. Leave a price blank if you do not know it yet: it stays blank, never zero, and blocks confirmation until you fill it.</p>
+      <p className="muted">Type each item with its {currency} price. Leave a price blank if you do not know it yet: it stays blank, never zero, and blocks confirmation until you fill it.</p>
       {draft.published && (
         <p className="muted">Changes you save here become a new draft. Buyers keep seeing the published menu until you confirm and publish the new version.</p>
       )}
@@ -226,7 +230,7 @@ export function MenuEditor({
 
       {webImportsOpen && <MenuWebImport outletId={outletId} draft={draft} dirty={dirty} onImported={imported} />}
 
-      <MenuGrid rows={gridRows} onEdit={edit} onRemove={remove} />
+      <MenuGrid currency={currency} rows={gridRows} onEdit={edit} onRemove={remove} />
       <p className="fine">Every cell can be edited: use the arrow keys to move, Enter to edit and Enter again to keep the change. A blank price stays blank until you type it, and the menu cannot be confirmed while one is blank.</p>
 
       <div className="actions">

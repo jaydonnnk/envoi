@@ -6,7 +6,7 @@ import { formatPyusdPerSgd, parsePyusdPerSgd, pyusdAtomicFor } from "@/domain/py
 import { canTransitionPyusdAttempt } from "@/domain/pyusd/state";
 import { computeCheckoutKey, type CheckoutKeyInput } from "@/domain/purchases/checkout-key";
 import { webEnv } from "@/env";
-import { sgdFromCents } from "@/lib/money";
+import { money } from "@/lib/money";
 import { createFakeChain, fakeSolanaClient, MAINNET_GENESIS, mintData, setMintOwnedByOriginalProgram } from "../support/fake-solana";
 import { webEnvFor } from "../support/session";
 
@@ -42,16 +42,16 @@ describe("PYUSD identity check", () => {
 describe("rate parsing, bounds and conversion", () => {
   it("PYUSD amount rounds up to the next atomic unit", () => {
     // 350 cents at an illustrative 742,115 atomic units per S$1: 2,597,402.5 rounds up.
-    expect(pyusdAtomicFor(sgdFromCents(350), 742_115n)).toBe(2_597_403n);
+    expect(pyusdAtomicFor(money("SGD", 350), 742_115n)).toBe(2_597_403n);
   });
 
   it("rate arithmetic is exact at its bounds", () => {
     // The largest amount pyusdAtomicFor accepts (a safe integer of cents, here the largest multiple of
     // 100, so the exact product is divisible by 100 and rounding cannot decide it) at the maximum rate.
     const cents = Number.MAX_SAFE_INTEGER - (Number.MAX_SAFE_INTEGER % 100);
-    expect(pyusdAtomicFor(sgdFromCents(cents), 10_000_000n)).toBe((BigInt(cents) * 10_000_000n) / 100n);
+    expect(pyusdAtomicFor(money("SGD", cents), 10_000_000n)).toBe((BigInt(cents) * 10_000_000n) / 100n);
     // The smallest rate on a total whose product is also divisible by 100.
-    expect(pyusdAtomicFor(sgdFromCents(100), 1n)).toBe(1n);
+    expect(pyusdAtomicFor(money("SGD", 100), 1n)).toBe(1n);
   });
 
   it("rate text must be a plain decimal with at most six places", () => {

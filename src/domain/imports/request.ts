@@ -353,7 +353,7 @@ export async function runWebImport(db: Db, request: Request, principal: OutletMe
           skippedForCapacity: commit.merge.skippedForCapacity,
           // Why each drafted price is blank, so the table can say it in words; names and portions
           // come from the merchant's own page, already in the draft below.
-          blankPrices: kept.draft.items.filter((item) => item.priceSgdCents === null).map((item) => ({ name: item.name, portion: item.portion, basis: item.priceBasis })),
+          blankPrices: kept.draft.items.filter((item) => item.priceMinor === null).map((item) => ({ name: item.name, portion: item.portion, basis: item.priceBasis })),
         },
         draft: draftJson(commit.draft),
       });

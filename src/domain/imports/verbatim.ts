@@ -49,7 +49,7 @@ export function keepPrintedOnly(draft: ValidDraft, pageText: string): { draft: V
       droppedNames += 1;
       continue;
     }
-    if (item.priceSgdCents !== null && !tokens.has(item.priceSgdCents)) items.push({ ...item, priceSgdCents: null, priceBasis: "not_on_page" });
+    if (item.priceMinor !== null && !tokens.has(item.priceMinor)) items.push({ ...item, priceMinor: null, priceBasis: "not_on_page" });
     else items.push({ ...item });
   }
   const serialized = JSON.stringify(items);
@@ -58,7 +58,7 @@ export function keepPrintedOnly(draft: ValidDraft, pageText: string): { draft: V
       ok: true,
       items,
       fingerprint: createHash("sha256").update(serialized).digest("hex"),
-      blankPriceCount: items.filter((item) => item.priceSgdCents === null).length,
+      blankPriceCount: items.filter((item) => item.priceMinor === null).length,
     },
     droppedNames,
   };

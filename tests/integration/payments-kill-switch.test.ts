@@ -74,8 +74,8 @@ describe("payments kill switch refuses PayPal start and completion", () => {
     // FIXTURE: an attempt PayPal approved before the switch was turned off.
     await fixture.database.admin`update purchases set state = 'pending_payment' where id = ${purchaseId}`;
     await fixture.database.admin`
-      insert into payment_attempts (id, purchase_id, state, payee_merchant_id, total_sgd_cents, currency, create_request_id, order_id, approval_url)
-      select 'att_killswitch', id, 'externally_approved', ${FIXTURE_SELLER}, total_sgd_cents, 'SGD', 'fixture-create-key', 'FIXTURE-ORDER-KILL', 'https://www.sandbox.paypal.com/checkoutnow?token=FIXTURE-ORDER-KILL'
+      insert into payment_attempts (id, purchase_id, state, payee_merchant_id, total_minor, currency, create_request_id, order_id, approval_url)
+      select 'att_killswitch', id, 'externally_approved', ${FIXTURE_SELLER}, total_minor, 'SGD', 'fixture-create-key', 'FIXTURE-ORDER-KILL', 'https://www.sandbox.paypal.com/checkoutnow?token=FIXTURE-ORDER-KILL'
       from purchases where id = ${purchaseId}`;
 
     const response = await routes.complete.POST(jsonPost(`/api/v1/purchases/${purchaseId}/paypal/complete`, cookie), routeParams(purchaseId));
@@ -90,8 +90,8 @@ describe("payments kill switch refuses PayPal start and completion", () => {
   // PayPal holds the captured order; Envoi's attempt is capture_unknown and its purchase uncertain.
   async function lostCaptureBeforeSwitchOff(quantity: number): Promise<{ cookie: string; purchaseId: string; orderId: string; captureId: string }> {
     const { cookie, purchaseId } = await openReview(quantity);
-    const [purchase] = await fixture.database.admin`select lines, total_sgd_cents from purchases where id = ${purchaseId}`;
-    const lines = purchase!.lines as { name: string; quantity: number; unitSgdCents: number }[];
+    const [purchase] = await fixture.database.admin`select lines, total_minor from purchases where id = ${purchaseId}`;
+    const lines = purchase!.lines as { name: string; quantity: number; unitMinor: number }[];
     const attemptId = `att_ks${quantity}`;
     const created = await fake.client.createOrder(
       {
@@ -100,7 +100,8 @@ describe("payments kill switch refuses PayPal start and completion", () => {
         correlationId: purchaseId,
         payeeMerchantId: FIXTURE_SELLER,
         lines,
-        totalSgdCents: purchase!.total_sgd_cents as number,
+        totalMinor: purchase!.total_minor as number,
+        currency: "SGD",
         returnUrl: `${TEST_BASE_URL}/paypal/return`,
         cancelUrl: `${TEST_BASE_URL}/paypal/cancel`,
       },
@@ -113,8 +114,8 @@ describe("payments kill switch refuses PayPal start and completion", () => {
     if (captured.kind !== "ok") throw new Error("fixture capture not made");
     await fixture.database.admin`update purchases set state = 'uncertain' where id = ${purchaseId}`;
     await fixture.database.admin`
-      insert into payment_attempts (id, purchase_id, state, payee_merchant_id, total_sgd_cents, currency, create_request_id, order_id, capture_request_id)
-      select ${attemptId}, id, 'capture_unknown', ${FIXTURE_SELLER}, total_sgd_cents, 'SGD', ${`fixture-create-key-${quantity}`}, ${orderId}, ${`fixture-capture-key-${quantity}`}
+      insert into payment_attempts (id, purchase_id, state, payee_merchant_id, total_minor, currency, create_request_id, order_id, capture_request_id)
+      select ${attemptId}, id, 'capture_unknown', ${FIXTURE_SELLER}, total_minor, 'SGD', ${`fixture-create-key-${quantity}`}, ${orderId}, ${`fixture-capture-key-${quantity}`}
       from purchases where id = ${purchaseId}`;
     return { cookie, purchaseId, orderId, captureId: captured.value.captures[0]!.id! };
   }

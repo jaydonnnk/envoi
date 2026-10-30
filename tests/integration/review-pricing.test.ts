@@ -43,19 +43,19 @@ describe("review creation", () => {
     const response = await create(cookie, {
       outletId: fixture.outletId,
       rail: "paypal",
-      totalSgdCents: 1,
+      totalMinor: 1,
       lines: [
-        { menuItemId: kopi!.id, quantity: 1, unitSgdCents: 1, lineSgdCents: 1 },
-        { menuItemId: teh!.id, quantity: 2, unitSgdCents: 1, lineSgdCents: 2 },
+        { menuItemId: kopi!.id, quantity: 1, unitMinor: 1, lineMinor: 1 },
+        { menuItemId: teh!.id, quantity: 2, unitMinor: 1, lineMinor: 2 },
       ],
     });
     expect(response.status).toBe(201);
     const { data } = (await response.json()) as { data: { purchaseId: string } };
-    const [row] = await fixture.database.admin`select total_sgd_cents, lines from purchases where id = ${data.purchaseId}`;
-    expect(row!.total_sgd_cents).toBe(kopi!.unitSgdCents + 2 * teh!.unitSgdCents);
+    const [row] = await fixture.database.admin`select total_minor, lines from purchases where id = ${data.purchaseId}`;
+    expect(row!.total_minor).toBe(kopi!.unitMinor + 2 * teh!.unitMinor);
     expect(row!.lines).toEqual([
-      { menuItemId: kopi!.id, name: kopi!.name, quantity: 1, unitSgdCents: kopi!.unitSgdCents, lineSgdCents: kopi!.unitSgdCents },
-      { menuItemId: teh!.id, name: teh!.name, quantity: 2, unitSgdCents: teh!.unitSgdCents, lineSgdCents: 2 * teh!.unitSgdCents },
+      { menuItemId: kopi!.id, name: kopi!.name, quantity: 1, unitMinor: kopi!.unitMinor, lineMinor: kopi!.unitMinor },
+      { menuItemId: teh!.id, name: teh!.name, quantity: 2, unitMinor: teh!.unitMinor, lineMinor: 2 * teh!.unitMinor },
     ]);
   });
 
@@ -65,7 +65,7 @@ describe("review creation", () => {
     const admin = fixture.database.admin;
     await admin`insert into outlets (id, name, area, is_demo_fixture) values ('out_unknownpricefixtureaaaaaaa', 'Unknown Price Fixture', 'Test', true)`;
     await admin`insert into menu_revisions (id, outlet_id, status, confirmed_at) values ('mrv_unknownprice', 'out_unknownpricefixtureaaaaaaa', 'confirmed', now())`;
-    await admin`insert into menu_items (id, menu_revision_id, position, name, unit_sgd_cents, available) values
+    await admin`insert into menu_items (id, menu_revision_id, position, name, unit_minor, available) values
       ('itm_noprice', 'mrv_unknownprice', 0, 'Market price fish', null, true), ('itm_priced', 'mrv_unknownprice', 1, 'Rice', 100, true)`;
     await admin`update outlets set published_menu_revision_id = 'mrv_unknownprice' where id = 'out_unknownpricefixtureaaaaaaa'`;
     await admin`insert into payment_destinations (id, outlet_id, rail, environment, seller_merchant_id, status) values ('dst_unknownprice', 'out_unknownpricefixtureaaaaaaa', 'paypal', 'sandbox', 'FXTRSELLER2AB', 'active')`;

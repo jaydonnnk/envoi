@@ -142,9 +142,9 @@ describe("reference buyer agent", () => {
         call("propose_basket", {
           outletId: TEST_SHOP.id,
           total: 1,
-          amountSgdCents: 1,
+          amountMinor: 1,
           payee: "FIXTURE-payee",
-          lines: [{ menuItemId: "itm_lemontea", quantity: 2, unitSgdCents: 1, price: 0.01 }],
+          lines: [{ menuItemId: "itm_lemontea", quantity: 2, unitMinor: 1, price: 0.01 }],
         }),
       ][index] ?? { kind: "text", text: "FIXTURE done." },
     );
@@ -157,7 +157,7 @@ describe("reference buyer agent", () => {
     // Called directly, with the schema bypassed, the body is still ids and quantities only.
     const direct = setup();
     await direct.tools.readMenu({ outletId: TEST_SHOP.id });
-    const extra = { outletId: TEST_SHOP.id, amount: 1, lines: [{ menuItemId: "itm_kopic", quantity: 1, unitSgdCents: 1 }] };
+    const extra = { outletId: TEST_SHOP.id, amount: 1, lines: [{ menuItemId: "itm_kopic", quantity: 1, unitMinor: 1 }] };
     await direct.tools.proposeBasket(extra);
     expect(posts(direct.envoi)[0]!.body).toEqual({ outletId: TEST_SHOP.id, lines: [{ menuItemId: "itm_kopic", quantity: 1 }] });
   });

@@ -9,6 +9,8 @@ import { MenuEditor } from "./menu-editor";
 import type { DraftWithImport } from "./menu-import";
 import { PyusdWalletCard } from "./pyusd-wallet";
 import { SgqrSticker } from "./sgqr-sticker";
+import { ShopQr } from "./shop-qr";
+import { CountryChoice } from "./country";
 import { useRestoreFocus } from "@/lib/browser/focus";
 
 function OutletChips({ outlet }: { outlet: MerchantOutlet }) {
@@ -342,7 +344,9 @@ export function Workspace({
               {!outlet.published && !outlet.detailsConfirmed && <ConfirmDetails key={`${outlet.name}|${outlet.area}`} outlet={outlet} onSaved={updated} />}
             </>
           )}
-          <SgqrSticker key={outlet.id} outlet={outlet} onSaved={replace} />
+          <CountryChoice key={`${outlet.id}:${outlet.country}`} outlet={outlet} onSaved={replace} />
+          {/* The SGQR sticker is a Singapore code; a US shop has its Envoi shop QR only (S27). */}
+          {outlet.country === "SG" ? <SgqrSticker key={outlet.id} outlet={outlet} onSaved={replace} /> : <div className="shop-qr-only"><ShopQr outlet={outlet} /></div>}
         </section>
       )}
 
@@ -360,6 +364,7 @@ export function Workspace({
         <MenuEditor
           key={`${outlet.id}:${editorGeneration}`}
           outletId={outlet.id}
+          currency={outlet.currency}
           outletPublished={outlet.published}
           importsOpen={importsOpen}
           webImportsOpen={webImportsOpen}

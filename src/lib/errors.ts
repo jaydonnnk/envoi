@@ -5,7 +5,8 @@ export type ErrorCode =
   | "consent_required" | "import_rejected" | "import_expired" | "import_base_revision_changed"
   | "admission_rejected"
   | "pyusd_unavailable" | "rate_expired" | "wallet_proof_rejected" | "wallet_attempt_locked"
-  | "provider_unreachable" | "provider_mismatch" | "rate_limited";
+  | "provider_unreachable" | "provider_mismatch" | "rate_limited"
+  | "country_locked";
 
 export type AppError = {
   code: ErrorCode;
@@ -42,6 +43,7 @@ const STATUS: Record<ErrorCode, number> = {
   provider_unreachable: 502,
   provider_mismatch: 502,
   rate_limited: 429,
+  country_locked: 409,
 };
 
 export function statusOf(code: ErrorCode): number {

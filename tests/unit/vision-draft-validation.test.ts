@@ -26,7 +26,7 @@ describe("vision draft validation", () => {
 
   it("blank price stays blank", () => {
     const result = ok({ items: [row("Chilli crab", "market price", { currency: null }), row("Fish soup", null)] });
-    expect(result.items.map((item) => [item.priceSgdCents, item.priceBasis])).toEqual([
+    expect(result.items.map((item) => [item.priceMinor, item.priceBasis])).toEqual([
       [null, "ambiguous"],
       [null, "blank"],
     ]);
@@ -57,23 +57,23 @@ describe("vision draft validation", () => {
 
   it("non-SGD price stays blank", () => {
     const [item] = ok({ items: [row("Nasi lemak", "12", { currency: "other" })] }).items;
-    expect(item).toMatchObject({ priceSgdCents: null, priceBasis: "other_currency" });
+    expect(item).toMatchObject({ priceMinor: null, priceBasis: "other_currency" });
   });
 
   it("zero or malformed price text stays blank", () => {
     const result = ok({ items: ["0", "-1", "3.505", "1e3"].map((price, n) => row(`Item ${n}`, price)) });
-    expect(result.items.map((item) => [item.priceSgdCents, item.priceBasis])).toEqual([
+    expect(result.items.map((item) => [item.priceMinor, item.priceBasis])).toEqual([
       [null, "ambiguous"],
       [null, "ambiguous"],
       [null, "ambiguous"],
       [null, "ambiguous"],
     ]);
-    expect(ok({ items: [row("Kopi", "1.80")] }).items[0]).toMatchObject({ priceSgdCents: 180, priceBasis: "explicit" });
+    expect(ok({ items: [row("Kopi", "1.80")] }).items[0]).toMatchObject({ priceMinor: 180, priceBasis: "explicit" });
   });
 
   it("duplicate variants are flagged for the merchant", () => {
     const result = ok({ items: [row("Teh", "1.60", { portion: "Hot" }), row("teh", "1.90", { portion: "hot" }), row("Teh", "2.10", { portion: "Iced" })] });
-    expect(result.items.map((item) => [item.priceSgdCents, item.priceBasis])).toEqual([
+    expect(result.items.map((item) => [item.priceMinor, item.priceBasis])).toEqual([
       [null, "duplicate_variant"],
       [null, "duplicate_variant"],
       [210, "explicit"],
@@ -86,7 +86,7 @@ describe("vision draft validation, review fixes", () => {
   it("a price above the menu cap stays blank and an empty row is dropped", () => {
     // The menu editor refuses a price above S$1,000, so an imported one is never filled above it.
     const priced = ok({ items: [row("Kopi", "1000"), row("Crab", "1000.01")] });
-    expect(priced.items.map((item) => [item.priceSgdCents, item.priceBasis])).toEqual([
+    expect(priced.items.map((item) => [item.priceMinor, item.priceBasis])).toEqual([
       [100_000, "explicit"],
       [null, "ambiguous"],
     ]);

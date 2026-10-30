@@ -113,8 +113,8 @@ describe("maintenance runner (fixture PayPal)", () => {
       const id = newId("att");
       await admin()`update purchases set state = 'uncertain' where id = ${purchaseId}`;
       await admin()`
-        insert into payment_attempts (id, purchase_id, state, payee_merchant_id, total_sgd_cents, currency, create_request_id, order_id, capture_request_id)
-        values (${id}, ${purchaseId}, 'capture_unknown', 'FXTRSELLER2AB', ${fixture.items[0]!.unitSgdCents}, 'SGD', ${randomUUID()}, ${`FIXTURE-ORDER-DUE-${id}`}, ${randomUUID()})`;
+        insert into payment_attempts (id, purchase_id, state, payee_merchant_id, total_minor, currency, create_request_id, order_id, capture_request_id)
+        values (${id}, ${purchaseId}, 'capture_unknown', 'FXTRSELLER2AB', ${fixture.items[0]!.unitMinor}, 'SGD', ${randomUUID()}, ${`FIXTURE-ORDER-DUE-${id}`}, ${randomUUID()})`;
       ids.push(id);
     }
     return ids;
@@ -382,10 +382,10 @@ describe("maintenance runner (fixture PayPal)", () => {
     const outcome = async (query: Promise<unknown>) => query.then(() => "allowed", (err: { message: string }) => err.message);
     const role = maintenance.client;
     expect(
-      await outcome(role`insert into payment_attempts (id, purchase_id, state, payee_merchant_id, total_sgd_cents, currency, create_request_id) values ('att_role_test', ${purchaseId}, 'created', 'FXTRSELLER2AB', 160, 'SGD', ${randomUUID()})`),
+      await outcome(role`insert into payment_attempts (id, purchase_id, state, payee_merchant_id, total_minor, currency, create_request_id) values ('att_role_test', ${purchaseId}, 'created', 'FXTRSELLER2AB', 160, 'SGD', ${randomUUID()})`),
     ).toMatch(/permission denied/);
     expect(await outcome(role`update payment_attempts set capture_request_id = ${randomUUID()} where purchase_id = ${purchaseId}`)).toMatch(/permission denied/);
-    expect(await outcome(role`update purchases set total_sgd_cents = 1 where id = ${purchaseId}`)).toMatch(/permission denied/);
+    expect(await outcome(role`update purchases set total_minor = 1 where id = ${purchaseId}`)).toMatch(/permission denied/);
     expect(await admin()`select id from payment_attempts where id = 'att_role_test'`).toHaveLength(0);
   });
 

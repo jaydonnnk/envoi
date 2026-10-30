@@ -14,7 +14,7 @@ export function purchaseJson(purchase: OwnPurchase) {
     entryPoint: purchase.entryPoint,
     rail: purchase.rail,
     lines: purchase.lines,
-    totalSgdCents: purchase.totalSgdCents,
+    totalMinor: purchase.totalMinor,
     currency: purchase.currency,
     reviewExpiresAt: purchase.reviewExpiresAt.toISOString(),
     createdAt: purchase.createdAt.toISOString(),

@@ -8,7 +8,7 @@ import { toPyusdAttempt, type PyusdAttempt } from "@/domain/pyusd/state";
 import { connectRunner } from "@/lib/db/runner";
 import { connectWeb, type Db } from "@/lib/db/web";
 import * as schema from "@/lib/db/schema";
-import { sgdFromCents } from "@/lib/money";
+import { money } from "@/lib/money";
 import type { TestDatabase } from "./db";
 import { fakeSolanaClient, fundWallet, testWallet, type FakeChain, type FixtureSignature, type TestWallet } from "./fake-solana";
 import { jsonPost, routeParams } from "./payments";
@@ -54,7 +54,7 @@ export function historySignature(n: number): string {
   return getBase58Decoder().decode(bytes);
 }
 
-export type PyusdShop = { outletId: string; itemId: string; unitSgdCents: number; merchant: TestWallet; tokenAccount: Address; memberUserId: string; memberCookie: string };
+export type PyusdShop = { outletId: string; itemId: string; unitMinor: number; merchant: TestWallet; tokenAccount: Address; memberUserId: string; memberCookie: string };
 export type Prepared = { shop: PyusdShop; cookie: string; purchaseId: string; buyer: TestWallet; attempt: PyusdAttempt };
 
 export function recoveryHarness(database: TestDatabase, routes: RecoveryRoutes, api: ReturnType<typeof shopApi>, chain: () => FakeChain) {
@@ -73,7 +73,7 @@ export function recoveryHarness(database: TestDatabase, routes: RecoveryRoutes, 
     const merchant = await testWallet();
     const tokenAccount = await fundWallet(chain(), merchant.address, 0n);
     await seedPyusdDestination(database, shop.outletId, { wallet: merchant.address, tokenAccount, atomicPerSgd: RATE, confirmedAt: new Date() });
-    return { outletId: shop.outletId, itemId: item!.id, unitSgdCents: item!.unitSgdCents, merchant, tokenAccount, memberUserId: shop.merchant.userId, memberCookie: shop.cookie };
+    return { outletId: shop.outletId, itemId: item!.id, unitMinor: item!.unitMinor, merchant, tokenAccount, memberUserId: shop.merchant.userId, memberCookie: shop.cookie };
   }
 
   const reviewRequest = (cookie: string, shop: PyusdShop) =>
@@ -96,7 +96,7 @@ export function recoveryHarness(database: TestDatabase, routes: RecoveryRoutes, 
     expect(review.status).toBe(201);
     const purchaseId = (await envelope<{ purchaseId: string }>(review)).data.purchaseId;
     const buyer = await testWallet();
-    await fundWallet(chain(), buyer.address, pyusdAtomicFor(sgdFromCents(shop.unitSgdCents), RATE));
+    await fundWallet(chain(), buyer.address, pyusdAtomicFor(money("SGD", shop.unitMinor), RATE));
     const response = await routes.prepare.POST(
       new Request(`${TEST_BASE_URL}/api/v1/purchases/${purchaseId}/pyusd/prepare`, {
         method: "POST",

@@ -1,3 +1,4 @@
+import type { Currency } from "@/lib/money";
 import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import { buyerActor, recordAudit } from "@/domain/audit/events";
 import { computeBasketLockKey, computeCheckoutKey, type BasketLockKey } from "@/domain/purchases/checkout-key";
@@ -156,7 +157,7 @@ export async function createReview(conn: Conn, principal: BuyerPrincipal, quote:
         state: "review_open",
         entryPoint,
         lines,
-        totalSgdCents: quote.totalSgdCents,
+        totalMinor: quote.totalMinor,
         currency: quote.currency,
         reviewExpiresAt: expiresAt,
         createdAt: now,
@@ -189,7 +190,7 @@ export async function createReview(conn: Conn, principal: BuyerPrincipal, quote:
       purchaseId,
       outletId: quote.outletId,
       operatorVisible: false,
-      details: { totalSgdCents: quote.totalSgdCents, rail: quote.rail, supersedes: replaces?.id ?? null, entryPoint, pyusdRateVersionId: quote.pyusd?.rateVersionId ?? null },
+      details: { totalMinor: quote.totalMinor, rail: quote.rail, supersedes: replaces?.id ?? null, entryPoint, pyusdRateVersionId: quote.pyusd?.rateVersionId ?? null },
     });
     return { kind: "created", purchaseId, expiresAt } as const;
   });
@@ -204,8 +205,8 @@ export type OwnPurchase = {
   entryPoint: string;
   rail: string | null;
   lines: StoredLine[];
-  totalSgdCents: number;
-  currency: string;
+  totalMinor: number;
+  currency: Currency;
   reviewExpiresAt: Date;
   createdAt: Date;
   sellerMerchantId: string | null;
@@ -260,7 +261,7 @@ export async function getOwnPurchase(db: Conn, principal: BuyerPrincipal, purcha
     entryPoint: purchase.entryPoint,
     rail: purchase.rail,
     lines: purchase.lines,
-    totalSgdCents: purchase.totalSgdCents,
+    totalMinor: purchase.totalMinor,
     currency: purchase.currency,
     reviewExpiresAt: purchase.reviewExpiresAt,
     createdAt: purchase.createdAt,

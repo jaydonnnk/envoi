@@ -1,7 +1,6 @@
 import { randomBytes } from "node:crypto";
 import type { PayPalOrder } from "@/domain/purchases/reconcile";
 import type { CreateOrderInput, PayPalWriteClient, ProviderResult } from "@/integrations/paypal/orders";
-import { sgdFromCents } from "@/lib/money";
 
 // FIXTURE: a fake of the PayPal Orders v2 boundary (PayPalWriteClient). Nothing here talks to
 // PayPal; order and capture ids are labeled FIXTURE so no output can pass for a sandbox record.
@@ -42,16 +41,18 @@ export type FakePayPal = {
 const SANDBOX_APPROVAL = "https://www.sandbox.paypal.com/checkoutnow?token=";
 
 function view(id: string, order: FakeOrder): PayPalOrder {
-  const total = sgdFromCents(order.input.totalSgdCents);
+  // The provider echoes the currency the order was created in, as PayPal does.
+  const total = order.input.totalMinor;
+  const currency = order.input.currency;
   return {
     id,
     status: order.status,
     purchaseUnitCount: 1,
     payeeMerchantId: order.input.payeeMerchantId,
-    amount: { currency: "SGD", cents: total },
+    amount: { currency, minor: total },
     customId: order.input.correlationId,
-    items: order.input.lines.map((line) => ({ name: line.name, quantity: String(line.quantity), unit: { currency: "SGD", cents: sgdFromCents(line.unitSgdCents) } })),
-    captures: order.captureId ? [{ id: order.captureId, status: "COMPLETED", amount: { currency: "SGD", cents: total } }] : [],
+    items: order.input.lines.map((line) => ({ name: line.name, quantity: String(line.quantity), unit: { currency, minor: line.unitMinor } })),
+    captures: order.captureId ? [{ id: order.captureId, status: "COMPLETED", amount: { currency, minor: total } }] : [],
     approvalUrl: order.status === "PAYER_ACTION_REQUIRED" ? `${SANDBOX_APPROVAL}${id}` : null,
   };
 }

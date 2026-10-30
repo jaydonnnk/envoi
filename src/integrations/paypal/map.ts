@@ -1,5 +1,5 @@
 import type { PayPalOrder, ProviderAmount, ProviderCapture, ProviderItem } from "@/domain/purchases/reconcile";
-import { sgdFromDecimalString } from "@/lib/money";
+import { minorFromDecimalString } from "@/lib/money";
 import type { ProviderResult } from "./client";
 
 // Provider payload to domain shape. Missing or unreadable fields map to null rather than a
@@ -15,7 +15,7 @@ function amount(value: unknown): ProviderAmount | null {
   const currency = str(value.currency_code);
   const decimal = str(value.value);
   if (currency === null || decimal === null) return null;
-  return { currency, cents: sgdFromDecimalString(decimal) };
+  return { currency, minor: minorFromDecimalString(decimal) };
 }
 
 function items(value: unknown): ProviderItem[] | null {

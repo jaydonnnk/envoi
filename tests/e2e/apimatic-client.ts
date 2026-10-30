@@ -42,7 +42,7 @@ const menu = await client.outlets.getOutletMenu({ id: shop.id });
 if (menu.data.outlet.id !== shop.id) fail(`menu answered for ${menu.data.outlet.id}, not ${shop.id}`);
 if (menu.data.items.length === 0) fail("the demo fixture menu has no items");
 console.log(`getOutletMenu(${shop.id}): revision ${menu.data.menuRevisionId}, ${menu.data.items.length} item(s)`);
-for (const item of menu.data.items) console.log(`  ${item.name}  ${price(item.unitSgdCents)}  ${availability(item.available)}`);
+for (const item of menu.data.items) console.log(`  ${item.name}  ${price(item.unitMinor)}  ${availability(item.available)}`);
 
 const unknown = `out_${[...randomBytes(26)].map((byte) => "abcdefghijklmnopqrstuvwxyz234567"[byte % 32]).join("")}`;
 const missing = await client.outlets.getOutletMenu({ id: unknown }).asApiResult();
@@ -50,7 +50,7 @@ if (missing.ok) fail(`unknown shop ${unknown} answered a menu`);
 if (missing.status !== 404 || missing.payload.kind !== "notFoundResponse") fail(`unknown shop answered ${missing.status} ${missing.payload.kind}`);
 console.log(`getOutletMenu(${unknown}): ${missing.status} ${missing.payload.body.error.code}, "${missing.payload.body.error.message}"`);
 
-const item = menu.data.items.find((candidate) => candidate.available === true && candidate.unitSgdCents !== null) ?? fail("no available, priced item on the menu");
+const item = menu.data.items.find((candidate) => candidate.available === true && candidate.unitMinor !== null) ?? fail("no available, priced item on the menu");
 const body = { outletId: shop.id, lines: [{ menuItemId: item.id, quantity: 1 }] };
 const created = await agent.purchaseRequests.createPurchaseRequest({ body });
 if (!/\/approve\/[a-z2-7]{52}$/.test(created.data.url)) fail("the purchase request answered no approval link");

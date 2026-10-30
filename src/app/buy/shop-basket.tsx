@@ -3,6 +3,7 @@
 import { useSyncExternalStore } from "react";
 import { BasketForm, type BasketItem } from "./basket-form";
 import type { Rail } from "./landing";
+import type { Currency } from "@/lib/money";
 import { basketProposalFor, noBasketProposal, subscribeBasketProposal } from "./one-box";
 
 // The shop page's basket, holding the proposal a sentence left in memory (Gate 2 one-box ordering
@@ -11,12 +12,14 @@ import { basketProposalFor, noBasketProposal, subscribeBasketProposal } from "./
 // basket starts empty, which is the safe answer.
 export function ShopBasket({
   outletId,
+  currency,
   items,
   preselected,
   rail,
   autoReview,
 }: {
   outletId: string;
+  currency: Currency;
   items: BasketItem[];
   preselected: { id: string; quantity: number }[];
   rail: Rail;
@@ -28,6 +31,7 @@ export function ShopBasket({
     <BasketForm
       key={proposal === null ? "address" : "sentence"}
       outletId={outletId}
+      currency={currency}
       items={items}
       preselected={proposal === null ? preselected : proposal.lines}
       rail={rail}

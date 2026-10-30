@@ -67,24 +67,24 @@ describe("agent handoff across republication", () => {
   };
 
   // Republishes the menu with each kept item's price and availability set by `change`.
-  const republishWith = (shop: Parameters<typeof shops.republish>[0], change: (item: { id: string; name: string; priceSgdCents: number | null }) => ItemInput | null) =>
+  const republishWith = (shop: Parameters<typeof shops.republish>[0], change: (item: { id: string; name: string; priceMinor: number | null }) => ItemInput | null) =>
     shops.republish(shop, (items) => items.map((item) => change(item)).filter((item): item is ItemInput => item !== null));
 
   it("handoff carries no amount", async () => {
-    const { shop } = await shops.publishedShop("handoff-amount", [{ name: "FIXTURE Soft-boiled eggs (2)", priceSgdCents: 180 }]);
+    const { shop } = await shops.publishedShop("handoff-amount", [{ name: "FIXTURE Soft-boiled eggs (2)", priceMinor: 180 }]);
     const eggs = named(await publishedItems(fixture.database, shop.outletId), "FIXTURE Soft-boiled eggs (2)");
-    const token = await link(shop.outletId, [{ menuItemId: eggs.id, quantity: 2 }], { totalSgdCents: 1, unitSgdCents: 1, amount: "0.01" });
+    const token = await link(shop.outletId, [{ menuItemId: eggs.id, quantity: 2 }], { totalMinor: 1, unitMinor: 1, amount: "0.01" });
 
     const columns = await fixture.database.admin<{ column_name: string }[]>`
       select column_name from information_schema.columns where table_name = 'purchase_requests'`;
     expect(columns.map((column) => column.column_name).filter((name) => /total|amount|price|cents/.test(name))).toEqual([]);
 
     // The shop republishes a new price after the agent asked; the review uses the price at redemption.
-    await republishWith(shop, (item) => ({ id: item.id, name: item.name, priceSgdCents: 250 }));
+    await republishWith(shop, (item) => ({ id: item.id, name: item.name, priceMinor: 250 }));
     const redeemed = await redeem(token);
     expect(redeemed.body.data?.outcome).toBe("redeemed");
-    const [purchase] = await fixture.database.admin`select total_sgd_cents, entry_point from purchases where id = ${redeemed.body.data!.purchaseId!}`;
-    expect(purchase!.total_sgd_cents).toBe(500);
+    const [purchase] = await fixture.database.admin`select total_minor, entry_point from purchases where id = ${redeemed.body.data!.purchaseId!}`;
+    expect(purchase!.total_minor).toBe(500);
     expect(purchase!.entry_point).toBe("agent_handoff");
   });
 
@@ -92,10 +92,10 @@ describe("agent handoff across republication", () => {
     const { shop } = await shops.publishedShop("handoff-unavailable");
     const kopi = named(await publishedItems(fixture.database, shop.outletId), "FIXTURE Kopi");
     const token = await link(shop.outletId, [{ menuItemId: kopi.id, quantity: 1 }]);
-    const kopiAvailable = (available: boolean) => (item: { id: string; name: string; priceSgdCents: number | null }): ItemInput => ({
+    const kopiAvailable = (available: boolean) => (item: { id: string; name: string; priceMinor: number | null }): ItemInput => ({
       id: item.id,
       name: item.name,
-      priceSgdCents: item.priceSgdCents,
+      priceMinor: item.priceMinor,
       availability: item.name === kopi.name && !available ? "unavailable" : "available",
     });
 
@@ -111,9 +111,9 @@ describe("agent handoff across republication", () => {
 
   it("a handoff redeemed after republication prices the republished menu", async () => {
     const { shop } = await shops.publishedShop("handoff-republished", [
-      { name: "FIXTURE Kopi", priceSgdCents: 180 },
-      { name: "FIXTURE Kaya toast", priceSgdCents: 400 },
-      { name: "FIXTURE Teh", priceSgdCents: 150 },
+      { name: "FIXTURE Kopi", priceMinor: 180 },
+      { name: "FIXTURE Kaya toast", priceMinor: 400 },
+      { name: "FIXTURE Teh", priceMinor: 150 },
     ]);
     const before = await publishedItems(fixture.database, shop.outletId);
     const basket = await link(shop.outletId, [
@@ -123,7 +123,7 @@ describe("agent handoff across republication", () => {
     const removed = await link(shop.outletId, [{ menuItemId: named(before, "FIXTURE Teh").id, quantity: 1 }]);
 
     // Republished: Kopi costs more, Teh is gone, and every item has a new id under its old key.
-    await republishWith(shop, (item) => (item.name === "FIXTURE Teh" ? null : { id: item.id, name: item.name, priceSgdCents: item.name === "FIXTURE Kopi" ? 200 : item.priceSgdCents }));
+    await republishWith(shop, (item) => (item.name === "FIXTURE Teh" ? null : { id: item.id, name: item.name, priceMinor: item.name === "FIXTURE Kopi" ? 200 : item.priceMinor }));
     const after = await publishedItems(fixture.database, shop.outletId);
     expect(after.map((item) => item.id).filter((id) => before.some((old) => old.id === id))).toEqual([]);
 
@@ -133,7 +133,7 @@ describe("agent handoff across republication", () => {
     const redeemed = await redeem(basket);
     expect(redeemed.body.data?.outcome).toBe("redeemed");
     const [purchase] = await fixture.database.admin<{ total: number; revision: string; lines: { menuItemId: string; quantity: number }[] }[]>`
-      select total_sgd_cents as total, menu_revision_id as revision, lines from purchases where id = ${redeemed.body.data!.purchaseId!}`;
+      select total_minor as total, menu_revision_id as revision, lines from purchases where id = ${redeemed.body.data!.purchaseId!}`;
     expect(purchase!.revision).toBe(after[0]!.revisionId);
     expect(purchase!.total).toBe(2 * 200 + 400);
     expect(purchase!.lines.map((line) => [line.menuItemId, line.quantity])).toEqual([
