@@ -498,9 +498,13 @@ export async function recordExtraTransferRefund(
 }
 
 // Reads one line from the terminal without echoing it. Refuses when stdin is not a terminal, so a
-// password is never piped in from a file or a shell history.
-function promptHidden(prompt: string): Promise<string> {
-  const input = process.stdin;
+// password is never piped in from a file or a shell history. A terminal in bracketed paste mode
+// wraps a pasted password in ESC[200~ and ESC[201~; those markers are dropped, or they would be
+// hashed with the password and sign-in would never match (S26).
+type HiddenInput = Pick<NodeJS.ReadStream, "isTTY" | "setRawMode" | "setEncoding" | "pause" | "resume" | "on" | "removeListener">;
+const PASTE_MARKERS = /\u001b\[20[01]~/g;
+
+export function promptHidden(prompt: string, input: HiddenInput = process.stdin, output: Pick<NodeJS.WriteStream, "write"> = process.stdout): Promise<string> {
   if (!input.isTTY) return Promise.reject(new Error("create-merchant reads the password from a terminal; run it interactively."));
   return new Promise((resolve, reject) => {
     let value = "";
@@ -508,13 +512,13 @@ function promptHidden(prompt: string): Promise<string> {
       input.setRawMode(false);
       input.pause();
       input.removeListener("data", onData);
-      process.stdout.write("\n");
+      output.write("\n");
     };
     const onData = (chunk: string) => {
       for (const char of chunk) {
         if (char === "\r" || char === "\n") {
           finish();
-          resolve(value);
+          resolve(value.replace(PASTE_MARKERS, ""));
           return;
         }
         if (char === "\u0003") {
@@ -526,7 +530,7 @@ function promptHidden(prompt: string): Promise<string> {
         else value += char;
       }
     };
-    process.stdout.write(prompt);
+    output.write(prompt);
     input.setRawMode(true);
     input.setEncoding("utf8");
     input.on("data", onData);
