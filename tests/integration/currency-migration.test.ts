@@ -33,9 +33,15 @@ async function totals(sql: postgres.Sql, names: { unit: string; total: string; g
   return row as Totals;
 }
 
+const ROLLBACK = join(MIGRATIONS_FOLDER, "rollback", "0027_currency_and_country.down.sql");
+const OLD_NAMES = { unit: "unit_sgd_cents", total: "total_sgd_cents", gross: "capture_gross_sgd_cents", unitKey: "unitSgdCents", lineKey: "lineSgdCents" };
+const NEW_NAMES = { unit: "unit_minor", total: "total_minor", gross: "capture_gross_minor", unitKey: "unitMinor", lineKey: "lineMinor" };
+
 describe("currency migration", () => {
   let database: TestDatabase;
   let folder: string;
+  let before: Totals;
+  let linesBefore: postgres.Row[];
 
   beforeAll(async () => {
     database = await createTestDatabase("currency_mig", { migrate: false });
@@ -84,13 +90,13 @@ describe("currency migration", () => {
       insert into payment_attempts (id, purchase_id, state, payee_merchant_id, total_sgd_cents, currency, create_request_id, capture_request_id, capture_id, capture_gross_sgd_cents) values
         ('att_fixture_s27a', 'pur_fixture_s27a', 'capture_confirmed', 'FXTRSELLER2AB', 440, 'SGD', 'fixture-create-s27a', 'fixture-capture-s27a', 'FIXTURE-CAPTURE-S27', 440),
         ('att_fixture_s27b', 'pur_fixture_s27b', 'capture_failed', 'FXTRSELLER2AB', 840, 'SGD', 'fixture-create-s27b', null, null, null)`;
-    const linesBefore = await sql`select id, lines from purchases order by id`;
-    const before = await totals(sql, { unit: "unit_sgd_cents", total: "total_sgd_cents", gross: "capture_gross_sgd_cents", unitKey: "unitSgdCents", lineKey: "lineSgdCents" });
+    linesBefore = [...(await sql`select id, lines from purchases order by id`)];
+    before = await totals(sql, OLD_NAMES);
     expect(before).toMatchObject({ menu_items_unit: "750", menu_items_unknown: 1, purchases_total: "1280", attempts_gross: "440", lines_unit: "620", line_count: 3 });
 
     await runMigrations(database.adminUrl);
 
-    const after = await totals(sql, { unit: "unit_minor", total: "total_minor", gross: "capture_gross_minor", unitKey: "unitMinor", lineKey: "lineMinor" });
+    const after = await totals(sql, NEW_NAMES);
     expect(after).toEqual(before);
     expect(await sql`select id, country from outlets order by id`).toEqual([
       { id: "out_fixture_s27a", country: "SG" },
@@ -107,5 +113,31 @@ describe("currency migration", () => {
     // The published outlet's country is now locked; the draft-only outlet may still choose.
     await expect(sql`update outlets set country = 'US' where id = 'out_fixture_s27a'`).rejects.toMatchObject({ code: "23514" });
     await sql`update outlets set country = 'US' where id = 'out_fixture_s27b'`;
+  });
+
+  // The S27 deploy plan's rollback, run after the test above on the same database.
+  it("the 0027 rollback refuses once a US shop exists, else restores 0026 with every amount kept", async () => {
+    const sql = database.admin;
+    const script = readFileSync(ROLLBACK, "utf8");
+    const applied = async () => (await sql`select count(*)::int as n from public.__drizzle_migrations`)[0]!.n as number;
+    const migrated = await applied();
+
+    // The draft outlet chose the United States above: the old code would show its prices as SGD.
+    await expect(sql.unsafe(script)).rejects.toThrow(/cannot be rolled back/);
+    expect(await totals(sql, NEW_NAMES)).toEqual(before);
+    await sql`update outlets set country = 'SG' where id = 'out_fixture_s27b'`;
+
+    await sql.unsafe(script);
+    expect(await totals(sql, OLD_NAMES)).toEqual(before);
+    expect([...(await sql`select id, lines from purchases order by id`)]).toEqual(linesBefore);
+    expect(await sql`select column_name from information_schema.columns where table_name = 'outlets' and column_name = 'country'`).toEqual([]);
+    expect(await applied()).toBe(migrated - 1);
+    await expect(sql`insert into purchases (id, buyer_user_id, outlet_id, menu_revision_id, state, entry_point, lines, total_sgd_cents, currency, review_expires_at)
+      values ('pur_fixture_s27usd', 'usr_fixture_s27', 'out_fixture_s27a', 'mrv_fixture_s27a', 'paid', 'fixture_tracer', '[]', 100, 'USD', now())`).rejects.toMatchObject({ code: "23514" });
+
+    // 0027 applies again over the restored schema.
+    await runMigrations(database.adminUrl);
+    expect(await totals(sql, NEW_NAMES)).toEqual(before);
+    expect(await applied()).toBe(migrated);
   });
 });
