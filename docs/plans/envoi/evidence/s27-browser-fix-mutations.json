@@ -1,0 +1,10 @@
+[
+ [
+  "mb1",
+  "mut_rc=1 assertion=True restored=True rerun_rc=0 AssertionError: expected 200 to be 400 // Object.is equality"
+ ],
+ [
+  "mb2",
+  "mut_rc=1 assertion=True restored=True rerun_rc=0 AssertionError: expected '<p class=\"status\" role=\"note\">Menu ph\u2026' to contain 'Enter each item and its USD pric"
+ ]
+]

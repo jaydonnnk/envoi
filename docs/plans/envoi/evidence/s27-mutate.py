@@ -19,6 +19,12 @@ M = [
  ("m18a","drizzle/0027_currency_and_country.sql","'lineMinor', l.value->'lineSgdCents'","'lineMinor', l.value->'unitSgdCents'","tests/integration/currency-migration.test.ts","keeps every amount"),
  ("m18b","drizzle/0027_currency_and_country.sql","ADD COLUMN \"country\" text DEFAULT 'SG' NOT NULL","ADD COLUMN \"country\" text DEFAULT 'US' NOT NULL","tests/integration/currency-migration.test.ts","keeps every amount"),
  ("m19","src/app/mcp/route.ts","unitMinor: item.unitMinor, currency: menu.currency,","unitMinor: item.unitMinor,",U,"MCP tools answer with the currency"),
+ # Beyond the named tests, found in the S27 browser check (2026-10-30).
+ ("mb1","src/domain/outlets/publish.ts","!(facts.country === \"SG\" && facts.pyusdVerified","!(facts.pyusdVerified",U,"PYUSD wallet never stands in"),
+ ("mr1","drizzle/rollback/0027_currency_and_country.down.sql","\n     OR EXISTS (SELECT 1 FROM \"outlets\" WHERE \"country\" <> 'SG')","","tests/integration/currency-migration.test.ts","currency migration"),
+ ("mr2","drizzle/rollback/0027_currency_and_country.down.sql","'lineSgdCents', l.value->'lineMinor'","'lineSgdCents', l.value->'unitMinor'","tests/integration/currency-migration.test.ts","currency migration"),
+ ("mr3","drizzle/rollback/0027_currency_and_country.down.sql","  DELETE FROM public.\"__drizzle_migrations\" WHERE \"created_at\" = 1793329393401;\n  IF NOT FOUND THEN\n    RAISE EXCEPTION '0027 is not recorded as applied';\n  END IF;\n","","tests/integration/currency-migration.test.ts","currency migration"),
+ ("mb2","src/app/merchant/setup/menu-import.tsx","Enter each item and its {currency} price below.","Enter each item and its SGD price below.","tests/unit/menu-import-closed.test.ts","names the shop's currency"),
 ]
 only = set(sys.argv[1:])
 env = {k:v for k,v in os.environ.items() if k not in ("DATABASE_URL","MIGRATION_DATABASE_URL","MAINTENANCE_DATABASE_URL")}
@@ -42,4 +48,4 @@ for mid,path,old,new,f,t in M:
     line=[l for l in o.splitlines() if "AssertionError" in l][:1]
     res.append((mid,"mut_rc=%d assertion=%s restored=%s rerun_rc=%d %s"%(rc,ae,same,rc2,line[0][:110] if line else "")))
     print(res[-1],flush=True)
-json.dump(res,open(os.path.join(os.path.dirname(__file__),"mutations.json"),"w"),indent=1)
+json.dump(res,open(os.path.join(os.path.dirname(__file__),os.environ.get("MUT_OUT","mutations.json")),"w"),indent=1)

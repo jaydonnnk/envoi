@@ -1,0 +1,14 @@
+[
+ [
+  "mr1",
+  "mut_rc=1 assertion=True restored=True rerun_rc=0 AssertionError: promise resolved \"[]\" instead of rejecting"
+ ],
+ [
+  "mr2",
+  "mut_rc=1 assertion=True restored=True rerun_rc=0 AssertionError: expected { outlets: 2, menu_items: 4, \u2026(10) } to deeply equal { outlets: 2, menu_items: 4, \u2026(1"
+ ],
+ [
+  "mr3",
+  "mut_rc=1 assertion=True restored=True rerun_rc=0 AssertionError: expected 28 to be 27 // Object.is equality"
+ ]
+]
