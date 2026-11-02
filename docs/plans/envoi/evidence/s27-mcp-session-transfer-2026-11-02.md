@@ -8,6 +8,8 @@ Read-only preflight update, 2026-11-02: the user subsequently answered "Authroiz
 
 Coordinated release update, 2026-11-02: the user later explicitly authorized the evidence commit, main merge/push, deployment, migration 0027, maintenance verification and documented rollback if checks fail. Render target identity and signed-in rollback controls are verified. Follow the coordinated release section of `00-status.md`; earlier authorization limits below are historical. Sandbox purchases, the US fixture and later slices remain outside this release authority.
 
+Release result, 2026-11-02: main `a7f60cb` is remotely verified, deployed in Render `dep-dbk5av7b9u1s73ccgrk0`, and migration 0027 is applied. Before/after and post-maintenance counts/sums match; main CI `41419610639` and maintenance `41420143081` pass, with Neon heartbeat status `ok`. The hosted SGD menu, merchant country lock at desktop/mobile widths and fixture SGQR paste/resolve check pass. No sandbox purchase or US fixture write ran. S27 remains incomplete; read current status before acting and do not rerun the historical old-schema preflight or migration from the prompts below.
+
 ## Completed
 
 - Exactly eight gate files published to main `94df453ea8108315d8d7aee582cd2a08b66647c4`; remote verified; CI 41408301808 passed.
@@ -39,7 +41,7 @@ Coordinated release update, 2026-11-02: the user later explicitly authorized the
 
 ## Open work
 
-Implementation is published as `bdc87a49dab3e4b84bad1d0085687c79c2d4181e` on `envoi/slice-27-us-shops`, remotely verified after the user's branch publication authorization. CI run `41414544915` passed all steps, including the production build, build scan and fixture HTTP/MCP check. Migration, hosted SGD/scan checks, a US seller/fixture and USD capture remain unrun and unauthorized. These block full S27 completion; the post-slice architecture cleanup also remains open. The hosted assistant stays off. The prompts below are historical handoffs from before this publication; current status wins.
+The technical release is deployed on main as recorded above. A fresh SGD sandbox capture, conditional PYUSD regression and the later US fixture/USD capture remain unrun and need named authorization. These block full S27 completion; the post-slice architecture cleanup also remains open. The hosted assistant stays off. The prompts below are historical handoffs from before publication and migration; current status wins.
 
 ## Prompt for New Chat
 

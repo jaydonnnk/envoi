@@ -1,0 +1,75 @@
+{
+  "date": "2026-11-02",
+  "checked_at": "2026-11-02T09:23:26.303Z",
+  "base_url": "https://envoi-helx.onrender.com",
+  "outcome": "PASS",
+  "checks": [
+    {
+      "path": "/api/v1/outlets",
+      "status": 200,
+      "outlets": 3,
+      "all_outlets_sg": true
+    },
+    {
+      "path": "/api/v1/outlets/out_vrlbnc3zylbrr6g2drovaiqkfu/menu",
+      "status": 200,
+      "currency": "SGD",
+      "items": 5,
+      "integer_positive_or_unknown_prices": true,
+      "old_price_key_absent": true
+    },
+    {
+      "path": "/buy",
+      "status": 200,
+      "assistant_link_absent": true
+    },
+    {
+      "path": "/buy/ask",
+      "status": 404
+    },
+    {
+      "path": "/buy/scan",
+      "status": 200,
+      "scan_page_served": true,
+      "limits": "Page load only; sticker resolution not yet exercised"
+    }
+  ],
+  "limits": [
+    "HTTP and browser reads plus the identity-only fixture scan; no checkout or sandbox purchase",
+    "No AI model call; assistant remains off",
+    "Initial scratch probe assumed an unwrapped REST answer and failed in the probe; corrected to httpOk envelope and REST menu contract",
+    "A browser snapshot timed out after scan navigation; a screenshot and fresh accessibility tree verified the result",
+    "The scratch mapping query initially assumed a status column; corrected to approved_at after reading the owning schema. Both queries were read only"
+  ],
+  "browser_checks": {
+    "merchant_setup": {
+      "url": "https://envoi-helx.onrender.com/merchant/setup",
+      "fixture": "S26 Fixture Shop",
+      "country": "Singapore",
+      "country_locked": true,
+      "currency_labels": "SGD",
+      "desktop_screenshot_inspected": true,
+      "mobile_screenshot_inspected": true,
+      "mobile_viewport_width": 390,
+      "mobile_document_width": 390,
+      "viewport_reset": true,
+      "edits_made": false
+    },
+    "sgqr": {
+      "fixture_image": "docs/plans/envoi/fixtures/sgqr-sticker-R26ZZ0001X.png",
+      "method": "Decoded the repository fixture with installed ZXing WASM, then pasted it into the deployed scan page",
+      "resolved_outlet_id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+      "resolved_outlet_name": "Test Shop",
+      "approved_mapping_verified_readonly": true,
+      "country": "SG",
+      "displayed_prices": [
+        "S$1.80",
+        "S$2.20",
+        "S$2.50"
+      ],
+      "basket_empty": true,
+      "review_disabled": true,
+      "camera_capture_tested": false
+    }
+  }
+}

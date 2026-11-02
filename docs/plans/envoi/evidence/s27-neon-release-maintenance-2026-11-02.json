@@ -1,0 +1,209 @@
+{
+  "date": "2026-11-02",
+  "timezone": "Asia/Singapore",
+  "mode": "maintenance",
+  "session": {
+    "read_only": "on",
+    "snapshot_at": "2026-11-02T09:25:38.328Z"
+  },
+  "target_fingerprint": "2c3ff75b64569eda065223d0738c86dbe39bee7fb20f958d680ccc5e3296824a",
+  "applied_migrations": 28,
+  "last_applied_tag": "0027_currency_and_country",
+  "all_migration_hashes_match": true,
+  "totals": {
+    "outlets": 3,
+    "menu_items": 34,
+    "purchases": 49,
+    "payment_attempts": 19,
+    "menu_items_unit": "11530",
+    "menu_items_unknown": 0,
+    "purchases_total": "16800",
+    "attempts_total": "7700",
+    "attempts_gross": "4170",
+    "lines_unit": "13830",
+    "lines_line": "16800",
+    "line_count": 58
+  },
+  "totals_identical_to_before": true,
+  "mismatched_totals": [],
+  "preconditions": {
+    "non_sg_outlets": 0,
+    "non_sgd_purchases": 0,
+    "non_sgd_attempts": 0,
+    "old_basket_keys": 0,
+    "missing_new_basket_keys": 0,
+    "open_purchases": 0,
+    "uncertain_purchases": 2
+  },
+  "purchase_states": [
+    {
+      "state": "paid",
+      "count": 12
+    },
+    {
+      "state": "review_expired",
+      "count": 30
+    },
+    {
+      "state": "uncertain",
+      "count": 2
+    },
+    {
+      "state": "unpaid_closed",
+      "count": 5
+    }
+  ],
+  "maintenance_runs": [
+    {
+      "id": "mnt_gbaabnslvr4kykxg5eign7tpau",
+      "trigger": "manual",
+      "status": "ok",
+      "started_at": "2026-11-02T09:24:11.230Z",
+      "finished_at": "2026-11-02T09:24:14.860Z",
+      "report": {
+        "tasks": [
+          {
+            "name": "heartbeat",
+            "reason": null,
+            "status": "ok",
+            "processed": 1
+          },
+          {
+            "name": "record_capacity",
+            "reason": null,
+            "status": "ok",
+            "processed": 1
+          },
+          {
+            "name": "reconcile_attempts",
+            "reason": null,
+            "status": "ok",
+            "processed": 2
+          },
+          {
+            "name": "reconcile_pyusd_attempts",
+            "reason": null,
+            "status": "ok",
+            "processed": 0
+          },
+          {
+            "name": "close_expired_reviews",
+            "reason": null,
+            "status": "ok",
+            "processed": 0
+          },
+          {
+            "name": "purge_expired_sessions",
+            "reason": null,
+            "status": "ok",
+            "processed": 0
+          }
+        ],
+        "operatorVisible": false
+      }
+    },
+    {
+      "id": "mnt_4g2iyspxq5y5ngn6ewcfd5a25q",
+      "trigger": "manual",
+      "status": "ok",
+      "started_at": "2026-11-02T09:16:26.610Z",
+      "finished_at": "2026-11-02T09:16:28.985Z",
+      "report": {
+        "tasks": [
+          {
+            "name": "heartbeat",
+            "reason": null,
+            "status": "ok",
+            "processed": 1
+          },
+          {
+            "name": "record_capacity",
+            "reason": null,
+            "status": "ok",
+            "processed": 1
+          },
+          {
+            "name": "reconcile_attempts",
+            "reason": null,
+            "status": "ok",
+            "processed": 2
+          },
+          {
+            "name": "reconcile_pyusd_attempts",
+            "reason": null,
+            "status": "ok",
+            "processed": 0
+          },
+          {
+            "name": "close_expired_reviews",
+            "reason": null,
+            "status": "ok",
+            "processed": 0
+          },
+          {
+            "name": "purge_expired_sessions",
+            "reason": null,
+            "status": "ok",
+            "processed": 0
+          }
+        ],
+        "operatorVisible": false
+      }
+    },
+    {
+      "id": "mnt_filrewp476hxe3abqogbuxotca",
+      "trigger": "scheduled",
+      "status": "ok",
+      "started_at": "2026-11-02T06:25:21.923Z",
+      "finished_at": "2026-11-02T06:25:27.958Z",
+      "report": {
+        "tasks": [
+          {
+            "name": "heartbeat",
+            "reason": null,
+            "status": "ok",
+            "processed": 1
+          },
+          {
+            "name": "record_capacity",
+            "reason": null,
+            "status": "ok",
+            "processed": 1
+          },
+          {
+            "name": "reconcile_attempts",
+            "reason": null,
+            "status": "ok",
+            "processed": 2
+          },
+          {
+            "name": "reconcile_pyusd_attempts",
+            "reason": null,
+            "status": "ok",
+            "processed": 0
+          },
+          {
+            "name": "close_expired_reviews",
+            "reason": null,
+            "status": "ok",
+            "processed": 0
+          },
+          {
+            "name": "purge_expired_sessions",
+            "reason": null,
+            "status": "ok",
+            "processed": 0
+          }
+        ],
+        "operatorVisible": false
+      }
+    }
+  ],
+  "blockers": [],
+  "outcome": "PASS",
+  "limits": [
+    "No sandbox purchase or US fixture created by this verification",
+    "Maintenance report does not prove sandbox checkout",
+    "Read-only verification transaction"
+  ]
+}
