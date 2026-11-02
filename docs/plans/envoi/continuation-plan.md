@@ -4,6 +4,7 @@ Drafted 2026-10-25 (Asia/Singapore) on `main` at `6535635`; Gates 1, 2 and 3 wer
 This plan is supporting material; it starts no slice and authorizes no install, model call, upload, migration, push or deploy.
 Each slice below starts only when you authorize it by its slice ID, as rule 1 of [`04-slices.md`](04-slices.md#rules-for-every-slice) says.
 Each slice now has its own section in `04-slices.md`, approved 2026-10-25; where this plan and `04-slices.md` differ, `04-slices.md` wins.
+Historical since 2026-11-02 for the agent path: the assistant calls Envoi's `/mcp` through the MCP SDK client and the APIMatic-generated client is removed, Gates 2, 3 and 4 re-approved 2026-11-02 ([record](00-status.md#gate-2-3-and-4-reopening-2026-11-02-mcp-client)).
 
 ## Why this plan exists
 

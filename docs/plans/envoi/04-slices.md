@@ -954,6 +954,7 @@ You perform: creating the Kernel account and placing `KERNEL_API_KEY` in your lo
 Drafted 2026-10-29 for the second build plan's Gate 1, 2 and 3 reopenings, each re-approved the same day ("Approve Gate 1", "Approve Gate 2", "Approve Gate 3"); **APPROVED 2026-10-29** ("I approve gate 4").
 Approval accepts this order, the test assignment and the cut order; it starts no slice and authorizes no install, migration, upload, model call, merge, push or deploy.
 **REOPENED 2026-10-29 for the S25 limiter bucket and APPROVED 2026-10-29** ("Approve Gate 4"): S25 builds migration `0026_assistant_rate_limit_bucket.sql`, S27's migration becomes `0027` and S29's `0028`; no order, test assignment, count, date or cut order changes; see the [record](00-status.md#gate-2-3-and-4-reopening-2026-10-29-s25-limiter-bucket).
+**REOPENED 2026-11-02 for the MCP client and RE-APPROVED 2026-11-02** ("Approved."): S27 builds the [Gate 3 MCP client reopening](03-program-design.md#reopening-2026-11-02-mcp-client) instead of an APIMatic regeneration; test 17 is replaced and test 36 added, so the plan carries 36 named tests; no order, date or cut order changes; see the [record](00-status.md#gate-2-3-and-4-reopening-2026-11-02-mcp-client).
 All seven come after S24 and outside the build-order table. Each has its own branch from the current tip of `main`, named below, and each shows a working result before the next starts.
 
 **Plan-wide rules.**
@@ -1010,15 +1011,15 @@ Branch: `envoi/slice-27-us-shops`. Depends on: S26 (so the connected run is on r
 2. A buyer's review matches [`mockups/review-us-shop.html`](mockups/review-us-shop.html) apart from the in-page button, which is S31's: US dollars, PYUSD unavailable with its reason; PayPal sandbox approval completes in USD and the receipt reads Paid.
 3. Every Singapore journey of the earlier slices still works on Render: an SGD PayPal purchase, a PYUSD devnet purchase if PYUSD is switched on for the check, and a scan.
 
-**Builds.** The S27 rows of the [Gate 3 reopening](03-program-design.md#reopening-2026-10-29-second-build-plan)'s file map, including migration `0027_currency_and_country.sql` and the regenerated client.
+**Builds.** The S27 rows of the [Gate 3 reopening](03-program-design.md#reopening-2026-10-29-second-build-plan)'s file map, including migration `0027_currency_and_country.sql`, and the S27 rows of the [Gate 3 MCP client reopening](03-program-design.md#reopening-2026-11-02-mcp-client): output schemas on `/mcp`, the assistant and the terminal agent on the MCP SDK client, and the generated client, its tests and `typecheck:client` removed. *Changed 2026-11-02:* the regenerated client is no longer built.
 
-**Tests.** Named tests 10-19 of the Gate 3 reopening; every existing payment, PYUSD, pricing and public API test passes on the renamed code.
+**Tests.** Named tests 10-19 of the Gate 3 reopening, with test 17 replaced on 2026-11-02 by `the assistant's MCP client reads a USD menu and rejects a price without its currency`, and test 36 `every MCP tool answer matches its output schema`; S25 test 6 and S20 test 13 renamed to the MCP client and S19 test 3 retired, as the [MCP client reopening](03-program-design.md#reopening-2026-11-02-mcp-client) says; every existing payment, PYUSD, pricing and public API test passes on the renamed code, including the 5 that failed on 2026-11-02 for the missing `unitMinor`.
 
-**Evidence.** The three visible results; the migration run on Neon with row counts and a sum of every amount column before and after, equal; the APIMatic regeneration record as in S19.
+**Evidence.** The three visible results; the migration run on Neon with row counts and a sum of every amount column before and after, equal; each new or changed MCP guard failing under its own mutation; typecheck, lint, `next build` and CI green. *Changed 2026-11-02:* no APIMatic regeneration record.
 
 **Falsifiers.** Not merged and deployed by 8 Nov: revert to `main` before S27, cut S27 and S28 together, and say Envoi is Singapore-only. Any SGD purchase misbehaves after the migration: roll the deploy back first, then fix.
 
-**Authorizations to request at start.** Starting S27; one APIMatic upload of the changed `openapi/envoi-public.yaml` with the generated client committed unchanged; migration 0027 on Neon; the merge, push and deploy.
+**Authorizations to request at start.** Starting S27; migration 0027 on Neon; the merge, push and deploy. *Changed 2026-11-02:* the APIMatic upload is withdrawn; the one v1-endpoint upload of 2026-10-30 ("Lets use v1 endpoint first while waiting for support") stays on record as used and not chosen.
 You perform: creating a US PayPal sandbox business account for the US fixture shop.
 
 #### S28 PayPal PYUSD rewards card
@@ -1095,7 +1096,7 @@ You perform: asking the organizers the APIMatic question before S31 starts.
 - **Target windows [hypothesis]:** S25 30 Oct-1 Nov, S26 2 Nov, S27 3-7 Nov, S28 8 Nov, S29 8-10 Nov, S30 10 Nov, S31 10-11 Nov; the video, your task, 12 Nov; submission cutoff 13 Nov 2026 04:00 SGT.
 - **Cut order, as approved in Gate 1:** S31 first, then S30, then S29, then S27 and S28 together.
 - **Never cut:** S25 and S26, every payment, approval and recipient guard of earlier slices, and the human approval of every payment.
-- **Counts:** the second build plan carries the 35 named tests of its Gate 3 reopening, counted here; every earlier count is unchanged.
+- **Counts:** the second build plan carries the 35 named tests of its Gate 3 reopening, counted here (36 since the 2026-11-02 MCP client reopening, which replaces test 17 and adds test 36); every earlier count is unchanged.
 
 ### Continuation schedule and cuts (S19-S22)
 
