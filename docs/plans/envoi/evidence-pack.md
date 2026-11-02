@@ -43,6 +43,7 @@ Every payment below used PayPal sandbox money or Solana devnet test tokens; none
 | The public read API matches its OpenAPI document, and an APIMatic-generated TypeScript client reads it | [verified] | [S14](00-status.md#s14-apimatic-client-and-docs-2026-10-19) |
 | The agent's purchase request route is in that same OpenAPI document, and the client APIMatic regenerated from it is committed byte-identical to the generator's output | [verified] | [S19](00-status.md#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-2026-10-25) |
 | The generated client reaches no receipt or payment route | [verified] | [S19](00-status.md#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-2026-10-25) |
+| The three rows above describe the APIMatic client as of S19; the 2026-11-02 MCP client decision removes it once implemented, Gates 2, 3 and 4 re-approved 2026-11-02 | [not run] | [record](00-status.md#gate-2-3-and-4-reopening-2026-11-02-mcp-client) |
 
 ## Operations and release
 

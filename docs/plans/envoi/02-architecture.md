@@ -438,6 +438,7 @@ Approval accepts this amendment as a proposal; it establishes no runtime, model,
 1. A new external component, `clients/buyer-agent/`, run by a person on their own machine; it is not deployed and the hosted app never imports it.
 2. It holds an agent token issued with the existing operator command, and an OpenAI key of its own, read from that machine's environment; neither is stored, logged or traced.
 3. Its model sees three tools, each a call of the generated client: list shops, read a menu, create a purchase request.
+   Since the [MCP client amendment](#mcp-client-amendment-2026-11-02), each tool is one MCP `tools/call` to Envoi's own `/mcp` route instead.
    It refuses any item id the menu it last read did not return, before calling the client.
 4. It writes a trace of each client call (operation, status, returned ids, timings) for evidence, without tokens, keys or prompts beyond the buyer's sentence.
 5. Envoi sees it as any other agent token holder: the same `POST /purchase-requests` limits, single redemption, fresh server price and human PayPal or wallet approval. No new agent authority.
@@ -446,6 +447,7 @@ Approval accepts this amendment as a proposal; it establishes no runtime, model,
 **Generated client covers the agent route (S19).**
 The OpenAPI document gains `POST /purchase-requests` with the agent bearer scheme, so the generated client covers the whole agent path; the route itself does not change.
 APIMatic stays development tooling: the document is uploaded to generate the client, and nothing calls APIMatic at runtime.
+Superseded 2026-11-02 by the [MCP client amendment](#mcp-client-amendment-2026-11-02): the assistant calls Envoi's own `/mcp` route, and the generated client is removed.
 
 **Menu photo round 4 (S22).**
 1. Before the existing browser shrink, the merchant may rotate the photo in quarter turns and crop it to the menu; only the rotated, cropped and shrunk JPEG leaves the browser, under the unchanged upload bounds.
@@ -500,6 +502,7 @@ Approval accepts this amendment as a proposal; it establishes no runtime, model,
    The loop moves from `clients/buyer-agent/` into a module both the terminal agent and the route import, so there is one agent, not two.
 4. Each tool calls Envoi's own public API through the APIMatic-generated client, over HTTP to the site's own public origin, with an agent token issued by the existing operator command and held in a new `ASSISTANT_AGENT_TOKEN`.
    This reverses the S14 rule that the app never calls the generated client: the assistant route is now its one caller in the app, so the client is on the live path a judge sees.
+   Superseded 2026-11-02 by the [MCP client amendment](#mcp-client-amendment-2026-11-02): each tool calls Envoi's own `/mcp` route through the official MCP SDK client with the same agent token.
 5. A created purchase request's one-time link goes from the server to the browser, never to the model, exactly as in S20; the browser opens it, and the existing redemption, fresh server price and human PayPal or wallet approval follow unchanged.
 6. The response carries the reply and a list of the calls made (operation, HTTP status, returned shop and item ids, duration), built from the existing trace records rather than from model text; it never carries a token or a link inside that list.
 7. Provider and model stay OpenAI and `AI_MODEL`. The assistant is on only when `OPENAI_API_KEY`, `AI_MODEL` and `ASSISTANT_AGENT_TOKEN` are all set; otherwise the screen offers the one-sentence box or the shop list.
@@ -526,7 +529,8 @@ Approval accepts this amendment as a proposal; it establishes no runtime, model,
    Mixing two currencies in one sum or comparison throws; there is no conversion anywhere.
 3. PayPal orders use the purchase's currency, and capture, read and webhook verification compare the captured currency with the purchase's, so a USD capture can never settle an SGD purchase or the reverse.
 4. A US outlet has no SGQR step and no PYUSD destination: PYUSD preparation refuses any purchase whose currency is not SGD, and SGQR resolution only ever returns SG outlets.
-5. The public OpenAPI document's menu and purchase-request schemas change with the rename and gain the currency field, so the generated client must be regenerated through one more APIMatic upload, and the MCP tools' outputs change the same way. Nothing else about the public routes changes.
+5. The public OpenAPI document's menu and purchase-request schemas change with the rename and gain the currency field, so the generated client must be regenerated through one more APIMatic upload, and the MCP tools' outputs change the same way.
+   Superseded 2026-11-02 by the [MCP client amendment](#mcp-client-amendment-2026-11-02): no regeneration or upload; the generated client is removed and the MCP tools declare output schemas. Nothing else about the public routes changes.
 6. A US shop needs a PayPal sandbox business account in the United States as its destination, connected exactly as a Singapore one is.
 
 **PayPal PYUSD rewards card.**
@@ -550,6 +554,35 @@ The web import returns a short excerpt per drafted row, at most 120 characters, 
 - **R5 extends:** the assistant's accuracy in the site and translation accuracy are unmeasured until their pre-registered evaluations.
 - **Estimate [hypothesis]:** US shops are the largest item, about 4 to 6 days because SGD is named in about 62 files, against about 2 to 3 days for Ask Envoi and about 2 days for translation.
 
+### MCP client amendment, 2026-11-02
+
+Drafted 2026-11-02 on `envoi/slice-27-us-shops` for the user's decision "Switch to MCP client" (2026-11-02); **REOPENED and RE-APPROVED 2026-11-02** ("yes i authroize gate 2").
+Approval accepts this amendment as a proposal; it authorizes no Gate 3 or 4 change, code change, install, upload, migration, commit, merge, push or deploy.
+Gate 1 is unchanged by the user's decision of 2026-11-02 ("Gate 1 unchanged"): no buyer or merchant behaviour changes, and the Ask Envoi steps keep the mockup's names.
+
+**Why.**
+- [verified 2026-11-02] The committed APIMatic client (codegen v4, generated from the pre-S27 document) has no `unitMinor`, so typecheck, `next build` and CI fail at `src/integrations/assistant/tools.ts`, and 5 tests fail for the same reason. APIMatic support request 25184 is open.
+- [verified 2026-10-30, scratch only] The codegen v3 client works for the three calls but coerces `"1295"` to 1295, turns a missing `unitMinor` or `available` into null, fixes its base URLs, cannot take an injected `fetch` and fails TypeScript 6.0.3 under Envoi's settings. Not chosen.
+- [verified 2026-11-02, scratch only, local production build of a copy, disposable database dropped] The official MCP SDK client (`@modelcontextprotocol/sdk` 1.32.1, already a dependency) against `src/app/mcp/route.ts` read a FIXTURE SG and a FIXTURE US shop with the right currencies and `unitMinor` equal to the database, created purchase requests for both, answered an unknown shop and quantity 21 with `isError`, refused a missing or wrong token with Envoi's 401, and surfaced timeout, abort and a closed port as errors.
+- [verified 2026-11-02, same run] The three tools declare no output schema and return JSON only as text, so a client with no schema of its own accepted seven corrupted answers (currency EUR, an item currency unlike the menu's, `unitMinor` as a string, missing or 12.5, `isDemoFixture` as `"True"`, a missing purchase url). A zod schema rejected all seven only once it also checked that every item's currency equals the menu's.
+- [verified, hackathon rules] APIMatic is an optional sponsor tool; the hard rule is meaningful use of PayPal and AI. [unknown] Whether dropping the generated client loses the APIMatic prize; the user chose the switch knowing this.
+
+**Decision.**
+1. The assistant's three tools (hosted Ask Envoi and the terminal agent `clients/buyer-agent/agent.ts`) each make one MCP `tools/call` to Envoi's own `/mcp` route through the official MCP SDK client, over HTTP to `APP_BASE_URL` (the terminal agent: `ENVOI_BASE_URL`), with the agent token as a bearer header. No tool calls `fetch` itself.
+2. The shop list and menu reads now need the agent token, as every MCP tool already does; the public REST reads stay open to everyone else.
+3. `/mcp` declares an output schema on each of its three tools and returns its answer as structured content beside the text, so every MCP client, the assistant and outside agents, can validate it. The menu schema requires every item's currency to equal the menu's, and each price to be an integer of at least 1 or null.
+4. The assistant validates every answer against those schemas and treats a mismatch as an error, never as data for the model. [hypothesis] The SDK client validates structured content against the declared schema; the implementation proves it with a mutation.
+5. Tool errors and transport errors map to the assistant's existing error results; the tool budget, the basket rebuilt from ids and quantities alone, and the link going to the browser, never the model, stay as they are.
+6. APIMatic leaves the runtime path and the repository: the generated client `clients/typescript/`, its unit test, the APIMatic end-to-end check and `typecheck:client` are removed, by the user's decision of 2026-11-02 ("Remove it"). The public OpenAPI document stays, because the REST routes stay, and its description is corrected to currency-explicit prices with no generator named.
+7. No new dependency, environment name, table, route or grant. `ASSISTANT_AGENT_TOKEN` keeps its role.
+
+**Deviations recorded.** S14 made APIMatic development tooling; S19 and S20 named the generated client as the agent's only path; the second build plan made the assistant route its one caller and gave S27 one more APIMatic upload. All three are superseded here. The S27 v1-endpoint upload of 2026-10-30 ("Lets use v1 endpoint first while waiting for support") stays on record as used and not chosen.
+
+**Risks.**
+- **R25 changes:** the assistant's calls now reach `/mcp` and its limits instead of the public REST limits; the same rule holds that assistant traffic must not lock itself or others out [hypothesis until measured].
+- **New, R30:** an MCP answer that drifts from the database or the schema could mislead the model about a price. The output schemas and the client's validation stop a malformed answer; nothing stops a well-formed wrong one, and Envoi's review page still prices from the server.
+- **New, R31:** the APIMatic sponsor story weakens: no generated client ships. [unknown] prize effect.
+
 ## External
 
 Names below are **proposed configuration names only**, never values. No credentials were read or provisioned. Database/auth/provider secrets remain server-side.
@@ -565,7 +598,7 @@ Names below are **proposed configuration names only**, never values. No credenti
 | Kernel (added and approved 2026-10-29) | One cloud browser session per web menu import; `KERNEL_API_KEY`, `WEB_IMPORTS_ENABLED`, `AI_WEB_MENU_MODEL`. | Server-side key; headless, no stealth, proxy, profile or CAPTCHA solving; one navigation, session deleted on every path. Account, allowance and pricing unverified. |
 | AG Grid Community (added and approved 2026-10-29) | Browser table for the menu draft; no environment name. | Client-side display and editing only; the server keeps every menu rule. Licence terms read before install. |
 | Supported MCP clients | Hash-stored scoped demo tokens configured out of band. | Registry/proposal tools only. No token value in repository/testing instructions; no production OAuth promise. |
-| APIMatic | PayPal Context Plugin; own-API clients/docs if actual tier supports them. | Development tooling, not payment authority. No runtime dependency or credential assumed. Entitlements and prize qualification unverified. [Sponsor offer](https://paypalaihackathon.devpost.com/details/apimatic). |
+| APIMatic | PayPal Context Plugin; own-API clients/docs if actual tier supports them. Since 2026-11-02 no generated client ships ([MCP client amendment](#mcp-client-amendment-2026-11-02)). | Development tooling, not payment authority. No runtime dependency or credential assumed. Entitlements and prize qualification unverified. [Sponsor offer](https://paypalaihackathon.devpost.com/details/apimatic). |
 | Solana devnet / Phantom | Proposed independently gated PYUSD rail; `SOLANA_RPC_URL`, `PYUSD_ENABLED`. | Pinned public devnet identity/mint constants; merchant-set rate, no FX service. Wallet Standard signs/broadcasts; Envoi builds unsigned bytes and performs reads only. No private-key env name, account access or enablement claimed. |
 
 Operator monitoring: redacted logs, maintenance heartbeat, overdue payment/manual-review records, total Neon quota/headroom, import latency/outcomes/credit reservations, decoder memory and RPC throttle/scan coverage.
@@ -620,3 +653,4 @@ Next is the Gate 3 revision described in the [Gate 3 handover](handoff.md#gate-3
 **Reopened 2026-10-24 for the [shop QR and order archive amendment](#shop-qr-and-order-archive-amendment-2026-10-24); re-approved by the user on 2026-10-24 ("I approve Gate 2.").**
 **Reopened 2026-10-25 for the [continuation amendment](#continuation-amendment-2026-10-25); re-approved by the user on 2026-10-25 ("I approve Gate 2.").**
 **Reopened 2026-10-29 for the [web menu import amendment](#web-menu-import-amendment-2026-10-29) and re-approved the same day ("Approve all four").**
+**Reopened 2026-11-02 for the [MCP client amendment](#mcp-client-amendment-2026-11-02) and re-approved the same day ("yes i authroize gate 2").**

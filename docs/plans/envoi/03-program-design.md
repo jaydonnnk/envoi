@@ -9,6 +9,7 @@
 **Reopened 2026-10-25 for the continuation slices S19-S22, after Gates 1 and 2 were re-approved the same day, and RE-APPROVED by the user the same day ("I approve Gate 3."):** see [Reopening 2026-10-25](#reopening-2026-10-25-continuation-slices-s19-s22).
 **Reopened 2026-10-29 for web menu import and re-approved the same day ("Approve all four"):** see [Reopening 2026-10-29](#reopening-2026-10-29-web-menu-import).
 **Reopened 2026-10-29 for the second build plan, after Gates 1 and 2 were re-approved the same day, and RE-APPROVED by the user the same day ("Approve Gate 3"):** see [Reopening 2026-10-29: second build plan](#reopening-2026-10-29-second-build-plan).
+**Reopened 2026-11-02 for the MCP client, after the user's decision "Switch to MCP client" (2026-11-02), and RE-APPROVED by the user the same day ("Approved"):** see [Reopening 2026-11-02: MCP client](#reopening-2026-11-02-mcp-client).
 Approval accepts these contracts as a proposal; it establishes no runtime, account, model, wallet or usability evidence and authorizes no implementation or Gate 4 approval.
 The user removed Zapier because it is paid and reopened Gates 1, 2 and 3.
 Gate 1 was re-approved on 2026-10-10 and Gate 2 on 2026-10-11.
@@ -19,6 +20,45 @@ See [Revision 2026-10-11](#revision-2026-10-11-direct-vision-and-pyusd), [`00-st
 
 Gate 3 program design, 2026-10-07 (Asia/Singapore). **APPROVED by the user 2026-10-07** ("gate 3 is approved"), together with a separate authorization to commit these planning documents and push `main`. Authorities: [approved Gate 1 product](01-product.md) and [approved Gate 2 architecture](02-architecture.md). Approval accepts the contracts below and the disposition of the eight Gate 2 review findings; it establishes no runtime, account, integration or usability evidence, and it does not authorize implementation or Gate 4. A separate, narrowly scoped authorization on the same day covered the R11 flag flip, its redeploy and a read-only schema inspection, all now complete. This document contains contracts only: file map, types and signatures without bodies, call stacks, state transitions, race rules, capacity budgets and named failure tests. No application implementation, no installed application packages and no approved slices exist.
 
+## Reopening 2026-11-02: MCP client
+
+Drafted 2026-11-02 on `envoi/slice-27-us-shops` for the [MCP client amendment](02-architecture.md#mcp-client-amendment-2026-11-02) of Gate 2; **REOPENED and RE-APPROVED 2026-11-02** ("Approved").
+Approval accepts these contracts as a proposal; it establishes no runtime evidence and authorizes no Gate 4 change, code change, install, upload, commit, merge, push or deploy.
+It replaces only the contracts below; every other contract of the [second build plan reopening](#reopening-2026-10-29-second-build-plan) stays as approved.
+
+- **Version pins:** nothing is installed. The assistant uses the already pinned `@modelcontextprotocol/sdk` (1.32.1 resolved [verified 2026-11-02]) `Client` and `StreamableHTTPClientTransport`, and the pinned `zod`. The generated client's `zod` range goes with it.
+- **Environment names:** none added or removed.
+- **Files:**
+
+| File | Slice | Change |
+| --- | --- | --- |
+| `src/app/mcp/route.ts` | S27 | Each of `search_outlets`, `get_menu` and `create_purchase_request` registers a zod `outputSchema` and returns `structuredContent` beside the existing JSON text. The menu schema refines that every item's `currency` equals the menu's; `unitMinor` is an integer of at least 1 or null. A tool error stays `isError: true` with its message and also carries Envoi's error code. |
+| `src/integrations/assistant/envoi-mcp.ts` | S27 | New. `connectEnvoi(baseUrl, agentToken, fetch?)` opens one MCP SDK client per assistant turn over `StreamableHTTPClientTransport` with `Authorization: Bearer`, and `callEnvoi(tool, args, signal)` returns `{ ok: true, value }` validated against the tool's schema or `{ ok: false, error }`. Closed when the turn ends. |
+| `src/integrations/assistant/tools.ts` | S27 | The three tools call `callEnvoi` instead of the generated client. Error mapping: Envoi code `not_found` gives `not_found`; any other tool error code gives `status_<code>`; no response, timeout or abort gives `unreachable`; a schema mismatch gives `invalid_answer`. `MAX_TOOL_CALLS`, the menu id check, the basket rebuilt from ids and quantities, and `onLink` stay. |
+| `src/integrations/assistant/trace.ts` | S27 | Operations keep the names `listOutlets`, `getOutletMenu` and `createPurchaseRequest`, so the steps panel matches the approved mockup. `status` is the HTTP status of the MCP request, or null when no response arrived; an error result also records its error code. |
+| `clients/buyer-agent/agent.ts` | S27 | Connects through `connectEnvoi` with `ENVOI_BASE_URL` and `ENVOI_AGENT_TOKEN`; nothing else changes. |
+| `src/app/api/v1/buyer/assistant/route.ts` | S27 | Passes `APP_BASE_URL` and `ASSISTANT_AGENT_TOKEN` to `connectEnvoi`; no other change. |
+| `openapi/envoi-public.yaml` | S27 | `unitMinor` and `currency` as already planned; `info.description` no longer says prices are Singapore cents and names no generator. |
+| `clients/typescript/`, `clients/README.md`, `tests/unit/generated-client.test.ts`, `tests/e2e/apimatic-client.ts` | S27 | Removed, by the user's decision of 2026-11-02 ("Remove it"). `tests/e2e/run-public-api.ts` drops its call of the APIMatic check. |
+| `package.json`, `config/tsconfig.client.json`, `tsconfig.json`, `.github/workflows/ci.yml`, `eslint.config.mjs` | S27 | `typecheck:client` and its CI step go; `config/tsconfig.client.json` is deleted; the root typecheck and lint now cover `clients/buyer-agent/` and its test; the eslint ignore of `clients/typescript` goes. |
+| `tests/support/fake-envoi-api.ts` | S27 | Replaced by a fake MCP server: the real `McpServer` with the route's tool definitions over an in-memory transport, so tests exercise the real schemas without HTTP. |
+
+- **Call stack (Ask Envoi and the terminal agent):** the turn opens `connectEnvoi`; each tool spends the turn budget, then `callEnvoi` sends one `tools/call` to `/mcp` with the turn's abort signal; the route checks the agent token, reads the counted body and runs the tool against the domain as today; the client validates `structuredContent` against the tool's schema; the tool maps the result; the purchase request's link goes to `onLink`, never the model. The turn closes the client.
+- **Named tests (changes):**
+  - S25 test 6 `the assistant reaches Envoi only through the generated client` becomes `the assistant reaches Envoi only through the MCP client`: a static check, proved by a planted `fetch` in the tools module and by a planted import of another HTTP client.
+  - S27 test 17 `the regenerated client reads a USD menu` is retired and replaced by `the assistant's MCP client reads a USD menu and rejects a price without its currency`: through the fake MCP server, a USD menu reads with its `unitMinor`, and an answer with `currency` removed, `unitMinor` as a string, or an item currency unlike the menu's is `invalid_answer` with nothing passed to the model. Each of the three corruptions is its own mutation.
+  - New S27 test 36 `every MCP tool answer matches its output schema`: each of the three tools' answers for an SG and a US fixture shop validates against its declared schema; mutations: currency `EUR`, an item currency unlike the menu's, `unitMinor` as a string, a missing purchase `url`, and the menu refine removed.
+  - S19 test 3 `generated client reaches no receipt or payment route` is retired with the client; the MCP route already exposes no payment or receipt tool, covered by the existing S13 tests.
+  - S20 test 13 `agent tools call only the generated client` becomes `agent tools call only the MCP client`, the same check as S25 test 6 on the terminal agent.
+  - The 5 tests failing on 2026-11-02 for the missing `unitMinor` (`tests/unit/buyer-agent.test.ts` 4, `tests/integration/buyer-assistant.test.ts` 1) re-run on the fake MCP server unchanged in intent.
+  - Tests 1-35 stay otherwise; the count becomes 36 named tests. Each new or changed guard gets its own mutation, recorded with S27.
+- **Least confident decisions:**
+  1. [hypothesis] The SDK client validates `structuredContent` against a declared output schema; `callEnvoi` also validates with the same zod schemas, so the guard does not rest on SDK behaviour alone. The mutation proves which one fails.
+  2. The reads now need the agent token. Outside agents already needed it for every MCP tool; the REST reads stay open.
+  3. Trace operation names stay those of the REST operations so the approved mockup holds; a reader of the trace sees REST names for MCP calls.
+  4. One MCP client per turn costs an `initialize` round trip per turn; a long-lived client would save it but must survive Render restarts.
+  5. Removing the generated client may weaken the APIMatic sponsor story [unknown prize effect].
+
 ## Reopening 2026-10-29: second build plan
 
 Drafted 2026-10-29 for the [second build plan](01-product.md#second-build-plan-proposed-2026-10-29) ("Approve Gate 1") and its [Gate 2 amendment](02-architecture.md#second-build-plan-amendment-2026-10-29) ("Approve Gate 2"), with the six mockups listed in Gate 1's Screens; **APPROVED 2026-10-29** ("Approve Gate 3").
@@ -27,7 +67,7 @@ Slice ids S25 to S31 are proposed here so each file and test has a home; Gate 4 
 **REOPENED 2026-10-29 for the S25 limiter bucket and RE-APPROVED 2026-10-29** ("Approve Gate 3"): S25 gains migration `0026_assistant_rate_limit_bucket.sql` and the `RATE_LIMIT_BUCKETS` entry, because `admit(db, "buyer_assistant", ...)` inserts a key the `rate_limit_hits` check constraint refuses; S27's migration becomes `0027`; S29's becomes `0028` and also allows `menu_translation`, which `admit(db, "menu_translation", ...)` needs for the same reason; no type, call stack, test name or test count changes; see the [record](00-status.md#gate-2-3-and-4-reopening-2026-10-29-s25-limiter-bucket).
 
 - **Proposed slices:** S25 Ask Envoi in the site (with the AI-off copy and the two iced teas); S26 the connected run (evidence only, plus the web-import fixture shop's PayPal sandbox destination); S27 US shops and currency-explicit money; S28 the PayPal PYUSD rewards card; S29 the menu explained and translated; S30 draft review aids; S31 PayPal approval over the review page.
-- **Version pins:** nothing is installed. PayPal's JavaScript SDK is loaded as a script from PayPal at run time, not as a package; the assistant uses the pinned `ai` and `@ai-sdk/openai`; the regenerated client keeps its `zod` range.
+- **Version pins:** nothing is installed. PayPal's JavaScript SDK is loaded as a script from PayPal at run time, not as a package; the assistant uses the pinned `ai` and `@ai-sdk/openai`; the regenerated client keeps its `zod` range (superseded 2026-11-02: no generated client; see [Reopening 2026-11-02](#reopening-2026-11-02-mcp-client)).
 - **Environment names:** `ASSISTANT_AGENT_TOKEN` (server only, optional; the assistant is off without it) and `AI_MENU_TRANSLATION_MODEL` (optional; translation is off without it) in `src/env.ts` and `.env.example`; no value is committed. `APP_BASE_URL` already exists and is the assistant's base URL. `PAYPAL_CLIENT_ID` already exists and is passed to the review page, never the secret.
 - **Files:**
 
@@ -49,7 +89,7 @@ Slice ids S25 to S31 are proposed here so each file and test has a home; Gate 4 
 | `src/integrations/paypal/orders.ts`, `map.ts`, `verify.ts` | S27 | Orders use the purchase's currency; a captured or webhook currency unlike the purchase's is a verification failure, never paid. |
 | `src/domain/pyusd/*` | S27 | Preparation refuses a purchase whose currency is not SGD, with the new unavailable reason `not_sgd_shop`. |
 | `src/domain/sgqr/resolve.ts` | S27 | Resolves only outlets with `country = 'SG'`. |
-| `openapi/envoi-public.yaml`, `clients/typescript/`, `src/app/mcp/route.ts` | S27 | `unitSgdCents` becomes `unitMinor` with `currency` on the outlet and menu; the client is regenerated by APIMatic and committed unchanged; the MCP tools' outputs change the same way. |
+| `openapi/envoi-public.yaml`, `clients/typescript/`, `src/app/mcp/route.ts` | S27 | `unitSgdCents` becomes `unitMinor` with `currency` on the outlet and menu; the client is regenerated by APIMatic and committed unchanged; the MCP tools' outputs change the same way. Superseded 2026-11-02: no regeneration; see [Reopening 2026-11-02](#reopening-2026-11-02-mcp-client). |
 | `src/app/merchant/setup/country.tsx` | S27 | The country choice in the mockup's words, before the SGQR step, which is shown for SG only. |
 | `src/domain/rewards/paypal-pyusd.ts` | S28 | New; the reviewed constant and `rewardsCard` below. |
 | `src/app/merchant/setup/rewards-card.tsx` | S28 | New; the card in the mockup's words, rendered from the server. |
@@ -128,7 +168,7 @@ type StartResult = { attemptId: string; approvalUrl: string; orderId: string };
 ```
 
 - **Call stacks:**
-  - Ask Envoi: `ask-envoi.tsx` sends the turns, then the route checks the session, reads the body, validates turns (count, length, roles `buyer` and `assistant` only, no other key), admits, checks the three settings, then `runAssistantTurn`; tools call the generated client at `APP_BASE_URL`; the purchase request's link is captured by `onLink`; the route answers with reply, steps and link. The browser opens the link, and `/approve/[handoffToken]` redeems it as today.
+  - Ask Envoi: `ask-envoi.tsx` sends the turns, then the route checks the session, reads the body, validates turns (count, length, roles `buyer` and `assistant` only, no other key), admits, checks the three settings, then `runAssistantTurn`; tools call the generated client at `APP_BASE_URL` (since 2026-11-02 Envoi's `/mcp` through the MCP SDK client); the purchase request's link is captured by `onLink`; the route answers with reply, steps and link. The browser opens the link, and `/approve/[handoffToken]` redeems it as today.
   - Translation: `shop-basket.tsx` sends the outlet id and `navigator.language`'s primary subtag, then the route checks session, body and subtag, admits, then `getOrCreateTranslation`; the screen draws prices, availability and original names from the published menu it already holds and only adds the translated text.
   - US purchase: review and pricing read the outlet's country and currency; the purchase stores its currency; `paypal/start` creates the order in that currency; capture and webhook verification compare currencies before any paid state.
   - Rewards: the merchant setup server page calls `rewardsCard` and renders `rewards-card.tsx`; nothing runs in the browser.
@@ -144,7 +184,7 @@ type StartResult = { attemptId: string; approvalUrl: string; orderId: string };
     3. `the assistant accepts text turns only`: a tool role, an extra key, a ninth turn or a 281-character turn is refused with no model call.
     4. `the assistant's link never reaches the model, its reply or its steps`: a needle self-test plants a marker link and proves the scanner finds it on each serialized surface first.
     5. `the assistant's steps come from the trace, not from model text`: a model reply that describes a fake call adds no step.
-    6. `the assistant reaches Envoi only through the generated client`: a static check, proved by a planted `fetch` in the tools module.
+    6. `the assistant reaches Envoi only through the generated client`: a static check, proved by a planted `fetch` in the tools module. Renamed 2026-11-02 to `the assistant reaches Envoi only through the MCP client`.
     7. `the terminal agent and the site run one agent module`: a static check that `clients/buyer-agent/` holds no tool or instruction text of its own.
     8. `the buyer page reads correctly with text suggestions off`.
     9. `the demo iced teas are added once and published through the menu rules`.
@@ -157,7 +197,7 @@ type StartResult = { attemptId: string; approvalUrl: string; orderId: string };
     14. `PYUSD preparation refuses a purchase that is not in SGD`.
     15. `SGQR resolution never returns a US outlet`.
     16. `public menu answers carry the currency and match the OpenAPI document`.
-    17. `the regenerated client reads a USD menu`.
+    17. `the regenerated client reads a USD menu`. Retired 2026-11-02 and replaced by `the assistant's MCP client reads a USD menu and rejects a price without its currency`; test 36 added (see [Reopening 2026-11-02](#reopening-2026-11-02-mcp-client)).
     18. `the currency migration keeps every amount and marks existing outlets SG`.
     19. `the MCP tools answer with the currency beside every price`.
     Every existing payment, PYUSD and pricing test re-runs on the renamed code; a renamed test keeps its old name in its description.
@@ -183,7 +223,7 @@ type StartResult = { attemptId: string; approvalUrl: string; orderId: string };
     35. `the redirect path still completes a payment when the buttons do not load`.
   Each guard in tests 1-35 gets its own mutation, recorded in its slice.
 - **Least confident decisions:**
-  1. The assistant calls its own public API over HTTP at `APP_BASE_URL` rather than through an in-process `fetch`; this is what makes the generated client real on the live path, at the cost of a round trip through Render's edge per call.
+  1. The assistant calls its own public API over HTTP at `APP_BASE_URL` rather than through an in-process `fetch`; this is what makes the generated client real on the live path (since 2026-11-02 the MCP client), at the cost of a round trip through Render's edge per call.
   2. The public API renames `unitSgdCents` instead of adding beside it. No outside client is known, so a clean rename now costs less than two fields forever, but it breaks any copy of the old client.
   3. Text-only history means the model re-reads the menu in the turn that proposes; more tool calls, but no forged tool result can widen what it may propose.
   4. The rewards rate is a constant with a checked date, not a fetch; it can go stale, and the card shows the date so a reader can see how old it is.
@@ -285,9 +325,9 @@ Approval accepts these contracts as a proposal; it establishes no runtime, model
 | File | Slice | Change |
 | --- | --- | --- |
 | `openapi/envoi-public.yaml` | S19 | Adds `POST /api/v1/purchase-requests` with an `agentBearer` security scheme, its request body (`outletId`, `lines` of `menuItemId` and `quantity`) and its 201, 400 `validation_failed`, 401 `unauthorized` and 404 `not_found` answers, all closed objects (corrected 2026-10-25, see below). Widens delta D6 from "public read routes only" to "public read routes and the agent's purchase request route". |
-| `clients/typescript/` | S19 | Regenerated by APIMatic from that document and committed unchanged. |
-| `clients/README.md` | S19 | Hand-written: names APIMatic as the generator, the CLI version and the document commit, and lists which files under `clients/` are hand-written. |
-| `tests/e2e/apimatic-client.ts` | S19 | Adds the purchase request call with a token from the environment, and the no-token 401. |
+| `clients/typescript/` | S19 | Regenerated by APIMatic from that document and committed unchanged. Removed 2026-11-02. |
+| `clients/README.md` | S19 | Hand-written: names APIMatic as the generator, the CLI version and the document commit, and lists which files under `clients/` are hand-written. Removed 2026-11-02. |
+| `tests/e2e/apimatic-client.ts` | S19 | Adds the purchase request call with a token from the environment, and the no-token 401. Removed 2026-11-02. |
 | `src/domain/suggestions/types.ts`, `suggest.ts` | S21 | The types below; `settle` builds the basket, choice and unavailable answers. |
 | `src/integrations/ai/openai.ts` | S21 | The structured output schema gains the quantities and the choice; tools, budget and `T_AI_BUDGET` unchanged. |
 | `src/app/api/v1/buyer/suggestions/route.ts` | S21 | Accepts the optional `outletId`. |
@@ -323,7 +363,7 @@ const MAX_SUGGESTED_QUANTITY = 20;
   7. Prices shown come from the registry. Nothing is written: no review, purchase, hold or audit row is created by a suggestion.
 - **Reference agent contract (S20):**
   - Reads `ENVOI_BASE_URL`, `ENVOI_AGENT_TOKEN`, `OPENAI_API_KEY` and `AI_MODEL` from the person's environment; `ENVOI_BASE_URL` must be `https`, or `http://localhost`.
-  - The model's tools are `list_shops`, `read_menu` and `propose_basket`; each is one call of the generated client, and no tool calls `fetch` itself.
+  - The model's tools are `list_shops`, `read_menu` and `propose_basket`; each is one call of the generated client, and no tool calls `fetch` itself. Since 2026-11-02 each is one MCP `tools/call`; see [Reopening 2026-11-02](#reopening-2026-11-02-mcp-client).
   - `propose_basket` refuses, without a client call, any item id the last `read_menu` of that outlet did not return, and any quantity outside 1-20; its body carries ids and quantities only.
   - At most six tool calls and 60 seconds per buyer turn; then the agent stops and says so.
   - The trace is one JSON line per client call: operation, HTTP status, outlet and item ids, purchase request expiry, milliseconds; never a token, key, link token or model prompt.
@@ -334,7 +374,7 @@ const MAX_SUGGESTED_QUANTITY = 20;
   - S19:
     1. `agent purchase request matches its OpenAPI document`: created, validation, unauthorized and not-found answers validate against the document.
     2. Retired 2026-10-25: `regenerated client refuses a zero price` (see the S19 reopening below).
-    3. `generated client reaches no receipt or payment route`: no operation's path is under `/purchases`.
+    3. `generated client reaches no receipt or payment route`: no operation's path is under `/purchases`. Retired 2026-11-02 with the client.
   - S21:
     4. `a basket holds only published available priced items`.
     5. `an unavailable item is named and never added`.
@@ -346,7 +386,7 @@ const MAX_SUGGESTED_QUANTITY = 20;
     11. `a suggestion writes nothing`: no review, purchase or audit row after a basket answer.
     12. `the prefilled basket never reaches a URL`: the shop page's address after a basket answer holds no item id or quantity.
   - S20:
-    13. `agent tools call only the generated client`.
+    13. `agent tools call only the generated client`. Renamed 2026-11-02 to `agent tools call only the MCP client`.
     14. `agent refuses an item id or quantity the menu did not allow`.
     15. `agent never sends an amount`.
     16. `agent trace holds no token, key or link`: a needle self-test plants each and proves the scanner finds it in a serialized trace first.
