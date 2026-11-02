@@ -4,6 +4,10 @@ The documentation publication and local MCP replacement are complete. S27 as a w
 
 Publication update, 2026-11-02: after this handoff, the user answered "yes authorze" to committing the MCP changes and pushing `envoi/slice-27-us-shops` for CI. The prompt and review below preserve the earlier authorization state. Follow the current publication record in `00-status.md`; merge, migration, sandbox captures and deployment remain unauthorized.
 
+Read-only preflight update, 2026-11-02: the user subsequently answered "Authroize" to the read-only Neon preflight. The local, uncommitted `s27-neon-preflight-2026-11-02.json` records its passing snapshot at 17:08:52 Asia/Singapore, through schema 0026, with no open purchases or non-SGD purchases/attempts. The original prompt's no-Neon-read statements are historical. No writes, migration, merge, deployment or payment is authorized. Refresh the baseline before release; Render environment/rollback access remains unverified.
+
+Coordinated release update, 2026-11-02: the user later explicitly authorized the evidence commit, main merge/push, deployment, migration 0027, maintenance verification and documented rollback if checks fail. Render target identity and signed-in rollback controls are verified. Follow the coordinated release section of `00-status.md`; earlier authorization limits below are historical. Sandbox purchases, the US fixture and later slices remain outside this release authority.
+
 ## Completed
 
 - Exactly eight gate files published to main `94df453ea8108315d8d7aee582cd2a08b66647c4`; remote verified; CI 41408301808 passed.

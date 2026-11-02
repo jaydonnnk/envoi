@@ -44,6 +44,7 @@ Every payment below used PayPal sandbox money or Solana devnet test tokens; none
 | The agent's purchase request route is in that same OpenAPI document, and the client APIMatic regenerated from it is committed byte-identical to the generator's output | [verified] | [S19](00-status.md#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-2026-10-25) |
 | The generated client reaches no receipt or payment route | [verified] | [S19](00-status.md#s19-agent-route-in-the-openapi-document-and-a-regenerated-client-2026-10-25) |
 | The three rows above describe the APIMatic client as of S19; the published S27 branch now replaces it with the MCP client. No S27 merge or deployment has run | [verified on the branch, not deployed] | [S27 evidence and publication](00-status.md#s27-mcp-client-local-continuation-2026-11-02) |
+| S27's read-only Neon baseline was recorded: schema through 0026, 0027 unapplied, all purchases/attempts in SGD and no open purchases at the snapshot time. No migration or hosted regression was run | [verified read-only snapshot, 2026-11-02] | [Snapshot](evidence/s27-neon-preflight-2026-11-02.json), [limits and next steps](s27-deploy-plan.md) |
 
 ## Operations and release
 

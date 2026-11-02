@@ -1,0 +1,114 @@
+{
+  "date": "2026-11-02",
+  "timezone": "Asia/Singapore",
+  "authorization": "Authroize, in response to read-only Neon preflight request",
+  "source_commit": "89ab2cd08e2201393811d9beaf730ffd0f18ccbd",
+  "credential_variable": "MIGRATION_DATABASE_URL",
+  "direct_endpoint_derived_from_pooled_host": true,
+  "target_fingerprint": "2c3ff75b64569eda065223d0738c86dbe39bee7fb20f958d680ccc5e3296824a",
+  "web_and_migration_targets_match": true,
+  "tls_verified": true,
+  "session": {
+    "read_only": "on",
+    "isolation": "repeatable read",
+    "snapshot_at": "2026-11-02T09:17:19.671Z",
+    "schema_create_privilege": true
+  },
+  "schema": {
+    "before_0027": true,
+    "country_column_present": false,
+    "us_country_records": "not representable in this pre-0027 schema",
+    "applied_migrations": 27,
+    "last_applied_tag": "0026_assistant_rate_limit_bucket",
+    "all_applied_hashes_match_local": true,
+    "migration_0027_applied": false,
+    "ownership": [
+      {
+        "table_name": "__drizzle_migrations",
+        "owner_privileges": true,
+        "row_security": false
+      },
+      {
+        "table_name": "menu_items",
+        "owner_privileges": true,
+        "row_security": false
+      },
+      {
+        "table_name": "outlets",
+        "owner_privileges": true,
+        "row_security": false
+      },
+      {
+        "table_name": "payment_attempts",
+        "owner_privileges": true,
+        "row_security": false
+      },
+      {
+        "table_name": "purchases",
+        "owner_privileges": true,
+        "row_security": false
+      }
+    ]
+  },
+  "totals": {
+    "outlets": 3,
+    "menu_items": 34,
+    "purchases": 49,
+    "payment_attempts": 19,
+    "menu_items_unit": "11530",
+    "menu_items_unknown": 0,
+    "purchases_total": "16800",
+    "attempts_total": "7700",
+    "attempts_gross": "4170",
+    "lines_unit": "13830",
+    "lines_line": "16800",
+    "line_count": 58
+  },
+  "purchase_states": [
+    {
+      "state": "paid",
+      "count": 12
+    },
+    {
+      "state": "review_expired",
+      "count": 30
+    },
+    {
+      "state": "uncertain",
+      "count": 2
+    },
+    {
+      "state": "unpaid_closed",
+      "count": 5
+    }
+  ],
+  "purchase_currencies": [
+    {
+      "currency": "SGD",
+      "count": 49
+    }
+  ],
+  "attempt_currencies": [
+    {
+      "currency": "SGD",
+      "count": 19
+    }
+  ],
+  "preconditions": {
+    "all_open_purchases": 0,
+    "test_shop_matches": 1,
+    "test_shop_open_purchases": 0,
+    "non_sgd_purchases": 0,
+    "non_sgd_attempts": 0,
+    "renamed_basket_lines": 0,
+    "missing_old_basket_keys": 0
+  },
+  "blockers": [],
+  "outcome": "PASS",
+  "limits": [
+    "Read-only snapshot only; no migration, writes, merge, push, deploy or payment",
+    "No Render dashboard or rollback access check",
+    "No DDL attempted, so future migration execution is not proven",
+    "Repeat the baseline and open-purchase check immediately before an authorized deployment"
+  ]
+}

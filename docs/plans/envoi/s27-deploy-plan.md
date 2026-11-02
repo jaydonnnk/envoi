@@ -1,8 +1,10 @@
 # S27 deploy order and rollback for migration 0027
 
 Written 2026-10-30 on `envoi/slice-27-us-shops`.
-This is a plan, not a record: nothing here has run on Neon or Render.
+The release steps below remain a plan. Only the authorized read-only Neon preflight ran on 2026-11-02, at 17:08:52 Asia/Singapore; see the [snapshot](evidence/s27-neon-preflight-2026-11-02.json) and [status](00-status.md#s27-mcp-client-local-continuation-2026-11-02). No migration or deployment has run. The baseline must be refreshed immediately before release; Render environment/rollback access remains unverified.
 Each step marked **[asks]** needs the user's words for that step by name before it runs.
+
+Release authorization, 2026-11-02: the user explicitly authorized committing the evidence, merging/pushing main, deployment, migration 0027, maintenance verification and the documented rollback if checks fail. The authorization is recorded in `00-status.md`. It covers steps 1-7 and the conditional rollback, not the sandbox purchases or US fixture in steps 8-9. Render dashboard access, recent rollback controls and database target identity were verified; the live pre-S27 rollback target is `dep-dbk3uvjbc2fs73e35lf0` at `94df453`. Release execution results follow in the status record.
 
 ## Why the order matters
 
@@ -25,6 +27,8 @@ A failed read in the gap leaves the money where it is: no path marks a purchase 
 2. The US fixture shop does not exist on Neon yet, and no `USD` row exists.
    It is created only after step 8 passes, so the rollback below stays available for the whole risky window.
 3. No Test Shop purchase is in `review_open` or `pending_payment` (read-only check in step 1).
+
+Read-only preflight, 2026-11-02: all 27 migration hashes/timestamps through 0026 match, 0027 is absent, all purchases/attempts are SGD, and no open purchase exists. `outlets.country` is absent, so no US marker can yet be stored; actual merchant location is not established by this check. The saved migration URL uses a pooler hostname; the preflight connected to its matching direct hostname with the same credentials and verified TLS. Use that direct connection for the future migration, without recording credentials. No DDL was attempted. Step 2 onward still requires named authorization, including maintenance verification and the rollback actions if needed.
 
 ## Order
 
