@@ -35,7 +35,7 @@ Publication update, 2026-11-02: after this handoff, the user answered "yes autho
 
 ## Open work
 
-Implementation is uncommitted. No S27 code publication or external action is authorized. Migration, hosted SGD/scan checks, a US seller/fixture and USD capture remain unrun. These block full S27 completion; the post-slice architecture cleanup also remains open. The hosted assistant stays off.
+Implementation is published as `bdc87a49dab3e4b84bad1d0085687c79c2d4181e` on `envoi/slice-27-us-shops`, remotely verified after the user's branch publication authorization. CI run `41414544915` passed all steps, including the production build, build scan and fixture HTTP/MCP check. Migration, hosted SGD/scan checks, a US seller/fixture and USD capture remain unrun and unauthorized. These block full S27 completion; the post-slice architecture cleanup also remains open. The hosted assistant stays off. The prompts below are historical handoffs from before this publication; current status wins.
 
 ## Prompt for New Chat
 
