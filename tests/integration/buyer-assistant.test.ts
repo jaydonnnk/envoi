@@ -157,15 +157,19 @@ describe("Ask Envoi route", () => {
   it("the assistant reads its body within 5 seconds", async () => {
     const cookie = await anonymousCookie(routes.auth.POST);
     // A FIXTURE body that arrives whole after a delay, as a slow client sends it.
-    const late = (ms: number) =>
-      new ReadableStream<Uint8Array>({
+    const late = (ms: number) => {
+      let timer: ReturnType<typeof setTimeout>;
+      return new ReadableStream<Uint8Array>({
         start: (controller) => {
-          setTimeout(() => {
+          timer = setTimeout(() => {
             controller.enqueue(new TextEncoder().encode(json));
             controller.close();
           }, ms);
         },
+        // A timed-out request cancels its producer, just as a disconnected client does.
+        cancel: () => clearTimeout(timer),
       });
+    };
     expect(await send(cookie, late(4_500))).toMatchObject({ status: 200 });
     expect(openai.calls).toHaveLength(1);
     expect(await send(cookie, late(5_500))).toMatchObject({ status: 400, code: "validation_failed", reason: "timeout" });
@@ -191,7 +195,7 @@ describe("Ask Envoi route", () => {
     expect(answer.data!.steps.map((step) => [step.operation, step.status])).toEqual([
       ["listOutlets", 200],
       ["getOutletMenu", 200],
-      ["createPurchaseRequest", 201],
+      ["createPurchaseRequest", 200],
     ]);
 
     const needles = { link: FIXTURE_LINK, linkToken: FIXTURE_LINK_TOKEN };

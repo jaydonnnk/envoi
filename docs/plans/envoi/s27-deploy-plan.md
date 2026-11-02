@@ -21,7 +21,7 @@ A failed read in the gap leaves the money where it is: no path marks a purchase 
 ## Preconditions
 
 1. CI is green on the S27 branch, which needs the regenerated APIMatic client (blocked as of 2026-10-30).
-   Changed 2026-11-02, Gates 2, 3 and 4 re-approved 2026-11-02: the assistant moves to the MCP client and the generated client is removed, so CI no longer needs a regeneration ([record](00-status.md#gate-2-3-and-4-reopening-2026-11-02-mcp-client)).
+   Changed 2026-11-02, Gates 2, 3 and 4 re-approved 2026-11-02: the local MCP replacement now passes typecheck, lint, tests and build; it is uncommitted and S27 CI remains pending. The generated client is removed locally, so CI no longer needs a regeneration ([record](00-status.md#gate-2-3-and-4-reopening-2026-11-02-mcp-client)).
 2. The US fixture shop does not exist on Neon yet, and no `USD` row exists.
    It is created only after step 8 passes, so the rollback below stays available for the whole risky window.
 3. No Test Shop purchase is in `review_open` or `pending_payment` (read-only check in step 1).

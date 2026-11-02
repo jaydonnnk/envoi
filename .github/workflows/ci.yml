@@ -45,14 +45,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
-      # The generated client is typechecked on its own (S14 review fix 3), so it never fails the build.
-      - run: npm run typecheck:client
       - run: npm run lint
       - run: npm run test:unit
       - run: npm run test:integration
       # The webpack build Render deploys; the unit test's esbuild bundle is only a proxy for it.
       - run: npm run build
       - run: npx tsx scripts/scan-build.ts .next
-      # The public API contract and the generated client over real HTTP against that build, on a
-      # disposable database with the demo FIXTURE shop (S14 review fix 4). Reads only.
+      # The public API contract over real HTTP against that build, on a
+      # disposable database with the demo FIXTURE shop. Payments stay disabled.
       - run: npx tsx tests/e2e/run-public-api.ts 3100

@@ -1,9 +1,9 @@
 import { tool } from "ai";
 import { z } from "zod";
-import type { EnvoiPublicApiClient } from "../../../clients/typescript/src/index";
+import type { EnvoiConnection, EnvoiResult } from "./envoi-mcp";
 import type { Trace, TraceOperation } from "./trace";
 
-// S20: the reference agent's three tools. Each one is one call of the APIMatic-generated client;
+// S20: the reference agent's three tools. Each one is one MCP tools/call;
 // no tool calls fetch itself (Gate 3 reopening 2026-10-25, reference agent contract).
 
 // At most six tool calls per buyer turn; the seventh is refused and stops the turn.
@@ -22,10 +22,7 @@ export type TurnGate = {
 export type CreatedLink = { url: string; expiresAt: string };
 
 export type AgentToolsOptions = {
-  // The client for the two public read routes, with no token.
-  reader: EnvoiPublicApiClient;
-  // The client holding the agent token, used for the purchase request alone.
-  agent: EnvoiPublicApiClient;
+  callEnvoi: EnvoiConnection["callEnvoi"];
   trace: Trace;
   gate: () => TurnGate;
   // The link goes to the person, never to the model or the trace.
@@ -40,49 +37,41 @@ export function createAgentTools(options: AgentToolsOptions) {
   // The item ids the last read_menu of each outlet returned. propose_basket accepts no other id.
   const menus = new Map<string, Set<string>>();
 
-  // Runs one generated-client call and writes its trace line. The status of an answered call comes
-  // from asApiResult; a call with no answer is traced with a null status and reported as
-  // unreachable, unless the turn's own budget aborted it.
   async function traced<T>(
     operation: TraceOperation,
     ids: { outletId: string | null; itemIds: string[] },
-    call: () => Promise<{ ok: true; status: number; value: T } | { ok: false; status: number }>,
+    call: () => Promise<EnvoiResult<T>>,
     expiry: (value: T) => string | null = () => null,
-  ): Promise<{ ok: true; value: T } | { ok: false; status: number | null }> {
+  ): Promise<EnvoiResult<T>> {
     const started = now();
-    try {
-      const result = await call();
-      options.trace({ operation, status: result.status, ...ids, expiresAt: result.ok ? expiry(result.value) : null, ms: now() - started });
-      return result.ok ? { ok: true, value: result.value } : { ok: false, status: result.status };
-    } catch (err) {
-      options.trace({ operation, status: null, ...ids, expiresAt: null, ms: now() - started });
-      if (options.gate().signal.aborted) throw err;
-      return { ok: false, status: null };
-    }
+    const result = await call();
+    options.trace({ operation, status: result.status, ...ids, expiresAt: result.ok ? expiry(result.value) : null, ms: now() - started, ...(!result.ok ? { error: result.error } : {}) });
+    if (options.gate().signal.aborted) throw new Error("turn aborted");
+    return result;
   }
 
   async function listShops() {
     const gate = options.gate();
     gate.spend();
     const result = await traced("listOutlets", { outletId: null, itemIds: [] }, () =>
-      options.reader.outlets.listOutlets({ signal: gate.signal }).asApiResult(),
+      options.callEnvoi("search_outlets", {}, gate.signal),
     );
-    if (!result.ok) return { error: result.status === null ? "unreachable" : `status_${result.status}` };
-    return { shops: result.value.data.outlets.map(({ id, name, area, isDemoFixture }) => ({ id, name, area, isDemoFixture })) };
+    if (!result.ok) return { error: result.error };
+    return { shops: result.value.outlets.map(({ id, name, area, isDemoFixture, currency }) => ({ id, name, area, isDemoFixture, currency })) };
   }
 
   async function readMenu(input: { outletId: string }) {
     const gate = options.gate();
     gate.spend();
     const result = await traced("getOutletMenu", { outletId: input.outletId, itemIds: [] }, () =>
-      options.reader.outlets.getOutletMenu({ id: input.outletId }, { signal: gate.signal }).asApiResult(),
+      options.callEnvoi("get_menu", { outletId: input.outletId }, gate.signal),
     );
-    if (!result.ok) return { error: result.status === 404 ? "not_found" : result.status === null ? "unreachable" : `status_${result.status}` };
-    const { outlet, items } = result.value.data;
+    if (!result.ok) return { error: result.error };
+    const { outlet, items } = result.value;
     menus.set(outlet.id, new Set(items.map((item) => item.id)));
     return {
-      shop: { id: outlet.id, name: outlet.name, area: outlet.area, isDemoFixture: outlet.isDemoFixture },
-      items: items.map(({ id, name, unitMinor, available }) => ({ id, name, unitMinor, available })),
+      shop: { id: outlet.id, name: outlet.name, area: outlet.area, isDemoFixture: outlet.isDemoFixture, currency: outlet.currency },
+      items: items.map(({ id, name, unitMinor, currency, available }) => ({ id, name, unitMinor, currency, available })),
     };
   }
 
@@ -104,12 +93,12 @@ export function createAgentTools(options: AgentToolsOptions) {
     const result = await traced(
       "createPurchaseRequest",
       { outletId: body.outletId, itemIds: body.lines.map((line) => line.menuItemId) },
-      () => options.agent.purchaseRequests.createPurchaseRequest({ body }, { signal: gate.signal }).asApiResult(),
-      (value) => value.data.expiresAt,
+      () => options.callEnvoi("create_purchase_request", body, gate.signal),
+      (value) => value.expiresAt,
     );
-    if (!result.ok) return { error: result.status === null ? "unreachable" : `status_${result.status}` };
-    options.onLink({ url: result.value.data.url, expiresAt: result.value.data.expiresAt });
-    return { created: true, expiresAt: result.value.data.expiresAt, shownToBuyer: "Envoi's one-time link was shown to the buyer directly." };
+    if (!result.ok) return { error: result.error };
+    options.onLink({ url: result.value.url, expiresAt: result.value.expiresAt });
+    return { created: true, expiresAt: result.value.expiresAt, shownToBuyer: "Envoi's one-time link was shown to the buyer directly." };
   }
 
   const tools = {
@@ -119,7 +108,7 @@ export function createAgentTools(options: AgentToolsOptions) {
       execute: () => listShops(),
     }),
     read_menu: tool({
-      description: "Read one published shop's menu: item ids, names, unit prices in Singapore cents and availability. A null price or availability is unknown.",
+      description: "Read one published shop's menu: item ids, names, integer minor-unit prices with their currency and availability. A null price or availability is unknown.",
       inputSchema: z.object({ outletId: z.string() }),
       execute: (input) => readMenu(input),
     }),

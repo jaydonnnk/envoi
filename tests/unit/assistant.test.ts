@@ -71,14 +71,14 @@ describe("Ask Envoi", () => {
     // The fake description reached the reply, so it existed to be mistaken for a step.
     expect(result).toMatchObject({ kind: "reply", text: expect.stringContaining("createPurchaseRequest") });
     expect(result.steps.map((step) => [step.operation, step.status])).toEqual([["listOutlets", 200]]);
-    expect(envoi.requests.map((request) => request.path)).toEqual(["/api/v1/outlets"]);
+    expect(envoi.requests.map((request) => request.path)).toEqual(["/mcp"]);
     expect(result.steps[0]).toMatchObject({ outletId: null, itemIds: [], expiresAt: null });
   });
 
-  it("the assistant reaches Envoi only through the generated client", () => {
+  it("the assistant reaches Envoi only through the MCP client", () => {
     const files = sources(ASSISTANT_DIR);
-    expect(files.map((source) => source.file).sort()).toEqual(["agent.ts", "tools.ts", "trace.ts"]);
-    const allowed = new Set(["ai", "@ai-sdk/openai", "zod", "../../../clients/typescript/src/index", "./tools", "./trace"]);
+    expect(files.map((source) => source.file).sort()).toEqual(["agent.ts", "envoi-mcp.ts", "tools.ts", "trace.ts"]);
+    const allowed = new Set(["ai", "@ai-sdk/openai", "zod", "./envoi-mcp", "./tools", "./trace", "../mcp/contracts", "node:async_hooks", "@modelcontextprotocol/sdk/client/index.js", "@modelcontextprotocol/sdk/client/streamableHttp.js", "@modelcontextprotocol/sdk/types.js"]);
     for (const { file, text } of files) {
       expect(text.match(/\bfetch\s*\(/g), file).toBeNull();
       expect(text.match(/\bimport\s*\(/g), file).toBeNull();
@@ -90,8 +90,8 @@ describe("Ask Envoi", () => {
     const routeImports = importsOf(route);
     expect(routeImports.filter((name) => name!.includes("clients/"))).toEqual([]);
     expect(routeImports.filter((name) => name!.startsWith("@/integrations/assistant/")).sort()).toEqual(["@/integrations/assistant/agent", "@/integrations/assistant/tools"]);
-    // The generated client is the module that carries every request.
-    expect(readFileSync(join(ASSISTANT_DIR, "tools.ts"), "utf8")).toMatch(/options\.reader\.outlets\.listOutlets\(/);
+    // Every tool uses the shared MCP client.
+    expect(readFileSync(join(ASSISTANT_DIR, "tools.ts"), "utf8")).toMatch(/options\.callEnvoi\("search_outlets"/);
   });
 
   it("the terminal agent and the site run one agent module", () => {
@@ -101,23 +101,17 @@ describe("Ask Envoi", () => {
     // It imports the moved module and none of the model or tool libraries itself.
     expect(importsOf(text).sort()).toEqual(["../../src/integrations/assistant/agent", "../../src/integrations/assistant/tools", "node:fs", "node:readline/promises", "node:url"]);
     // No instructions, tool definitions or client of its own.
-    for (const needle of ["You are Envoi", "INSTRUCTIONS", "tool(", "createAgentTools", "EnvoiPublicApiClient", "generateText", "propose_basket", "list_shops", "read_menu"]) {
+    for (const needle of ["You are Envoi", "INSTRUCTIONS", "tool(", "createAgentTools", "generateText", "propose_basket", "list_shops", "read_menu"]) {
       expect(text.includes(needle), needle).toBe(false);
     }
     // The site's agent module does hold them, so the absence above is a move and not a deletion.
     const moved = readFileSync(join(ASSISTANT_DIR, "agent.ts"), "utf8") + readFileSync(join(ASSISTANT_DIR, "tools.ts"), "utf8");
-    for (const needle of ["You are Envoi", "INSTRUCTIONS", "tool(", "createAgentTools", "EnvoiPublicApiClient", "generateText", "propose_basket", "list_shops", "read_menu"]) {
+    for (const needle of ["You are Envoi", "INSTRUCTIONS", "tool(", "createAgentTools", "generateText", "propose_basket", "list_shops", "read_menu"]) {
       expect(moved.includes(needle), needle).toBe(true);
     }
   });
 
-  // S25 review fix: the generated client resolves only through next.config.ts's webpack rule, which
-  // Turbopack ignores, so a Next.js dev server or build without --webpack fails on "./client.js".
-  it("every Next.js dev server and build applies the generated client rule", () => {
-    const scripts = (JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")) as { scripts: Record<string, string> }).scripts;
-    const bundled = Object.entries(scripts).filter(([, command]) => /\bnext (dev|build)\b/.test(command));
-    expect(bundled.map(([name]) => name).sort()).toEqual(["build", "dev"]);
-    for (const [name, command] of bundled) expect(command.split(/\s+/), name).toContain("--webpack");
-    expect(readFileSync(join(process.cwd(), "next.config.ts"), "utf8")).toContain('extensionAlias: { ".js": [".ts", ".js"] }');
+  it("the removed generated client leaves no webpack workaround", () => {
+    expect(readFileSync(join(process.cwd(), "next.config.ts"), "utf8")).not.toMatch(/GENERATED_CLIENT_SOURCE|extensionAlias|clients\/typescript/);
   });
 });

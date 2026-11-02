@@ -37,7 +37,7 @@ const STOPPED: Record<"tool_calls" | "time", string> = {
 };
 
 // Ask Envoi (S25): one buyer turn of the agent, which reads shops and menus and may ask Envoi for a
-// one-time review link, all through the generated client. The limiter admits the turn before any
+// one-time review link, all through the MCP client. The limiter admits the turn before any
 // model call. The link is answered beside the reply, never inside it or the steps.
 export async function POST(request: Request): Promise<Response> {
   const now = new Date();
@@ -71,7 +71,7 @@ export async function POST(request: Request): Promise<Response> {
 // One server log line per client call, from the same trace entries the buyer sees as steps.
 function logSteps(kind: string, steps: AssistantStep[]): void {
   for (const step of steps) {
-    log("info", "assistant_step", { operation: step.operation, status: step.status, outletId: step.outletId, itemIds: step.itemIds.join(","), expiresAt: step.expiresAt, ms: step.ms });
+    log("info", "assistant_step", { operation: step.operation, status: step.status, outletId: step.outletId, itemIds: step.itemIds.join(","), expiresAt: step.expiresAt, ms: step.ms, ...(step.error !== undefined ? { error: step.error } : {}) });
   }
   log("info", "assistant_turn", { kind, steps: steps.length });
 }

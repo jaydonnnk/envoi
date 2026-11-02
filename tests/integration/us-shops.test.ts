@@ -2,6 +2,7 @@ import type { Address } from "@solana/kit";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { outputSchemas } from "@/integrations/mcp/contracts";
 import { runMaintenance } from "@/domain/maintenance/tasks";
 import { assertPyusdEligible } from "@/domain/pyusd/attempts";
 import { pyusdAvailability } from "@/domain/pyusd/identity";
@@ -324,6 +325,35 @@ describe("US shops (S27)", () => {
       const menu = await (await routes.publicMenu.GET(new Request(`${TEST_BASE_URL}/api/v1/outlets/${outletId}/menu`), routeParams(outletId))).json();
       expect(validate(document, { $ref: "#/components/schemas/MenuResponse" }, menu)).toEqual([]);
       expect((menu as { data: { currency: string; outlet: { currency: string } } }).data).toMatchObject({ currency, outlet: { currency } });
+    }
+  });
+
+  it("every MCP tool answer matches its output schema", async () => {
+    const { token } = await issueAgentToken(drizzle(admin(), { schema }), "FIXTURE S27 output schemas");
+    const rpc = async (method: string, params: Record<string, unknown> = {}) => {
+      const response = await routes.mcp.POST(new Request(`${TEST_BASE_URL}/mcp`, {
+        method: "POST",
+        headers: { authorization: `Bearer ${token}`, "content-type": "application/json", accept: "application/json, text/event-stream", host: new URL(TEST_BASE_URL).host, "mcp-protocol-version": "2025-06-18" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+      }));
+      expect(response.status).toBe(200);
+      return response.json();
+    };
+    const listed = await rpc("tools/list");
+    expect(listed.result.tools).toHaveLength(3);
+    for (const tool of listed.result.tools) expect(tool.outputSchema, tool.name).toMatchObject({ type: "object" });
+    for (const outletId of [fixture.outletId, us.shop.outletId]) {
+      const itemId = outletId === fixture.outletId ? fixture.items[0]!.id : us.items[0]!.id;
+      for (const [name, args] of [
+        ["search_outlets", {}],
+        ["get_menu", { outletId }],
+        ["create_purchase_request", { outletId, lines: [{ menuItemId: itemId, quantity: 1 }] }],
+      ] as const) {
+        const answer = (await rpc("tools/call", { name, arguments: args })).result;
+        expect(answer.isError).not.toBe(true);
+        expect(answer.structuredContent, name).toEqual(JSON.parse(answer.content[0].text));
+        expect(outputSchemas[name].safeParse(answer.structuredContent).success, name).toBe(true);
+      }
     }
   });
 

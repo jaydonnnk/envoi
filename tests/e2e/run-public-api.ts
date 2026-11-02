@@ -1,18 +1,16 @@
-// S14 review fix 4: runs the public API contract check and the generated client over real HTTP,
+// S14 review fix 4: runs the public API contract check over real HTTP,
 // against the production build in .next, so the framework layer (routing, next.config headers,
 // decoding of the path) is checked too, not only the route handlers the integration test calls.
 // It creates a disposable, migrated local database holding the seeded demo FIXTURE shop, starts
-// `next start` against it with fixture settings (payments and PYUSD off), runs both scripts, then
+// `next start` against it with fixture settings (payments and PYUSD off), runs the contract script and MCP client, then
 // stops the server and drops the database. CI runs it after `npm run build`.
-// S19: it also gives the fixture shop the FIXTURE PayPal sandbox seller the integration tests use and
-// issues one FIXTURE agent token in that database, handed to the generated client run only, in its
-// environment, so the client can create a purchase request; the token is never printed. Payments stay
-// off, so nothing reaches PayPal.
 //
 //   npm run build && npx tsx tests/e2e/run-public-api.ts [port]
 //
 // Every configuration name src/env.ts reads is set here, so neither Next.js nor src/env.ts can fill
 // one from a local .env.local; the run refuses to start if a name is left unset.
+import assert from "node:assert/strict";
+import { connectEnvoi } from "@/integrations/assistant/envoi-mcp";
 import { spawn, type ChildProcess } from "node:child_process";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -51,12 +49,14 @@ let code = 1;
 try {
   const seedClient = postgres(database.adminUrl, { max: 1, onnotice: () => {} });
   let agentToken: string;
+  let outletId: string;
   try {
     const db = drizzle(seedClient, { schema });
     const seeded = await seedDemoFixture(db);
     console.log(`FIXTURE seed: ${JSON.stringify(seeded)}`);
     await assignPayPalDestination(db, seeded.outletId, FIXTURE_SELLER);
-    agentToken = (await issueAgentToken(db, "FIXTURE e2e agent")).token;
+    outletId = seeded.outletId;
+    agentToken = (await issueAgentToken(db, "FIXTURE MCP e2e agent")).token;
   } finally {
     await seedClient.end({ timeout: 5 });
   }
@@ -92,9 +92,30 @@ try {
   await waitFor(`${baseUrl}/api/v1/outlets`, server);
 
   const contract = await run("node_modules/.bin/tsx", ["tests/e2e/public-api-contract.ts", baseUrl, "nul"], env);
-  const client = await run("node_modules/.bin/tsx", ["tests/e2e/apimatic-client.ts", baseUrl], { ...env, ENVOI_AGENT_TOKEN: agentToken });
-  console.log(`contract check exit ${contract}, generated client exit ${client}`);
-  code = contract === 0 && client === 0 ? 0 : 1;
+  assert.equal(contract, 0);
+  const client = await connectEnvoi(baseUrl, agentToken);
+  try {
+    const signal = AbortSignal.timeout(10_000);
+    const shops = await client.callEnvoi("search_outlets", {}, signal);
+    assert.equal(shops.ok, true);
+    if (!shops.ok) throw new Error("FIXTURE registry read failed");
+    assert.ok(shops.value.outlets.some((outlet) => outlet.id === outletId && outlet.currency === "SGD"));
+    const menu = await client.callEnvoi("get_menu", { outletId }, signal);
+    assert.equal(menu.ok, true);
+    if (!menu.ok) throw new Error("FIXTURE menu read failed");
+    const item = menu.value.items.find((item) => item.available && item.unitMinor !== null);
+    assert.ok(item);
+    const link = await client.callEnvoi("create_purchase_request", { outletId, lines: [{ menuItemId: item.id, quantity: 1 }] }, signal);
+    assert.equal(link.ok, true);
+    if (!link.ok) throw new Error("FIXTURE proposal failed");
+    assert.equal(new URL(link.value.url).origin, baseUrl);
+    assert.ok(new URL(link.value.url).pathname.startsWith("/approve/"));
+    assert.equal(link.status, 200);
+  } finally {
+    await client.close();
+  }
+  console.log("Public API contract and MCP client over real HTTP: PASS (local FIXTURE only)");
+  code = 0;
 } finally {
   server?.kill("SIGTERM");
   if (server && server.exitCode === null) await new Promise((resolve) => server!.once("exit", resolve));

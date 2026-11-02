@@ -12,7 +12,6 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "typecheck:client": "tsc --noEmit -p config/tsconfig.client.json && tsc --noEmit -p clients/typescript/tsconfig.json",
     "test": "vitest run --config config/vitest.config.ts",
     "test:unit": "vitest run --config config/vitest.config.ts --project unit",
     "test:integration": "vitest run --config config/vitest.config.ts --project integration",

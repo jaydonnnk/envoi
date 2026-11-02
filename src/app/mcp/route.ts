@@ -1,10 +1,10 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
-import { z } from "zod";
-import { purchaseRequestShape, parseJsonBytes } from "@/domain/handoffs/input";
+import { parseJsonBytes } from "@/domain/handoffs/input";
 import { createPurchaseRequest } from "@/domain/handoffs/redeem";
 import { searchRegistry } from "@/domain/handoffs/registry";
 import { getPublishedMenu } from "@/domain/outlets/search";
+import { envoiTools, TEST_NOTICE } from "@/integrations/mcp/contracts";
 import { webEnv } from "@/env";
 import { isAgent, requireAgentToken, type AgentPrincipal } from "@/lib/auth-context";
 import { webDb, type Db } from "@/lib/db/web";
@@ -24,8 +24,6 @@ export const dynamic = "force-dynamic";
 // client's initialize message.
 const MAX_BODY_BYTES = 16_384;
 const BODY_READ_MS = 5_000;
-
-const TEST_NOTICE = "Envoi test environment: demo fixture shops and PayPal sandbox test money only. No real money moves.";
 
 const INSTRUCTIONS = [
   TEST_NOTICE,
@@ -59,12 +57,12 @@ function sameSite(request: Request): "ok" | "origin" | "host" {
   return "ok";
 }
 
-function json(value: unknown) {
-  return { content: [{ type: "text" as const, text: JSON.stringify(value, null, 2) }] };
+function json(value: Record<string, unknown>) {
+  return { content: [{ type: "text" as const, text: JSON.stringify(value, null, 2) }], structuredContent: value };
 }
 
-function toolError(message: string) {
-  return { content: [{ type: "text" as const, text: message }], isError: true };
+function toolError(code: string, message: string) {
+  return { content: [{ type: "text" as const, text: JSON.stringify({ code, message }) }], isError: true };
 }
 
 function outletView(outlet: { id: string; name: string; area: string; isDemoFixture: boolean }) {
@@ -76,12 +74,7 @@ function agentServer(db: Db, agent: AgentPrincipal): McpServer {
 
   server.registerTool(
     "search_outlets",
-    {
-      title: "Search Envoi shops",
-      description: `Find published Envoi shops by Singapore area or shop name. ${TEST_NOTICE}`,
-      inputSchema: { area: z.string().max(80).optional().describe("Area, for example Tanjong Pagar"), name: z.string().max(80).optional().describe("Shop name") },
-      annotations: { readOnlyHint: true, openWorldHint: false },
-    },
+    envoiTools.search_outlets,
     async ({ area, name }) => {
       const outlets = await searchRegistry(db, { area, name });
       log("info", "mcp_tool", { tool: "search_outlets", agentTokenId: agent.agentTokenId, results: outlets.length });
@@ -91,16 +84,11 @@ function agentServer(db: Db, agent: AgentPrincipal): McpServer {
 
   server.registerTool(
     "get_menu",
-    {
-      title: "Read a shop's menu",
-      description: `Read the published menu of one Envoi shop. Prices are the shop's current published prices for reference; Envoi prices the basket again when the buyer reviews it. ${TEST_NOTICE}`,
-      inputSchema: { outletId: z.string().min(1).max(64).describe("Outlet id from search_outlets") },
-      annotations: { readOnlyHint: true, openWorldHint: false },
-    },
+    envoiTools.get_menu,
     async ({ outletId }) => {
       const menu = await getPublishedMenu(db, outletId);
       log("info", "mcp_tool", { tool: "get_menu", agentTokenId: agent.agentTokenId, found: menu !== null });
-      if (!menu) return toolError("That shop is not on Envoi.");
+      if (!menu) return toolError("not_found", "That shop is not on Envoi.");
       return json({
         notice: TEST_NOTICE,
         outlet: outletView(menu.outlet),
@@ -113,18 +101,11 @@ function agentServer(db: Db, agent: AgentPrincipal): McpServer {
 
   server.registerTool(
     "create_purchase_request",
-    {
-      title: "Propose a basket to the buyer",
-      description:
-        "Propose items from one shop and get a link for the buyer. The link works once and expires 10 minutes after creation. It carries no price: the buyer reviews Envoi's own price and approves payment themselves. " +
-        TEST_NOTICE,
-      inputSchema: purchaseRequestShape,
-      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
-    },
+    envoiTools.create_purchase_request,
     async (input) => {
       const created = await createPurchaseRequest(db, agent, input, new Date());
       log("info", "mcp_tool", { tool: "create_purchase_request", agentTokenId: agent.agentTokenId, outcome: created.kind });
-      if (created.kind === "refused") return toolError(created.error.message);
+      if (created.kind === "refused") return toolError(created.error.code, created.error.message);
       return json({
         notice: TEST_NOTICE,
         url: created.url,

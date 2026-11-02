@@ -52,7 +52,6 @@ Never point these commands at a shared or hosted database you mean to keep.
 
 ```bash
 npm run typecheck
-npm run typecheck:client
 npm run lint
 npm run test:unit
 TEST_DATABASE_URL=postgres://postgres@127.0.0.1:5432/envoi_test npm run test:integration
@@ -71,7 +70,7 @@ To run it by hand: `npm run runner:build`, then `npm run runner:start` with the 
 ## Public API
 
 `openapi/envoi-public.yaml` describes the two public read routes (list shops, read a published menu) and the agent's purchase request route, which takes an agent token and answers a one-time link a human buyer opens to review and approve.
-`clients/typescript/` is a TypeScript client generated from it by APIMatic and committed unchanged; the app never calls it. [`clients/README.md`](clients/README.md) says how it was generated and what it checks.
+The assistant and terminal buyer agent use the MCP SDK client against Envoi's `/mcp` endpoint. Each tool answer is validated against the same output schema as the server. The public REST API and its OpenAPI document remain available.
 
 ## Project records
 

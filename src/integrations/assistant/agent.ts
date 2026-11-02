@@ -1,12 +1,12 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateText, stepCountIs, type ModelMessage } from "ai";
-import { EnvoiPublicApiClient } from "../../../clients/typescript/src/index";
+import { connectEnvoi, type EnvoiConnection } from "./envoi-mcp";
 import { createAgentTools, MAX_QUANTITY, MAX_TOOL_CALLS, MIN_QUANTITY, type CreatedLink, type TurnGate } from "./tools";
 import { createTrace, type Trace, type TraceEntry } from "./trace";
 
 // S20's reference buyer agent, moved here in S25 (Gate 3 reopening 2026-10-29) so the terminal agent
 // in clients/buyer-agent/ and the site's Ask Envoi route run one agent. It reads published shops and
-// menus and asks Envoi for a one-time link, all through the APIMatic-generated client; the person
+// menus and asks Envoi for a one-time link, all through the MCP client; the person
 // opens the link, sees Envoi's own price and approves payment themselves in PayPal sandbox. The
 // link is never given to the model or written to the trace.
 
@@ -62,16 +62,16 @@ export function checkBaseUrl(value: string): string | null {
 // returns the model's own messages for that turn, so a caller can keep or drop the conversation.
 function createLoop(config: LoopConfig, trace: Trace) {
   const now = config.now ?? Date.now;
-  const retry = { maxRetries: 0 };
-  const reader = new EnvoiPublicApiClient({ serverOptions: { baseUrl: config.baseUrl }, fetch: config.envoiFetch, retry });
-  const agent = new EnvoiPublicApiClient({ serverOptions: { baseUrl: config.baseUrl }, agentBearer: config.agentToken, fetch: config.envoiFetch, retry });
+  let connection: EnvoiConnection | null = null;
   const provider = createOpenAI({ apiKey: config.openaiApiKey, fetch: config.openaiFetch });
 
   let gate: TurnGate = { signal: AbortSignal.abort(), spend: () => {} };
   let link: CreatedLink | null = null;
   const { tools } = createAgentTools({
-    reader,
-    agent,
+    callEnvoi: (tool, args, signal) => {
+      if (!connection) throw new Error("MCP connection is not open");
+      return connection.callEnvoi(tool, args, signal);
+    },
     trace,
     gate: () => gate,
     onLink: (created) => {
@@ -103,6 +103,7 @@ function createLoop(config: LoopConfig, trace: Trace) {
     link = null;
 
     try {
+      connection = await connectEnvoi(config.baseUrl, config.agentToken, config.envoiFetch, controller.signal);
       const result = await generateText({
         model: provider.responses(config.model),
         system: INSTRUCTIONS,
@@ -126,6 +127,8 @@ function createLoop(config: LoopConfig, trace: Trace) {
       return { result: { kind: "failed" }, response: [] };
     } finally {
       clearTimeout(timer);
+      await connection?.close();
+      connection = null;
     }
   }
 

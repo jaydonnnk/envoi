@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { checkBaseUrl, createAgent, TURN_BUDGET_MS } from "../../src/integrations/assistant/agent";
 import { createAgentTools, MAX_TOOL_CALLS, type TurnGate } from "../../src/integrations/assistant/tools";
 import { createTrace } from "../../src/integrations/assistant/trace";
-import { EnvoiPublicApiClient } from "../../clients/typescript/src/index";
+import { connectEnvoi } from "../../src/integrations/assistant/envoi-mcp";
 import {
   createFakeEnvoiApi,
   FIXTURE_AGENT_TOKEN,
@@ -24,9 +24,8 @@ import { createFakeOpenAI, FIXTURE_AI_ENV, type FakeTurn } from "../support/fake
 // called.
 
 const AGENT_DIR = join(process.cwd(), "src/integrations/assistant");
-// The only modules the agent may import: the model SDK, its schema library, the generated client and
-// its own two files. The command line's Node built-ins stayed in clients/buyer-agent/agent.ts.
-const ALLOWED_IMPORTS = new Set(["ai", "@ai-sdk/openai", "zod", "../../../clients/typescript/src/index", "./tools", "./trace"]);
+// The agent imports the model SDK, MCP SDK, schema library and its own modules. The command line's Node built-ins stayed in clients/buyer-agent/agent.ts.
+const ALLOWED_IMPORTS = new Set(["ai", "@ai-sdk/openai", "zod", "./envoi-mcp", "./tools", "./trace", "../mcp/contracts", "node:async_hooks", "@modelcontextprotocol/sdk/client/index.js", "@modelcontextprotocol/sdk/client/streamableHttp.js", "@modelcontextprotocol/sdk/types.js"]);
 
 function agentSources(): { file: string; text: string }[] {
   return readdirSync(AGENT_DIR)
@@ -34,18 +33,18 @@ function agentSources(): { file: string; text: string }[] {
     .map((file) => ({ file, text: readFileSync(join(AGENT_DIR, file), "utf8") }));
 }
 
-function setup() {
+async function setup() {
   const envoi = createFakeEnvoiApi();
   const lines: string[] = [];
   const gate: TurnGate = { signal: new AbortController().signal, spend: () => {} };
   const links: { url: string; expiresAt: string }[] = [];
-  const reader = new EnvoiPublicApiClient({ serverOptions: { baseUrl: FIXTURE_BASE_URL }, fetch: envoi.fetch, retry: { maxRetries: 0 } });
-  const agent = new EnvoiPublicApiClient({ serverOptions: { baseUrl: FIXTURE_BASE_URL }, agentBearer: FIXTURE_AGENT_TOKEN, fetch: envoi.fetch, retry: { maxRetries: 0 } });
-  const tools = createAgentTools({ reader, agent, trace: createTrace((line) => lines.push(line)), gate: () => gate, onLink: (link) => links.push(link) });
+  const client = await connectEnvoi(FIXTURE_BASE_URL, FIXTURE_AGENT_TOKEN, envoi.fetch);
+  connections.push(client);
+  const tools = createAgentTools({ callEnvoi: client.callEnvoi, trace: createTrace((line) => lines.push(line)), gate: () => gate, onLink: (link) => links.push(link) });
   return { envoi, lines, links, tools };
 }
 
-const posts = (envoi: ReturnType<typeof createFakeEnvoiApi>) => envoi.requests.filter((request) => request.method === "POST");
+const posts = (envoi: ReturnType<typeof createFakeEnvoiApi>) => envoi.requests.filter((request) => request.tool === "create_purchase_request");
 
 function agentWith(script: (index: number) => FakeTurn) {
   const envoi = createFakeEnvoiApi();
@@ -65,17 +64,18 @@ function agentWith(script: (index: number) => FakeTurn) {
 
 const call = (name: string, args: Record<string, unknown> = {}): FakeTurn => ({ kind: "tools", calls: [{ name, args }] });
 
-afterEach(() => {
+const connections: Awaited<ReturnType<typeof connectEnvoi>>[] = [];
+afterEach(async () => {
+  await Promise.all(connections.splice(0).map((client) => client.close()));
   vi.useRealTimers();
   vi.unstubAllGlobals();
 });
 
 describe("reference buyer agent", () => {
-  it("agent tools call only the generated client", async () => {
-    // Statically: no source calls fetch, and every import is on the allowed list, so neither MCP nor
-    // another HTTP library can carry a request.
+  it("agent tools call only the MCP client", async () => {
+    // Only the shared MCP client may carry requests.
     const sources = agentSources();
-    expect(sources.map((source) => source.file).sort()).toEqual(["agent.ts", "tools.ts", "trace.ts"]);
+    expect(sources.map((source) => source.file).sort()).toEqual(["agent.ts", "envoi-mcp.ts", "tools.ts", "trace.ts"]);
     for (const { file, text } of sources) {
       expect(text.match(/\bfetch\s*\(/g), file).toBeNull();
       // Named, namespace and re-export forms, and bare side-effect imports.
@@ -85,25 +85,21 @@ describe("reference buyer agent", () => {
     }
 
     // At run time: with the global fetch refusing everything, each tool makes exactly one request,
-    // through the generated client's fetch, to its own route.
+    // through the MCP client's injected transport to /mcp.
     vi.stubGlobal("fetch", () => {
       throw new Error("FIXTURE: the global fetch must not be used");
     });
-    const { envoi, tools } = setup();
+    const { envoi, tools } = await setup();
     await tools.listShops();
     await tools.readMenu({ outletId: TEST_SHOP.id });
     await tools.proposeBasket({ outletId: TEST_SHOP.id, lines: [{ menuItemId: "itm_kopic", quantity: 2 }] });
-    expect(envoi.requests.map((request) => `${request.method} ${request.path}`)).toEqual([
-      "GET /api/v1/outlets",
-      `GET /api/v1/outlets/${TEST_SHOP.id}/menu`,
-      "POST /api/v1/purchase-requests",
-    ]);
-    // Only the purchase request carries the agent token.
-    expect(envoi.requests.map((request) => request.headers.get("authorization"))).toEqual([null, null, `Bearer ${FIXTURE_AGENT_TOKEN}`]);
+    expect(envoi.requests.map((request) => request.tool)).toEqual(["search_outlets", "get_menu", "create_purchase_request"]);
+    expect(envoi.requests.map((request) => request.path)).toEqual(["/mcp", "/mcp", "/mcp"]);
+    expect(envoi.requests.map((request) => request.headers.get("authorization"))).toEqual(Array(3).fill(`Bearer ${FIXTURE_AGENT_TOKEN}`));
   });
 
   it("agent refuses an item id or quantity the menu did not allow", async () => {
-    const { envoi, tools, links } = setup();
+    const { envoi, tools, links } = await setup();
     // No menu read yet for this shop.
     expect(await tools.proposeBasket({ outletId: TEST_SHOP.id, lines: [{ menuItemId: "itm_kopic", quantity: 1 }] })).toHaveProperty("refused");
 
@@ -155,7 +151,7 @@ describe("reference buyer agent", () => {
     expect(sent[0]!.body).toEqual({ outletId: TEST_SHOP.id, lines: [{ menuItemId: "itm_lemontea", quantity: 2 }] });
 
     // Called directly, with the schema bypassed, the body is still ids and quantities only.
-    const direct = setup();
+    const direct = await setup();
     await direct.tools.readMenu({ outletId: TEST_SHOP.id });
     const extra = { outletId: TEST_SHOP.id, amount: 1, lines: [{ menuItemId: "itm_kopic", quantity: 1, unitMinor: 1 }] };
     await direct.tools.proposeBasket(extra);
@@ -203,7 +199,7 @@ describe("reference buyer agent", () => {
     expect(entries.map((entry) => [entry.operation, entry.status])).toEqual([
       ["listOutlets", 200],
       ["getOutletMenu", 200],
-      ["createPurchaseRequest", 201],
+      ["createPurchaseRequest", 200],
     ]);
     expect(entries[2]).toMatchObject({ outletId: TEST_SHOP.id, itemIds: ["itm_lemontea"], expiresAt: FIXTURE_EXPIRES_AT });
 

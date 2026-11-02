@@ -1,16 +1,19 @@
-// FIXTURE: a fake of Envoi's three public API routes at the generated client's fetch boundary, for
-// the S20 reference agent's tests. No Envoi deployment is called; every shop, item, token and link
-// it answers is a FIXTURE value.
+import { z } from "zod";
+import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { JSONRPCMessageSchema, type JSONRPCMessage } from "@modelcontextprotocol/sdk/types.js";
+import { envoiTools, TEST_NOTICE } from "@/integrations/mcp/contracts";
 
+// FIXTURE: real McpServer and tool definitions over in-memory transport. The fetch adapter only
+// bridges JSON-RPC, so the production HTTP client runs without a network or deployment.
 export const FIXTURE_BASE_URL = "https://fixture.envoi.test";
 export const FIXTURE_AGENT_TOKEN = "envoi_agent_FIXTUREtokenFIXTUREtokenFIXTUREtokenFIXTUREtoken";
 export const FIXTURE_LINK_TOKEN = "fixturelinktokenfixturelinktokenfixturelinktokenab";
 export const FIXTURE_LINK = `${FIXTURE_BASE_URL}/approve/${FIXTURE_LINK_TOKEN}`;
 export const FIXTURE_EXPIRES_AT = "2026-10-28T03:10:00.000Z";
-
-export const TEST_SHOP = { id: "out_fixturetestshop", name: "FIXTURE Test Shop", area: "Test Area", isDemoFixture: true };
-export const OTHER_SHOP = { id: "out_fixtureothershop", name: "FIXTURE Other Shop", area: "Other Area", isDemoFixture: true };
-
+export const TEST_SHOP = { id: "out_fixturetestshop", name: "FIXTURE Test Shop", area: "Test Area", isDemoFixture: true, country: "SG", currency: "SGD", label: "Demo fixture shop, not a real merchant" };
+export const OTHER_SHOP = { ...TEST_SHOP, id: "out_fixtureothershop", name: "FIXTURE Other Shop", area: "Other Area" };
+export const US_SHOP = { ...TEST_SHOP, id: "out_fixtureusshop", name: "FIXTURE US Shop", country: "US", currency: "USD" };
 export const MENUS: Record<string, { id: string; name: string; unitMinor: number | null; available: boolean | null }[]> = {
   [TEST_SHOP.id]: [
     { id: "itm_kopic", name: "Kopi C", unitMinor: 180, available: true },
@@ -19,37 +22,55 @@ export const MENUS: Record<string, { id: string; name: string; unitMinor: number
     { id: "itm_milktea", name: "Iced milk tea", unitMinor: 250, available: true },
   ],
   [OTHER_SHOP.id]: [{ id: "itm_otherkopi", name: "Kopi O", unitMinor: 160, available: true }],
+  [US_SHOP.id]: [{ id: "itm_uscoffee", name: "FIXTURE Coffee", unitMinor: 1295, available: true }],
 };
-
-export type FakeEnvoiRequest = { method: string; path: string; headers: Headers; body: unknown };
-
+export type FakeEnvoiRequest = { method: string; path: string; tool: string; headers: Headers; body: unknown };
 export type FakeEnvoiApi = { fetch: typeof globalThis.fetch; requests: FakeEnvoiRequest[] };
+type Options = { corrupt?: (tool: string, answer: Record<string, unknown>) => Record<string, unknown>; discoverSchemas?: boolean };
 
-const SHOPS = [TEST_SHOP, OTHER_SHOP];
-
-export function createFakeEnvoiApi(): FakeEnvoiApi {
+export function createFakeEnvoiApi(options: Options = {}): FakeEnvoiApi {
   const requests: FakeEnvoiRequest[] = [];
-  const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
-    const request = input instanceof Request ? input : new Request(input, init);
-    const url = new URL(request.url);
-    if (url.origin !== FIXTURE_BASE_URL) throw new Error(`FIXTURE fake Envoi refuses an unexpected URL: ${request.url}`);
-    const text = request.method === "GET" ? "" : await request.text();
-    requests.push({ method: request.method, path: url.pathname, headers: request.headers, body: text ? JSON.parse(text) : null });
-
-    if (request.method === "GET" && url.pathname === "/api/v1/outlets") return Response.json({ ok: true, data: { outlets: SHOPS } });
-    const menu = url.pathname.match(/^\/api\/v1\/outlets\/([^/]+)\/menu$/);
-    if (request.method === "GET" && menu) {
-      const shop = SHOPS.find((candidate) => candidate.id === decodeURIComponent(menu[1]!));
-      if (!shop) return Response.json({ ok: false, error: { code: "not_found", message: "Not found.", retryable: false, details: {} } }, { status: 404 });
-      return Response.json({ ok: true, data: { outlet: shop, menuRevisionId: `rev_${shop.id}`, items: MENUS[shop.id] } });
-    }
-    if (request.method === "POST" && url.pathname === "/api/v1/purchase-requests") {
-      if (request.headers.get("authorization") !== `Bearer ${FIXTURE_AGENT_TOKEN}`) {
-        return Response.json({ ok: false, error: { code: "unauthorized", message: "Unauthorized.", retryable: false, details: {} } }, { status: 401 });
+  const shops = [TEST_SHOP, OTHER_SHOP, US_SHOP];
+  const json = (value: Record<string, unknown>) => ({ content: [{ type: "text" as const, text: JSON.stringify(value) }], structuredContent: value });
+  const fetch: typeof globalThis.fetch = async (input, init) => {
+    const request = new Request(input, init);
+    if (request.url !== `${FIXTURE_BASE_URL}/mcp`) throw new Error("FIXTURE fake MCP refuses an unexpected URL");
+    if (request.headers.get("authorization") !== `Bearer ${FIXTURE_AGENT_TOKEN}`) return Response.json({}, { status: 401 });
+    const message = JSONRPCMessageSchema.parse(await request.json());
+    const tool = "method" in message && message.method === "tools/call" ? String(message.params?.name) : null;
+    if (tool) requests.push({ method: request.method, path: "/mcp", tool, headers: request.headers, body: "params" in message ? message.params?.arguments : null });
+    const server = new McpServer({ name: "FIXTURE-envoi", version: "1.0.0" });
+    server.registerTool("search_outlets", envoiTools.search_outlets, async () => json({ notice: TEST_NOTICE, outlets: shops }));
+    server.registerTool("get_menu", envoiTools.get_menu, async ({ outletId }) => {
+      const outlet = shops.find((shop) => shop.id === outletId);
+      if (!outlet) return { isError: true, content: [{ type: "text", text: JSON.stringify({ code: "not_found", message: "FIXTURE shop not found" }) }] };
+      return json({ notice: TEST_NOTICE, outlet, currency: outlet.currency, items: MENUS[outlet.id]!.map((item) => ({ ...item, currency: outlet.currency })) });
+    });
+    server.registerTool("create_purchase_request", envoiTools.create_purchase_request, async ({ lines }) => {
+      if (lines.some((line) => line.quantity < 1 || line.quantity > 20)) return { isError: true, content: [{ type: "text", text: JSON.stringify({ code: "validation_failed", message: "FIXTURE quantity outside 1-20" }) }] };
+      return json({ notice: TEST_NOTICE, url: FIXTURE_LINK, expiresAt: FIXTURE_EXPIRES_AT, forTheBuyer: "FIXTURE: review and approve test money yourself." });
+    });
+    const [wire, service] = InMemoryTransport.createLinkedPair();
+    await server.connect(service);
+    try {
+      const answer = new Promise<JSONRPCMessage>((resolve) => { wire.onmessage = resolve; });
+      await wire.start();
+      await wire.send(message);
+      if (!("id" in message)) return new Response(null, { status: 202 });
+      const reply = await answer;
+      if ("result" in reply && tool && options.corrupt) {
+        const value = z.record(z.string(), z.unknown()).safeParse(reply.result.structuredContent);
+        if (value.success) reply.result.structuredContent = options.corrupt(tool, value.data);
       }
-      return Response.json({ ok: true, data: { url: FIXTURE_LINK, expiresAt: FIXTURE_EXPIRES_AT } }, { status: 201 });
+      if ("result" in reply && "method" in message && message.method === "tools/list" && options.discoverSchemas === false) {
+        const listed = reply.result.tools;
+        if (Array.isArray(listed)) for (const definition of listed) delete definition.outputSchema;
+      }
+      return Response.json(reply);
+    } finally {
+      await wire.close();
+      await server.close();
     }
-    throw new Error(`FIXTURE fake Envoi has no route for ${request.method} ${url.pathname}`);
-  }) as typeof globalThis.fetch;
+  };
   return { fetch, requests };
 }
