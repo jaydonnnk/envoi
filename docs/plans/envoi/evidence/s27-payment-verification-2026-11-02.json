@@ -1,0 +1,209 @@
+{
+  "date": "2026-11-02",
+  "timezone": "Asia/Singapore",
+  "purpose": "S27 payment verification: SGD PayPal regression, US fixture and USD capture, PYUSD devnet regression",
+  "authority": {
+    "handoff_quote": "I authroize. please handoff to the next agent in a copy paste prompt for these. Thanks. Use this prompt as reference on how to structure the prompt",
+    "run_quote": "Sure go ahead for A to C. PYUSD_ENABLED is true in Render",
+    "human_actions": "The user performed every PayPal sign-in and approval, the US seller account creation and consent, the Envoi merchant account creation, and the Solana wallet signature. No credential or private key entered the agent, chat, files or logs.",
+    "scope_limit": "Sandbox PayPal test money and Solana devnet test tokens only. No real money, no paid model calls, no assistant enablement, no S28 work."
+  },
+  "environment": {
+    "app": "https://envoi-helx.onrender.com",
+    "main": "25a3b1252e150725eabcc9acdcb0a91ac7575ec0",
+    "release_deployment": "dep-dbk5him417fc73bjg74g",
+    "migration": "0027_currency_and_country applied; 28 migration hashes matched local files",
+    "baseline": "evidence/s27-payment-baseline-2026-11-02.json (2026-11-02T12:05:36.084Z)"
+  },
+  "A_sgd_paypal": {
+    "outlet": "Test Shop (out_vrlbnc3zylbrr6g2drovaiqkfu), SG, SGD",
+    "purchase": "pur_gmzbuujinxr4eozj47dqdrxcra",
+    "attempt": "att_cnip7c4serqvn3ud7nz7kq57rm",
+    "total_minor": 400,
+    "currency": "SGD",
+    "lines": [
+      { "name": "Kopi C", "quantity": 1, "unit_minor": 180 },
+      { "name": "Iced lemon tea", "quantity": 1, "unit_minor": 220 }
+    ],
+    "review_created_at": "2026-11-02T12:17:16.936Z",
+    "review_expires_at": "2026-11-02T12:22:16.936Z",
+    "attempt_created_at": "2026-11-02T12:17:29.101Z",
+    "paypal_order": "3LC60058BU074993J",
+    "paypal_capture": "13X59411JL1833901",
+    "capture_gross_minor": 400,
+    "payee_merchant_id": "EQN6264CF9F4Y",
+    "capture_verified_at": "2026-11-02T12:19:50.285Z",
+    "neon_state": "paid",
+    "attempt_state": "capture_confirmed",
+    "receipt": "Paid; S$4.00; PayPal sandbox capture and order ids shown; DOM text captured in session. Screenshot of the review exists; the receipt screenshot was unavailable after the buyer session was replaced.",
+    "earlier_review": "pur_h7busroxome2xdtofw3w7ejbyu expired at 12:11:16Z with no attempt (the browser pane was not visible for sign-in). No money."
+  },
+  "B_us_fixture_and_usd": {
+    "seller_merchant_id": "972VTMQPEUZ5A",
+    "seller_consent": {
+      "tracking_id": "envoi-s27-us-fixture-2",
+      "first_referral": "envoi-s27-us-fixture-1: PayPal redirected to /unifiedonboarding and returned Cannot GET; no integration was created.",
+      "second_referral": "PayPal consent screen shown; the user clicked Allow and PayPal showed You're all set!",
+      "partner_api_check": "HTTP 200; payments_receivable true; primary_email_confirmed true; oauth_integrations [OAUTH_THIRD_PARTY]",
+      "control": "The same partner API returned 200 for 4F58DLN39SWBS and EQN6264CF9F4Y, and 401 for 972VTMQPEUZ5A before consent."
+    },
+    "merchant": {
+      "user": "usr_uipdz5wi6rfliitqwsqqjwhutu (envoimerchant+s27us@gmail.com, name S27 US Fixture)",
+      "membership": "mbr_uox6jofqhkrh4ylp5fqhx3updi (evidenceRef s27-us-fixture)"
+    },
+    "outlet": "out_ft27b47w7r6iu7e74mb23yvydq (S27 US Fixture Shop, San Francisco, US, published)",
+    "menu": {
+      "revision": "mrv_deatykbcftimodbuka2a5orrhe (version 2, confirmed)",
+      "items": [
+        { "name": "Drip coffee", "unit_minor": 350, "available": true },
+        { "name": "Bagel", "unit_minor": 425, "available": true }
+      ],
+      "public_menu": "https://envoi-helx.onrender.com/api/v1/outlets/out_ft27b47w7r6iu7e74mb23yvydq/menu returned country US, currency USD, unitMinor 350 and 425 in a read on 2026-11-02."
+    },
+    "destination": "dst_bupixkqnjrz55wk6rsq7kmlfd4 (rail paypal, environment sandbox, seller 972VTMQPEUZ5A, status active, version 2 after use)",
+    "enrollment": "enr_6u5ubqaoildtu7xlmstcn6vski (approved, evidenceRef s27-us-fixture)",
+    "country_lock": "Authenticated PATCH country=SG answered HTTP 409, error code country_locked, message Your shop's country cannot change after you publish; the merchant UI showed United States Locked.",
+    "pyusd_on_us_review": "Unavailable with the not_sgd_shop message: PYUSD is offered at Singapore shops only in this release.",
+    "paid_purchase": {
+      "purchase": "pur_ssy6hdhw33pe2gwakmbvn5ovcq",
+      "attempt": "att_ltm7lg6wffl6gagra7t2an66a4",
+      "total_minor": 775,
+      "currency": "USD",
+      "review_created_at": "2026-11-02T13:17:47.186Z",
+      "review_expires_at": "2026-11-02T13:22:47.186Z",
+      "attempt_created_at": "2026-11-02T13:17:53.859Z",
+      "paypal_order": "3BF18639HM1756411",
+      "paypal_capture": "6UJ28034J5731743J",
+      "capture_gross_minor": 775,
+      "payee_merchant_id": "972VTMQPEUZ5A",
+      "capture_verified_at": "2026-11-02T13:18:03.077Z",
+      "neon_state": "paid",
+      "attempt_state": "capture_confirmed",
+      "receipt": "Paid; US$7.75; seller 972VTMQPEUZ5A; capture 6UJ28034J5731743J; order 3BF18639HM1756411. DOM text captured in session."
+    },
+    "unpaid_retries": [
+      {
+        "purchase": "pur_jvr66vpnwqryg53mrvdjej74zy",
+        "state": "review_expired",
+        "created_at": "2026-11-02T13:01:57.655Z",
+        "expires_at": "2026-11-02T13:06:57.655Z",
+        "attempt": null,
+        "note": "Review expired before an order."
+      },
+      {
+        "purchase": "pur_j4ik3sqmdrppfg5vhvzjrki4rq",
+        "state": "unpaid_closed",
+        "created_at": "2026-11-02T13:08:54.684Z",
+        "expires_at": "2026-11-02T13:13:54.684Z",
+        "attempt": "att_u5h5emgdsqdyt2znwajmjxdb5a",
+        "attempt_state": "abandoned",
+        "outcome_reason": "review_window_passed",
+        "paypal_order": "68C534594V443531C",
+        "capture": null,
+        "note": "The PayPal approval returned after the review window closed. The return page read This review has expired and no capture was sent."
+      }
+    ]
+  },
+  "C_pyusd_devnet": {
+    "outlet": "Test Shop (out_vrlbnc3zylbrr6g2drovaiqkfu)",
+    "rate": "rat_pfaadi5fspair5diaog5b5qd7a, 1000000 atomic per SGD, confirmed 2026-10-17T16:23:21.106Z",
+    "destination": "dst_mt4ht7ih2py2vvdkbzyjuo5fhy, version 2, wallet 6CZs2FrxDdWySqTDdfbCbTQUpWPfaLnTmnkBn1W2PF6z, token account 4TCtouxfbRqbShQDym4MdFjngcS6TFfZvL1W5BMPjz14",
+    "enablement": "The user stated PYUSD_ENABLED is true in Render. The hosted review showed PYUSD Available with the 1.000000 rate and a Pay button, which is functional evidence; the flag value itself is user-reported.",
+    "paid_purchase": {
+      "purchase": "pur_tkeuy5cd2cdamzccxpcwwkgqte",
+      "attempt": "att_k734teu26qugfeycg6bnlldj2q",
+      "total_minor": 220,
+      "currency": "SGD",
+      "pyusd_atomic_amount": "2200000",
+      "review_created_at": "2026-11-02T13:32:43.690Z",
+      "review_expires_at": "2026-11-02T13:37:43.690Z",
+      "attempt_created_at": "2026-11-02T13:32:46.705Z",
+      "signature_hint_received_at": "2026-11-02T13:32:55.553Z",
+      "verified_at": "2026-11-02T13:33:28.244Z",
+      "finalized_signature": "5wBHzXgVr73MeqvSEs24BVZY5KbHGgmBAezTxvZfMAMGknwdS8QkYRz6HeU4Y3dWEbQMEYGHcAxmqAixKsiitjR1",
+      "neon_state": "paid",
+      "attempt_state": "confirmed",
+      "on_chain": {
+        "rpc": "https://api.devnet.solana.com",
+        "slot": 517871115,
+        "blockTime": 1793626375,
+        "err": null,
+        "status": "Ok",
+        "fee_lamports": 80000,
+        "program": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb (Token-2022)",
+        "instruction": "TransferChecked",
+        "mint": "CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM",
+        "buyer_owner": "89CbH6RAXRfNFpRNDGdyzThBUyccySPqPA5QVkLa38mv",
+        "buyer_delta_ui": "-2.1999999999999886",
+        "destination_owner": "6CZs2FrxDdWySqTDdfbCbTQUpWPfaLnTmnkBn1W2PF6z",
+        "destination_delta_ui": "2.1999999999999886",
+        "destination_post_balance_ui": "108.6",
+        "note": "The UI float shows binary rounding; the token amount is 2.200000 with six decimals and the prepared atomic amount was 2200000."
+      },
+      "extra_transfers": [],
+      "receipt": "User-pasted receipt: Transferred and finalized on Solana devnet; amount transferred 2.200000 PYUSD; rate 1.000000; recipient 4TCtoux...; signature 5wBHz...; reference pur_tkeuy5cd2cdamzccxpcwwkgqte. Verified independently in Neon and on devnet."
+    },
+    "unpaid_retry": {
+      "purchase": "pur_4gwr3lzejzshkizedyp6x2zzme",
+      "attempt": "att_hgfgzxo47odlnq7cvarcb5otpe",
+      "created_at": "2026-11-02T13:22:08.379Z",
+      "prepared_at": "2026-11-02T13:22:34.314Z",
+      "closed_at": "2026-11-02T13:24:31.132Z",
+      "state": "unpaid_closed",
+      "attempt_state": "closed_unpaid",
+      "blockhash_last_valid_height": "505035437",
+      "preparation_slot": "517868519",
+      "scan_started_height": "505035773",
+      "hints": [],
+      "candidates_checked": 0,
+      "on_chain_absence": "No 2026-11-02 transaction on the buyer wallet, source token account or destination token account; the newest source transaction 37KTjnknFVSDvYsM93GD476BwQxE9WwQ44Pj9yLYcfqzExQZgFPZEq3vPrqpjN8pwWe6drG3yuQjf6QWRkH5WDkL is from 2026-10-19 at slot 512488184.",
+      "cause": "[verified] No devnet transfer exists and no signature hint arrived. [unknown] Whether Phantom was on mainnet or the signature was produced after the blockhash window; the successful retry shows the setup works.",
+      "money": "No transfer and no charge."
+    },
+    "abandoned_review": {
+      "purchase": "pur_ehrmk5dcmtsfo6o3plpruoegzu",
+      "state": "review_open stored at the snapshot; expired by wall clock at 13:31:57Z",
+      "attempt": null,
+      "note": "A PYUSD review created mid-retry with no preparation. No money."
+    }
+  },
+  "final_inventory": {
+    "snapshot_at": "2026-11-02T13:35:51.803Z",
+    "read_only": "on",
+    "totals": {
+      "outlets": 4,
+      "menu_items": 36,
+      "purchases": 57,
+      "payment_attempts": 24,
+      "basket_lines": 71,
+      "us_outlets": 1,
+      "paid_purchases": 15,
+      "unpaid_closed": 7,
+      "uncertain": 2,
+      "open_stored": 1
+    },
+    "delta_from_baseline": {
+      "outlets": 1,
+      "menu_items": 2,
+      "purchases": 8,
+      "payment_attempts": 5,
+      "basket_lines": 13,
+      "note": "The eight purchases are the three paid runs plus five reviews/orders that expired or closed unpaid. The one stored open purchase is pur_ehrmk..., expired by wall clock."
+    }
+  },
+  "checks_reused_not_rerun": [
+    "The S27 release typecheck, lint, 674-test suite, CI and eight documented gates remain the last code checks; no application code changed in this verification.",
+    "The fixture SGQR paste/resolve scan evidence remains evidence/s27-hosted-release-smoke-2026-11-02.json; no camera or new scan ran today.",
+    "No migration, deployment, configuration, dependency or secret change was made."
+  ],
+  "limits": [
+    "Sandbox PayPal test money and Solana devnet test tokens only; no real money moved.",
+    "The user performed all PayPal approvals and the Solana signature; the agent never had a credential or private key.",
+    "A receipt screenshot for the SGD capture was unavailable after the browser buyer session was replaced; the DOM text and Neon readback are the evidence.",
+    "The US review screenshot stored in /tmp is for pur_jvr... (same UI, expired); the paid US receipt DOM text is recorded for pur_ssy...",
+    "The PYUSD receipt is user-pasted; it is independently verified by the Neon attempt and the finalized devnet transaction.",
+    "The first PYUSD attempt's wallet-side cause is unknown; no devnet transfer exists for it.",
+    "Amount deltas read through the JSON-RPC float API show binary rounding; the prepared atomic amount and token decimals establish 2.200000 PYUSD.",
+    "This file is a local, uncommitted evidence artifact until publication is authorized."
+  ]
+}

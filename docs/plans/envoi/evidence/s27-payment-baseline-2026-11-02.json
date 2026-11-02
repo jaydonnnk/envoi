@@ -1,0 +1,258 @@
+{
+  "date": "2026-11-02",
+  "timezone": "Asia/Singapore",
+  "purpose": "Fresh read-only baseline before authorized S27 payment checks",
+  "session": {
+    "read_only": "on",
+    "snapshot_at": "2026-11-02T12:05:36.084Z"
+  },
+  "target_fingerprint": "2c3ff75b64569eda065223d0738c86dbe39bee7fb20f958d680ccc5e3296824a",
+  "applied_migrations": 28,
+  "last_applied_tag": "0027_currency_and_country",
+  "all_migration_hashes_match": true,
+  "totals": {
+    "outlets": 3,
+    "menu_items": 34,
+    "purchases": 49,
+    "payment_attempts": 19,
+    "basket_lines": 58,
+    "menu_items_unit": "11530",
+    "menu_items_unknown": 0,
+    "purchases_total": "16800",
+    "attempts_total": "7700",
+    "attempts_gross": "4170",
+    "open_purchases": 0,
+    "uncertain_purchases": 2
+  },
+  "outlets": [
+    {
+      "id": "out_wgoyp6kgg75472b6s772dplgoq",
+      "name": "Lorong Demo Kopi",
+      "country": "SG",
+      "is_demo_fixture": true,
+      "published": true
+    },
+    {
+      "id": "out_rigqfs5f2vdtsmibj5rxenbnjq",
+      "name": "S26 Fixture Shop",
+      "country": "SG",
+      "is_demo_fixture": true,
+      "published": true
+    },
+    {
+      "id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+      "name": "Test Shop",
+      "country": "SG",
+      "is_demo_fixture": true,
+      "published": true
+    }
+  ],
+  "purchase_states": [
+    {
+      "state": "paid",
+      "rail": "paypal",
+      "currency": "SGD",
+      "count": 9
+    },
+    {
+      "state": "paid",
+      "rail": "pyusd",
+      "currency": "SGD",
+      "count": 3
+    },
+    {
+      "state": "review_expired",
+      "rail": "paypal",
+      "currency": "SGD",
+      "count": 20
+    },
+    {
+      "state": "review_expired",
+      "rail": "pyusd",
+      "currency": "SGD",
+      "count": 7
+    },
+    {
+      "state": "review_expired",
+      "rail": null,
+      "currency": "SGD",
+      "count": 3
+    },
+    {
+      "state": "uncertain",
+      "rail": "paypal",
+      "currency": "SGD",
+      "count": 2
+    },
+    {
+      "state": "unpaid_closed",
+      "rail": "paypal",
+      "currency": "SGD",
+      "count": 5
+    }
+  ],
+  "latest_purchases": [
+    {
+      "id": "pur_f5gja6qvu3uc4oshpqwjvom7gi",
+      "outlet_id": "out_rigqfs5f2vdtsmibj5rxenbnjq",
+      "outlet_name": "S26 Fixture Shop",
+      "state": "paid",
+      "rail": "paypal",
+      "currency": "SGD",
+      "total_minor": 440,
+      "created_at": "2026-10-30 02:20:37.181+00",
+      "latest_attempt_id": "att_icgpcdgzo4ato4uptfjoywkxla",
+      "latest_attempt_state": "capture_confirmed"
+    },
+    {
+      "id": "pur_xidgcr7ruzastkxwsuecv3en6u",
+      "outlet_id": "out_rigqfs5f2vdtsmibj5rxenbnjq",
+      "outlet_name": "S26 Fixture Shop",
+      "state": "unpaid_closed",
+      "rail": "paypal",
+      "currency": "SGD",
+      "total_minor": 440,
+      "created_at": "2026-10-30 02:07:07.721+00",
+      "latest_attempt_id": "att_d43leogciq3fa45ql7nodcg46m",
+      "latest_attempt_state": "capture_failed"
+    },
+    {
+      "id": "pur_pciweldkcqxbhlsd3fopw4evaa",
+      "outlet_id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+      "outlet_name": "Test Shop",
+      "state": "paid",
+      "rail": "paypal",
+      "currency": "SGD",
+      "total_minor": 440,
+      "created_at": "2026-10-28 02:15:52.59+00",
+      "latest_attempt_id": "att_zlxpa6msbxqobhktubfkbejnm4",
+      "latest_attempt_state": "capture_confirmed"
+    },
+    {
+      "id": "pur_z7aawzfb5nzqcdd7ao7c3t2tqa",
+      "outlet_id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+      "outlet_name": "Test Shop",
+      "state": "paid",
+      "rail": "paypal",
+      "currency": "SGD",
+      "total_minor": 360,
+      "created_at": "2026-10-24 12:10:06.044+00",
+      "latest_attempt_id": "att_wshxkveflneqcmhqmeqp7uhkzi",
+      "latest_attempt_state": "capture_confirmed"
+    },
+    {
+      "id": "pur_2beytiriidapmjixa5ngsihkay",
+      "outlet_id": "out_wgoyp6kgg75472b6s772dplgoq",
+      "outlet_name": "Lorong Demo Kopi",
+      "state": "paid",
+      "rail": "paypal",
+      "currency": "SGD",
+      "total_minor": 670,
+      "created_at": "2026-10-24 04:42:00.333+00",
+      "latest_attempt_id": "att_nehzeocygcvkyyg5nleuj2bmwa",
+      "latest_attempt_state": "capture_confirmed"
+    },
+    {
+      "id": "pur_dhbzehg7i72t7yteam7m47xsti",
+      "outlet_id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+      "outlet_name": "Test Shop",
+      "state": "review_expired",
+      "rail": "paypal",
+      "currency": "SGD",
+      "total_minor": 180,
+      "created_at": "2026-10-18 11:25:05.648+00",
+      "latest_attempt_id": null,
+      "latest_attempt_state": null
+    },
+    {
+      "id": "pur_mnrn2ajhhaojr434mtdmboikh4",
+      "outlet_id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+      "outlet_name": "Test Shop",
+      "state": "review_expired",
+      "rail": "paypal",
+      "currency": "SGD",
+      "total_minor": 180,
+      "created_at": "2026-10-18 11:10:18.404+00",
+      "latest_attempt_id": null,
+      "latest_attempt_state": null
+    },
+    {
+      "id": "pur_ojzvsinajmx33c6m6mxt3maa4a",
+      "outlet_id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+      "outlet_name": "Test Shop",
+      "state": "review_expired",
+      "rail": "paypal",
+      "currency": "SGD",
+      "total_minor": 180,
+      "created_at": "2026-10-18 09:57:36.182+00",
+      "latest_attempt_id": null,
+      "latest_attempt_state": null
+    },
+    {
+      "id": "pur_3rvqxuggwi3q3nrbslidzn7sfu",
+      "outlet_id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+      "outlet_name": "Test Shop",
+      "state": "paid",
+      "rail": "pyusd",
+      "currency": "SGD",
+      "total_minor": 180,
+      "created_at": "2026-10-18 09:33:44.258+00",
+      "latest_attempt_id": "att_jpccrgwqd4cwohtbslhyxcc3ji",
+      "latest_attempt_state": "confirmed"
+    },
+    {
+      "id": "pur_rm5sh7zfsotcjivx36pygvaha4",
+      "outlet_id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+      "outlet_name": "Test Shop",
+      "state": "review_expired",
+      "rail": "pyusd",
+      "currency": "SGD",
+      "total_minor": 180,
+      "created_at": "2026-10-18 09:33:35.627+00",
+      "latest_attempt_id": null,
+      "latest_attempt_state": null
+    }
+  ],
+  "money_columns": [
+    {
+      "table_name": "menu_items",
+      "column_name": "unit_minor",
+      "data_type": "integer"
+    },
+    {
+      "table_name": "outlets",
+      "column_name": "country",
+      "data_type": "text"
+    },
+    {
+      "table_name": "payment_attempts",
+      "column_name": "capture_gross_minor",
+      "data_type": "integer"
+    },
+    {
+      "table_name": "payment_attempts",
+      "column_name": "currency",
+      "data_type": "text"
+    },
+    {
+      "table_name": "payment_attempts",
+      "column_name": "total_minor",
+      "data_type": "integer"
+    },
+    {
+      "table_name": "purchases",
+      "column_name": "currency",
+      "data_type": "text"
+    },
+    {
+      "table_name": "purchases",
+      "column_name": "total_minor",
+      "data_type": "integer"
+    }
+  ],
+  "limits": [
+    "Read-only transaction",
+    "No payment, US fixture or configuration change made by this snapshot",
+    "Totals are a starting point, not a frozen post-test target"
+  ]
+}

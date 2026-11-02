@@ -1,7 +1,7 @@
 # S27 deploy order and rollback for migration 0027
 
 Written 2026-10-30 on `envoi/slice-27-us-shops`.
-Steps 1-7 below were executed with authorization on 2026-11-02; see the [release record](00-status.md#s27-coordinated-release-authorized-2026-11-02). Main `a7f60cb` was deployed and migration 0027 applied, with every recorded count/sum unchanged and maintenance passing. Steps 8-9, including the SGD sandbox capture and later US fixture/USD capture, remain unrun and unauthorized. The ordered steps below are retained as the runbook and release history, not instructions to repeat the completed migration. Re-check actual state before any further action.
+Steps 1-7 below were executed with authorization on 2026-11-02; see the [release record](00-status.md#s27-coordinated-release-authorized-2026-11-02). Main `a7f60cb` was deployed and migration 0027 applied, with every recorded count/sum unchanged and maintenance passing. The latest evidence commit `25a3b12` was then observed live with CI passing. Steps 8-9 were run under the payment verification authorization on 2026-11-02 and passed: SGD, US/USD and PYUSD; see the [payment verification results](00-status.md#s27-payment-verification-results-2026-11-02). Human payment approval/signing applied throughout. The ordered steps below are retained as the runbook and release history, not instructions to repeat the completed migration or payments. Re-check actual state before any further action.
 Each step marked **[asks]** needs the user's words for that step by name before it runs.
 
 Release authorization, 2026-11-02: the user explicitly authorized committing the evidence, merging/pushing main, deployment, migration 0027, maintenance verification and the documented rollback if checks fail. The authorization is recorded in `00-status.md`. It covers steps 1-7 and the conditional rollback, not the sandbox purchases or US fixture in steps 8-9. Render dashboard access, recent rollback controls and database target identity were verified; the live pre-S27 rollback target is `dep-dbk3uvjbc2fs73e35lf0` at `94df453`. Release execution results follow in the status record.
@@ -43,9 +43,11 @@ Historical read-only preflight, 2026-11-02: all 27 migration hashes/timestamps t
    If one differs, stop and roll back (below).
 6. Verify the served build: a page or file only S27 has (for example `/merchant/setup` JavaScript holding "Where is your shop?") and `/api/v1/outlets/{Test Shop}/menu` answering `"currency":"SGD"`.
 7. Trigger the maintenance workflow by hand once (`workflow_dispatch`) and read its result.
-8. **[asks]** An SGD PayPal sandbox purchase at Test Shop, read back from Neon as `paid` with `currency = 'SGD'` and the amount unchanged.
+8. **[asks, done 2026-11-02]** An SGD PayPal sandbox purchase at Test Shop, read back from Neon as `paid` with `currency = 'SGD'` and the amount unchanged.
+   Result: `pur_gmzbu...` paid S$4.00, capture `13X59411JL1833901` to `EQN6264CF9F4Y`, verified 20:19:50 SGT in its review window; the receipt read Paid. See [payment verification results](00-status.md#s27-payment-verification-results-2026-11-02).
    This is the falsifier check: any SGD misbehaviour here means roll back first.
 9. Only then: the user creates the US sandbox seller, **[asks]** the operator writes the US fixture shop on Neon, and **[asks]** the USD capture is run and read back from Neon.
+   Result **[done 2026-11-02]:** the US seller `972VTMQPEUZ5A` consented, the dedicated US fixture shop `out_ft27b47w7r6iu7e74mb23yvydq` published in USD and locked its country, and `pur_ssy...` paid US$7.75 with capture `6UJ28034J5731743J` to `972VTMQPEUZ5A`. PYUSD also settled 2.200000 devnet tokens for `pur_tkeu...`. See the same results section.
 
 ## Rollback
 
