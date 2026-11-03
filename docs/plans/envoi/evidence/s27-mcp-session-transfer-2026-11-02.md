@@ -1,5 +1,7 @@
 # S27 session transfer, 2026-11-02
 
+Superseding handoff: [S27 payment verification](s27-payment-handoff-2026-11-02.md). The user has now authorized the remaining SGD sandbox checkout, US seller/USD testing and conditional PYUSD regression for the next agent. The gates, implementation, deployment and migration in the older prompts below are complete. No payment check ran in the handoff-writing session; current `00-status.md` governs.
+
 The documentation publication and local MCP replacement are complete. S27 as a whole remains in progress. The continuation prompt below copies the approved contract from current `main`; its local evidence is in `00-status.md` under the S27 MCP continuation section.
 
 Publication update, 2026-11-02: after this handoff, the user answered "yes authorze" to committing the MCP changes and pushing `envoi/slice-27-us-shops` for CI. The prompt and review below preserve the earlier authorization state. Follow the current publication record in `00-status.md`; merge, migration, sandbox captures and deployment remain unauthorized.
