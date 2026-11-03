@@ -11,6 +11,7 @@ import { PyusdWalletCard } from "./pyusd-wallet";
 import { SgqrSticker } from "./sgqr-sticker";
 import { ShopQr } from "./shop-qr";
 import { CountryChoice } from "./country";
+import { RewardsCardView, type RewardsTerms } from "./rewards-card";
 import { useRestoreFocus } from "@/lib/browser/focus";
 
 function OutletChips({ outlet }: { outlet: MerchantOutlet }) {
@@ -265,11 +266,13 @@ export function Workspace({
   initialDraft,
   importsOpen,
   webImportsOpen,
+  rewardsTerms,
 }: {
   initial: MerchantOutlets;
   initialDraft: DraftWithImport | null;
   importsOpen: boolean;
   webImportsOpen: boolean;
+  rewardsTerms: RewardsTerms;
 }) {
   const [outlets, setOutlets] = useState(initial.outlets);
   const [canCreate, setCanCreate] = useState(initial.canCreateOutlet);
@@ -378,6 +381,7 @@ export function Workspace({
       {outlet && <PayPalCard outlet={outlet} onSaved={updated} />}
       {outlet && outlet.country === "SG" && <PyusdWalletCard key={outlet.id} outlet={outlet} onSaved={updated} />}
       {outlet && <PublishCard outlet={outlet} onPublished={published} />}
+      {outlet && <RewardsCardView card={outlet.rewards} terms={rewardsTerms} />}
     </div>
   );
 }

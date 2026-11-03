@@ -263,3 +263,4 @@ footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; 
 .country .rail small { display: block; }
 .shop-qr-only { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
 .shop-qr-only .shop-qr { max-width: 320px; }
+.rewards-subhead { border-top: 1px solid var(--line); margin: 20px 0 8px; padding-top: 20px; font-size: 1.05rem; }

@@ -7,6 +7,7 @@ import { publicationStatus, type PublicationStatus } from "@/domain/outlets/publ
 import { decodeEmvcoTlv, type SupportedScheme } from "@/domain/sgqr/decode";
 import { isMappable, mappableIdentifier } from "@/domain/sgqr/validate";
 import { formatPyusdPerSgd, isRateExpired, latestPyusdRate } from "@/domain/pyusd/rate";
+import { rewardsCard, type RewardsCard } from "@/domain/rewards/paypal-pyusd";
 import { webEnv } from "@/env";
 import { enrollments, merchantMemberships, outletIdentifiers, outlets, paymentDestinations } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
@@ -47,6 +48,8 @@ export type MerchantOutlet = {
   publication: PublicationStatus;
   identifiers: OutletIdentifier[];
   pyusd: PyusdSetup;
+  // S28: paid this month and PayPal's PYUSD rewards, for the rewards card.
+  rewards: RewardsCard;
 };
 
 // S16: the outlet's PYUSD devnet setup as its merchant sees it. The wallet proves key control only;
@@ -140,6 +143,7 @@ async function toMerchantOutlet(db: Pick<Db, "select">, row: OutletRow): Promise
     publication,
     identifiers: await listIdentifiers(db, row.id),
     pyusd: await pyusdSetup(db, row.id, new Date()),
+    rewards: await rewardsCard(db, row.id, new Date()),
   };
 }
 

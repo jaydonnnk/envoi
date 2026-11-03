@@ -5,6 +5,7 @@ import { menuImportsOpen, webImportsOpen } from "@/domain/imports/request";
 import { getMenuDraft } from "@/domain/menu/draft";
 import { draftJson } from "@/domain/menu/serialize";
 import { listMerchantOutlets } from "@/domain/outlets/merchant";
+import { PAYPAL_PYUSD_REWARDS } from "@/domain/rewards/paypal-pyusd";
 import { getAuth } from "@/lib/auth";
 import { isMerchantAccount, requireMerchantMembership } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
@@ -66,7 +67,7 @@ export default async function MerchantSetupPage() {
       <p className="eyebrow">Merchant setup</p>
       <h1>Your shop</h1>
       <p className="lead">Signed in as {session.user.name}. Buyers see only what you publish; drafts stay invisible to them.</p>
-      <Workspace initial={initial} importsOpen={menuImportsOpen()} webImportsOpen={webImportsOpen()} initialDraft={draft ? { ...draftJson(draft), latestImport: latest ? importJson(latest) : null } : null} />
+      <Workspace initial={initial} rewardsTerms={PAYPAL_PYUSD_REWARDS} importsOpen={menuImportsOpen()} webImportsOpen={webImportsOpen()} initialDraft={draft ? { ...draftJson(draft), latestImport: latest ? importJson(latest) : null } : null} />
       <div className="actions">
         <a className="button secondary" href="/merchant/orders">
           See orders
