@@ -1,0 +1,35 @@
+{
+ "label": "S29 Neon snapshot, read-only repeatable-read transaction on the direct endpoint; public schema only; endpoint shown as a hash",
+ "endpointFingerprint": "2c3ff75b6456",
+ "at": "2026-11-03T15:41:43.838Z",
+ "migrationsApplied": 29,
+ "lastAppliedMatches": "0028_menu_translations",
+ "menuTranslationsPresent": true,
+ "menuTranslationsRows": 0,
+ "webGrants": [
+  "INSERT",
+  "SELECT"
+ ],
+ "bucketCheck": "CHECK ((bucket = ANY (ARRAY['buyer_suggestion'::text, 'wallet_challenge'::text, 'buyer_assistant'::text, 'menu_translation'::text])))",
+ "counts": {
+  "outlets": 4,
+  "menu_revisions": 10,
+  "menu_items": 36,
+  "purchases": 57,
+  "payment_attempts": 24
+ },
+ "purchaseStates": {
+  "paid": 15,
+  "review_expired": 33,
+  "uncertain": 2,
+  "unpaid_closed": 7
+ },
+ "rateLimitHits": {
+  "buyer_suggestion": 2,
+  "wallet_challenge": 3
+ },
+ "sums": {
+  "menu_unit_minor": "12305",
+  "purchases_total_minor": "20585"
+ }
+}
