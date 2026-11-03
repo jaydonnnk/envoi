@@ -551,6 +551,21 @@ Written and committed before any OpenAI call, as [`04-slices.md`](04-slices.md#s
 - **Harness self-tests [verified 2026-11-03, no OpenAI call]:** a dry run with a FIXTURE model that adds one invented item and one price per case scored 20 items not on the menu and 0 displayed changes, the guard dropping each FIXTURE price; in every case the displayed-change scorer caught its needle, a price one cent higher and a missing original name, as two changed items.
 - **Falsifier, from the slice plan:** a miss keeps translation off (`AI_MENU_TRANSLATION_MODEL` unset on Render) and no translation claim is made. One run per model; every result is reported; nothing is re-scored, dropped or re-run to change the outcome.
 
+#### S29 translation evaluation, results
+
+Run once on 2026-11-03 after the pre-registration was committed at `217e78a`, with real OpenAI calls; every answer, stored row and score is in [`s29-translate-eval-gpt-6-luna.json`](evidence/s29-translate-eval-gpt-6-luna.json).
+
+- **Run 1, `gpt-6-luna`: PASS [verified].** Displayed prices changed: 0. Translated items not on the menu: 0. Both under the pre-registered threshold of zero.
+- **Run 2, `gpt-6.1-sol`:** not run, because run 1 passed.
+- **Reported, not scored:** all 20 calls answered with a valid schema; no item was dropped by Envoi's guards; 90 of 90 menu items in the 20 cases were shown with a translation or explanation; latency 2.3 s to 7.8 s per call.
+- **Spend [verified]:** US$0.004709 of the US$3 limit (7,872 input and 7,844 output tokens over 20 requests, none refused), at S4's prices [vendor claim].
+- **Builder's notes on explanations wrong about what the dish is, no pass mark [hypothesis: the builder's own knowledge of these dishes, not checked against a source]:**
+  - S26 Fixture Shop, Chinese, Kopi C: "加入炼乳" says condensed milk; Kopi C is made with evaporated milk.
+  - Lorong Demo Kopi, Korean, Teh C peng: "연유가 들어간" says condensed milk; Teh C is made with evaporated milk.
+  - S26 Fixture Shop, all five languages, the second "Ebi fry" (S$1.00): explained as breaded fried shrimp. Its row is the merchant's price for the "+ Mentaiko" add-on drafted in S26, but its published name is only "Ebi fry", so the explanation follows the shop's own ambiguous name. Translation cannot fix a name the menu does not give.
+  - Every other explanation read as right about what the item is. This is R26 as it stands: the original name is always shown and the text is labeled AI translation, and nothing proves an explanation right.
+- **Decision under the pre-registration:** `gpt-6-luna` is the model to set as `AI_MENU_TRANSLATION_MODEL` on Render. The claim is bounded to these four FIXTURE menus, 18 items, five languages and one run each: prices, availability and original names were unchanged on screen and no item off the menu was proposed. Nothing is claimed about translation quality.
+
 ### S28 PayPal PYUSD rewards card, 2026-11-03
 
 - **Authority [verified]:** asked "Continue to slice S28, or re-steer?", the user answered "Continue to S28" on 2026-11-03. This starts S28 and its branch. It does not authorize the merge, push or deploy, which the slice names as separate authorizations. Asked "Authorize committing S28, fast-forwarding main and pushing to deploy on Render?", the user answered "Yes, ship S28" on 2026-11-03; that authorizes the slice commit, the fast-forward of `main`, the push and the Render auto-deploy.
