@@ -48,6 +48,9 @@ const webSchema = z.object({
   KERNEL_API_KEY: z.string().min(1).optional(),
   AI_WEB_MENU_MODEL: z.string().min(1).optional(),
   WEB_IMPORTS_ENABLED: z.enum(["true", "false"]).default("false").transform((value) => value === "true"),
+  // The menu explained and translated (S29). The text model chosen by the pre-registered translation
+  // evaluation in 00-status.md; translation is off unless it and OPENAI_API_KEY are set.
+  AI_MENU_TRANSLATION_MODEL: z.string().min(1).optional(),
   // PYUSD on Solana devnet (S16). These are the rail's only two settings: the cluster, genesis hash,
   // mint, token program and decimals are reviewed code constants in src/domain/pyusd/constants.ts,
   // and any other PYUSD_ or SOLANA_ name refuses to boot. The RPC URL is checked against the pinned

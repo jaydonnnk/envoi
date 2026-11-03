@@ -9,6 +9,11 @@ import { formatMoney, money, type Currency } from "@/lib/money";
 
 export type BasketItem = { id: string; name: string; unitMinor: number | null; available: boolean | null };
 
+// AI text shown beside an item's original name (S29), in the buyer's language. It never replaces the
+// original name, price or availability, and never leaves this screen.
+export type ItemTranslation = { name: string; explanation: string | null };
+export type MenuTranslation = { language: string; items: Record<string, ItemTranslation> };
+
 const MAX_QUANTITY = 20;
 
 // The browser sends item ids and quantities only. The server prices them from the published menu
@@ -21,6 +26,7 @@ export function BasketForm({
   rail = "paypal",
   autoReview = false,
   note,
+  translation = null,
 }: {
   outletId: string;
   // The shop's currency: every price on the form is in it.
@@ -32,6 +38,8 @@ export function BasketForm({
   autoReview?: boolean;
   // Set when the basket arrived from a sentence, to say that it is still only a proposal.
   note?: string;
+  // Set while the buyer reads the AI translation; the shop's original menu otherwise.
+  translation?: MenuTranslation | null;
 }) {
   const router = useRouter();
   const [quantities, setQuantities] = useState<Record<string, number>>(() =>
@@ -95,7 +103,7 @@ export function BasketForm({
         return (
           <div className="row item-row" key={item.id}>
             <span>
-              {item.name}
+              <ItemName name={item.name} translated={translation?.items[item.id]} language={translation?.language} />
               <small>{item.unitMinor === null ? "Price not set, cannot be bought yet" : item.available === false ? "Not available" : `${formatMoney(money(currency, item.unitMinor))} each`}</small>
             </span>
             <span className="stepper" role="group" aria-label={`Quantity of ${item.name}`}>
@@ -125,6 +133,19 @@ export function BasketForm({
           {error}
         </p>
       )}
+    </>
+  );
+}
+
+// The translated name above the shop's own, which is always shown; an English explanation keeps the
+// shop's name as the only name.
+function ItemName({ name, translated, language }: { name: string; translated: ItemTranslation | undefined; language: string | undefined }) {
+  if (!translated) return <>{name}</>;
+  return (
+    <>
+      {translated.name === name ? name : <strong lang={language}>{translated.name}</strong>}
+      {translated.name !== name && <small className="orig">{name}</small>}
+      {translated.explanation && <small lang={language}>{translated.explanation}</small>}
     </>
   );
 }

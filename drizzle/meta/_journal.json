@@ -197,6 +197,13 @@
       "when": 1793329393401,
       "tag": "0027_currency_and_country",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1793719122875,
+      "tag": "0028_menu_translations",
+      "breakpoints": true
     }
   ]
 }

@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { bigint, boolean, check, customType, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex, type AnyPgColumn } from "drizzle-orm/pg-core";
+import { bigint, boolean, check, customType, index, integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex, type AnyPgColumn } from "drizzle-orm/pg-core";
 import type { Country, Currency } from "@/lib/money";
 
 // Every table lives in public. drizzle-orm refuses pgSchema("public"), so the schema pin is the
@@ -153,6 +153,31 @@ export const menuItems = pgTable(
     check("menu_items_source_check", sql`${t.source} in ('merchant', 'import_suggestion')`),
     index("menu_items_revision_idx").on(t.menuRevisionId, t.position),
     uniqueIndex("menu_items_revision_item_key_unique").on(t.menuRevisionId, t.itemKey),
+  ],
+);
+
+// The menu explained and translated (S29). One row per published menu revision and buyer language:
+// each item's id, translated name and short explanation, and the model that wrote them. A published
+// revision never changes, so a row never goes stale and a new revision gets new rows. The web role
+// may read and insert, never update or delete, and the translated text never reaches a review,
+// receipt, PayPal order or merchant view.
+export type StoredTranslatedItem = { itemId: string; name: string; explanation: string | null };
+
+export const menuTranslations = pgTable(
+  "menu_translations",
+  {
+    menuRevisionId: text("menu_revision_id")
+      .notNull()
+      .references(() => menuRevisions.id),
+    // A lower-case primary language subtag, such as "zh".
+    language: text("language").notNull(),
+    items: jsonb("items").$type<StoredTranslatedItem[]>().notNull(),
+    model: text("model").notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    primaryKey({ name: "menu_translations_pkey", columns: [t.menuRevisionId, t.language] }),
+    check("menu_translations_language_check", sql`${t.language} ~ '^[a-z]{2,3}$'`),
   ],
 );
 
@@ -562,7 +587,7 @@ export const auditEvents = pgTable(
 // nothing. Admission prunes rows older than the bucket's longest window, so the table stays small
 // without a maintenance task.
 
-export const RATE_LIMIT_BUCKETS = ["buyer_suggestion", "wallet_challenge", "buyer_assistant"] as const;
+export const RATE_LIMIT_BUCKETS = ["buyer_suggestion", "wallet_challenge", "buyer_assistant", "menu_translation"] as const;
 
 export const rateLimitHits = pgTable(
   "rate_limit_hits",
@@ -573,7 +598,7 @@ export const rateLimitHits = pgTable(
     at: timestamp("at", { withTimezone: true }).notNull(),
   },
   (t) => [
-    check("rate_limit_hits_bucket_check", sql`${t.bucket} in ('buyer_suggestion', 'wallet_challenge', 'buyer_assistant')`),
+    check("rate_limit_hits_bucket_check", sql`${t.bucket} in ('buyer_suggestion', 'wallet_challenge', 'buyer_assistant', 'menu_translation')`),
     index("rate_limit_hits_bucket_at_idx").on(t.bucket, t.at),
     index("rate_limit_hits_subject_idx").on(t.bucket, t.subject, t.at),
   ],

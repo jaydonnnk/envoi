@@ -31,6 +31,14 @@ export const ASSISTANT_LIMITS: RateLimits = {
   global: { max: 150, windowMs: 60 * 60_000 },
 };
 
+// S29, Gate 3 reopening 2026-10-29 [hypothesis: starting values]: at most 30 menu translation requests
+// per buyer in 10 minutes and 120 across all buyers in an hour. A miss may spend model money, so the
+// limiter runs before any model call; a cached answer is counted the same way.
+export const TRANSLATION_LIMITS: RateLimits = {
+  perSubject: { max: 30, windowMs: 10 * 60_000 },
+  global: { max: 120, windowMs: 60 * 60_000 },
+};
+
 // S16, Gate 3 "PYUSD merchant wallet and rate": at most 10 wallet challenges per outlet in an hour.
 // The subject is the outlet, so a member cannot spread requests across sessions to exceed it.
 export const WALLET_CHALLENGE_LIMITS: RateLimits = {

@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { outletPyusdAvailability } from "@/app/pyusd-availability";
 import { outletRails } from "@/domain/outlets/destination";
 import { getPublishedMenu, listPublishedOutlets } from "@/domain/outlets/search";
-import { assistantEnabled, textSuggestionsEnabled } from "@/integrations/ai/openai";
+import { assistantEnabled, textSuggestionsEnabled, translationEnabled } from "@/integrations/ai/openai";
 import { webDb } from "@/lib/db/web";
 import { landsOnPyusd } from "./landing";
 import { ShopBasket } from "./shop-basket";
@@ -95,7 +95,7 @@ export default async function BuyPage({ searchParams }: { searchParams: Promise<
               <PyusdOnlyStatus outletId={menu.outlet.id} />
             </Suspense>
           )}
-          <ShopBasket outletId={menu.outlet.id} currency={menu.currency} items={menu.items} preselected={preselected} rail={rail} autoReview={autoReview} />
+          <ShopBasket outletId={menu.outlet.id} currency={menu.currency} items={menu.items} preselected={preselected} rail={rail} autoReview={autoReview} translationEnabled={translationEnabled()} />
         </section>
       </main>
     );

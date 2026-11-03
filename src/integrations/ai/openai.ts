@@ -1,10 +1,12 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateText, Output, stepCountIs, tool } from "ai";
 import { z } from "zod";
+import type { MenuTranslator } from "@/domain/menu/translate";
 import type { ModelOutcome, SuggestionModel, SuggestionTools } from "@/domain/suggestions/types";
 import { webEnv, type WebEnv } from "@/env";
 import { checkBaseUrl } from "@/integrations/assistant/agent";
 import { log, toSafeErrorRecord } from "@/lib/log";
+import { translateMenuNames } from "./menu-translate";
 
 // Gate 3 named clock T_AI_BUDGET: 30 seconds from the suggestion request start, enforced here.
 export const T_AI_BUDGET_MS = 30_000;
@@ -140,4 +142,19 @@ export function suggestionModel(): SuggestionModel | null {
   const env = webEnv();
   if (!env.OPENAI_API_KEY || !env.AI_MODEL) return null;
   return createOpenAISuggestionModel({ apiKey: env.OPENAI_API_KEY, model: env.AI_MODEL });
+}
+
+// The menu explained and translated (S29) is on only when the key and the evaluated
+// AI_MENU_TRANSLATION_MODEL are both configured.
+export function menuTranslator(env: WebEnv = webEnv()): MenuTranslator | null {
+  if (!env.OPENAI_API_KEY || !env.AI_MENU_TRANSLATION_MODEL) return null;
+  const { OPENAI_API_KEY: apiKey, AI_MENU_TRANSLATION_MODEL: model } = env;
+  return {
+    model,
+    translate: (items, language) => translateMenuNames({ items, languageName: language.name, english: language.tag === "en", model, apiKey }),
+  };
+}
+
+export function translationEnabled(): boolean {
+  return menuTranslator() !== null;
 }
