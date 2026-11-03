@@ -12,8 +12,8 @@ export const MENU_TRANSLATION_PROMPT_VERSION = "menu-translation-prompt-2026-11-
 
 // [hypothesis] A published menu holds at most 100 items; this bounds the answer for that many and
 // stops a stuck call well inside a buyer's patience.
-export const TRANSLATION_MAX_OUTPUT_TOKENS = 16_000;
-export const TRANSLATION_BUDGET_MS = 45_000;
+const TRANSLATION_MAX_OUTPUT_TOKENS = 16_000;
+const TRANSLATION_BUDGET_MS = 45_000;
 
 const TranslationOutput = z.object({
   items: z.array(z.object({ itemId: z.string(), name: z.string(), explanation: z.string().nullable() }).strict()),

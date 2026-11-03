@@ -11,7 +11,7 @@ export type BasketItem = { id: string; name: string; unitMinor: number | null; a
 
 // AI text shown beside an item's original name (S29), in the buyer's language. It never replaces the
 // original name, price or availability, and never leaves this screen.
-export type ItemTranslation = { name: string; explanation: string | null };
+type ItemTranslation = { name: string; explanation: string | null };
 export type MenuTranslation = { language: string; items: Record<string, ItemTranslation> };
 
 const MAX_QUANTITY = 20;

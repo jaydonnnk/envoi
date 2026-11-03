@@ -12,8 +12,8 @@ import type { TranslationCall } from "@/integrations/ai/menu-translate";
 // A browser language's lower-cased primary subtag, such as "zh" from "zh-CN".
 export const LANGUAGE_SUBTAG = /^[a-z]{2,3}$/;
 
-export const MAX_TRANSLATED_NAME_CHARS = 80;
-export const MAX_EXPLANATION_CHARS = 160;
+const MAX_TRANSLATED_NAME_CHARS = 80;
+const MAX_EXPLANATION_CHARS = 160;
 
 export type TranslatedItem = StoredTranslatedItem;
 
