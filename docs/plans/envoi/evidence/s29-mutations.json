@@ -1,0 +1,737 @@
+{
+ "branch": "envoi/slice-29-menu-translation",
+ "base_commit": "45497eb",
+ "uncommitted_changes": true,
+ "method": "Each definition in s29-mutation-defs.json applied alone by exact text replacement, its whole test file run with the vitest JSON reporter, every touched file restored and compared by SHA-256, then the whole file rerun. A proof needs the named row to fail on an AssertionError, a byte-identical restore and an all-passing rerun; other failing rows are recorded. The integration file runs the real route handler POST /api/v1/buyer/menu-translations and getOrCreateTranslation on local PostgreSQL databases built from the migrations through 0028, with the three Neon URLs removed; OpenAI is faked at the fetch boundary by tests/support/fake-openai.ts, labeled FIXTURE, so no model is called. The unit file reads src/domain/menu/translate.ts, src/integrations/ai/openai.ts and renders src/app/buy/basket-form.tsx. Every definition here is an S29 test recorded in 00-status.md.",
+ "results": [
+  {
+   "id": "m01-subtag-unanchored",
+   "test": "a translation language must be a primary language subtag",
+   "kind": "standalone",
+   "group": "menu translation rules",
+   "files": [
+    "src/domain/menu/translate.ts"
+   ],
+   "mutation": "Named test 23, subtag shape: the pattern loses its end anchor, so \"zh-CN\" passes.",
+   "own_row": "failed",
+   "error": "AssertionError: \"zh-CN\": expected 'Chinese (China)' to be null",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "m02-subtag-any-case",
+   "test": "a translation language must be a primary language subtag",
+   "kind": "standalone",
+   "group": "menu translation rules",
+   "files": [
+    "src/domain/menu/translate.ts"
+   ],
+   "mutation": "Named test 23, subtag case: the pattern accepts capitals.",
+   "own_row": "failed",
+   "error": "AssertionError: \"ZH\": expected 'Chinese' to be null",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "m03-unknown-language",
+   "test": "a translation language must be a primary language subtag",
+   "kind": "standalone",
+   "group": "menu translation rules",
+   "files": [
+    "src/domain/menu/translate.ts"
+   ],
+   "mutation": "Named test 23, known language: a well-formed subtag naming no language gets a name.",
+   "own_row": "failed",
+   "error": "AssertionError: \"zzz\": expected 'zzz' to be null",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "m04-route-body-not-strict",
+   "test": "a translation language must be a primary language subtag",
+   "kind": "standalone",
+   "group": "menu translation",
+   "files": [
+    "src/app/api/v1/buyer/menu-translations/route.ts"
+   ],
+   "mutation": "Named test 23 at the route: the body schema accepts an extra key.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { status: 200, code: undefined, \u2026(2) } to match object { status: 400, \u2026(1) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "m05-route-body-bound",
+   "test": "a translation language must be a primary language subtag",
+   "kind": "standalone",
+   "group": "menu translation",
+   "files": [
+    "src/app/api/v1/buyer/menu-translations/route.ts"
+   ],
+   "mutation": "Named test 23 at the route: the counted body bound grows from 1 KiB to 16 KiB.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 200 to be 400 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "m06-route-no-session",
+   "test": "a translation language must be a primary language subtag",
+   "kind": "standalone",
+   "group": "menu translation",
+   "files": [
+    "src/app/api/v1/buyer/menu-translations/route.ts"
+   ],
+   "mutation": "Named test 23 at the route: a request without a buyer session is read.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 200 to be 401 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "m07-db-language-check",
+   "test": "a translation language must be a primary language subtag",
+   "kind": "standalone",
+   "group": "menu translation",
+   "files": [
+    "drizzle/0028_menu_translations.sql"
+   ],
+   "mutation": "Named test 23 in the database: migration 0028 stores any language text.",
+   "own_row": "failed",
+   "error": "AssertionError: zh-CN: expected 'stored' to be 'menu_translations_language_check' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "m08-no-cache-read",
+   "test": "a cached translation makes no model call",
+   "kind": "standalone",
+   "group": "menu translation",
+   "files": [
+    "src/domain/menu/translate.ts"
+   ],
+   "mutation": "Named test 24: the stored row is never read before the model call.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ { \u2026(2) }, { \u2026(2) }, { \u2026(2) } ] to have a length of 1 but got 3",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "a new menu revision gets new translations",
+    "the translation route is refused by its limiter before any model call"
+   ],
+   "other_errors": {
+    "a new menu revision gets new translations": "AssertionError: expected [ { \u2026(2) }, { \u2026(2) }, { \u2026(2) } ] to have a length of 2 but got 3",
+    "the translation route is refused by its limiter before any model call": "AssertionError: expected [ { \u2026(2) }, { \u2026(2) }, { \u2026(2) }, \u2026(27) ] to have a length of 1 but got 30"
+   },
+   "same_group_others": [
+    "a new menu revision gets new translations",
+    "the translation route is refused by its limiter before any model call"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "m09-store-true",
+   "test": "a cached translation makes no model call",
+   "kind": "standalone",
+   "group": "menu translation",
+   "files": [
+    "src/integrations/ai/menu-translate.ts"
+   ],
+   "mutation": "Named test 24, provider boundary: the call is stored by OpenAI.",
+   "own_row": "failed",
+   "error": "AssertionError: expected true to be false // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "m10-price-sent",
+   "test": "a cached translation makes no model call",
+   "kind": "standalone",
+   "group": "menu translation",
+   "files": [
+    "src/integrations/ai/menu-translate.ts"
+   ],
+   "mutation": "Named test 24, data sent: the menu sent to the model carries each item's name and id plus a price field.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ [ 'itemId', 'name', 'price' ], \u2026(3) ] to deeply equal [ [ 'itemId', 'name' ], \u2026(3) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "m11-english-rewrites-name",
+   "test": "a cached translation makes no model call",
+   "kind": "standalone",
+   "group": "menu translation",
+   "files": [
+    "src/domain/menu/translate.ts"
+   ],
+   "mutation": "Named test 24, English: the model's English name replaces the shop's own.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'FIXTURE \u8bd1 Kopi O', \u2026(3) ] to deeply equal [ 'Kopi O', 'Kaya toast set', \u2026(2) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "m12-unknown-id-kept",
+   "test": "a translated item not on the menu revision is dropped",
+   "kind": "standalone",
+   "group": "menu translation rules",
+   "files": [
+    "src/domain/menu/translate.ts"
+   ],
+   "mutation": "Named test 25, revision ids: an item id not on the revision is kept with an empty original.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ { \u2026(3) }, { \u2026(3) } ] to deeply equal [ { itemId: 'itm_fixturekopi', \u2026(2) } ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "m13-duplicate-kept",
+   "test": "a translated item not on the menu revision is dropped",
+   "kind": "standalone",
+   "group": "menu translation rules",
+   "files": [
+    "src/domain/menu/translate.ts"
+   ],
+   "mutation": "Named test 25, one answer per item: a second answer for the same id is kept.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ { \u2026(3) }, { \u2026(3) } ] to deeply equal [ { itemId: 'itm_fixturekopi', \u2026(2) } ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "m14-name-bound",
+   "test": "a translated item not on the menu revision is dropped",
+   "kind": "standalone",
+   "group": "menu translation rules",
+   "files": [
+    "src/domain/menu/translate.ts"
+   ],
+   "mutation": "Named test 25, name bound: a name of 81 characters is kept.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ Array(2) ] to deeply equal [ 'itm_fixturekopi' ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "m15-empty-name",
+   "test": "a translated item not on the menu revision is dropped",
+   "kind": "standalone",
+   "group": "menu translation rules",
+   "files": [
+    "src/domain/menu/translate.ts"
+   ],
+   "mutation": "Named test 25, name bound: an empty name is kept.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ Array(2) ] to deeply equal [ 'itm_fixturekopi' ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "m16-explanation-bound",
+   "test": "a translated item not on the menu revision is dropped",
+   "kind": "standalone",
+   "group": "menu translation rules",
+   "files": [
+    "src/domain/menu/translate.ts"
+   ],
+   "mutation": "Named test 25, explanation bound: an explanation of 161 characters is kept.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ { itemId: 'itm_fixturekaya', \u2026(2) } ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "m17-code-units",
+   "test": "a translated item not on the menu revision is dropped",
+   "kind": "standalone",
+   "group": "menu translation rules",
+   "files": [
+    "src/domain/menu/translate.ts"
+   ],
+   "mutation": "Named test 25, counting: bounds count UTF-16 code units, not characters.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ 'itm_fixturekopi' ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "m18-digit-kept",
+   "test": "a translation holding a digit or currency sign the original lacks is dropped",
+   "kind": "standalone",
+   "group": "menu translation rules",
+   "files": [
+    "src/domain/menu/translate.ts"
+   ],
+   "mutation": "Named test 26, digits: a digit the original lacks is kept.",
+   "own_row": "failed",
+   "error": "AssertionError: \u5496\u5561C\u5c11\u7cd6 1.60 / null: expected [ { itemId: 'itm_fixturekopi', \u2026(2) } ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "m19-own-digit-dropped",
+   "test": "a translation holding a digit or currency sign the original lacks is dropped",
+   "kind": "standalone",
+   "group": "menu translation rules",
+   "files": [
+    "src/domain/menu/translate.ts"
+   ],
+   "mutation": "Named test 26, the shop's own digit: any digit drops the item, even one the original holds.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to have a length of 1 but got +0",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "m20-currency-kept",
+   "test": "a translation holding a digit or currency sign the original lacks is dropped",
+   "kind": "standalone",
+   "group": "menu translation rules",
+   "files": [
+    "src/domain/menu/translate.ts"
+   ],
+   "mutation": "Named test 26, currency signs: a sign the original lacks is kept.",
+   "own_row": "failed",
+   "error": "AssertionError: \u5496\u5561 $ / null: expected [ { itemId: 'itm_fixturekopi', \u2026(2) } ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "m21-yuan-kept",
+   "test": "a translation holding a digit or currency sign the original lacks is dropped",
+   "kind": "standalone",
+   "group": "menu translation rules",
+   "files": [
+    "src/domain/menu/translate.ts"
+   ],
+   "mutation": "Named test 26, the sign list: \u5143 is not a currency sign.",
+   "own_row": "failed",
+   "error": "AssertionError: \u5496\u5561 / \u4e00\u5143: expected [ { itemId: 'itm_fixturekopi', \u2026(2) } ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "m22-no-nfkc",
+   "test": "a translation holding a digit or currency sign the original lacks is dropped",
+   "kind": "standalone",
+   "group": "menu translation rules",
+   "files": [
+    "src/domain/menu/translate.ts"
+   ],
+   "mutation": "Named test 26, full-width forms: text is not normalized, so \uff04 and \uffe5 pass.",
+   "own_row": "failed",
+   "error": "AssertionError: \u5496\u5561 / \uff04: expected [ { itemId: 'itm_fixturekopi', \u2026(2) } ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "m23-explanation-unchecked",
+   "test": "a translation holding a digit or currency sign the original lacks is dropped",
+   "kind": "standalone",
+   "group": "menu translation rules",
+   "files": [
+    "src/domain/menu/translate.ts"
+   ],
+   "mutation": "Named test 26, both texts: only the name is checked for digits and signs.",
+   "own_row": "failed",
+   "error": "AssertionError: \u5496\u5561C\u5c11\u7cd6 / \u53ea\u89811\u5143: expected [ { itemId: 'itm_fixturekopi', \u2026(2) } ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "m24-original-hidden",
+   "test": "a translation never changes a displayed price, availability or original name",
+   "kind": "standalone",
+   "group": "menu translation rules",
+   "files": [
+    "src/app/buy/basket-form.tsx"
+   ],
+   "mutation": "Named test 27, original name: the translated name replaces the shop's own.",
+   "own_row": "failed",
+   "error": "AssertionError: expected '<div class=\"row item-row\"><span><stro\u2026' to contain '<small class=\"orig\">Kopi C siew dai</\u2026'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "m25-price-replaced",
+   "test": "a translation never changes a displayed price, availability or original name",
+   "kind": "standalone",
+   "group": "menu translation rules",
+   "files": [
+    "src/app/buy/basket-form.tsx"
+   ],
+   "mutation": "Named test 27, price: an item with an explanation shows it in place of its price.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { \u2026(4) } to deeply equal { \u2026(4) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "m26-stepper-translated",
+   "test": "a translation never changes a displayed price, availability or original name",
+   "kind": "standalone",
+   "group": "menu translation rules",
+   "files": [
+    "src/app/buy/basket-form.tsx"
+   ],
+   "mutation": "Named test 27, controls: the quantity buttons are labeled with the translated name.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { \u2026(4) } to deeply equal { \u2026(4) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "m27-revision-ignored",
+   "test": "a new menu revision gets new translations",
+   "kind": "standalone",
+   "group": "menu translation",
+   "files": [
+    "src/domain/menu/translate.ts"
+   ],
+   "mutation": "Named test 28: the stored row is read by language only, whatever the revision.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ { \u2026(2) } ] to have a length of 2 but got 1",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "m28-web-may-update",
+   "test": "a new menu revision gets new translations",
+   "kind": "standalone",
+   "group": "menu translation",
+   "files": [
+    "drizzle/0028_menu_translations.sql"
+   ],
+   "mutation": "Named test 28, immutability: migration 0028 lets the web role update and delete translations.",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'allowed' to be '42501' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "m29-no-on-conflict",
+   "test": "two concurrent misses store one translation",
+   "kind": "standalone",
+   "group": "menu translation",
+   "files": [
+    "src/domain/menu/translate.ts"
+   ],
+   "mutation": "Named test 29: the insert has no on conflict do nothing, so the second miss fails.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'rejected', 'fulfilled' ] to deeply equal [ 'fulfilled', 'fulfilled' ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "m30-no-reread",
+   "test": "two concurrent misses store one translation",
+   "kind": "standalone",
+   "group": "menu translation",
+   "files": [
+    "src/domain/menu/translate.ts"
+   ],
+   "mutation": "Named test 29: each miss answers with its own items, not the stored row.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { kind: 'ok', \u2026(3) } to deeply equal { kind: 'ok', \u2026(3) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "m31-admit-after-model",
+   "test": "the translation route is refused by its limiter before any model call",
+   "kind": "standalone",
+   "group": "menu translation",
+   "files": [
+    "src/app/api/v1/buyer/menu-translations/route.ts"
+   ],
+   "mutation": "Named test 30: the limiter admits after the model call.",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ { \u2026(2) }, { \u2026(2) } ] to have a length of 1 but got 2",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "m32-per-buyer-limit",
+   "test": "the translation route is refused by its limiter before any model call",
+   "kind": "standalone",
+   "group": "menu translation",
+   "files": [
+    "src/lib/ratelimit.ts"
+   ],
+   "mutation": "Named test 30, per buyer: 31 requests in 10 minutes.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { status: 200, code: undefined, \u2026(2) } to match object { status: 429, \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "m33-global-limit",
+   "test": "the translation route is refused by its limiter before any model call",
+   "kind": "standalone",
+   "group": "menu translation",
+   "files": [
+    "src/lib/ratelimit.ts"
+   ],
+   "mutation": "Named test 30, across buyers: 121 requests in an hour.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { status: 200, code: undefined, \u2026(2) } to match object { status: 429, \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "m34-shared-bucket",
+   "test": "the translation route is refused by its limiter before any model call",
+   "kind": "standalone",
+   "group": "menu translation",
+   "files": [
+    "src/app/api/v1/buyer/menu-translations/route.ts"
+   ],
+   "mutation": "Named test 30, own bucket: the route admits under the assistant's bucket.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { status: 200, code: undefined, \u2026(2) } to match object { status: 429, \u2026(2) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "m35-on-without-key",
+   "test": "translation is off unless the key and the model are set",
+   "kind": "standalone",
+   "group": "menu translation rules",
+   "files": [
+    "src/integrations/ai/openai.ts"
+   ],
+   "mutation": "Translation off: on without OPENAI_API_KEY.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { \u2026(2) } to be null",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  },
+  {
+   "id": "m36-on-with-ai-model",
+   "test": "translation is off unless the key and the model are set",
+   "kind": "standalone",
+   "group": "menu translation rules",
+   "files": [
+    "src/integrations/ai/openai.ts"
+   ],
+   "mutation": "Translation off: the suggestion model AI_MODEL stands in for AI_MENU_TRANSLATION_MODEL.",
+   "own_row": "failed",
+   "error": "AssertionError: expected { model: 'FIXTURE-model', \u2026(1) } to be null",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 5,
+   "proof": true
+  }
+ ]
+}

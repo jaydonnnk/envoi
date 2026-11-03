@@ -1,0 +1,27 @@
+{
+ "label": "FIXTURE: the four published demo fixture menus on Render, read 2026-11-03 through the envoi MCP get_menu; demo fixture shops, not real merchants, test money only",
+ "menus": [
+  {"outletId": "out_wgoyp6kgg75472b6s772dplgoq", "name": "Lorong Demo Kopi", "area": "Tanjong Pagar", "country": "SG", "items": [
+   {"id": "itm_i4i3hgvw2xgwustsbbtyw5gffi", "name": "Kopi O", "unitMinor": 160, "available": true},
+   {"id": "itm_wvj3flrvmhy6twiie7t5wkxit4", "name": "Kaya toast set", "unitMinor": 450, "available": true},
+   {"id": "itm_l5ogbmy4c2o4oluxfstutrxtra", "name": "Teh C peng", "unitMinor": 220, "available": true},
+   {"id": "itm_epfm4zh377t5jtnyf2qs55chtu", "name": "Soft-boiled eggs (2)", "unitMinor": 200, "available": true}]},
+  {"outletId": "out_rigqfs5f2vdtsmibj5rxenbnjq", "name": "S26 Fixture Shop", "area": "Tampines", "country": "SG", "items": [
+   {"id": "itm_3xr4r57pbjp222b6y6c36gucqu", "name": "Kopi C", "unitMinor": 180, "available": true},
+   {"id": "itm_t5eja6e2vcdnszjs2hhgpq4w54", "name": "Teh O", "unitMinor": 160, "available": true},
+   {"id": "itm_uqz54lv7ayuk3qwzarei2vwtua", "name": "Kaya toast set", "unitMinor": 350, "available": true},
+   {"id": "itm_mvozrxbtrjwid7vtheu7vuytee", "name": "Ebi fry", "unitMinor": 490, "available": true},
+   {"id": "itm_vtnlzbjuxozcbwattfb4fz3aee", "name": "Ebi fry", "unitMinor": 100, "available": true},
+   {"id": "itm_4e4mffmuroq4o2vzzckzgwrpmm", "name": "Iced lemon tea", "unitMinor": 220, "available": true},
+   {"id": "itm_qflqcltdaspg645hwc3b6truee", "name": "Iced milk tea", "unitMinor": 250, "available": true}]},
+  {"outletId": "out_ft27b47w7r6iu7e74mb23yvydq", "name": "S27 US Fixture Shop", "area": "San Francisco", "country": "US", "items": [
+   {"id": "itm_csoij4hjcxl4ahzqiocx7k2smq", "name": "Drip coffee", "unitMinor": 350, "available": true},
+   {"id": "itm_knxvgp7dekdmb3fclo4vlnryzu", "name": "Bagel", "unitMinor": 425, "available": true}]},
+  {"outletId": "out_vrlbnc3zylbrr6g2drovaiqkfu", "name": "Test Shop", "area": "Test Area", "country": "SG", "items": [
+   {"id": "itm_rpuonb2ag72dfn4tudxol7tzhy", "name": "Kopi C", "unitMinor": 180, "available": true},
+   {"id": "itm_dhfrfldyrcwnifpw3e74lfn644", "name": "Mee siam", "unitMinor": 550, "available": false},
+   {"id": "itm_pbtn2zuv4fotvrqvqn5cxeeji4", "name": "Kaya toast set", "unitMinor": 450, "available": false},
+   {"id": "itm_orkwjxszkbnw4lbm25ydfmdwwm", "name": "Iced lemon tea", "unitMinor": 220, "available": true},
+   {"id": "itm_fcx4h677abzullp3d3pkyogorm", "name": "Iced milk tea", "unitMinor": 250, "available": true}]}
+ ]
+}

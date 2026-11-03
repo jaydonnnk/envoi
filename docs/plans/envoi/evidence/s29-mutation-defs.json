@@ -1,0 +1,531 @@
+[
+ {
+  "id": "m01-subtag-unanchored",
+  "test_file": "tests/unit/menu-translation.test.ts",
+  "test": "a translation language must be a primary language subtag",
+  "kind": "standalone",
+  "mutation": "Named test 23, subtag shape: the pattern loses its end anchor, so \"zh-CN\" passes.",
+  "edits": [
+   {
+    "file": "src/domain/menu/translate.ts",
+    "old": "export const LANGUAGE_SUBTAG = /^[a-z]{2,3}$/;",
+    "new": "export const LANGUAGE_SUBTAG = /^[a-z]{2,3}/;"
+   }
+  ]
+ },
+ {
+  "id": "m02-subtag-any-case",
+  "test_file": "tests/unit/menu-translation.test.ts",
+  "test": "a translation language must be a primary language subtag",
+  "kind": "standalone",
+  "mutation": "Named test 23, subtag case: the pattern accepts capitals.",
+  "edits": [
+   {
+    "file": "src/domain/menu/translate.ts",
+    "old": "export const LANGUAGE_SUBTAG = /^[a-z]{2,3}$/;",
+    "new": "export const LANGUAGE_SUBTAG = /^[a-z]{2,3}$/i;"
+   }
+  ]
+ },
+ {
+  "id": "m03-unknown-language",
+  "test_file": "tests/unit/menu-translation.test.ts",
+  "test": "a translation language must be a primary language subtag",
+  "kind": "standalone",
+  "mutation": "Named test 23, known language: a well-formed subtag naming no language gets a name.",
+  "edits": [
+   {
+    "file": "src/domain/menu/translate.ts",
+    "old": "return new Intl.DisplayNames([\"en\"], { type: \"language\", fallback: \"none\" }).of(language) ?? null;",
+    "new": "return new Intl.DisplayNames([\"en\"], { type: \"language\", fallback: \"none\" }).of(language) ?? language;"
+   }
+  ]
+ },
+ {
+  "id": "m04-route-body-not-strict",
+  "test_file": "tests/integration/menu-translation.test.ts",
+  "test": "a translation language must be a primary language subtag",
+  "kind": "standalone",
+  "mutation": "Named test 23 at the route: the body schema accepts an extra key.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/buyer/menu-translations/route.ts",
+    "old": "language: z.string().refine((tag) => languageName(tag) !== null) }).strict();",
+    "new": "language: z.string().refine((tag) => languageName(tag) !== null) });"
+   }
+  ]
+ },
+ {
+  "id": "m05-route-body-bound",
+  "test_file": "tests/integration/menu-translation.test.ts",
+  "test": "a translation language must be a primary language subtag",
+  "kind": "standalone",
+  "mutation": "Named test 23 at the route: the counted body bound grows from 1 KiB to 16 KiB.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/buyer/menu-translations/route.ts",
+    "old": "const MAX_BODY_BYTES = 1_024;",
+    "new": "const MAX_BODY_BYTES = 16_384;"
+   }
+  ]
+ },
+ {
+  "id": "m06-route-no-session",
+  "test_file": "tests/integration/menu-translation.test.ts",
+  "test": "a translation language must be a primary language subtag",
+  "kind": "standalone",
+  "mutation": "Named test 23 at the route: a request without a buyer session is read.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/buyer/menu-translations/route.ts",
+    "old": "  if (!isPrincipal(principal)) return httpErr(principal);\n",
+    "new": "  if (!isPrincipal(principal) && false) return httpErr(principal);\n"
+   },
+   {
+    "file": "src/app/api/v1/buyer/menu-translations/route.ts",
+    "old": "const admission = await admit(webDb(), \"menu_translation\", principal.userId, TRANSLATION_LIMITS, now);",
+    "new": "const admission = await admit(webDb(), \"menu_translation\", isPrincipal(principal) ? principal.userId : \"anonymous\", TRANSLATION_LIMITS, now);"
+   }
+  ]
+ },
+ {
+  "id": "m07-db-language-check",
+  "test_file": "tests/integration/menu-translation.test.ts",
+  "test": "a translation language must be a primary language subtag",
+  "kind": "standalone",
+  "mutation": "Named test 23 in the database: migration 0028 stores any language text.",
+  "edits": [
+   {
+    "file": "drizzle/0028_menu_translations.sql",
+    "old": ",\n\tCONSTRAINT \"menu_translations_language_check\" CHECK (\"menu_translations\".\"language\" ~ '^[a-z]{2,3}$')\n",
+    "new": "\n"
+   }
+  ]
+ },
+ {
+  "id": "m08-no-cache-read",
+  "test_file": "tests/integration/menu-translation.test.ts",
+  "test": "a cached translation makes no model call",
+  "kind": "standalone",
+  "mutation": "Named test 24: the stored row is never read before the model call.",
+  "edits": [
+   {
+    "file": "src/domain/menu/translate.ts",
+    "old": "  if (hit) return answer(hit.items);\n",
+    "new": "  if (hit && false) return answer(hit.items);\n"
+   }
+  ]
+ },
+ {
+  "id": "m09-store-true",
+  "test_file": "tests/integration/menu-translation.test.ts",
+  "test": "a cached translation makes no model call",
+  "kind": "standalone",
+  "mutation": "Named test 24, provider boundary: the call is stored by OpenAI.",
+  "edits": [
+   {
+    "file": "src/integrations/ai/menu-translate.ts",
+    "old": "providerOptions: { openai: { store: false, strictJsonSchema: true } },",
+    "new": "providerOptions: { openai: { store: true, strictJsonSchema: true } },"
+   }
+  ]
+ },
+ {
+  "id": "m10-price-sent",
+  "test_file": "tests/integration/menu-translation.test.ts",
+  "test": "a cached translation makes no model call",
+  "kind": "standalone",
+  "mutation": "Named test 24, data sent: the menu sent to the model carries each item's name and id plus a price field.",
+  "edits": [
+   {
+    "file": "src/integrations/ai/menu-translate.ts",
+    "old": "input.items.map((item) => ({ itemId: item.id, name: item.name }))",
+    "new": "input.items.map((item) => ({ itemId: item.id, name: item.name, price: null }))"
+   }
+  ]
+ },
+ {
+  "id": "m11-english-rewrites-name",
+  "test_file": "tests/integration/menu-translation.test.ts",
+  "test": "a cached translation makes no model call",
+  "kind": "standalone",
+  "mutation": "Named test 24, English: the model's English name replaces the shop's own.",
+  "edits": [
+   {
+    "file": "src/domain/menu/translate.ts",
+    "old": "const items = language === \"en\" ? kept.map",
+    "new": "const items = language === \"xx\" ? kept.map"
+   }
+  ]
+ },
+ {
+  "id": "m12-unknown-id-kept",
+  "test_file": "tests/unit/menu-translation.test.ts",
+  "test": "a translated item not on the menu revision is dropped",
+  "kind": "standalone",
+  "mutation": "Named test 25, revision ids: an item id not on the revision is kept with an empty original.",
+  "edits": [
+   {
+    "file": "src/domain/menu/translate.ts",
+    "old": "    if (originalName === undefined || seen.has(item.itemId)) return [];\n    seen.add(item.itemId);",
+    "new": "    if (seen.has(item.itemId)) return [];\n    seen.add(item.itemId);"
+   },
+   {
+    "file": "src/domain/menu/translate.ts",
+    "old": "    if (addsNumberOrCurrency(`${name}\\n${explanation ?? \"\"}`, originalName)) return [];",
+    "new": "    if (addsNumberOrCurrency(`${name}\\n${explanation ?? \"\"}`, originalName ?? \"\")) return [];"
+   }
+  ]
+ },
+ {
+  "id": "m13-duplicate-kept",
+  "test_file": "tests/unit/menu-translation.test.ts",
+  "test": "a translated item not on the menu revision is dropped",
+  "kind": "standalone",
+  "mutation": "Named test 25, one answer per item: a second answer for the same id is kept.",
+  "edits": [
+   {
+    "file": "src/domain/menu/translate.ts",
+    "old": "    if (originalName === undefined || seen.has(item.itemId)) return [];",
+    "new": "    if (originalName === undefined) return [];"
+   }
+  ]
+ },
+ {
+  "id": "m14-name-bound",
+  "test_file": "tests/unit/menu-translation.test.ts",
+  "test": "a translated item not on the menu revision is dropped",
+  "kind": "standalone",
+  "mutation": "Named test 25, name bound: a name of 81 characters is kept.",
+  "edits": [
+   {
+    "file": "src/domain/menu/translate.ts",
+    "old": "if (chars(name) < 1 || chars(name) > MAX_TRANSLATED_NAME_CHARS) return [];",
+    "new": "if (chars(name) < 1 || chars(name) > MAX_TRANSLATED_NAME_CHARS + 1) return [];"
+   }
+  ]
+ },
+ {
+  "id": "m15-empty-name",
+  "test_file": "tests/unit/menu-translation.test.ts",
+  "test": "a translated item not on the menu revision is dropped",
+  "kind": "standalone",
+  "mutation": "Named test 25, name bound: an empty name is kept.",
+  "edits": [
+   {
+    "file": "src/domain/menu/translate.ts",
+    "old": "if (chars(name) < 1 || chars(name) > MAX_TRANSLATED_NAME_CHARS) return [];",
+    "new": "if (chars(name) > MAX_TRANSLATED_NAME_CHARS) return [];"
+   }
+  ]
+ },
+ {
+  "id": "m16-explanation-bound",
+  "test_file": "tests/unit/menu-translation.test.ts",
+  "test": "a translated item not on the menu revision is dropped",
+  "kind": "standalone",
+  "mutation": "Named test 25, explanation bound: an explanation of 161 characters is kept.",
+  "edits": [
+   {
+    "file": "src/domain/menu/translate.ts",
+    "old": "if (explanation !== null && chars(explanation) > MAX_EXPLANATION_CHARS) return [];",
+    "new": "if (explanation !== null && chars(explanation) > MAX_EXPLANATION_CHARS + 1) return [];"
+   }
+  ]
+ },
+ {
+  "id": "m17-code-units",
+  "test_file": "tests/unit/menu-translation.test.ts",
+  "test": "a translated item not on the menu revision is dropped",
+  "kind": "standalone",
+  "mutation": "Named test 25, counting: bounds count UTF-16 code units, not characters.",
+  "edits": [
+   {
+    "file": "src/domain/menu/translate.ts",
+    "old": "const chars = (text: string) => Array.from(text).length;",
+    "new": "const chars = (text: string) => text.length * 2;"
+   }
+  ]
+ },
+ {
+  "id": "m18-digit-kept",
+  "test_file": "tests/unit/menu-translation.test.ts",
+  "test": "a translation holding a digit or currency sign the original lacks is dropped",
+  "kind": "standalone",
+  "mutation": "Named test 26, digits: a digit the original lacks is kept.",
+  "edits": [
+   {
+    "file": "src/domain/menu/translate.ts",
+    "old": "  for (const digit of added.match(/\\p{Nd}/gu) ?? []) if (!source.includes(digit)) return true;\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "m19-own-digit-dropped",
+  "test_file": "tests/unit/menu-translation.test.ts",
+  "test": "a translation holding a digit or currency sign the original lacks is dropped",
+  "kind": "standalone",
+  "mutation": "Named test 26, the shop's own digit: any digit drops the item, even one the original holds.",
+  "edits": [
+   {
+    "file": "src/domain/menu/translate.ts",
+    "old": "if (!source.includes(digit)) return true;",
+    "new": "return true;"
+   }
+  ]
+ },
+ {
+  "id": "m20-currency-kept",
+  "test_file": "tests/unit/menu-translation.test.ts",
+  "test": "a translation holding a digit or currency sign the original lacks is dropped",
+  "kind": "standalone",
+  "mutation": "Named test 26, currency signs: a sign the original lacks is kept.",
+  "edits": [
+   {
+    "file": "src/domain/menu/translate.ts",
+    "old": "  return CURRENCY_SIGNS.some((sign) => added.includes(sign) && !source.includes(sign));",
+    "new": "  return false;"
+   }
+  ]
+ },
+ {
+  "id": "m21-yuan-kept",
+  "test_file": "tests/unit/menu-translation.test.ts",
+  "test": "a translation holding a digit or currency sign the original lacks is dropped",
+  "kind": "standalone",
+  "mutation": "Named test 26, the sign list: 元 is not a currency sign.",
+  "edits": [
+   {
+    "file": "src/domain/menu/translate.ts",
+    "old": "const CURRENCY_SIGNS = [\"$\", \"¥\", \"€\", \"£\", \"元\"];",
+    "new": "const CURRENCY_SIGNS = [\"$\", \"¥\", \"€\", \"£\"];"
+   }
+  ]
+ },
+ {
+  "id": "m22-no-nfkc",
+  "test_file": "tests/unit/menu-translation.test.ts",
+  "test": "a translation holding a digit or currency sign the original lacks is dropped",
+  "kind": "standalone",
+  "mutation": "Named test 26, full-width forms: text is not normalized, so ＄ and ￥ pass.",
+  "edits": [
+   {
+    "file": "src/domain/menu/translate.ts",
+    "old": "  const added = text.normalize(\"NFKC\");",
+    "new": "  const added = text;"
+   }
+  ]
+ },
+ {
+  "id": "m23-explanation-unchecked",
+  "test_file": "tests/unit/menu-translation.test.ts",
+  "test": "a translation holding a digit or currency sign the original lacks is dropped",
+  "kind": "standalone",
+  "mutation": "Named test 26, both texts: only the name is checked for digits and signs.",
+  "edits": [
+   {
+    "file": "src/domain/menu/translate.ts",
+    "old": "if (addsNumberOrCurrency(`${name}\\n${explanation ?? \"\"}`, originalName)) return [];",
+    "new": "if (addsNumberOrCurrency(name, originalName)) return [];"
+   }
+  ]
+ },
+ {
+  "id": "m24-original-hidden",
+  "test_file": "tests/unit/menu-translation.test.ts",
+  "test": "a translation never changes a displayed price, availability or original name",
+  "kind": "standalone",
+  "mutation": "Named test 27, original name: the translated name replaces the shop's own.",
+  "edits": [
+   {
+    "file": "src/app/buy/basket-form.tsx",
+    "old": "      {translated.name !== name && <small className=\"orig\">{name}</small>}\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "m25-price-replaced",
+  "test_file": "tests/unit/menu-translation.test.ts",
+  "test": "a translation never changes a displayed price, availability or original name",
+  "kind": "standalone",
+  "mutation": "Named test 27, price: an item with an explanation shows it in place of its price.",
+  "edits": [
+   {
+    "file": "src/app/buy/basket-form.tsx",
+    "old": "<small>{item.unitMinor === null ? \"Price not set",
+    "new": "<small>{translation?.items[item.id]?.explanation ?? (item.unitMinor === null ? \"Price not set"
+   },
+   {
+    "file": "src/app/buy/basket-form.tsx",
+    "old": "`${formatMoney(money(currency, item.unitMinor))} each`}</small>",
+    "new": "`${formatMoney(money(currency, item.unitMinor))} each`)}</small>"
+   }
+  ]
+ },
+ {
+  "id": "m26-stepper-translated",
+  "test_file": "tests/unit/menu-translation.test.ts",
+  "test": "a translation never changes a displayed price, availability or original name",
+  "kind": "standalone",
+  "mutation": "Named test 27, controls: the quantity buttons are labeled with the translated name.",
+  "edits": [
+   {
+    "file": "src/app/buy/basket-form.tsx",
+    "old": "aria-label={`One more ${item.name}`}",
+    "new": "aria-label={`One more ${translation?.items[item.id]?.name ?? item.name}`}"
+   }
+  ]
+ },
+ {
+  "id": "m27-revision-ignored",
+  "test_file": "tests/integration/menu-translation.test.ts",
+  "test": "a new menu revision gets new translations",
+  "kind": "standalone",
+  "mutation": "Named test 28: the stored row is read by language only, whatever the revision.",
+  "edits": [
+   {
+    "file": "src/domain/menu/translate.ts",
+    "old": ".where(and(eq(menuTranslations.menuRevisionId, menu.menuRevisionId), eq(menuTranslations.language, language)))",
+    "new": ".where(eq(menuTranslations.language, language))"
+   }
+  ]
+ },
+ {
+  "id": "m28-web-may-update",
+  "test_file": "tests/integration/menu-translation.test.ts",
+  "test": "a new menu revision gets new translations",
+  "kind": "standalone",
+  "mutation": "Named test 28, immutability: migration 0028 lets the web role update and delete translations.",
+  "edits": [
+   {
+    "file": "drizzle/0028_menu_translations.sql",
+    "old": "GRANT SELECT, INSERT ON TABLE public.\"menu_translations\" TO envoi_web;",
+    "new": "GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.\"menu_translations\" TO envoi_web;"
+   }
+  ]
+ },
+ {
+  "id": "m29-no-on-conflict",
+  "test_file": "tests/integration/menu-translation.test.ts",
+  "test": "two concurrent misses store one translation",
+  "kind": "standalone",
+  "mutation": "Named test 29: the insert has no on conflict do nothing, so the second miss fails.",
+  "edits": [
+   {
+    "file": "src/domain/menu/translate.ts",
+    "old": "model: translator.model, createdAt: now }).onConflictDoNothing();",
+    "new": "model: translator.model, createdAt: now });"
+   }
+  ]
+ },
+ {
+  "id": "m30-no-reread",
+  "test_file": "tests/integration/menu-translation.test.ts",
+  "test": "two concurrent misses store one translation",
+  "kind": "standalone",
+  "mutation": "Named test 29: each miss answers with its own items, not the stored row.",
+  "edits": [
+   {
+    "file": "src/domain/menu/translate.ts",
+    "old": "  return row ? answer(row.items) : { kind: \"unavailable\" };",
+    "new": "  return row ? answer(items) : { kind: \"unavailable\" };"
+   }
+  ]
+ },
+ {
+  "id": "m31-admit-after-model",
+  "test_file": "tests/integration/menu-translation.test.ts",
+  "test": "the translation route is refused by its limiter before any model call",
+  "kind": "standalone",
+  "mutation": "Named test 30: the limiter admits after the model call.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/buyer/menu-translations/route.ts",
+    "old": "  const admission = await admit(webDb(), \"menu_translation\", principal.userId, TRANSLATION_LIMITS, now);\n  if (admission.kind === \"rate_limited\") {",
+    "new": "  const result = await getOrCreateTranslation(webDb(), parsed.data.outletId, parsed.data.language, now, menuTranslator());\n  const admission = await admit(webDb(), \"menu_translation\", principal.userId, TRANSLATION_LIMITS, now);\n  if (admission.kind === \"rate_limited\") {"
+   },
+   {
+    "file": "src/app/api/v1/buyer/menu-translations/route.ts",
+    "old": "\n  const result = await getOrCreateTranslation(webDb(), parsed.data.outletId, parsed.data.language, now, menuTranslator());\n  if (result.kind === \"not_found\")",
+    "new": "\n  if (result.kind === \"not_found\")"
+   }
+  ]
+ },
+ {
+  "id": "m32-per-buyer-limit",
+  "test_file": "tests/integration/menu-translation.test.ts",
+  "test": "the translation route is refused by its limiter before any model call",
+  "kind": "standalone",
+  "mutation": "Named test 30, per buyer: 31 requests in 10 minutes.",
+  "edits": [
+   {
+    "file": "src/lib/ratelimit.ts",
+    "old": "  perSubject: { max: 30, windowMs: 10 * 60_000 },\n  global: { max: 120, windowMs: 60 * 60_000 },",
+    "new": "  perSubject: { max: 31, windowMs: 10 * 60_000 },\n  global: { max: 120, windowMs: 60 * 60_000 },"
+   }
+  ]
+ },
+ {
+  "id": "m33-global-limit",
+  "test_file": "tests/integration/menu-translation.test.ts",
+  "test": "the translation route is refused by its limiter before any model call",
+  "kind": "standalone",
+  "mutation": "Named test 30, across buyers: 121 requests in an hour.",
+  "edits": [
+   {
+    "file": "src/lib/ratelimit.ts",
+    "old": "  perSubject: { max: 30, windowMs: 10 * 60_000 },\n  global: { max: 120, windowMs: 60 * 60_000 },",
+    "new": "  perSubject: { max: 30, windowMs: 10 * 60_000 },\n  global: { max: 121, windowMs: 60 * 60_000 },"
+   }
+  ]
+ },
+ {
+  "id": "m34-shared-bucket",
+  "test_file": "tests/integration/menu-translation.test.ts",
+  "test": "the translation route is refused by its limiter before any model call",
+  "kind": "standalone",
+  "mutation": "Named test 30, own bucket: the route admits under the assistant's bucket.",
+  "edits": [
+   {
+    "file": "src/app/api/v1/buyer/menu-translations/route.ts",
+    "old": "admit(webDb(), \"menu_translation\", principal.userId",
+    "new": "admit(webDb(), \"buyer_assistant\", principal.userId"
+   }
+  ]
+ },
+ {
+  "id": "m35-on-without-key",
+  "test_file": "tests/unit/menu-translation.test.ts",
+  "test": "translation is off unless the key and the model are set",
+  "kind": "standalone",
+  "mutation": "Translation off: on without OPENAI_API_KEY.",
+  "edits": [
+   {
+    "file": "src/integrations/ai/openai.ts",
+    "old": "  if (!env.OPENAI_API_KEY || !env.AI_MENU_TRANSLATION_MODEL) return null;",
+    "new": "  if (!env.AI_MENU_TRANSLATION_MODEL) return null;"
+   }
+  ]
+ },
+ {
+  "id": "m36-on-with-ai-model",
+  "test_file": "tests/unit/menu-translation.test.ts",
+  "test": "translation is off unless the key and the model are set",
+  "kind": "standalone",
+  "mutation": "Translation off: the suggestion model AI_MODEL stands in for AI_MENU_TRANSLATION_MODEL.",
+  "edits": [
+   {
+    "file": "src/integrations/ai/openai.ts",
+    "old": "  const { OPENAI_API_KEY: apiKey, AI_MENU_TRANSLATION_MODEL: model } = env;",
+    "new": "  const { OPENAI_API_KEY: apiKey } = env;\n  const model = env.AI_MENU_TRANSLATION_MODEL ?? env.AI_MODEL!;"
+   },
+   {
+    "file": "src/integrations/ai/openai.ts",
+    "old": "  if (!env.OPENAI_API_KEY || !env.AI_MENU_TRANSLATION_MODEL) return null;",
+    "new": "  if (!env.OPENAI_API_KEY || !(env.AI_MENU_TRANSLATION_MODEL ?? env.AI_MODEL)) return null;"
+   }
+  ]
+ }
+]
