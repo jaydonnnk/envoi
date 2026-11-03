@@ -132,7 +132,7 @@ export function AskEnvoi() {
       </section>
       <aside className="card tint" aria-labelledby="steps-heading">
         <h2 id="steps-heading">What the assistant did</h2>
-        <p className="muted">Each step is a call to Envoi&apos;s published API, made through the client APIMatic generated from it.</p>
+        <p className="muted">Each step is a call to Envoi&apos;s published API, made through Envoi&apos;s own MCP server with the official MCP client.</p>
         {steps.length === 0 && <p className="muted fine">No calls yet in this turn.</p>}
         {steps.map((step, index) => (
           <div className="call" key={index}>

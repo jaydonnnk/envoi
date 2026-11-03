@@ -455,7 +455,8 @@ G1_MOCKUP_SHA256 = {
     os.path.join("mockups", "merchant-web-import.html"): "3535093c00094324e6adea23cfbe2a45dc74854887f07e19b32acb11de129ded",
     # Approved 2026-10-29 for the second build plan ("Approve Gate 1"); index.html gained links to these screens.
     os.path.join("mockups", "index.html"): "717ab77feea8e9e132b40b006951f692a05f105f7ba8904d816399723f1f057c",
-    os.path.join("mockups", "buyer-ask-envoi.html"): "7eaa8bf7b0bb0be032b97b1067824da4d68e252d68644c6f7b60e7ee55e080ff",
+    # 2026-11-03: the Ask Envoi MCP wording reopening, approved in advance by the user; 7eaa8bf7...e080ff was the text before it.
+    os.path.join("mockups", "buyer-ask-envoi.html"): "f444a826d2e2b083ecec2e2342fedaec649140ad9c18321befd4e24452bb83c8",
     os.path.join("mockups", "buyer-menu-explained.html"): "9144c60650ef7e2c081393693fd2cb12025844f0717f5e1fb4bee22534ad1274",
     os.path.join("mockups", "review-us-shop.html"): "593d95562d04bc0e77a69d6192e11f125f1d74e42a59cecd9731835c57cfb826",
     os.path.join("mockups", "merchant-country.html"): "03bd22f1e4b6c214c8685ce51e3019d3fa717cf4112aaa7d0044e8c2269a62f8",
