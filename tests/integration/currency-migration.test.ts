@@ -12,6 +12,7 @@ import { createTestDatabase, type TestDatabase } from "../support/db";
 // published and a draft menu (one price unknown), two purchases whose lines carry the old keys, and
 // their payment attempts, one captured. The same counts and sums are taken on Neon before and after.
 const BEFORE = "0026_assistant_rate_limit_bucket";
+const TARGET = "0027_currency_and_country";
 
 type Totals = Record<string, string | number | null>;
 
@@ -39,18 +40,19 @@ const NEW_NAMES = { unit: "unit_minor", total: "total_minor", gross: "capture_gr
 
 describe("currency migration", () => {
   let database: TestDatabase;
-  let folder: string;
   let before: Totals;
   let linesBefore: postgres.Row[];
 
-  beforeAll(async () => {
-    database = await createTestDatabase("currency_mig", { migrate: false });
-    // The migrations up to 0026 only, as Neon holds them before this slice.
-    folder = mkdtempSync(join(tmpdir(), "envoi-0026-"));
+  const folders: string[] = [];
+
+  // Applies the migrations up to and including tag only, from a copy of the folder cut after it.
+  async function migrateThrough(tag: string): Promise<void> {
+    const folder = mkdtempSync(join(tmpdir(), `envoi-${tag.slice(0, 4)}-`));
+    folders.push(folder);
     cpSync(MIGRATIONS_FOLDER, folder, { recursive: true });
     const journalPath = join(folder, "meta", "_journal.json");
     const journal = JSON.parse(readFileSync(journalPath, "utf8")) as { entries: { tag: string }[] };
-    const last = journal.entries.findIndex((entry) => entry.tag === BEFORE);
+    const last = journal.entries.findIndex((entry) => entry.tag === tag);
     expect(last).toBeGreaterThan(0);
     for (const entry of journal.entries.slice(last + 1)) rmSync(join(folder, `${entry.tag}.sql`));
     journal.entries = journal.entries.slice(0, last + 1);
@@ -61,10 +63,16 @@ describe("currency migration", () => {
     } finally {
       await client.end({ timeout: 5 });
     }
+  }
+
+  beforeAll(async () => {
+    database = await createTestDatabase("currency_mig", { migrate: false });
+    // The migrations up to 0026 only, as Neon held them before S27.
+    await migrateThrough(BEFORE);
   });
 
   afterAll(async () => {
-    if (folder) rmSync(folder, { recursive: true, force: true });
+    for (const folder of folders) rmSync(folder, { recursive: true, force: true });
     await database?.drop();
   });
 
@@ -94,7 +102,7 @@ describe("currency migration", () => {
     before = await totals(sql, OLD_NAMES);
     expect(before).toMatchObject({ menu_items_unit: "750", menu_items_unknown: 1, purchases_total: "1280", attempts_gross: "440", lines_unit: "620", line_count: 3 });
 
-    await runMigrations(database.adminUrl);
+    await migrateThrough(TARGET);
 
     const after = await totals(sql, NEW_NAMES);
     expect(after).toEqual(before);
@@ -136,8 +144,16 @@ describe("currency migration", () => {
       values ('pur_fixture_s27usd', 'usr_fixture_s27', 'out_fixture_s27a', 'mrv_fixture_s27a', 'paid', 'fixture_tracer', '[]', 100, 'USD', now())`).rejects.toMatchObject({ code: "23514" });
 
     // 0027 applies again over the restored schema.
-    await runMigrations(database.adminUrl);
+    await migrateThrough(TARGET);
     expect(await totals(sql, NEW_NAMES)).toEqual(before);
     expect(await applied()).toBe(migrated);
+
+    // Once a later migration is applied, the rollback refuses and changes nothing.
+    await runMigrations(database.adminUrl);
+    const latest = await applied();
+    expect(latest).toBeGreaterThan(migrated);
+    await expect(sql.unsafe(script)).rejects.toThrow(/a migration after 0027 is applied/);
+    expect(await applied()).toBe(latest);
+    expect(await totals(sql, NEW_NAMES)).toEqual(before);
   });
 });
