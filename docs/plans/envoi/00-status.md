@@ -537,11 +537,12 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
   - Close window, at 390 px, Not paid: `pur_7jyr3wrywt2rxiiec2pwzz2zfm` (SGD), `pur_5m373q3dynl7pyg7huusqk2sgy` (USD).
   - Approve in window, Paid: `pur_h4yqyxtjjmfhmcf6674fgx3fbm` (S$1.80, order `67J92562M55062057`, capture `277991078D118615C`, seller `EQN6264CF9F4Y`); `pur_wofg6cruy5pg5xtcfzuuir4l7a` (US$3.50, order `3J230046B9473812R`, capture `7RC93534JB159992J`, seller `972VTMQPEUZ5A`).
   - Script failing, redirect, Paid: `pur_boksmlxihqhowjaiisrzyxjaqe` (S$1.80, order `5R485482LK581763E`, capture `1KR63540CV915350M`); `pur_vju5v6aoayihzesvl7ibmqfiaq` (US$3.50, order `3C198236SY711364N`, capture `0WD09672VE486035P`).
-    The failure was simulated: a patch in the tab pointed the script at a URL that does not exist. No extension or network block was tried [unknown].
+    The failure was simulated: a patch in the tab pointed the script at a URL that does not exist.
+  - Real network block, the user's Chrome DevTools, 2026-11-04 [verified by the user's screenshot]: a block rule on `www.paypal.com/sdk/js` showed the request as blocked at `pur_uwbshmegmqogvfesoejskjwzee`. The card showed no PayPal button, "PayPal's button did not load here. You can approve on PayPal's own page instead." and Continue to PayPal. No payment was made on this review; a payment through the link is proved only by the simulated runs above.
   - A seventh purchase beyond the six authorized, disclosed before the retry: `pur_i7grne2gftfngommczb44lwn5m` expired before approval. `paypal/complete` answered 409, nothing was captured and the receipt read Not paid. Its order was left approved at PayPal, uncaptured.
   - Widths: button and window at 390 px and 1280 px for both currencies. USD at 1280 px, on the user's "Do your three": `pur_nmh6wlclk5ph7woumsm7pmrc3a`, script `currency=USD`, no page overflow, window closed, receipt Not paid. The paid runs ran at the pane's own width, not measured.
   - Expired card's links, served by Render at 1280 px, on the same words: `pur_xyao3cvubfpyuoqvovnp666cqe` showed "See the receipt" and "Review the basket again". This was simulated: a fake SDK in the tab and a faked 409 `review_expired`, so no order was created. The real 409 is the seventh purchase above. That review ended unpaid.
-  - In all, nine new purchases on Render: four paid and five unpaid.
+  - In all, ten new purchases on Render: four paid and six unpaid.
 
   - Local only, on a disposable database since dropped: one more sandbox order, window opened and closed, with Envoi's `Referrer-Policy: no-referrer` in force.
 - **Boundary:** a sandbox result. No usability, completion or timing claim is made. No version pin exists for PayPal's script (R29 stays open).
