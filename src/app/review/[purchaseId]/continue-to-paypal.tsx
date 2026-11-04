@@ -1,20 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { postJson } from "@/lib/browser/session";
 import { useRestoreFocus } from "@/lib/browser/focus";
+import { PayPalButtons } from "./paypal-buttons";
 
-// Asks the server to create the exact sandbox order, then sends the buyer to PayPal's sandbox
-// approval page. The browser never chooses the amount, payee or link host.
+// PayPal's button comes first. If its script fails or it reports an error, this falls back to the
+// redirect: asks the server to create the exact sandbox order, then sends the buyer to PayPal's
+// sandbox approval page. The browser never chooses the amount, payee or link host.
 // A review the shop's republication or connection change closed turns this card into the closed
 // card a reload shows, sending the buyer back to review the basket at the current prices; any other
 // refusal points at the receipt.
-export function ContinueToPayPal({ purchaseId, outletId, validUntil }: { purchaseId: string; outletId: string; validUntil: string }) {
+export function ContinueToPayPal({ purchaseId, outletId, validUntil, clientId, currency }: { purchaseId: string; outletId: string; validUntil: string; clientId: string; currency: string }) {
   const [busy, setBusy] = useState(false);
+  const [redirect, setRedirect] = useState(false);
   const [error, setError] = useState<{ message: string; reviewAgain: boolean } | null>(null);
   useRestoreFocus(busy);
   const receiptHref = `/receipt/${encodeURIComponent(purchaseId)}`;
   const reviewAgainHref = `/buy?outlet=${encodeURIComponent(outletId)}`;
+
+  const showRedirect = useCallback(() => setRedirect(true), []);
+  const refused = useCallback((refusal?: { code: string; message: string }) => {
+    setError({ message: refusal?.message ?? "PayPal could not be opened. Nothing was charged; try again.", reviewAgain: refusal?.code === "review_invalidated" });
+  }, []);
 
   async function start() {
     setBusy(true);
@@ -49,9 +57,16 @@ export function ContinueToPayPal({ purchaseId, outletId, validUntil }: { purchas
     <section className="card" aria-labelledby="pay-heading">
       <h2 id="pay-heading">Approve in PayPal</h2>
       <p className="muted">This review is valid until {validUntil} Singapore time. You approve the exact amount in PayPal&apos;s sandbox; Envoi charges nothing before that.</p>
-      <button className="button full" type="button" onClick={start} disabled={busy}>
-        {busy ? "Opening PayPal…" : "Continue to PayPal"}
-      </button>
+      {redirect ? (
+        <>
+          <p className="muted" role="status">PayPal&apos;s button did not load here. You can approve on PayPal&apos;s own page instead.</p>
+          <button className="button full" type="button" onClick={start} disabled={busy}>
+            {busy ? "Opening PayPal…" : "Continue to PayPal"}
+          </button>
+        </>
+      ) : (
+        <PayPalButtons purchaseId={purchaseId} clientId={clientId} currency={currency} onUnavailable={showRedirect} onRefused={refused} />
+      )}
       {error && (
         <p className="error" role="alert">
           {error.message} <a href={receiptHref}>See the receipt</a>

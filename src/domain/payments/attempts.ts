@@ -111,11 +111,11 @@ async function claimSlot(tx: Tx, input: { purchaseId: string; payeeMerchantId: s
   }
 }
 
-export type StartResult = { attemptId: string; approvalUrl: string };
+export type StartResult = { attemptId: string; approvalUrl: string; orderId: string };
 
 function existingStartAnswer(attempt: PaymentAttemptRow): StartResult | AppError {
-  if ((attempt.state === "order_created" || attempt.state === "externally_approved") && attempt.approvalUrl) {
-    return { attemptId: attempt.id, approvalUrl: attempt.approvalUrl };
+  if ((attempt.state === "order_created" || attempt.state === "externally_approved") && attempt.approvalUrl && attempt.orderId) {
+    return { attemptId: attempt.id, approvalUrl: attempt.approvalUrl, orderId: attempt.orderId };
   }
   if (attempt.state === "capture_dispatched" || attempt.state === "capture_unknown") {
     return appError("capture_already_dispatched", "PayPal is already completing this payment. Check the receipt.");
@@ -163,7 +163,7 @@ async function createAndRecord(tx: Tx, deps: PayPalDeps, purchase: LockedPurchas
       outcomeReason: null,
     });
     if (replay) await recordAudit(tx, { at: after, actor: "system", action: "paypal_create_recovered", purchaseId: purchase.id, attemptId: attempt.id, operatorVisible: true, details: { orderId: created.value.id } });
-    return { attemptId: attempt.id, approvalUrl: created.value.approvalUrl };
+    return { attemptId: attempt.id, approvalUrl: created.value.approvalUrl, orderId: created.value.id };
   }
 
   // Unknown outcome: the buyer received no approval link, so no capture can follow. An order id

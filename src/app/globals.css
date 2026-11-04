@@ -96,6 +96,8 @@ small { font-size: 13px; display: block; }
 .step:disabled { background: #e3eaf1; border-color: var(--line); color: #8a99a8; cursor: not-allowed; }
 .qty { min-width: 2ch; text-align: center; font-variant-numeric: tabular-nums; font-weight: 600; }
 .card > .button.full { margin-top: 16px; }
+.paypal-buttons { margin-top: 16px; }
+.paypal-buttons + small { margin-top: 10px; }
 
 .shop { display: flex; justify-content: space-between; align-items: center; gap: 14px; color: var(--ink); text-decoration: none; }
 .shop:hover { border-color: var(--blue); }

@@ -213,7 +213,13 @@ export default async function ReviewPage({ params }: { params: Promise<{ purchas
               validUntil={SINGAPORE_CLOCK.format(purchase.reviewExpiresAt)}
             />
           ) : payable ? (
-            <ContinueToPayPal purchaseId={purchase.id} outletId={purchase.outletId} validUntil={SINGAPORE_CLOCK.format(purchase.reviewExpiresAt)} />
+            <ContinueToPayPal
+              purchaseId={purchase.id}
+              outletId={purchase.outletId}
+              validUntil={SINGAPORE_CLOCK.format(purchase.reviewExpiresAt)}
+              clientId={webEnv().PAYPAL_CLIENT_ID}
+              currency={purchase.currency}
+            />
           ) : (
             <section className="card warning" aria-labelledby="closed-heading">
               <h2 id="closed-heading">{purchase.view.state === "paid" ? "Already paid" : "Payment cannot start here"}</h2>
