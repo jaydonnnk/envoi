@@ -94,8 +94,13 @@ describe("excerptFor: the page's words around a drafted name", () => {
     expect(excerpt.length).toBeLessThanOrEqual(120);
     expect(excerpt.length).toBeGreaterThan(100);
     expect(excerpt).toContain("Kopi C $1.80");
-    expect(excerpt.startsWith("lorem") || excerpt.startsWith("ipsum") || excerpt.startsWith("dolor") || excerpt.startsWith("sit") || excerpt.startsWith("amet")).toBe(true);
-    expect(/(lorem|ipsum|dolor|sit|amet)$/.test(excerpt)).toBe(true);
+    // Whatever the cut falls on, each end is a whole word.
+    const WORDS = new Set(["lorem", "ipsum", "dolor", "sit", "amet"]);
+    for (let shift = 0; shift < 27; shift += 1) {
+      const words = excerptFor(`${filler}${filler.slice(0, shift)} Kopi C $1.80 ${filler.slice(shift)}`, "Kopi C", money("SGD", 180))!.split(" ");
+      expect(WORDS.has(words[0]!), `shift ${shift}: ${words[0]}`).toBe(true);
+      expect(WORDS.has(words.at(-1)!), `shift ${shift}: ${words.at(-1)}`).toBe(true);
+    }
     // A name longer than the limit is still cut to it.
     expect(excerptFor("x".repeat(300), "x".repeat(200), null)!.length).toBe(120);
   });
@@ -104,6 +109,12 @@ describe("excerptFor: the page's words around a drafted name", () => {
     const excerpt = excerptFor(`${"lorem ipsum dolor sit amet ".repeat(40)}Kopi C $1.80\nMilo $2.00`, "Kopi C", money("SGD", 180))!;
     expect(excerpt.length).toBeGreaterThan(100);
     expect(excerpt.endsWith("Kopi C $1.80")).toBe(true);
+  });
+
+  it("uses the whole allowance when the name sits at the start of a long line", () => {
+    const excerpt = excerptFor(`Earlier line\nKopi C $1.80 ${"lorem ipsum dolor sit amet ".repeat(40)}`, "Kopi C", money("SGD", 180))!;
+    expect(excerpt.startsWith("Kopi C $1.80")).toBe(true);
+    expect(excerpt.length).toBeGreaterThan(100);
   });
 
   it("a matching price too far from the name is not reached for", () => {
