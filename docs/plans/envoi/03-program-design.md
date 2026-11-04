@@ -1,5 +1,7 @@
 # Program Design: Envoi
 
+**REOPENED and RE-APPROVED 2026-11-04 to add Show the stall (S42)** ("Alright fine, reopne gates 1 to 4 to add this in and then add it to the build plan").
+
 **REOPENED 2026-11-04 for the [third build plan](#reopening-2026-11-04-third-build-plan); RE-APPROVED 2026-11-04** ("I dont need s39 and s40. Other than that, all is approved, after u redo the build order").
 
 **Reopened 2026-10-10; revised 2026-10-11, revised again after the user's review the same day, revised a third time the same day for fixes L and M after Gate 2 was reopened, and RE-APPROVED by the user on 2026-10-11** ("Yes approve commit the branch and push and merge to main").
@@ -43,6 +45,7 @@ Every earlier contract stays unless a row below changes it.
 | `src/app/api/v1/buyer/assistant/route.ts` | S33 | Optional `outletId`, resolved to a published outlet |
 | `src/app/buy/ask/page.tsx`, `src/app/buy/ask/ask-envoi.tsx`, `src/app/buy/shop-basket.tsx` | S33 | Shop-scoped page and the link from the shop page |
 | `src/integrations/assistant/tools.ts` | S34 | `propose_basket` takes optional `budgetMinor`, refused in code when menu prices exceed it |
+| `src/app/receipt/[purchaseId]/show-the-stall.tsx`, `src/app/receipt/[purchaseId]/page.tsx` | S42 | New client panel, rendered only when state is paid; uses the existing translations route, and shows original names when it fails. |
 | `src/app/merchant/orders/orders-grid.tsx`, `orders-view.tsx` | S35 | New grid, keeping Acknowledge, Delete and polling |
 | `src/app/api/v1/merchant/outlets/[id]/orders/filter/route.ts`, `src/integrations/ai/order-filter.ts`, `src/domain/purchases/order-filter.ts` | S35 | Route, model call, schema and applying function |
 | `drizzle/0029_*.sql`, `src/lib/db/schema.ts`, `src/lib/ratelimit.ts` | S35, S37 | Two buckets and their limits |
@@ -78,6 +81,7 @@ function cryptoAllowed(outlet: { country: Country }, sellerMerchantId: string, a
   - S34: 41 `propose_basket refuses a basket over the stated budget`, with the sum from menu prices and not from the model.
   - S35: 42 `the filter schema refuses any field but the five`; 43 `the order filter call receives no order data`; 44 `a filter never turns a pending order into a paid row`; 45 `a non-member cannot call the filter route`.
   - S37: 46 `an agent token over its limit reaches no tool`; 47 `a revoked agent token reaches no tool`; 48 `the agents page holds no token value`, by a scan proved with a planted needle.
+  - S42: 54 `show the stall renders only on a paid receipt`; 55 `the stall card's amount comes from the purchase, and its text cannot supply one`.
   - S38: 49 `a crypto attempt never calls capture`; 50 `crypto is refused for a Singapore shop and an unlisted seller`; 51 `a crypto order that is not COMPLETED never reads paid`; 52 `a crypto order with a wrong payee or amount never reads paid`; 53 `a PayPal attempt's order body is unchanged`.
 - **Evaluations, written into `00-status.md` before the first call:** the two in Gate 1's success measure. One run per model on FIXTURE shops, with the sentences fixed first.
 - **Least confident decisions:**
@@ -85,7 +89,9 @@ function cryptoAllowed(outlet: { country: Country }, sellerMerchantId: string, a
   2. The budget guard is at `propose_basket` only. A wrong sum in the assistant's words is caught by evaluation, not code.
   3. The filter applies to rows already loaded, so older pages need "load older" first. A server query would be more correct and larger.
   4. A per-token limit on all MCP tools may slow a legitimate judge's assistant: 60 calls per 10 minutes is proposed.
-  5. S38's body may be refused with items or `invoice_id`; dropping `invoice_id` would lose the duplicate-payment guard, in which case S38 is cut rather than weakened.
+  5. The stall language is chosen by the visitor, with no shop setting, to avoid a migration. A shop setting would be more accurate.
+  6. Whether the receipt's stored lines carry what the translations route needs is checked when S42 starts; if not, S42 stops and asks.
+  7. S38's body may be refused with items or `invoice_id`; dropping `invoice_id` would lose the duplicate-payment guard, in which case S38 is cut rather than weakened.
 
 ## Reopening 2026-11-02: MCP client
 

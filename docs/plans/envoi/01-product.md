@@ -1,5 +1,7 @@
 # Product: Envoi
 
+**REOPENED and RE-APPROVED 2026-11-04 to add Show the stall (S42)** ("Alright fine, reopne gates 1 to 4 to add this in and then add it to the build plan"). See the [third build plan](#third-build-plan-proposed-2026-11-04).
+
 **REOPENED and RE-APPROVED 2026-11-04 for the third build plan** ("I dont need s39 and s40. Other than that, all is approved, after u redo the build order").
 The user's words: "Lets open all 4 gates if possible ill approve all at once."
 The proposal is in [Third build plan](#third-build-plan-proposed-2026-11-04). Approval accepts the product proposal only; it starts no slice.
@@ -267,6 +269,7 @@ The user's own pitch was tourists paying with PayPal through a QR code, with mer
 - **Order in your own language.** The assistant and the one box accept the languages that pass an evaluation, and the assistant replies in the visitor's language. The claim names only the languages that passed.
 - **Scan, then ask.** Scanning a sticker or shop QR opens the assistant already at that shop. Screen: `mockups/buyer-scan-to-ask.html`.
 - **"What should I try under S$10?"** The assistant suggests items from the published menu within the stated budget, and nothing enters a basket until the visitor accepts. It never says "popular" or "best seller". It gives no allergy, halal or dietary assurance; it says it cannot tell and suggests asking the stall. Screen: `mockups/buyer-menu-advice.html`.
+- **Show the stall.** After a Paid receipt, the visitor can show the order in large text in a language they choose for the stall, and play it aloud. Original names and the paid amount stay on screen, the text is labeled as AI translation, and it never appears before Paid. It cannot change a payment. If a translation cannot be made, the original names show alone. Screen: `mockups/receipt-show-the-stall.html`.
 - **Bring your own assistant.** A public page shows how to connect an outside AI assistant to Envoi. A judge's test credential is given only in the submission form. It can read shops and menus and make a one-time link, and it cannot pay, approve or read a receipt. Screen: `mockups/buyer-own-assistant.html`.
 - **Pay with crypto through PayPal, US shops only, conditional.** On an enabled US shop the review offers it as a separate choice of one payment method. PayPal's test environment simulates it: no token is chosen and none moves, and the screen says so. The shop receives dollars in PayPal [vendor claim]. Singapore's PYUSD is unchanged. Screen: `mockups/review-us-crypto.html`.
 
@@ -289,7 +292,8 @@ The user's own pitch was tourists paying with PayPal through a QR code, with mer
 
 ### Flagged for review, beyond the user's words
 
-- Show the stall and Try to trick Envoi were proposed and removed by the user before approval.
+- Try to trick Envoi was proposed and removed by the user before approval. Show the stall was removed, then returned and approved by the user on 2026-11-04.
+- Show the stall assumes the stall needs telling and may not be watching an orders screen; no stall has said so [hypothesis]. A wrong translation could get the visitor the wrong food, though never the wrong charge.
 - Crypto through PayPal adds no AI, and its token choice cannot be filmed in sandbox.
 - The US story still has the weak buyer problem flagged on 2026-10-29 [hypothesis].
 - Voice input was removed by the user: "we dont need voice input".
@@ -300,6 +304,7 @@ The user's own pitch was tourists paying with PayPal through a QR code, with mer
 2. The advice question.
 3. Ask your orders.
 4. Bring your own assistant.
+5. Show the stall.
 
 The landing change, judge access, corrected documents, the language evaluation and scan then ask are never cut.
 
@@ -324,7 +329,7 @@ Each `.html` file in `mockups/` is a plain, throwaway product mockup. The direct
   - `mockups/merchant-country.html`: the merchant chooses Singapore or the United States, which sets currency and payment methods.
   - `mockups/merchant-rewards.html`: the PayPal PYUSD rewards card for a US shop, with a labeled illustration, and for a Singapore shop, which cannot earn it yet.
   - `mockups/merchant-web-import-review.html`: the draft table showing only rows that need review, a next-problem button and the page text behind each row.
-- *Added 2026-11-04 (third plan), approved:* `mockups/landing-ai.html`, `mockups/buyer-scan-to-ask.html`, `mockups/buyer-menu-advice.html`, `mockups/buyer-own-assistant.html`, `mockups/review-us-crypto.html`, `mockups/merchant-orders-grid.html`.
+- *Added 2026-11-04 (third plan), approved:* `mockups/landing-ai.html`, `mockups/buyer-scan-to-ask.html`, `mockups/buyer-menu-advice.html`, `mockups/receipt-show-the-stall.html`, `mockups/buyer-own-assistant.html`, `mockups/review-us-crypto.html`, `mockups/merchant-orders-grid.html`.
 - `mockups/index.html`: review navigation for the five screens above it; not a product screen. The landing page is opened directly.
 
 No mockup uploads an image, extracts data, publishes a shop or performs a payment. Sample prices and local interactions are fixture demonstrations, not market or integration evidence.

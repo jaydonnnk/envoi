@@ -1,5 +1,7 @@
 # Vertical Slices: Envoi
 
+**REOPENED and RE-APPROVED 2026-11-04 to add Show the stall (S42)** ("Alright fine, reopne gates 1 to 4 to add this in and then add it to the build plan").
+
 **REOPENED 2026-11-04 for the third build plan (S41, S32 to S35, S37, S38); RE-APPROVED 2026-11-04** ("I dont need s39 and s40. Other than that, all is approved, after u redo the build order").
 
 Gate 4 slice plan, drafted 2026-10-10 and revised 2026-10-12 (Asia/Singapore).
@@ -1112,7 +1114,7 @@ You perform: asking the organizers the APIMatic question before S31 starts.
 ### Third build plan: S41, S32 to S35, S37, S38 (approved 2026-11-04)
 
 Proposed for the third build plan's gate reopenings; **APPROVED 2026-11-04.** Approval accepts this order, test assignment and cut order; it starts no slice and authorizes no install, migration, upload, model call, merge, push or deploy.
-S36 (voice input), S39 (Show the stall) and S40 (Try to trick Envoi) were removed by the user, and their IDs are not reused. All come after S31, outside the build-order table, each with its own branch from the current tip of `main`.
+S36 (voice input), S39 (Show the stall, first version) and S40 (Try to trick Envoi) were removed by the user, and their IDs are not reused. Show the stall returns as S42, approved 2026-11-04. All come after S31, outside the build-order table, each with its own branch from the current tip of `main`.
 The plan-wide rules of the second build plan apply.
 
 | Order | Slice | Target date [hypothesis] | Cut position |
@@ -1120,10 +1122,11 @@ The plan-wide rules of the second build plan apply.
 | 1 | S41 Judge-ready fixes | 5 Nov | never |
 | 2 | S32 Ordering in other languages | 5 Nov | never |
 | 3 | S33 Scan opens Ask Envoi | 6 Nov | never |
-| 4 | S35 Ask your orders | 7 to 8 Nov | 3 |
-| 5 | S37 Bring your own assistant | 8 to 9 Nov | 4 |
-| 6 | S38 Crypto through PayPal | 9 Nov | 1 |
-| 7 | S34 Advice | 10 Nov | 2 |
+| 4 | S42 Show the stall | 7 Nov | 5 |
+| 5 | S35 Ask your orders | 8 to 9 Nov | 3 |
+| 6 | S37 Bring your own assistant | 9 Nov | 4 |
+| 7 | S38 Crypto through PayPal | 9 to 10 Nov | 1 |
+| 8 | S34 Advice | 10 Nov | 2 |
 
 Freeze 11 Nov, video 12 Nov, cutoff 13 Nov 04:00 SGT.
 
@@ -1138,6 +1141,10 @@ Branch: `envoi/slice-32-language-eval`. **Visible result.** A results table for 
 #### S33 Scan opens Ask Envoi
 
 Branch: `envoi/slice-33-scan-to-ask`. Depends on S32. **Visible result.** On a phone on Render, a scan or shop QR reaches a shop-scoped assistant, then Review, then a Paid receipt and the merchant's order, with the buyer approving. **Tests.** 38 to 40. **Evidence.** The recording, capture id and order view. This also closes Ask Envoi to Paid on Render. **Falsifier.** Not deployed by 7 Nov: film the existing path. **Authorizations.** Starting S33; one sandbox purchase; merge, push and deploy.
+
+#### S42 Show the stall
+
+Branch: `envoi/slice-42-show-the-stall`. Depends on S33. **Visible result.** Per `mockups/receipt-show-the-stall.html` on a Paid receipt on Render. **Tests.** 54, 55. **Evidence.** Screens at 390 px and 1280 px; a native reader's check of the demo order's text, by Javier, named by the user, when the slice comes and before filming. **Falsifiers.** S33 not deployed by 7 Nov: cut S42. A translation cannot be made: the panel shows original names only. **Authorizations.** Starting S42; one sandbox purchase on Render; translation model spend as a stated number; merge, push and deploy.
 
 #### S35 Ask your orders
 

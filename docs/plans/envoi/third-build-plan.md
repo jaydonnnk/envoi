@@ -1,6 +1,6 @@
 # Third build plan: Envoi (draft)
 
-Status: **draft, 2026-11-04 (Asia/Singapore), not approved.** Superseded by the gate documents re-approved 2026-11-04, which win where they differ. There, the blockers are S41; C1 and C2 were removed by the user.
+Status: **draft, 2026-11-04 (Asia/Singapore), not approved.** Superseded by the gate documents re-approved 2026-11-04, which win where they differ. There, the blockers are S41; C2 was removed by the user, and C1 returned as S42, approved 2026-11-04.
 This plan is supporting material.
 It changes no gate, starts no slice and authorizes no install, model call, migration, merge, push, deploy or payment.
 `00-status.md` stays the authority for gate and slice state, and approved gate documents win over this file.

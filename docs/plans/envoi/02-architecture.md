@@ -1,5 +1,7 @@
 # Architecture: Envoi
 
+**REOPENED and RE-APPROVED 2026-11-04 to add Show the stall (S42)** ("Alright fine, reopne gates 1 to 4 to add this in and then add it to the build plan").
+
 **REOPENED 2026-11-04 for the [third build plan amendment](#third-build-plan-amendment-2026-11-04); RE-APPROVED 2026-11-04** ("I dont need s39 and s40. Other than that, all is approved, after u redo the build order").
 
 **Reopened and revised 2026-10-10, revised again after review on 2026-10-11, and RE-APPROVED by the user on 2026-10-11** ("gate 2 approved").
@@ -669,6 +671,7 @@ AG Grid Community stays the only grid; no paid module and no AG Studio.
 - `POST /api/v1/buyer/assistant` gains an optional `outletId`. The server resolves it to a published outlet or refuses it; the browser never supplies shop text.
 - `POST /api/v1/merchant/outlets/[id]/orders/filter` is new: a member's sentence in, a validated filter out.
 - `POST /api/v1/purchases/[id]/paypal/start` gains an optional funding choice, `paypal` or `crypto`.
+- Show the stall reuses `POST /api/v1/buyer/menu-translations`; no new route, table or migration.
 - `GET /agents` is a new public page. `/buy/ask?outlet=<id>` is the shop-scoped assistant page.
 
 **Data.** Additive migrations only:
@@ -684,7 +687,7 @@ No table stores a merchant's filter sentence.
 
 **Flow: judge token.** An operator-issued agent token labeled for judges reaches `/mcp` as any agent does, and a per-token limit applies before the tools run. Revoking it uses the existing `revoked_at`.
 
-**External.** Environment names added: `PAYPAL_CRYPTO_ENABLED`. Reused: `OPENAI_API_KEY`, `AI_MODEL`, `AI_MENU_TRANSLATION_MODEL`, `PAYPAL_*`.
+**External.** Environment names added: `PAYPAL_CRYPTO_ENABLED`. Reused: `OPENAI_API_KEY`, `AI_MODEL`, `AI_MENU_TRANSLATION_MODEL`, `PAYPAL_*`. Show the stall's audio uses the browser's speech synthesis, with no provider, and is left out where the browser has no matching voice.
 
 **Risks.**
 - R-T2 [unknown]: webhook delivery for crypto orders, and whether line items, `invoice_id` and `custom_id` are accepted beside `payment_source.crypto`. S38's first step tests them; the 2026-11-04 order had none of them.
