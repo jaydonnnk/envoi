@@ -1,6 +1,6 @@
 # Envoi demo and test guide
 
-Status: 2026-10-23, written from `main` at `1d354f8`; the buyer text steps corrected 2026-10-26 for S21's one-box screen.
+Status: 2026-11-05. Written 2026-10-23 from `main` at `1d354f8`; the buyer text steps corrected 2026-10-26 for S21's one-box screen; the landing page, Ask Envoi and the box's example sentence corrected 2026-11-05 for S41.
 It walks through every built journey, in the order a judge or tester would meet them.
 Test money only: PayPal sandbox and Solana devnet test tokens; no real money moves.
 Where this guide and a gate document disagree, the gate document wins.
@@ -63,17 +63,41 @@ MIGRATION_DATABASE_URL=postgres://postgres@127.0.0.1:5432/envoi_dev npm run oper
 ## 2. Landing page
 
 1. Open `/`.
-2. Check: headline "PayPal or PYUSD. Straight to the shop.", buttons "Find a shop" and "I run a shop", the notice "Test money only. No real money moves.", no navigation bar and no demo shop named.
-3. Resize to phone width (390 px): no sideways scroll.
+2. Check: headline "Any language. One scan. PayPal."; the lead ending "AI reads the menu with you. It never sets a price and never pays."; the buttons "Ask Envoi", "Find a shop" and "I run a shop" in that order, with "Ask Envoi" the only filled one; the "How it works" card with its three steps Scan, Ask and Approve; the notice "Test money only. No real money moves."; the GitHub and Evidence links; no navigation bar and no demo shop named.
+3. The headline is approved landing wording, not a measured result. No language evaluation has run, so never repeat it as a result and never name a language.
+4. With the assistant off, "Ask Envoi" is absent and "Find a shop" becomes the filled button, because `/buy/ask` answers 404 when the assistant is off and the landing page must not link there.
+5. Resize to phone width (390 px): no sideways scroll.
 
-## 3. Buyer: find a shop by text
+## 3. Buyer: Ask Envoi, or find a shop by text
+
+Ask Envoi is on only when `OPENAI_API_KEY`, `AI_MODEL` and `ASSISTANT_AGENT_TOKEN` are all set. When it is off, `/buy/ask` answers 404 and neither the landing page nor `/buy` links to it.
+
+1. From the landing page press "Ask Envoi", or open `/buy/ask`.
+2. Check the heading "Ask Envoi. Approve it yourself." and the lead's "It never pays."
+3. Type the box's own example, `one Kopi O and a kaya toast set at Lorong Demo Kopi`, and press Send. Every item in that example is one the seeded shop actually sells; an example naming an item it does not sell is the defect S41 fixed.
+4. Check: the reply names only shops and items registered on Envoi; the "What the assistant did" panel lists each call by its own operation name (`listOutlets`, `getOutletMenu`, `createPurchaseRequest`) with its HTTP status; and no price in the reply comes from the model.
+5. When it offers a basket, "Review and pay" opens the existing server-priced review. The assistant sends no amount, cannot approve and cannot read a receipt.
+6. **Stop there.** Ask Envoi through to a Paid receipt has not been run on the deployed site; S33 owns it. Do not film it and do not claim it.
+7. Ask for something off any menu: you get no invented shop and no invented item.
+
+**The one-sentence box**
 
 1. Click "Find a shop", or open `/buy`.
 2. Check the "Test environment" badge and the sandbox and devnet notice.
 3. In the one box labeled "What would you like, and where?", type `two kopi o and one kaya toast near Tanjong Pagar`, then press "Find it". There is no separate area field: the place goes in the same sentence.
-4. Check: only registered shops and items appear, with prices from the shop's menu, not from the AI. A sentence that gives quantities opens the shop with the basket already filled and the note "Nothing is reviewed or paid yet."; a sentence that gives none lists the items with a "Choose quantities" button.
-5. Try nonsense such as `asdfgh`: you get no invented shop. Try `kopi near me`: you get "Which area, or which shop?", because Envoi has no location and does not guess the nearest shop.
-6. Change a quantity or add an item, then press Review.
+4. Check: only registered shops and items appear, with prices from the shop's menu, not from the AI. A sentence that gives a quantity for every item opens the shop with the basket already filled and the note "Nothing is reviewed or paid yet."
+5. Now type the box's own example, `two kaya toast and kopi near Tanjong Pagar`, which gives a quantity for one item and none for the other. Check that both items are listed with their prices and a "Choose quantities" button, and that Envoi does not guess the missing number. Before S41 this sentence asked "What would you like to buy?" on 7 of 10 tries, which is what the buyer had just answered.
+6. A quantity above 20, such as `100 kopi o at Lorong Demo Kopi`, asks again rather than filling a clamped basket, and says the bound.
+7. Try nonsense such as `asdfgh`: you get no invented shop. Try `kopi near me`: you get "Which area, or which shop?", because Envoi has no location and does not guess the nearest shop.
+8. Change a quantity or add an item, then press Review.
+
+**The menu explained and translated**
+
+1. Open any published shop from `/buy`.
+2. Check each item shows an AI translation beside its original name, its price and its availability, with the original menu one tap away.
+3. Check no displayed price changed and no item appeared that is not on that menu. A translation never sets a price.
+4. It is off unless `AI_MENU_TRANSLATION_MODEL` and `OPENAI_API_KEY` are both set; with it off the menu shows original names only.
+5. Nothing here measures whether an explanation is right. The registered evaluation checked prices and items, not meaning, and its builder read three explanations as wrong.
 
 ## 4. Buyer: review and pay with PayPal sandbox
 
@@ -148,6 +172,16 @@ MIGRATION_DATABASE_URL=<database url> npm run operator -- approve-enrollment <ou
 9. Check the shop now appears on `/buy`, and that scanning or pasting the sticker on `/buy/scan` opens it.
 10. Open a buyer review, then change a price and republish in another tab.
     Go back and try to pay: the old review is refused before payment starts.
+
+**Web menu import, an alternative to step 3's hand entry**
+
+1. Signed in at `/merchant/setup`, open the web import and paste the shop's own public menu page. On the deployed site the labeled fixture page is <https://envoi-helx.onrender.com/fixtures/menus/test-shop.html>, which serves 200.
+2. One hosted Kernel browser session reads that page and one model call drafts an editable table. Check that a PDF link answers "Envoi cannot read PDF menus", and that a sign-in page drafts nothing.
+3. Check the draft's aids: the table filters to the rows that still need the merchant, "Next problem" moves keyboard focus to each in turn, and each row shows its own page excerpt until a reload.
+4. Check a price is filled only where the page printed it as text with the same digits; every other price stays blank for the merchant to fill.
+5. The draft never publishes itself. Confirm every row, then publish as in step 8.
+6. An import writes to that shop's draft, so never point it at a shop whose records you must not change.
+7. Web import is closed unless `WEB_IMPORTS_ENABLED` is `true` and `AI_WEB_MENU_MODEL` has a reviewed bounds entry.
 
 Menu photo import is built but ships closed; do not demo it as working.
 
@@ -253,8 +287,8 @@ Integration tests create and drop their own databases, so point `TEST_DATABASE_U
 
 | Step | Pass when |
 | --- | --- |
-| 2 Landing | Copy matches, no sideways scroll at 390 px |
-| 3 Text | Only registered shops and menu prices |
+| 2 Landing | Pitch headline, Ask Envoi offered first and only while the assistant is on, no sideways scroll at 390 px |
+| 3 Ask and text | Ask Envoi names only registered shops and items and stops before Paid; the box's own example lists both items and guesses no quantity |
 | 4 PayPal | Receipt Paid, PayPal payee and amount match |
 | 5 Scan | Approved sticker opens shop, unknown one does not |
 | 6 Merchant | Publish works, stale review refused |
