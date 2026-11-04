@@ -1,5 +1,7 @@
 # Program Design: Envoi
 
+**REOPENED 2026-11-04 for the [third build plan](#reopening-2026-11-04-third-build-plan); RE-APPROVED 2026-11-04** ("I dont need s39 and s40. Other than that, all is approved, after u redo the build order").
+
 **Reopened 2026-10-10; revised 2026-10-11, revised again after the user's review the same day, revised a third time the same day for fixes L and M after Gate 2 was reopened, and RE-APPROVED by the user on 2026-10-11** ("Yes approve commit the branch and push and merge to main").
 **Reopened 2026-10-12 for one change only and RE-APPROVED by the user the same day** ("I approve both pls publish the branches and commit all the changes to main so that we can proceed with the first slice"): PayPal start and completion now check `PAYMENTS_ENABLED` and refuse with a new error code, `payments_disabled`; see [Reopening 2026-10-12](#reopening-2026-10-12-paypal-payments-kill-switch).
 **Reopened 2026-10-15 for one change only, approved by the user in advance:** menu photos are English only, so Chinese text accuracy is no longer an R5 falsifier; see [Reopening 2026-10-15](#reopening-2026-10-15-english-only-menu-photos).
@@ -19,6 +21,71 @@ Every other contract below stays as approved on 2026-10-07.
 See [Revision 2026-10-11](#revision-2026-10-11-direct-vision-and-pyusd), [`00-status.md`](00-status.md#reopening-2026-10-10-zapier-removed) and [`handoff.md`](handoff.md#gate-3-handover-2026-10-11).
 
 Gate 3 program design, 2026-10-07 (Asia/Singapore). **APPROVED by the user 2026-10-07** ("gate 3 is approved"), together with a separate authorization to commit these planning documents and push `main`. Authorities: [approved Gate 1 product](01-product.md) and [approved Gate 2 architecture](02-architecture.md). Approval accepts the contracts below and the disposition of the eight Gate 2 review findings; it establishes no runtime, account, integration or usability evidence, and it does not authorize implementation or Gate 4. A separate, narrowly scoped authorization on the same day covered the R11 flag flip, its redeploy and a read-only schema inspection, all now complete. This document contains contracts only: file map, types and signatures without bodies, call stacks, state transitions, race rules, capacity budgets and named failure tests. No application implementation, no installed application packages and no approved slices exist.
+
+## Reopening 2026-11-04: third build plan
+
+Proposed for the [Gate 1 third build plan](01-product.md#third-build-plan-proposed-2026-11-04) and the [Gate 2 amendment](02-architecture.md#third-build-plan-amendment-2026-11-04); **RE-APPROVED 2026-11-04.** S39 and S40 were removed before approval.
+Approval accepts these contracts as a proposal; it establishes no runtime or evaluation evidence and authorizes no slice, install, migration, model call, merge, push or deploy.
+Every earlier contract stays unless a row below changes it.
+
+- **Version pins:** nothing is installed. `ag-grid-community` and `ag-grid-react` stay at 36.2.0.
+- **Environment names:** `PAYPAL_CRYPTO_ENABLED`, in `src/env.ts` and `.env.example`, holding a comma-separated allowlist of seller merchant ids; empty means off.
+- **Files:**
+
+| File | Slice | Change |
+| --- | --- | --- |
+| `src/app/page.tsx` | S41 | Landing per `mockups/landing-ai.html` |
+| `src/app/buy/ask/ask-envoi.tsx`, `src/app/buy/text-suggest.tsx` | S41 | Placeholders name items the shop sells |
+| `src/domain/suggestions/` | S41 | Fix for the box's "What would you like to buy?" reply, once reproduced |
+| `README.md`, `docs/plans/envoi/evidence-pack.md`, `docs/plans/envoi/video-script.md`, `docs/plans/envoi/demo-guide.md` | S41 | Corrected records and a tools section |
+| `docs/plans/envoi/evidence/s32-language-eval.mts` | S32 | Harness; outside the build |
+| `src/integrations/assistant/agent.ts` | S32, S33, S34 | Reply in the person's language; "in Singapore" goes; optional shop context; advice rules |
+| `src/app/api/v1/buyer/assistant/route.ts` | S33 | Optional `outletId`, resolved to a published outlet |
+| `src/app/buy/ask/page.tsx`, `src/app/buy/ask/ask-envoi.tsx`, `src/app/buy/shop-basket.tsx` | S33 | Shop-scoped page and the link from the shop page |
+| `src/integrations/assistant/tools.ts` | S34 | `propose_basket` takes optional `budgetMinor`, refused in code when menu prices exceed it |
+| `src/app/merchant/orders/orders-grid.tsx`, `orders-view.tsx` | S35 | New grid, keeping Acknowledge, Delete and polling |
+| `src/app/api/v1/merchant/outlets/[id]/orders/filter/route.ts`, `src/integrations/ai/order-filter.ts`, `src/domain/purchases/order-filter.ts` | S35 | Route, model call, schema and applying function |
+| `drizzle/0029_*.sql`, `src/lib/db/schema.ts`, `src/lib/ratelimit.ts` | S35, S37 | Two buckets and their limits |
+| `src/app/agents/page.tsx`, `src/app/mcp/route.ts` | S37 | Setup page; per-token limit |
+| `src/operator/cli.ts` | S37, S41 | `revoke-agent-token` if absent; fixture renames and judge merchant through existing commands where they exist |
+| `drizzle/0030_*.sql`, `src/integrations/paypal/orders.ts`, `src/domain/payments/attempts.ts`, `src/app/api/v1/purchases/[id]/paypal/start/route.ts`, `src/app/review/[purchaseId]/` | S38 | Funding column, order body, no-capture completion, route and review option |
+
+- **Types and signatures (no bodies):**
+
+```ts
+// S33
+type AssistantBody = { turns: Turn[]; outletId?: string };
+function shopContext(db: Db, outletId: string): Promise<{ id: string; name: string } | null>;
+
+// S34
+type ProposeBasketInput = { outletId: string; lines: { menuItemId: string; quantity: number }[]; budgetMinor?: number };
+
+// S35
+type OrderFilter = { states?: OrderState[]; rails?: ("paypal" | "pyusd")[]; currencies?: Currency[]; from?: string; to?: string };
+function parseOrderFilter(text: string, today: string, model: OrderFilterModel): Promise<OrderFilter | null>;
+function applyOrderFilter(orders: readonly MerchantOrder[], filter: OrderFilter): MerchantOrder[];
+
+// S38
+type PayPalFunding = "paypal" | "crypto";
+type CreateOrderInput = /* existing fields */ { funding: PayPalFunding };
+function cryptoAllowed(outlet: { country: Country }, sellerMerchantId: string, allowlist: readonly string[]): boolean;
+```
+
+- **Call stack (crypto):** review, then `paypal/start` with `crypto`, then `cryptoAllowed`, then `createOrder`, then redirect; on return `paypal/complete`, then `readOrder`, then the existing checks of amount, currency and payee, then paid only on capture `COMPLETED`. `captureOrder` is not reachable for a crypto attempt.
+- **Named tests (37 onward; each guard gets its own mutation):**
+  - S32: 37 `the language evaluation counts a wrong basket link as a failure`.
+  - S33: 38 `an unpublished or unknown outlet id gives no shop context`; 39 `shop text reaches the model only as data`; 40 `a shop-scoped turn cannot propose another shop's items`.
+  - S34: 41 `propose_basket refuses a basket over the stated budget`, with the sum from menu prices and not from the model.
+  - S35: 42 `the filter schema refuses any field but the five`; 43 `the order filter call receives no order data`; 44 `a filter never turns a pending order into a paid row`; 45 `a non-member cannot call the filter route`.
+  - S37: 46 `an agent token over its limit reaches no tool`; 47 `a revoked agent token reaches no tool`; 48 `the agents page holds no token value`, by a scan proved with a planted needle.
+  - S38: 49 `a crypto attempt never calls capture`; 50 `crypto is refused for a Singapore shop and an unlisted seller`; 51 `a crypto order that is not COMPLETED never reads paid`; 52 `a crypto order with a wrong payee or amount never reads paid`; 53 `a PayPal attempt's order body is unchanged`.
+- **Evaluations, written into `00-status.md` before the first call:** the two in Gate 1's success measure. One run per model on FIXTURE shops, with the sentences fixed first.
+- **Least confident decisions:**
+  1. [hypothesis] Five languages (zh, ja, ko, es, ms): chosen for visitors plus Singapore's stalls, with no data behind the choice.
+  2. The budget guard is at `propose_basket` only. A wrong sum in the assistant's words is caught by evaluation, not code.
+  3. The filter applies to rows already loaded, so older pages need "load older" first. A server query would be more correct and larger.
+  4. A per-token limit on all MCP tools may slow a legitimate judge's assistant: 60 calls per 10 minutes is proposed.
+  5. S38's body may be refused with items or `invoice_id`; dropping `invoice_id` would lose the duplicate-payment guard, in which case S38 is cut rather than weakened.
 
 ## Reopening 2026-11-02: MCP client
 

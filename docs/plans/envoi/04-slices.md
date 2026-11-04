@@ -1,5 +1,7 @@
 # Vertical Slices: Envoi
 
+**REOPENED 2026-11-04 for the third build plan (S41, S32 to S35, S37, S38); RE-APPROVED 2026-11-04** ("I dont need s39 and s40. Other than that, all is approved, after u redo the build order").
+
 Gate 4 slice plan, drafted 2026-10-10 and revised 2026-10-12 (Asia/Singapore).
 **APPROVED by the user on 2026-10-12** ("I approve both pls publish the branches and commit all the changes to main so that we can proceed with the first slice").
 Approval starts no slice; each starts only on an authorization naming its slice ID.
@@ -1106,6 +1108,52 @@ You perform: asking the organizers the APIMatic question before S31 starts.
 - *Added and approved 2026-10-29:* **S24** follows S22, with a target window of 30 Oct-9 Nov [hypothesis], and is first in the cut order ahead of every other open slice; S15 stays open and closes last.
 - **Never cut:** every payment, approval and recipient guard of the earlier slices, and the human approval of every payment. *Changed 2026-10-29, by the user's decision:* the S15 usability study was previously never cut and is now removed outright, so no study runs and no usability claim is made; every other item in this list stands.
 - **Counts:** the 92 named tests, 231 cases and 39 additions of the original plan and S18's 12 tests are unchanged; S19-S21 carry the 15 named tests of the Gate 3 reopening (test 2 retired on 2026-10-25), counted here. *Added and approved 2026-10-29:* S24 carries the 12 named tests of the 2026-10-29 Gate 3 reopening, counted here.
+
+### Third build plan: S41, S32 to S35, S37, S38 (approved 2026-11-04)
+
+Proposed for the third build plan's gate reopenings; **APPROVED 2026-11-04.** Approval accepts this order, test assignment and cut order; it starts no slice and authorizes no install, migration, upload, model call, merge, push or deploy.
+S36 (voice input), S39 (Show the stall) and S40 (Try to trick Envoi) were removed by the user, and their IDs are not reused. All come after S31, outside the build-order table, each with its own branch from the current tip of `main`.
+The plan-wide rules of the second build plan apply.
+
+| Order | Slice | Target date [hypothesis] | Cut position |
+| --- | --- | --- | --- |
+| 1 | S41 Judge-ready fixes | 5 Nov | never |
+| 2 | S32 Ordering in other languages | 5 Nov | never |
+| 3 | S33 Scan opens Ask Envoi | 6 Nov | never |
+| 4 | S35 Ask your orders | 7 to 8 Nov | 3 |
+| 5 | S37 Bring your own assistant | 8 to 9 Nov | 4 |
+| 6 | S38 Crypto through PayPal | 9 Nov | 1 |
+| 7 | S34 Advice | 10 Nov | 2 |
+
+Freeze 11 Nov, video 12 Nov, cutoff 13 Nov 04:00 SGT.
+
+#### S41 Judge-ready fixes
+
+Branch: `envoi/slice-41-judge-ready`. **Visible result.** Landing per mockup; placeholders work; a judge merchant signs in on Render and imports the fixture page; shop names are believable; README, evidence pack, demo guide and script match the product. **Tests.** Existing suite; the box fix gets a regression test from the reproduced sentence. **Evidence.** Screens at 390 px and 1280 px on Render. **Falsifier.** The box failure does not reproduce in 10 tries: record it as a 1 of 2 live observation and change the placeholder only. **Authorizations.** Starting S41; Neon writes for fixtures and the merchant; merge, push and deploy; `main` receiving the docs commits.
+
+#### S32 Ordering in other languages
+
+Branch: `envoi/slice-32-language-eval`. **Visible result.** A results table for Ask Envoi and the box. **Tests.** 37. **Evaluation.** 24 of 25, zero wrong links. **Falsifier.** Misses after one prompt fix: the claim names only passing languages, and S33 proceeds. **Authorizations.** Starting S32; OpenAI spend as a stated number.
+
+#### S33 Scan opens Ask Envoi
+
+Branch: `envoi/slice-33-scan-to-ask`. Depends on S32. **Visible result.** On a phone on Render, a scan or shop QR reaches a shop-scoped assistant, then Review, then a Paid receipt and the merchant's order, with the buyer approving. **Tests.** 38 to 40. **Evidence.** The recording, capture id and order view. This also closes Ask Envoi to Paid on Render. **Falsifier.** Not deployed by 7 Nov: film the existing path. **Authorizations.** Starting S33; one sandbox purchase; merge, push and deploy.
+
+#### S35 Ask your orders
+
+Branch: `envoi/slice-35-orders-grid`. Depends on S41's judge login. **Visible result.** Per mockup, on Render. **Tests.** 42 to 45. **Falsifier.** Not deployed by 10 Nov: cut. **Authorizations.** Starting S35; migration 0029 on Neon; OpenAI spend as a stated number; merge, push and deploy.
+
+#### S37 Bring your own assistant
+
+Branch: `envoi/slice-37-own-assistant`. **Visible result.** An outside assistant makes a link on Render and the person pays; the page is public. **Tests.** 46 to 48. **Falsifier.** The limit cannot hold: film with a private token and publish none. **Authorizations.** Starting S37; migration 0029 if S35 was cut; issuing the token; one sandbox purchase; merge, push and deploy.
+
+#### S38 Crypto through PayPal
+
+Branch: `envoi/slice-38-pay-with-crypto`. **First step.** One order with Envoi's real body, on the enabled seller, including Failed and Cancelled, and webhook delivery. [verified 2026-11-04] order `1RP01000A2096744K` reached `COMPLETED`, capture `6VY93897R24256104`, with a minimal body and simulator only. **Visible result.** Per mockup on one US FIXTURE shop, through a Paid receipt, labeled simulated. **Tests.** 49 to 53. **Falsifier.** The real body is refused without dropping a guard, or not done by 10 Nov: cut, no claim. **Authorizations.** Starting S38; sandbox orders; migration 0030; setting `PAYPAL_CRYPTO_ENABLED` on Render; merge, push and deploy.
+
+#### S34 Advice
+
+Branch: `envoi/slice-34-menu-advice`. Depends on S33. **Visible result.** Per mockup. **Tests.** 41. **Evaluation.** Ten advice cases and the existing 25. **Falsifier.** Any over-budget or dietary assurance: not shipped. **Authorizations.** Starting S34; OpenAI spend; merge, push and deploy.
 
 ## Test assignment
 

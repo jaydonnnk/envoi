@@ -1,5 +1,9 @@
 # Product: Envoi
 
+**REOPENED and RE-APPROVED 2026-11-04 for the third build plan** ("I dont need s39 and s40. Other than that, all is approved, after u redo the build order").
+The user's words: "Lets open all 4 gates if possible ill approve all at once."
+The proposal is in [Third build plan](#third-build-plan-proposed-2026-11-04). Approval accepts the product proposal only; it starts no slice.
+
 **Reopened 2026-10-29 a third time for the second build plan and RE-APPROVED by the user the same day** ("Approve Gate 1").
 On 2026-10-29 two external reviews scored Envoi about 30 and 33 of 50 [hypothesis: model judgements, not official scores], both finding that the AI is real but hard for a judge to see and that the merchant's reason to join is weak.
 The user consolidated both reviews into one list and asked to "start on the second build plan to improve Envoi".
@@ -243,6 +247,62 @@ It adds to the approved product; every earlier rule, journey and failure state s
 
 Ask Envoi, the AI switched on, the two ambiguous items and the connected run are never cut.
 
+## Third build plan (proposed 2026-11-04)
+
+Status: approved 2026-11-04, not built.
+It adds to the approved product; every earlier rule, journey and failure state still holds unless a point below says otherwise.
+
+### The pitch
+
+**"Any language. One scan. PayPal."**
+A visitor scans the shop's QR, says what they want in their own language, and approves the exact amount in PayPal.
+AI gets the visitor past a menu they cannot read; it never sets a price and never pays.
+Singapore is the main story. In the United States, the same shop QR and menu help visitors who cannot read English.
+PayPal's PYUSD rewards stay one card for US shops. Singapore shops cannot earn them [vendor claim], and Envoi pitches no Singapore yield.
+The user's own pitch was tourists paying with PayPal through a QR code, with merchant yield; the wording above was proposed by the builder and approved with the plan.
+
+### What changes for the buyer
+
+- **The landing page says what the AI does.** It leads with the line above and offers Ask Envoi first. Screen: `mockups/landing-ai.html`.
+- **Order in your own language.** The assistant and the one box accept the languages that pass an evaluation, and the assistant replies in the visitor's language. The claim names only the languages that passed.
+- **Scan, then ask.** Scanning a sticker or shop QR opens the assistant already at that shop. Screen: `mockups/buyer-scan-to-ask.html`.
+- **"What should I try under S$10?"** The assistant suggests items from the published menu within the stated budget, and nothing enters a basket until the visitor accepts. It never says "popular" or "best seller". It gives no allergy, halal or dietary assurance; it says it cannot tell and suggests asking the stall. Screen: `mockups/buyer-menu-advice.html`.
+- **Bring your own assistant.** A public page shows how to connect an outside AI assistant to Envoi. A judge's test credential is given only in the submission form. It can read shops and menus and make a one-time link, and it cannot pay, approve or read a receipt. Screen: `mockups/buyer-own-assistant.html`.
+- **Pay with crypto through PayPal, US shops only, conditional.** On an enabled US shop the review offers it as a separate choice of one payment method. PayPal's test environment simulates it: no token is chosen and none moves, and the screen says so. The shop receives dollars in PayPal [vendor claim]. Singapore's PYUSD is unchanged. Screen: `mockups/review-us-crypto.html`.
+
+### What changes for the merchant
+
+- **Ask your orders.** Merchant orders become a table that sorts and filters. Typing "paid PayPal orders this week" sets the filters and shows which were chosen. It changes no order and no status. Screen: `mockups/merchant-orders-grid.html`.
+- **A judge's merchant account** is created by the operator, with a labeled fixture page to import. There is still no public sign-up.
+
+### What changes for the demo and the record
+
+- Demo fixture shops get believable names and stock; internal labels leave what judges see.
+- Ask Envoi to Paid runs once on the deployed site. This is the connected run the second plan promised through Ask Envoi and S26 recorded through the terminal agent.
+- The video script, README, evidence pack and placeholder examples are corrected.
+
+### Success measure for this plan
+
+- **Language ordering:** 24 of 25 sentences across five languages, with zero wrong basket links, FIXTURE shops only, threshold written before the run.
+- **Advice:** across ten cases, zero items off the menu, zero over budget and zero dietary assurances, and Ask Envoi's existing 24 of 25 still holds.
+- No usability, completion, timing, adoption, return or prize claim is made.
+
+### Flagged for review, beyond the user's words
+
+- Show the stall and Try to trick Envoi were proposed and removed by the user before approval.
+- Crypto through PayPal adds no AI, and its token choice cannot be filmed in sandbox.
+- The US story still has the weak buyer problem flagged on 2026-10-29 [hypothesis].
+- Voice input was removed by the user: "we dont need voice input".
+
+### Cuts, in order, if time runs short
+
+1. Pay with crypto through PayPal.
+2. The advice question.
+3. Ask your orders.
+4. Bring your own assistant.
+
+The landing change, judge access, corrected documents, the language evaluation and scan then ask are never cut.
+
 ## Screens
 
 Each `.html` file in `mockups/` is a plain, throwaway product mockup. The directory is the location convention required by software-factory, not an implementation design. `mockups/review-preview.jpg` is a superseded historical image and not a current screen; review the HTML.
@@ -264,6 +324,7 @@ Each `.html` file in `mockups/` is a plain, throwaway product mockup. The direct
   - `mockups/merchant-country.html`: the merchant chooses Singapore or the United States, which sets currency and payment methods.
   - `mockups/merchant-rewards.html`: the PayPal PYUSD rewards card for a US shop, with a labeled illustration, and for a Singapore shop, which cannot earn it yet.
   - `mockups/merchant-web-import-review.html`: the draft table showing only rows that need review, a next-problem button and the page text behind each row.
+- *Added 2026-11-04 (third plan), approved:* `mockups/landing-ai.html`, `mockups/buyer-scan-to-ask.html`, `mockups/buyer-menu-advice.html`, `mockups/buyer-own-assistant.html`, `mockups/review-us-crypto.html`, `mockups/merchant-orders-grid.html`.
 - `mockups/index.html`: review navigation for the five screens above it; not a product screen. The landing page is opened directly.
 
 No mockup uploads an image, extracts data, publishes a shop or performs a payment. Sample prices and local interactions are fixture demonstrations, not market or integration evidence.
