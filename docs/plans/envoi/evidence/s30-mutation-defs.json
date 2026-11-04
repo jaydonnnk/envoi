@@ -1,0 +1,548 @@
+[
+ {
+  "id": "needs-name",
+  "test": "needs review and Next problem reach every row that still needs the merchant",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "A blank name no longer needs the merchant",
+  "edits": [
+   {
+    "file": "src/app/merchant/setup/menu-grid.tsx",
+    "old": "return row.name.trim() === \"\" || row.priceInvalid || row.priceMissing || row.availability === \"unknown\";",
+    "new": "return row.priceInvalid || row.priceMissing || row.availability === \"unknown\";"
+   }
+  ]
+ },
+ {
+  "id": "needs-invalid",
+  "test": "needs review and Next problem reach every row that still needs the merchant",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "An unreadable price no longer needs the merchant",
+  "edits": [
+   {
+    "file": "src/app/merchant/setup/menu-grid.tsx",
+    "old": "return row.name.trim() === \"\" || row.priceInvalid || row.priceMissing || row.availability === \"unknown\";",
+    "new": "return row.name.trim() === \"\" || row.priceMissing || row.availability === \"unknown\";"
+   }
+  ]
+ },
+ {
+  "id": "needs-missing",
+  "test": "needs review and Next problem reach every row that still needs the merchant",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "A blank price no longer needs the merchant",
+  "edits": [
+   {
+    "file": "src/app/merchant/setup/menu-grid.tsx",
+    "old": "return row.name.trim() === \"\" || row.priceInvalid || row.priceMissing || row.availability === \"unknown\";",
+    "new": "return row.name.trim() === \"\" || row.priceInvalid || row.availability === \"unknown\";"
+   }
+  ]
+ },
+ {
+  "id": "needs-availability",
+  "test": "needs review and Next problem reach every row that still needs the merchant",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "Unknown availability no longer needs the merchant",
+  "edits": [
+   {
+    "file": "src/app/merchant/setup/menu-grid.tsx",
+    "old": "return row.name.trim() === \"\" || row.priceInvalid || row.priceMissing || row.availability === \"unknown\";",
+    "new": "return row.name.trim() === \"\" || row.priceInvalid || row.priceMissing;"
+   }
+  ]
+ },
+ {
+  "id": "filter-all",
+  "test": "needs review and Next problem reach every row that still needs the merchant",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "All rows also filters",
+  "edits": [
+   {
+    "file": "src/app/merchant/setup/menu-grid.tsx",
+    "old": "return filter === \"all\" ? [...rows] : rows.filter(",
+    "new": "return filter === \"none\" ? [...rows] : rows.filter("
+   }
+  ]
+ },
+ {
+  "id": "filter-needs",
+  "test": "needs review and Next problem reach every row that still needs the merchant",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "Needs review shows every row",
+  "edits": [
+   {
+    "file": "src/app/merchant/setup/menu-grid.tsx",
+    "old": "rows.filter((row) => needsMerchant(row) || row.key === keptKey)",
+    "new": "rows.filter(() => true)"
+   }
+  ]
+ },
+ {
+  "id": "next-wrap",
+  "test": "needs review and Next problem reach every row that still needs the merchant",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "The walk stops at the last row instead of wrapping",
+  "edits": [
+   {
+    "file": "src/app/merchant/setup/menu-grid.tsx",
+    "old": "for (let step = 1; step <= rows.length; step += 1) {",
+    "new": "for (let step = 1; start + step < rows.length; step += 1) {"
+   }
+  ]
+ },
+ {
+  "id": "next-skip-fine",
+  "test": "needs review and Next problem reach every row that still needs the merchant",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "The walk stops on a row that needs nothing",
+  "edits": [
+   {
+    "file": "src/app/merchant/setup/menu-grid.tsx",
+    "old": "if (needsMerchant(row)) return { key: row.key, column: problemColumn(row) };",
+    "new": "return { key: row.key, column: problemColumn(row) };"
+   }
+  ]
+ },
+ {
+  "id": "kept-row",
+  "test": "a row just fixed stays in view until the merchant moves on",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "A just fixed row leaves at once",
+  "edits": [
+   {
+    "file": "src/app/merchant/setup/menu-grid.tsx",
+    "old": "needsMerchant(row) || row.key === keptKey",
+    "new": "needsMerchant(row)"
+   }
+  ]
+ },
+ {
+  "id": "column-name",
+  "test": "Next problem lands on the cell the note names first",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "A blank name lands on another cell",
+  "edits": [
+   {
+    "file": "src/app/merchant/setup/menu-grid.tsx",
+    "old": "if (row.name.trim() === \"\") return \"name\";\n  return row.priceInvalid",
+    "new": "return row.priceInvalid"
+   }
+  ]
+ },
+ {
+  "id": "column-price",
+  "test": "Next problem lands on the cell the note names first",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "A blank price lands on availability",
+  "edits": [
+   {
+    "file": "src/app/merchant/setup/menu-grid.tsx",
+    "old": "return row.priceInvalid || row.priceMissing ? \"price\" : \"availability\";",
+    "new": "return row.priceInvalid ? \"price\" : \"availability\";"
+   }
+  ]
+ },
+ {
+  "id": "column-invalid",
+  "test": "Next problem lands on the cell the note names first",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "An unreadable price lands on availability",
+  "edits": [
+   {
+    "file": "src/app/merchant/setup/menu-grid.tsx",
+    "old": "return row.priceInvalid || row.priceMissing ? \"price\" : \"availability\";",
+    "new": "return row.priceMissing ? \"price\" : \"availability\";"
+   }
+  ]
+ },
+ {
+  "id": "lone-problem",
+  "test": "Next problem finds nothing when no row needs the merchant, and a lone problem finds itself",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "The walk never returns to the row it started from",
+  "edits": [
+   {
+    "file": "src/app/merchant/setup/menu-grid.tsx",
+    "old": "for (let step = 1; step <= rows.length; step += 1) {",
+    "new": "for (let step = 1; step < rows.length; step += 1) {"
+   }
+  ]
+ },
+ {
+  "id": "limit",
+  "test": "is at most 120 characters, keeps the name and price, and cuts at a word",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "The limit is 400 characters",
+  "edits": [
+   {
+    "file": "src/domain/imports/verbatim.ts",
+    "old": "const EXCERPT_MAX = 120;",
+    "new": "const EXCERPT_MAX = 400;"
+   }
+  ]
+ },
+ {
+  "id": "word-start",
+  "test": "is at most 120 characters, keeps the name and price, and cuts at a word",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "A cut keeps its partial first word",
+  "edits": [
+   {
+    "file": "src/domain/imports/verbatim.ts",
+    "old": "if (from > lineStart) {",
+    "new": "if (false) {"
+   }
+  ]
+ },
+ {
+  "id": "word-end",
+  "test": "is at most 120 characters, keeps the name and price, and cuts at a word",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "A cut keeps its partial last word",
+  "edits": [
+   {
+    "file": "src/domain/imports/verbatim.ts",
+    "old": "if (to < lineEnd) {",
+    "new": "if (false) {"
+   }
+  ]
+ },
+ {
+  "id": "reclamp",
+  "test": "uses the whole allowance when the name sits at the end of a long line",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "A window ending at the line end stays short",
+  "edits": [
+   {
+    "file": "src/domain/imports/verbatim.ts",
+    "old": "from = Math.max(lineStart, to - EXCERPT_MAX);",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "far-price",
+  "test": "a matching price too far from the name is not reached for",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "A price any distance away is used",
+  "edits": [
+   {
+    "file": "src/domain/imports/verbatim.ts",
+    "old": "if (end - start <= EXCERPT_MAX && cost < spanCost) {",
+    "new": "if (cost < spanCost) {"
+   }
+  ]
+ },
+ {
+  "id": "nearest-price",
+  "test": "prefers the occurrence nearest the drafted price",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "The drafted price is ignored",
+  "edits": [
+   {
+    "file": "src/domain/imports/verbatim.ts",
+    "old": "const printed = price === null ? [] : [...page.matchAll(PRICE_TOKEN)].filter((token) => cents(token[2]!, token[3]) === price.minor);",
+    "new": "const printed: RegExpExecArray[] = [];"
+   }
+  ]
+ },
+ {
+  "id": "own-line",
+  "test": "a price on the name's own line beats a nearer one on the next row's line",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "A price across lines costs the same",
+  "edits": [
+   {
+    "file": "src/domain/imports/verbatim.ts",
+    "old": "(page.slice(start, end).includes(\"\\n\") ? EXCERPT_MAX : 0) + ",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "tie-after",
+  "test": "on a tie takes the price printed after the name",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "A tie takes the price before the name",
+  "edits": [
+   {
+    "file": "src/domain/imports/verbatim.ts",
+    "old": " + (token.index < occurrence.index ? 1 : 0);",
+    "new": ";"
+   }
+  ]
+ },
+ {
+  "id": "next-line-price",
+  "test": "holds a price printed on the next line with its name",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "The line end is measured from before the span",
+  "edits": [
+   {
+    "file": "src/domain/imports/verbatim.ts",
+    "old": "const lineEndAt = (from: number) => {\n    const end = page.indexOf(\"\\n\", from);",
+    "new": "const lineEndAt = (from: number) => {\n    const end = page.indexOf(\"\\n\", Math.max(0, from - 12));"
+   }
+  ]
+ },
+ {
+  "id": "blank-next-line",
+  "test": "a blank-price name alone on its line shows the next line",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "A name alone on its line stays alone",
+  "edits": [
+   {
+    "file": "src/domain/imports/verbatim.ts",
+    "old": "if (price === null && page.slice(lineStart, lineEnd).trim() === page.slice(span.start, span.end)) {",
+    "new": "if (false) {"
+   }
+  ]
+ },
+ {
+  "id": "blank-own-line",
+  "test": "a blank-price name with words on its line stops at that line",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "A blank-price row always takes the next line",
+  "edits": [
+   {
+    "file": "src/domain/imports/verbatim.ts",
+    "old": "if (price === null && page.slice(lineStart, lineEnd).trim() === page.slice(span.start, span.end)) {",
+    "new": "if (price === null) {"
+   }
+  ]
+ },
+ {
+  "id": "line-end",
+  "test": "gives the line that holds the name",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "The window runs past the line end",
+  "edits": [
+   {
+    "file": "src/domain/imports/verbatim.ts",
+    "old": "let to = Math.min(lineEnd, from + EXCERPT_MAX);",
+    "new": "let to = from + EXCERPT_MAX;"
+   }
+  ]
+ },
+ {
+  "id": "line-start",
+  "test": "uses the whole allowance when the name sits at the start of a long line",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "The first window ignores the line start, so a window reclamped to it comes out short",
+  "edits": [
+   {
+    "file": "src/domain/imports/verbatim.ts",
+    "old": "let from = Math.max(lineStart, span.start - Math.floor(spare / 2));\n",
+    "new": "let from = span.start - Math.floor(spare / 2);\n"
+   }
+  ]
+ },
+ {
+  "id": "spacing",
+  "test": "finds a name across case and spacing, and reads special characters literally",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "A name split by other spacing is not found",
+  "edits": [
+   {
+    "file": "src/domain/imports/verbatim.ts",
+    "old": "words.map(nameSource).join(\"\\\\s+\")",
+    "new": "words.map(nameSource).join(\" \")"
+   }
+  ]
+ },
+ {
+  "id": "case",
+  "test": "finds a name across case and spacing, and reads special characters literally",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "A name in other case is not found",
+  "edits": [
+   {
+    "file": "src/domain/imports/verbatim.ts",
+    "old": "\"giu\"",
+    "new": "\"gu\""
+   }
+  ]
+ },
+ {
+  "id": "escape",
+  "test": "finds a name across case and spacing, and reads special characters literally",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "Special characters act as a pattern",
+  "edits": [
+   {
+    "file": "src/domain/imports/verbatim.ts",
+    "old": "const nameSource = (word: string) => word.replace(/[\\\\^$.*+?()[\\]{}|/]/g, \"\\\\$&\");",
+    "new": "const nameSource = (word: string) => word;"
+   }
+  ]
+ },
+ {
+  "id": "empty-name",
+  "test": "is null for a name the page does not print or an empty name",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "An empty name matches everywhere",
+  "edits": [
+   {
+    "file": "src/domain/imports/verbatim.ts",
+    "old": "if (words.length === 0) return null;\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "absent-name",
+  "test": "is null for a name the page does not print or an empty name",
+  "test_file": "tests/unit/menu-review-aids.test.ts",
+  "kind": "standalone",
+  "mutation": "A name not found returns page text",
+  "edits": [
+   {
+    "file": "src/domain/imports/verbatim.ts",
+    "old": "if (!first) return null;",
+    "new": "if (!first) return page.slice(0, EXCERPT_MAX);"
+   }
+  ]
+ },
+ {
+  "id": "answer-excerpts",
+  "test": "each drafted row gets the page's words, by name and portion",
+  "test_file": "tests/integration/menu-web-import.test.ts",
+  "kind": "standalone",
+  "mutation": "The success answer has no excerpts",
+  "edits": [
+   {
+    "file": "src/domain/imports/request.ts",
+    "old": "          excerpts,\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "portion-first",
+  "test": "each drafted row gets the page's words, by name and portion",
+  "test_file": "tests/integration/menu-web-import.test.ts",
+  "kind": "standalone",
+  "mutation": "The portion is not tried first",
+  "edits": [
+   {
+    "file": "src/domain/imports/request.ts",
+    "old": "const text = (item.portion ? excerptFor(pageText, `${item.name} ${item.portion}`, price) : null) ?? excerptFor(pageText, item.name, price);",
+    "new": "const text = excerptFor(pageText, item.name, price);"
+   }
+  ]
+ },
+ {
+  "id": "leak-log",
+  "test": "page excerpts never reach the database, a log or a trace",
+  "test_file": "tests/integration/menu-web-import.test.ts",
+  "kind": "standalone",
+  "mutation": "A log line carries the excerpts",
+  "edits": [
+   {
+    "file": "src/domain/imports/request.ts",
+    "old": "const excerpts = pageExcerpts(page.text, kept.draft.items);",
+    "new": "const excerpts = pageExcerpts(page.text, kept.draft.items);\n    log(\"info\", \"menu_web_excerpts\", { importId, excerpts });"
+   }
+  ]
+ },
+ {
+  "id": "leak-db",
+  "test": "page excerpts never reach the database, a log or a trace",
+  "test_file": "tests/integration/menu-web-import.test.ts",
+  "kind": "standalone",
+  "mutation": "The import row keeps an excerpt",
+  "edits": [
+   {
+    "file": "src/domain/imports/request.ts",
+    "old": "const commit = await commitImport(db, importId, kept.draft, usage, importRuntime.now());",
+    "new": "const commit = await commitImport(db, importId, { ...kept.draft, fingerprint: excerpts[0]?.text ?? kept.draft.fingerprint }, usage, importRuntime.now());"
+   }
+  ]
+ },
+ {
+  "id": "leak-trace",
+  "test": "page excerpts never reach the database, a log or a trace",
+  "test_file": "tests/integration/menu-web-import.test.ts",
+  "kind": "standalone",
+  "mutation": "A trace line writes every field it is given",
+  "edits": [
+   {
+    "file": "src/integrations/assistant/trace.ts",
+    "old": "        operation: entry.operation,\n",
+    "new": "        ...entry,\n        operation: entry.operation,\n"
+   }
+  ]
+ },
+ {
+  "id": "leak-failed-answer",
+  "test": "page excerpts never reach the database, a log or a trace",
+  "test_file": "tests/integration/menu-web-import.test.ts",
+  "kind": "standalone",
+  "mutation": "A failed answer carries page text",
+  "edits": [
+   {
+    "file": "src/domain/imports/request.ts",
+    "old": "\"Drafting failed, so no item was added. Try again or enter the menu by hand.\", \"model_failed\", undefined, true);\n    }\n\n    const validated = validateVisionDraft(call.raw);\n    const kept",
+    "new": "`Drafting failed, so no item was added: ${page.text}`, \"model_failed\", undefined, true);\n    }\n\n    const validated = validateVisionDraft(call.raw);\n    const kept"
+   }
+  ]
+ },
+ {
+  "id": "scanner-blind",
+  "test": "page excerpts never reach the database, a log or a trace",
+  "test_file": "tests/integration/menu-web-import.test.ts",
+  "kind": "standalone",
+  "mutation": "The scanner sees nothing: the self-test must catch it",
+  "edits": [
+   {
+    "file": "tests/integration/menu-web-import.test.ts",
+    "old": "const found = (surface: string) => variants(NEEDLE).some((variant) => surface.includes(variant));",
+    "new": "const found = (surface: string) => false && variants(NEEDLE).some((variant) => surface.includes(variant));"
+   }
+  ]
+ },
+ {
+  "id": "scanner-variants",
+  "test": "page excerpts never reach the database, a log or a trace",
+  "test_file": "tests/integration/menu-web-import.test.ts",
+  "kind": "standalone",
+  "mutation": "The scanner reads the raw needle only: the lower-case self-test must catch it",
+  "edits": [
+   {
+    "file": "tests/integration/menu-web-import.test.ts",
+    "old": "const variants = (needle: string) => [needle, JSON.stringify(needle).slice(1, -1), needle.toLowerCase(), encodeURIComponent(needle)];\n    const found = (surface: string) => variants",
+    "new": "const variants = (needle: string) => [needle];\n    const found = (surface: string) => variants"
+   }
+  ]
+ }
+]

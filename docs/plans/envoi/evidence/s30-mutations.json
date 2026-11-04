@@ -1,0 +1,915 @@
+{
+ "branch": "envoi/slice-30-review-aids",
+ "base_commit": "417f9ed",
+ "uncommitted_changes": true,
+ "method": "Each definition in s30-mutation-defs.json applied alone by exact text replacement, its whole test file run with the vitest JSON reporter, every touched file restored and compared by SHA-256, then the whole file rerun. A proof needs the named row to fail on an AssertionError, a byte-identical restore and an all-passing rerun; other failing rows are recorded. The integration file runs the real web import route handler on a local PostgreSQL database built from the migrations through 0028, with the three Neon URLs removed; Kernel and OpenAI are faked at the fetch boundary, labeled FIXTURE, so no page is read and no model is called. The unit file reads excerptFor and the table review functions; that a browser focus lands on each row is keyboard evidence in 00-status.md, not a test here.",
+ "results": [
+  {
+   "id": "needs-name",
+   "test": "needs review and Next problem reach every row that still needs the merchant",
+   "kind": "standalone",
+   "group": "needs review and Next problem",
+   "files": [
+    "src/app/merchant/setup/menu-grid.tsx"
+   ],
+   "mutation": "A blank name no longer needs the merchant",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'bad-price', 'blank-price', \u2026(1) ] to deeply equal [ 'no-name', 'bad-price', \u2026(2) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "Next problem lands on the cell the note names first",
+    "a removed row does not stop the walk",
+    "each row needs the merchant for its own reason"
+   ],
+   "other_errors": {
+    "Next problem lands on the cell the note names first": "AssertionError: expected undefined to be 'name' // Object.is equality",
+    "a removed row does not stop the walk": "AssertionError: expected 'bad-price' to be 'no-name' // Object.is equality",
+    "each row needs the merchant for its own reason": "AssertionError: no-name: expected false to be true // Object.is equality"
+   },
+   "same_group_others": [
+    "Next problem lands on the cell the note names first",
+    "a removed row does not stop the walk",
+    "each row needs the merchant for its own reason"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "needs-invalid",
+   "test": "needs review and Next problem reach every row that still needs the merchant",
+   "kind": "standalone",
+   "group": "needs review and Next problem",
+   "files": [
+    "src/app/merchant/setup/menu-grid.tsx"
+   ],
+   "mutation": "An unreadable price no longer needs the merchant",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'no-name', 'blank-price', \u2026(1) ] to deeply equal [ 'no-name', 'bad-price', \u2026(2) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "Next problem lands on the cell the note names first",
+    "each row needs the merchant for its own reason"
+   ],
+   "other_errors": {
+    "Next problem lands on the cell the note names first": "AssertionError: expected undefined to be 'price' // Object.is equality",
+    "each row needs the merchant for its own reason": "AssertionError: bad-price: expected false to be true // Object.is equality"
+   },
+   "same_group_others": [
+    "Next problem lands on the cell the note names first",
+    "each row needs the merchant for its own reason"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "needs-missing",
+   "test": "needs review and Next problem reach every row that still needs the merchant",
+   "kind": "standalone",
+   "group": "needs review and Next problem",
+   "files": [
+    "src/app/merchant/setup/menu-grid.tsx"
+   ],
+   "mutation": "A blank price no longer needs the merchant",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'no-name', 'bad-price', \u2026(1) ] to deeply equal [ 'no-name', 'bad-price', \u2026(2) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "Next problem lands on the cell the note names first",
+    "each row needs the merchant for its own reason"
+   ],
+   "other_errors": {
+    "Next problem lands on the cell the note names first": "AssertionError: expected undefined to be 'price' // Object.is equality",
+    "each row needs the merchant for its own reason": "AssertionError: blank-price: expected false to be true // Object.is equality"
+   },
+   "same_group_others": [
+    "Next problem lands on the cell the note names first",
+    "each row needs the merchant for its own reason"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "needs-availability",
+   "test": "needs review and Next problem reach every row that still needs the merchant",
+   "kind": "standalone",
+   "group": "needs review and Next problem",
+   "files": [
+    "src/app/merchant/setup/menu-grid.tsx"
+   ],
+   "mutation": "Unknown availability no longer needs the merchant",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'no-name', 'bad-price', \u2026(1) ] to deeply equal [ 'no-name', 'bad-price', \u2026(2) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "Next problem finds nothing when no row needs the merchant, and a lone problem finds itself",
+    "Next problem lands on the cell the note names first",
+    "a row just fixed stays in view until the merchant moves on",
+    "each row needs the merchant for its own reason"
+   ],
+   "other_errors": {
+    "Next problem finds nothing when no row needs the merchant, and a lone problem finds itself": "AssertionError: expected undefined to be 'a' // Object.is equality",
+    "Next problem lands on the cell the note names first": "AssertionError: expected undefined to be 'availability' // Object.is equality",
+    "a row just fixed stays in view until the merchant moves on": "AssertionError: expected [ 'fixed' ] to deeply equal [ 'fixed', 'open' ]",
+    "each row needs the merchant for its own reason": "AssertionError: no-availability: expected false to be true // Object.is equality"
+   },
+   "same_group_others": [
+    "Next problem finds nothing when no row needs the merchant, and a lone problem finds itself",
+    "Next problem lands on the cell the note names first",
+    "a row just fixed stays in view until the merchant moves on",
+    "each row needs the merchant for its own reason"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "filter-all",
+   "test": "needs review and Next problem reach every row that still needs the merchant",
+   "kind": "standalone",
+   "group": "needs review and Next problem",
+   "files": [
+    "src/app/merchant/setup/menu-grid.tsx"
+   ],
+   "mutation": "All rows also filters",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'no-name', 'bad-price', \u2026(2) ] to deeply equal [ 'fine-first', 'no-name', \u2026(5) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "filter-needs",
+   "test": "needs review and Next problem reach every row that still needs the merchant",
+   "kind": "standalone",
+   "group": "needs review and Next problem",
+   "files": [
+    "src/app/merchant/setup/menu-grid.tsx"
+   ],
+   "mutation": "Needs review shows every row",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'fine-first', 'no-name', \u2026(5) ] to deeply equal [ 'no-name', 'bad-price', \u2026(2) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "a row just fixed stays in view until the merchant moves on"
+   ],
+   "other_errors": {
+    "a row just fixed stays in view until the merchant moves on": "AssertionError: expected [ 'fixed', 'open' ] to deeply equal [ 'open' ]"
+   },
+   "same_group_others": [
+    "a row just fixed stays in view until the merchant moves on"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "next-wrap",
+   "test": "needs review and Next problem reach every row that still needs the merchant",
+   "kind": "standalone",
+   "group": "needs review and Next problem",
+   "files": [
+    "src/app/merchant/setup/menu-grid.tsx"
+   ],
+   "mutation": "The walk stops at the last row instead of wrapping",
+   "own_row": "failed",
+   "error": "AssertionError: expected undefined to be 'no-name' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "Next problem finds nothing when no row needs the merchant, and a lone problem finds itself"
+   ],
+   "other_errors": {
+    "Next problem finds nothing when no row needs the merchant, and a lone problem finds itself": "AssertionError: expected undefined to be 'a' // Object.is equality"
+   },
+   "same_group_others": [
+    "Next problem finds nothing when no row needs the merchant, and a lone problem finds itself"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "next-skip-fine",
+   "test": "needs review and Next problem reach every row that still needs the merchant",
+   "kind": "standalone",
+   "group": "needs review and Next problem",
+   "files": [
+    "src/app/merchant/setup/menu-grid.tsx"
+   ],
+   "mutation": "The walk stops on a row that needs nothing",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'fine-first', 'no-name', \u2026(2) ] to deeply equal [ 'no-name', 'bad-price', \u2026(2) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "Next problem finds nothing when no row needs the merchant, and a lone problem finds itself",
+    "a removed row does not stop the walk"
+   ],
+   "other_errors": {
+    "Next problem finds nothing when no row needs the merchant, and a lone problem finds itself": "AssertionError: expected { key: 'b', column: 'availability' } to be null",
+    "a removed row does not stop the walk": "AssertionError: expected 'fine-first' to be 'no-name' // Object.is equality"
+   },
+   "same_group_others": [
+    "Next problem finds nothing when no row needs the merchant, and a lone problem finds itself",
+    "a removed row does not stop the walk"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "kept-row",
+   "test": "a row just fixed stays in view until the merchant moves on",
+   "kind": "standalone",
+   "group": "needs review and Next problem",
+   "files": [
+    "src/app/merchant/setup/menu-grid.tsx"
+   ],
+   "mutation": "A just fixed row leaves at once",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'open' ] to deeply equal [ 'fixed', 'open' ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "column-name",
+   "test": "Next problem lands on the cell the note names first",
+   "kind": "standalone",
+   "group": "needs review and Next problem",
+   "files": [
+    "src/app/merchant/setup/menu-grid.tsx"
+   ],
+   "mutation": "A blank name lands on another cell",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'availability' to be 'name' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "column-price",
+   "test": "Next problem lands on the cell the note names first",
+   "kind": "standalone",
+   "group": "needs review and Next problem",
+   "files": [
+    "src/app/merchant/setup/menu-grid.tsx"
+   ],
+   "mutation": "A blank price lands on availability",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'availability' to be 'price' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "column-invalid",
+   "test": "Next problem lands on the cell the note names first",
+   "kind": "standalone",
+   "group": "needs review and Next problem",
+   "files": [
+    "src/app/merchant/setup/menu-grid.tsx"
+   ],
+   "mutation": "An unreadable price lands on availability",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'availability' to be 'price' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "lone-problem",
+   "test": "Next problem finds nothing when no row needs the merchant, and a lone problem finds itself",
+   "kind": "standalone",
+   "group": "needs review and Next problem",
+   "files": [
+    "src/app/merchant/setup/menu-grid.tsx"
+   ],
+   "mutation": "The walk never returns to the row it started from",
+   "own_row": "failed",
+   "error": "AssertionError: expected undefined to be 'a' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "Next problem lands on the cell the note names first"
+   ],
+   "other_errors": {
+    "Next problem lands on the cell the note names first": "AssertionError: expected undefined to be 'name' // Object.is equality"
+   },
+   "same_group_others": [
+    "Next problem lands on the cell the note names first"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "limit",
+   "test": "is at most 120 characters, keeps the name and price, and cuts at a word",
+   "kind": "standalone",
+   "group": "excerptFor: the page's words around a drafted name",
+   "files": [
+    "src/domain/imports/verbatim.ts"
+   ],
+   "mutation": "The limit is 400 characters",
+   "own_row": "failed",
+   "error": "AssertionError: expected 390 to be less than or equal to 120",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "word-start",
+   "test": "is at most 120 characters, keeps the name and price, and cuts at a word",
+   "kind": "standalone",
+   "group": "excerptFor: the page's words around a drafted name",
+   "files": [
+    "src/domain/imports/verbatim.ts"
+   ],
+   "mutation": "A cut keeps its partial first word",
+   "own_row": "failed",
+   "error": "AssertionError: shift 0: orem: expected false to be true // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "word-end",
+   "test": "is at most 120 characters, keeps the name and price, and cuts at a word",
+   "kind": "standalone",
+   "group": "excerptFor: the page's words around a drafted name",
+   "files": [
+    "src/domain/imports/verbatim.ts"
+   ],
+   "mutation": "A cut keeps its partial last word",
+   "own_row": "failed",
+   "error": "AssertionError: shift 2: l: expected false to be true // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "reclamp",
+   "test": "uses the whole allowance when the name sits at the end of a long line",
+   "kind": "standalone",
+   "group": "excerptFor: the page's words around a drafted name",
+   "files": [
+    "src/domain/imports/verbatim.ts"
+   ],
+   "mutation": "A window ending at the line end stays short",
+   "own_row": "failed",
+   "error": "AssertionError: expected 60 to be greater than 100",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "far-price",
+   "test": "a matching price too far from the name is not reached for",
+   "kind": "standalone",
+   "group": "excerptFor: the page's words around a drafted name",
+   "files": [
+    "src/domain/imports/verbatim.ts"
+   ],
+   "mutation": "A price any distance away is used",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'amet lorem ipsum dolor sit amet lorem\u2026' to contain 'Kopi C'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "nearest-price",
+   "test": "prefers the occurrence nearest the drafted price",
+   "kind": "standalone",
+   "group": "excerptFor: the page's words around a drafted name",
+   "files": [
+    "src/domain/imports/verbatim.ts"
+   ],
+   "mutation": "The drafted price is ignored",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'Ebi fry - small - $4.90' to be 'Ebi fry - large - $6.40' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "holds a price printed on the next line with its name",
+    "on a tie takes the price printed after the name"
+   ],
+   "other_errors": {
+    "holds a price printed on the next line with its name": "AssertionError: expected 'Teh O' to be 'Teh O Hot $1.60' // Object.is equality",
+    "on a tie takes the price printed after the name": "AssertionError: expected '$1.80 Kopi' to be 'Kopi $1.80' // Object.is equality"
+   },
+   "same_group_others": [
+    "holds a price printed on the next line with its name",
+    "on a tie takes the price printed after the name"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "own-line",
+   "test": "a price on the name's own line beats a nearer one on the next row's line",
+   "kind": "standalone",
+   "group": "excerptFor: the page's words around a drafted name",
+   "files": [
+    "src/domain/imports/verbatim.ts"
+   ],
+   "mutation": "A price across lines costs the same",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'Ebi fry, 3 pcs - $4.90 Ebi fry + Ment\u2026' to be 'Ebi fry, 3 pcs - $4.90' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "tie-after",
+   "test": "on a tie takes the price printed after the name",
+   "kind": "standalone",
+   "group": "excerptFor: the page's words around a drafted name",
+   "files": [
+    "src/domain/imports/verbatim.ts"
+   ],
+   "mutation": "A tie takes the price before the name",
+   "own_row": "failed",
+   "error": "AssertionError: expected '$1.80 Kopi' to be 'Kopi $1.80' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "next-line-price",
+   "test": "holds a price printed on the next line with its name",
+   "kind": "standalone",
+   "group": "excerptFor: the page's words around a drafted name",
+   "files": [
+    "src/domain/imports/verbatim.ts"
+   ],
+   "mutation": "The line end is measured from before the span",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'Teh O' to be 'Teh O Hot $1.60' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "finds a name across case and spacing, and reads special characters literally",
+    "on a tie takes the price printed after the name"
+   ],
+   "other_errors": {
+    "finds a name across case and spacing, and reads special characters literally": "AssertionError: expected 'KAYA TOAST' to be 'KAYA TOAST SET - $3.50' // Object.is equality",
+    "on a tie takes the price printed after the name": "AssertionError: expected '' to be 'Kopi $1.80' // Object.is equality"
+   },
+   "same_group_others": [
+    "finds a name across case and spacing, and reads special characters literally",
+    "on a tie takes the price printed after the name"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "blank-next-line",
+   "test": "a blank-price name alone on its line shows the next line",
+   "kind": "standalone",
+   "group": "excerptFor: the page's words around a drafted name",
+   "files": [
+    "src/domain/imports/verbatim.ts"
+   ],
+   "mutation": "A name alone on its line stays alone",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'Chicken rice set' to be 'Chicken rice set ask staff' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "blank-own-line",
+   "test": "a blank-price name with words on its line stops at that line",
+   "kind": "standalone",
+   "group": "excerptFor: the page's words around a drafted name",
+   "files": [
+    "src/domain/imports/verbatim.ts"
+   ],
+   "mutation": "A blank-price row always takes the next line",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'Chicken rice set, ask staff Milo $2.00' to be 'Chicken rice set, ask staff' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "line-end",
+   "test": "gives the line that holds the name",
+   "kind": "standalone",
+   "group": "excerptFor: the page's words around a drafted name",
+   "files": [
+    "src/domain/imports/verbatim.ts"
+   ],
+   "mutation": "The window runs past the line end",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'Kaya toast set - $3.50 Ebi fry, 3 pcs\u2026' to be 'Kaya toast set - $3.50' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "a blank-price name alone on its line shows the next line",
+    "a blank-price name with words on its line stops at that line",
+    "a price on the name's own line beats a nearer one on the next row's line",
+    "holds a price printed on the next line with its name",
+    "prefers the occurrence nearest the drafted price",
+    "uses the whole allowance when the name sits at the end of a long line"
+   ],
+   "other_errors": {
+    "a blank-price name alone on its line shows the next line": "AssertionError: expected 'Chicken rice set ask staff Milo $2.00' to be 'Chicken rice set ask staff' // Object.is equality",
+    "a blank-price name with words on its line stops at that line": "AssertionError: expected 'Chicken rice set, ask staff Milo $2.00' to be 'Chicken rice set, ask staff' // Object.is equality",
+    "a price on the name's own line beats a nearer one on the next row's line": "AssertionError: expected 'Ebi fry, 3 pcs - $4.90 Ebi fry + Ment\u2026' to be 'Ebi fry, 3 pcs - $4.90' // Object.is equality",
+    "holds a price printed on the next line with its name": "AssertionError: expected 'Teh O Hot $1.60 Milo' to be 'Teh O Hot $1.60' // Object.is equality",
+    "prefers the occurrence nearest the drafted price": "AssertionError: expected 'Ebi fry - small - $4.90 something els\u2026' to be 'Ebi fry - small - $4.90' // Object.is equality",
+    "uses the whole allowance when the name sits at the end of a long line": "AssertionError: expected 71 to be greater than 100"
+   },
+   "same_group_others": [
+    "a blank-price name alone on its line shows the next line",
+    "a blank-price name with words on its line stops at that line",
+    "a price on the name's own line beats a nearer one on the next row's line",
+    "holds a price printed on the next line with its name",
+    "prefers the occurrence nearest the drafted price",
+    "uses the whole allowance when the name sits at the end of a long line"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "line-start",
+   "test": "uses the whole allowance when the name sits at the start of a long line",
+   "kind": "standalone",
+   "group": "excerptFor: the page's words around a drafted name",
+   "files": [
+    "src/domain/imports/verbatim.ts"
+   ],
+   "mutation": "The first window ignores the line start, so a window reclamped to it comes out short",
+   "own_row": "failed",
+   "error": "AssertionError: expected 66 to be greater than 100",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "spacing",
+   "test": "finds a name across case and spacing, and reads special characters literally",
+   "kind": "standalone",
+   "group": "excerptFor: the page's words around a drafted name",
+   "files": [
+    "src/domain/imports/verbatim.ts"
+   ],
+   "mutation": "A name split by other spacing is not found",
+   "own_row": "failed",
+   "error": "AssertionError: expected null to be 'KAYA TOAST SET - $3.50' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "case",
+   "test": "finds a name across case and spacing, and reads special characters literally",
+   "kind": "standalone",
+   "group": "excerptFor: the page's words around a drafted name",
+   "files": [
+    "src/domain/imports/verbatim.ts"
+   ],
+   "mutation": "A name in other case is not found",
+   "own_row": "failed",
+   "error": "AssertionError: expected null to be 'KAYA TOAST SET - $3.50' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "escape",
+   "test": "finds a name across case and spacing, and reads special characters literally",
+   "kind": "standalone",
+   "group": "excerptFor: the page's words around a drafted name",
+   "files": [
+    "src/domain/imports/verbatim.ts"
+   ],
+   "mutation": "Special characters act as a pattern",
+   "own_row": "failed",
+   "error": "AssertionError: expected null to be 'Kopi (C)+ [hot] $1.80' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "empty-name",
+   "test": "is null for a name the page does not print or an empty name",
+   "kind": "standalone",
+   "group": "excerptFor: the page's words around a drafted name",
+   "files": [
+    "src/domain/imports/verbatim.ts"
+   ],
+   "mutation": "An empty name matches everywhere",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'FIXTURE page' to be null",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "absent-name",
+   "test": "is null for a name the page does not print or an empty name",
+   "kind": "standalone",
+   "group": "excerptFor: the page's words around a drafted name",
+   "files": [
+    "src/domain/imports/verbatim.ts"
+   ],
+   "mutation": "A name not found returns page text",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'FIXTURE page\\nKopi C (Hot) - $1.80\\nK\u2026' to be null",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "finds a name across case and spacing, and reads special characters literally"
+   ],
+   "other_errors": {
+    "finds a name across case and spacing, and reads special characters literally": "AssertionError: expected 'Kopi CCC $1.80' to be null"
+   },
+   "same_group_others": [
+    "finds a name across case and spacing, and reads special characters literally"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 19,
+   "proof": true
+  },
+  {
+   "id": "answer-excerpts",
+   "test": "each drafted row gets the page's words, by name and portion",
+   "kind": "standalone",
+   "group": "page excerpts stay in the success answer",
+   "files": [
+    "src/domain/imports/request.ts"
+   ],
+   "mutation": "The success answer has no excerpts",
+   "own_row": "failed",
+   "error": "AssertionError: expected undefined to deeply equal [ { name: 'Kopi C', \u2026(2) }, \u2026(3) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "page excerpts never reach the database, a log or a trace"
+   ],
+   "other_errors": {
+    "page excerpts never reach the database, a log or a trace": "AssertionError: expected undefined to deeply equal [ { name: 'Teh O', \u2026(2) } ]"
+   },
+   "same_group_others": [
+    "page excerpts never reach the database, a log or a trace"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "portion-first",
+   "test": "each drafted row gets the page's words, by name and portion",
+   "kind": "standalone",
+   "group": "page excerpts stay in the success answer",
+   "files": [
+    "src/domain/imports/request.ts"
+   ],
+   "mutation": "The portion is not tried first",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ { name: 'Kopi C', \u2026(2) }, \u2026(3) ] to deeply equal [ { name: 'Kopi C', \u2026(2) }, \u2026(3) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "leak-log",
+   "test": "page excerpts never reach the database, a log or a trace",
+   "kind": "standalone",
+   "group": "page excerpts stay in the success answer",
+   "files": [
+    "src/domain/imports/request.ts"
+   ],
+   "mutation": "A log line carries the excerpts",
+   "own_row": "failed",
+   "error": "AssertionError: logs holds the excerpt: expected true to be false // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "leak-db",
+   "test": "page excerpts never reach the database, a log or a trace",
+   "kind": "standalone",
+   "group": "page excerpts stay in the success answer",
+   "files": [
+    "src/domain/imports/request.ts"
+   ],
+   "mutation": "The import row keeps an excerpt",
+   "own_row": "failed",
+   "error": "AssertionError: rows holds the excerpt: expected true to be false // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "leak-trace",
+   "test": "page excerpts never reach the database, a log or a trace",
+   "kind": "standalone",
+   "group": "page excerpts stay in the success answer",
+   "files": [
+    "src/integrations/assistant/trace.ts"
+   ],
+   "mutation": "A trace line writes every field it is given",
+   "own_row": "failed",
+   "error": "AssertionError: trace holds the excerpt: expected true to be false // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "leak-failed-answer",
+   "test": "page excerpts never reach the database, a log or a trace",
+   "kind": "standalone",
+   "group": "page excerpts stay in the success answer",
+   "files": [
+    "src/domain/imports/request.ts"
+   ],
+   "mutation": "A failed answer carries page text",
+   "own_row": "failed",
+   "error": "AssertionError: expected true to be false // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "a planted marker in the page text and the URL path appears on no surface"
+   ],
+   "other_errors": {
+    "a planted marker in the page text and the URL path appears on no surface": "AssertionError: logs holds FIXTURENEEDLETEXT7Q: expected true to be false // Object.is equality"
+   },
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "scanner-blind",
+   "test": "page excerpts never reach the database, a log or a trace",
+   "kind": "standalone",
+   "group": "page excerpts stay in the success answer",
+   "files": [
+    "tests/integration/menu-web-import.test.ts"
+   ],
+   "mutation": "The scanner sees nothing: the self-test must catch it",
+   "own_row": "failed",
+   "error": "AssertionError: logs self-test: expected false to be true // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  },
+  {
+   "id": "scanner-variants",
+   "test": "page excerpts never reach the database, a log or a trace",
+   "kind": "standalone",
+   "group": "page excerpts stay in the success answer",
+   "files": [
+    "tests/integration/menu-web-import.test.ts"
+   ],
+   "mutation": "The scanner reads the raw needle only: the lower-case self-test must catch it",
+   "own_row": "failed",
+   "error": "AssertionError: logs self-test: expected false to be true // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 17,
+   "proof": true
+  }
+ ]
+}
