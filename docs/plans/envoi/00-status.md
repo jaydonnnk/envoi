@@ -512,7 +512,7 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 - **Turned on, in the user's words:** "im going to turn on the assistent agent token(i ran the npm command u gave me and put into render already), as well as the ai model to gpt 6 luna." [verified 2026-11-04] `/buy/ask` answers 200 and `/buy` shows Ask Envoi and "Or scan the sticker". This departs from S25's falsifier, which kept the assistant off after its miss; the user made that choice.
 - **Authority for the rerun:** "i want you to run some tests on whether it still misses evaluation, things to improve, and whether a different model would work." No limit was named; the builder capped each model at US$0.50.
 - **What ran:** S25's 25 sentences and scoring, unchanged, one run each, on a local production build of `b1425df` against a disposable database, since dropped, by [`ask-rerun-2026-11-04.mts`](evidence/ask-rerun-2026-11-04.mts) with [its seed](evidence/ask-rerun-2026-11-04-seed.mts). The S25 result stays as recorded. This is not a new pre-registration. Render was not tested beyond the two pages above.
-- **Results [verified], threshold 24 of 25; no model passes:**
+- **Results [verified], threshold 24 of 25; none of these four passes:**
 
   | Model | Correct | Median time | Spend (S4's prices, [vendor claim]) | Wrong |
   | --- | --- | --- | --- | --- |
@@ -521,8 +521,12 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
   | `gpt-5.4-mini` | 23 | 3.9 s | US$0.0714 | C3, C4 |
   | `gpt-4.1-mini` | 18 | 3.3 s | US$0.0321 | B2, B4, B7, B9, C3, C4, I1 |
 
+- **Two more candidates, the user's words "what about gpt 6 sol or gpt 6.1 sol" and "just try gpt 6.1 sol light first then go up the thinking level if needed" [verified]:** threshold met by both, one run each, capped at US$1 each; prices from OpenAI's pricing page read 2026-11-04 [vendor claim].
+  `gpt-6-sol`, the default thinking level `medium`: 24 of 25, wrong N3 (wording), median 5.4 s, US$0.1650.
+  `gpt-6.1-sol` at `low`, set by the harness's proxy because the build sends no level: 24 of 25, wrong I1 (asked to confirm five sets instead of making the link), median 8.4 s, US$0.1580. "Light" was taken as `low`, the lowest level this model supports. A partial `gpt-6.1-sol` run at the default level was stopped and is not scored.
+  Passing after trying six candidates is weaker than a first-run pass [hypothesis]. Neither is set on Render. `AI_MODEL` also drives the one-sentence box, whose own evaluation has not run on these models [unknown].
 - **Reading [hypothesis]:** `gpt-6-luna`'s N3 reply, "Nowhere Shop isn't on Envoi", has the right meaning and misses only the registered words "not on envoi"; it is not re-scored. L2 was wrong in S25 and correct here, so one run does not fix a case's outcome. No wrong basket link was created by any model in this run: every miss is a missing link or a reply wording.
-- **Claim boundary:** Ask Envoi is on, but it has not met the threshold in `01-product.md`. Any claim must state the result as it stands.
+- **Claim boundary:** Ask Envoi is on with `gpt-6-luna`, which has not met the threshold in `01-product.md`. Any claim must state the result as it stands.
 
 ### S31 PayPal approval over the review page, 2026-11-04
 

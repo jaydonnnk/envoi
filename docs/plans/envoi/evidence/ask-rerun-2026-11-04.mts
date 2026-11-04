@@ -37,6 +37,9 @@ const PRICES: Record<string, { input: number; cached: number; output: number }> 
   "gpt-5.6-luna": { input: 0.2, cached: 0.02, output: 1.2 },
   "gpt-4.1-mini": { input: 0.4, cached: 0.1, output: 1.6 },
   "gpt-5.4-mini": { input: 0.75, cached: 0.075, output: 4.5 },
+  // OpenAI pricing page, read 2026-11-04 [vendor claim].
+  "gpt-6-sol": { input: 2, cached: 0.2, output: 10 },
+  "gpt-6.1-sol": { input: 2, cached: 0.1, output: 10 },
 };
 // The worst case of one model request: 8,000 input and 2,000 output tokens, as S20's per-step bound.
 const WORST_STEP_TOKENS = { input: 8_000, output: 2_000 };
@@ -123,7 +126,8 @@ function startProxy(limit: number, price: { input: number; cached: number; outpu
     const upstream = await fetch(`https://api.openai.com${request.url}`, {
       method: request.method,
       headers: { authorization: String(request.headers.authorization ?? ""), "content-type": "application/json" },
-      body: chunks.length ? Buffer.concat(chunks) : undefined,
+      // S25_EFFORT sets the thinking level the build itself does not send; unset leaves the model's default.
+      body: chunks.length ? (process.env.S25_EFFORT ? JSON.stringify({ ...JSON.parse(Buffer.concat(chunks).toString("utf8")), reasoning: { effort: process.env.S25_EFFORT } }) : Buffer.concat(chunks)) : undefined,
     });
     const text = await upstream.text();
     usage.requests += 1;
@@ -229,6 +233,7 @@ async function run() {
   const correct = results.filter((row) => row.correct).length;
   const summary = {
     model,
+    effort: process.env.S25_EFFORT ?? "default",
     baseUrl: BASE_URL,
     ran: results.length,
     correct,
@@ -242,7 +247,7 @@ async function run() {
     spentUsd: Number(proxy.spent().toFixed(6)),
     limitUsd: limit,
   };
-  writeFileSync(join(HERE, `ask-rerun-2026-11-04-${model}.json`), `${JSON.stringify({ summary, results }, null, 1)}\n`);
+  writeFileSync(join(HERE, `ask-rerun-2026-11-04-${model}${process.env.S25_EFFORT ? `-${process.env.S25_EFFORT}` : ""}.json`), `${JSON.stringify({ summary, results }, null, 1)}\n`);
   console.log(JSON.stringify(summary));
 }
 
