@@ -1,0 +1,343 @@
+{
+ "label": "FIXTURE shops and one FIXTURE sentence; real OpenAI calls; anonymous buyer principal",
+ "ranAt": "2026-11-04T15:49:27.121Z",
+ "sentence": "two kaya toast and kopi near Tanjong Pagar",
+ "model": "gpt-6-sol",
+ "spendLimitUsd": 0.5,
+ "spentUsd": 0.09519,
+ "worstCasePerTryUsd": 0.18,
+ "tries": 10,
+ "completed": 10,
+ "failures": 7,
+ "reproducedOnTry": 2,
+ "shops": [
+  "Lorong Demo Kopi (Tanjong Pagar)",
+  "Test Shop (Test Area)"
+ ],
+ "rows": [
+  {
+   "attempt": 1,
+   "ms": 14881,
+   "usd": 0.010579,
+   "usage": {
+    "input": 3251,
+    "cached": 1063,
+    "output": 599
+   },
+   "reproduced": false,
+   "got": {
+    "kind": "items",
+    "outlet": "Lorong Demo Kopi",
+    "items": [
+     "Kopi O",
+     "Kaya toast set"
+    ]
+   },
+   "proposals": [
+    {
+     "kind": "items",
+     "outletIds": [],
+     "outletId": "out_etj3b2665rpwqu3rvrox5p2vry",
+     "itemIds": [
+      "itm_tdz23tahn3kbibv3apmziisyyy",
+      "itm_r3nh3xp3erikvxln4f7rhwqdnu"
+     ],
+     "lines": [],
+     "choices": [],
+     "area": "Tanjong Pagar",
+     "missing": []
+    }
+   ]
+  },
+  {
+   "attempt": 2,
+   "ms": 8105,
+   "usd": 0.010799,
+   "usage": {
+    "input": 3871,
+    "cached": 1296,
+    "output": 539
+   },
+   "reproduced": true,
+   "got": {
+    "kind": "clarification",
+    "missing": [
+     "item"
+    ],
+    "question": "What would you like to buy?"
+   },
+   "proposals": [
+    {
+     "kind": "clarification",
+     "outletIds": [],
+     "outletId": null,
+     "itemIds": [],
+     "lines": [],
+     "choices": [],
+     "area": "Tanjong Pagar",
+     "missing": [
+      "item"
+     ]
+    }
+   ]
+  },
+  {
+   "attempt": 3,
+   "ms": 7405,
+   "usd": 0.008896,
+   "usage": {
+    "input": 3185,
+    "cached": 1030,
+    "output": 438
+   },
+   "reproduced": true,
+   "got": {
+    "kind": "clarification",
+    "missing": [
+     "item"
+    ],
+    "question": "What would you like to buy?"
+   },
+   "proposals": [
+    {
+     "kind": "clarification",
+     "outletIds": [],
+     "outletId": null,
+     "itemIds": [],
+     "lines": [],
+     "choices": [],
+     "area": "Tanjong Pagar",
+     "missing": [
+      "item"
+     ]
+    }
+   ]
+  },
+  {
+   "attempt": 4,
+   "ms": 11284,
+   "usd": 0.012482,
+   "usage": {
+    "input": 3864,
+    "cached": 1292,
+    "output": 708
+   },
+   "reproduced": true,
+   "got": {
+    "kind": "clarification",
+    "missing": [
+     "item"
+    ],
+    "question": "What would you like to buy?"
+   },
+   "proposals": [
+    {
+     "kind": "clarification",
+     "outletIds": [],
+     "outletId": null,
+     "itemIds": [],
+     "lines": [],
+     "choices": [],
+     "area": "Tanjong Pagar",
+     "missing": [
+      "item"
+     ]
+    }
+   ]
+  },
+  {
+   "attempt": 5,
+   "ms": 7319,
+   "usd": 0.010152,
+   "usage": {
+    "input": 3161,
+    "cached": 0,
+    "output": 383
+   },
+   "reproduced": true,
+   "got": {
+    "kind": "clarification",
+    "missing": [
+     "item"
+    ],
+    "question": "What would you like to buy?"
+   },
+   "proposals": [
+    {
+     "kind": "clarification",
+     "outletIds": [],
+     "outletId": null,
+     "itemIds": [],
+     "lines": [],
+     "choices": [],
+     "area": "Tanjong Pagar",
+     "missing": [
+      "item"
+     ]
+    }
+   ]
+  },
+  {
+   "attempt": 6,
+   "ms": 8519,
+   "usd": 0.008036,
+   "usage": {
+    "input": 3203,
+    "cached": 1039,
+    "output": 350
+   },
+   "reproduced": true,
+   "got": {
+    "kind": "clarification",
+    "missing": [
+     "item"
+    ],
+    "question": "What would you like to buy?"
+   },
+   "proposals": [
+    {
+     "kind": "clarification",
+     "outletIds": [],
+     "outletId": null,
+     "itemIds": [],
+     "lines": [],
+     "choices": [],
+     "area": "Tanjong Pagar",
+     "missing": [
+      "item"
+     ]
+    }
+   ]
+  },
+  {
+   "attempt": 7,
+   "ms": 7020,
+   "usd": 0.008486,
+   "usage": {
+    "input": 3221,
+    "cached": 1048,
+    "output": 393
+   },
+   "reproduced": false,
+   "got": {
+    "kind": "items",
+    "outlet": "Lorong Demo Kopi",
+    "items": [
+     "Kopi O",
+     "Kaya toast set"
+    ]
+   },
+   "proposals": [
+    {
+     "kind": "items",
+     "outletIds": [],
+     "outletId": "out_etj3b2665rpwqu3rvrox5p2vry",
+     "itemIds": [
+      "itm_tdz23tahn3kbibv3apmziisyyy",
+      "itm_r3nh3xp3erikvxln4f7rhwqdnu"
+     ],
+     "lines": [],
+     "choices": [],
+     "area": "Tanjong Pagar",
+     "missing": []
+    }
+   ]
+  },
+  {
+   "attempt": 8,
+   "ms": 7727,
+   "usd": 0.009065,
+   "usage": {
+    "input": 3211,
+    "cached": 1043,
+    "output": 452
+   },
+   "reproduced": true,
+   "got": {
+    "kind": "clarification",
+    "missing": [
+     "item"
+    ],
+    "question": "What would you like to buy?"
+   },
+   "proposals": [
+    {
+     "kind": "clarification",
+     "outletIds": [],
+     "outletId": null,
+     "itemIds": [],
+     "lines": [],
+     "choices": [],
+     "area": "Tanjong Pagar",
+     "missing": [
+      "item"
+     ]
+    }
+   ]
+  },
+  {
+   "attempt": 9,
+   "ms": 6883,
+   "usd": 0.008792,
+   "usage": {
+    "input": 3263,
+    "cached": 1069,
+    "output": 419
+   },
+   "reproduced": true,
+   "got": {
+    "kind": "clarification",
+    "missing": [
+     "item"
+    ],
+    "question": "What would you like to buy?"
+   },
+   "proposals": [
+    {
+     "kind": "clarification",
+     "outletIds": [],
+     "outletId": null,
+     "itemIds": [],
+     "lines": [],
+     "choices": [],
+     "area": "Tanjong Pagar",
+     "missing": []
+    }
+   ]
+  },
+  {
+   "attempt": 10,
+   "ms": 6916,
+   "usd": 0.007904,
+   "usage": {
+    "input": 3247,
+    "cached": 1061,
+    "output": 332
+   },
+   "reproduced": false,
+   "got": {
+    "kind": "items",
+    "outlet": "Lorong Demo Kopi",
+    "items": [
+     "Kopi O",
+     "Kaya toast set"
+    ]
+   },
+   "proposals": [
+    {
+     "kind": "items",
+     "outletIds": [],
+     "outletId": "out_etj3b2665rpwqu3rvrox5p2vry",
+     "itemIds": [
+      "itm_tdz23tahn3kbibv3apmziisyyy",
+      "itm_r3nh3xp3erikvxln4f7rhwqdnu"
+     ],
+     "lines": [],
+     "choices": [],
+     "area": "Tanjong Pagar",
+     "missing": []
+    }
+   ]
+  }
+ ]
+}

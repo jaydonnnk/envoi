@@ -360,7 +360,7 @@ describe("buyer text suggestions", () => {
   // reaching a clamped basket, and 20 itself is the bound, not one past it.
   it("a quantity outside 1 to 20 asks again", async () => {
     const kopi = item("Kopi O");
-    const asksAgain = { kind: "clarification", question: "What would you like to buy?", missing: ["item"] };
+    const asksAgain = { kind: "clarification", question: "Which items, and how many of each? Envoi asks again rather than guess a quantity, and it takes at most 20 of one item.", missing: ["item"] };
     for (const quantity of [0, -1, 21, 2.5]) {
       script = () => ({ kind: "answer", proposal: proposal({ kind: "basket", outletId: fixture.outletId, lines: [{ itemId: kopi.id, quantity }], area: "Tanjong Pagar" }) });
       const refused = await suggest({ text: `${quantity} kopi o near Tanjong Pagar` });
@@ -445,7 +445,42 @@ describe("buyer text suggestions", () => {
 
     const result = await suggest({ text: "two or three drinks near Tanjong Pagar" });
 
-    expect(result.suggestion).toEqual({ kind: "clarification", question: "What would you like to buy?", missing: ["item"] });
+    expect(result.suggestion).toEqual({
+      kind: "clarification",
+      question: "Which items, and how many of each? Envoi asks again rather than guess a quantity, and it takes at most 20 of one item.",
+      missing: ["item"],
+    });
+  });
+
+  // S41 regression, from the box's own placeholder sentence, which reproduced the live failure on 7
+  // of 10 anonymous tries: the model itself answered clarification for the item gap, and the buyer
+  // was then asked what they had just said. The sentence and the proposal are the reproduced ones.
+  it("the reproduced placeholder sentence is not answered by asking what the buyer already said", async () => {
+    script = () => ({ kind: "answer", proposal: proposal({ kind: "clarification", area: "Tanjong Pagar", missing: ["item"] }) });
+
+    const result = await suggest({ text: "two kaya toast and kopi near Tanjong Pagar" });
+
+    expect(result.suggestion).toEqual({
+      kind: "clarification",
+      question: "Which items, and how many of each? Envoi asks again rather than guess a quantity, and it takes at most 20 of one item.",
+      missing: ["item"],
+    });
+    expect(JSON.stringify(result.suggestion)).not.toContain("What would you like to buy?");
+  });
+
+  // S41: the box's instructions must cover a sentence that gives a quantity for one named item and
+  // none for another, which is the gap the reproduced failure fell into. Asserted on the request that
+  // leaves the process, not on the source file, so a rule that never reaches the model fails here.
+  it("the box instructions send a partial-quantity sentence to the item answer", async () => {
+    script = () => ({ kind: "answer", proposal: proposal({ kind: "no_match" }) });
+
+    await suggest({ text: "two kaya toast and kopi near Tanjong Pagar" });
+
+    const sent = JSON.stringify(fake.calls[0]?.body ?? {});
+    expect(sent, "basket rule").toContain("how many of every item they want");
+    expect(sent, "above-20 rule").toContain("A quantity above 20 is still the quantity they gave");
+    expect(sent, "items rule").toContain("named items but left out how many of at least one of them");
+    expect(sent, "no-clarify rule").toContain("A quantity they left out is never a reason to answer kind");
   });
 
   // Gate 3 named test 9 (S21), settle rules 1 and 2.

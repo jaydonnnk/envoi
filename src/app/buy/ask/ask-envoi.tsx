@@ -121,7 +121,7 @@ export function AskEnvoi() {
             value={text}
             maxLength={MAX_TEXT}
             rows={3}
-            placeholder="For example: one Kopi C and a kaya toast at Lorong Demo Kopi"
+            placeholder="For example: one Kopi O and a kaya toast set at Lorong Demo Kopi"
             onChange={(event) => setText(event.target.value)}
           />
           <button className="button full" type="submit" disabled={busy || text.trim().length === 0}>

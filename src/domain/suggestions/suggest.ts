@@ -11,10 +11,11 @@ const MAX_MATCHES = 5;
 export type SuggestionResult = Suggestion | { kind: "unavailable" };
 
 // Server-written questions. The model's own wording is never shown, so it cannot put a price,
-// a payee or a "nearest" claim in front of the buyer.
+// a payee or a "nearest" claim in front of the buyer. The item question names the quantity gap and
+// its bound, because by the time it is asked the buyer has usually already named the items.
 const QUESTIONS: Record<SuggestionGap, string> = {
   area: "Which area are you in? For example, Tanjong Pagar.",
-  item: "What would you like to buy?",
+  item: `Which items, and how many of each? Envoi asks again rather than guess a quantity, and it takes at most ${MAX_SUGGESTED_QUANTITY} of one item.`,
   outlet: "Which shop are you at?",
 };
 

@@ -1,0 +1,360 @@
+{
+ "label": "FIXTURE shops and one FIXTURE sentence; real OpenAI calls; anonymous buyer principal",
+ "ranAt": "2026-11-04T17:05:04.022Z",
+ "sentence": "two kaya toast and kopi near Tanjong Pagar",
+ "model": "gpt-6-sol",
+ "promptCarriesPartialQuantityRule": true,
+ "spendLimitUsd": 0.5,
+ "spentUsd": 0.07534,
+ "worstCasePerTryUsd": 0.18,
+ "tries": 10,
+ "completed": 10,
+ "failures": 0,
+ "reproducedOnTry": null,
+ "shops": [
+  "Lorong Demo Kopi (Tanjong Pagar)",
+  "Test Shop (Test Area)"
+ ],
+ "rows": [
+  {
+   "attempt": 1,
+   "ms": 5745,
+   "usd": 0.007374,
+   "usage": {
+    "input": 3515,
+    "cached": 1142,
+    "output": 240
+   },
+   "reproduced": false,
+   "got": {
+    "kind": "items",
+    "outlet": "Lorong Demo Kopi",
+    "items": [
+     "Kopi O",
+     "Kaya toast set"
+    ]
+   },
+   "proposals": [
+    {
+     "kind": "items",
+     "outletIds": [],
+     "outletId": "out_vvqqf76merioa7lqxzcphwweii",
+     "itemIds": [
+      "itm_u42e4lvnxizdnzbj2nho4md5a4",
+      "itm_zw6imku4bzsjnldqpxlxhajkiy"
+     ],
+     "lines": [],
+     "choices": [],
+     "area": "Tanjong Pagar",
+     "missing": []
+    }
+   ]
+  },
+  {
+   "attempt": 2,
+   "ms": 5769,
+   "usd": 0.007274,
+   "usage": {
+    "input": 3487,
+    "cached": 1128,
+    "output": 233
+   },
+   "reproduced": false,
+   "got": {
+    "kind": "items",
+    "outlet": "Lorong Demo Kopi",
+    "items": [
+     "Kopi O",
+     "Kaya toast set"
+    ]
+   },
+   "proposals": [
+    {
+     "kind": "items",
+     "outletIds": [],
+     "outletId": "out_vvqqf76merioa7lqxzcphwweii",
+     "itemIds": [
+      "itm_u42e4lvnxizdnzbj2nho4md5a4",
+      "itm_zw6imku4bzsjnldqpxlxhajkiy"
+     ],
+     "lines": [],
+     "choices": [],
+     "area": "Tanjong Pagar",
+     "missing": []
+    }
+   ]
+  },
+  {
+   "attempt": 3,
+   "ms": 5015,
+   "usd": 0.007086,
+   "usage": {
+    "input": 3471,
+    "cached": 1120,
+    "output": 216
+   },
+   "reproduced": false,
+   "got": {
+    "kind": "items",
+    "outlet": "Lorong Demo Kopi",
+    "items": [
+     "Kopi O",
+     "Kaya toast set"
+    ]
+   },
+   "proposals": [
+    {
+     "kind": "items",
+     "outletIds": [],
+     "outletId": "out_vvqqf76merioa7lqxzcphwweii",
+     "itemIds": [
+      "itm_u42e4lvnxizdnzbj2nho4md5a4",
+      "itm_zw6imku4bzsjnldqpxlxhajkiy"
+     ],
+     "lines": [],
+     "choices": [],
+     "area": "Tanjong Pagar",
+     "missing": []
+    }
+   ]
+  },
+  {
+   "attempt": 4,
+   "ms": 5932,
+   "usd": 0.007386,
+   "usage": {
+    "input": 3507,
+    "cached": 1138,
+    "output": 242
+   },
+   "reproduced": false,
+   "got": {
+    "kind": "items",
+    "outlet": "Lorong Demo Kopi",
+    "items": [
+     "Kopi O",
+     "Kaya toast set"
+    ]
+   },
+   "proposals": [
+    {
+     "kind": "items",
+     "outletIds": [],
+     "outletId": "out_vvqqf76merioa7lqxzcphwweii",
+     "itemIds": [
+      "itm_u42e4lvnxizdnzbj2nho4md5a4",
+      "itm_zw6imku4bzsjnldqpxlxhajkiy"
+     ],
+     "lines": [],
+     "choices": [],
+     "area": "Tanjong Pagar",
+     "missing": []
+    }
+   ]
+  },
+  {
+   "attempt": 5,
+   "ms": 6139,
+   "usd": 0.007546,
+   "usage": {
+    "input": 3535,
+    "cached": 1152,
+    "output": 255
+   },
+   "reproduced": false,
+   "got": {
+    "kind": "items",
+    "outlet": "Lorong Demo Kopi",
+    "items": [
+     "Kopi O",
+     "Kaya toast set"
+    ]
+   },
+   "proposals": [
+    {
+     "kind": "items",
+     "outletIds": [],
+     "outletId": "out_vvqqf76merioa7lqxzcphwweii",
+     "itemIds": [
+      "itm_u42e4lvnxizdnzbj2nho4md5a4",
+      "itm_zw6imku4bzsjnldqpxlxhajkiy"
+     ],
+     "lines": [],
+     "choices": [],
+     "area": "Tanjong Pagar",
+     "missing": []
+    }
+   ]
+  },
+  {
+   "attempt": 6,
+   "ms": 5937,
+   "usd": 0.007392,
+   "usage": {
+    "input": 3513,
+    "cached": 1141,
+    "output": 242
+   },
+   "reproduced": false,
+   "got": {
+    "kind": "items",
+    "outlet": "Lorong Demo Kopi",
+    "items": [
+     "Kopi O",
+     "Kaya toast set"
+    ]
+   },
+   "proposals": [
+    {
+     "kind": "items",
+     "outletIds": [],
+     "outletId": "out_vvqqf76merioa7lqxzcphwweii",
+     "itemIds": [
+      "itm_u42e4lvnxizdnzbj2nho4md5a4",
+      "itm_zw6imku4bzsjnldqpxlxhajkiy"
+     ],
+     "lines": [],
+     "choices": [],
+     "area": "Tanjong Pagar",
+     "missing": []
+    }
+   ]
+  },
+  {
+   "attempt": 7,
+   "ms": 6123,
+   "usd": 0.009307,
+   "usage": {
+    "input": 4155,
+    "cached": 1385,
+    "output": 349
+   },
+   "reproduced": false,
+   "got": {
+    "kind": "items",
+    "outlet": "Lorong Demo Kopi",
+    "items": [
+     "Kopi O",
+     "Kaya toast set"
+    ]
+   },
+   "proposals": [
+    {
+     "kind": "items",
+     "outletIds": [],
+     "outletId": "out_vvqqf76merioa7lqxzcphwweii",
+     "itemIds": [
+      "itm_u42e4lvnxizdnzbj2nho4md5a4",
+      "itm_zw6imku4bzsjnldqpxlxhajkiy"
+     ],
+     "lines": [],
+     "choices": [],
+     "area": "Tanjong Pagar",
+     "missing": []
+    }
+   ]
+  },
+  {
+   "attempt": 8,
+   "ms": 5141,
+   "usd": 0.007189,
+   "usage": {
+    "input": 3483,
+    "cached": 1126,
+    "output": 225
+   },
+   "reproduced": false,
+   "got": {
+    "kind": "items",
+    "outlet": "Lorong Demo Kopi",
+    "items": [
+     "Kopi O",
+     "Kaya toast set"
+    ]
+   },
+   "proposals": [
+    {
+     "kind": "items",
+     "outletIds": [],
+     "outletId": "out_vvqqf76merioa7lqxzcphwweii",
+     "itemIds": [
+      "itm_u42e4lvnxizdnzbj2nho4md5a4",
+      "itm_zw6imku4bzsjnldqpxlxhajkiy"
+     ],
+     "lines": [],
+     "choices": [],
+     "area": "Tanjong Pagar",
+     "missing": []
+    }
+   ]
+  },
+  {
+   "attempt": 9,
+   "ms": 5348,
+   "usd": 0.007426,
+   "usage": {
+    "input": 3507,
+    "cached": 1138,
+    "output": 246
+   },
+   "reproduced": false,
+   "got": {
+    "kind": "items",
+    "outlet": "Lorong Demo Kopi",
+    "items": [
+     "Kopi O",
+     "Kaya toast set"
+    ]
+   },
+   "proposals": [
+    {
+     "kind": "items",
+     "outletIds": [],
+     "outletId": "out_vvqqf76merioa7lqxzcphwweii",
+     "itemIds": [
+      "itm_u42e4lvnxizdnzbj2nho4md5a4",
+      "itm_zw6imku4bzsjnldqpxlxhajkiy"
+     ],
+     "lines": [],
+     "choices": [],
+     "area": "Tanjong Pagar",
+     "missing": []
+    }
+   ]
+  },
+  {
+   "attempt": 10,
+   "ms": 5017,
+   "usd": 0.00736,
+   "usage": {
+    "input": 3511,
+    "cached": 1140,
+    "output": 239
+   },
+   "reproduced": false,
+   "got": {
+    "kind": "items",
+    "outlet": "Lorong Demo Kopi",
+    "items": [
+     "Kopi O",
+     "Kaya toast set"
+    ]
+   },
+   "proposals": [
+    {
+     "kind": "items",
+     "outletIds": [],
+     "outletId": "out_vvqqf76merioa7lqxzcphwweii",
+     "itemIds": [
+      "itm_u42e4lvnxizdnzbj2nho4md5a4",
+      "itm_zw6imku4bzsjnldqpxlxhajkiy"
+     ],
+     "lines": [],
+     "choices": [],
+     "area": "Tanjong Pagar",
+     "missing": []
+    }
+   ]
+  }
+ ]
+}

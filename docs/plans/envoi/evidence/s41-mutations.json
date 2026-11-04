@@ -1,0 +1,236 @@
+{
+ "label": "S41 guard mutations; FIXTURE model boundary for the prompt guard, no real model call",
+ "ranAt": "2026-11-04T17:05:33+00:00",
+ "total": 14,
+ "proved": 14,
+ "allRestoredByteIdentical": true,
+ "greenAfterRestore": {
+  "tests/unit/landing-page.test.ts": {
+   "exitCode": 0,
+   "failedAssertions": []
+  },
+  "tests/unit/placeholder-examples.test.ts": {
+   "exitCode": 0,
+   "failedAssertions": []
+  },
+  "tests/integration/buyer-suggestions.test.ts": {
+   "exitCode": 0,
+   "failedAssertions": []
+  }
+ },
+ "mutations": [
+  {
+   "id": "M1",
+   "guard": "the reproduced placeholder sentence is not answered by asking what the buyer already said",
+   "needle": "the reproduced placeholder sentence is not answered by asking what the buyer already said",
+   "file": "src/domain/suggestions/suggest.ts",
+   "test": "tests/integration/buyer-suggestions.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "a quantity outside 1 to 20 asks again",
+    "a choice carrying two quantities asks again",
+    "the reproduced placeholder sentence is not answered by asking what the buyer already said"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M2",
+   "guard": "the box instructions send a partial-quantity sentence to the item answer",
+   "needle": "basket rule",
+   "file": "src/integrations/ai/openai.ts",
+   "test": "tests/integration/buyer-suggestions.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "the box instructions send a partial-quantity sentence to the item answer"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M3",
+   "guard": "the box instructions send a partial-quantity sentence to the item answer",
+   "needle": "items rule",
+   "file": "src/integrations/ai/openai.ts",
+   "test": "tests/integration/buyer-suggestions.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "the box instructions send a partial-quantity sentence to the item answer"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M4",
+   "guard": "the box instructions send a partial-quantity sentence to the item answer",
+   "needle": "no-clarify rule",
+   "file": "src/integrations/ai/openai.ts",
+   "test": "tests/integration/buyer-suggestions.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "the box instructions send a partial-quantity sentence to the item answer"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M5",
+   "guard": "leads with the approved pitch line",
+   "needle": "leads with the approved pitch line",
+   "file": "src/app/page.tsx",
+   "test": "tests/unit/landing-page.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "leads with the approved pitch line",
+    "names no language, because none is measured yet"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M6",
+   "guard": "says the AI never sets a price and never pays",
+   "needle": "says the AI never sets a price and never pays",
+   "file": "src/app/page.tsx",
+   "test": "tests/unit/landing-page.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "says the AI never sets a price and never pays"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M7",
+   "guard": "offers Ask Envoi first, as the one primary action",
+   "needle": "offers Ask Envoi first, as the one primary action",
+   "file": "src/app/page.tsx",
+   "test": "tests/unit/landing-page.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "offers Ask Envoi first, as the one primary action"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M8",
+   "guard": "offers no Ask Envoi link while the assistant is off, and Find a shop stays primary",
+   "needle": "offers no Ask Envoi link while the assistant is off, and Find a shop stays primary",
+   "file": "src/app/page.tsx",
+   "test": "tests/unit/landing-page.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "offers no Ask Envoi link while the assistant is off, and Find a shop stays primary"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M9",
+   "guard": "links merchants to merchant setup",
+   "needle": "links merchants to merchant setup",
+   "file": "src/app/page.tsx",
+   "test": "tests/unit/landing-page.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "links merchants to merchant setup"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M10",
+   "guard": "says a scan is never a payment code",
+   "needle": "says a scan is never a payment code",
+   "file": "src/app/page.tsx",
+   "test": "tests/unit/landing-page.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "says a scan is never a payment code"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M11",
+   "guard": "names no language, because none is measured yet",
+   "needle": "names no language, because none is measured yet",
+   "file": "src/app/page.tsx",
+   "test": "tests/unit/landing-page.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "names no language, because none is measured yet"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M12",
+   "guard": "the Ask Envoi example names only items that shop sells",
+   "needle": "the Ask Envoi example names only items that shop sells",
+   "file": "src/app/buy/ask/ask-envoi.tsx",
+   "test": "tests/unit/placeholder-examples.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "the Ask Envoi example names only items that shop sells"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M13",
+   "guard": "the one-sentence box example is answerable by a shop in the area it names",
+   "needle": "the one-sentence box example is answerable by a shop in the area it names",
+   "file": "src/app/buy/text-suggest.tsx",
+   "test": "tests/unit/placeholder-examples.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "the one-sentence box example is answerable by a shop in the area it names"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M14",
+   "guard": "the box instructions send a partial-quantity sentence to the item answer",
+   "needle": "above-20 rule",
+   "file": "src/integrations/ai/openai.ts",
+   "test": "tests/integration/buyer-suggestions.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "the box instructions send a partial-quantity sentence to the item answer"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  }
+ ]
+}

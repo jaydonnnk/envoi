@@ -1,0 +1,145 @@
+{
+ "note": "S41 mutation definitions. Each entry names one guard's own fault. 'expect' is the test name that must fail, and the run must fail on an AssertionError.",
+ "mutations": [
+  {
+   "id": "M1",
+   "guard": "the reproduced placeholder sentence is not answered by asking what the buyer already said",
+   "file": "src/domain/suggestions/suggest.ts",
+   "find": "  item: `Which items, and how many of each? Envoi asks again rather than guess a quantity, and it takes at most ${MAX_SUGGESTED_QUANTITY} of one item.`,",
+   "replace": "  item: \"What would you like to buy?\",",
+   "project": "integration",
+   "test": "tests/integration/buyer-suggestions.test.ts",
+   "needle": "the reproduced placeholder sentence is not answered by asking what the buyer already said"
+  },
+  {
+   "id": "M2",
+   "guard": "the box instructions send a partial-quantity sentence to the item answer",
+   "file": "src/integrations/ai/openai.ts",
+   "find": "If the buyer said how many of every item they want (\"a\" or \"an\" is 1) and one shop sells them,",
+   "replace": "If the buyer said how many of an item they want and one shop sells it,",
+   "project": "integration",
+   "test": "tests/integration/buyer-suggestions.test.ts",
+   "needle": "basket rule"
+  },
+  {
+   "id": "M3",
+   "guard": "the box instructions send a partial-quantity sentence to the item answer",
+   "file": "src/integrations/ai/openai.ts",
+   "find": "If the buyer named items but left out how many of at least one of them,",
+   "replace": "If the buyer named items but no quantity,",
+   "project": "integration",
+   "test": "tests/integration/buyer-suggestions.test.ts",
+   "needle": "items rule"
+  },
+  {
+   "id": "M4",
+   "guard": "the box instructions send a partial-quantity sentence to the item answer",
+   "file": "src/integrations/ai/openai.ts",
+   "find": " A quantity they left out is never a reason to answer kind \"clarification\": they already named the items, and Envoi does not guess a number for them.",
+   "replace": "",
+   "project": "integration",
+   "test": "tests/integration/buyer-suggestions.test.ts",
+   "needle": "no-clarify rule"
+  },
+  {
+   "id": "M5",
+   "guard": "leads with the approved pitch line",
+   "file": "src/app/page.tsx",
+   "find": "<h1>Any language. One scan. PayPal.</h1>",
+   "replace": "<h1>Pay the shop with what you already have.</h1>",
+   "project": "unit",
+   "test": "tests/unit/landing-page.test.ts",
+   "needle": "leads with the approved pitch line"
+  },
+  {
+   "id": "M6",
+   "guard": "says the AI never sets a price and never pays",
+   "file": "src/app/page.tsx",
+   "find": " It never sets a price and never pays.",
+   "replace": "",
+   "project": "unit",
+   "test": "tests/unit/landing-page.test.ts",
+   "needle": "says the AI never sets a price and never pays"
+  },
+  {
+   "id": "M7",
+   "guard": "offers Ask Envoi first, as the one primary action",
+   "file": "src/app/page.tsx",
+   "find": "<a className=\"button\" href=\"/buy/ask\">",
+   "replace": "<a className=\"button secondary\" href=\"/buy/ask\">",
+   "project": "unit",
+   "test": "tests/unit/landing-page.test.ts",
+   "needle": "offers Ask Envoi first, as the one primary action"
+  },
+  {
+   "id": "M8",
+   "guard": "offers no Ask Envoi link while the assistant is off, and Find a shop stays primary",
+   "file": "src/app/page.tsx",
+   "find": "{askEnabled && (",
+   "replace": "{true && (",
+   "project": "unit",
+   "test": "tests/unit/landing-page.test.ts",
+   "needle": "offers no Ask Envoi link while the assistant is off, and Find a shop stays primary"
+  },
+  {
+   "id": "M9",
+   "guard": "links merchants to merchant setup",
+   "file": "src/app/page.tsx",
+   "find": "href=\"/merchant/setup\"",
+   "replace": "href=\"/merchant\"",
+   "project": "unit",
+   "test": "tests/unit/landing-page.test.ts",
+   "needle": "links merchants to merchant setup"
+  },
+  {
+   "id": "M10",
+   "guard": "says a scan is never a payment code",
+   "file": "src/app/page.tsx",
+   "find": "It is never a payment code.",
+   "replace": "It opens that shop.",
+   "project": "unit",
+   "test": "tests/unit/landing-page.test.ts",
+   "needle": "says a scan is never a payment code"
+  },
+  {
+   "id": "M11",
+   "guard": "names no language, because none is measured yet",
+   "file": "src/app/page.tsx",
+   "find": "say what you want in your own language",
+   "replace": "say what you want in Mandarin or your own language",
+   "project": "unit",
+   "test": "tests/unit/landing-page.test.ts",
+   "needle": "names no language, because none is measured yet"
+  },
+  {
+   "id": "M12",
+   "guard": "the Ask Envoi example names only items that shop sells",
+   "file": "src/app/buy/ask/ask-envoi.tsx",
+   "find": "placeholder=\"For example: one Kopi O and a kaya toast set at Lorong Demo Kopi\"",
+   "replace": "placeholder=\"For example: one Kopi C and a kaya toast at Lorong Demo Kopi\"",
+   "project": "unit",
+   "test": "tests/unit/placeholder-examples.test.ts",
+   "needle": "the Ask Envoi example names only items that shop sells"
+  },
+  {
+   "id": "M13",
+   "guard": "the one-sentence box example is answerable by a shop in the area it names",
+   "file": "src/app/buy/text-suggest.tsx",
+   "find": "placeholder=\"For example: two kaya toast and kopi near Tanjong Pagar\"",
+   "replace": "placeholder=\"For example: two kaya toast and kopi near Orchard\"",
+   "project": "unit",
+   "test": "tests/unit/placeholder-examples.test.ts",
+   "needle": "the one-sentence box example is answerable by a shop in the area it names"
+  },
+  {
+   "id": "M14",
+   "guard": "the box instructions send a partial-quantity sentence to the item answer",
+   "needle": "above-20 rule",
+   "file": "src/integrations/ai/openai.ts",
+   "find": "\nA quantity above 20 is still the quantity they gave: answer kind \"basket\" carrying it, and Envoi refuses it and asks them again, because Envoi never clamps a number and never guesses one.",
+   "replace": "",
+   "project": "integration",
+   "test": "tests/integration/buyer-suggestions.test.ts"
+  }
+ ]
+}
