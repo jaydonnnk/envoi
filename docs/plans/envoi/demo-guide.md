@@ -60,6 +60,8 @@ It has no PayPal seller yet; attach one with:
 MIGRATION_DATABASE_URL=postgres://postgres@127.0.0.1:5432/envoi_dev npm run operator -- assign-paypal-destination <outletId> <sellerMerchantId>
 ```
 
+The deployed site holds three more fixture shops that a local seed does not create, added by S41 so the public list reads like a list of shops: Ah Seng Chicken Rice (Maxwell), Tiong Bahru Kopi House (Tiong Bahru) and Larkspur Street Taqueria (San Francisco, USD). Create them with `npm run operator -- seed-judge-fixtures`, which is idempotent, then attach a seller to each the same way. The two Singapore shops share the sandbox seller `EQN6264CF9F4Y`, so a payment at either would reach the same PayPal sandbox account: a fixture limitation, never two shops each paid into their own account. The four earlier fixtures stay, because no rename or unpublish command exists, so the deployed list shows both the believable names and "S26 Fixture Shop", "S27 US Fixture Shop" and "Test Shop".
+
 ## 2. Landing page
 
 1. Open `/`.
