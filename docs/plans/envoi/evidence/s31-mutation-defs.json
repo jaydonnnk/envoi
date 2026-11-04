@@ -288,8 +288,8 @@
   "edits": [
    {
     "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
-    "old": "if (result?.ok) callbacks.showReceipt();\n      else callbacks.onFailure(result?.error?.message ?? \"The payment could not be finished.\");",
-    "new": "if (!result?.ok) callbacks.onFailure(result?.error?.message ?? \"The payment could not be finished.\");"
+    "old": "if (result?.ok) callbacks.showReceipt();\n      else callbacks.onFailure(result?.error?.message ?? \"The payment could not be finished.\", result?.error?.code);",
+    "new": "if (!result?.ok) callbacks.onFailure(result?.error?.message ?? \"The payment could not be finished.\", result?.error?.code);"
    }
   ]
  },
@@ -598,6 +598,20 @@
     "file": "src/domain/payments/attempts.ts",
     "old": "approvalUrl: attempt.approvalUrl, orderId: attempt.orderId };",
     "new": "approvalUrl: \"https://example.com/\", orderId: attempt.orderId };"
+   }
+  ]
+ },
+ {
+  "id": "expired-code",
+  "test": "an expired completion passes its code on, so the card can offer a fresh review",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "The refusal code is dropped",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "finished.\", result?.error?.code);",
+    "new": "finished.\");"
    }
   ]
  }

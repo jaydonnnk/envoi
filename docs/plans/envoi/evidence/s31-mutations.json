@@ -1,6 +1,6 @@
 {
  "branch": "envoi/slice-31-paypal-buttons",
- "base_commit": "7fd8bae",
+ "base_commit": "4caeb7a",
  "uncommitted_changes": true,
  "method": "Each definition in s31-mutation-defs.json applied alone by exact text replacement, its whole test file run with the vitest JSON reporter, every touched file restored and compared by SHA-256, then the whole file rerun. A proof needs the named row to fail on an AssertionError, a byte-identical restore and an all-passing rerun; other failing rows are recorded. The integration files run the real paypal/start and paypal/complete route handlers on a local PostgreSQL database built from the migrations, with the three Neon URLs removed; PayPal is a fake labeled FIXTURE, so no order exists. The unit file reads the buttons source, drives the loader with a fake document and the handlers with a fake fetch; the window, focus and the switch to the redirect link are browser evidence in 00-status.md, not a test here.",
  "results": [
@@ -21,7 +21,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -41,7 +41,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -61,7 +61,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -87,7 +87,7 @@
    ],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -111,7 +111,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -131,7 +131,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -151,7 +151,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -171,7 +171,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -197,7 +197,7 @@
    ],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -223,7 +223,7 @@
    ],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -243,7 +243,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -263,7 +263,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -283,7 +283,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -303,7 +303,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -329,7 +329,7 @@
    ],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -349,7 +349,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -369,7 +369,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -389,7 +389,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -409,7 +409,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -433,7 +433,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -453,7 +453,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -468,12 +468,18 @@
    "own_row": "failed",
    "error": "AssertionError: expected [] to deeply equal [ 'Do not pay again.' ]",
    "fails_on_assertion": true,
-   "other_failing_rows": [],
-   "other_errors": {},
-   "same_group_others": [],
+   "other_failing_rows": [
+    "an expired completion passes its code on, so the card can offer a fresh review"
+   ],
+   "other_errors": {
+    "an expired completion passes its code on, so the card can offer a fresh review": "AssertionError: expected [] to deeply equal [ 'review_expired' ]"
+   },
+   "same_group_others": [
+    "an expired completion passes its code on, so the card can offer a fresh review"
+   ],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -493,7 +499,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -517,7 +523,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -537,7 +543,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -557,7 +563,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -577,7 +583,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -597,7 +603,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -617,7 +623,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -637,7 +643,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -657,7 +663,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -677,7 +683,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -697,7 +703,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -717,7 +723,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -737,7 +743,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -757,7 +763,7 @@
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -770,14 +776,14 @@
    ],
    "mutation": "The card passes a total",
    "own_row": "failed",
-   "error": "AssertionError: expected [ 'total', 'purchaseId', \u2026(4) ] to deeply equal [ 'purchaseId', 'clientId', \u2026(3) ]",
+   "error": "AssertionError: expected [ 'total', 'purchaseId', \u2026(5) ] to deeply equal [ 'purchaseId', 'outletId', \u2026(4) ]",
    "fails_on_assertion": true,
    "other_failing_rows": [],
    "other_errors": {},
    "same_group_others": [],
    "restored_identical": true,
    "rerun_all_passed": true,
-   "rerun_rows": 26,
+   "rerun_rows": 27,
    "proof": true
   },
   {
@@ -810,13 +816,13 @@
    ],
    "mutation": "A new order answers without the order id",
    "own_row": "failed",
-   "error": "AssertionError: expected undefined to be 'FIXTURE-ORDER-93C0F22F-1' // Object.is equality",
+   "error": "AssertionError: expected undefined to be 'FIXTURE-ORDER-FA9B2C62-1' // Object.is equality",
    "fails_on_assertion": true,
    "other_failing_rows": [
     "a recovered create also returns the order id"
    ],
    "other_errors": {
-    "a recovered create also returns the order id": "AssertionError: expected undefined to be 'FIXTURE-ORDER-3A0FD606-1' // Object.is equality"
+    "a recovered create also returns the order id": "AssertionError: expected undefined to be 'FIXTURE-ORDER-54568130-1' // Object.is equality"
    },
    "same_group_others": [
     "a recovered create also returns the order id"
@@ -836,7 +842,7 @@
    ],
    "mutation": "A recovered order answers without the order id",
    "own_row": "failed",
-   "error": "AssertionError: expected '' to be 'FIXTURE-ORDER-7E299192-1' // Object.is equality",
+   "error": "AssertionError: expected '' to be 'FIXTURE-ORDER-61CC739A-1' // Object.is equality",
    "fails_on_assertion": true,
    "other_failing_rows": [],
    "other_errors": {},
@@ -904,6 +910,26 @@
    "restored_identical": true,
    "rerun_all_passed": true,
    "rerun_rows": 9,
+   "proof": true
+  },
+  {
+   "id": "expired-code",
+   "test": "an expired completion passes its code on, so the card can offer a fresh review",
+   "kind": "standalone",
+   "group": "what PayPal's window calls",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "The refusal code is dropped",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ undefined ] to deeply equal [ 'review_expired' ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 27,
    "proof": true
   }
  ]

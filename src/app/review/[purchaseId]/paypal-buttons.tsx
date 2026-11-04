@@ -73,7 +73,7 @@ type HandlerCallbacks = {
   onUnavailable: () => void;
   onRefused: (refusal?: { code: string; message: string }) => void;
   onStage: (stage: Stage) => void;
-  onFailure: (message: string) => void;
+  onFailure: (message: string, code?: string) => void;
   showReceipt: () => void;
   isStopped: () => boolean;
 };
@@ -95,7 +95,7 @@ export function paypalButtonHandlers(purchaseId: string, callbacks: HandlerCallb
       callbacks.onStage("completing");
       const result = await postJson(`${purchasePath}/paypal/complete`).catch(() => null);
       if (result?.ok) callbacks.showReceipt();
-      else callbacks.onFailure(result?.error?.message ?? "The payment could not be finished.");
+      else callbacks.onFailure(result?.error?.message ?? "The payment could not be finished.", result?.error?.code);
     },
     async onCancel() {
       settled = true;
@@ -113,12 +113,14 @@ export function paypalButtonHandlers(purchaseId: string, callbacks: HandlerCallb
 
 export function PayPalButtons({
   purchaseId,
+  outletId,
   clientId,
   currency,
   onUnavailable,
   onRefused,
 }: {
   purchaseId: string;
+  outletId: string;
   clientId: string;
   currency: string;
   onUnavailable: () => void;
@@ -127,7 +129,7 @@ export function PayPalButtons({
   const router = useRouter();
   const container = useRef<HTMLDivElement>(null);
   const [stage, setStage] = useState<Stage>("loading");
-  const [failure, setFailure] = useState<string | null>(null);
+  const [failure, setFailure] = useState<{ message: string; expired: boolean } | null>(null);
   const receipt = `/receipt/${encodeURIComponent(purchaseId)}`;
 
   useEffect(() => {
@@ -137,7 +139,7 @@ export function PayPalButtons({
       onUnavailable,
       onRefused,
       onStage: setStage,
-      onFailure: setFailure,
+      onFailure: (message, code) => setFailure({ message, expired: code === "review_expired" }),
       showReceipt: () => router.replace(receipt),
       isStopped: () => stopped,
     });
@@ -162,11 +164,18 @@ export function PayPalButtons({
     return (
       <>
         <p className="error" role="alert">
-          {failure}
+          {failure.message}
         </p>
-        <a className="button" href={receipt}>
-          See the receipt
-        </a>
+        <div className="actions">
+          <a className="button" href={receipt}>
+            See the receipt
+          </a>
+          {failure.expired && (
+            <a className="button secondary" href={`/buy?outlet=${encodeURIComponent(outletId)}`}>
+              Review the basket again
+            </a>
+          )}
+        </div>
       </>
     );
   }

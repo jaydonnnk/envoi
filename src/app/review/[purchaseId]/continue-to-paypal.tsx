@@ -65,7 +65,7 @@ export function ContinueToPayPal({ purchaseId, outletId, validUntil, clientId, c
           </button>
         </>
       ) : (
-        <PayPalButtons purchaseId={purchaseId} clientId={clientId} currency={currency} onUnavailable={showRedirect} onRefused={refused} />
+        <PayPalButtons purchaseId={purchaseId} outletId={outletId} clientId={clientId} currency={currency} onUnavailable={showRedirect} onRefused={refused} />
       )}
       {error && (
         <p className="error" role="alert">

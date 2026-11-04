@@ -27,6 +27,8 @@ function parse(text: string): ts.SourceFile {
 function forbiddenNames(text: string): string[] {
   const found: string[] = [];
   const visit = (node: ts.Node) => {
+    // A CSS class is not an order field: the card's own "actions" row reuses that name.
+    if (ts.isJsxAttribute(node) && node.name.getText() === "className") return;
     if ((ts.isIdentifier(node) || ts.isStringLiteralLike(node)) && ORDER_FIELDS.test(node.text)) found.push(node.text);
     ts.forEachChild(node, visit);
   };
@@ -177,12 +179,15 @@ describe("what PayPal's window calls", () => {
   const posts: Array<{ url: string; body: unknown }> = [];
 
   function handlers(stopped = false) {
-    const seen = { unavailable: 0, receipt: 0, refused: [] as unknown[], stages: [] as string[], failures: [] as string[] };
+    const seen = { unavailable: 0, receipt: 0, refused: [] as unknown[], stages: [] as string[], failures: [] as string[], codes: [] as unknown[] };
     const value = paypalButtonHandlers("pur_1", {
       onUnavailable: () => seen.unavailable++,
       onRefused: (refusal) => seen.refused.push(refusal),
       onStage: (stage) => seen.stages.push(stage),
-      onFailure: (message) => seen.failures.push(message),
+      onFailure: (message, code) => {
+        seen.failures.push(message);
+        seen.codes.push(code);
+      },
       showReceipt: () => seen.receipt++,
       isStopped: () => stopped,
     });
@@ -233,6 +238,13 @@ describe("what PayPal's window calls", () => {
     await value.onApprove();
     expect(seen.failures).toEqual(["Do not pay again."]);
     expect(seen.receipt).toBe(0);
+  });
+
+  it("an expired completion passes its code on, so the card can offer a fresh review", async () => {
+    const { value, seen } = handlers();
+    replies.push(refusal("review_expired", "This review has expired."));
+    await value.onApprove();
+    expect(seen.codes).toEqual(["review_expired"]);
   });
 
   it("a completion that never answers says so instead of throwing", async () => {
@@ -317,6 +329,6 @@ describe("the review's PayPal card", () => {
 
   it("passes the buttons only these props", () => {
     const usage = /<PayPalButtons ([^/]*)\/>/.exec(source("continue-to-paypal.tsx"))![1]!;
-    expect([...usage.matchAll(/(\w+)=\{/g)].map((match) => match[1])).toEqual(["purchaseId", "clientId", "currency", "onUnavailable", "onRefused"]);
+    expect([...usage.matchAll(/(\w+)=\{/g)].map((match) => match[1])).toEqual(["purchaseId", "outletId", "clientId", "currency", "onUnavailable", "onRefused"]);
   });
 });
