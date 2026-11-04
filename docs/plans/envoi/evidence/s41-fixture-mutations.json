@@ -1,0 +1,164 @@
+{
+ "label": "S41 judge-fixture guard mutations; no model, PayPal or Kernel call, local test database only",
+ "ranAt": "2026-11-04T19:42:16+00:00",
+ "total": 9,
+ "proved": 9,
+ "allRestoredByteIdentical": true,
+ "greenAfterRestore": {
+  "tests/integration/seed-judge-fixtures.test.ts": {
+   "exitCode": 0,
+   "failedAssertions": []
+  },
+  "tests/integration/seed-demo-fixture.test.ts": {
+   "exitCode": 0,
+   "failedAssertions": []
+  },
+  "tests/integration/demo-iced-teas.test.ts": {
+   "exitCode": 0,
+   "failedAssertions": []
+  }
+ },
+ "mutations": [
+  {
+   "id": "MF1",
+   "guard": "publishes each shop with a confirmed revision and every item priced on that revision",
+   "needle": "publishes each shop with a confirmed revision and every item priced on that revision",
+   "file": "src/operator/cli.ts",
+   "test": "tests/integration/seed-judge-fixtures.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "publishes each shop with a confirmed revision and every item priced on that revision"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "MF2",
+   "guard": "publishes each shop with a confirmed revision and every item priced on that revision",
+   "needle": "publishes each shop with a confirmed revision and every item priced on that revision",
+   "file": "src/operator/cli.ts",
+   "test": "tests/integration/seed-judge-fixtures.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "publishes each shop with a confirmed revision and every item priced on that revision",
+    "prices a basket once a destination is assigned, with no enrollment row anywhere"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "MF3",
+   "guard": "publishes each shop with a confirmed revision and every item priced on that revision",
+   "needle": "publishes each shop with a confirmed revision and every item priced on that revision",
+   "file": "src/operator/cli.ts",
+   "test": "tests/integration/seed-judge-fixtures.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "publishes each shop with a confirmed revision and every item priced on that revision",
+    "reports the existing ids on a second run and changes nothing",
+    "reaches the public list as a demo fixture, in the currency its country sets",
+    "prices a basket once a destination is assigned, with no enrollment row anywhere"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "MF4",
+   "guard": "reports the existing ids on a second run and changes nothing",
+   "needle": "reports the existing ids on a second run and changes nothing",
+   "file": "src/operator/cli.ts",
+   "test": "tests/integration/seed-judge-fixtures.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "reports the existing ids on a second run and changes nothing",
+    "reaches the public list as a demo fixture, in the currency its country sets"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "MF5",
+   "guard": "reaches the public list as a demo fixture, in the currency its country sets",
+   "needle": "reaches the public list as a demo fixture, in the currency its country sets",
+   "file": "src/operator/cli.ts",
+   "test": "tests/integration/seed-judge-fixtures.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "reaches the public list as a demo fixture, in the currency its country sets",
+    "prices a basket once a destination is assigned, with no enrollment row anywhere"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "MF6",
+   "guard": "reaches the public list as a demo fixture, in the currency its country sets",
+   "needle": "reaches the public list as a demo fixture, in the currency its country sets",
+   "file": "src/operator/cli.ts",
+   "test": "tests/integration/seed-judge-fixtures.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "reaches the public list as a demo fixture, in the currency its country sets"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "MF7",
+   "guard": "reaches the public list as a demo fixture, in the currency its country sets",
+   "needle": "reaches the public list as a demo fixture, in the currency its country sets",
+   "file": "src/operator/cli.ts",
+   "test": "tests/integration/seed-judge-fixtures.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "reaches the public list as a demo fixture, in the currency its country sets"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "MF8",
+   "guard": "prices a basket once a destination is assigned, with no enrollment row anywhere",
+   "needle": "prices a basket once a destination is assigned, with no enrollment row anywhere",
+   "file": "src/operator/cli.ts",
+   "test": "tests/integration/seed-judge-fixtures.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "prices a basket once a destination is assigned, with no enrollment row anywhere"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "MF9",
+   "guard": "prices a basket once a destination is assigned, with no enrollment row anywhere",
+   "needle": "prices a basket once a destination is assigned, with no enrollment row anywhere",
+   "file": "src/operator/cli.ts",
+   "test": "tests/integration/seed-judge-fixtures.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "prices a basket once a destination is assigned, with no enrollment row anywhere"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  }
+ ]
+}

@@ -1,6 +1,6 @@
 {
  "label": "S41 guard mutations; FIXTURE model boundary for the prompt guard, no real model call",
- "ranAt": "2026-11-04T17:05:33+00:00",
+ "ranAt": "2026-11-04T19:45:15+00:00",
  "total": 14,
  "proved": 14,
  "allRestoredByteIdentical": true,

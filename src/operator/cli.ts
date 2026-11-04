@@ -18,6 +18,7 @@ import { isEntrypoint } from "@/lib/entrypoint";
 import { hashToken, newId, newSecretToken } from "@/lib/ids";
 import { isAppError } from "@/lib/errors";
 import { redact } from "@/lib/log";
+import type { Country } from "@/lib/money";
 
 // Operator acts (Gate 4 delta D1), run locally by the human operator with MIGRATION_DATABASE_URL.
 // No HTTP route reaches this file.
@@ -71,6 +72,94 @@ export async function seedDemoFixture(db: OperatorDb, now: Date = new Date()): P
     await tx.update(schema.outlets).set({ publishedMenuRevisionId: menuRevisionId }).where(eq(schema.outlets.id, outletId));
     return { status: "created", outletId, menuRevisionId };
   });
+}
+
+// S41: shops whose names a judge can read as shops. Fictional branding (product rule 9), every one
+// flagged isDemoFixture so the demo badge follows it, and every price known so a basket can be
+// priced. Seeded like the demo fixture rather than through the merchant flow, so none has an
+// enrollment row: approve-enrollment refuses them, and nothing on the buyer's path asks for one.
+// Basket pricing needs only an active destination (src/domain/purchases/price.ts) and publication
+// is set here directly, so the merchant publication gate never runs for these.
+export const JUDGE_FIXTURES = [
+  {
+    fixtureKey: "judge-fixture-ah-seng",
+    name: "Ah Seng Chicken Rice",
+    area: "Maxwell",
+    country: "SG",
+    items: [
+      { name: "Hainanese chicken rice (steamed)", unitMinor: 650 },
+      { name: "Roast chicken rice", unitMinor: 700 },
+      { name: "Chicken rice set with soup", unitMinor: 850 },
+      { name: "Iced lemon tea", unitMinor: 220 },
+    ],
+  },
+  {
+    fixtureKey: "judge-fixture-tiong-bahru",
+    name: "Tiong Bahru Kopi House",
+    area: "Tiong Bahru",
+    country: "SG",
+    items: [
+      { name: "Kopi O", unitMinor: 180 },
+      { name: "Kopi C", unitMinor: 220 },
+      { name: "Kaya toast set", unitMinor: 450 },
+      { name: "Soft-boiled eggs (2)", unitMinor: 200 },
+      { name: "Curry puff", unitMinor: 280 },
+    ],
+  },
+  {
+    fixtureKey: "judge-fixture-larkspur",
+    name: "Larkspur Street Taqueria",
+    area: "Larkspur Street, San Francisco",
+    country: "US",
+    items: [
+      { name: "Chicken burrito", unitMinor: 1150 },
+      { name: "Two beef tacos", unitMinor: 900 },
+      { name: "Chips and guacamole", unitMinor: 650 },
+      { name: "Horchata", unitMinor: 375 },
+    ],
+  },
+] as const satisfies readonly { fixtureKey: string; name: string; area: string; country: Country; items: readonly { name: string; unitMinor: number }[] }[];
+
+export type JudgeFixtureResult = { status: "created" | "unchanged"; fixtureKey: string; name: string; outletId: string; menuRevisionId: string };
+
+// One transaction per shop, each idempotent on its own fixture key, so a rerun reports the existing
+// ids and never gives a basket a second checkout key. A shop that fails leaves the others as they
+// were. No payment destination is written here: assign-paypal-destination does that, separately.
+export async function seedJudgeFixtures(db: OperatorDb, now: Date = new Date()): Promise<JudgeFixtureResult[]> {
+  const results: JudgeFixtureResult[] = [];
+  for (const fixture of JUDGE_FIXTURES) {
+    results.push(
+      await db.transaction(async (tx) => {
+        const outletId = newId("out");
+        const inserted = await tx
+          .insert(schema.outlets)
+          .values({ id: outletId, name: fixture.name, area: fixture.area, country: fixture.country, isDemoFixture: true, fixtureKey: fixture.fixtureKey, createdAt: now })
+          .onConflictDoNothing({ target: schema.outlets.fixtureKey })
+          .returning({ id: schema.outlets.id });
+
+        if (inserted.length === 0) {
+          const [existing] = await tx
+            .select({ id: schema.outlets.id, menuRevisionId: schema.outlets.publishedMenuRevisionId })
+            .from(schema.outlets)
+            .where(eq(schema.outlets.fixtureKey, fixture.fixtureKey));
+          if (!existing?.menuRevisionId) throw new Error(`${fixture.name} exists without a published menu; inspect it by hand.`);
+          return { status: "unchanged", fixtureKey: fixture.fixtureKey, name: fixture.name, outletId: existing.id, menuRevisionId: existing.menuRevisionId };
+        }
+
+        const menuRevisionId = newId("mrv");
+        await tx.insert(schema.menuRevisions).values({ id: menuRevisionId, outletId, status: "confirmed", confirmedAt: now, createdAt: now });
+        await tx.insert(schema.menuItems).values(
+          fixture.items.map((item, position) => {
+            const id = newId("itm");
+            return { id, itemKey: id, menuRevisionId, position, name: item.name, unitMinor: item.unitMinor, available: true };
+          }),
+        );
+        await tx.update(schema.outlets).set({ publishedMenuRevisionId: menuRevisionId }).where(eq(schema.outlets.id, outletId));
+        return { status: "created", fixtureKey: fixture.fixtureKey, name: fixture.name, outletId, menuRevisionId };
+      }),
+    );
+  }
+  return results;
 }
 
 // PayPal account ids: 13 characters from 2-9 and A-Z without I and O (PayPal rejects any other
@@ -540,6 +629,7 @@ export function promptHidden(prompt: string, input: HiddenInput = process.stdin,
 
 const COMMANDS = [
   "seed-demo-fixture",
+  "seed-judge-fixtures",
   "assign-paypal-destination",
   "issue-agent-token",
   "create-merchant",
@@ -614,7 +704,7 @@ export async function addDemoIcedTeas(db: OperatorDb, now: Date = new Date()): P
 }
 
 const USAGE =
-  "usage: npm run operator -- seed-demo-fixture | assign-paypal-destination <outletId> <sellerMerchantId> | issue-agent-token <label> | create-merchant <email> <name> | approve-membership <email> [evidenceRef] | approve-enrollment <outletId> [evidenceRef] | approve-identifier [identifierId [evidenceRef]] | grant-operator <email> [evidenceRef] | resolve-pyusd-mismatch <operatorEmail> <attemptId> <reason> <evidenceRef> | record-extra-transfer-refund <operatorEmail> <attemptId> <signature> <reason> <refundReference> | unarchive-order <purchaseId> | export-archived-orders [outletId] | add-demo-iced-teas";
+  "usage: npm run operator -- seed-demo-fixture | seed-judge-fixtures | assign-paypal-destination <outletId> <sellerMerchantId> | issue-agent-token <label> | create-merchant <email> <name> | approve-membership <email> [evidenceRef] | approve-enrollment <outletId> [evidenceRef] | approve-identifier [identifierId [evidenceRef]] | grant-operator <email> [evidenceRef] | resolve-pyusd-mismatch <operatorEmail> <attemptId> <reason> <evidenceRef> | record-extra-transfer-refund <operatorEmail> <attemptId> <signature> <reason> <refundReference> | unarchive-order <purchaseId> | export-archived-orders [outletId] | add-demo-iced-teas";
 
 async function run(db: OperatorDb, argv: string[]): Promise<number> {
   const [command, ...args] = argv;
@@ -625,6 +715,16 @@ async function run(db: OperatorDb, argv: string[]): Promise<number> {
         ? `created demo fixture: outlet ${result.outletId}, menu revision ${result.menuRevisionId}`
         : `demo fixture already exists, nothing changed: outlet ${result.outletId}, menu revision ${result.menuRevisionId}`,
     );
+    return 0;
+  }
+  if (command === "seed-judge-fixtures" && args.length === 0) {
+    for (const result of await seedJudgeFixtures(db)) {
+      console.log(
+        result.status === "created"
+          ? `created ${result.name}: outlet ${result.outletId}, menu revision ${result.menuRevisionId}`
+          : `${result.name} already exists, nothing changed: outlet ${result.outletId}, menu revision ${result.menuRevisionId}`,
+      );
+    }
     return 0;
   }
   if (command === "add-demo-iced-teas" && args.length === 0) {

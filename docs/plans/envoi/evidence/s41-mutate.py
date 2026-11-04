@@ -6,6 +6,10 @@ is restored byte-identical. Definitions are in s41-mutation-defs.json beside thi
 written to s41-mutations.json.
 
 Run from the repository root:  python3 docs/plans/envoi/evidence/s41-mutate.py
+
+An optional first argument names another definitions file beside this one, so a second set of guards
+can be proved without overwriting the first set's recorded result. That file may carry its own
+"label", "output" and "greenRerun" keys; without them the defaults below apply unchanged.
 """
 
 import hashlib
@@ -19,7 +23,18 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
-DEFS = json.loads((HERE / "s41-mutation-defs.json").read_text())
+DEFS_PATH = HERE / (sys.argv[1] if len(sys.argv) > 1 else "s41-mutation-defs.json")
+DEFS = json.loads(DEFS_PATH.read_text())
+OUT_PATH = HERE / DEFS.get("output", "s41-mutations.json")
+LABEL = DEFS.get("label", "S41 guard mutations; FIXTURE model boundary for the prompt guard, no real model call")
+GREEN_RERUN = DEFS.get(
+    "greenRerun",
+    [
+        {"project": "unit", "test": "tests/unit/landing-page.test.ts"},
+        {"project": "unit", "test": "tests/unit/placeholder-examples.test.ts"},
+        {"project": "integration", "test": "tests/integration/buyer-suggestions.test.ts"},
+    ],
+)
 
 LOCAL_TEST_DB = "postgres://postgres@127.0.0.1:5432/envoi_test"
 NEON_NAMES = ("DATABASE_URL", "MIGRATION_DATABASE_URL", "MAINTENANCE_DATABASE_URL")
@@ -111,16 +126,15 @@ def main() -> int:
               f"needle {needle_hit}, restored {byte_identical})", flush=True)
 
     green = {}
-    for project, files in (("unit", ["tests/unit/landing-page.test.ts", "tests/unit/placeholder-examples.test.ts"]),
-                           ("integration", ["tests/integration/buyer-suggestions.test.ts"])):
-        for test_file in files:
-            code, failures, _ = run_tests(project, test_file)
-            green[test_file] = {"exitCode": code, "failedAssertions": [f["title"] for f in failures]}
-            print(f"{'GREEN  ' if code == 0 else 'RED    '}{test_file}", flush=True)
+    for entry in GREEN_RERUN:
+        project, test_file = entry["project"], entry["test"]
+        code, failures, _ = run_tests(project, test_file)
+        green[test_file] = {"exitCode": code, "failedAssertions": [f["title"] for f in failures]}
+        print(f"{'GREEN  ' if code == 0 else 'RED    '}{test_file}", flush=True)
 
     proved = sum(1 for row in results if row.get("proved"))
     out = {
-        "label": "S41 guard mutations; FIXTURE model boundary for the prompt guard, no real model call",
+        "label": LABEL,
         "ranAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "total": len(results),
         "proved": proved,
@@ -128,7 +142,7 @@ def main() -> int:
         "greenAfterRestore": green,
         "mutations": results,
     }
-    (HERE / "s41-mutations.json").write_text(json.dumps(out, indent=1) + "\n")
+    OUT_PATH.write_text(json.dumps(out, indent=1) + "\n")
     print(f"\nproved {proved} of {len(results)}; restored byte-identical: {restored_ok}")
     return 0 if proved == len(results) and restored_ok and all(g["exitCode"] == 0 for g in green.values()) else 1
 

@@ -10,11 +10,13 @@ const ROOT = join(import.meta.dirname, "..", "..");
 const source = (file: string) => readFileSync(join(ROOT, file), "utf8");
 
 // The operator's own definition of the seeded fixture shop: its name, area and published items.
+// Scoped to that one block. The file seeds other fixture shops whose items also carry unitMinor, so
+// scraping the whole file would collect items the buyer box examples were never meant to match.
 const cli = source("src/operator/cli.ts");
-const FIXTURE_NAME = /name: "([^"]+)"/.exec(cli)?.[1] ?? "";
-const FIXTURE_AREA = /area: "([^"]+)"/.exec(cli)?.[1] ?? "";
-// unitMinor is the seeded fixture's own field; the operator's other item list uses priceMinor.
-const FIXTURE_ITEMS = [...cli.matchAll(/\{ name: "([^"]+)", unitMinor: \d+ \}/g)].map((match) => match[1] ?? "");
+const DEMO_FIXTURE_BLOCK = /export const DEMO_FIXTURE = \{[\s\S]*?\n\} as const;/.exec(cli)?.[0] ?? "";
+const FIXTURE_NAME = /name: "([^"]+)"/.exec(DEMO_FIXTURE_BLOCK)?.[1] ?? "";
+const FIXTURE_AREA = /area: "([^"]+)"/.exec(DEMO_FIXTURE_BLOCK)?.[1] ?? "";
+const FIXTURE_ITEMS = [...DEMO_FIXTURE_BLOCK.matchAll(/\{ name: "([^"]+)", unitMinor: \d+ \}/g)].map((match) => match[1] ?? "");
 
 function placeholderOf(file: string): string {
   return /placeholder="([^"]+)"/.exec(source(file))?.[1] ?? "";

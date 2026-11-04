@@ -1,0 +1,102 @@
+{
+ "note": "S41 judge-fixture guard mutations. Each entry mutates one branch of seedJudgeFixtures in src/operator/cli.ts and names the guard that must fail on an AssertionError. MF3, MF8 and MF9 share one find because they mutate three different things at the same anchor. The find strings for the revision and item inserts are disambiguated from seedDemoFixture by indentation, since those two lines are otherwise identical. No model, PayPal or Kernel call is involved: every mutation runs against the local test database. MF1 was first written as status 'confirmed' to 'draft' and could not be proved: the database trigger envoi_outlet_publication_guard refuses to publish a non-confirmed revision, so the fault was caught by Postgres inside beforeAll and no assertion ever ran. That trigger, not this test, owns the confirmed-status invariant. MF1 now writes an extra draft revision beside the confirmed one, which the trigger permits and which the guard catches on its own revision count.",
+ "label": "S41 judge-fixture guard mutations; no model, PayPal or Kernel call, local test database only",
+ "output": "s41-fixture-mutations.json",
+ "greenRerun": [
+  { "project": "integration", "test": "tests/integration/seed-judge-fixtures.test.ts" },
+  { "project": "integration", "test": "tests/integration/seed-demo-fixture.test.ts" },
+  { "project": "integration", "test": "tests/integration/demo-iced-teas.test.ts" }
+ ],
+ "mutations": [
+  {
+   "id": "MF1",
+   "guard": "publishes each shop with a confirmed revision and every item priced on that revision",
+   "file": "src/operator/cli.ts",
+   "find": "        await tx.insert(schema.menuRevisions).values({ id: menuRevisionId, outletId, status: \"confirmed\", confirmedAt: now, createdAt: now });",
+   "replace": "        await tx.insert(schema.menuRevisions).values({ id: menuRevisionId, outletId, status: \"confirmed\", confirmedAt: now, createdAt: now });\n        await tx.insert(schema.menuRevisions).values({ id: newId(\"mrv\"), outletId, status: \"draft\", createdAt: now });",
+   "project": "integration",
+   "test": "tests/integration/seed-judge-fixtures.test.ts",
+   "needle": "publishes each shop with a confirmed revision and every item priced on that revision"
+  },
+  {
+   "id": "MF2",
+   "guard": "publishes each shop with a confirmed revision and every item priced on that revision",
+   "file": "src/operator/cli.ts",
+   "find": "            return { id, itemKey: id, menuRevisionId, position, name: item.name, unitMinor: item.unitMinor, available: true };",
+   "replace": "            return { id, itemKey: id, menuRevisionId, position, name: item.name, unitMinor: null, available: true };",
+   "project": "integration",
+   "test": "tests/integration/seed-judge-fixtures.test.ts",
+   "needle": "publishes each shop with a confirmed revision and every item priced on that revision"
+  },
+  {
+   "id": "MF3",
+   "guard": "publishes each shop with a confirmed revision and every item priced on that revision",
+   "file": "src/operator/cli.ts",
+   "find": "        await tx.update(schema.outlets).set({ publishedMenuRevisionId: menuRevisionId }).where(eq(schema.outlets.id, outletId));\n        return { status: \"created\", fixtureKey: fixture.fixtureKey, name: fixture.name, outletId, menuRevisionId };",
+   "replace": "        return { status: \"created\", fixtureKey: fixture.fixtureKey, name: fixture.name, outletId, menuRevisionId };",
+   "project": "integration",
+   "test": "tests/integration/seed-judge-fixtures.test.ts",
+   "needle": "publishes each shop with a confirmed revision and every item priced on that revision"
+  },
+  {
+   "id": "MF4",
+   "guard": "reports the existing ids on a second run and changes nothing",
+   "file": "src/operator/cli.ts",
+   "find": "          .values({ id: outletId, name: fixture.name, area: fixture.area, country: fixture.country, isDemoFixture: true, fixtureKey: fixture.fixtureKey, createdAt: now })",
+   "replace": "          .values({ id: outletId, name: fixture.name, area: fixture.area, country: fixture.country, isDemoFixture: true, fixtureKey: `${fixture.fixtureKey}-${outletId}`, createdAt: now })",
+   "project": "integration",
+   "test": "tests/integration/seed-judge-fixtures.test.ts",
+   "needle": "reports the existing ids on a second run and changes nothing"
+  },
+  {
+   "id": "MF5",
+   "guard": "reaches the public list as a demo fixture, in the currency its country sets",
+   "file": "src/operator/cli.ts",
+   "find": "          .values({ id: outletId, name: fixture.name, area: fixture.area, country: fixture.country, isDemoFixture: true, fixtureKey: fixture.fixtureKey, createdAt: now })",
+   "replace": "          .values({ id: outletId, name: fixture.name, area: fixture.area, isDemoFixture: true, fixtureKey: fixture.fixtureKey, createdAt: now })",
+   "project": "integration",
+   "test": "tests/integration/seed-judge-fixtures.test.ts",
+   "needle": "reaches the public list as a demo fixture, in the currency its country sets"
+  },
+  {
+   "id": "MF6",
+   "guard": "reaches the public list as a demo fixture, in the currency its country sets",
+   "file": "src/operator/cli.ts",
+   "find": "          .values({ id: outletId, name: fixture.name, area: fixture.area, country: fixture.country, isDemoFixture: true, fixtureKey: fixture.fixtureKey, createdAt: now })",
+   "replace": "          .values({ id: outletId, name: fixture.name, area: fixture.area, country: fixture.country, isDemoFixture: false, fixtureKey: fixture.fixtureKey, createdAt: now })",
+   "project": "integration",
+   "test": "tests/integration/seed-judge-fixtures.test.ts",
+   "needle": "reaches the public list as a demo fixture, in the currency its country sets"
+  },
+  {
+   "id": "MF7",
+   "guard": "reaches the public list as a demo fixture, in the currency its country sets",
+   "file": "src/operator/cli.ts",
+   "find": "area: fixture.area, country: fixture.country",
+   "replace": "area: \"Test Area\", country: fixture.country",
+   "project": "integration",
+   "test": "tests/integration/seed-judge-fixtures.test.ts",
+   "needle": "reaches the public list as a demo fixture, in the currency its country sets"
+  },
+  {
+   "id": "MF8",
+   "guard": "prices a basket once a destination is assigned, with no enrollment row anywhere",
+   "file": "src/operator/cli.ts",
+   "find": "        await tx.update(schema.outlets).set({ publishedMenuRevisionId: menuRevisionId }).where(eq(schema.outlets.id, outletId));\n        return { status: \"created\", fixtureKey: fixture.fixtureKey, name: fixture.name, outletId, menuRevisionId };",
+   "replace": "        await tx.update(schema.outlets).set({ publishedMenuRevisionId: menuRevisionId }).where(eq(schema.outlets.id, outletId));\n        await tx.insert(schema.paymentDestinations).values({ id: newId(\"dst\"), outletId, rail: \"paypal\", environment: \"sandbox\", sellerMerchantId: \"EQN6264CF9F4Y\", status: \"active\", version: 1, createdAt: now });\n        return { status: \"created\", fixtureKey: fixture.fixtureKey, name: fixture.name, outletId, menuRevisionId };",
+   "project": "integration",
+   "test": "tests/integration/seed-judge-fixtures.test.ts",
+   "needle": "prices a basket once a destination is assigned, with no enrollment row anywhere"
+  },
+  {
+   "id": "MF9",
+   "guard": "prices a basket once a destination is assigned, with no enrollment row anywhere",
+   "file": "src/operator/cli.ts",
+   "find": "        await tx.update(schema.outlets).set({ publishedMenuRevisionId: menuRevisionId }).where(eq(schema.outlets.id, outletId));\n        return { status: \"created\", fixtureKey: fixture.fixtureKey, name: fixture.name, outletId, menuRevisionId };",
+   "replace": "        await tx.update(schema.outlets).set({ publishedMenuRevisionId: menuRevisionId }).where(eq(schema.outlets.id, outletId));\n        await tx.insert(schema.enrollments).values({ id: newId(\"enr\"), outletId, isDemo: true, createdAt: now });\n        return { status: \"created\", fixtureKey: fixture.fixtureKey, name: fixture.name, outletId, menuRevisionId };",
+   "project": "integration",
+   "test": "tests/integration/seed-judge-fixtures.test.ts",
+   "needle": "prices a basket once a destination is assigned, with no enrollment row anywhere"
+  }
+ ]
+}
