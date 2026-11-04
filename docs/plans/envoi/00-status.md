@@ -528,7 +528,8 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 - **One-sentence box on the same models, the user's words "Yes, test the box" [verified]:** S21's 25 cases and threshold (22 correct, B1 to B8 all correct, median at most 10 s), one run each through the product's own suggestion code, by [`box-rerun-2026-11-04.mts`](evidence/box-rerun-2026-11-04.mts), at each model's default thinking level. `gpt-6-sol`: 25 of 25, median 4.9 s, pass. `gpt-6-luna`: 25 of 25, median 5.2 s, pass. Full rows are in [the result file](evidence/box-rerun-2026-11-04.json).
   **Fault in this run [verified]:** the price table's field names did not match the harness, so the cost was NaN and the harness's US$1 spend stop could not trigger. Actual spend is [unknown]; the OpenAI dashboard holds it.
 - **Reading [hypothesis]:** `gpt-6-luna`'s N3 reply, "Nowhere Shop isn't on Envoi", has the right meaning and misses only the registered words "not on envoi"; it is not re-scored. L2 was wrong in S25 and correct here, so one run does not fix a case's outcome. No wrong basket link was created by any model in this run: every miss is a missing link or a reply wording.
-- **Claim boundary:** Ask Envoi is on with `gpt-6-luna`, which has not met the threshold in `01-product.md`. Any claim must state the result as it stands.
+- **Switched, 2026-11-04, the user's words:** "Okay ive switched already on render its dpeloyed and live", meaning `AI_MODEL=gpt-6-sol` [user-reported; the model in use cannot be read from outside].
+- **Claim boundary:** `gpt-6-sol` scored 24 of 25 in one local run, after six candidates were tried. Any claim must state that, on FIXTURE shops, and not generalize it to real buyers.
 
 ### S31 PayPal approval over the review page, 2026-11-04
 
