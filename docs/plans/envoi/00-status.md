@@ -507,6 +507,23 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 - **Post-slice cleanup [verified], 2026-11-02:** the architect-reviewer pass found no orphan S27 module, dead fixture or stale test file. Every S27 module is imported, named tests 17 and 36 and the MCP-client guards exist, the OpenAPI document carries `unitMinor` and `currency`, and code, tests and CI carry no generated-client import or `typecheck:client` reference. One deferred wording divergence: the Gate 1 approved Ask Envoi mockup and page still name an APIMatic-generated client while the runtime uses the MCP client; Ask Envoi is off on Render, and changing that copy needs a Gate 1 decision, so it was not changed here. It was fixed on 2026-11-03 under the [Gate 1 wording reopening](#gate-1-reopening-2026-11-03-ask-envoi-mcp-wording). The historical `s27-mcp-session-transfer-2026-11-02.md` keeps its superseding note; the protected RTF, four untracked handoff text files and `PROGRESS.md` remain uncommitted.
 - **Publication and completion [verified], 2026-11-02:** the seven-file documentation and evidence commit `7514eb34c1ed427e2f5865a288aa044f563c0464` is pushed to `main`; [CI run 41456616279](https://github.com/jaydonnnk/envoi/actions/runs/41456616279) passed typecheck, lint, unit, integration, build, build scan and the local-fixture public HTTP/MCP check. The commit changes no runtime code; Render auto-deploys `main`, the app health read 200 after the push, and the deployment id was not read because the Render dashboard session was signed out. S27 is complete: the SGD, US/USD and PYUSD visible results, the technical release, the evidence in this section and the post-slice cleanup are all recorded. The next step is the closing slice question.
 
+### Ask Envoi turned on and re-evaluated, 2026-11-04
+
+- **Turned on, in the user's words:** "im going to turn on the assistent agent token(i ran the npm command u gave me and put into render already), as well as the ai model to gpt 6 luna." [verified 2026-11-04] `/buy/ask` answers 200 and `/buy` shows Ask Envoi and "Or scan the sticker". This departs from S25's falsifier, which kept the assistant off after its miss; the user made that choice.
+- **Authority for the rerun:** "i want you to run some tests on whether it still misses evaluation, things to improve, and whether a different model would work." No limit was named; the builder capped each model at US$0.50.
+- **What ran:** S25's 25 sentences and scoring, unchanged, one run each, on a local production build of `b1425df` against a disposable database, since dropped, by [`ask-rerun-2026-11-04.mts`](evidence/ask-rerun-2026-11-04.mts) with [its seed](evidence/ask-rerun-2026-11-04-seed.mts). The S25 result stays as recorded. This is not a new pre-registration. Render was not tested beyond the two pages above.
+- **Results [verified], threshold 24 of 25; no model passes:**
+
+  | Model | Correct | Median time | Spend (S4's prices, [vendor claim]) | Wrong |
+  | --- | --- | --- | --- | --- |
+  | `gpt-6-luna` | 23 | 6.3 s | US$0.0088 | B7, N3 |
+  | `gpt-5.6-luna` | 23 | 5.7 s | US$0.0184 | B7, C3 |
+  | `gpt-5.4-mini` | 23 | 3.9 s | US$0.0714 | C3, C4 |
+  | `gpt-4.1-mini` | 18 | 3.3 s | US$0.0321 | B2, B4, B7, B9, C3, C4, I1 |
+
+- **Reading [hypothesis]:** `gpt-6-luna`'s N3 reply, "Nowhere Shop isn't on Envoi", has the right meaning and misses only the registered words "not on envoi"; it is not re-scored. L2 was wrong in S25 and correct here, so one run does not fix a case's outcome. No wrong basket link was created by any model in this run: every miss is a missing link or a reply wording.
+- **Claim boundary:** Ask Envoi is on, but it has not met the threshold in `01-product.md`. Any claim must state the result as it stands.
+
 ### S31 PayPal approval over the review page, 2026-11-04
 
 - **Authority [verified], 2026-11-04, in the user's words:** "1. Yes. 2. Yes 3. Yes. 4. yes." to four named questions: starting S31 on `envoi/slice-31-paypal-buttons` with local commits; the local B1 spike with sandbox orders; the Render evidence purchases; fast-forwarding `main` and pushing, which deploys.
