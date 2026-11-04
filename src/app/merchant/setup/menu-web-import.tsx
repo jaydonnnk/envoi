@@ -13,7 +13,10 @@ import type { DraftWithImport } from "./menu-import";
 
 export type BlankPrice = { name: string; portion: string | null; basis: DraftItemSuggestion["priceBasis"] };
 
-type Imported = { import: { rowsDrafted: number; rowsBlankPrice: number; droppedNames: number; added: number; blankPrices: BlankPrice[] }; draft: DraftWithImport };
+// The page's own words for a drafted row. They live only in the browser's memory (S30).
+export type PageExcerpt = { name: string; portion: string | null; text: string };
+
+type Imported = { import: { rowsDrafted: number; rowsBlankPrice: number; droppedNames: number; added: number; blankPrices: BlankPrice[]; excerpts: PageExcerpt[] }; draft: DraftWithImport };
 
 type Answer =
   | { kind: "drafted"; host: string; drafted: number; blank: number }
@@ -31,7 +34,7 @@ export function MenuWebImport({
   outletId: string;
   draft: DraftWithImport;
   dirty: boolean;
-  onImported: (draft: DraftWithImport, blankPrices: BlankPrice[]) => void;
+  onImported: (draft: DraftWithImport, blankPrices: BlankPrice[], excerpts: PageExcerpt[]) => void;
 }) {
   const [link, setLink] = useState("");
   const [owned, setOwned] = useState(false);
@@ -59,7 +62,7 @@ export function MenuWebImport({
         // The server accepted the link, so this does not happen; the answer then names no host.
       }
       setAnswer({ kind: "drafted", host, drafted: result.data.import.rowsDrafted, blank: result.data.import.rowsBlankPrice });
-      onImported(result.data.draft, result.data.import.blankPrices);
+      onImported(result.data.draft, result.data.import.blankPrices, result.data.import.excerpts);
       return;
     }
     const error = result.error;

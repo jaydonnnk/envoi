@@ -4,6 +4,7 @@ import { importRuntime } from "@/domain/imports/request";
 import { draftMenuFromPhoto } from "@/integrations/ai/menu-vision";
 import { draftMenuFromPageText } from "@/integrations/ai/menu-web";
 import { readPageText } from "@/integrations/browser/kernel";
+import { createTrace, type TraceEntry } from "@/integrations/assistant/trace";
 import { createFakeKernel, FIXTURE_PAGE_TEXT, FIXTURE_PICTURE_TEXT, isKernelUrl, type FakeKernel, type PageTurn } from "../support/fake-kernel";
 import { FIXTURE_BOUNDS, FIXTURE_RESERVATION, FIXTURE_VISION_ENV, createFakeVision, fixturePolicy, importRequest, photoBody, solidJpeg, visionItem, type VisionTurn } from "../support/menu-import";
 import { createPaymentsFixture, routeParams, type PaymentsFixture } from "../support/payments";
@@ -271,6 +272,71 @@ describe("page text and the full URL never reach a log, response or row", () => 
         expect(found(surface + JSON.stringify({ planted: `x/${needle}` }), needle), `${name} self-test`).toBe(true);
         expect(found(surface, needle), `${name} holds ${needle}`).toBe(false);
       }
+    }
+  });
+});
+
+// S30 named test 32 (Gate 2 draft review aids). The merchant gets each row's page excerpt in the
+// success answer; nothing else keeps it. The database surface is every public table in full.
+describe("page excerpts stay in the success answer", () => {
+  it("each drafted row gets the page's words, by name and portion", async () => {
+    const shop = await api.newShop("excerpts");
+    const { status, body } = await sendWeb(shop);
+    expect(status).toBe(200);
+    expect(body.data?.import?.excerpts).toEqual([
+      { name: "Kopi C", portion: "Hot", text: "Kopi C (Hot) - $1.80" },
+      { name: "Kaya toast set", portion: null, text: "Kaya toast set - $3.50" },
+      { name: "Ebi fry", portion: "3 pcs", text: "Ebi fry, 3 pcs - $4.90" },
+      // The blank-price variant finds its own line through its portion, not the first "Ebi fry".
+      { name: "Ebi fry", portion: "+ Mentaiko", text: "Ebi fry + Mentaiko - add one dollar fifty" },
+    ]);
+  });
+
+  it("page excerpts never reach the database, a log or a trace", async () => {
+    const NEEDLE = "FIXTURENEEDLEEXCERPT5K";
+    const variants = (needle: string) => [needle, JSON.stringify(needle).slice(1, -1), needle.toLowerCase(), encodeURIComponent(needle)];
+    const found = (surface: string) => variants(NEEDLE).some((variant) => surface.includes(variant));
+
+    const logs: string[] = [];
+    vi.spyOn(console, "log").mockImplementation((line: unknown) => void logs.push(String(line)));
+    vi.spyOn(console, "error").mockImplementation((line: unknown) => void logs.push(String(line)));
+    page = { kind: "page", text: `${FIXTURE_PAGE_TEXT}\nTeh O ${NEEDLE} - $1.60` };
+    model = () => ({ kind: "answer", output: { items: [visionItem("Teh O", "1.60")] } });
+    const shop = await api.newShop("excerpt-needle");
+
+    const success = await sendWeb(shop);
+    expect(success.status).toBe(200);
+    // The needle did travel: this excerpt holds it, so a copy kept anywhere below would be seen.
+    const excerpts = success.body.data?.import?.excerpts as { name: string; text: string }[];
+    expect(excerpts).toEqual([{ name: "Teh O", portion: null, text: `Teh O ${NEEDLE} - $1.60` }]);
+    expect(found(JSON.stringify(success.body.data?.draft))).toBe(false);
+
+    // A failed import answers no excerpt, though the model call read the same page.
+    model = () => ({ kind: "status", status: 500 });
+    const failed = await sendWeb(shop);
+    expect(failed.status).toBeGreaterThanOrEqual(400);
+    expect(found(failed.text)).toBe(false);
+
+    const tables = await fixture.database.admin<{ table_name: string }[]>`select table_name from information_schema.tables where table_schema = 'public' and table_type = 'BASE TABLE'`;
+    expect(tables.length).toBeGreaterThan(10);
+    const rows: string[] = [];
+    for (const { table_name: table } of tables) {
+      const dump = await fixture.database.admin.unsafe(`select row_to_json(t)::text as row from "${table}" t`);
+      for (const entry of dump) rows.push(String(entry.row));
+    }
+
+    // The web import writes no trace; a trace line is named fields only, so an excerpt has no field.
+    const traceLines: string[] = [];
+    createTrace((line) => traceLines.push(line))({ operation: "getOutletMenu", status: 200, outletId: shop.outletId, itemIds: [], expiresAt: null, ms: 1, excerpts } as TraceEntry);
+
+    const surfaces = { logs: logs.join("\n"), rows: rows.join("\n"), trace: traceLines.join("\n") };
+    expect(logs.length).toBeGreaterThan(2);
+    expect(rows.some((entry) => entry.includes('"Teh O"'))).toBe(true);
+    expect(traceLines).toHaveLength(1);
+    for (const [name, surface] of Object.entries(surfaces)) {
+      // Self-test first: the scanner finds the needle once it is planted on this serialized surface.
+      for (const planted of [`x/${NEEDLE}`, NEEDLE.toLowerCase(), encodeURIComponent(NEEDLE)]) expect(found(surface + JSON.stringify({ planted })), `${name} self-test`).toBe(true);
+      expect(found(surface), `${name} holds the excerpt`).toBe(false);
     }
   });
 });

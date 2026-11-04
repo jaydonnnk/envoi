@@ -15,9 +15,10 @@ import {
 } from "@/domain/imports/types";
 import { parseSinglePhotoPart } from "@/domain/imports/upload";
 import { validateVisionDraft } from "@/domain/imports/validate-result";
-import { hasPrintedPrice, keepPrintedOnly } from "@/domain/imports/verbatim";
+import { excerptFor, hasPrintedPrice, keepPrintedOnly } from "@/domain/imports/verbatim";
 import { checkMenuPageUrl } from "@/domain/imports/web-url";
 import { draftJson } from "@/domain/menu/serialize";
+import type { DraftItemSuggestion } from "@/domain/menu/types";
 import { webEnv } from "@/env";
 import { draftMenuFromPhoto } from "@/integrations/ai/menu-vision";
 import { draftMenuFromPageText, MENU_WEB_PROMPT_VERSION } from "@/integrations/ai/menu-web";
@@ -28,6 +29,7 @@ import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
 import { readCountedBody } from "@/lib/http/bounded-body";
 import { httpErr, httpOk } from "@/lib/http/respond";
+import { money } from "@/lib/money";
 import { log, toSafeErrorRecord } from "@/lib/log";
 import { durationMs, menuModelBudgetMs } from "@/lib/time";
 
@@ -240,11 +242,23 @@ function parseWebBody(bytes: Uint8Array): WebBody | null {
   }
 }
 
+// The name with its portion first, so "Ebi fry" "+ Mentaiko" finds its own line, then the name alone.
+// The import reads a drafted price as SGD or unmarked (validate-result.ts), and excerptFor compares
+// only its digits, so the currency named here changes nothing for a US shop.
+function pageExcerpts(pageText: string, items: readonly DraftItemSuggestion[]): { name: string; portion: string | null; text: string }[] {
+  return items.flatMap((item) => {
+    const price = item.priceMinor === null ? null : money("SGD", item.priceMinor);
+    const text = (item.portion ? excerptFor(pageText, `${item.name} ${item.portion}`, price) : null) ?? excerptFor(pageText, item.name, price);
+    return text === null ? [] : [{ name: item.name, portion: item.portion, text }];
+  });
+}
+
 // One synchronous web menu import (Gate 3 reopening 2026-10-29), after the route's membership guard
 // and origin check, in the contract's order: the switch, the consent version, the link check, the S11
 // admission, the one Kernel read, the printed-price check, the dispatch mark, the one text call,
 // validation, the verbatim rule and the commit. The page text and the full URL live only in this
-// request's memory: the row keeps the host, and no response, log or error record carries either.
+// request's memory: the row keeps the host, and no log or error record carries either. The one
+// exception is S30's excerpts, at most 120 characters per row, in the success answer only.
 export async function runWebImport(db: Db, request: Request, principal: OutletMemberPrincipal): Promise<Response> {
   const env = webEnv();
   if (!env.WEB_IMPORTS_ENABLED || !env.OPENAI_API_KEY || !env.AI_WEB_MENU_MODEL || !env.KERNEL_API_KEY) {
@@ -339,6 +353,7 @@ export async function runWebImport(db: Db, request: Request, principal: OutletMe
       return refused(importId, "import_rejected", "No menu item could be drafted from that page, so nothing was added. Type the menu instead.", "output_invalid", validated.ok ? "empty" : validated.reason);
     }
 
+    const excerpts = pageExcerpts(page.text, kept.draft.items);
     const commit = await commitImport(db, importId, kept.draft, usage, importRuntime.now());
     if (commit.committed) {
       return httpOk({
@@ -354,6 +369,8 @@ export async function runWebImport(db: Db, request: Request, principal: OutletMe
           // Why each drafted price is blank, so the table can say it in words; names and portions
           // come from the merchant's own page, already in the draft below.
           blankPrices: kept.draft.items.filter((item) => item.priceMinor === null).map((item) => ({ name: item.name, portion: item.portion, basis: item.priceBasis })),
+          // The page's own words for each drafted row, held only in the browser's memory (S30).
+          excerpts,
         },
         draft: draftJson(commit.draft),
       });

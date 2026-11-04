@@ -5,9 +5,9 @@ import { useState } from "react";
 import type { DraftJson } from "@/domain/menu/serialize";
 import type { MenuItemDraft } from "@/domain/menu/types";
 import { requestJson } from "@/lib/browser/session";
-import { MenuGrid, type GridRow } from "./menu-grid";
+import { MenuGrid, type GridRow, type ReviewFilter } from "./menu-grid";
 import { MenuPhotoImport, type DraftWithImport } from "./menu-import";
-import { MenuWebImport, type BlankPrice } from "./menu-web-import";
+import { MenuWebImport, type BlankPrice, type PageExcerpt } from "./menu-web-import";
 import { useRestoreFocus } from "@/lib/browser/focus";
 
 type Row = { key: string; id?: string; name: string; portion: string; price: string; availability: MenuItemDraft["availability"]; fromImport?: boolean };
@@ -90,6 +90,10 @@ export function MenuEditor({
   const [attested, setAttested] = useState(false);
   // The last web import's blank-price reasons, by name and portion; a reload forgets them.
   const [blankReasons, setBlankReasons] = useState<Map<string, string>>(new Map());
+  // The last web import's page excerpts, by name and portion. They stay in this memory only: nothing
+  // saves them, and a reload forgets them while the row keeps its note (S30).
+  const [excerpts, setExcerpts] = useState<Map<string, string>>(new Map());
+  const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("all");
 
   async function load() {
     const result = await requestJson<DraftWithImport>("GET", `${url}/menu-draft`);
@@ -104,10 +108,14 @@ export function MenuEditor({
     setAttested(false);
     setMessage(null);
     setBlankReasons(new Map());
+    setExcerpts(new Map());
   }
 
-  function imported(merged: DraftWithImport, blankPrices: BlankPrice[] = []) {
+  function imported(merged: DraftWithImport, blankPrices: BlankPrice[] = [], pageExcerpts: PageExcerpt[] = []) {
     setBlankReasons(new Map(blankPrices.map((blank) => [variantKey(blank.name, blank.portion), BLANK_REASON[blank.basis]])));
+    setExcerpts(new Map(pageExcerpts.map((excerpt) => [variantKey(excerpt.name, excerpt.portion), excerpt.text])));
+    // A web import opens on the rows that still need the merchant (mockup merchant-web-import-review).
+    if (pageExcerpts.length > 0) setReviewFilter("needs");
     setDraft(merged);
     setRows(rowsOf(merged));
     setDirty(false);
@@ -209,6 +217,7 @@ export function MenuEditor({
     price: row.price,
     availability: row.availability,
     blankReason: row.fromImport ? blankReasons.get(variantKey(row.name, row.portion)) : undefined,
+    excerpt: excerpts.get(variantKey(row.name, row.portion)),
     origin: row.fromImport ? origin : undefined,
     priceInvalid: "invalid" in price,
     priceMissing: "cents" in price && price.cents === null,
@@ -230,8 +239,8 @@ export function MenuEditor({
 
       {webImportsOpen && <MenuWebImport outletId={outletId} draft={draft} dirty={dirty} onImported={imported} />}
 
-      <MenuGrid currency={currency} rows={gridRows} onEdit={edit} onRemove={remove} />
-      <p className="fine">Every cell can be edited: use the arrow keys to move, Enter to edit and Enter again to keep the change. A blank price stays blank until you type it, and the menu cannot be confirmed while one is blank.</p>
+      <MenuGrid currency={currency} rows={gridRows} filter={reviewFilter} onFilter={setReviewFilter} onEdit={edit} onRemove={remove} />
+      <p className="fine">Every cell can be edited: use the arrow keys to move, Enter to edit and Enter again to keep the change. Shift+Tab goes back to Next problem. A blank price stays blank until you type it, and the menu cannot be confirmed while one is blank.</p>
 
       <div className="actions">
         <button className="button secondary" type="button" onClick={add} disabled={rows.length >= 100}>
