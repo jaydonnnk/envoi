@@ -1,0 +1,910 @@
+{
+ "branch": "envoi/slice-31-paypal-buttons",
+ "base_commit": "7fd8bae",
+ "uncommitted_changes": true,
+ "method": "Each definition in s31-mutation-defs.json applied alone by exact text replacement, its whole test file run with the vitest JSON reporter, every touched file restored and compared by SHA-256, then the whole file rerun. A proof needs the named row to fail on an AssertionError, a byte-identical restore and an all-passing rerun; other failing rows are recorded. The integration files run the real paypal/start and paypal/complete route handlers on a local PostgreSQL database built from the migrations, with the three Neon URLs removed; PayPal is a fake labeled FIXTURE, so no order exists. The unit file reads the buttons source, drives the loader with a fake document and the handlers with a fake fetch; the window, focus and the switch to the redirect link are browser evidence in 00-status.md, not a test here.",
+ "results": [
+  {
+   "id": "plant-amount",
+   "test": "the component names none of them",
+   "kind": "standalone",
+   "group": "the PayPal buttons set no amount, payee or item",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "Planted amount field in the Buttons options",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'amount' ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "plant-payee",
+   "test": "the component names none of them",
+   "kind": "standalone",
+   "group": "the PayPal buttons set no amount, payee or item",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "Planted payee field in the Buttons options",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'payee' ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "plant-item",
+   "test": "the component names none of them",
+   "kind": "standalone",
+   "group": "the PayPal buttons set no amount, payee or item",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "Planted items field in the Buttons options",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'items' ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "sdk-merchant-id",
+   "test": "the script carries only the client id, the currency and intent=capture",
+   "kind": "standalone",
+   "group": "the PayPal buttons set no amount, payee or item",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "The script gains merchant-id",
+   "own_row": "failed",
+   "error": "AssertionError: expected { \u2026(4) } to deeply equal { \u2026(3) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "the component names none of them"
+   ],
+   "other_errors": {
+    "the component names none of them": "AssertionError: expected [ 'merchant-id' ] to deeply equal []"
+   },
+   "same_group_others": [
+    "the component names none of them"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "start-body",
+   "test": "every server call posts only an empty body",
+   "kind": "standalone",
+   "group": "the PayPal buttons set no amount, payee or item",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "The create step sends the currency",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 2, 1, 1 ] to deeply equal [ 1, 1, 1 ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "the create step asks paypal/start and returns its order id"
+   ],
+   "other_errors": {
+    "the create step asks paypal/start and returns its order id": "AssertionError: expected [ { \u2026(2) } ] to deeply equal [ { \u2026(2) } ]"
+   },
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "funding",
+   "test": "only PayPal itself is offered as funding",
+   "kind": "standalone",
+   "group": "the PayPal buttons set no amount, payee or item",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "Card funding",
+   "own_row": "failed",
+   "error": "AssertionError: expected '\"card\"' to be 'sdk.FUNDING.PAYPAL' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "page-secret",
+   "test": "the review page passes the public client id and never the secret",
+   "kind": "standalone",
+   "group": "the PayPal buttons set no amount, payee or item",
+   "files": [
+    "src/app/review/[purchaseId]/page.tsx"
+   ],
+   "mutation": "The page passes the secret",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'import { headers } from \"next/headers\u2026' to contain 'clientId={webEnv().PAYPAL_CLIENT_ID}'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "page-currency",
+   "test": "the review page passes the public client id and never the secret",
+   "kind": "standalone",
+   "group": "the PayPal buttons set no amount, payee or item",
+   "files": [
+    "src/app/review/[purchaseId]/page.tsx"
+   ],
+   "mutation": "The page hardcodes the currency",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'import { headers } from \"next/headers\u2026' to contain 'currency={purchase.currency}'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "sdk-error",
+   "test": "a blocked script rejects and leaves nothing behind",
+   "kind": "standalone",
+   "group": "PayPal script loading",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "A blocked script resolves",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'no failure' to be 'paypal_sdk_failed' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "an older script failing late leaves the newer script alone"
+   ],
+   "other_errors": {
+    "an older script failing late leaves the newer script alone": "AssertionError: expected 'no failure' to be 'paypal_sdk_failed' // Object.is equality"
+   },
+   "same_group_others": [
+    "an older script failing late leaves the newer script alone"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "sdk-cleanup",
+   "test": "a blocked script rejects and leaves nothing behind",
+   "kind": "standalone",
+   "group": "PayPal script loading",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "A failed script stays in the page",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ { id: 'paypal-sdk', \u2026(5) } ] to deeply equal []",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "a script that hangs rejects at the timeout"
+   ],
+   "other_errors": {
+    "a script that hangs rejects at the timeout": "AssertionError: expected [ { id: 'paypal-sdk', \u2026(5) } ] to deeply equal []"
+   },
+   "same_group_others": [
+    "a script that hangs rejects at the timeout"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "sdk-retry",
+   "test": "a blocked script rejects and leaves nothing behind",
+   "kind": "standalone",
+   "group": "PayPal script loading",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "A failed load is remembered",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to have a length of 1 but got +0",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "sdk-superseded",
+   "test": "an older script failing late leaves the newer script alone",
+   "kind": "standalone",
+   "group": "PayPal script loading",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "No check that the failing load is current",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "sdk-timeout",
+   "test": "a script that hangs rejects at the timeout",
+   "kind": "standalone",
+   "group": "PayPal script loading",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "A hanging script resolves",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'no failure' to be 'paypal_sdk_timeout' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "sdk-missing",
+   "test": "a script that loads without the SDK rejects",
+   "kind": "standalone",
+   "group": "PayPal script loading",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "A script without the SDK resolves",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'no failure' to be 'paypal_sdk_missing' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "sdk-replace-script",
+   "test": "a second currency replaces the first currency's script and SDK",
+   "kind": "standalone",
+   "group": "PayPal script loading",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "The old script stays",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ \u2026(2) ] to deeply equal [ 'https://www.paypal.com/sdk/js?usd' ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "an older script failing late leaves the newer script alone"
+   ],
+   "other_errors": {
+    "an older script failing late leaves the newer script alone": "AssertionError: expected [ \u2026(2) ] to deeply equal [ Array(1) ]"
+   },
+   "same_group_others": [
+    "an older script failing late leaves the newer script alone"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "sdk-replace-global",
+   "test": "a second currency replaces the first currency's script and SDK",
+   "kind": "standalone",
+   "group": "PayPal script loading",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "The old SDK stays",
+   "own_row": "failed",
+   "error": "AssertionError: expected { FUNDING: { PAYPAL: 'paypal' }, \u2026(1) } to be undefined",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "sdk-memo",
+   "test": "a second currency replaces the first currency's script and SDK",
+   "kind": "standalone",
+   "group": "PayPal script loading",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "No reuse of the loaded script",
+   "own_row": "failed",
+   "error": "AssertionError: expected Promise{\u2026} to be Promise{\u2026} // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "create-orderid",
+   "test": "the create step asks paypal/start and returns its order id",
+   "kind": "standalone",
+   "group": "what PayPal's window calls",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "Returns the attempt id",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'att_1' to be 'ORDER-1' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "create-refused",
+   "test": "a refused start reports the refusal and opens nothing",
+   "kind": "standalone",
+   "group": "what PayPal's window calls",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "The refusal is not reported",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ Array(1) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "approve-route",
+   "test": "approving asks paypal/complete, then shows the receipt the server decided",
+   "kind": "standalone",
+   "group": "what PayPal's window calls",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "Approving posts elsewhere",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ { \u2026(2) } ] to deeply equal [ { \u2026(2) } ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "every server call posts only an empty body"
+   ],
+   "other_errors": {
+    "every server call posts only an empty body": "AssertionError: expected [ \u2026(3) ] to deeply equal [ \u2026(3) ]"
+   },
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "approve-receipt",
+   "test": "approving asks paypal/complete, then shows the receipt the server decided",
+   "kind": "standalone",
+   "group": "what PayPal's window calls",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "No receipt after approval",
+   "own_row": "failed",
+   "error": "AssertionError: expected +0 to be 1 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "approve-ok",
+   "test": "a refused completion shows the server's message and no receipt redirect",
+   "kind": "standalone",
+   "group": "what PayPal's window calls",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "A refused completion still goes to the receipt",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ 'Do not pay again.' ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "approve-catch",
+   "test": "a completion that never answers says so instead of throwing",
+   "kind": "standalone",
+   "group": "what PayPal's window calls",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "A network failure throws",
+   "own_row": "failed",
+   "error": "AssertionError: expected 'network' to be 'no failure' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "cancel-route",
+   "test": "closing the window asks the cancel route, then shows the receipt",
+   "kind": "standalone",
+   "group": "what PayPal's window calls",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "Closing posts elsewhere",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ { \u2026(2) } ] to deeply equal [ { \u2026(2) } ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "every server call posts only an empty body"
+   ],
+   "other_errors": {
+    "every server call posts only an empty body": "AssertionError: expected [ \u2026(3) ] to deeply equal [ \u2026(3) ]"
+   },
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "cancel-uncertain",
+   "test": "closing during a capture goes to the receipt, not an error",
+   "kind": "standalone",
+   "group": "what PayPal's window calls",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "payment_uncertain is an error",
+   "own_row": "failed",
+   "error": "AssertionError: expected +0 to be 1 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "cancel-refused",
+   "test": "a cancel the server refuses shows its message",
+   "kind": "standalone",
+   "group": "what PayPal's window calls",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "Any cancel answer goes to the receipt",
+   "own_row": "failed",
+   "error": "AssertionError: expected [] to deeply equal [ 'Cannot close.' ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "error-offers",
+   "test": "an SDK error before approval offers the redirect",
+   "kind": "standalone",
+   "group": "what PayPal's window calls",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "An SDK error offers nothing",
+   "own_row": "failed",
+   "error": "AssertionError: expected +0 to be 1 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "settled-approve",
+   "test": "an SDK error after approval never offers a second way to pay",
+   "kind": "standalone",
+   "group": "what PayPal's window calls",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "Approval does not settle",
+   "own_row": "failed",
+   "error": "AssertionError: expected 1 to be +0 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "settled-cancel",
+   "test": "an SDK error after closing the window never offers a second way to pay",
+   "kind": "standalone",
+   "group": "what PayPal's window calls",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "Closing does not settle",
+   "own_row": "failed",
+   "error": "AssertionError: expected 1 to be +0 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "stopped",
+   "test": "an SDK error after leaving the page does nothing",
+   "kind": "standalone",
+   "group": "what PayPal's window calls",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "No stopped check",
+   "own_row": "failed",
+   "error": "AssertionError: expected 1 to be +0 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "first-paint-redirect",
+   "test": "first paints the buttons' place and the approved wording, not the redirect",
+   "kind": "standalone",
+   "group": "the review's PayPal card",
+   "files": [
+    "src/app/review/[purchaseId]/continue-to-paypal.tsx"
+   ],
+   "mutation": "The redirect shows first",
+   "own_row": "failed",
+   "error": "AssertionError: expected '<section class=\"card\" aria-labelledby\u2026' to contain 'class=\"paypal-buttons\"'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "first-paint-copy",
+   "test": "first paints the buttons' place and the approved wording, not the redirect",
+   "kind": "standalone",
+   "group": "the review's PayPal card",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "Approved wording changed",
+   "own_row": "failed",
+   "error": "AssertionError: expected '<section class=\"card\" aria-labelledby\u2026' to contain 'Opens PayPal sandbox in a window over\u2026'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "wire-link",
+   "test": "keeps the redirect wired to the buttons' failure",
+   "kind": "standalone",
+   "group": "the review's PayPal card",
+   "files": [
+    "src/app/review/[purchaseId]/continue-to-paypal.tsx"
+   ],
+   "mutation": "The link goes nowhere",
+   "own_row": "failed",
+   "error": "AssertionError: expected '\"use client\";\\n\\nimport { useCallback\u2026' to contain 'window.location.assign(result.data.ap\u2026'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "wire-unavailable",
+   "test": "keeps the redirect wired to the buttons' failure",
+   "kind": "standalone",
+   "group": "the review's PayPal card",
+   "files": [
+    "src/app/review/[purchaseId]/continue-to-paypal.tsx"
+   ],
+   "mutation": "The card ignores unavailability",
+   "own_row": "failed",
+   "error": "AssertionError: expected '\"use client\";\\n\\nimport { useCallback\u2026' to contain 'onUnavailable={showRedirect}'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "wire-catch",
+   "test": "keeps the redirect wired to the buttons' failure",
+   "kind": "standalone",
+   "group": "the review's PayPal card",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "A failed load shows nothing",
+   "own_row": "failed",
+   "error": "AssertionError: expected '\"use client\";\\n\\nimport { useRouter }\u2026' to contain '.catch(handlers.onError)'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "wire-eligible",
+   "test": "keeps the redirect wired to the buttons' failure",
+   "kind": "standalone",
+   "group": "the review's PayPal card",
+   "files": [
+    "src/app/review/[purchaseId]/paypal-buttons.tsx"
+   ],
+   "mutation": "An ineligible button shows nothing",
+   "own_row": "failed",
+   "error": "AssertionError: expected '\"use client\";\\n\\nimport { useRouter }\u2026' to contain 'if (!buttons.isEligible()) return han\u2026'",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "card-prop",
+   "test": "passes the buttons only these props",
+   "kind": "standalone",
+   "group": "the review's PayPal card",
+   "files": [
+    "src/app/review/[purchaseId]/continue-to-paypal.tsx"
+   ],
+   "mutation": "The card passes a total",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ 'total', 'purchaseId', \u2026(4) ] to deeply equal [ 'purchaseId', 'clientId', \u2026(3) ]",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 26,
+   "proof": true
+  },
+  {
+   "id": "start-existing",
+   "test": "PayPal start returns the order id with the approval link",
+   "kind": "standalone",
+   "group": "paypal/start",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
+   "mutation": "A stored attempt answers without the order id",
+   "own_row": "failed",
+   "error": "AssertionError: expected { \u2026(2) } to deeply equal { \u2026(3) }",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "start-new",
+   "test": "PayPal start returns the order id with the approval link",
+   "kind": "standalone",
+   "group": "paypal/start",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
+   "mutation": "A new order answers without the order id",
+   "own_row": "failed",
+   "error": "AssertionError: expected undefined to be 'FIXTURE-ORDER-93C0F22F-1' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [
+    "a recovered create also returns the order id"
+   ],
+   "other_errors": {
+    "a recovered create also returns the order id": "AssertionError: expected undefined to be 'FIXTURE-ORDER-3A0FD606-1' // Object.is equality"
+   },
+   "same_group_others": [
+    "a recovered create also returns the order id"
+   ],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "start-recover",
+   "test": "a recovered create also returns the order id",
+   "kind": "standalone",
+   "group": "paypal/start",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
+   "mutation": "A recovered order answers without the order id",
+   "own_row": "failed",
+   "error": "AssertionError: expected '' to be 'FIXTURE-ORDER-7E299192-1' // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "start-null-order",
+   "test": "an attempt with an approval link but no order id gives the buttons nothing to open",
+   "kind": "standalone",
+   "group": "paypal/start",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
+   "mutation": "A stored attempt without an order id answers",
+   "own_row": "failed",
+   "error": "AssertionError: expected 200 to be 409 // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 6,
+   "proof": true
+  },
+  {
+   "id": "redirect-same-order",
+   "test": "the redirect path still completes a payment when the buttons do not load",
+   "kind": "standalone",
+   "group": "paypal/complete",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
+   "mutation": "A second start creates a second order",
+   "own_row": "failed",
+   "error": "AssertionError: expected [ { op: 'createOrder', \u2026(2) }, \u2026(1) ] to have a length of 1 but got 2",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 9,
+   "proof": true
+  },
+  {
+   "id": "redirect-link",
+   "test": "the redirect path still completes a payment when the buttons do not load",
+   "kind": "standalone",
+   "group": "paypal/complete",
+   "files": [
+    "src/domain/payments/attempts.ts"
+   ],
+   "mutation": "The start answers an unsafe link",
+   "own_row": "failed",
+   "error": "AssertionError: expected false to be true // Object.is equality",
+   "fails_on_assertion": true,
+   "other_failing_rows": [],
+   "other_errors": {},
+   "same_group_others": [],
+   "restored_identical": true,
+   "rerun_all_passed": true,
+   "rerun_rows": 9,
+   "proof": true
+  }
+ ]
+}

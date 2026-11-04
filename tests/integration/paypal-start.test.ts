@@ -112,6 +112,48 @@ describe("paypal/start", () => {
     }
   });
 
+  it("PayPal start returns the order id with the approval link", async () => {
+    const { cookie, purchaseId } = await review(1);
+    const start = async () => {
+      const response = await routes.start.POST(jsonPost(`/api/v1/purchases/${purchaseId}/paypal/start`, cookie), routeParams(purchaseId));
+      return { status: response.status, body: (await response.json()) as { data?: StartResult } };
+    };
+
+    const first = await start();
+    expect(first.status).toBe(200);
+    const [attempt] = await fixture.database.admin`select order_id, approval_url from payment_attempts where purchase_id = ${purchaseId}`;
+    expect(first.body.data?.orderId).toBe(attempt!.order_id);
+    expect(first.body.data?.approvalUrl).toBe(attempt!.approval_url);
+
+    // A second start answers from the stored attempt: the buttons and the redirect share one order.
+    const second = await start();
+    expect(second.body.data).toEqual(first.body.data);
+    expect(fake.writes()).toHaveLength(1);
+  });
+
+  it("a recovered create also returns the order id", async () => {
+    const { cookie, purchaseId } = await review(1);
+    fake.fail("createOrder", "lose_response", 1);
+    const lost = await routes.start.POST(jsonPost(`/api/v1/purchases/${purchaseId}/paypal/start`, cookie), routeParams(purchaseId));
+    expect(lost.ok).toBe(false);
+
+    const recovered = await routes.start.POST(jsonPost(`/api/v1/purchases/${purchaseId}/paypal/start`, cookie), routeParams(purchaseId));
+    const { data } = (await recovered.json()) as { data: StartResult };
+    const [attempt] = await fixture.database.admin`select state, order_id from payment_attempts where purchase_id = ${purchaseId}`;
+    expect(attempt!.state).toBe("order_created");
+    expect(data.orderId).toBe(attempt!.order_id);
+  });
+
+  it("an attempt with an approval link but no order id gives the buttons nothing to open", async () => {
+    const { cookie, purchaseId } = await review(1);
+    await routes.start.POST(jsonPost(`/api/v1/purchases/${purchaseId}/paypal/start`, cookie), routeParams(purchaseId));
+    await fixture.database.admin`update payment_attempts set order_id = null where purchase_id = ${purchaseId}`;
+
+    const response = await routes.start.POST(jsonPost(`/api/v1/purchases/${purchaseId}/paypal/start`, cookie), routeParams(purchaseId));
+    expect(response.status).toBe(409);
+    expect(await response.json()).toMatchObject({ ok: false, error: { code: "payment_uncertain" } });
+  });
+
   it("a purchase holds at most one non-terminal attempt", async () => {
     const { purchaseId } = await review(3);
 

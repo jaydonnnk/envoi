@@ -1,5 +1,6 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { completePayPal, type CompleteResult } from "@/domain/payments/attempts";
+import { isSandboxApprovalUrl } from "@/integrations/paypal/client";
 import type { PayPalWriteClient } from "@/integrations/paypal/orders";
 import { getAuth } from "@/lib/auth";
 import { isPrincipal, requireBuyerSession } from "@/lib/auth-context";
@@ -80,6 +81,25 @@ describe("paypal/complete", () => {
     expect(await response.json()).toMatchObject({ ok: true, data: { status: "paid", captureId } });
     expect(await rows(purchaseId)).toMatchObject({ purchase: "paid", attempt: { state: "capture_confirmed", capture_id: captureId, lease_owner: null } });
     expect(fake.captures()).toEqual([expect.objectContaining({ orderId })]);
+  });
+
+  // This is the server half of the fallback: the redirect's own calls against the real schema, with
+  // no script involved. The switch from the buttons to the link is browser evidence in 00-status.md.
+  it("the redirect path still completes a payment when the buttons do not load", async () => {
+    const { cookie, purchaseId, orderId } = await approvedPurchase(1, false);
+    const started = await routes.start.POST(jsonPost(`/api/v1/purchases/${purchaseId}/paypal/start`, cookie), routeParams(purchaseId));
+    const { data } = (await started.json()) as { data: { approvalUrl: string; orderId: string } };
+    expect(isSandboxApprovalUrl(data.approvalUrl)).toBe(true);
+    expect(data.orderId).toBe(orderId);
+    // The buttons may have created the order before they failed: the link opens that same order.
+    expect(fake.writes().filter((call) => call.op === "createOrder")).toHaveLength(1);
+
+    fake.approve(orderId);
+    const response = await complete(cookie, purchaseId);
+    expect(response.status).toBe(200);
+    expect(fake.captures()).toHaveLength(1);
+    const [purchase] = await fixture.database.admin`select state from purchases where id = ${purchaseId}`;
+    expect(purchase!.state).toBe("paid");
   });
 
   it("capture requires an owned lease", async () => {

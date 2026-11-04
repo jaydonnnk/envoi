@@ -1,0 +1,604 @@
+[
+ {
+  "id": "plant-amount",
+  "test": "the component names none of them",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "Planted amount field in the Buttons options",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "buttons = sdk.Buttons({ fundingSource: sdk.FUNDING.PAYPAL,",
+    "new": "buttons = sdk.Buttons({ fundingSource: sdk.FUNDING.PAYPAL, amount: \"1.80\","
+   }
+  ]
+ },
+ {
+  "id": "plant-payee",
+  "test": "the component names none of them",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "Planted payee field in the Buttons options",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "buttons = sdk.Buttons({ fundingSource: sdk.FUNDING.PAYPAL,",
+    "new": "buttons = sdk.Buttons({ fundingSource: sdk.FUNDING.PAYPAL, payee: \"X\","
+   }
+  ]
+ },
+ {
+  "id": "plant-item",
+  "test": "the component names none of them",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "Planted items field in the Buttons options",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "buttons = sdk.Buttons({ fundingSource: sdk.FUNDING.PAYPAL,",
+    "new": "buttons = sdk.Buttons({ fundingSource: sdk.FUNDING.PAYPAL, items: [],"
+   }
+  ]
+ },
+ {
+  "id": "sdk-merchant-id",
+  "test": "the script carries only the client id, the currency and intent=capture",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "The script gains merchant-id",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "currency, intent: \"capture\" }",
+    "new": "currency, intent: \"capture\", \"merchant-id\": \"X\" }"
+   }
+  ]
+ },
+ {
+  "id": "start-body",
+  "test": "every server call posts only an empty body",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "The create step sends the currency",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "postJson<{ orderId: string }>(`${purchasePath}/paypal/start`)",
+    "new": "postJson<{ orderId: string }>(`${purchasePath}/paypal/start`, { source: \"b\" })"
+   }
+  ]
+ },
+ {
+  "id": "funding",
+  "test": "only PayPal itself is offered as funding",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "Card funding",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "fundingSource: sdk.FUNDING.PAYPAL",
+    "new": "fundingSource: \"card\""
+   }
+  ]
+ },
+ {
+  "id": "page-secret",
+  "test": "the review page passes the public client id and never the secret",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "The page passes the secret",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/page.tsx",
+    "old": "clientId={webEnv().PAYPAL_CLIENT_ID}",
+    "new": "clientId={webEnv().PAYPAL_CLIENT_SECRET}"
+   }
+  ]
+ },
+ {
+  "id": "page-currency",
+  "test": "the review page passes the public client id and never the secret",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "The page hardcodes the currency",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/page.tsx",
+    "old": "currency={purchase.currency}\n",
+    "new": "currency=\"SGD\"\n"
+   }
+  ]
+ },
+ {
+  "id": "sdk-error",
+  "test": "a blocked script rejects and leaves nothing behind",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "A blocked script resolves",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "reject(new Error(\"paypal_sdk_failed\"));",
+    "new": "resolve(window.paypal as PayPalSdk);"
+   }
+  ]
+ },
+ {
+  "id": "sdk-cleanup",
+  "test": "a blocked script rejects and leaves nothing behind",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "A failed script stays in the page",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "    loading = null;\n    document.getElementById(SDK_SCRIPT_ID)?.remove();",
+    "new": "    loading = null;"
+   }
+  ]
+ },
+ {
+  "id": "sdk-retry",
+  "test": "a blocked script rejects and leaves nothing behind",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "A failed load is remembered",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "    loading = null;\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "sdk-superseded",
+  "test": "an older script failing late leaves the newer script alone",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "No check that the failing load is current",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "    if (loading !== current) return;\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "sdk-timeout",
+  "test": "a script that hangs rejects at the timeout",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "A hanging script resolves",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "setTimeout(() => reject(new Error(\"paypal_sdk_timeout\")), timeoutMs)",
+    "new": "setTimeout(() => resolve(window.paypal as PayPalSdk), timeoutMs)"
+   }
+  ]
+ },
+ {
+  "id": "sdk-missing",
+  "test": "a script that loads without the SDK rejects",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "A script without the SDK resolves",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "else reject(new Error(\"paypal_sdk_missing\"));",
+    "new": "else resolve(window.paypal as unknown as PayPalSdk);"
+   }
+  ]
+ },
+ {
+  "id": "sdk-replace-script",
+  "test": "a second currency replaces the first currency's script and SDK",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "The old script stays",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "  document.getElementById(SDK_SCRIPT_ID)?.remove();\n  delete window.paypal;",
+    "new": "  delete window.paypal;"
+   }
+  ]
+ },
+ {
+  "id": "sdk-replace-global",
+  "test": "a second currency replaces the first currency's script and SDK",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "The old SDK stays",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "  delete window.paypal;\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "sdk-memo",
+  "test": "a second currency replaces the first currency's script and SDK",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "No reuse of the loaded script",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "  if (loading?.src === src) return loading.sdk;\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "create-orderid",
+  "test": "the create step asks paypal/start and returns its order id",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "Returns the attempt id",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "return result.data.orderId;",
+    "new": "return (result.data as unknown as { attemptId: string }).attemptId;"
+   }
+  ]
+ },
+ {
+  "id": "create-refused",
+  "test": "a refused start reports the refusal and opens nothing",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "The refusal is not reported",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "      callbacks.onRefused(result.error);\n",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "approve-route",
+  "test": "approving asks paypal/complete, then shows the receipt the server decided",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "Approving posts elsewhere",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "`${purchasePath}/paypal/complete`",
+    "new": "`${purchasePath}/paypal/start`"
+   }
+  ]
+ },
+ {
+  "id": "approve-receipt",
+  "test": "approving asks paypal/complete, then shows the receipt the server decided",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "No receipt after approval",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "if (result?.ok) callbacks.showReceipt();\n      else callbacks.onFailure(result?.error?.message ?? \"The payment could not be finished.\");",
+    "new": "if (!result?.ok) callbacks.onFailure(result?.error?.message ?? \"The payment could not be finished.\");"
+   }
+  ]
+ },
+ {
+  "id": "approve-ok",
+  "test": "a refused completion shows the server's message and no receipt redirect",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "A refused completion still goes to the receipt",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "if (result?.ok) callbacks.showReceipt();",
+    "new": "if (result) callbacks.showReceipt();"
+   }
+  ]
+ },
+ {
+  "id": "approve-catch",
+  "test": "a completion that never answers says so instead of throwing",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "A network failure throws",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "postJson(`${purchasePath}/paypal/complete`).catch(() => null)",
+    "new": "postJson(`${purchasePath}/paypal/complete`)"
+   }
+  ]
+ },
+ {
+  "id": "cancel-route",
+  "test": "closing the window asks the cancel route, then shows the receipt",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "Closing posts elsewhere",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "`${purchasePath}/cancel`",
+    "new": "`${purchasePath}/paypal/complete`"
+   }
+  ]
+ },
+ {
+  "id": "cancel-uncertain",
+  "test": "closing during a capture goes to the receipt, not an error",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "payment_uncertain is an error",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "if (result?.ok || result?.error?.code === \"payment_uncertain\") callbacks.showReceipt();",
+    "new": "if (result?.ok) callbacks.showReceipt();"
+   }
+  ]
+ },
+ {
+  "id": "cancel-refused",
+  "test": "a cancel the server refuses shows its message",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "Any cancel answer goes to the receipt",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "if (result?.ok || result?.error?.code === \"payment_uncertain\") callbacks.showReceipt();",
+    "new": "if (result) callbacks.showReceipt();"
+   }
+  ]
+ },
+ {
+  "id": "error-offers",
+  "test": "an SDK error before approval offers the redirect",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "An SDK error offers nothing",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "if (!settled && !callbacks.isStopped()) callbacks.onUnavailable();",
+    "new": ""
+   }
+  ]
+ },
+ {
+  "id": "settled-approve",
+  "test": "an SDK error after approval never offers a second way to pay",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "Approval does not settle",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "      settled = true;\n      callbacks.onStage(\"completing\");",
+    "new": "      callbacks.onStage(\"completing\");"
+   }
+  ]
+ },
+ {
+  "id": "settled-cancel",
+  "test": "an SDK error after closing the window never offers a second way to pay",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "Closing does not settle",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "      settled = true;\n      callbacks.onStage(\"closing\");",
+    "new": "      callbacks.onStage(\"closing\");"
+   }
+  ]
+ },
+ {
+  "id": "stopped",
+  "test": "an SDK error after leaving the page does nothing",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "No stopped check",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "if (!settled && !callbacks.isStopped())",
+    "new": "if (!settled)"
+   }
+  ]
+ },
+ {
+  "id": "first-paint-redirect",
+  "test": "first paints the buttons' place and the approved wording, not the redirect",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "The redirect shows first",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/continue-to-paypal.tsx",
+    "old": "const [redirect, setRedirect] = useState(false);",
+    "new": "const [redirect, setRedirect] = useState(true);"
+   }
+  ]
+ },
+ {
+  "id": "first-paint-copy",
+  "test": "first paints the buttons' place and the approved wording, not the redirect",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "Approved wording changed",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "Closing it keeps the purchase unpaid.",
+    "new": "Closing it cancels."
+   }
+  ]
+ },
+ {
+  "id": "wire-link",
+  "test": "keeps the redirect wired to the buttons' failure",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "The link goes nowhere",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/continue-to-paypal.tsx",
+    "old": "window.location.assign(result.data.approvalUrl);",
+    "new": "void result.data.approvalUrl;"
+   }
+  ]
+ },
+ {
+  "id": "wire-unavailable",
+  "test": "keeps the redirect wired to the buttons' failure",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "The card ignores unavailability",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/continue-to-paypal.tsx",
+    "old": "onUnavailable={showRedirect}",
+    "new": "onUnavailable={refused}"
+   }
+  ]
+ },
+ {
+  "id": "wire-catch",
+  "test": "keeps the redirect wired to the buttons' failure",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "A failed load shows nothing",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": ".catch(handlers.onError)",
+    "new": ".catch(() => undefined)"
+   }
+  ]
+ },
+ {
+  "id": "wire-eligible",
+  "test": "keeps the redirect wired to the buttons' failure",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "An ineligible button shows nothing",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/paypal-buttons.tsx",
+    "old": "if (!buttons.isEligible()) return handlers.onError();",
+    "new": "if (!buttons.isEligible()) return;"
+   }
+  ]
+ },
+ {
+  "id": "card-prop",
+  "test": "passes the buttons only these props",
+  "test_file": "tests/unit/paypal-buttons.test.ts",
+  "kind": "standalone",
+  "mutation": "The card passes a total",
+  "edits": [
+   {
+    "file": "src/app/review/[purchaseId]/continue-to-paypal.tsx",
+    "old": "<PayPalButtons purchaseId={purchaseId}",
+    "new": "<PayPalButtons total={\"1\"} purchaseId={purchaseId}"
+   }
+  ]
+ },
+ {
+  "id": "start-existing",
+  "test": "PayPal start returns the order id with the approval link",
+  "test_file": "tests/integration/paypal-start.test.ts",
+  "kind": "standalone",
+  "mutation": "A stored attempt answers without the order id",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "approvalUrl: attempt.approvalUrl, orderId: attempt.orderId };",
+    "new": "approvalUrl: attempt.approvalUrl } as StartResult;"
+   }
+  ]
+ },
+ {
+  "id": "start-new",
+  "test": "PayPal start returns the order id with the approval link",
+  "test_file": "tests/integration/paypal-start.test.ts",
+  "kind": "standalone",
+  "mutation": "A new order answers without the order id",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "approvalUrl: created.value.approvalUrl, orderId: created.value.id };",
+    "new": "approvalUrl: created.value.approvalUrl } as StartResult;"
+   }
+  ]
+ },
+ {
+  "id": "start-recover",
+  "test": "a recovered create also returns the order id",
+  "test_file": "tests/integration/paypal-start.test.ts",
+  "kind": "standalone",
+  "mutation": "A recovered order answers without the order id",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "approvalUrl: created.value.approvalUrl, orderId: created.value.id };",
+    "new": "approvalUrl: created.value.approvalUrl, orderId: replay ? \"\" : created.value.id };"
+   }
+  ]
+ },
+ {
+  "id": "start-null-order",
+  "test": "an attempt with an approval link but no order id gives the buttons nothing to open",
+  "test_file": "tests/integration/paypal-start.test.ts",
+  "kind": "standalone",
+  "mutation": "A stored attempt without an order id answers",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "&& attempt.approvalUrl && attempt.orderId) {",
+    "new": "&& attempt.approvalUrl) {"
+   }
+  ]
+ },
+ {
+  "id": "redirect-same-order",
+  "test": "the redirect path still completes a payment when the buttons do not load",
+  "test_file": "tests/integration/paypal-complete.test.ts",
+  "kind": "standalone",
+  "mutation": "A second start creates a second order",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "if (existing) return existingStartAnswer(existing);",
+    "new": "if (existing?.state === \"order_created\") await createOrderFor(deps, locked, existing);\n        if (existing) return existingStartAnswer(existing);"
+   }
+  ]
+ },
+ {
+  "id": "redirect-link",
+  "test": "the redirect path still completes a payment when the buttons do not load",
+  "test_file": "tests/integration/paypal-complete.test.ts",
+  "kind": "standalone",
+  "mutation": "The start answers an unsafe link",
+  "edits": [
+   {
+    "file": "src/domain/payments/attempts.ts",
+    "old": "approvalUrl: attempt.approvalUrl, orderId: attempt.orderId };",
+    "new": "approvalUrl: \"https://example.com/\", orderId: attempt.orderId };"
+   }
+  ]
+ }
+]
