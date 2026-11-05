@@ -527,7 +527,8 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 - **Placement notes:** `shopContext` is in `src/domain/outlets/search.ts` and `src/app/buy/page.tsx` passes one new prop. Neither file is in Gate 3's S33 row; the approved signature and flow are unchanged. A scan reaches the shop page, then one tap reaches the assistant, per Gate 2's flow. The mockup's "You scanned this shop's QR." is left out because a visitor from the shop list did not scan.
 - **Offline proof [verified, FIXTURE]:** OpenAI and Envoi are faked at their fetch boundaries. Tests 38, 39 and 40 and two route tests pass. [Nine independent mutations](evidence/s33-mutations.json), with [definitions](evidence/s33-mutation-defs.json) and [runner](evidence/s33-mutate.py), each fail, restore byte-identical and pass on rerun. Full suite 783 of 783 in 99 files, typecheck, lint, production build and `git diff --check` pass.
 - **Local screens [verified, FIXTURE]:** disposable database, no model call: the shop page at 390 px and the scoped page at 390 px and 1280 px have no horizontal overflow and keep the test-environment badge, notice and demo-fixture label.
-- **Not established:** real model behaviour on a scoped turn, anything on Render, Paid, the merchant's order, recording and capture id.
+- **Render check [verified], 2026-11-05, real model, Lorong Demo Kopi (FIXTURE), 375 px:** `/buy/ask?outlet=out_aaaaaaaaaaaaaaaaaaaaaaaaaa` answers "Not on Envoi". The shop page's "Ask Envoi about this shop" opens "Ask about Lorong Demo Kopi". One turn, "我要在 Test Shop 买一杯 Kopi C。", read only that shop's menu (`getOutletMenu` 200), replied in Chinese that this conversation is about Lorong Demo Kopi, and created no link. One fixed turn proves no general behaviour.
+- **Not established:** a scoped turn reaching a link on Render, Paid, the merchant's order, recording and capture id.
 
 #### S33 Chinese follow-up pre-registration
 
