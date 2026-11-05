@@ -527,7 +527,34 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 - **Placement notes:** `shopContext` is in `src/domain/outlets/search.ts` and `src/app/buy/page.tsx` passes one new prop. Neither file is in Gate 3's S33 row; the approved signature and flow are unchanged. A scan reaches the shop page, then one tap reaches the assistant, per Gate 2's flow. The mockup's "You scanned this shop's QR." is left out because a visitor from the shop list did not scan.
 - **Offline proof [verified, FIXTURE]:** OpenAI and Envoi are faked at their fetch boundaries. Tests 38, 39 and 40 and two route tests pass. [Nine independent mutations](evidence/s33-mutations.json), with [definitions](evidence/s33-mutation-defs.json) and [runner](evidence/s33-mutate.py), each fail, restore byte-identical and pass on rerun. Full suite 783 of 783 in 99 files, typecheck, lint, production build and `git diff --check` pass.
 - **Local screens [verified, FIXTURE]:** disposable database, no model call: the shop page at 390 px and the scoped page at 390 px and 1280 px have no horizontal overflow and keep the test-environment badge, notice and demo-fixture label.
-- **Not established:** real model behaviour on a scoped turn, anything on Render, Paid, the merchant's order, recording and capture id.
+- **Render check [verified], 2026-11-05, real model, Lorong Demo Kopi (FIXTURE), 375 px:** `/buy/ask?outlet=out_aaaaaaaaaaaaaaaaaaaaaaaaaa` answers "Not on Envoi". The shop page's "Ask Envoi about this shop" opens "Ask about Lorong Demo Kopi". One turn, "我要在 Test Shop 买一杯 Kopi C。", read only that shop's menu (`getOutletMenu` 200), replied in Chinese that this conversation is about Lorong Demo Kopi, and created no link. One fixed turn proves no general behaviour.
+- **Not established:** a scoped turn reaching a link on Render, Paid, the merchant's order, recording and capture id.
+
+#### S33 Chinese follow-up pre-registration
+
+Written 2026-11-05T15:00:59+0800, before the follow-up's first model call. It is separate from S32: S32's scores and its interrupted first attempt stay as recorded.
+
+- **Authority [verified], the user's words:** "Apprive both, but for the model spend u can go up to 1". S33's inference ceiling is US$1. This follow-up is capped at US$0.75, leaving the rest for turns on Render. The S32 allowance is not reused.
+- **What runs:** the five original sentences below, unchanged, from [`s32-language-cases.json`](evidence/s32-language-cases.json), each once on Ask Envoi and once on the box: ten new outcomes. Model `gpt-6-sol`. Same FIXTURE menus and conditions as S32: the real assistant loop and MCP client on a labeled in-memory backend whose links are not redeemable, and the real box on a disposable local database. No injected shop context, `outletId`, added location or rewritten sentence. [Harness](evidence/s33-chinese-followup.mts).
+- **Threshold:** **5/5 on each path with zero wrong links.** Every created basket must have the requested shop, items and quantities, with no invented item or price. A missing or incomplete outcome never becomes a pass.
+- **Semantic review:** the builder (an AI, not a native reader) reads each assistant reply after the run for meaningful Chinese and the required unavailable or choice meaning, and checks each box outcome against the expected result. Recorded per outcome in `evidence/s33-chinese-semantic-review.json`. This is not native-reader validation.
+- **Metering:** the S32 meter on a new ledger: missing cache-write lifetime priced at the highest rate, an unresolved charge stays reserved. A stopped run is recorded and not restarted. Actual invoice stays [unknown].
+- **Offline first [verified, FIXTURE]:** missing lifetime, missing usage, a dropped connection and the real local wiring pass against a fake provider before this run.
+- **Decision rule:** on a pass, Chinese becomes eligible for the supported-language line with the same fixed-fixture and builder-review limits. Otherwise it stays verification pending. This does not repair Korean or support any broader language claim.
+
+| ID | Language | Fixed sentence | Expected outcome |
+| --- | --- | --- | --- |
+| zh1 | zh | 我要在 Lorong Demo Kopi 买两杯黑咖啡（Kopi O）。 | `{"kind":"basket","shop":"Lorong Demo Kopi","lines":[["Kopi O",2]]}` |
+| zh2 | zh | 我要在 Test Shop 买两杯 Kopi C 和一杯冰奶茶。 | `{"kind":"basket","shop":"Test Shop","lines":[["Kopi C",2],["Iced milk tea",1]]}` |
+| zh3 | zh | 我要在 Lorong Demo Kopi 买两份半熟蛋，每份两个（Soft-boiled eggs (2)）。 | `{"kind":"basket","shop":"Lorong Demo Kopi","lines":[["Soft-boiled eggs (2)",2]]}` |
+| zh4 | zh | 我要在 Test Shop 买一份咖椰吐司套餐。 | `{"kind":"unavailable_item","shop":"Test Shop","names":["Kaya toast set"]}` |
+| zh5 | zh | 我要在 Test Shop 买三杯冰茶。 | `{"kind":"choose","shop":"Test Shop","names":["Iced lemon tea","Iced milk tea"],"quantity":3}` |
+
+#### S33 Chinese follow-up results
+
+- **Result [verified as this fixed fixture record]:** Ask Envoi **5/5**, box **5/5**, **zero wrong links**, all ten outcomes attempted once, no stop and no retry. [Results](evidence/s33-chinese-followup.json) and [builder AI semantic review](evidence/s33-chinese-semantic-review.json). The pre-registration was committed as `66d1a3e` at 2026-11-05T15:01:39+08:00, before the first model call.
+- **Spend [verified as conservative accounting]:** 33 requests, **US$0.1054844** usage estimate, nothing reserved, of this follow-up's US$0.75 cap and S33's US$1 ceiling. The 12501 cache writes reported no lifetime and are priced at the highest rate. Actual invoice is [unknown].
+- **Decision:** Chinese is eligible for the supported-language line. It proves these five fixed sentences on FIXTURE menus, reviewed by the builder AI. It does not prove fluency, native-reader quality, real customer demand or payment completion, and it changes no S32 score. Korean is unchanged.
 
 ### S32 Ordering in other languages, 2026-11-05
 

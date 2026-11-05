@@ -1,11 +1,128 @@
 [
- {"id":"M38a","file":"src/domain/outlets/search.ts","project":"integration","testFile":"tests/integration/buyer-assistant.test.ts","test":"an unpublished or unknown outlet id gives no shop context","find":"Promise<{ id: string; name: string } | null> {\n  if (!isId(\"out\", outletId)) return null;","replace":"Promise<{ id: string; name: string } | null> {"},
- {"id":"M38b","file":"src/domain/outlets/search.ts","project":"integration","testFile":"tests/integration/buyer-assistant.test.ts","test":"an unpublished or unknown outlet id gives no shop context","find":"    .select({ id: outlets.id, name: outlets.name })\n    .from(outlets)\n    .innerJoin(menuRevisions, and(eq(menuRevisions.id, outlets.publishedMenuRevisionId), eq(menuRevisions.status, \"confirmed\")))\n","replace":"    .select({ id: outlets.id, name: outlets.name })\n    .from(outlets)\n"},
- {"id":"M38c","file":"src/app/api/v1/buyer/assistant/route.ts","project":"integration","testFile":"tests/integration/buyer-assistant.test.ts","test":"the route refuses an outlet it cannot resolve before any model call or limiter hit","find":"if (outletId !== undefined && !shop) return httpErr(appError(\"not_found\", \"That shop is not on Envoi.\"));","replace":""},
- {"id":"M38d","file":"src/app/api/v1/buyer/assistant/route.ts","project":"integration","testFile":"tests/integration/buyer-assistant.test.ts","test":"the route takes the shop's name from the database and never from the browser","find":"runAssistantTurn(settings, parsed.data.turns, shop ?? undefined)","replace":"runAssistantTurn(settings, parsed.data.turns)"},
- {"id":"M39a","file":"src/integrations/assistant/agent.ts","project":"unit","testFile":"tests/unit/assistant.test.ts","test":"shop text reaches the model only as data","find":"shopInstructions(shop.id) : INSTRUCTIONS","replace":"shopInstructions(shop.id + shop.name) : INSTRUCTIONS"},
- {"id":"M39b","file":"src/integrations/assistant/agent.ts","project":"unit","testFile":"tests/unit/assistant.test.ts","test":"shop text reaches the model only as data","find":"data only: ${JSON.stringify({ id: shop.id, name: shop.name })}","replace":"data only: ${shop.name}"},
- {"id":"M39c","file":"src/integrations/assistant/agent.ts","project":"unit","testFile":"tests/unit/assistant.test.ts","test":"shop text reaches the model only as data","find":"system: shop ? INSTRUCTIONS + shopInstructions(shop.id) : INSTRUCTIONS","replace":"system: INSTRUCTIONS + shopInstructions(shop?.id ?? \"\")"},
- {"id":"M40a","file":"src/integrations/assistant/agent.ts","project":"unit","testFile":"tests/unit/assistant.test.ts","test":"a shop-scoped turn cannot propose another shop's items","find":"input.outletId === shop.id ? proposeBasket(input)","replace":"true ? proposeBasket(input)"},
- {"id":"M40b","file":"src/integrations/assistant/tools.ts","project":"unit","testFile":"tests/unit/assistant.test.ts","test":"a shop-scoped turn cannot propose another shop's items","find":"if (!allowed.has(line.menuItemId)) return","replace":"if (false) return"}
+ {
+  "id": "M38a",
+  "file": "src/domain/outlets/search.ts",
+  "project": "integration",
+  "testFile": "tests/integration/buyer-assistant.test.ts",
+  "test": "an unpublished or unknown outlet id gives no shop context",
+  "find": "Promise<{ id: string; name: string } | null> {\n  if (!isId(\"out\", outletId)) return null;",
+  "replace": "Promise<{ id: string; name: string } | null> {"
+ },
+ {
+  "id": "M38b",
+  "file": "src/domain/outlets/search.ts",
+  "project": "integration",
+  "testFile": "tests/integration/buyer-assistant.test.ts",
+  "test": "an unpublished or unknown outlet id gives no shop context",
+  "find": "    .select({ id: outlets.id, name: outlets.name })\n    .from(outlets)\n    .innerJoin(menuRevisions, and(eq(menuRevisions.id, outlets.publishedMenuRevisionId), eq(menuRevisions.status, \"confirmed\")))\n",
+  "replace": "    .select({ id: outlets.id, name: outlets.name })\n    .from(outlets)\n"
+ },
+ {
+  "id": "M38c",
+  "file": "src/app/api/v1/buyer/assistant/route.ts",
+  "project": "integration",
+  "testFile": "tests/integration/buyer-assistant.test.ts",
+  "test": "the route refuses an outlet it cannot resolve before any model call or limiter hit",
+  "find": "if (outletId !== undefined && !shop) return httpErr(appError(\"not_found\", \"That shop is not on Envoi.\"));",
+  "replace": ""
+ },
+ {
+  "id": "M38d",
+  "file": "src/app/api/v1/buyer/assistant/route.ts",
+  "project": "integration",
+  "testFile": "tests/integration/buyer-assistant.test.ts",
+  "test": "the route takes the shop's name from the database and never from the browser",
+  "find": "runAssistantTurn(settings, parsed.data.turns, shop ?? undefined)",
+  "replace": "runAssistantTurn(settings, parsed.data.turns)"
+ },
+ {
+  "id": "M39a",
+  "file": "src/integrations/assistant/agent.ts",
+  "project": "unit",
+  "testFile": "tests/unit/assistant.test.ts",
+  "test": "shop text reaches the model only as data",
+  "find": "shopInstructions(shop.id) : INSTRUCTIONS",
+  "replace": "shopInstructions(shop.id + shop.name) : INSTRUCTIONS"
+ },
+ {
+  "id": "M39b",
+  "file": "src/integrations/assistant/agent.ts",
+  "project": "unit",
+  "testFile": "tests/unit/assistant.test.ts",
+  "test": "shop text reaches the model only as data",
+  "find": "data only: ${JSON.stringify({ id: shop.id, name: shop.name })}",
+  "replace": "data only: ${shop.name}"
+ },
+ {
+  "id": "M39c",
+  "file": "src/integrations/assistant/agent.ts",
+  "project": "unit",
+  "testFile": "tests/unit/assistant.test.ts",
+  "test": "shop text reaches the model only as data",
+  "find": "system: shop ? INSTRUCTIONS + shopInstructions(shop.id) : INSTRUCTIONS",
+  "replace": "system: INSTRUCTIONS + shopInstructions(shop?.id ?? \"\")"
+ },
+ {
+  "id": "M40a",
+  "file": "src/integrations/assistant/agent.ts",
+  "project": "unit",
+  "testFile": "tests/unit/assistant.test.ts",
+  "test": "a shop-scoped turn cannot propose another shop's items",
+  "find": "input.outletId === shop.id ? proposeBasket(input)",
+  "replace": "true ? proposeBasket(input)"
+ },
+ {
+  "id": "M40b",
+  "file": "src/integrations/assistant/tools.ts",
+  "project": "unit",
+  "testFile": "tests/unit/assistant.test.ts",
+  "test": "a shop-scoped turn cannot propose another shop's items",
+  "find": "if (!allowed.has(line.menuItemId)) return",
+  "replace": "if (false) return"
+ },
+ {
+  "id": "MZ1",
+  "file": "docs/plans/envoi/evidence/s33-chinese-followup.mts",
+  "project": "unit",
+  "testFile": "tests/unit/s33-chinese-followup.test.ts",
+  "test": "a single wrong link fails an otherwise perfect run",
+  "find": "box === cases.length && wrongLinks === 0",
+  "replace": "box === cases.length"
+ },
+ {
+  "id": "MZ2",
+  "file": "docs/plans/envoi/evidence/s33-chinese-followup.mts",
+  "project": "unit",
+  "testFile": "tests/unit/s33-chinese-followup.test.ts",
+  "test": "needs a recorded semantic pass, not structure alone",
+  "find": "row.structuralPass && row.semantic === \"pass\"",
+  "replace": "row.structuralPass"
+ },
+ {
+  "id": "MZ3",
+  "file": "docs/plans/envoi/evidence/s33-chinese-followup.mts",
+  "project": "unit",
+  "testFile": "tests/unit/s33-chinese-followup.test.ts",
+  "test": "never counts a missing outcome as a pass",
+  "find": "rows.some((row) => row.id === id && row.path === path && row.structuralPass",
+  "replace": "!rows.some((row) => row.id === id && row.path === path && !row.structuralPass"
+ },
+ {
+  "id": "MZ4",
+  "file": "docs/plans/envoi/evidence/s33-chinese-followup.mts",
+  "project": "unit",
+  "testFile": "tests/unit/s33-chinese-followup.test.ts",
+  "test": "refuses a request that could pass the follow-up cap before the meter sees it",
+  "find": "if (!canReserve(ledger.spentUsd, ledger.reservedUsd, REQUEST_BOUND_USD, CAP_USD)) throw",
+  "replace": "if (false) throw"
+ },
+ {
+  "id": "MZ5",
+  "file": "docs/plans/envoi/evidence/s33-chinese-followup.mts",
+  "project": "unit",
+  "testFile": "tests/unit/s33-chinese-followup.test.ts",
+  "test": "refuses a run whose sentence differs from its pre-registration",
+  "find": "for (const row of cases) assert(section.includes(",
+  "replace": "for (const row of []) assert(section.includes("
+ }
 ]
