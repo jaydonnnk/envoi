@@ -25,7 +25,7 @@ Each spoken claim must appear in the [evidence pack](evidence-pack.md); cut any 
 ## Do not show or say
 
 - Universal language support or Korean ordering support. Japanese, Spanish and Malay passed the S32 fixed cases; Chinese passed the separate S33 follow-up. These are fixed fixture sets with builder AI review, not general language accuracy or native-reader validation.
-- Ask Envoi reaching a Paid receipt. It has not been run end to end on the deployed site; S33 owns it. Shot 2 stops at the steps panel and shot 3 stops at "Choose quantities" for this reason; the payment shots use the manual path.
+- Ask Envoi reaching a Paid receipt as anything beyond its one recorded S33 run. Shots 2 and 3 still stop at the steps panel and "Choose quantities"; extending them is the user's choice when filming. See the [S33 record](00-status.md#s33-scan-opens-ask-envoi-2026-11-05).
 - Crypto through PayPal. It is not built; S38 owns it and one simulated sandbox order is all the evidence there is.
 - The success target, "4 of 5 first-time buyers". The study was removed on 2026-10-29 and the target is never measured.
 - A real merchant's name or logo without their permission.
