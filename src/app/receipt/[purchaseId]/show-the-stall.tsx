@@ -42,7 +42,10 @@ export async function fetchStallTranslation(outletId: string, language: StallLan
 }
 
 // Browsers name voices "zh-CN" or, on some Android versions, "zh_CN".
+// Tamil is never spoken: a listed ta voice was heard reading only the digits of an order, and a browser
+// cannot tell in advance whether a voice can read the words.
 export function voiceMatches(voiceLang: string, language: StallLanguage): boolean {
+  if (language === "ta") return false;
   return voiceLang.toLowerCase().split(/[-_]/)[0] === language;
 }
 

@@ -521,7 +521,7 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 
 ### S42 Show the stall, 2026-11-05
 
-- **State: in progress.** Built on `envoi/slice-42-show-the-stall` in its own worktree and live on Render at `aaed46f`, with one sandbox purchase seen on Render. Not done: no native reader's check, so the slice is not ticked.
+- **State: in progress.** Built on `envoi/slice-42-show-the-stall` in its own worktree and live on Render at `aaed46f`, with one sandbox purchase seen on Render. Javier's check is recorded below, with its Tamil audio fix.
 - **Authority, the user's words:** "Start S42. Translation model spend up to US$1.00." The user then approved commit, merge, push, deploy and the sandbox purchase on Render ("Approved"), and confirmed the Render translation model setting.
 - **Gate 3 start check [verified]:** the receipt's stored lines carry what the translations route needs. The purchase holds `outletId`; each stored line holds `menuItemId`, `name` and `quantity`; the route takes an outlet and a language and answers by item id. Limit: the route translates the outlet's current published revision and item ids are per revision, so after a republish a stored line matches nothing and shows its original name alone, which Gate 1 already allows.
 - **Built:** `src/app/receipt/[purchaseId]/show-the-stall.tsx`, rendered from `page.tsx` only for a verified payment. The pure translation rules moved to `src/domain/menu/translation-rules.ts`, so the panel applies them again in the browser; `translate.ts` re-exports them and the route's contract is unchanged. No migration, route, table or environment name.
@@ -531,7 +531,7 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
   - A PYUSD receipt reads "... PYUSD paid", not an SGD total, because PYUSD is what moved.
   - Large lines read "name × quantity"; the route translates names, so the mockup's quantity words are not produced.
   - The card sits above the receipt slip, as the mockup does. At 390 px the language label takes its own line.
-  - Play aloud appears only when every line is translated and the browser has a matching voice. It reads the lines and quantities, never an amount.
+  - Play aloud appears only when every line is translated and the browser has a matching voice, and never for தமிழ். It reads the lines and quantities, never an amount.
 - **Tests [verified, FIXTURE PayPal and devnet, no model call]:** 54 and 55 in `tests/integration/show-the-stall.test.ts`, with more cases in `tests/unit/show-the-stall.test.ts` and `tests/integration/pyusd-purchase.test.ts`.
 - **Mutations [verified], each applied alone, restored byte-identical by SHA256, 41 of 41 focused tests before and after:**
 
@@ -558,7 +558,9 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 
 - **Play aloud [partly verified]:** in the desktop browser pane, each language sent its lines and quantities to a matching voice (zh-CN, ms-MY, ta-IN), with no amount in the text. Nobody listened to it, and voices on the user's phone are unknown.
 - **Model spend [unknown exact]:** real calls ran on Render for up to three languages, and two aborted requests may also have reached the model. No billing figure was read, so staying inside the US$1.00 allowance is not measured.
-- **Not established [unknown]:** any translation's accuracy; Javier's check; what a listener hears; voices on the user's phone.
+- **Javier's check [user-reported], 2026-11-06, this order's text only:** 中文, தமிழ் and English are fine. Melayu should say "Teh susu ice", not "Teh susu ais". தமிழ் Play aloud said only "2 1" and not the words; the device is [unknown].
+- **Fixes:** Play aloud is hidden for தமிழ் on every device, because a browser cannot tell in advance whether a voice reads the words; the large text stays. On the user's words "chang to teh susu ice", one item in the live `menu_translations` row for revision `mrv_huedtkqt2rq7lgvpfprp34i74i`, language `ms`, was edited by hand. "Teh lemon ais" was left unchanged, and a menu republish makes a new revision that asks the model again, so "ais" can return.
+- **Not established [unknown]:** accuracy of any other text; how the 中文 and Melayu voices sound to a listener on the filming phone.
 
 ### S33 Scan opens Ask Envoi, 2026-11-05
 

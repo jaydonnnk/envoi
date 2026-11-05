@@ -53,6 +53,11 @@ describe("show the stall card", () => {
     expect(voiceMatches("", "zh")).toBe(false);
   });
 
+  it("never offers Tamil audio, because a listed Tamil voice was heard reading only the digits", () => {
+    expect(voiceMatches("ta-IN", "ta")).toBe(false);
+    expect(voiceMatches("ms-MY", "ms")).toBe(true);
+  });
+
   it("audio reads the order and never an amount", () => {
     expect(spokenOrder(stallRows(LINES, ZH))).toBe("1 咖椰吐司套餐. 2 冰奶茶");
   });
