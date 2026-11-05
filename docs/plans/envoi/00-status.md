@@ -549,6 +549,12 @@ Written 2026-11-05T15:00:59+0800, before the follow-up's first model call. It is
 | zh4 | zh | 我要在 Test Shop 买一份咖椰吐司套餐。 | `{"kind":"unavailable_item","shop":"Test Shop","names":["Kaya toast set"]}` |
 | zh5 | zh | 我要在 Test Shop 买三杯冰茶。 | `{"kind":"choose","shop":"Test Shop","names":["Iced lemon tea","Iced milk tea"],"quantity":3}` |
 
+#### S33 Chinese follow-up results
+
+- **Result [verified as this fixed fixture record]:** Ask Envoi **5/5**, box **5/5**, **zero wrong links**, all ten outcomes attempted once, no stop and no retry. [Results](evidence/s33-chinese-followup.json) and [builder AI semantic review](evidence/s33-chinese-semantic-review.json). The pre-registration was committed as `66d1a3e` at 2026-11-05T15:01:39+08:00, before the first model call.
+- **Spend [verified as conservative accounting]:** 33 requests, **US$0.1054844** usage estimate, nothing reserved, of this follow-up's US$0.75 cap and S33's US$1 ceiling. The 12501 cache writes reported no lifetime and are priced at the highest rate. Actual invoice is [unknown].
+- **Decision:** Chinese is eligible for the supported-language line. It proves these five fixed sentences on FIXTURE menus, reviewed by the builder AI. It does not prove fluency, native-reader quality, real customer demand or payment completion, and it changes no S32 score. Korean is unchanged.
+
 ### S32 Ordering in other languages, 2026-11-05
 
 - **State [verified]:** **done 2026-11-05** on `envoi/slice-32-language-eval`, created from `main` at `904f482` and retained. Scoped application/evidence commit `ae801d6` is fast-forwarded to main, remotely verified pushed and deployed on Render with CI passing. The threshold miss and bounded claim are the recorded exit decision, not a passing overall evaluation.

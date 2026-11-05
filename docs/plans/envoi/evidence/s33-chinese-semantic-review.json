@@ -1,0 +1,66 @@
+{
+ "label": "Builder AI semantic review of FIXTURE outcomes; not native-reader validation",
+ "reviewedBy": "Claude Opus 5.5 builder session",
+ "rows": [
+  {
+   "id": "zh1",
+   "path": "assistant",
+   "semantic": "pass",
+   "note": "Chinese reply; basket Lorong Demo Kopi, Kopi O x2; says the buyer checks the price and approves."
+  },
+  {
+   "id": "zh1",
+   "path": "box",
+   "semantic": "pass",
+   "note": "Requested shop, item and quantity."
+  },
+  {
+   "id": "zh2",
+   "path": "assistant",
+   "semantic": "pass",
+   "note": "Chinese reply; basket Test Shop, Kopi C x2 and Iced milk tea x1."
+  },
+  {
+   "id": "zh2",
+   "path": "box",
+   "semantic": "pass",
+   "note": "Requested shop, items and quantities."
+  },
+  {
+   "id": "zh3",
+   "path": "assistant",
+   "semantic": "pass",
+   "note": "Chinese reply; Soft-boiled eggs (2) x2; the pack size was not taken as the quantity."
+  },
+  {
+   "id": "zh3",
+   "path": "box",
+   "semantic": "pass",
+   "note": "Requested shop, item and quantity."
+  },
+  {
+   "id": "zh4",
+   "path": "assistant",
+   "semantic": "pass",
+   "note": "Chinese reply says Kaya toast set cannot be bought at Test Shop today; no link."
+  },
+  {
+   "id": "zh4",
+   "path": "box",
+   "semantic": "pass",
+   "note": "Unavailable item at the requested shop; no link."
+  },
+  {
+   "id": "zh5",
+   "path": "assistant",
+   "semantic": "pass",
+   "note": "Chinese reply asks which of Iced lemon tea (S$2.20) or Iced milk tea (S$2.50), the fixture menu prices, for three cups; no link."
+  },
+  {
+   "id": "zh5",
+   "path": "box",
+   "semantic": "pass",
+   "note": "Choice of both iced teas at quantity 3; no link."
+  }
+ ]
+}

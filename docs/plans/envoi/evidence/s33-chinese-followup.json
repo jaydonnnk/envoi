@@ -1,0 +1,673 @@
+{
+  "label": "FIXTURE shops; real OpenAI; box on local DB; assistant backend and links simulated; no payment or deployment; separate from S32",
+  "startedAt": "2026-11-05T07:01:40.982Z",
+  "updatedAt": "2026-11-05T07:02:37.634Z",
+  "model": "gpt-6-sol",
+  "capUsd": 0.75,
+  "manifestSha256": "bde23b3a0bdcaff9627d82fc3d258e9300cb1da1fdb56b7ee863fcee21a70211",
+  "meter": {
+    "spentUsd": 0.1054844,
+    "reservedUsd": 0,
+    "requests": 33,
+    "inputTokens": 33617,
+    "cachedTokens": 8757,
+    "outputTokens": 1651,
+    "cacheWriteTokens": 12501,
+    "longCacheWriteTokens": 0,
+    "cacheUpperBoundTokens": 12501
+  },
+  "stopReason": null,
+  "costBoundary": "Usage-derived estimates; missing cache lifetime is priced at the highest rate; an unresolved charge stays reserved. Actual invoice total is unknown.",
+  "semanticReview": "pending; structuralPass is not an overall pass",
+  "rows": [
+    {
+      "id": "zh1",
+      "language": "zh",
+      "sentence": "我要在 Lorong Demo Kopi 买两杯黑咖啡（Kopi O）。",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Kopi O",
+            2
+          ]
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Kopi O",
+              2
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Lorong Demo Kopi",
+            "lines": [
+              [
+                "Kopi O",
+                2
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "已为你申请 Lorong Demo Kopi 两杯 Kopi O 的一次性链接。请在 Envoi 打开链接查看价格，并自行确认付款。",
+      "diagnostic": {
+        "kind": "link",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 4
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_3e5chw3nxjra4rfuz6par3gxpm",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 3
+          },
+          {
+            "operation": "createPurchaseRequest",
+            "status": 200,
+            "outletId": "out_3e5chw3nxjra4rfuz6par3gxpm",
+            "itemIds": [
+              "itm_7kmdhqcvzodeyd5xsqe36arw7i"
+            ],
+            "expiresAt": "2030-01-01T00:00:00.000Z",
+            "ms": 8
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0
+    },
+    {
+      "id": "zh1",
+      "language": "zh",
+      "sentence": "我要在 Lorong Demo Kopi 买两杯黑咖啡（Kopi O）。",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Kopi O",
+            2
+          ]
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Kopi O",
+              2
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Lorong Demo Kopi",
+            "lines": [
+              [
+                "Kopi O",
+                2
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "basket",
+        "outletId": "out_3e5chw3nxjra4rfuz6par3gxpm",
+        "outlet": {
+          "id": "out_3e5chw3nxjra4rfuz6par3gxpm",
+          "name": "Lorong Demo Kopi",
+          "area": "Tanjong Pagar",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "lines": [
+          {
+            "item": {
+              "id": "itm_7kmdhqcvzodeyd5xsqe36arw7i",
+              "name": "Kopi O",
+              "unitMinor": 160,
+              "available": true
+            },
+            "quantity": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0
+    },
+    {
+      "id": "zh2",
+      "language": "zh",
+      "sentence": "我要在 Test Shop 买两杯 Kopi C 和一杯冰奶茶。",
+      "expected": {
+        "kind": "basket",
+        "shop": "Test Shop",
+        "lines": [
+          [
+            "Kopi C",
+            2
+          ],
+          [
+            "Iced milk tea",
+            1
+          ]
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Test Shop",
+          "lines": [
+            [
+              "Kopi C",
+              2
+            ],
+            [
+              "Iced milk tea",
+              1
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Test Shop",
+            "lines": [
+              [
+                "Kopi C",
+                2
+              ],
+              [
+                "Iced milk tea",
+                1
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "已为你在 Test Shop 申请了两杯 Kopi C 和一杯 Iced milk tea 的一次性链接。打开链接后可查看 Envoi 计算的价格，再自行确认是否付款。",
+      "diagnostic": {
+        "kind": "link",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 3
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_jzngsudoetfexbo3v6zxqjbmxu",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "createPurchaseRequest",
+            "status": 200,
+            "outletId": "out_jzngsudoetfexbo3v6zxqjbmxu",
+            "itemIds": [
+              "itm_tudzrh2ec73jyigvsksfm2k6ae",
+              "itm_i2cogsmc7ae5fmhcpubimr2gnq"
+            ],
+            "expiresAt": "2030-01-01T00:00:00.000Z",
+            "ms": 5
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0
+    },
+    {
+      "id": "zh2",
+      "language": "zh",
+      "sentence": "我要在 Test Shop 买两杯 Kopi C 和一杯冰奶茶。",
+      "expected": {
+        "kind": "basket",
+        "shop": "Test Shop",
+        "lines": [
+          [
+            "Kopi C",
+            2
+          ],
+          [
+            "Iced milk tea",
+            1
+          ]
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Test Shop",
+          "lines": [
+            [
+              "Kopi C",
+              2
+            ],
+            [
+              "Iced milk tea",
+              1
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Test Shop",
+            "lines": [
+              [
+                "Kopi C",
+                2
+              ],
+              [
+                "Iced milk tea",
+                1
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "basket",
+        "outletId": "out_jzngsudoetfexbo3v6zxqjbmxu",
+        "outlet": {
+          "id": "out_jzngsudoetfexbo3v6zxqjbmxu",
+          "name": "Test Shop",
+          "area": "Test Area",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "lines": [
+          {
+            "item": {
+              "id": "itm_tudzrh2ec73jyigvsksfm2k6ae",
+              "name": "Kopi C",
+              "unitMinor": 180,
+              "available": true
+            },
+            "quantity": 2
+          },
+          {
+            "item": {
+              "id": "itm_i2cogsmc7ae5fmhcpubimr2gnq",
+              "name": "Iced milk tea",
+              "unitMinor": 250,
+              "available": true
+            },
+            "quantity": 1
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0
+    },
+    {
+      "id": "zh3",
+      "language": "zh",
+      "sentence": "我要在 Lorong Demo Kopi 买两份半熟蛋，每份两个（Soft-boiled eggs (2)）。",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Soft-boiled eggs (2)",
+            2
+          ]
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Soft-boiled eggs (2)",
+              2
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Lorong Demo Kopi",
+            "lines": [
+              [
+                "Soft-boiled eggs (2)",
+                2
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "已为你申请 Lorong Demo Kopi 的两份 Soft-boiled eggs (2) 一次性链接。打开 Envoi 展示的链接后，可核对价格并自行决定是否付款。",
+      "diagnostic": {
+        "kind": "link",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 1
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_3e5chw3nxjra4rfuz6par3gxpm",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 1
+          },
+          {
+            "operation": "createPurchaseRequest",
+            "status": 200,
+            "outletId": "out_3e5chw3nxjra4rfuz6par3gxpm",
+            "itemIds": [
+              "itm_nxgdalaihnattet3fsvoq6pta4"
+            ],
+            "expiresAt": "2030-01-01T00:00:00.000Z",
+            "ms": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0
+    },
+    {
+      "id": "zh3",
+      "language": "zh",
+      "sentence": "我要在 Lorong Demo Kopi 买两份半熟蛋，每份两个（Soft-boiled eggs (2)）。",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Soft-boiled eggs (2)",
+            2
+          ]
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Soft-boiled eggs (2)",
+              2
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Lorong Demo Kopi",
+            "lines": [
+              [
+                "Soft-boiled eggs (2)",
+                2
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "basket",
+        "outletId": "out_3e5chw3nxjra4rfuz6par3gxpm",
+        "outlet": {
+          "id": "out_3e5chw3nxjra4rfuz6par3gxpm",
+          "name": "Lorong Demo Kopi",
+          "area": "Tanjong Pagar",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "lines": [
+          {
+            "item": {
+              "id": "itm_nxgdalaihnattet3fsvoq6pta4",
+              "name": "Soft-boiled eggs (2)",
+              "unitMinor": 200,
+              "available": true
+            },
+            "quantity": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0
+    },
+    {
+      "id": "zh4",
+      "language": "zh",
+      "sentence": "我要在 Test Shop 买一份咖椰吐司套餐。",
+      "expected": {
+        "kind": "unavailable_item",
+        "shop": "Test Shop",
+        "names": [
+          "Kaya toast set"
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "reply",
+          "text": "Test Shop 的 Kaya toast set 今天无法购买。"
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "Test Shop 的 Kaya toast set 今天无法购买。",
+      "diagnostic": {
+        "kind": "reply",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 0
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_jzngsudoetfexbo3v6zxqjbmxu",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0
+    },
+    {
+      "id": "zh4",
+      "language": "zh",
+      "sentence": "我要在 Test Shop 买一份咖椰吐司套餐。",
+      "expected": {
+        "kind": "unavailable_item",
+        "shop": "Test Shop",
+        "names": [
+          "Kaya toast set"
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "unavailable_item",
+          "shop": "Test Shop",
+          "names": [
+            "Kaya toast set"
+          ]
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "unavailable_item",
+        "outletId": "out_jzngsudoetfexbo3v6zxqjbmxu",
+        "outlet": {
+          "id": "out_jzngsudoetfexbo3v6zxqjbmxu",
+          "name": "Test Shop",
+          "area": "Test Area",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "items": [
+          {
+            "id": "itm_uxsflltlmlc5zrxhlcxuv7v47y",
+            "name": "Kaya toast set"
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0
+    },
+    {
+      "id": "zh5",
+      "language": "zh",
+      "sentence": "我要在 Test Shop 买三杯冰茶。",
+      "expected": {
+        "kind": "choose",
+        "shop": "Test Shop",
+        "names": [
+          "Iced lemon tea",
+          "Iced milk tea"
+        ],
+        "quantity": 3
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "reply",
+          "text": "Test Shop 有两种冰茶：Iced lemon tea（S$2.20）和 Iced milk tea（S$2.50）。你要三杯哪一种？"
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "Test Shop 有两种冰茶：Iced lemon tea（S$2.20）和 Iced milk tea（S$2.50）。你要三杯哪一种？",
+      "diagnostic": {
+        "kind": "reply",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 4
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_jzngsudoetfexbo3v6zxqjbmxu",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 1
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0
+    },
+    {
+      "id": "zh5",
+      "language": "zh",
+      "sentence": "我要在 Test Shop 买三杯冰茶。",
+      "expected": {
+        "kind": "choose",
+        "shop": "Test Shop",
+        "names": [
+          "Iced lemon tea",
+          "Iced milk tea"
+        ],
+        "quantity": 3
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "choose",
+          "shop": "Test Shop",
+          "names": [
+            "Iced lemon tea",
+            "Iced milk tea"
+          ],
+          "quantity": 3
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "choose",
+        "outletId": "out_jzngsudoetfexbo3v6zxqjbmxu",
+        "outlet": {
+          "id": "out_jzngsudoetfexbo3v6zxqjbmxu",
+          "name": "Test Shop",
+          "area": "Test Area",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "quantity": 3,
+        "matches": [
+          {
+            "id": "itm_ldzoldgaf6pgvm2n3vgz2itr24",
+            "name": "Iced lemon tea",
+            "unitMinor": 220,
+            "available": true
+          },
+          {
+            "id": "itm_i2cogsmc7ae5fmhcpubimr2gnq",
+            "name": "Iced milk tea",
+            "unitMinor": 250,
+            "available": true
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0
+    }
+  ]
+}
