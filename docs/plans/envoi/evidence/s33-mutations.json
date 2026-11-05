@@ -1,6 +1,6 @@
 {
  "label": "FIXTURE offline guard proof",
- "at": "2026-11-05T06:49:12.873924+00:00",
+ "at": "2026-11-05T07:01:27.340974+00:00",
  "allProved": true,
  "results": [
   {
@@ -38,7 +38,7 @@
    "file": "src/app/api/v1/buyer/assistant/route.ts",
    "test": "the route takes the shop's name from the database and never from the browser",
    "redExit": 1,
-   "failure": "AssertionError: expected '[{\"role\":\"system\",\"content\":\"You are \u2026' to contain 'out_hjoqgs2lvdl3qqf7hpf3pyuufy'",
+   "failure": "AssertionError: expected '[{\"role\":\"system\",\"content\":\"You are \u2026' to contain 'out_wzxsqplx5swdhtm4v6inr3zbdi'",
    "restoredByteIdentical": true,
    "greenExit": 0,
    "proved": true
@@ -89,6 +89,56 @@
    "test": "a shop-scoped turn cannot propose another shop's items",
    "redExit": 1,
    "failure": "AssertionError: expected 'link' to be 'reply' // Object.is equality",
+   "restoredByteIdentical": true,
+   "greenExit": 0,
+   "proved": true
+  },
+  {
+   "id": "MZ1",
+   "file": "docs/plans/envoi/evidence/s33-chinese-followup.mts",
+   "test": "a single wrong link fails an otherwise perfect run",
+   "redExit": 1,
+   "failure": "AssertionError: expected true to be false // Object.is equality",
+   "restoredByteIdentical": true,
+   "greenExit": 0,
+   "proved": true
+  },
+  {
+   "id": "MZ2",
+   "file": "docs/plans/envoi/evidence/s33-chinese-followup.mts",
+   "test": "needs a recorded semantic pass, not structure alone",
+   "redExit": 1,
+   "failure": "AssertionError: expected true to be false // Object.is equality",
+   "restoredByteIdentical": true,
+   "greenExit": 0,
+   "proved": true
+  },
+  {
+   "id": "MZ3",
+   "file": "docs/plans/envoi/evidence/s33-chinese-followup.mts",
+   "test": "never counts a missing outcome as a pass",
+   "redExit": 1,
+   "failure": "AssertionError: expected true to be false // Object.is equality",
+   "restoredByteIdentical": true,
+   "greenExit": 0,
+   "proved": true
+  },
+  {
+   "id": "MZ4",
+   "file": "docs/plans/envoi/evidence/s33-chinese-followup.mts",
+   "test": "refuses a request that could pass the follow-up cap before the meter sees it",
+   "redExit": 1,
+   "failure": "AssertionError: expected [Function] to throw an error",
+   "restoredByteIdentical": true,
+   "greenExit": 0,
+   "proved": true
+  },
+  {
+   "id": "MZ5",
+   "file": "docs/plans/envoi/evidence/s33-chinese-followup.mts",
+   "test": "refuses a run whose sentence differs from its pre-registration",
+   "redExit": 1,
+   "failure": "AssertionError: expected [Function] to throw an error",
    "restoredByteIdentical": true,
    "greenExit": 0,
    "proved": true
