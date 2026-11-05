@@ -521,7 +521,7 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 
 ### S42 Show the stall, 2026-11-05
 
-- **State: in progress.** Built on `envoi/slice-42-show-the-stall` in its own worktree and live on Render at `aaed46f`, with one sandbox purchase seen on Render. Javier's check is recorded below, with its Tamil audio fix.
+- **State: done, 2026-11-06.** Built on `envoi/slice-42-show-the-stall` in its own worktree. Live on Render at `967b09a`, where the receipt showed "Teh susu ice" and no Play aloud for தமிழ். Javier's check and its fixes are recorded below.
 - **Authority, the user's words:** "Start S42. Translation model spend up to US$1.00." The user then approved commit, merge, push, deploy and the sandbox purchase on Render ("Approved"), and confirmed the Render translation model setting.
 - **Gate 3 start check [verified]:** the receipt's stored lines carry what the translations route needs. The purchase holds `outletId`; each stored line holds `menuItemId`, `name` and `quantity`; the route takes an outlet and a language and answers by item id. Limit: the route translates the outlet's current published revision and item ids are per revision, so after a republish a stored line matches nothing and shows its original name alone, which Gate 1 already allows.
 - **Built:** `src/app/receipt/[purchaseId]/show-the-stall.tsx`, rendered from `page.tsx` only for a verified payment. The pure translation rules moved to `src/domain/menu/translation-rules.ts`, so the panel applies them again in the browser; `translate.ts` re-exports them and the route's contract is unchanged. No migration, route, table or environment name.
