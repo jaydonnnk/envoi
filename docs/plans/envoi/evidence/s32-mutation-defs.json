@@ -177,8 +177,8 @@
     "id": "M30",
     "file": "src/app/page.tsx",
     "testFile": "tests/unit/landing-page.test.ts",
-    "test": "leads with the evaluated language claim",
-    "find": "<h1>Japanese, Spanish or Malay. One scan. PayPal.</h1>",
+    "test": "leads with the approved language headline",
+    "find": "<h1>Your language. One scan. PayPal.</h1>",
     "replace": "<h1>Any language. One scan. PayPal.</h1>"
   },
   {
@@ -186,15 +186,23 @@
     "file": "src/app/page.tsx",
     "testFile": "tests/unit/landing-page.test.ts",
     "test": "makes no unproven language ordering claim",
-    "find": "in Japanese, Spanish or Malay, and",
-    "replace": "in Japanese, Spanish or Malay or Korean, and"
+    "find": "AI explains the menu and builds your order.",
+    "replace": "AI explains the menu and builds your order in Korean."
   },
   {
     "id": "M32",
     "file": "src/app/page.tsx",
     "testFile": "tests/unit/landing-page.test.ts",
-    "test": "names the passing languages in the ordering sentence",
-    "find": "say what you want in Japanese, Spanish or Malay",
-    "replace": "say what you want in Japanese"
+    "test": "names the passing languages separately",
+    "find": "Supported languages: Japanese, Malay, Spanish.",
+    "replace": "Supported languages: Japanese, Malay."
+  },
+  {
+    "id": "M33",
+    "file": "src/app/page.tsx",
+    "testFile": "tests/unit/landing-page.test.ts",
+    "test": "shows the approved order and human approval copy",
+    "find": "Review the exact amount, then approve in PayPal.",
+    "replace": "Pay immediately."
   }
 ]

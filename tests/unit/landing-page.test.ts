@@ -26,14 +26,12 @@ function landing(enabled: boolean): string {
 }
 
 describe("landing page", () => {
-  it("leads with the evaluated language claim", () => {
-    expect(landing(true)).toContain("<h1>Japanese, Spanish or Malay. One scan. PayPal.</h1>");
+  it("leads with the approved language headline", () => {
+    expect(landing(true)).toContain("<h1>Your language. One scan. PayPal.</h1>");
   });
 
-  it("says the AI never sets a price and never pays", () => {
-    const markup = landing(true);
-    expect(markup).toContain("AI reads the menu with you.");
-    expect(markup).toContain("It never sets a price and never pays.");
+  it("shows the approved order and human approval copy", () => {
+    expect(landing(true)).toContain("Scan the shop’s QR and say what you want in your own language. Envoi helps you read the menu and put your order together. Review the exact amount, then approve in PayPal.");
   });
 
   it("offers Ask Envoi first, as the one primary action", () => {
@@ -65,8 +63,8 @@ describe("landing page", () => {
     expect(landing(true).toLowerCase()).not.toContain("fixture");
   });
 
-  it("names the passing languages in the ordering sentence", () => {
-    expect(landing(true)).toContain("say what you want in Japanese, Spanish or Malay");
+  it("names the passing languages separately", () => {
+    expect(landing(true)).toContain('<p class="muted">Supported languages: Japanese, Malay, Spanish.</p>');
   });
 
   it("makes no unproven language ordering claim", () => {

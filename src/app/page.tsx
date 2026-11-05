@@ -22,10 +22,11 @@ export default function Home() {
   return (
     <main id="main" className="landing">
       <div className="landing-hero">
-        <h1>Japanese, Spanish or Malay. One scan. PayPal.</h1>
+        <h1>Your language. One scan. PayPal.</h1>
         <p className="lead">
-          Scan the shop&apos;s QR, say what you want in Japanese, Spanish or Malay, and approve the exact amount in PayPal. AI reads the menu with you. It never sets a price and never pays.
+          Scan the shop’s QR and say what you want in your own language. Envoi helps you read the menu and put your order together. Review the exact amount, then approve in PayPal.
         </p>
+        <p className="muted">Supported languages: Japanese, Malay, Spanish.</p>
         <div className="actions">
           {askEnabled && (
             <a className="button" href="/buy/ask">
