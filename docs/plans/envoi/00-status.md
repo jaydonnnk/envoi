@@ -521,8 +521,8 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 
 ### S42 Show the stall, 2026-11-05
 
-- **State: in progress.** Built and checked locally on `envoi/slice-42-show-the-stall`, in its own worktree. Not committed, merged, pushed or deployed. Not done: no Render purchase, no native reader's check.
-- **Authority, the user's words:** "Start S42. Translation model spend up to US$1.00." Merge, push, deploy and the sandbox purchase on Render are still to be requested.
+- **State: in progress.** Built on `envoi/slice-42-show-the-stall` in its own worktree and live on Render at `aaed46f`, with one sandbox purchase seen on Render. Not done: no native reader's check, so the slice is not ticked.
+- **Authority, the user's words:** "Start S42. Translation model spend up to US$1.00." The user then approved commit, merge, push, deploy and the sandbox purchase on Render ("Approved"), and confirmed the Render translation model setting.
 - **Gate 3 start check [verified]:** the receipt's stored lines carry what the translations route needs. The purchase holds `outletId`; each stored line holds `menuItemId`, `name` and `quantity`; the route takes an outlet and a language and answers by item id. Limit: the route translates the outlet's current published revision and item ids are per revision, so after a republish a stored line matches nothing and shows its original name alone, which Gate 1 already allows.
 - **Built:** `src/app/receipt/[purchaseId]/show-the-stall.tsx`, rendered from `page.tsx` only for a verified payment. The pure translation rules moved to `src/domain/menu/translation-rules.ts`, so the panel applies them again in the browser; `translate.ts` re-exports them and the route's contract is unchanged. No migration, route, table or environment name.
 - **Choices inside the approved scope, for review:**
@@ -546,8 +546,19 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 
 - **Local checks [verified]:** typecheck and lint clean; 803 tests in 103 files; production build; scan-build at 223 files; public API and MCP HTTP e2e PASS (local FIXTURE only); `git diff --check` clean.
 - **Local browser [verified at 390 px and 1280 px, no horizontal overflow]:** a FIXTURE Paid purchase on a disposable database, since dropped, with seeded FIXTURE translations and model calls blocked in the server. This proves panel behaviour only, not any translation. Seen: 中文 translated with Play aloud and originals; Melayu partly translated with originals and no Play aloud; தமிழ் failed on the real route, showing originals alone, the failure line and no AI label; English with originals and Play aloud. Pressing Play aloud and hearing it was not checked.
-- **Model spend:** US$0 of the US$1.00 allowance so far.
-- **Not established [unknown]:** whether `AI_MENU_TRANSLATION_MODEL` is set on Render, where the language choices are hidden if it is not; any real translation's accuracy; Javier's check; voices on the user's phone.
+- **Deployment [verified], 2026-11-06:** `git ls-remote` showed remote `main` at `aaed46f`, CI run 42023071132 passed, and the Render dashboard showed `aaed46f` Live.
+- **Render purchase [verified], 2026-11-06 12:12 am SGT, Test Shop (FIXTURE), PayPal sandbox test money:** 2 x Kopi C and 1 x Iced milk tea, S$6.10, Paid, capture `16C18606T98022605`, order `3SL7110181321782C`, purchase `pur_si3me2upp2hcb2wziimiqsyzju`, seller `EQN6264CF9F4Y`. The user approved in PayPal.
+- **Render receipt [verified at 390 px and 1280 px, no horizontal overflow]:** the panel showed S$6.10 paid and the original names, with real model output:
+
+  | Language | Kopi C | Iced milk tea |
+  | --- | --- | --- |
+  | 中文 | 新加坡式淡奶咖啡（Kopi C） | 冰奶茶 |
+  | Melayu | Kopi C | Teh susu ais |
+  | தமிழ் | கோப்பி சி | ஐஸ் பால் தேநீர் |
+
+- **Play aloud [partly verified]:** in the desktop browser pane, each language sent its lines and quantities to a matching voice (zh-CN, ms-MY, ta-IN), with no amount in the text. Nobody listened to it, and voices on the user's phone are unknown.
+- **Model spend [unknown exact]:** real calls ran on Render for up to three languages, and two aborted requests may also have reached the model. No billing figure was read, so staying inside the US$1.00 allowance is not measured.
+- **Not established [unknown]:** any translation's accuracy; Javier's check; what a listener hears; voices on the user's phone.
 
 ### S33 Scan opens Ask Envoi, 2026-11-05
 
