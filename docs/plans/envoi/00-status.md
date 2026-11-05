@@ -519,6 +519,36 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 - **Post-slice cleanup [verified], 2026-11-02:** the architect-reviewer pass found no orphan S27 module, dead fixture or stale test file. Every S27 module is imported, named tests 17 and 36 and the MCP-client guards exist, the OpenAPI document carries `unitMinor` and `currency`, and code, tests and CI carry no generated-client import or `typecheck:client` reference. One deferred wording divergence: the Gate 1 approved Ask Envoi mockup and page still name an APIMatic-generated client while the runtime uses the MCP client; Ask Envoi is off on Render, and changing that copy needs a Gate 1 decision, so it was not changed here. It was fixed on 2026-11-03 under the [Gate 1 wording reopening](#gate-1-reopening-2026-11-03-ask-envoi-mcp-wording). The historical `s27-mcp-session-transfer-2026-11-02.md` keeps its superseding note; the protected RTF, four untracked handoff text files and `PROGRESS.md` remain uncommitted.
 - **Publication and completion [verified], 2026-11-02:** the seven-file documentation and evidence commit `7514eb34c1ed427e2f5865a288aa044f563c0464` is pushed to `main`; [CI run 41456616279](https://github.com/jaydonnnk/envoi/actions/runs/41456616279) passed typecheck, lint, unit, integration, build, build scan and the local-fixture public HTTP/MCP check. The commit changes no runtime code; Render auto-deploys `main`, the app health read 200 after the push, and the deployment id was not read because the Render dashboard session was signed out. S27 is complete: the SGD, US/USD and PYUSD visible results, the technical release, the evidence in this section and the post-slice cleanup are all recorded. The next step is the closing slice question.
 
+### S42 Show the stall, 2026-11-05
+
+- **State: in progress.** Built and checked locally on `envoi/slice-42-show-the-stall`, in its own worktree. Not committed, merged, pushed or deployed. Not done: no Render purchase, no native reader's check.
+- **Authority, the user's words:** "Start S42. Translation model spend up to US$1.00." Merge, push, deploy and the sandbox purchase on Render are still to be requested.
+- **Gate 3 start check [verified]:** the receipt's stored lines carry what the translations route needs. The purchase holds `outletId`; each stored line holds `menuItemId`, `name` and `quantity`; the route takes an outlet and a language and answers by item id. Limit: the route translates the outlet's current published revision and item ids are per revision, so after a republish a stored line matches nothing and shows its original name alone, which Gate 1 already allows.
+- **Built:** `src/app/receipt/[purchaseId]/show-the-stall.tsx`, rendered from `page.tsx` only for a verified payment. The pure translation rules moved to `src/domain/menu/translation-rules.ts`, so the panel applies them again in the browser; `translate.ts` re-exports them and the route's contract is unchanged. No migration, route, table or environment name.
+- **Choices inside the approved scope, for review:**
+  - The default language is 中文, as in the mockup, so a Paid receipt asks the route on load. One model call per menu revision and language, then cached.
+  - English makes no request: the route never rewrites an English name, so the card shows the shop's own names, without the AI label.
+  - A PYUSD receipt reads "... PYUSD paid", not an SGD total, because PYUSD is what moved.
+  - Large lines read "name × quantity"; the route translates names, so the mockup's quantity words are not produced.
+  - The card sits above the receipt slip, as the mockup does. At 390 px the language label takes its own line.
+  - Play aloud appears only when every line is translated and the browser has a matching voice. It reads the lines and quantities, never an amount.
+- **Tests [verified, FIXTURE PayPal and devnet, no model call]:** 54 and 55 in `tests/integration/show-the-stall.test.ts`, with more cases in `tests/unit/show-the-stall.test.ts` and `tests/integration/pyusd-purchase.test.ts`.
+- **Mutations [verified], each applied alone, restored byte-identical by SHA256, 41 of 41 focused tests before and after:**
+
+  | Mutation | Failed |
+  | --- | --- |
+  | M1 any PayPal state gets an amount | 54; PYUSD hint test |
+  | M2 unverified PYUSD gets an amount | PYUSD hint test |
+  | M3 amount from the first line, not the capture | 55 |
+  | M4 PYUSD amount read as the SGD total | PYUSD hint test |
+  | M5 translated text skips the rules | 55 |
+  | M6 translations matched by position, not item id | 55; other-revision unit test |
+
+- **Local checks [verified]:** typecheck and lint clean; 803 tests in 103 files; production build; scan-build at 223 files; public API and MCP HTTP e2e PASS (local FIXTURE only); `git diff --check` clean.
+- **Local browser [verified at 390 px and 1280 px, no horizontal overflow]:** a FIXTURE Paid purchase on a disposable database, since dropped, with seeded FIXTURE translations and model calls blocked in the server. This proves panel behaviour only, not any translation. Seen: 中文 translated with Play aloud and originals; Melayu partly translated with originals and no Play aloud; தமிழ் failed on the real route, showing originals alone, the failure line and no AI label; English with originals and Play aloud. Pressing Play aloud and hearing it was not checked.
+- **Model spend:** US$0 of the US$1.00 allowance so far.
+- **Not established [unknown]:** whether `AI_MENU_TRANSLATION_MODEL` is set on Render, where the language choices are hidden if it is not; any real translation's accuracy; Javier's check; voices on the user's phone.
+
 ### S33 Scan opens Ask Envoi, 2026-11-05
 
 - **Authority [verified], the user's words:** "Start S33", then "Apprive both, but for the model spend u can go up to 1", answering a request naming commit, merge, push and deploy for S33 plus model spend. It authorizes those Git and deployment steps and at most US$1 of S33 inference. The one sandbox purchase, merchant sign-in and PayPal approval stay separate.

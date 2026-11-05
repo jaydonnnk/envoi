@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { SINGAPORE_CLOCK, SINGAPORE_TIME } from "@/app/purchase-copy";
 import { getOwnPurchase, type OwnPurchase } from "@/domain/purchases/review";
 import { applyDerivedTransitions } from "@/domain/purchases/state";
+import { translationEnabled } from "@/integrations/ai/openai";
 import { getAuth } from "@/lib/auth";
 import { isPrincipal, requireBuyerSession } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
@@ -11,6 +12,7 @@ import { formatPyusdAtomic, formatPyusdPerSgd } from "@/domain/pyusd/rate";
 import { OPERATOR_RESOLUTION } from "@/domain/pyusd/state";
 import { LiveStatus } from "./live-status";
 import { PyusdExtraTransfers, PyusdReceiptDetails, pyusdReceiptStatus } from "./pyusd-receipt";
+import { ShowTheStall } from "./show-the-stall";
 
 const SINGAPORE_DATE = new Intl.DateTimeFormat("en-SG", { dateStyle: "medium", timeZone: "Asia/Singapore" });
 
@@ -92,6 +94,9 @@ export default async function ReceiptPage({ params }: { params: Promise<{ purcha
   const pyusd = purchase.rail === "pyusd" ? purchase.pyusd : null;
   const pyusdPaid = pyusd !== null && purchase.view.state === "paid" && purchase.attempt?.rail === "pyusd" && purchase.attempt.pyusdFinalizedSignature !== null;
   const paid = purchase.view.state === "paid" && purchase.attempt?.captureId;
+  const paidMinor = purchase.attempt?.captureGrossMinor ?? purchase.totalMinor;
+  // S42: only a verified payment gets an amount, and only the purchase supplies it.
+  const stallAmount = pyusdPaid ? `${formatPyusdAtomic(pyusd.atomicAmount)} PYUSD` : paid ? formatMoney(money(purchase.currency, paidMinor)) : null;
   const attemptState = purchase.rail === "pyusd" ? purchase.view.pyusdAttempt : purchase.view.paypalAttempt;
   const canContinue =
     purchase.view.state === "review_open" ||
@@ -113,6 +118,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ purcha
           <span className={`chip ${status.tone}`}>{status.chip}</span> {status.body}
         </p>
       </div>
+      {stallAmount !== null && <ShowTheStall outletId={purchase.outletId} lines={purchase.lines} paidAmount={stallAmount} translationAvailable={translationEnabled()} />}
       <section className="card slip" aria-labelledby="receipt-heading">
         <h2 id="receipt-heading">
           {purchase.outletName} {purchase.outletIsDemoFixture && <span className="chip warn">Demo fixture</span>}
@@ -127,7 +133,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ purcha
         ))}
         <div className="row total-row">
           <strong>{paid ? "Paid total" : "Reviewed total"}</strong>
-          <span className="total money">{formatMoney(money(purchase.currency, paid ? (purchase.attempt?.captureGrossMinor ?? purchase.totalMinor) : purchase.totalMinor))}</span>
+          <span className="total money">{formatMoney(money(purchase.currency, paid ? paidMinor : purchase.totalMinor))}</span>
         </div>
         {purchase.rail === "paypal" && (
           <div className="row">

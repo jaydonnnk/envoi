@@ -1,8 +1,11 @@
 import { and, eq } from "drizzle-orm";
 import { getPublishedMenu } from "@/domain/outlets/search";
-import { menuTranslations, type StoredTranslatedItem } from "@/lib/db/schema";
+import { menuTranslations } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import type { TranslationCall } from "@/integrations/ai/menu-translate";
+import { keepSafeTranslations, type TranslatedItem } from "./translation-rules";
+
+export { keepSafeTranslations, type TranslatedItem };
 
 // The menu explained and translated (S29; Gate 2 second build plan amendment, "Menu explained and
 // translated"). The translated text only ever sits beside the shop's own names: prices, availability
@@ -12,50 +15,12 @@ import type { TranslationCall } from "@/integrations/ai/menu-translate";
 // A browser language's lower-cased primary subtag, such as "zh" from "zh-CN".
 export const LANGUAGE_SUBTAG = /^[a-z]{2,3}$/;
 
-const MAX_TRANSLATED_NAME_CHARS = 80;
-const MAX_EXPLANATION_CHARS = 160;
-
-export type TranslatedItem = StoredTranslatedItem;
-
 // The language's English name for the model's instructions, or null when the tag is not a primary
 // language subtag a runtime knows. A well-formed tag that names no language, such as "zzz" or
 // "und", is refused too, so it cannot buy a model call or a stored row.
 export function languageName(language: string): string | null {
   if (!LANGUAGE_SUBTAG.test(language)) return null;
   return new Intl.DisplayNames(["en"], { type: "language", fallback: "none" }).of(language) ?? null;
-}
-
-const chars = (text: string) => Array.from(text).length;
-
-// Signs that read as a price. S$ and US$ hold $.
-const CURRENCY_SIGNS = ["$", "¥", "€", "£", "元"];
-
-// The digits and currency signs in text that the original name does not hold. Both are compared in
-// NFKC, so a full-width "１" or "＄" counts as "1" or "$".
-function addsNumberOrCurrency(text: string, original: string): boolean {
-  const source = original.normalize("NFKC");
-  const added = text.normalize("NFKC");
-  for (const digit of added.match(/\p{Nd}/gu) ?? []) if (!source.includes(digit)) return true;
-  return CURRENCY_SIGNS.some((sign) => added.includes(sign) && !source.includes(sign));
-}
-
-// Keeps a proposed item only when its id is one of the revision's items (once), its name is 1 to 80
-// characters, its explanation at most 160, and neither holds a digit or currency sign the original
-// name lacks. A dropped item shows its original name alone.
-export function keepSafeTranslations(original: readonly { id: string; name: string }[], proposed: readonly TranslatedItem[]): TranslatedItem[] {
-  const names = new Map(original.map((item) => [item.id, item.name]));
-  const seen = new Set<string>();
-  return proposed.flatMap((item) => {
-    const originalName = names.get(item.itemId);
-    if (originalName === undefined || seen.has(item.itemId)) return [];
-    seen.add(item.itemId);
-    const name = item.name.trim();
-    const explanation = item.explanation?.trim() || null;
-    if (chars(name) < 1 || chars(name) > MAX_TRANSLATED_NAME_CHARS) return [];
-    if (explanation !== null && chars(explanation) > MAX_EXPLANATION_CHARS) return [];
-    if (addsNumberOrCurrency(`${name}\n${explanation ?? ""}`, originalName)) return [];
-    return [{ itemId: item.itemId, name, explanation }];
-  });
 }
 
 export type MenuTranslator = {

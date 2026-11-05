@@ -1,8 +1,9 @@
 import type { Address } from "@solana/kit";
+import { renderToStaticMarkup } from "react-dom/server";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { preparePyusdPayment } from "@/domain/pyusd/attempts";
 import { associatedPyusdAccount } from "@/domain/pyusd/identity";
-import { pyusdAtomicFor } from "@/domain/pyusd/rate";
+import { formatPyusdAtomic, pyusdAtomicFor } from "@/domain/pyusd/rate";
 import { getAuth } from "@/lib/auth";
 import { isPrincipal, requireBuyerSession, type BuyerPrincipal } from "@/lib/auth-context";
 import { connectWeb } from "@/lib/db/web";
@@ -17,6 +18,12 @@ import { anonymousCookie, TEST_BASE_URL, webEnvFor } from "../support/session";
 import { PYUSD_DEVNET } from "@/domain/pyusd/constants";
 
 const state = vi.hoisted((): PyusdTestState => ({ env: {}, fetch: null }));
+const pageRequest = vi.hoisted(() => ({ cookie: "" }));
+vi.mock("next/headers", () => ({ headers: async () => new Headers({ cookie: pageRequest.cookie }) }));
+vi.mock("next/navigation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/navigation")>()),
+  useRouter: () => ({ refresh() {}, replace() {}, push() {} }),
+}));
 vi.mock("@/env", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/env")>();
   return { ...actual, webEnv: (source?: NodeJS.ProcessEnv) => ({ ...actual.webEnv(source), ...state.env }) };
@@ -475,11 +482,20 @@ describe("PYUSD purchase", () => {
       const notOurs = fixtureSignature(5);
       chain.transactions.set(notOurs, landedTransactionJson(attempt, notOurs, { reference: "FXTRanotherReference1234" }));
       expect(await envelope(await submitHint(review, attemptId, notOurs))).toMatchObject({ data: { check: "not_ours" } });
+      // S42: a prepared PYUSD purchase is not paid, so it has no stall card.
+      const { default: ReceiptPage } = await import("@/app/receipt/[purchaseId]/page");
+      pageRequest.cookie = review.cookie;
+      const receipt = async () => renderToStaticMarkup(await ReceiptPage({ params: Promise.resolve({ purchaseId: review.purchaseId }) }));
+      expect(await receipt()).not.toContain("Show the stall");
       const real = fixtureSignature(6);
       chain.transactions.set(real, landedTransactionJson(attempt, real));
       freeze(new Date(T0.getTime() + durationMs("T_PROVIDER_READ_DEBOUNCE")));
       expect(await envelope(await submitHint(review, attemptId, real))).toMatchObject({ data: { check: "confirmed", purchase: { state: "paid" } } });
       expect(await attemptOf(review.purchaseId)).toMatchObject({ state: "confirmed" });
+
+      // S42: a finalized PYUSD purchase shows the stall the PYUSD amount, not an SGD total.
+      const card = /<section class="card show-the-stall".*?<\/section>/s.exec(await receipt())?.[0] ?? "";
+      expect(card).toContain(`${formatPyusdAtomic(review.amount)} PYUSD paid`);
     });
 
     it("hints beyond the per-attempt cap are not read", async () => {
