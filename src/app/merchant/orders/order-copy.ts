@@ -1,4 +1,6 @@
+import type { OrderFilter, OrderState } from "@/domain/purchases/order-filter";
 import type { MerchantOrder } from "@/domain/purchases/orders";
+import { formatMoney, money } from "@/lib/money";
 
 export type OrderStatus = { chip: string; tone: "ok" | "warn" | "plain"; body: string };
 
@@ -92,4 +94,50 @@ export const DELETE_COPY = {
 
 export function archivedCountLine(count: number): string {
   return `${count} deleted ${count === 1 ? "order is kept as a record" : "orders are kept as records"}. Ask the Envoi operator if you need one back.`;
+}
+
+// Tokens may have reached the shop outside the order's own payment. The record says so in full, so it
+// stays open under the table whatever is filtered or selected.
+export function needsReading(order: MerchantOrder): boolean {
+  return Boolean(order.pyusd && (order.pyusd.extraTransfers.length > 0 || order.pyusd.closedBy === "operator"));
+}
+
+// The table's amount: what the capture verified once paid, and the review's total until then.
+export function orderTotal(order: MerchantOrder): string {
+  return formatMoney(money(order.currency, order.state === "paid" ? (order.payment?.captureGrossMinor ?? order.totalMinor) : order.totalMinor));
+}
+
+const RAIL_WORDS: Record<string, string> = { paypal: "PayPal", pyusd: "PYUSD" };
+
+// The "Paid via" column names a rail as the way a payment arrived only on a paid order, so a row that
+// is not paid never reads as paid through that rail.
+export function paidVia(order: MerchantOrder): string {
+  const rail = order.rail === null ? null : (RAIL_WORDS[order.rail] ?? null);
+  if (order.state === "paid") return rail ?? "Unknown";
+  return rail === null ? "Not paid" : `${rail}, not paid`;
+}
+
+// A filter's states, as the words the sentence is answered in.
+const STATE_WORDS: Record<OrderState, string> = { paid: "Paid", pending_payment: "Not paid yet", uncertain: "Checking payment", unpaid_closed: "Closed unpaid" };
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+function shortDate(date: string): string {
+  const [, month, day] = date.split("-").map(Number);
+  return `${day} ${MONTHS[month! - 1]}`;
+}
+
+function dateWords(from: string | undefined, to: string | undefined): string | null {
+  if (from && to) return from === to ? shortDate(from) : `${shortDate(from)} to ${shortDate(to)}`;
+  if (from) return `From ${shortDate(from)}`;
+  return to ? `Up to ${shortDate(to)}` : null;
+}
+
+// "Filters set: Paid · PayPal · 29 Oct to 4 Nov." shows the merchant exactly what the model chose.
+export function filterWords(filter: OrderFilter): string[] {
+  return [
+    ...(filter.states ?? []).map((state) => STATE_WORDS[state]),
+    ...(filter.rails ?? []).map((rail) => RAIL_WORDS[rail]!),
+    ...(filter.currencies ?? []),
+    ...[dateWords(filter.from, filter.to)].filter((words) => words !== null),
+  ];
 }

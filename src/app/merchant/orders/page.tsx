@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { listMerchantOutlets } from "@/domain/outlets/merchant";
 import { listOutletOrders, type OutletOrders } from "@/domain/purchases/orders";
+import { orderFilterEnabled } from "@/integrations/ai/openai";
 import { getAuth } from "@/lib/auth";
 import { isMerchantAccount, requireMerchantMembership } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
@@ -46,6 +47,7 @@ export default async function MerchantOrdersPage() {
   // Each outlet's orders are read only because the account holds that outlet's live membership.
   const { outlets } = await listMerchantOutlets(webDb(), principal.userId);
   const now = new Date();
+  const askEnabled = orderFilterEnabled();
   const shops: OutletOrders[] = [];
   for (const outlet of outlets) {
     const orders = await listOutletOrders(webDb(), outlet.id, now);
@@ -54,9 +56,9 @@ export default async function MerchantOrdersPage() {
 
   return (
     <main>
-      <p className="eyebrow">Merchant orders</p>
-      <h1>See the payment. Acknowledge the order.</h1>
-      <p className="lead">A buyer&apos;s payment and your acknowledgment are different facts. Only a payment that PayPal sandbox confirmed, or that Envoi verified as finalized on Solana devnet, shows as paid, and you can acknowledge only a paid order.</p>
+      <p className="eyebrow">Merchant</p>
+      <h1>Orders</h1>
+      <p className="lead">Ask in your own words, or sort and filter the table. Asking changes no order.</p>
       {shops.length === 0 && (
         <section className="card">
           <h2>No shop yet</h2>
@@ -64,7 +66,7 @@ export default async function MerchantOrdersPage() {
         </section>
       )}
       {shops.map((shop) => (
-        <OrdersView key={shop.outlet.id} initial={shop} />
+        <OrdersView key={shop.outlet.id} initial={shop} askEnabled={askEnabled} />
       ))}
       <div className="actions">
         <a className="button secondary" href="/merchant/setup">

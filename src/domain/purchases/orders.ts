@@ -1,6 +1,7 @@
 import type { Currency } from "@/lib/money";
 import { and, count, desc, eq, inArray, isNotNull, isNull, ne, not, or, sql } from "drizzle-orm";
 import { recordAudit } from "@/domain/audit/events";
+import { ORDER_STATES } from "@/domain/purchases/order-filter";
 import { derivePurchaseView, applyDerivedTransitions, type PaymentAttemptRow, type PurchaseRow, type PurchaseState } from "@/domain/purchases/state";
 import { formatPyusdAtomic } from "@/domain/pyusd/rate";
 import { OPERATOR_RESOLUTION } from "@/domain/pyusd/state";
@@ -15,9 +16,6 @@ import { appError, type AppError } from "@/lib/errors";
 // field: it is allowed only on a paid order and never writes the payment state. Archive (S18) is
 // also its own field: it hides an order from the merchant's list and never writes anything else.
 
-// An order is a purchase that reached a payment. A review that never started one moved no money,
-// and any buyer can open many, so listing reviews would push real orders off the page.
-const ORDER_STATES = ["pending_payment", "paid", "uncertain", "unpaid_closed"] as const satisfies readonly PurchaseState[];
 const ORDERS_PAGE = 50;
 
 export type MerchantOrder = {

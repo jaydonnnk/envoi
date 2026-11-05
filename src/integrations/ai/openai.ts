@@ -2,11 +2,13 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { generateText, Output, stepCountIs, tool } from "ai";
 import { z } from "zod";
 import type { MenuTranslator } from "@/domain/menu/translate";
+import type { OrderFilterModel } from "@/domain/purchases/order-filter";
 import type { ModelOutcome, SuggestionModel, SuggestionTools } from "@/domain/suggestions/types";
 import { webEnv, type WebEnv } from "@/env";
 import { checkBaseUrl } from "@/integrations/assistant/agent";
 import { log, toSafeErrorRecord } from "@/lib/log";
 import { translateMenuNames } from "./menu-translate";
+import { createOrderFilterModel } from "./order-filter";
 
 // Gate 3 named clock T_AI_BUDGET: 30 seconds from the suggestion request start, enforced here.
 export const T_AI_BUDGET_MS = 30_000;
@@ -158,4 +160,14 @@ export function menuTranslator(env: WebEnv = webEnv()): MenuTranslator | null {
 
 export function translationEnabled(): boolean {
   return menuTranslator() !== null;
+}
+
+// Ask your orders (S35) reuses the key and AI_MODEL. Off without them: the table still sorts and filters.
+export function orderFilterModel(env: WebEnv = webEnv()): OrderFilterModel | null {
+  if (!env.OPENAI_API_KEY || !env.AI_MODEL) return null;
+  return createOrderFilterModel({ apiKey: env.OPENAI_API_KEY, model: env.AI_MODEL });
+}
+
+export function orderFilterEnabled(): boolean {
+  return orderFilterModel() !== null;
 }

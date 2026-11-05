@@ -39,6 +39,14 @@ export const TRANSLATION_LIMITS: RateLimits = {
   global: { max: 120, windowMs: 60 * 60_000 },
 };
 
+// S35, third build plan [hypothesis: starting values]: at most 10 orders filter sentences per outlet in
+// 10 minutes and 60 across all outlets in an hour. Each admitted sentence spends model money, so the
+// limiter runs before the model call. The subject is the outlet, so members share its allowance.
+export const ORDER_FILTER_LIMITS: RateLimits = {
+  perSubject: { max: 10, windowMs: 10 * 60_000 },
+  global: { max: 60, windowMs: 60 * 60_000 },
+};
+
 // S16, Gate 3 "PYUSD merchant wallet and rate": at most 10 wallet challenges per outlet in an hour.
 // The subject is the outlet, so a member cannot spread requests across sessions to exceed it.
 export const WALLET_CHALLENGE_LIMITS: RateLimits = {

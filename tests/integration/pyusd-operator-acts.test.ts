@@ -95,7 +95,7 @@ describe("PYUSD extra transfers and operator acts", () => {
     expect(order.state).toBe("paid");
     const amount = formatPyusdAtomic(prepared.attempt.atomicAmount);
     expect(order.pyusd?.extraTransfers).toEqual([{ signature: extra, amount }]);
-    const page = renderToStaticMarkup(createElement(OrdersView, { initial: orders }));
+    const page = renderToStaticMarkup(createElement(OrdersView, { initial: orders, askEnabled: false }));
     expect(page).toContain("Extra transfer");
     expect(page).toContain(`A second devnet transfer of ${amount} PYUSD`);
     expect(page).toContain(extra);
