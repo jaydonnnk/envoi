@@ -26,7 +26,7 @@ export default function Home() {
         <p className="lead">
           Scan the shop’s QR and say what you want in your own language. Envoi helps you read the menu and put your order together. Review the exact amount, then approve in PayPal.
         </p>
-        <p className="muted">Supported languages: Japanese, Malay, Spanish.</p>
+        <p className="muted">Supported languages: Japanese, Malay, Spanish, Chinese.</p>
         <div className="actions">
           {askEnabled && (
             <a className="button" href="/buy/ask">

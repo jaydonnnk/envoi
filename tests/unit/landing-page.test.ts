@@ -64,12 +64,12 @@ describe("landing page", () => {
   });
 
   it("names the passing languages separately", () => {
-    expect(landing(true)).toContain('<p class="muted">Supported languages: Japanese, Malay, Spanish.</p>');
+    expect(landing(true)).toContain('<p class="muted">Supported languages: Japanese, Malay, Spanish, Chinese.</p>');
   });
 
   it("makes no unproven language ordering claim", () => {
     const markup = landing(true).toLowerCase();
-    for (const language of ["mandarin", "chinese", "korean", "bahasa", "hindi", "thai", "vietnamese", "indonesian", "french", "german", "tamil"]) {
+    for (const language of ["mandarin", "korean", "bahasa", "hindi", "thai", "vietnamese", "indonesian", "french", "german", "tamil"]) {
       expect(markup, language).not.toContain(language);
     }
     expect(markup).not.toContain("any language");

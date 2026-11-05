@@ -1,9 +1,9 @@
 {
   "label": "S32 FIXTURE scoring, spend-boundary and narrowed-copy mutations; no real model, DB, build or server",
-  "ranAt": "2026-11-05T06:45:54.584172+00:00",
+  "ranAt": "2026-11-05T07:20:17.648355+00:00",
   "sourceSha256": "c40cc5e114f0ad4105e6f488e39913421df777b07689f865b5f39abcaf77de7e",
   "filesSha256": {
-    "src/app/page.tsx": "9232bf7ec8c2b977a41e77e1b79fed6b3da2c5ad1b7d98c4604868c8eb8f4ddf",
+    "src/app/page.tsx": "69b085aaa207503d2368876fd7a62496ee101dba8d272ed414bbbbd83247530b",
     "docs/plans/envoi/evidence/s32-language-eval.mts": "c40cc5e114f0ad4105e6f488e39913421df777b07689f865b5f39abcaf77de7e"
   },
   "allRestoredByteIdentical": true,

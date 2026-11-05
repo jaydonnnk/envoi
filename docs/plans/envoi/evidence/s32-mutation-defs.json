@@ -194,8 +194,8 @@
     "file": "src/app/page.tsx",
     "testFile": "tests/unit/landing-page.test.ts",
     "test": "names the passing languages separately",
-    "find": "Supported languages: Japanese, Malay, Spanish.",
-    "replace": "Supported languages: Japanese, Malay."
+    "find": "Supported languages: Japanese, Malay, Spanish, Chinese.",
+    "replace": "Supported languages: Japanese, Malay, Spanish."
   },
   {
     "id": "M33",

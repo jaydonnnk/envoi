@@ -6,7 +6,7 @@ Every shot keeps the "Test environment" badge and the test-money notice on scree
 Say "test money" or "devnet test tokens" every time money moves; never call a demo shop a real merchant.
 Each spoken claim must appear in the [evidence pack](evidence-pack.md); cut any line that does not.
 
-**The S32 language claim is limited.** The approved landing copy now leads with "Your language. One scan. PayPal." and separately states "Supported languages: Japanese, Malay, Spanish." Those languages passed five fixed FIXTURE cases on both paths. Ask Envoi scored 24 of 25 and the box 20 of 25, with zero wrong basket links; the interrupted first attempt remains failed. Chinese is unproven in this run and Korean fails the box's scope check. This draft still does not speak a language claim, and no native-reader or general accuracy claim is supported. The narrowed landing is deployed from `ae801d6`; the video remains an unrecorded draft. See [S32](00-status.md#s32-ordering-in-other-languages-2026-11-05).
+**The S32 language claim is limited.** The approved landing copy now leads with "Your language. One scan. PayPal." and separately states "Supported languages: Japanese, Malay, Spanish, Chinese." Japanese, Malay and Spanish passed the S32 fixed set; Chinese passed all five cases on both paths in the separately pre-registered S33 follow-up. Ask Envoi scored 24 of 25 and the box 20 of 25, with zero wrong basket links; the interrupted first attempt remains failed. The original S32 Chinese gap stays in that historical result; the separate S33 Chinese follow-up now passes. Korean still fails the box's scope check. This draft still does not speak a language claim, and no native-reader or general accuracy claim is supported. The narrowed landing is deployed from `ae801d6`; the video remains an unrecorded draft. See [S32](00-status.md#s32-ordering-in-other-languages-2026-11-05).
 
 | Time | Shot | Voice-over |
 | --- | --- | --- |
@@ -24,7 +24,7 @@ Each spoken claim must appear in the [evidence pack](evidence-pack.md); cut any 
 
 ## Do not show or say
 
-- "Any language", Chinese or Korean ordering support. S32 supports only the five fixed Japanese, Spanish and Malay cases on both paths; Chinese is unproven after an instrumentation interruption and Korean fails the box's scope check. The draft makes no general language accuracy claim.
+- Universal language support or Korean ordering support. Japanese, Spanish and Malay passed the S32 fixed cases; Chinese passed the separate S33 follow-up. These are fixed fixture sets with builder AI review, not general language accuracy or native-reader validation.
 - Ask Envoi reaching a Paid receipt. It has not been run end to end on the deployed site; S33 owns it. Shot 2 stops at the steps panel and shot 3 stops at "Choose quantities" for this reason; the payment shots use the manual path.
 - Crypto through PayPal. It is not built; S38 owns it and one simulated sandbox order is all the evidence there is.
 - The success target, "4 of 5 first-time buyers". The study was removed on 2026-10-29 and the target is never measured.
