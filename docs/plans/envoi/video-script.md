@@ -6,7 +6,7 @@ Every shot keeps the "Test environment" badge and the test-money notice on scree
 Say "test money" or "devnet test tokens" every time money moves; never call a demo shop a real merchant.
 Each spoken claim must appear in the [evidence pack](evidence-pack.md); cut any line that does not.
 
-**The pitch line is not spoken.** The approved landing line is "Any language. One scan. PayPal." No language evaluation has run, S32 owns it, so this script says nothing about languages and does not speak that line. The landing page may carry it because Gate 1 approved the wording there; a spoken claim needs the evidence, and there is none yet.
+**The S32 language claim is limited.** The local landing now says "Japanese, Spanish or Malay. One scan. PayPal." Those languages passed five fixed FIXTURE cases on both paths. Ask Envoi scored 24 of 25 and the box 20 of 25, with zero wrong basket links; the interrupted first attempt remains failed. Chinese is unproven in this run and Korean fails the box's scope check. This draft still does not speak a language claim, and no native-reader or general accuracy claim is supported. S32 is not deployed yet. See [S32](00-status.md#s32-ordering-in-other-languages-2026-11-05).
 
 | Time | Shot | Voice-over |
 | --- | --- | --- |
@@ -24,7 +24,7 @@ Each spoken claim must appear in the [evidence pack](evidence-pack.md); cut any 
 
 ## Do not show or say
 
-- Any language, or the pitch line "Any language. One scan. PayPal." No language evaluation has run; S32 owns it.
+- "Any language", Chinese or Korean ordering support. S32 supports only the five fixed Japanese, Spanish and Malay cases on both paths; Chinese is unproven after an instrumentation interruption and Korean fails the box's scope check. The draft makes no general language accuracy claim.
 - Ask Envoi reaching a Paid receipt. It has not been run end to end on the deployed site; S33 owns it. Shot 2 stops at the steps panel and shot 3 stops at "Choose quantities" for this reason; the payment shots use the manual path.
 - Crypto through PayPal. It is not built; S38 owns it and one simulated sandbox order is all the evidence there is.
 - The success target, "4 of 5 first-time buyers". The study was removed on 2026-10-29 and the target is never measured.

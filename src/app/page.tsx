@@ -22,9 +22,9 @@ export default function Home() {
   return (
     <main id="main" className="landing">
       <div className="landing-hero">
-        <h1>Any language. One scan. PayPal.</h1>
+        <h1>Japanese, Spanish or Malay. One scan. PayPal.</h1>
         <p className="lead">
-          Scan the shop&apos;s QR, say what you want in your own language, and approve the exact amount in PayPal. AI reads the menu with you. It never sets a price and never pays.
+          Scan the shop&apos;s QR, say what you want in Japanese, Spanish or Malay, and approve the exact amount in PayPal. AI reads the menu with you. It never sets a price and never pays.
         </p>
         <div className="actions">
           {askEnabled && (

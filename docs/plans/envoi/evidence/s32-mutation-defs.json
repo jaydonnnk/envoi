@@ -1,0 +1,200 @@
+[
+  {
+    "id": "M01",
+    "test": "the language evaluation counts a wrong basket link as a failure",
+    "find": "left.shop === right.shop && linesKey(left) === linesKey(right)",
+    "replace": "linesKey(left) === linesKey(right)"
+  },
+  {
+    "id": "M02",
+    "test": "rejects a link containing an unrequested item",
+    "find": "JSON.stringify(line)))",
+    "replace": "JSON.stringify(line[1])))"
+  },
+  {
+    "id": "M03",
+    "test": "rejects a link with the wrong quantity",
+    "find": "JSON.stringify(line)))",
+    "replace": "JSON.stringify(line[0])))"
+  },
+  {
+    "id": "M04",
+    "test": "rejects an extra line instead of ignoring it",
+    "find": "sorted(basket.lines.map((line) => JSON.stringify(line)))",
+    "replace": "sorted([...new Set(basket.lines.map((line) => JSON.stringify(line)))])"
+  },
+  {
+    "id": "M05",
+    "test": "counts a basket on an unavailable case as a wrong link",
+    "find": "expected.kind !== \"basket\" || !sameBasket(expected, basket)",
+    "replace": "expected.kind === \"basket\" && !sameBasket(expected, basket)"
+  },
+  {
+    "id": "M06",
+    "test": "counts a model-written URL as a wrong link",
+    "find": "observed.modelWrittenLinks + observed.baskets",
+    "replace": "0 + observed.baskets"
+  },
+  {
+    "id": "M07",
+    "test": "requires the returned basket even when a correct proposal was captured",
+    "find": "const got = observed.got;",
+    "replace": "const got = expected;"
+  },
+  {
+    "id": "M08",
+    "test": "requires a captured proposal and allows line reordering",
+    "find": "observed.baskets.length > 0",
+    "replace": "true"
+  },
+  {
+    "id": "M09",
+    "test": "requires both ambiguity choices and the requested quantity",
+    "find": "sorted(expected.names) === sorted(got.names) && expected.quantity",
+    "replace": "true && expected.quantity"
+  },
+  {
+    "id": "M10",
+    "test": "requires both ambiguity choices and the requested quantity",
+    "find": "expected.quantity === got.quantity",
+    "replace": "true"
+  },
+  {
+    "id": "M11",
+    "test": "requires the unavailable item at the right shop",
+    "find": "matches = expected.shop === got.shop && sorted(expected.names) === sorted(got.names);",
+    "replace": "matches = sorted(expected.names) === sorted(got.names);"
+  },
+  {
+    "id": "M12",
+    "test": "refuses a request before it can exceed the shared US$1 cap",
+    "find": "if (!canReserve(ledger.spentUsd, ledger.reservedUsd, reserved, CAP_USD))",
+    "replace": "if (false)"
+  },
+  {
+    "id": "M13",
+    "test": "charges cached tokens once and bounds output before forwarding",
+    "find": "...body, max_output_tokens: 2000",
+    "replace": "...body, max_output_tokens: 20000"
+  },
+  {
+    "id": "M14",
+    "test": "charges cached tokens once and bounds output before forwarding",
+    "find": "(input - cached) * PRICES.inputPerM",
+    "replace": "input * PRICES.inputPerM"
+  },
+  {
+    "id": "M15",
+    "test": "keeps unknown usage reserved and refuses a subsequent request",
+    "find": "const { usage } = z.object({ model: z.literal(MODEL), service_tier: z.literal(\"default\"), usage: usageSchema }).parse(value);",
+    "replace": "const usage = { input_tokens: 0, output_tokens: 0, input_tokens_details: { cached_tokens: 0, cache_write_tokens: 0, cache_write_tokens_details: { ttl_30m_tokens: 0, ttl_12h_tokens: 0 } } };"
+  },
+  {
+    "id": "M16",
+    "test": "keeps unknown usage reserved and refuses a subsequent request",
+    "find": "assert(!stopped, \"evaluation already stopped\");",
+    "replace": "// MUTATION: permit another request after uncertain usage."
+  },
+  {
+    "id": "M17",
+    "test": "keeps unknown usage reserved and refuses a subsequent request",
+    "find": "assert(options.allowReserved || ledger.reservedUsd === 0, \"unresolved earlier model charge; reconcile before more calls\");",
+    "replace": "// MUTATION: default meter ignores earlier unresolved charge."
+  },
+  {
+    "id": "M18",
+    "test": "rejects impossible cached usage",
+    "find": "written + cached <= input && longWritten <= written",
+    "replace": "(cached > input || written + cached <= input) && longWritten <= written"
+  },
+  {
+    "id": "M19",
+    "test": "rejects another endpoint and another model before forwarding",
+    "find": "assert.equal(url, \"https://api.openai.com/v1/responses\", \"only the recorded model endpoint is authorized\");",
+    "replace": "// MUTATION: allow an unapproved endpoint."
+  },
+  {
+    "id": "M20",
+    "test": "rejects another endpoint and another model before forwarding",
+    "find": "z.object({ model: z.literal(MODEL) }).passthrough()",
+    "replace": "z.object({ model: z.string() }).passthrough()"
+  },
+  {
+    "id": "M21",
+    "test": "charges short and long cache writes without double counting",
+    "find": "written * (PRICES.cacheWritePerM - PRICES.inputPerM)",
+    "replace": "0"
+  },
+  {
+    "id": "M22",
+    "test": "charges short and long cache writes without double counting",
+    "find": "longWritten * (PRICES.longCacheWritePerM - PRICES.cacheWritePerM)",
+    "replace": "0"
+  },
+  {
+    "id": "M23",
+    "test": "charges cached tokens once and bounds output before forwarding",
+    "find": "...body, max_output_tokens: 2000, service_tier: \"default\"",
+    "replace": "...body, max_output_tokens: 2000, service_tier: \"fast\""
+  },
+  {
+    "id": "M24",
+    "test": "reserves the highest cache-write rate before forwarding",
+    "find": "inputBound * PRICES.longCacheWritePerM",
+    "replace": "inputBound * PRICES.inputPerM"
+  },
+  {
+    "id": "M25",
+    "test": "rejects overlapping cache reads and writes",
+    "find": "written + cached <= input && longWritten <= written",
+    "replace": "(written > 0 || written + cached <= input) && longWritten <= written"
+  },
+  {
+    "id": "M26",
+    "test": "prices missing cache-write lifetime at the highest rate",
+    "find": "const longWritten = details.cache_write_tokens_details?.ttl_12h_tokens ?? upperBoundWrites;\n      const shortWritten = details.cache_write_tokens_details?.ttl_30m_tokens ?? 0;",
+    "replace": "const longWritten = details.cache_write_tokens_details?.ttl_12h_tokens ?? 0;\n      const shortWritten = details.cache_write_tokens_details?.ttl_30m_tokens ?? upperBoundWrites;"
+  },
+  {
+    "id": "M27",
+    "test": "refuses a response with an unexpected model or processing tier",
+    "find": "z.object({ model: z.literal(MODEL), service_tier: z.literal(\"default\"), usage: usageSchema }).parse(value)",
+    "replace": "z.object({ model: z.string(), service_tier: z.literal(\"default\"), usage: usageSchema }).parse(value)"
+  },
+  {
+    "id": "M28",
+    "test": "refuses a response with an unexpected model or processing tier",
+    "find": "z.object({ model: z.literal(MODEL), service_tier: z.literal(\"default\"), usage: usageSchema }).parse(value)",
+    "replace": "z.object({ model: z.literal(MODEL), service_tier: z.string(), usage: usageSchema }).parse(value)"
+  },
+  {
+    "id": "M29",
+    "test": "keeps an earlier unresolved charge inside the continuation cap",
+    "find": "return spent + reserved + next <= cap;",
+    "replace": "return spent + next <= cap;"
+  },
+  {
+    "id": "M30",
+    "file": "src/app/page.tsx",
+    "testFile": "tests/unit/landing-page.test.ts",
+    "test": "leads with the evaluated language claim",
+    "find": "<h1>Japanese, Spanish or Malay. One scan. PayPal.</h1>",
+    "replace": "<h1>Any language. One scan. PayPal.</h1>"
+  },
+  {
+    "id": "M31",
+    "file": "src/app/page.tsx",
+    "testFile": "tests/unit/landing-page.test.ts",
+    "test": "makes no unproven language ordering claim",
+    "find": "in Japanese, Spanish or Malay, and",
+    "replace": "in Japanese, Spanish or Malay or Korean, and"
+  },
+  {
+    "id": "M32",
+    "file": "src/app/page.tsx",
+    "testFile": "tests/unit/landing-page.test.ts",
+    "test": "names the passing languages in the ordering sentence",
+    "find": "say what you want in Japanese, Spanish or Malay",
+    "replace": "say what you want in Japanese"
+  }
+]

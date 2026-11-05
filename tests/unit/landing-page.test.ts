@@ -26,8 +26,8 @@ function landing(enabled: boolean): string {
 }
 
 describe("landing page", () => {
-  it("leads with the approved pitch line", () => {
-    expect(landing(true)).toContain("<h1>Any language. One scan. PayPal.</h1>");
+  it("leads with the evaluated language claim", () => {
+    expect(landing(true)).toContain("<h1>Japanese, Spanish or Malay. One scan. PayPal.</h1>");
   });
 
   it("says the AI never sets a price and never pays", () => {
@@ -65,14 +65,16 @@ describe("landing page", () => {
     expect(landing(true).toLowerCase()).not.toContain("fixture");
   });
 
-  it("names no language, because none is measured yet", () => {
+  it("names the passing languages in the ordering sentence", () => {
+    expect(landing(true)).toContain("say what you want in Japanese, Spanish or Malay");
+  });
+
+  it("makes no unproven language ordering claim", () => {
     const markup = landing(true).toLowerCase();
-    const languages = ["mandarin", "chinese", "japanese", "korean", "spanish", "malay", "bahasa", "hindi", "thai", "vietnamese", "indonesian", "french", "german", "tamil"];
-    for (const language of languages) {
+    for (const language of ["mandarin", "chinese", "korean", "bahasa", "hindi", "thai", "vietnamese", "indonesian", "french", "german", "tamil"]) {
       expect(markup, language).not.toContain(language);
     }
-    expect(markup).not.toContain("any language works");
-    expect(markup).toContain("any language. one scan. paypal.");
+    expect(markup).not.toContain("any language");
   });
 
   it("every other page keeps the demo fixture notice and footer", () => {

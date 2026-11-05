@@ -1,0 +1,90 @@
+{
+  "label": "FIXTURE shops; real OpenAI; box on local DB; assistant backend and links simulated; no payment or deployment",
+  "startedAt": "2026-11-05T05:12:49.933Z",
+  "updatedAt": "2026-11-05T05:12:58.484Z",
+  "model": "gpt-6-sol",
+  "run": "initial",
+  "manifestSha256": "bde23b3a0bdcaff9627d82fc3d258e9300cb1da1fdb56b7ee863fcee21a70211",
+  "promptSha256": "ea96d39aafab74a03d237e319e4cfe0e98f3158e590c4537ff12f47b03e3242f",
+  "boxPromptSha256": "05330862d4022463bba517f10b8442ee6304e67f32fee916d555ac33b2937d16",
+  "prices": {
+    "inputPerM": 2,
+    "cachedInputPerM": 0.2,
+    "cacheWritePerM": 2.5,
+    "longCacheWritePerM": 5,
+    "outputPerM": 10
+  },
+  "approvedS32CapUsd": 1,
+  "totalS32Meter": {
+    "spentUsd": 0.003436,
+    "reservedUsd": 0.056145,
+    "requests": 3,
+    "inputTokens": 1458,
+    "cachedTokens": 0,
+    "outputTokens": 52,
+    "cacheWriteTokens": 0,
+    "longCacheWriteTokens": 0
+  },
+  "stopReason": "cache_accounting",
+  "semanticReview": "pending; structuralPass is not an overall pass",
+  "rows": [
+    {
+      "id": "zh1",
+      "language": "zh",
+      "sentence": "我要在 Lorong Demo Kopi 买两杯黑咖啡（Kopi O）。",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Kopi O",
+            2
+          ]
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "failed"
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "failed",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_dd7olp4rzgtbr4ey3xzpgv2zom",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 1
+          }
+        ]
+      },
+      "structuralPass": false,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 1458,
+        "cached": 0,
+        "output": 52,
+        "cacheWrites": 0,
+        "longCacheWrites": 0
+      },
+      "usd": 0.003436,
+      "reservedUsd": 0.056145
+    }
+  ]
+}

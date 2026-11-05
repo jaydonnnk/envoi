@@ -1,0 +1,240 @@
+{
+  "label": "FIXTURE perfect model replies at provider fetch; local PostgreSQL; no real model; counterfactuals are NOT registered evaluation replacements",
+  "ranAt": "2026-11-05T05:27:21.047Z",
+  "finding": "All five attached Korean shop-name particles are rejected by whole-word scope validation; a space changes only the scope match and all five intended outcomes settle",
+  "rows": [
+    {
+      "id": "ko1",
+      "original": "Lorong Demo Kopi에서 블랙커피(Kopi O) 두 잔 주세요.",
+      "unregisteredCounterfactual": "Lorong Demo Kopi 에서 블랙커피(Kopi O) 두 잔 주세요.",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Kopi O",
+            2
+          ]
+        ]
+      },
+      "originalGot": {
+        "kind": "clarification",
+        "question": "Which area are you in? For example, Tanjong Pagar.",
+        "missing": [
+          "area"
+        ]
+      },
+      "counterfactualGot": {
+        "kind": "basket",
+        "outletId": "out_zldcbq23g74n4ugjvtrjz4zgji",
+        "outlet": {
+          "id": "out_zldcbq23g74n4ugjvtrjz4zgji",
+          "name": "Lorong Demo Kopi",
+          "area": "Tanjong Pagar",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "lines": [
+          {
+            "item": {
+              "id": "itm_hqqqe4kfx4rqueepw3t6uff7tu",
+              "name": "Kopi O",
+              "unitMinor": 160,
+              "available": true
+            },
+            "quantity": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "ko2",
+      "original": "Test Shop에서 Kopi C 두 잔과 아이스 밀크티 한 잔 주세요.",
+      "unregisteredCounterfactual": "Test Shop 에서 Kopi C 두 잔과 아이스 밀크티 한 잔 주세요.",
+      "expected": {
+        "kind": "basket",
+        "shop": "Test Shop",
+        "lines": [
+          [
+            "Kopi C",
+            2
+          ],
+          [
+            "Iced milk tea",
+            1
+          ]
+        ]
+      },
+      "originalGot": {
+        "kind": "clarification",
+        "question": "Which area are you in? For example, Tanjong Pagar.",
+        "missing": [
+          "area"
+        ]
+      },
+      "counterfactualGot": {
+        "kind": "basket",
+        "outletId": "out_4x6cw5w4fcrvaknl2eastozie4",
+        "outlet": {
+          "id": "out_4x6cw5w4fcrvaknl2eastozie4",
+          "name": "Test Shop",
+          "area": "Test Area",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "lines": [
+          {
+            "item": {
+              "id": "itm_6ya6jjucyk5dqp2b5s7qofdl5e",
+              "name": "Kopi C",
+              "unitMinor": 180,
+              "available": true
+            },
+            "quantity": 2
+          },
+          {
+            "item": {
+              "id": "itm_pyueellfxkvzq2jrhe5qqnhyr4",
+              "name": "Iced milk tea",
+              "unitMinor": 250,
+              "available": true
+            },
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "ko3",
+      "original": "Lorong Demo Kopi에서 반숙 달걀 두 세트 주세요. 한 세트에 두 개입니다(Soft-boiled eggs (2)).",
+      "unregisteredCounterfactual": "Lorong Demo Kopi 에서 반숙 달걀 두 세트 주세요. 한 세트에 두 개입니다(Soft-boiled eggs (2)).",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Soft-boiled eggs (2)",
+            2
+          ]
+        ]
+      },
+      "originalGot": {
+        "kind": "clarification",
+        "question": "Which area are you in? For example, Tanjong Pagar.",
+        "missing": [
+          "area"
+        ]
+      },
+      "counterfactualGot": {
+        "kind": "basket",
+        "outletId": "out_zldcbq23g74n4ugjvtrjz4zgji",
+        "outlet": {
+          "id": "out_zldcbq23g74n4ugjvtrjz4zgji",
+          "name": "Lorong Demo Kopi",
+          "area": "Tanjong Pagar",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "lines": [
+          {
+            "item": {
+              "id": "itm_4zew2cueds7mgor446amqesumi",
+              "name": "Soft-boiled eggs (2)",
+              "unitMinor": 200,
+              "available": true
+            },
+            "quantity": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "ko4",
+      "original": "Test Shop에서 카야 토스트 세트 하나 주세요.",
+      "unregisteredCounterfactual": "Test Shop 에서 카야 토스트 세트 하나 주세요.",
+      "expected": {
+        "kind": "unavailable_item",
+        "shop": "Test Shop",
+        "names": [
+          "Kaya toast set"
+        ]
+      },
+      "originalGot": {
+        "kind": "clarification",
+        "question": "Which area are you in? For example, Tanjong Pagar.",
+        "missing": [
+          "area"
+        ]
+      },
+      "counterfactualGot": {
+        "kind": "unavailable_item",
+        "outletId": "out_4x6cw5w4fcrvaknl2eastozie4",
+        "outlet": {
+          "id": "out_4x6cw5w4fcrvaknl2eastozie4",
+          "name": "Test Shop",
+          "area": "Test Area",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "items": [
+          {
+            "id": "itm_tmu77rhblhgujz2wcmf4xn6cya",
+            "name": "Kaya toast set"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ko5",
+      "original": "Test Shop에서 아이스티 세 잔 주세요.",
+      "unregisteredCounterfactual": "Test Shop 에서 아이스티 세 잔 주세요.",
+      "expected": {
+        "kind": "choose",
+        "shop": "Test Shop",
+        "names": [
+          "Iced lemon tea",
+          "Iced milk tea"
+        ],
+        "quantity": 3
+      },
+      "originalGot": {
+        "kind": "clarification",
+        "question": "Which area are you in? For example, Tanjong Pagar.",
+        "missing": [
+          "area"
+        ]
+      },
+      "counterfactualGot": {
+        "kind": "choose",
+        "outletId": "out_4x6cw5w4fcrvaknl2eastozie4",
+        "outlet": {
+          "id": "out_4x6cw5w4fcrvaknl2eastozie4",
+          "name": "Test Shop",
+          "area": "Test Area",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "quantity": 3,
+        "matches": [
+          {
+            "id": "itm_dkcwcnckmeg3j6cgk6rcescrd4",
+            "name": "Iced lemon tea",
+            "unitMinor": 220,
+            "available": true
+          },
+          {
+            "id": "itm_pyueellfxkvzq2jrhe5qqnhyr4",
+            "name": "Iced milk tea",
+            "unitMinor": 250,
+            "available": true
+          }
+        ]
+      }
+    }
+  ]
+}

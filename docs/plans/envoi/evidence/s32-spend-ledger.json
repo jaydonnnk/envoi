@@ -1,0 +1,11 @@
+{
+  "spentUsd": 0.525292,
+  "reservedUsd": 0.05614499999999992,
+  "requests": 164,
+  "inputTokens": 166795,
+  "cachedTokens": 43095,
+  "outputTokens": 8408,
+  "cacheWriteTokens": 61731,
+  "longCacheWriteTokens": 0,
+  "cacheUpperBoundTokens": 61731
+}

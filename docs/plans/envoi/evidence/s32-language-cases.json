@@ -1,0 +1,377 @@
+[
+  {
+    "id": "zh1",
+    "language": "zh",
+    "sentence": "我要在 Lorong Demo Kopi 买两杯黑咖啡（Kopi O）。",
+    "expected": {
+      "kind": "basket",
+      "shop": "Lorong Demo Kopi",
+      "lines": [
+        [
+          "Kopi O",
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "zh2",
+    "language": "zh",
+    "sentence": "我要在 Test Shop 买两杯 Kopi C 和一杯冰奶茶。",
+    "expected": {
+      "kind": "basket",
+      "shop": "Test Shop",
+      "lines": [
+        [
+          "Kopi C",
+          2
+        ],
+        [
+          "Iced milk tea",
+          1
+        ]
+      ]
+    }
+  },
+  {
+    "id": "zh3",
+    "language": "zh",
+    "sentence": "我要在 Lorong Demo Kopi 买两份半熟蛋，每份两个（Soft-boiled eggs (2)）。",
+    "expected": {
+      "kind": "basket",
+      "shop": "Lorong Demo Kopi",
+      "lines": [
+        [
+          "Soft-boiled eggs (2)",
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "zh4",
+    "language": "zh",
+    "sentence": "我要在 Test Shop 买一份咖椰吐司套餐。",
+    "expected": {
+      "kind": "unavailable_item",
+      "shop": "Test Shop",
+      "names": [
+        "Kaya toast set"
+      ]
+    }
+  },
+  {
+    "id": "zh5",
+    "language": "zh",
+    "sentence": "我要在 Test Shop 买三杯冰茶。",
+    "expected": {
+      "kind": "choose",
+      "shop": "Test Shop",
+      "names": [
+        "Iced lemon tea",
+        "Iced milk tea"
+      ],
+      "quantity": 3
+    }
+  },
+  {
+    "id": "ja1",
+    "language": "ja",
+    "sentence": "Lorong Demo Kopi でブラックコーヒー（Kopi O）を二杯ください。",
+    "expected": {
+      "kind": "basket",
+      "shop": "Lorong Demo Kopi",
+      "lines": [
+        [
+          "Kopi O",
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "ja2",
+    "language": "ja",
+    "sentence": "Test Shop で Kopi C を二杯とアイスミルクティーを一杯ください。",
+    "expected": {
+      "kind": "basket",
+      "shop": "Test Shop",
+      "lines": [
+        [
+          "Kopi C",
+          2
+        ],
+        [
+          "Iced milk tea",
+          1
+        ]
+      ]
+    }
+  },
+  {
+    "id": "ja3",
+    "language": "ja",
+    "sentence": "Lorong Demo Kopi で半熟卵を二人前ください。一人前は二個です（Soft-boiled eggs (2)）。",
+    "expected": {
+      "kind": "basket",
+      "shop": "Lorong Demo Kopi",
+      "lines": [
+        [
+          "Soft-boiled eggs (2)",
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "ja4",
+    "language": "ja",
+    "sentence": "Test Shop でカヤトーストセットを一つください。",
+    "expected": {
+      "kind": "unavailable_item",
+      "shop": "Test Shop",
+      "names": [
+        "Kaya toast set"
+      ]
+    }
+  },
+  {
+    "id": "ja5",
+    "language": "ja",
+    "sentence": "Test Shop でアイスティーを三杯ください。",
+    "expected": {
+      "kind": "choose",
+      "shop": "Test Shop",
+      "names": [
+        "Iced lemon tea",
+        "Iced milk tea"
+      ],
+      "quantity": 3
+    }
+  },
+  {
+    "id": "ko1",
+    "language": "ko",
+    "sentence": "Lorong Demo Kopi에서 블랙커피(Kopi O) 두 잔 주세요.",
+    "expected": {
+      "kind": "basket",
+      "shop": "Lorong Demo Kopi",
+      "lines": [
+        [
+          "Kopi O",
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "ko2",
+    "language": "ko",
+    "sentence": "Test Shop에서 Kopi C 두 잔과 아이스 밀크티 한 잔 주세요.",
+    "expected": {
+      "kind": "basket",
+      "shop": "Test Shop",
+      "lines": [
+        [
+          "Kopi C",
+          2
+        ],
+        [
+          "Iced milk tea",
+          1
+        ]
+      ]
+    }
+  },
+  {
+    "id": "ko3",
+    "language": "ko",
+    "sentence": "Lorong Demo Kopi에서 반숙 달걀 두 세트 주세요. 한 세트에 두 개입니다(Soft-boiled eggs (2)).",
+    "expected": {
+      "kind": "basket",
+      "shop": "Lorong Demo Kopi",
+      "lines": [
+        [
+          "Soft-boiled eggs (2)",
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "ko4",
+    "language": "ko",
+    "sentence": "Test Shop에서 카야 토스트 세트 하나 주세요.",
+    "expected": {
+      "kind": "unavailable_item",
+      "shop": "Test Shop",
+      "names": [
+        "Kaya toast set"
+      ]
+    }
+  },
+  {
+    "id": "ko5",
+    "language": "ko",
+    "sentence": "Test Shop에서 아이스티 세 잔 주세요.",
+    "expected": {
+      "kind": "choose",
+      "shop": "Test Shop",
+      "names": [
+        "Iced lemon tea",
+        "Iced milk tea"
+      ],
+      "quantity": 3
+    }
+  },
+  {
+    "id": "es1",
+    "language": "es",
+    "sentence": "Quiero dos cafés negros (Kopi O) en Lorong Demo Kopi.",
+    "expected": {
+      "kind": "basket",
+      "shop": "Lorong Demo Kopi",
+      "lines": [
+        [
+          "Kopi O",
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "es2",
+    "language": "es",
+    "sentence": "Quiero dos Kopi C y un té helado con leche en Test Shop.",
+    "expected": {
+      "kind": "basket",
+      "shop": "Test Shop",
+      "lines": [
+        [
+          "Kopi C",
+          2
+        ],
+        [
+          "Iced milk tea",
+          1
+        ]
+      ]
+    }
+  },
+  {
+    "id": "es3",
+    "language": "es",
+    "sentence": "Quiero dos porciones de huevos pasados por agua en Lorong Demo Kopi; cada porción lleva dos huevos (Soft-boiled eggs (2)).",
+    "expected": {
+      "kind": "basket",
+      "shop": "Lorong Demo Kopi",
+      "lines": [
+        [
+          "Soft-boiled eggs (2)",
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "es4",
+    "language": "es",
+    "sentence": "Quiero un conjunto de tostadas con kaya en Test Shop.",
+    "expected": {
+      "kind": "unavailable_item",
+      "shop": "Test Shop",
+      "names": [
+        "Kaya toast set"
+      ]
+    }
+  },
+  {
+    "id": "es5",
+    "language": "es",
+    "sentence": "Quiero tres tés helados en Test Shop.",
+    "expected": {
+      "kind": "choose",
+      "shop": "Test Shop",
+      "names": [
+        "Iced lemon tea",
+        "Iced milk tea"
+      ],
+      "quantity": 3
+    }
+  },
+  {
+    "id": "ms1",
+    "language": "ms",
+    "sentence": "Saya mahu dua cawan kopi hitam (Kopi O) di Lorong Demo Kopi.",
+    "expected": {
+      "kind": "basket",
+      "shop": "Lorong Demo Kopi",
+      "lines": [
+        [
+          "Kopi O",
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "ms2",
+    "language": "ms",
+    "sentence": "Saya mahu dua cawan Kopi C dan satu cawan teh susu ais di Test Shop.",
+    "expected": {
+      "kind": "basket",
+      "shop": "Test Shop",
+      "lines": [
+        [
+          "Kopi C",
+          2
+        ],
+        [
+          "Iced milk tea",
+          1
+        ]
+      ]
+    }
+  },
+  {
+    "id": "ms3",
+    "language": "ms",
+    "sentence": "Saya mahu dua set telur separuh masak di Lorong Demo Kopi; setiap set ada dua biji (Soft-boiled eggs (2)).",
+    "expected": {
+      "kind": "basket",
+      "shop": "Lorong Demo Kopi",
+      "lines": [
+        [
+          "Soft-boiled eggs (2)",
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "ms4",
+    "language": "ms",
+    "sentence": "Saya mahu satu set roti bakar kaya di Test Shop.",
+    "expected": {
+      "kind": "unavailable_item",
+      "shop": "Test Shop",
+      "names": [
+        "Kaya toast set"
+      ]
+    }
+  },
+  {
+    "id": "ms5",
+    "language": "ms",
+    "sentence": "Saya mahu tiga cawan teh ais di Test Shop.",
+    "expected": {
+      "kind": "choose",
+      "shop": "Test Shop",
+      "names": [
+        "Iced lemon tea",
+        "Iced milk tea"
+      ],
+      "quantity": 3
+    }
+  }
+]

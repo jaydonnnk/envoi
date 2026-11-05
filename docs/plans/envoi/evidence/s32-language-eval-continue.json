@@ -1,0 +1,3695 @@
+{
+  "label": "FIXTURE shops; real OpenAI; box on local DB; assistant backend and links simulated; no payment or deployment",
+  "startedAt": "2026-11-05T05:22:15.416Z",
+  "updatedAt": "2026-11-05T05:26:09.735Z",
+  "model": "gpt-6-sol",
+  "run": "continue",
+  "manifestSha256": "bde23b3a0bdcaff9627d82fc3d258e9300cb1da1fdb56b7ee863fcee21a70211",
+  "promptSha256": "ea96d39aafab74a03d237e319e4cfe0e98f3158e590c4537ff12f47b03e3242f",
+  "boxPromptSha256": "05330862d4022463bba517f10b8442ee6304e67f32fee916d555ac33b2937d16",
+  "prices": {
+    "inputPerM": 2,
+    "cachedInputPerM": 0.2,
+    "cacheWritePerM": 2.5,
+    "longCacheWritePerM": 5,
+    "outputPerM": 10
+  },
+  "approvedS32CapUsd": 1,
+  "totalS32Meter": {
+    "spentUsd": 0.525292,
+    "reservedUsd": 0.05614499999999992,
+    "requests": 164,
+    "inputTokens": 166795,
+    "cachedTokens": 43095,
+    "outputTokens": 8408,
+    "cacheWriteTokens": 61731,
+    "longCacheWriteTokens": 0,
+    "cacheUpperBoundTokens": 61731
+  },
+  "stopReason": null,
+  "semanticReview": "pending; structuralPass is not an overall pass",
+  "costBoundary": "Usage-derived estimates; missing cache lifetime is priced at the highest rate. Earlier unresolved charge stays reserved. Actual invoice total is unknown.",
+  "continuedFrom": "s32-language-eval-initial.json",
+  "rows": [
+    {
+      "id": "zh1",
+      "language": "zh",
+      "sentence": "我要在 Lorong Demo Kopi 买两杯黑咖啡（Kopi O）。",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Kopi O",
+            2
+          ]
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "failed"
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "failed",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_dd7olp4rzgtbr4ey3xzpgv2zom",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 1
+          }
+        ]
+      },
+      "structuralPass": false,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 1458,
+        "cached": 0,
+        "output": 52,
+        "cacheWrites": 0,
+        "longCacheWrites": 0
+      },
+      "usd": 0.003436,
+      "reservedUsd": 0.056145
+    },
+    {
+      "id": "zh1",
+      "language": "zh",
+      "sentence": "我要在 Lorong Demo Kopi 买两杯黑咖啡（Kopi O）。",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Kopi O",
+            2
+          ]
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Kopi O",
+              2
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Lorong Demo Kopi",
+            "lines": [
+              [
+                "Kopi O",
+                2
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "basket",
+        "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+        "outlet": {
+          "id": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+          "name": "Lorong Demo Kopi",
+          "area": "Tanjong Pagar",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "lines": [
+          {
+            "item": {
+              "id": "itm_oaefajdjvudkitioep2nca6lmy",
+              "name": "Kopi O",
+              "unitMinor": 160,
+              "available": true
+            },
+            "quantity": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3493,
+        "cached": 1125,
+        "output": 176,
+        "cacheWrites": 1352,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1352
+      },
+      "usd": 0.010777000000000002,
+      "reservedUsd": 0.056145
+    },
+    {
+      "id": "zh2",
+      "language": "zh",
+      "sentence": "我要在 Test Shop 买两杯 Kopi C 和一杯冰奶茶。",
+      "expected": {
+        "kind": "basket",
+        "shop": "Test Shop",
+        "lines": [
+          [
+            "Kopi C",
+            2
+          ],
+          [
+            "Iced milk tea",
+            1
+          ]
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Test Shop",
+          "lines": [
+            [
+              "Kopi C",
+              2
+            ],
+            [
+              "Iced milk tea",
+              1
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Test Shop",
+            "lines": [
+              [
+                "Kopi C",
+                2
+              ],
+              [
+                "Iced milk tea",
+                1
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "已为你在 Test Shop 申请两杯 Kopi C 和一杯 Iced milk tea 的一次性链接。Envoi 已向你显示链接；打开后可查看价格并自行确认付款。",
+      "diagnostic": {
+        "kind": "link",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 6
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 5
+          },
+          {
+            "operation": "createPurchaseRequest",
+            "status": 200,
+            "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+            "itemIds": [
+              "itm_ldvtbs2if5sj77ucf2mffn22ey",
+              "itm_lngsvjf7l5wblzpf4dwngh626e"
+            ],
+            "expiresAt": "2030-01-01T00:00:00.000Z",
+            "ms": 7
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 4,
+      "tokens": {
+        "input": 3789,
+        "cached": 1084,
+        "output": 203,
+        "cacheWrites": 1245,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1245
+      },
+      "usd": 0.011391799999999999,
+      "reservedUsd": 0.05614499999999999
+    },
+    {
+      "id": "zh2",
+      "language": "zh",
+      "sentence": "我要在 Test Shop 买两杯 Kopi C 和一杯冰奶茶。",
+      "expected": {
+        "kind": "basket",
+        "shop": "Test Shop",
+        "lines": [
+          [
+            "Kopi C",
+            2
+          ],
+          [
+            "Iced milk tea",
+            1
+          ]
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Test Shop",
+          "lines": [
+            [
+              "Kopi C",
+              2
+            ],
+            [
+              "Iced milk tea",
+              1
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Test Shop",
+            "lines": [
+              [
+                "Kopi C",
+                2
+              ],
+              [
+                "Iced milk tea",
+                1
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "basket",
+        "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+        "outlet": {
+          "id": "out_h43dinf65fggpq7sz6bwhwc324",
+          "name": "Test Shop",
+          "area": "Test Area",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "lines": [
+          {
+            "item": {
+              "id": "itm_ldvtbs2if5sj77ucf2mffn22ey",
+              "name": "Kopi C",
+              "unitMinor": 180,
+              "available": true
+            },
+            "quantity": 2
+          },
+          {
+            "item": {
+              "id": "itm_lngsvjf7l5wblzpf4dwngh626e",
+              "name": "Iced milk tea",
+              "unitMinor": 250,
+              "available": true
+            },
+            "quantity": 1
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3465,
+        "cached": 1104,
+        "output": 206,
+        "cacheWrites": 1347,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1347
+      },
+      "usd": 0.011043800000000003,
+      "reservedUsd": 0.056145
+    },
+    {
+      "id": "zh3",
+      "language": "zh",
+      "sentence": "我要在 Lorong Demo Kopi 买两份半熟蛋，每份两个（Soft-boiled eggs (2)）。",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Soft-boiled eggs (2)",
+            2
+          ]
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Soft-boiled eggs (2)",
+              2
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Lorong Demo Kopi",
+            "lines": [
+              [
+                "Soft-boiled eggs (2)",
+                2
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "已为你申请 Lorong Demo Kopi 的两份 Soft-boiled eggs (2) 一次性链接。Envoi 已直接向你展示链接；打开后可核对价格并自行决定是否付款。",
+      "diagnostic": {
+        "kind": "link",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 3
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 3
+          },
+          {
+            "operation": "createPurchaseRequest",
+            "status": 200,
+            "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+            "itemIds": [
+              "itm_li2hh7xpstugyva6jwx63xwgwm"
+            ],
+            "expiresAt": "2030-01-01T00:00:00.000Z",
+            "ms": 5
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 4,
+      "tokens": {
+        "input": 3734,
+        "cached": 1066,
+        "output": 174,
+        "cacheWrites": 1192,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1192
+      },
+      "usd": 0.010865199999999998,
+      "reservedUsd": 0.056145000000000014
+    },
+    {
+      "id": "zh3",
+      "language": "zh",
+      "sentence": "我要在 Lorong Demo Kopi 买两份半熟蛋，每份两个（Soft-boiled eggs (2)）。",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Soft-boiled eggs (2)",
+            2
+          ]
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Soft-boiled eggs (2)",
+              2
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Lorong Demo Kopi",
+            "lines": [
+              [
+                "Soft-boiled eggs (2)",
+                2
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "basket",
+        "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+        "outlet": {
+          "id": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+          "name": "Lorong Demo Kopi",
+          "area": "Tanjong Pagar",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "lines": [
+          {
+            "item": {
+              "id": "itm_li2hh7xpstugyva6jwx63xwgwm",
+              "name": "Soft-boiled eggs (2)",
+              "unitMinor": 200,
+              "available": true
+            },
+            "quantity": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3507,
+        "cached": 1129,
+        "output": 197,
+        "cacheWrites": 1356,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1356
+      },
+      "usd": 0.011019799999999996,
+      "reservedUsd": 0.056145000000000014
+    },
+    {
+      "id": "zh4",
+      "language": "zh",
+      "sentence": "我要在 Test Shop 买一份咖椰吐司套餐。",
+      "expected": {
+        "kind": "unavailable_item",
+        "shop": "Test Shop",
+        "names": [
+          "Kaya toast set"
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "reply",
+          "text": "Test Shop 的 Kaya toast set 今天暂不供应，暂时无法为你生成购买链接。"
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "Test Shop 的 Kaya toast set 今天暂不供应，暂时无法为你生成购买链接。",
+      "diagnostic": {
+        "kind": "reply",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 2532,
+        "cached": 0,
+        "output": 74,
+        "cacheWrites": 1081,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1081
+      },
+      "usd": 0.009046999999999993,
+      "reservedUsd": 0.056145
+    },
+    {
+      "id": "zh4",
+      "language": "zh",
+      "sentence": "我要在 Test Shop 买一份咖椰吐司套餐。",
+      "expected": {
+        "kind": "unavailable_item",
+        "shop": "Test Shop",
+        "names": [
+          "Kaya toast set"
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "unavailable_item",
+          "shop": "Test Shop",
+          "names": [
+            "Kaya toast set"
+          ]
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "unavailable_item",
+        "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+        "outlet": {
+          "id": "out_h43dinf65fggpq7sz6bwhwc324",
+          "name": "Test Shop",
+          "area": "Test Area",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "items": [
+          {
+            "id": "itm_3sxrlxmpqd75g57z4kefs6ghxm",
+            "name": "Kaya toast set"
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3468,
+        "cached": 1107,
+        "output": 166,
+        "cacheWrites": 1350,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1350
+      },
+      "usd": 0.010653399999999993,
+      "reservedUsd": 0.05614499999999999
+    },
+    {
+      "id": "zh5",
+      "language": "zh",
+      "sentence": "我要在 Test Shop 买三杯冰茶。",
+      "expected": {
+        "kind": "choose",
+        "shop": "Test Shop",
+        "names": [
+          "Iced lemon tea",
+          "Iced milk tea"
+        ],
+        "quantity": 3
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "reply",
+          "text": "Test Shop 有两种冰茶：Iced lemon tea（每杯 SGD 2.20）和 Iced milk tea（每杯 SGD 2.50）。你要三杯哪一种？"
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "Test Shop 有两种冰茶：Iced lemon tea（每杯 SGD 2.20）和 Iced milk tea（每杯 SGD 2.50）。你要三杯哪一种？",
+      "diagnostic": {
+        "kind": "reply",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 1
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 2520,
+        "cached": 0,
+        "output": 96,
+        "cacheWrites": 1077,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1077
+      },
+      "usd": 0.00923099999999999,
+      "reservedUsd": 0.056144999999999994
+    },
+    {
+      "id": "zh5",
+      "language": "zh",
+      "sentence": "我要在 Test Shop 买三杯冰茶。",
+      "expected": {
+        "kind": "choose",
+        "shop": "Test Shop",
+        "names": [
+          "Iced lemon tea",
+          "Iced milk tea"
+        ],
+        "quantity": 3
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "choose",
+          "shop": "Test Shop",
+          "names": [
+            "Iced lemon tea",
+            "Iced milk tea"
+          ],
+          "quantity": 3
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "choose",
+        "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+        "outlet": {
+          "id": "out_h43dinf65fggpq7sz6bwhwc324",
+          "name": "Test Shop",
+          "area": "Test Area",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "quantity": 3,
+        "matches": [
+          {
+            "id": "itm_33xbwq62mfx7m2u5gf5mzqmiqu",
+            "name": "Iced lemon tea",
+            "unitMinor": 220,
+            "available": true
+          },
+          {
+            "id": "itm_lngsvjf7l5wblzpf4dwngh626e",
+            "name": "Iced milk tea",
+            "unitMinor": 250,
+            "available": true
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3462,
+        "cached": 1106,
+        "output": 229,
+        "cacheWrites": 1349,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1349
+      },
+      "usd": 0.011270199999999994,
+      "reservedUsd": 0.05614499999999999
+    },
+    {
+      "id": "ja1",
+      "language": "ja",
+      "sentence": "Lorong Demo Kopi でブラックコーヒー（Kopi O）を二杯ください。",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Kopi O",
+            2
+          ]
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Kopi O",
+              2
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Lorong Demo Kopi",
+            "lines": [
+              [
+                "Kopi O",
+                2
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "Lorong Demo Kopi の Kopi O 2杯分のリンクをEnvoiが表示しました。リンクを開いて、価格をご確認ください。",
+      "diagnostic": {
+        "kind": "link",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "createPurchaseRequest",
+            "status": 200,
+            "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+            "itemIds": [
+              "itm_oaefajdjvudkitioep2nca6lmy"
+            ],
+            "expiresAt": "2030-01-01T00:00:00.000Z",
+            "ms": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 4,
+      "tokens": {
+        "input": 3722,
+        "cached": 1063,
+        "output": 161,
+        "cacheWrites": 1189,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1189
+      },
+      "usd": 0.010707599999999998,
+      "reservedUsd": 0.05614499999999999
+    },
+    {
+      "id": "ja1",
+      "language": "ja",
+      "sentence": "Lorong Demo Kopi でブラックコーヒー（Kopi O）を二杯ください。",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Kopi O",
+            2
+          ]
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Kopi O",
+              2
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Lorong Demo Kopi",
+            "lines": [
+              [
+                "Kopi O",
+                2
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "basket",
+        "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+        "outlet": {
+          "id": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+          "name": "Lorong Demo Kopi",
+          "area": "Tanjong Pagar",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "lines": [
+          {
+            "item": {
+              "id": "itm_oaefajdjvudkitioep2nca6lmy",
+              "name": "Kopi O",
+              "unitMinor": 160,
+              "available": true
+            },
+            "quantity": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3536,
+        "cached": 1145,
+        "output": 193,
+        "cacheWrites": 1372,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1372
+      },
+      "usd": 0.011056999999999984,
+      "reservedUsd": 0.05614499999999999
+    },
+    {
+      "id": "ja2",
+      "language": "ja",
+      "sentence": "Test Shop で Kopi C を二杯とアイスミルクティーを一杯ください。",
+      "expected": {
+        "kind": "basket",
+        "shop": "Test Shop",
+        "lines": [
+          [
+            "Kopi C",
+            2
+          ],
+          [
+            "Iced milk tea",
+            1
+          ]
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Test Shop",
+          "lines": [
+            [
+              "Kopi C",
+              2
+            ],
+            [
+              "Iced milk tea",
+              1
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Test Shop",
+            "lines": [
+              [
+                "Kopi C",
+                2
+              ],
+              [
+                "Iced milk tea",
+                1
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "Test Shop の Kopi C 2杯と Iced milk tea 1杯の確認リンクが表示されました。リンクを開いて、Envoi の価格をご確認ください。",
+      "diagnostic": {
+        "kind": "link",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 1
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 1
+          },
+          {
+            "operation": "createPurchaseRequest",
+            "status": 200,
+            "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+            "itemIds": [
+              "itm_ldvtbs2if5sj77ucf2mffn22ey",
+              "itm_lngsvjf7l5wblzpf4dwngh626e"
+            ],
+            "expiresAt": "2030-01-01T00:00:00.000Z",
+            "ms": 1
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 4,
+      "tokens": {
+        "input": 3801,
+        "cached": 1090,
+        "output": 186,
+        "cacheWrites": 1239,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1239
+      },
+      "usd": 0.01121699999999999,
+      "reservedUsd": 0.05614499999999999
+    },
+    {
+      "id": "ja2",
+      "language": "ja",
+      "sentence": "Test Shop で Kopi C を二杯とアイスミルクティーを一杯ください。",
+      "expected": {
+        "kind": "basket",
+        "shop": "Test Shop",
+        "lines": [
+          [
+            "Kopi C",
+            2
+          ],
+          [
+            "Iced milk tea",
+            1
+          ]
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Test Shop",
+          "lines": [
+            [
+              "Kopi C",
+              2
+            ],
+            [
+              "Iced milk tea",
+              1
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Test Shop",
+            "lines": [
+              [
+                "Kopi C",
+                2
+              ],
+              [
+                "Iced milk tea",
+                1
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "basket",
+        "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+        "outlet": {
+          "id": "out_h43dinf65fggpq7sz6bwhwc324",
+          "name": "Test Shop",
+          "area": "Test Area",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "lines": [
+          {
+            "item": {
+              "id": "itm_ldvtbs2if5sj77ucf2mffn22ey",
+              "name": "Kopi C",
+              "unitMinor": 180,
+              "available": true
+            },
+            "quantity": 2
+          },
+          {
+            "item": {
+              "id": "itm_lngsvjf7l5wblzpf4dwngh626e",
+              "name": "Iced milk tea",
+              "unitMinor": 250,
+              "available": true
+            },
+            "quantity": 1
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3509,
+        "cached": 1123,
+        "output": 198,
+        "cacheWrites": 1366,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1366
+      },
+      "usd": 0.01107459999999999,
+      "reservedUsd": 0.05614499999999997
+    },
+    {
+      "id": "ja3",
+      "language": "ja",
+      "sentence": "Lorong Demo Kopi で半熟卵を二人前ください。一人前は二個です（Soft-boiled eggs (2)）。",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Soft-boiled eggs (2)",
+            2
+          ]
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Soft-boiled eggs (2)",
+              2
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Lorong Demo Kopi",
+            "lines": [
+              [
+                "Soft-boiled eggs (2)",
+                2
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "Lorong Demo Kopi の Soft-boiled eggs (2) を二人前で、Envoi の確認用リンクを表示しました。リンクを開いて内容をご確認ください。",
+      "diagnostic": {
+        "kind": "link",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 0
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 1
+          },
+          {
+            "operation": "createPurchaseRequest",
+            "status": 200,
+            "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+            "itemIds": [
+              "itm_li2hh7xpstugyva6jwx63xwgwm"
+            ],
+            "expiresAt": "2030-01-01T00:00:00.000Z",
+            "ms": 3
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 4,
+      "tokens": {
+        "input": 3825,
+        "cached": 1094,
+        "output": 188,
+        "cacheWrites": 1220,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1220
+      },
+      "usd": 0.011220800000000003,
+      "reservedUsd": 0.05614499999999996
+    },
+    {
+      "id": "ja3",
+      "language": "ja",
+      "sentence": "Lorong Demo Kopi で半熟卵を二人前ください。一人前は二個です（Soft-boiled eggs (2)）。",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Soft-boiled eggs (2)",
+            2
+          ]
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Soft-boiled eggs (2)",
+              2
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Lorong Demo Kopi",
+            "lines": [
+              [
+                "Soft-boiled eggs (2)",
+                2
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "basket",
+        "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+        "outlet": {
+          "id": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+          "name": "Lorong Demo Kopi",
+          "area": "Tanjong Pagar",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "lines": [
+          {
+            "item": {
+              "id": "itm_li2hh7xpstugyva6jwx63xwgwm",
+              "name": "Soft-boiled eggs (2)",
+              "unitMinor": 200,
+              "available": true
+            },
+            "quantity": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3564,
+        "cached": 1154,
+        "output": 209,
+        "cacheWrites": 1381,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1381
+      },
+      "usd": 0.01128380000000001,
+      "reservedUsd": 0.05614499999999997
+    },
+    {
+      "id": "ja4",
+      "language": "ja",
+      "sentence": "Test Shop でカヤトーストセットを一つください。",
+      "expected": {
+        "kind": "unavailable_item",
+        "shop": "Test Shop",
+        "names": [
+          "Kaya toast set"
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "reply",
+          "text": "申し訳ありません。Test Shop の Kaya toast set は本日ご利用いただけません。"
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "申し訳ありません。Test Shop の Kaya toast set は本日ご利用いただけません。",
+      "diagnostic": {
+        "kind": "reply",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 1
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 2535,
+        "cached": 0,
+        "output": 73,
+        "cacheWrites": 1082,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1082
+      },
+      "usd": 0.009046000000000026,
+      "reservedUsd": 0.05614499999999996
+    },
+    {
+      "id": "ja4",
+      "language": "ja",
+      "sentence": "Test Shop でカヤトーストセットを一つください。",
+      "expected": {
+        "kind": "unavailable_item",
+        "shop": "Test Shop",
+        "names": [
+          "Kaya toast set"
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "unavailable_item",
+          "shop": "Test Shop",
+          "names": [
+            "Kaya toast set"
+          ]
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "unavailable_item",
+        "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+        "outlet": {
+          "id": "out_h43dinf65fggpq7sz6bwhwc324",
+          "name": "Test Shop",
+          "area": "Test Area",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "items": [
+          {
+            "id": "itm_3sxrlxmpqd75g57z4kefs6ghxm",
+            "name": "Kaya toast set"
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3473,
+        "cached": 1109,
+        "output": 167,
+        "cacheWrites": 1352,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1352
+      },
+      "usd": 0.010675800000000013,
+      "reservedUsd": 0.056144999999999945
+    },
+    {
+      "id": "ja5",
+      "language": "ja",
+      "sentence": "Test Shop でアイスティーを三杯ください。",
+      "expected": {
+        "kind": "choose",
+        "shop": "Test Shop",
+        "names": [
+          "Iced lemon tea",
+          "Iced milk tea"
+        ],
+        "quantity": 3
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "reply",
+          "text": "Test Shop には Iced lemon tea（SGD 2.20）と Iced milk tea（SGD 2.50）があります。三杯はどちらにしますか？"
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "Test Shop には Iced lemon tea（SGD 2.20）と Iced milk tea（SGD 2.50）があります。三杯はどちらにしますか？",
+      "diagnostic": {
+        "kind": "reply",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 2529,
+        "cached": 0,
+        "output": 94,
+        "cacheWrites": 1080,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1080
+      },
+      "usd": 0.009237999999999996,
+      "reservedUsd": 0.05614499999999995
+    },
+    {
+      "id": "ja5",
+      "language": "ja",
+      "sentence": "Test Shop でアイスティーを三杯ください。",
+      "expected": {
+        "kind": "choose",
+        "shop": "Test Shop",
+        "names": [
+          "Iced lemon tea",
+          "Iced milk tea"
+        ],
+        "quantity": 3
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "choose",
+          "shop": "Test Shop",
+          "names": [
+            "Iced lemon tea",
+            "Iced milk tea"
+          ],
+          "quantity": 3
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "choose",
+        "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+        "outlet": {
+          "id": "out_h43dinf65fggpq7sz6bwhwc324",
+          "name": "Test Shop",
+          "area": "Test Area",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "quantity": 3,
+        "matches": [
+          {
+            "id": "itm_33xbwq62mfx7m2u5gf5mzqmiqu",
+            "name": "Iced lemon tea",
+            "unitMinor": 220,
+            "available": true
+          },
+          {
+            "id": "itm_lngsvjf7l5wblzpf4dwngh626e",
+            "name": "Iced milk tea",
+            "unitMinor": 250,
+            "available": true
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3473,
+        "cached": 1110,
+        "output": 236,
+        "cacheWrites": 1353,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1353
+      },
+      "usd": 0.011366999999999988,
+      "reservedUsd": 0.05614499999999993
+    },
+    {
+      "id": "ko1",
+      "language": "ko",
+      "sentence": "Lorong Demo Kopi에서 블랙커피(Kopi O) 두 잔 주세요.",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Kopi O",
+            2
+          ]
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Kopi O",
+              2
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Lorong Demo Kopi",
+            "lines": [
+              [
+                "Kopi O",
+                2
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "Lorong Demo Kopi의 Kopi O 두 잔을 담은 일회용 링크가 표시됐습니다. 링크를 열어 가격을 확인하고 결제를 승인해 주세요.",
+      "diagnostic": {
+        "kind": "link",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 1
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "createPurchaseRequest",
+            "status": 200,
+            "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+            "itemIds": [
+              "itm_oaefajdjvudkitioep2nca6lmy"
+            ],
+            "expiresAt": "2030-01-01T00:00:00.000Z",
+            "ms": 1
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 4,
+      "tokens": {
+        "input": 3710,
+        "cached": 1060,
+        "output": 167,
+        "cacheWrites": 1186,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1186
+      },
+      "usd": 0.010739999999999972,
+      "reservedUsd": 0.05614499999999994
+    },
+    {
+      "id": "ko1",
+      "language": "ko",
+      "sentence": "Lorong Demo Kopi에서 블랙커피(Kopi O) 두 잔 주세요.",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Kopi O",
+            2
+          ]
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "failed"
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "clarification",
+        "question": "Which area are you in? For example, Tanjong Pagar.",
+        "missing": [
+          "area"
+        ]
+      },
+      "structuralPass": false,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3508,
+        "cached": 1133,
+        "output": 185,
+        "cacheWrites": 1360,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1360
+      },
+      "usd": 0.010906599999999989,
+      "reservedUsd": 0.05614499999999996
+    },
+    {
+      "id": "ko2",
+      "language": "ko",
+      "sentence": "Test Shop에서 Kopi C 두 잔과 아이스 밀크티 한 잔 주세요.",
+      "expected": {
+        "kind": "basket",
+        "shop": "Test Shop",
+        "lines": [
+          [
+            "Kopi C",
+            2
+          ],
+          [
+            "Iced milk tea",
+            1
+          ]
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Test Shop",
+          "lines": [
+            [
+              "Kopi C",
+              2
+            ],
+            [
+              "Iced milk tea",
+              1
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Test Shop",
+            "lines": [
+              [
+                "Kopi C",
+                2
+              ],
+              [
+                "Iced milk tea",
+                1
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "Test Shop의 Kopi C 두 잔과 Iced milk tea 한 잔을 담은 Envoi 링크가 표시됐습니다. 링크에서 가격을 확인하고 결제를 승인하실 수 있습니다.",
+      "diagnostic": {
+        "kind": "link",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 1
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 1
+          },
+          {
+            "operation": "createPurchaseRequest",
+            "status": 200,
+            "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+            "itemIds": [
+              "itm_ldvtbs2if5sj77ucf2mffn22ey",
+              "itm_lngsvjf7l5wblzpf4dwngh626e"
+            ],
+            "expiresAt": "2030-01-01T00:00:00.000Z",
+            "ms": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 4,
+      "tokens": {
+        "input": 3825,
+        "cached": 1099,
+        "output": 202,
+        "cacheWrites": 1248,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1248
+      },
+      "usd": 0.011435800000000024,
+      "reservedUsd": 0.056144999999999945
+    },
+    {
+      "id": "ko2",
+      "language": "ko",
+      "sentence": "Test Shop에서 Kopi C 두 잔과 아이스 밀크티 한 잔 주세요.",
+      "expected": {
+        "kind": "basket",
+        "shop": "Test Shop",
+        "lines": [
+          [
+            "Kopi C",
+            2
+          ],
+          [
+            "Iced milk tea",
+            1
+          ]
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "failed"
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "clarification",
+        "question": "Which area are you in? For example, Tanjong Pagar.",
+        "missing": [
+          "area"
+        ]
+      },
+      "structuralPass": false,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3493,
+        "cached": 1117,
+        "output": 196,
+        "cacheWrites": 1360,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1360
+      },
+      "usd": 0.011015400000000009,
+      "reservedUsd": 0.05614499999999992
+    },
+    {
+      "id": "ko3",
+      "language": "ko",
+      "sentence": "Lorong Demo Kopi에서 반숙 달걀 두 세트 주세요. 한 세트에 두 개입니다(Soft-boiled eggs (2)).",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Soft-boiled eggs (2)",
+            2
+          ]
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Soft-boiled eggs (2)",
+              2
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Lorong Demo Kopi",
+            "lines": [
+              [
+                "Soft-boiled eggs (2)",
+                2
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "Lorong Demo Kopi의 Soft-boiled eggs (2) 두 세트로 일회용 링크를 요청했습니다. 링크에서 가격을 확인해 주세요.",
+      "diagnostic": {
+        "kind": "link",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "createPurchaseRequest",
+            "status": 200,
+            "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+            "itemIds": [
+              "itm_li2hh7xpstugyva6jwx63xwgwm"
+            ],
+            "expiresAt": "2030-01-01T00:00:00.000Z",
+            "ms": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 4,
+      "tokens": {
+        "input": 3791,
+        "cached": 1083,
+        "output": 173,
+        "cacheWrites": 1209,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1209
+      },
+      "usd": 0.010989600000000044,
+      "reservedUsd": 0.05614499999999992
+    },
+    {
+      "id": "ko3",
+      "language": "ko",
+      "sentence": "Lorong Demo Kopi에서 반숙 달걀 두 세트 주세요. 한 세트에 두 개입니다(Soft-boiled eggs (2)).",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Soft-boiled eggs (2)",
+            2
+          ]
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "failed"
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "clarification",
+        "question": "Which area are you in? For example, Tanjong Pagar.",
+        "missing": [
+          "area"
+        ]
+      },
+      "structuralPass": false,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3539,
+        "cached": 1142,
+        "output": 181,
+        "cacheWrites": 1369,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1369
+      },
+      "usd": 0.010939399999999988,
+      "reservedUsd": 0.05614499999999993
+    },
+    {
+      "id": "ko4",
+      "language": "ko",
+      "sentence": "Test Shop에서 카야 토스트 세트 하나 주세요.",
+      "expected": {
+        "kind": "unavailable_item",
+        "shop": "Test Shop",
+        "names": [
+          "Kaya toast set"
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "reply",
+          "text": "Test Shop의 Kaya toast set은 오늘 주문할 수 없습니다."
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "Test Shop의 Kaya toast set은 오늘 주문할 수 없습니다.",
+      "diagnostic": {
+        "kind": "reply",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 1
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 2526,
+        "cached": 0,
+        "output": 67,
+        "cacheWrites": 1079,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1079
+      },
+      "usd": 0.00895899999999994,
+      "reservedUsd": 0.056144999999999924
+    },
+    {
+      "id": "ko4",
+      "language": "ko",
+      "sentence": "Test Shop에서 카야 토스트 세트 하나 주세요.",
+      "expected": {
+        "kind": "unavailable_item",
+        "shop": "Test Shop",
+        "names": [
+          "Kaya toast set"
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "failed"
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "clarification",
+        "question": "Which area are you in? For example, Tanjong Pagar.",
+        "missing": [
+          "area"
+        ]
+      },
+      "structuralPass": false,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3463,
+        "cached": 1106,
+        "output": 168,
+        "cacheWrites": 1349,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1349
+      },
+      "usd": 0.01066220000000001,
+      "reservedUsd": 0.05614499999999992
+    },
+    {
+      "id": "ko5",
+      "language": "ko",
+      "sentence": "Test Shop에서 아이스티 세 잔 주세요.",
+      "expected": {
+        "kind": "choose",
+        "shop": "Test Shop",
+        "names": [
+          "Iced lemon tea",
+          "Iced milk tea"
+        ],
+        "quantity": 3
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "reply",
+          "text": "Test Shop에는 Iced lemon tea(SGD 2.20)와 Iced milk tea(SGD 2.50)가 있습니다. 어느 아이스티를 세 잔 드릴까요?"
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "Test Shop에는 Iced lemon tea(SGD 2.20)와 Iced milk tea(SGD 2.50)가 있습니다. 어느 아이스티를 세 잔 드릴까요?",
+      "diagnostic": {
+        "kind": "reply",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 3
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 2523,
+        "cached": 0,
+        "output": 94,
+        "cacheWrites": 1078,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1078
+      },
+      "usd": 0.009220000000000061,
+      "reservedUsd": 0.05614499999999991
+    },
+    {
+      "id": "ko5",
+      "language": "ko",
+      "sentence": "Test Shop에서 아이스티 세 잔 주세요.",
+      "expected": {
+        "kind": "choose",
+        "shop": "Test Shop",
+        "names": [
+          "Iced lemon tea",
+          "Iced milk tea"
+        ],
+        "quantity": 3
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "failed"
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "clarification",
+        "question": "Which area are you in? For example, Tanjong Pagar.",
+        "missing": [
+          "area"
+        ]
+      },
+      "structuralPass": false,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3464,
+        "cached": 1107,
+        "output": 228,
+        "cacheWrites": 1350,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1350
+      },
+      "usd": 0.011265399999999981,
+      "reservedUsd": 0.05614499999999993
+    },
+    {
+      "id": "es1",
+      "language": "es",
+      "sentence": "Quiero dos cafés negros (Kopi O) en Lorong Demo Kopi.",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Kopi O",
+            2
+          ]
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Kopi O",
+              2
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Lorong Demo Kopi",
+            "lines": [
+              [
+                "Kopi O",
+                2
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "Envoi te ha mostrado un enlace para revisar y aprobar el pedido de dos Kopi O en Lorong Demo Kopi.",
+      "diagnostic": {
+        "kind": "link",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 1
+          },
+          {
+            "operation": "createPurchaseRequest",
+            "status": 200,
+            "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+            "itemIds": [
+              "itm_oaefajdjvudkitioep2nca6lmy"
+            ],
+            "expiresAt": "2030-01-01T00:00:00.000Z",
+            "ms": 3
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 4,
+      "tokens": {
+        "input": 3702,
+        "cached": 1058,
+        "output": 154,
+        "cacheWrites": 1184,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1184
+      },
+      "usd": 0.010591600000000034,
+      "reservedUsd": 0.05614499999999995
+    },
+    {
+      "id": "es1",
+      "language": "es",
+      "sentence": "Quiero dos cafés negros (Kopi O) en Lorong Demo Kopi.",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Kopi O",
+            2
+          ]
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Kopi O",
+              2
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Lorong Demo Kopi",
+            "lines": [
+              [
+                "Kopi O",
+                2
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "basket",
+        "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+        "outlet": {
+          "id": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+          "name": "Lorong Demo Kopi",
+          "area": "Tanjong Pagar",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "lines": [
+          {
+            "item": {
+              "id": "itm_oaefajdjvudkitioep2nca6lmy",
+              "name": "Kopi O",
+              "unitMinor": 160,
+              "available": true
+            },
+            "quantity": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3486,
+        "cached": 1123,
+        "output": 177,
+        "cacheWrites": 1350,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1350
+      },
+      "usd": 0.010770600000000019,
+      "reservedUsd": 0.05614499999999996
+    },
+    {
+      "id": "es2",
+      "language": "es",
+      "sentence": "Quiero dos Kopi C y un té helado con leche en Test Shop.",
+      "expected": {
+        "kind": "basket",
+        "shop": "Test Shop",
+        "lines": [
+          [
+            "Kopi C",
+            2
+          ],
+          [
+            "Iced milk tea",
+            1
+          ]
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Test Shop",
+          "lines": [
+            [
+              "Kopi C",
+              2
+            ],
+            [
+              "Iced milk tea",
+              1
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Test Shop",
+            "lines": [
+              [
+                "Kopi C",
+                2
+              ],
+              [
+                "Iced milk tea",
+                1
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "Envoi te ha mostrado un enlace para revisar dos Kopi C y un Iced milk tea de Test Shop. Allí podrás comprobar el precio y aprobar el pago si quieres.",
+      "diagnostic": {
+        "kind": "link",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 4
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 1
+          },
+          {
+            "operation": "createPurchaseRequest",
+            "status": 200,
+            "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+            "itemIds": [
+              "itm_ldvtbs2if5sj77ucf2mffn22ey",
+              "itm_lngsvjf7l5wblzpf4dwngh626e"
+            ],
+            "expiresAt": "2030-01-01T00:00:00.000Z",
+            "ms": 1
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 4,
+      "tokens": {
+        "input": 3794,
+        "cached": 1084,
+        "output": 200,
+        "cacheWrites": 1250,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1250
+      },
+      "usd": 0.011386799999999975,
+      "reservedUsd": 0.056144999999999945
+    },
+    {
+      "id": "es2",
+      "language": "es",
+      "sentence": "Quiero dos Kopi C y un té helado con leche en Test Shop.",
+      "expected": {
+        "kind": "basket",
+        "shop": "Test Shop",
+        "lines": [
+          [
+            "Kopi C",
+            2
+          ],
+          [
+            "Iced milk tea",
+            1
+          ]
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Test Shop",
+          "lines": [
+            [
+              "Kopi C",
+              2
+            ],
+            [
+              "Iced milk tea",
+              1
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Test Shop",
+            "lines": [
+              [
+                "Kopi C",
+                2
+              ],
+              [
+                "Iced milk tea",
+                1
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "basket",
+        "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+        "outlet": {
+          "id": "out_h43dinf65fggpq7sz6bwhwc324",
+          "name": "Test Shop",
+          "area": "Test Area",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "lines": [
+          {
+            "item": {
+              "id": "itm_ldvtbs2if5sj77ucf2mffn22ey",
+              "name": "Kopi C",
+              "unitMinor": 180,
+              "available": true
+            },
+            "quantity": 2
+          },
+          {
+            "item": {
+              "id": "itm_lngsvjf7l5wblzpf4dwngh626e",
+              "name": "Iced milk tea",
+              "unitMinor": 250,
+              "available": true
+            },
+            "quantity": 1
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3458,
+        "cached": 1101,
+        "output": 203,
+        "cacheWrites": 1344,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1344
+      },
+      "usd": 0.010996200000000012,
+      "reservedUsd": 0.056144999999999945
+    },
+    {
+      "id": "es3",
+      "language": "es",
+      "sentence": "Quiero dos porciones de huevos pasados por agua en Lorong Demo Kopi; cada porción lleva dos huevos (Soft-boiled eggs (2)).",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Soft-boiled eggs (2)",
+            2
+          ]
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Soft-boiled eggs (2)",
+              2
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Lorong Demo Kopi",
+            "lines": [
+              [
+                "Soft-boiled eggs (2)",
+                2
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "Envoi te ha mostrado un enlace para revisar y aprobar dos porciones de Soft-boiled eggs (2) de Lorong Demo Kopi.",
+      "diagnostic": {
+        "kind": "link",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "createPurchaseRequest",
+            "status": 200,
+            "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+            "itemIds": [
+              "itm_li2hh7xpstugyva6jwx63xwgwm"
+            ],
+            "expiresAt": "2030-01-01T00:00:00.000Z",
+            "ms": 1
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 4,
+      "tokens": {
+        "input": 3762,
+        "cached": 1073,
+        "output": 158,
+        "cacheWrites": 1199,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1199
+      },
+      "usd": 0.01076959999999999,
+      "reservedUsd": 0.05614499999999995
+    },
+    {
+      "id": "es3",
+      "language": "es",
+      "sentence": "Quiero dos porciones de huevos pasados por agua en Lorong Demo Kopi; cada porción lleva dos huevos (Soft-boiled eggs (2)).",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Soft-boiled eggs (2)",
+            2
+          ]
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Soft-boiled eggs (2)",
+              2
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Lorong Demo Kopi",
+            "lines": [
+              [
+                "Soft-boiled eggs (2)",
+                2
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "basket",
+        "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+        "outlet": {
+          "id": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+          "name": "Lorong Demo Kopi",
+          "area": "Tanjong Pagar",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "lines": [
+          {
+            "item": {
+              "id": "itm_li2hh7xpstugyva6jwx63xwgwm",
+              "name": "Soft-boiled eggs (2)",
+              "unitMinor": 200,
+              "available": true
+            },
+            "quantity": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3526,
+        "cached": 1135,
+        "output": 173,
+        "cacheWrites": 1362,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1362
+      },
+      "usd": 0.010825000000000029,
+      "reservedUsd": 0.05614499999999993
+    },
+    {
+      "id": "es4",
+      "language": "es",
+      "sentence": "Quiero un conjunto de tostadas con kaya en Test Shop.",
+      "expected": {
+        "kind": "unavailable_item",
+        "shop": "Test Shop",
+        "names": [
+          "Kaya toast set"
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "reply",
+          "text": "Kaya toast set no está disponible hoy en Test Shop."
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "Kaya toast set no está disponible hoy en Test Shop.",
+      "diagnostic": {
+        "kind": "reply",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 1
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 1
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 2529,
+        "cached": 0,
+        "output": 66,
+        "cacheWrites": 1080,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1080
+      },
+      "usd": 0.008957999999999966,
+      "reservedUsd": 0.05614499999999993
+    },
+    {
+      "id": "es4",
+      "language": "es",
+      "sentence": "Quiero un conjunto de tostadas con kaya en Test Shop.",
+      "expected": {
+        "kind": "unavailable_item",
+        "shop": "Test Shop",
+        "names": [
+          "Kaya toast set"
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "unavailable_item",
+          "shop": "Test Shop",
+          "names": [
+            "Kaya toast set"
+          ]
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "unavailable_item",
+        "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+        "outlet": {
+          "id": "out_h43dinf65fggpq7sz6bwhwc324",
+          "name": "Test Shop",
+          "area": "Test Area",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "items": [
+          {
+            "id": "itm_3sxrlxmpqd75g57z4kefs6ghxm",
+            "name": "Kaya toast set"
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3548,
+        "cached": 1148,
+        "output": 221,
+        "cacheWrites": 1391,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1391
+      },
+      "usd": 0.011412599999999995,
+      "reservedUsd": 0.056144999999999945
+    },
+    {
+      "id": "es5",
+      "language": "es",
+      "sentence": "Quiero tres tés helados en Test Shop.",
+      "expected": {
+        "kind": "choose",
+        "shop": "Test Shop",
+        "names": [
+          "Iced lemon tea",
+          "Iced milk tea"
+        ],
+        "quantity": 3
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "reply",
+          "text": "¿Quieres tres **Iced lemon tea** (2,20 SGD cada uno) o tres **Iced milk tea** (2,50 SGD cada uno)?"
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "¿Quieres tres **Iced lemon tea** (2,20 SGD cada uno) o tres **Iced milk tea** (2,50 SGD cada uno)?",
+      "diagnostic": {
+        "kind": "reply",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 0
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 2523,
+        "cached": 0,
+        "output": 87,
+        "cacheWrites": 1078,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1078
+      },
+      "usd": 0.009150000000000047,
+      "reservedUsd": 0.05614499999999994
+    },
+    {
+      "id": "es5",
+      "language": "es",
+      "sentence": "Quiero tres tés helados en Test Shop.",
+      "expected": {
+        "kind": "choose",
+        "shop": "Test Shop",
+        "names": [
+          "Iced lemon tea",
+          "Iced milk tea"
+        ],
+        "quantity": 3
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "choose",
+          "shop": "Test Shop",
+          "names": [
+            "Iced lemon tea",
+            "Iced milk tea"
+          ],
+          "quantity": 3
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "choose",
+        "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+        "outlet": {
+          "id": "out_h43dinf65fggpq7sz6bwhwc324",
+          "name": "Test Shop",
+          "area": "Test Area",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "quantity": 3,
+        "matches": [
+          {
+            "id": "itm_33xbwq62mfx7m2u5gf5mzqmiqu",
+            "name": "Iced lemon tea",
+            "unitMinor": 220,
+            "available": true
+          },
+          {
+            "id": "itm_lngsvjf7l5wblzpf4dwngh626e",
+            "name": "Iced milk tea",
+            "unitMinor": 250,
+            "available": true
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3442,
+        "cached": 1096,
+        "output": 254,
+        "cacheWrites": 1339,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1339
+      },
+      "usd": 0.011468199999999984,
+      "reservedUsd": 0.05614499999999993
+    },
+    {
+      "id": "ms1",
+      "language": "ms",
+      "sentence": "Saya mahu dua cawan kopi hitam (Kopi O) di Lorong Demo Kopi.",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Kopi O",
+            2
+          ]
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Kopi O",
+              2
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Lorong Demo Kopi",
+            "lines": [
+              [
+                "Kopi O",
+                2
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "Pautan sekali guna untuk dua Kopi O di Lorong Demo Kopi telah dipaparkan kepada anda. Semak harga Envoi sebelum meluluskan pembayaran.",
+      "diagnostic": {
+        "kind": "link",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "createPurchaseRequest",
+            "status": 200,
+            "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+            "itemIds": [
+              "itm_oaefajdjvudkitioep2nca6lmy"
+            ],
+            "expiresAt": "2030-01-01T00:00:00.000Z",
+            "ms": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 4,
+      "tokens": {
+        "input": 3714,
+        "cached": 1061,
+        "output": 163,
+        "cacheWrites": 1187,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1187
+      },
+      "usd": 0.010709199999999974,
+      "reservedUsd": 0.05614499999999995
+    },
+    {
+      "id": "ms1",
+      "language": "ms",
+      "sentence": "Saya mahu dua cawan kopi hitam (Kopi O) di Lorong Demo Kopi.",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Kopi O",
+            2
+          ]
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Kopi O",
+              2
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Lorong Demo Kopi",
+            "lines": [
+              [
+                "Kopi O",
+                2
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "basket",
+        "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+        "outlet": {
+          "id": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+          "name": "Lorong Demo Kopi",
+          "area": "Tanjong Pagar",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "lines": [
+          {
+            "item": {
+              "id": "itm_oaefajdjvudkitioep2nca6lmy",
+              "name": "Kopi O",
+              "unitMinor": 160,
+              "available": true
+            },
+            "quantity": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3495,
+        "cached": 1126,
+        "output": 197,
+        "cacheWrites": 1353,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1353
+      },
+      "usd": 0.010992200000000008,
+      "reservedUsd": 0.05614499999999996
+    },
+    {
+      "id": "ms2",
+      "language": "ms",
+      "sentence": "Saya mahu dua cawan Kopi C dan satu cawan teh susu ais di Test Shop.",
+      "expected": {
+        "kind": "basket",
+        "shop": "Test Shop",
+        "lines": [
+          [
+            "Kopi C",
+            2
+          ],
+          [
+            "Iced milk tea",
+            1
+          ]
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Test Shop",
+          "lines": [
+            [
+              "Kopi C",
+              2
+            ],
+            [
+              "Iced milk tea",
+              1
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Test Shop",
+            "lines": [
+              [
+                "Kopi C",
+                2
+              ],
+              [
+                "Iced milk tea",
+                1
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "Pautan sekali guna untuk 2 Kopi C dan 1 Iced milk tea di Test Shop telah dipaparkan kepada anda. Sila semak harga Envoi sebelum meluluskan pembayaran.",
+      "diagnostic": {
+        "kind": "link",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 1
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "createPurchaseRequest",
+            "status": 200,
+            "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+            "itemIds": [
+              "itm_ldvtbs2if5sj77ucf2mffn22ey",
+              "itm_lngsvjf7l5wblzpf4dwngh626e"
+            ],
+            "expiresAt": "2030-01-01T00:00:00.000Z",
+            "ms": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 4,
+      "tokens": {
+        "input": 3805,
+        "cached": 1086,
+        "output": 209,
+        "cacheWrites": 1255,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1255
+      },
+      "usd": 0.011510200000000026,
+      "reservedUsd": 0.056144999999999945
+    },
+    {
+      "id": "ms2",
+      "language": "ms",
+      "sentence": "Saya mahu dua cawan Kopi C dan satu cawan teh susu ais di Test Shop.",
+      "expected": {
+        "kind": "basket",
+        "shop": "Test Shop",
+        "lines": [
+          [
+            "Kopi C",
+            2
+          ],
+          [
+            "Iced milk tea",
+            1
+          ]
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Test Shop",
+          "lines": [
+            [
+              "Kopi C",
+              2
+            ],
+            [
+              "Iced milk tea",
+              1
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Test Shop",
+            "lines": [
+              [
+                "Kopi C",
+                2
+              ],
+              [
+                "Iced milk tea",
+                1
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "basket",
+        "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+        "outlet": {
+          "id": "out_h43dinf65fggpq7sz6bwhwc324",
+          "name": "Test Shop",
+          "area": "Test Area",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "lines": [
+          {
+            "item": {
+              "id": "itm_ldvtbs2if5sj77ucf2mffn22ey",
+              "name": "Kopi C",
+              "unitMinor": 180,
+              "available": true
+            },
+            "quantity": 2
+          },
+          {
+            "item": {
+              "id": "itm_lngsvjf7l5wblzpf4dwngh626e",
+              "name": "Iced milk tea",
+              "unitMinor": 250,
+              "available": true
+            },
+            "quantity": 1
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3484,
+        "cached": 1113,
+        "output": 193,
+        "cacheWrites": 1356,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1356
+      },
+      "usd": 0.010962599999999989,
+      "reservedUsd": 0.056144999999999945
+    },
+    {
+      "id": "ms3",
+      "language": "ms",
+      "sentence": "Saya mahu dua set telur separuh masak di Lorong Demo Kopi; setiap set ada dua biji (Soft-boiled eggs (2)).",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Soft-boiled eggs (2)",
+            2
+          ]
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Soft-boiled eggs (2)",
+              2
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Lorong Demo Kopi",
+            "lines": [
+              [
+                "Soft-boiled eggs (2)",
+                2
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "Pautan sekali guna untuk dua set Soft-boiled eggs (2) di Lorong Demo Kopi telah dipaparkan oleh Envoi. Semak harga dan luluskan pembayaran di sana jika anda mahu meneruskan.",
+      "diagnostic": {
+        "kind": "link",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "createPurchaseRequest",
+            "status": 200,
+            "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+            "itemIds": [
+              "itm_li2hh7xpstugyva6jwx63xwgwm"
+            ],
+            "expiresAt": "2030-01-01T00:00:00.000Z",
+            "ms": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 4,
+      "tokens": {
+        "input": 3754,
+        "cached": 1071,
+        "output": 175,
+        "cacheWrites": 1197,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1197
+      },
+      "usd": 0.01092120000000002,
+      "reservedUsd": 0.05614499999999995
+    },
+    {
+      "id": "ms3",
+      "language": "ms",
+      "sentence": "Saya mahu dua set telur separuh masak di Lorong Demo Kopi; setiap set ada dua biji (Soft-boiled eggs (2)).",
+      "expected": {
+        "kind": "basket",
+        "shop": "Lorong Demo Kopi",
+        "lines": [
+          [
+            "Soft-boiled eggs (2)",
+            2
+          ]
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "basket",
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Soft-boiled eggs (2)",
+              2
+            ]
+          ]
+        },
+        "baskets": [
+          {
+            "shop": "Lorong Demo Kopi",
+            "lines": [
+              [
+                "Soft-boiled eggs (2)",
+                2
+              ]
+            ]
+          }
+        ],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "basket",
+        "outletId": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+        "outlet": {
+          "id": "out_2nnxg2pwg2sgtgteh5lcjwkwr4",
+          "name": "Lorong Demo Kopi",
+          "area": "Tanjong Pagar",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "lines": [
+          {
+            "item": {
+              "id": "itm_li2hh7xpstugyva6jwx63xwgwm",
+              "name": "Soft-boiled eggs (2)",
+              "unitMinor": 200,
+              "available": true
+            },
+            "quantity": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3552,
+        "cached": 1149,
+        "output": 212,
+        "cacheWrites": 1376,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1376
+      },
+      "usd": 0.01128380000000001,
+      "reservedUsd": 0.056144999999999945
+    },
+    {
+      "id": "ms4",
+      "language": "ms",
+      "sentence": "Saya mahu satu set roti bakar kaya di Test Shop.",
+      "expected": {
+        "kind": "unavailable_item",
+        "shop": "Test Shop",
+        "names": [
+          "Kaya toast set"
+        ]
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "reply",
+          "text": "Kaya toast set tiada di Test Shop hari ini."
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "Kaya toast set tiada di Test Shop hari ini.",
+      "diagnostic": {
+        "kind": "reply",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 2529,
+        "cached": 0,
+        "output": 66,
+        "cacheWrites": 1080,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1080
+      },
+      "usd": 0.008957999999999966,
+      "reservedUsd": 0.056144999999999945
+    },
+    {
+      "id": "ms4",
+      "language": "ms",
+      "sentence": "Saya mahu satu set roti bakar kaya di Test Shop.",
+      "expected": {
+        "kind": "unavailable_item",
+        "shop": "Test Shop",
+        "names": [
+          "Kaya toast set"
+        ]
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "unavailable_item",
+          "shop": "Test Shop",
+          "names": [
+            "Kaya toast set"
+          ]
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "unavailable_item",
+        "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+        "outlet": {
+          "id": "out_h43dinf65fggpq7sz6bwhwc324",
+          "name": "Test Shop",
+          "area": "Test Area",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "items": [
+          {
+            "id": "itm_3sxrlxmpqd75g57z4kefs6ghxm",
+            "name": "Kaya toast set"
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3482,
+        "cached": 1115,
+        "output": 176,
+        "cacheWrites": 1358,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1358
+      },
+      "usd": 0.010790999999999995,
+      "reservedUsd": 0.056144999999999945
+    },
+    {
+      "id": "ms5",
+      "language": "ms",
+      "sentence": "Saya mahu tiga cawan teh ais di Test Shop.",
+      "expected": {
+        "kind": "choose",
+        "shop": "Test Shop",
+        "names": [
+          "Iced lemon tea",
+          "Iced milk tea"
+        ],
+        "quantity": 3
+      },
+      "path": "assistant",
+      "observed": {
+        "got": {
+          "kind": "reply",
+          "text": "Di Test Shop, adakah anda maksudkan tiga cawan Iced lemon tea (SGD 2.20 secawan) atau Iced milk tea (SGD 2.50 secawan)?"
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "Di Test Shop, adakah anda maksudkan tiga cawan Iced lemon tea (SGD 2.20 secawan) atau Iced milk tea (SGD 2.50 secawan)?",
+      "diagnostic": {
+        "kind": "reply",
+        "steps": [
+          {
+            "operation": "listOutlets",
+            "status": 200,
+            "outletId": null,
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          },
+          {
+            "operation": "getOutletMenu",
+            "status": 200,
+            "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+            "itemIds": [],
+            "expiresAt": null,
+            "ms": 2
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 2523,
+        "cached": 0,
+        "output": 119,
+        "cacheWrites": 1078,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1078
+      },
+      "usd": 0.009469999999999978,
+      "reservedUsd": 0.05614499999999993
+    },
+    {
+      "id": "ms5",
+      "language": "ms",
+      "sentence": "Saya mahu tiga cawan teh ais di Test Shop.",
+      "expected": {
+        "kind": "choose",
+        "shop": "Test Shop",
+        "names": [
+          "Iced lemon tea",
+          "Iced milk tea"
+        ],
+        "quantity": 3
+      },
+      "path": "box",
+      "observed": {
+        "got": {
+          "kind": "choose",
+          "shop": "Test Shop",
+          "names": [
+            "Iced lemon tea",
+            "Iced milk tea"
+          ],
+          "quantity": 3
+        },
+        "baskets": [],
+        "modelWrittenLinks": 0
+      },
+      "reply": "",
+      "diagnostic": {
+        "kind": "choose",
+        "outletId": "out_h43dinf65fggpq7sz6bwhwc324",
+        "outlet": {
+          "id": "out_h43dinf65fggpq7sz6bwhwc324",
+          "name": "Test Shop",
+          "area": "Test Area",
+          "isDemoFixture": true,
+          "country": "SG",
+          "currency": "SGD"
+        },
+        "quantity": 3,
+        "matches": [
+          {
+            "id": "itm_33xbwq62mfx7m2u5gf5mzqmiqu",
+            "name": "Iced lemon tea",
+            "unitMinor": 220,
+            "available": true
+          },
+          {
+            "id": "itm_lngsvjf7l5wblzpf4dwngh626e",
+            "name": "Iced milk tea",
+            "unitMinor": 250,
+            "available": true
+          }
+        ]
+      },
+      "structuralPass": true,
+      "wrongLinks": 0,
+      "semanticReview": "pending",
+      "usageRequests": 3,
+      "tokens": {
+        "input": 3450,
+        "cached": 1100,
+        "output": 266,
+        "cacheWrites": 1343,
+        "longCacheWrites": 0,
+        "upperBoundCacheWrites": 1343
+      },
+      "usd": 0.01160899999999998,
+      "reservedUsd": 0.05614499999999992
+    }
+  ]
+}

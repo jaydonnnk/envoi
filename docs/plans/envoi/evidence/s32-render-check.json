@@ -1,0 +1,64 @@
+{
+  "label": "Actual headless Chrome rendering on isolated fixture-only local previews; provider endpoint disabled; no real account session",
+  "ranAt": "2026-11-05T05:44:03.361Z",
+  "rows": [
+    {
+      "name": "landing",
+      "url": "http://localhost:3101/",
+      "width": 390,
+      "innerWidth": 390,
+      "scrollWidth": 390,
+      "height": 1026,
+      "heading": "Japanese, Spanish or Malay. One scan. PayPal.",
+      "notice": true,
+      "filters": null,
+      "screenshot": "s32-landing-390.jpg"
+    },
+    {
+      "name": "results",
+      "url": "http://127.0.0.1:3102/s32-results.html",
+      "width": 390,
+      "innerWidth": 390,
+      "scrollWidth": 390,
+      "height": 12997,
+      "heading": "S32 language ordering",
+      "notice": true,
+      "filters": {
+        "total": 25,
+        "korean": 5,
+        "failures": 6,
+        "reset": 25
+      },
+      "screenshot": "s32-results-390.jpg"
+    },
+    {
+      "name": "landing",
+      "url": "http://localhost:3101/",
+      "width": 1280,
+      "innerWidth": 1280,
+      "scrollWidth": 1280,
+      "height": 900,
+      "heading": "Japanese, Spanish or Malay. One scan. PayPal.",
+      "notice": true,
+      "filters": null,
+      "screenshot": "s32-landing-1280.jpg"
+    },
+    {
+      "name": "results",
+      "url": "http://127.0.0.1:3102/s32-results.html",
+      "width": 1280,
+      "innerWidth": 1280,
+      "scrollWidth": 1280,
+      "height": 5244,
+      "heading": "S32 language ordering",
+      "notice": true,
+      "filters": {
+        "total": 25,
+        "korean": 5,
+        "failures": 6,
+        "reset": 25
+      },
+      "screenshot": "s32-results-1280.jpg"
+    }
+  ]
+}

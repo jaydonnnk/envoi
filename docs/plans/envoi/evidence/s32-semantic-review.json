@@ -1,0 +1,458 @@
+{
+  "label": "Builder AI semantic review of saved FIXTURE outputs; not native-reader validation or general language accuracy",
+  "reviewedAt": "2026-11-05T13:32:14+08:00",
+  "sourceSha256": "f5eee5bcd785b76d837958acbd80a9bd42136a670d24b1a68d0252e91d8617bf",
+  "nativeReaderValidation": false,
+  "rows": [
+    {
+      "id": "zh1",
+      "path": "assistant",
+      "languageCorrect": false,
+      "meaningCorrect": false,
+      "noInventedItemOrPrice": true,
+      "passed": false,
+      "reason": "Instrumented request stopped before a reply or link; retained as failed, not retried."
+    },
+    {
+      "id": "zh1",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Structured shop, items, quantities and no-link outcome match the fixed rubric; prices stay registry-owned."
+    },
+    {
+      "id": "zh2",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "zh2",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Structured shop, items, quantities and no-link outcome match the fixed rubric; prices stay registry-owned."
+    },
+    {
+      "id": "zh3",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "zh3",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Structured shop, items, quantities and no-link outcome match the fixed rubric; prices stay registry-owned."
+    },
+    {
+      "id": "zh4",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "zh4",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Structured shop, items, quantities and no-link outcome match the fixed rubric; prices stay registry-owned."
+    },
+    {
+      "id": "zh5",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "zh5",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Structured shop, items, quantities and no-link outcome match the fixed rubric; prices stay registry-owned."
+    },
+    {
+      "id": "ja1",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "ja1",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Structured shop, items, quantities and no-link outcome match the fixed rubric; prices stay registry-owned."
+    },
+    {
+      "id": "ja2",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "ja2",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Structured shop, items, quantities and no-link outcome match the fixed rubric; prices stay registry-owned."
+    },
+    {
+      "id": "ja3",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "ja3",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Structured shop, items, quantities and no-link outcome match the fixed rubric; prices stay registry-owned."
+    },
+    {
+      "id": "ja4",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "ja4",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Structured shop, items, quantities and no-link outcome match the fixed rubric; prices stay registry-owned."
+    },
+    {
+      "id": "ja5",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "ja5",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Structured shop, items, quantities and no-link outcome match the fixed rubric; prices stay registry-owned."
+    },
+    {
+      "id": "ko1",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "ko1",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": false,
+      "noInventedItemOrPrice": true,
+      "passed": false,
+      "reason": "Asked for an area despite a named shop; server whole-word scope check rejects the attached Korean particle."
+    },
+    {
+      "id": "ko2",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "ko2",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": false,
+      "noInventedItemOrPrice": true,
+      "passed": false,
+      "reason": "Asked for an area despite a named shop; server whole-word scope check rejects the attached Korean particle."
+    },
+    {
+      "id": "ko3",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "ko3",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": false,
+      "noInventedItemOrPrice": true,
+      "passed": false,
+      "reason": "Asked for an area despite a named shop; server whole-word scope check rejects the attached Korean particle."
+    },
+    {
+      "id": "ko4",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "ko4",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": false,
+      "noInventedItemOrPrice": true,
+      "passed": false,
+      "reason": "Asked for an area despite a named shop; server whole-word scope check rejects the attached Korean particle."
+    },
+    {
+      "id": "ko5",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "ko5",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": false,
+      "noInventedItemOrPrice": true,
+      "passed": false,
+      "reason": "Asked for an area despite a named shop; server whole-word scope check rejects the attached Korean particle."
+    },
+    {
+      "id": "es1",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "es1",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Structured shop, items, quantities and no-link outcome match the fixed rubric; prices stay registry-owned."
+    },
+    {
+      "id": "es2",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "es2",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Structured shop, items, quantities and no-link outcome match the fixed rubric; prices stay registry-owned."
+    },
+    {
+      "id": "es3",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "es3",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Structured shop, items, quantities and no-link outcome match the fixed rubric; prices stay registry-owned."
+    },
+    {
+      "id": "es4",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "es4",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Structured shop, items, quantities and no-link outcome match the fixed rubric; prices stay registry-owned."
+    },
+    {
+      "id": "es5",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "es5",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Structured shop, items, quantities and no-link outcome match the fixed rubric; prices stay registry-owned."
+    },
+    {
+      "id": "ms1",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "ms1",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Structured shop, items, quantities and no-link outcome match the fixed rubric; prices stay registry-owned."
+    },
+    {
+      "id": "ms2",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "ms2",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Structured shop, items, quantities and no-link outcome match the fixed rubric; prices stay registry-owned."
+    },
+    {
+      "id": "ms3",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "ms3",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Structured shop, items, quantities and no-link outcome match the fixed rubric; prices stay registry-owned."
+    },
+    {
+      "id": "ms4",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "ms4",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Structured shop, items, quantities and no-link outcome match the fixed rubric; prices stay registry-owned."
+    },
+    {
+      "id": "ms5",
+      "path": "assistant",
+      "languageCorrect": true,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Builder AI read the saved reply in the expected language, checked requested meaning and the published tea prices where stated; no invented item or price found."
+    },
+    {
+      "id": "ms5",
+      "path": "box",
+      "languageCorrect": null,
+      "meaningCorrect": true,
+      "noInventedItemOrPrice": true,
+      "passed": true,
+      "reason": "Structured shop, items, quantities and no-link outcome match the fixed rubric; prices stay registry-owned."
+    }
+  ]
+}

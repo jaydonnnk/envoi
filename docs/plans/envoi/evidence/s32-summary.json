@@ -1,0 +1,71 @@
+{
+  "label": "S32 registered fixed FIXTURE set with an explicitly authorized interrupted-run continuation; not an uninterrupted pass or general accuracy estimate",
+  "reviewedAt": "2026-11-05T13:32:14+08:00",
+  "sources": {
+    "results": "s32-language-eval-continue.json",
+    "resultsSha256": "f5eee5bcd785b76d837958acbd80a9bd42136a670d24b1a68d0252e91d8617bf",
+    "initial": "s32-language-eval-initial.json",
+    "semanticReview": "s32-semantic-review.json"
+  },
+  "paths": {
+    "assistant": {
+      "correct": 24,
+      "total": 25,
+      "wrongLinks": 0,
+      "meetsThreshold": true
+    },
+    "box": {
+      "correct": 20,
+      "total": 25,
+      "wrongLinks": 0,
+      "meetsThreshold": false
+    }
+  },
+  "languages": {
+    "zh": {
+      "assistant": 4,
+      "box": 5
+    },
+    "ja": {
+      "assistant": 5,
+      "box": 5
+    },
+    "ko": {
+      "assistant": 5,
+      "box": 0
+    },
+    "es": {
+      "assistant": 5,
+      "box": 5
+    },
+    "ms": {
+      "assistant": 5,
+      "box": 5
+    }
+  },
+  "passingLanguages": [
+    "ja",
+    "es",
+    "ms"
+  ],
+  "overallPass": false,
+  "productPromptFixesUsed": 0,
+  "reasonNoPromptFix": "All five Korean box cases fail the deterministic shop scope check even with perfect fixture model proposals. Prompt-only changes cannot repair the absent whole-word match without misrepresenting location; domain scope changes are outside S32. No repeated inference was used to hunt for a pass.",
+  "cost": {
+    "spentUsd": 0.525292,
+    "reservedUsd": 0.05614499999999992,
+    "requests": 164,
+    "inputTokens": 166795,
+    "cachedTokens": 43095,
+    "outputTokens": 8408,
+    "cacheWriteTokens": 61731,
+    "longCacheWriteTokens": 0,
+    "cacheUpperBoundTokens": 61731,
+    "usageCostType": "conservative estimate; 61731 cache-write tokens have unknown lifetime and are priced at the highest rate",
+    "unresolvedRequests": 1,
+    "totalBudgetHeldUsd": 0.581437,
+    "actualInvoiceUsd": null
+  },
+  "claim": "Japanese, Spanish or Malay. One scan. PayPal.",
+  "boundary": "Five fixed sentences per language. Assistant backend/links simulated; box on local fixture DB. Chinese is unproven after the instrumentation interruption, not disproven as a language. Korean box ordering has the reproduced scope limitation. No deployed payment or user study."
+}
