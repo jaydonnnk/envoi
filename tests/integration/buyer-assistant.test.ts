@@ -1,3 +1,5 @@
+import { shopContext } from "@/domain/outlets/search";
+import { webDb } from "@/lib/db/web";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createFakeEnvoiApi, FIXTURE_AGENT_TOKEN, FIXTURE_BASE_URL, FIXTURE_EXPIRES_AT, FIXTURE_LINK, FIXTURE_LINK_TOKEN, TEST_SHOP, type FakeEnvoiApi } from "../support/fake-envoi-api";
 import { createFakeOpenAI, FIXTURE_AI_ENV, type FakeOpenAI, type FakeTurn } from "../support/fake-openai";
@@ -218,5 +220,42 @@ describe("Ask Envoi route", () => {
     for (const [surface, text] of Object.entries(surfaces)) expect(found(text), surface).toEqual([]);
     // The tool's answer to the model said a link was shown, without it.
     expect(openai.toolOutputs().at(-1)).toContain("shownToBuyer");
+  });
+
+  // S33 named test 38, on the real schema: only a published outlet resolves.
+  it("an unpublished or unknown outlet id gives no shop context", async () => {
+    const { admin } = fixture.database;
+    const [outlet] = await admin<{ name: string }[]>`select name from outlets where id = ${fixture.outletId}`;
+    expect(await shopContext(webDb(), fixture.outletId)).toEqual({ id: fixture.outletId, name: outlet!.name });
+    expect(await shopContext(webDb(), `out_${"a".repeat(26)}`)).toBeNull();
+    // An id no outlet can have answers like an unknown shop, before a query PostgreSQL would refuse.
+    expect(await shopContext(webDb(), "out_\u0000")).toBeNull();
+
+    // A shop enrolled but never published, in the same shape as the seeded one.
+    const unpublished = `out_${"b".repeat(26)}`;
+    await admin`insert into outlets (id, name, area, is_demo_fixture) values (${unpublished}, 'FIXTURE Unpublished Shop', 'Test Area', true)`;
+    expect(await shopContext(webDb(), unpublished)).toBeNull();
+  });
+
+  it("the route refuses an outlet it cannot resolve before any model call or limiter hit", async () => {
+    const cookie = await anonymousCookie(routes.auth.POST);
+    const answer = await ask(cookie, { ...buyer("One Kopi C"), outletId: `out_${"a".repeat(26)}` });
+    expect([answer.status, answer.code]).toEqual([404, "not_found"]);
+    expect(openai.calls).toHaveLength(0);
+    expect(await hits()).toBe(0);
+  });
+
+  it("the route takes the shop's name from the database and never from the browser", async () => {
+    const cookie = await anonymousCookie(routes.auth.POST);
+    const forged = await ask(cookie, { ...buyer("One Kopi C"), outletId: fixture.outletId, shopName: "FIXTURE forged name" });
+    expect(forged.status).toBe(400);
+    expect(openai.calls).toHaveLength(0);
+
+    const [outlet] = await fixture.database.admin<{ name: string }[]>`select name from outlets where id = ${fixture.outletId}`;
+    const scoped = await ask(cookie, { ...buyer("One Kopi C"), outletId: fixture.outletId });
+    expect(scoped.status).toBe(200);
+    const sent = JSON.stringify(openai.calls[0]!.body.input);
+    expect(sent).toContain(fixture.outletId);
+    expect(sent).toContain(outlet!.name);
   });
 });

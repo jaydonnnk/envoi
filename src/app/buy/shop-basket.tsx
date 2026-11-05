@@ -19,6 +19,7 @@ export function ShopBasket({
   rail,
   autoReview,
   translationEnabled,
+  askEnabled,
 }: {
   outletId: string;
   currency: Currency;
@@ -28,6 +29,8 @@ export function ShopBasket({
   autoReview: boolean;
   // Whether the server has a translation model (S29), passed from the server page.
   translationEnabled: boolean;
+  // Whether Ask Envoi is on (S33), passed from the server page.
+  askEnabled: boolean;
 }) {
   const proposal = useSyncExternalStore(subscribeBasketProposal, () => basketProposalFor(outletId), noBasketProposal);
   const translation = useMenuTranslation(outletId, translationEnabled);
@@ -35,6 +38,11 @@ export function ShopBasket({
 
   return (
     <>
+      {askEnabled && (
+        <p className="ask-link">
+          Prefer to say it? <a href={`/buy/ask?${new URLSearchParams({ outlet: outletId }).toString()}`}>Ask Envoi about this shop</a>.
+        </p>
+      )}
       {translation && <TranslationStatus translation={translation} original={original} toggle={() => setOriginal(!original)} />}
       <BasketForm
         key={proposal === null ? "address" : "sentence"}

@@ -36,7 +36,12 @@ function history(turns: Turn[]): Turn[] {
     .map((turn) => ({ role: turn.role, text: turn.text.slice(0, MAX_TEXT) }));
 }
 
-export function AskEnvoi() {
+// S33: the one published shop this conversation is about. Only its id goes back to the server; the
+// name and example item are the page's own display text.
+type AskShop = { id: string; name: string; example?: string };
+
+export function AskEnvoi({ shop }: { shop?: AskShop }) {
+  const fallback = shop ? "Choose from this shop's menu instead." : "Pick a shop from the list instead.";
   const [turns, setTurns] = useState<Turn[]>([]);
   const [steps, setSteps] = useState<Step[]>([]);
   const [link, setLink] = useState<Answer["link"]>(null);
@@ -58,9 +63,9 @@ export function AskEnvoi() {
     setLink(null);
     try {
       await ensureBuyerSession();
-      const result = await postJson<Answer>("/api/v1/buyer/assistant", { turns: history(next) }, AbortSignal.timeout(CLIENT_TIMEOUT_MS));
+      const result = await postJson<Answer>("/api/v1/buyer/assistant", { turns: history(next), ...(shop ? { outletId: shop.id } : {}) }, AbortSignal.timeout(CLIENT_TIMEOUT_MS));
       if (!result.ok || !result.data) {
-        setFailure(result.error?.message ?? "Ask Envoi is not available right now. Pick a shop from the list instead.");
+        setFailure(result.error?.message ?? `Ask Envoi is not available right now. ${fallback}`);
         return;
       }
       const answer = result.data;
@@ -70,8 +75,8 @@ export function AskEnvoi() {
     } catch (err) {
       setFailure(
         err instanceof DOMException && err.name === "TimeoutError"
-          ? "Ask Envoi took too long. No review was created. Pick a shop from the list instead."
-          : "Ask Envoi is not available right now. Pick a shop from the list instead.",
+          ? `Ask Envoi took too long. No review was created. ${fallback}`
+          : `Ask Envoi is not available right now. ${fallback}`,
       );
     } finally {
       setBusy(false);
@@ -107,9 +112,9 @@ export function AskEnvoi() {
         )}
         {failure && (
           <div className="status" role="alert">
-            <strong>Pick a shop instead</strong>
+            <strong>{shop ? "Use the menu instead" : "Pick a shop instead"}</strong>
             <small>
-              {failure} <a href="/buy">See all shops</a>
+              {failure} {shop ? <a href={`/buy?${new URLSearchParams({ outlet: shop.id }).toString()}`}>See this shop&apos;s menu</a> : <a href="/buy">See all shops</a>}
             </small>
           </div>
         )}
@@ -122,6 +127,7 @@ export function AskEnvoi() {
             maxLength={MAX_TEXT}
             rows={3}
             placeholder="For example: one Kopi O and a kaya toast set at Lorong Demo Kopi"
+            {...(shop ? { placeholder: shop.example ? `For example: one ${shop.example}` : `What would you like from ${shop.name}?` } : {})}
             onChange={(event) => setText(event.target.value)}
           />
           <button className="button full" type="submit" disabled={busy || text.trim().length === 0}>
