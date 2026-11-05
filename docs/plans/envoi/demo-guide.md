@@ -66,7 +66,7 @@ The deployed site holds three more fixture shops that a local seed does not crea
 
 1. Open `/`.
 2. Check: headline "Japanese, Spanish or Malay. One scan. PayPal."; the lead ending "AI reads the menu with you. It never sets a price and never pays."; the buttons "Ask Envoi", "Find a shop" and "I run a shop" in that order, with "Ask Envoi" the only filled one; the "How it works" card with its three steps Scan, Ask and Approve; the notice "Test money only. No real money moves."; the GitHub and Evidence links; no navigation bar and no demo shop named.
-3. S32 narrows the local headline to Japanese, Spanish and Malay, each 5/5 on both fixture paths. This is not general accuracy or native-reader validation. Chinese is unproven after the interrupted first attempt; Korean fails the box scope check. S32 is not deployed yet, so the live headline still has the older wording until authorized publication.
+3. S32 narrows the local headline to Japanese, Spanish and Malay, each 5/5 on both fixture paths. This is not general accuracy or native-reader validation. Chinese is unproven after the interrupted first attempt; Korean fails the box scope check. The narrowed headline is now verified live from `ae801d6`; no deployed assistant-to-paid claim follows.
 4. With the assistant off, "Ask Envoi" is absent and "Find a shop" becomes the filled button, because `/buy/ask` answers 404 when the assistant is off and the landing page must not link there.
 5. Resize to phone width (390 px): no sideways scroll.
 

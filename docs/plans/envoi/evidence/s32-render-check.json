@@ -60,5 +60,19 @@
       },
       "screenshot": "s32-results-1280.jpg"
     }
-  ]
+  ],
+  "hosted": {
+    "observedAt": "2026-11-05T06:03:18.763Z",
+    "url": "https://envoi-helx.onrender.com/",
+    "commit": "ae801d6d362ca36b84b5084fb3c48259b050f3a7",
+    "deployment": "dep-dbm1l1qjnfac73crjqpg",
+    "configuredModel": "gpt-6-sol",
+    "heading": "Japanese, Spanish or Malay. One scan. PayPal.",
+    "innerWidth": 1272,
+    "scrollWidth": 1272,
+    "askPrimary": true,
+    "testEnvironment": true,
+    "testMoney": true,
+    "boundary": "Read-only public root and non-secret configured model checked through CUA. No model/payment call. Original rows above remain the exact local 390/1280 checks."
+  }
 }

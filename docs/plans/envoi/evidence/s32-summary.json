@@ -67,5 +67,15 @@
     "actualInvoiceUsd": null
   },
   "claim": "Japanese, Spanish or Malay. One scan. PayPal.",
-  "boundary": "Five fixed sentences per language. Assistant backend/links simulated; box on local fixture DB. Chinese is unproven after the instrumentation interruption, not disproven as a language. Korean box ordering has the reproduced scope limitation. No deployed payment or user study."
+  "boundary": "Five fixed sentences per language. Assistant backend/links simulated; box on local fixture DB. Chinese is unproven after the instrumentation interruption, not disproven as a language. Korean box ordering has the reproduced scope limitation. No deployed payment or user study.",
+  "publication": {
+    "applicationCommit": "ae801d6d362ca36b84b5084fb3c48259b050f3a7",
+    "renderDeployment": "dep-dbm1l1qjnfac73crjqpg",
+    "publicUrl": "https://envoi-helx.onrender.com/",
+    "hostedObservedAt": "2026-11-05T06:03:18.763Z",
+    "configuredModel": "gpt-6-sol",
+    "ciRun": 41977135627,
+    "ciStatus": "success",
+    "sliceComplete": true
+  }
 }

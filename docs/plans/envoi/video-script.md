@@ -6,7 +6,7 @@ Every shot keeps the "Test environment" badge and the test-money notice on scree
 Say "test money" or "devnet test tokens" every time money moves; never call a demo shop a real merchant.
 Each spoken claim must appear in the [evidence pack](evidence-pack.md); cut any line that does not.
 
-**The S32 language claim is limited.** The local landing now says "Japanese, Spanish or Malay. One scan. PayPal." Those languages passed five fixed FIXTURE cases on both paths. Ask Envoi scored 24 of 25 and the box 20 of 25, with zero wrong basket links; the interrupted first attempt remains failed. Chinese is unproven in this run and Korean fails the box's scope check. This draft still does not speak a language claim, and no native-reader or general accuracy claim is supported. S32 is not deployed yet. See [S32](00-status.md#s32-ordering-in-other-languages-2026-11-05).
+**The S32 language claim is limited.** The local landing now says "Japanese, Spanish or Malay. One scan. PayPal." Those languages passed five fixed FIXTURE cases on both paths. Ask Envoi scored 24 of 25 and the box 20 of 25, with zero wrong basket links; the interrupted first attempt remains failed. Chinese is unproven in this run and Korean fails the box's scope check. This draft still does not speak a language claim, and no native-reader or general accuracy claim is supported. The narrowed landing is deployed from `ae801d6`; the video remains an unrecorded draft. See [S32](00-status.md#s32-ordering-in-other-languages-2026-11-05).
 
 | Time | Shot | Voice-over |
 | --- | --- | --- |

@@ -32,7 +32,7 @@ for (const [, value] of [...needles, ["FAKE", canary]]) {
   assert(!detects('{"fixture":"negative control"}', value), "negative control failed");
 }
 const paths = execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "-z"], { encoding: "utf8" }).split("\0").filter((path) =>
-  path.startsWith("docs/plans/envoi/evidence/s32-") || ["PROGRESS.md", "docs/plans/envoi/00-status.md", "src/integrations/assistant/agent.ts", "tests/unit/s32-language-eval.test.ts", "tests/integration/s32-language-eval.test.ts"].includes(path),
+  path.startsWith("docs/plans/envoi/evidence/s32-") || ["PROGRESS.md", "docs/plans/envoi/00-status.md", "docs/plans/envoi/01-product.md", "docs/plans/envoi/demo-guide.md", "docs/plans/envoi/evidence-pack.md", "docs/plans/envoi/video-script.md", "src/app/page.tsx", "src/integrations/assistant/agent.ts", "tests/unit/landing-page.test.ts", "tests/unit/s32-language-eval.test.ts", "tests/integration/s32-language-eval.test.ts"].includes(path),
 ).filter((path) => !path.endsWith("s32-secret-scan.json"));
 const hits: { name: string; path: string }[] = [];
 for (const path of paths) {
