@@ -1,0 +1,137 @@
+{
+ "note": "S35 guard mutations, run with s41-mutate.py. OpenAI and PayPal are FIXTURE fakes at their boundaries; local test database only; no real model call.",
+ "label": "S35 guard mutations; FIXTURE model boundary, no real model call",
+ "output": "s35-mutations.json",
+ "greenRerun": [
+  {
+   "project": "unit",
+   "test": "tests/unit/order-filter.test.ts"
+  },
+  {
+   "project": "integration",
+   "test": "tests/integration/order-filter-route.test.ts"
+  }
+ ],
+ "mutations": [
+  {
+   "id": "M42",
+   "guard": "the filter schema refuses any field but the five",
+   "needle": "the filter schema refuses any field but the five",
+   "file": "src/domain/purchases/order-filter.ts",
+   "find": "  .strict()\n  .refine(",
+   "replace": "  .refine(",
+   "project": "unit",
+   "test": "tests/unit/order-filter.test.ts"
+  },
+  {
+   "id": "M42b",
+   "guard": "refuses a model answer outside the schema and changes nothing",
+   "needle": "refuses a model answer outside the schema and changes nothing",
+   "file": "src/integrations/ai/order-filter.ts",
+   "find": "  .strict();\n\nfunction instructions",
+   "replace": "  ;\n\nfunction instructions",
+   "project": "integration",
+   "test": "tests/integration/order-filter-route.test.ts"
+  },
+  {
+   "id": "M43",
+   "guard": "the order filter call receives no order data",
+   "needle": "the order filter call receives no order data",
+   "file": "src/app/api/v1/merchant/outlets/[id]/orders/filter/route.ts",
+   "find": "parseOrderFilter(parsed.data.text, singaporeDate(now), model)",
+   "replace": "parseOrderFilter(`${parsed.data.text} ${JSON.stringify(await (await import(\"@/domain/purchases/orders\")).listOutletOrders(webDb(), principal.outletId, now))}`, singaporeDate(now), model)",
+   "project": "integration",
+   "test": "tests/integration/order-filter-route.test.ts"
+  },
+  {
+   "id": "M44a",
+   "guard": "a filter never turns a pending order into a paid row",
+   "needle": "a filter never turns a pending order into a paid row",
+   "file": "src/domain/purchases/order-filter.ts",
+   "find": "if (filter.states && !(filter.states as readonly string[]).includes(order.state)) return false;",
+   "replace": "if (filter.states && !(filter.states as readonly string[]).includes(order.state === \"pending_payment\" ? \"paid\" : order.state)) return false;",
+   "project": "unit",
+   "test": "tests/unit/order-filter.test.ts"
+  },
+  {
+   "id": "M44b",
+   "guard": "a filter never turns a pending order into a paid row",
+   "needle": "a filter never turns a pending order into a paid row",
+   "file": "src/domain/purchases/order-filter.ts",
+   "find": "    return true;\n  });",
+   "replace": "    return true;\n  }).map((order) => ({ ...order, state: \"paid\" as const }));",
+   "project": "unit",
+   "test": "tests/unit/order-filter.test.ts"
+  },
+  {
+   "id": "M44c",
+   "guard": "a filter never turns a pending order into a paid row",
+   "needle": "a filter never turns a pending order into a paid row",
+   "file": "src/app/merchant/orders/order-copy.ts",
+   "find": "  if (order.state === \"paid\") return rail ?? \"Unknown\";\n",
+   "replace": "  return rail ?? \"Unknown\";\n",
+   "project": "unit",
+   "test": "tests/unit/order-filter.test.ts"
+  },
+  {
+   "id": "M45",
+   "guard": "a non-member cannot call the filter route",
+   "needle": "a non-member cannot call the filter route",
+   "file": "src/app/api/v1/merchant/outlets/[id]/orders/filter/route.ts",
+   "find": "if (!isOutletMember(principal)) return httpErr(principal);",
+   "replace": "if (!isOutletMember(principal)) return httpOk({ filter: await parseOrderFilter(\"FIXTURE\", singaporeDate(now), orderFilterModel()!) });",
+   "project": "integration",
+   "test": "tests/integration/order-filter-route.test.ts"
+  },
+  {
+   "id": "M46",
+   "guard": "limits each outlet before the model, under its own bucket, and stores no sentence",
+   "needle": "limits each outlet before the model, under its own bucket, and stores no sentence",
+   "file": "src/app/api/v1/merchant/outlets/[id]/orders/filter/route.ts",
+   "find": "if (admission.kind === \"rate_limited\") {",
+   "replace": "if (admission.kind === \"rate_limited\" && now.getTime() < 0) {",
+   "project": "integration",
+   "test": "tests/integration/order-filter-route.test.ts"
+  },
+  {
+   "id": "M47",
+   "guard": "refuses a value the five fields do not allow",
+   "needle": "refuses a value the five fields do not allow",
+   "file": "src/domain/purchases/order-filter.ts",
+   "find": "  .refine((filter) => !filter.from || !filter.to || filter.from <= filter.to);",
+   "replace": "  ;",
+   "project": "unit",
+   "test": "tests/unit/order-filter.test.ts"
+  },
+  {
+   "id": "M48",
+   "guard": "filters by rail, currency and inclusive Singapore dates",
+   "needle": "filters by rail, currency and inclusive Singapore dates",
+   "file": "src/domain/purchases/order-filter.ts",
+   "find": "timeZone: \"Asia/Singapore\" });",
+   "replace": "timeZone: \"UTC\" });",
+   "project": "unit",
+   "test": "tests/unit/order-filter.test.ts"
+  },
+  {
+   "id": "M49",
+   "guard": "keeps a record open when tokens may have reached the shop outside the order",
+   "needle": "keeps a record open when tokens may have reached the shop outside the order",
+   "file": "src/app/merchant/orders/order-copy.ts",
+   "find": " || order.pyusd.closedBy === \"operator\"",
+   "replace": "",
+   "project": "unit",
+   "test": "tests/unit/order-filter.test.ts"
+  },
+  {
+   "id": "M50",
+   "guard": "answers no filter when the sentence names none",
+   "needle": "answers no filter when the sentence names none",
+   "file": "src/integrations/ai/order-filter.ts",
+   "find": "filter(([, value]) => value !== null && !(Array.isArray(value) && value.length === 0))",
+   "replace": "filter(([, value]) => value !== null)",
+   "project": "integration",
+   "test": "tests/integration/order-filter-route.test.ts"
+  }
+ ]
+}

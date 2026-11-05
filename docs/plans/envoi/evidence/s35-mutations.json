@@ -1,0 +1,200 @@
+{
+ "label": "S35 guard mutations; FIXTURE model boundary, no real model call",
+ "ranAt": "2026-11-05T17:34:25+00:00",
+ "total": 12,
+ "proved": 12,
+ "allRestoredByteIdentical": true,
+ "greenAfterRestore": {
+  "tests/unit/order-filter.test.ts": {
+   "exitCode": 0,
+   "failedAssertions": []
+  },
+  "tests/integration/order-filter-route.test.ts": {
+   "exitCode": 0,
+   "failedAssertions": []
+  }
+ },
+ "mutations": [
+  {
+   "id": "M42",
+   "guard": "the filter schema refuses any field but the five",
+   "needle": "the filter schema refuses any field but the five",
+   "file": "src/domain/purchases/order-filter.ts",
+   "test": "tests/unit/order-filter.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "the filter schema refuses any field but the five"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M42b",
+   "guard": "refuses a model answer outside the schema and changes nothing",
+   "needle": "refuses a model answer outside the schema and changes nothing",
+   "file": "src/integrations/ai/order-filter.ts",
+   "test": "tests/integration/order-filter-route.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "refuses a model answer outside the schema and changes nothing"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M43",
+   "guard": "the order filter call receives no order data",
+   "needle": "the order filter call receives no order data",
+   "file": "src/app/api/v1/merchant/outlets/[id]/orders/filter/route.ts",
+   "test": "tests/integration/order-filter-route.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "the order filter call receives no order data"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M44a",
+   "guard": "a filter never turns a pending order into a paid row",
+   "needle": "a filter never turns a pending order into a paid row",
+   "file": "src/domain/purchases/order-filter.ts",
+   "test": "tests/unit/order-filter.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "a filter never turns a pending order into a paid row"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M44b",
+   "guard": "a filter never turns a pending order into a paid row",
+   "needle": "a filter never turns a pending order into a paid row",
+   "file": "src/domain/purchases/order-filter.ts",
+   "test": "tests/unit/order-filter.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "a filter never turns a pending order into a paid row"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M44c",
+   "guard": "a filter never turns a pending order into a paid row",
+   "needle": "a filter never turns a pending order into a paid row",
+   "file": "src/app/merchant/orders/order-copy.ts",
+   "test": "tests/unit/order-filter.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "a filter never turns a pending order into a paid row",
+    "names a rail as how an order was paid only when it was paid"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M45",
+   "guard": "a non-member cannot call the filter route",
+   "needle": "a non-member cannot call the filter route",
+   "file": "src/app/api/v1/merchant/outlets/[id]/orders/filter/route.ts",
+   "test": "tests/integration/order-filter-route.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "a non-member cannot call the filter route"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M46",
+   "guard": "limits each outlet before the model, under its own bucket, and stores no sentence",
+   "needle": "limits each outlet before the model, under its own bucket, and stores no sentence",
+   "file": "src/app/api/v1/merchant/outlets/[id]/orders/filter/route.ts",
+   "test": "tests/integration/order-filter-route.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "limits each outlet before the model, under its own bucket, and stores no sentence"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M47",
+   "guard": "refuses a value the five fields do not allow",
+   "needle": "refuses a value the five fields do not allow",
+   "file": "src/domain/purchases/order-filter.ts",
+   "test": "tests/unit/order-filter.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "refuses a value the five fields do not allow"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M48",
+   "guard": "filters by rail, currency and inclusive Singapore dates",
+   "needle": "filters by rail, currency and inclusive Singapore dates",
+   "file": "src/domain/purchases/order-filter.ts",
+   "test": "tests/unit/order-filter.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "filters by rail, currency and inclusive Singapore dates"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M49",
+   "guard": "keeps a record open when tokens may have reached the shop outside the order",
+   "needle": "keeps a record open when tokens may have reached the shop outside the order",
+   "file": "src/app/merchant/orders/order-copy.ts",
+   "test": "tests/unit/order-filter.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "keeps a record open when tokens may have reached the shop outside the order"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  },
+  {
+   "id": "M50",
+   "guard": "answers no filter when the sentence names none",
+   "needle": "answers no filter when the sentence names none",
+   "file": "src/integrations/ai/order-filter.ts",
+   "test": "tests/integration/order-filter-route.test.ts",
+   "exitCode": 1,
+   "failedAssertions": [
+    "answers no filter when the sentence names none"
+   ],
+   "assertionError": true,
+   "needleFound": true,
+   "restoredByteIdentical": true,
+   "proved": true
+  }
+ ]
+}
