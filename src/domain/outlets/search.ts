@@ -49,6 +49,19 @@ export async function getPublishedMenu(db: Pick<Db, "select">, outletId: string)
   };
 }
 
+// S33: the one shop a shop-scoped assistant turn is about, or null for an id that is malformed,
+// unknown or not published. The name is merchant text, so it reaches the model only as data.
+export async function shopContext(db: Pick<Db, "select">, outletId: string): Promise<{ id: string; name: string } | null> {
+  if (!isId("out", outletId)) return null;
+  const rows = await db
+    .select({ id: outlets.id, name: outlets.name })
+    .from(outlets)
+    .innerJoin(menuRevisions, and(eq(menuRevisions.id, outlets.publishedMenuRevisionId), eq(menuRevisions.status, "confirmed")))
+    .where(eq(outlets.id, outletId))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
 // Price-free reads for the AI suggestion tools. Nothing here returns a price: the model never sees
 // one, and pricing always re-reads the confirmed revision server-side.
 

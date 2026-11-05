@@ -1,0 +1,97 @@
+{
+ "label": "FIXTURE offline guard proof",
+ "at": "2026-11-05T06:49:12.873924+00:00",
+ "allProved": true,
+ "results": [
+  {
+   "id": "M38a",
+   "file": "src/domain/outlets/search.ts",
+   "test": "an unpublished or unknown outlet id gives no shop context",
+   "redExit": 1,
+   "failure": "Error: Failed query: select \"outlets\".\"id\", \"outlets\".\"name\" from \"outlets\" inner join \"menu_revisions\" on (\"menu_revisions\".\"id\" = \"outlets\".\"published_menu_revision_id\" and \"menu_revisions\".\"status\" = $1) where \"outlets\".\"id\" = $2 limit $3",
+   "restoredByteIdentical": true,
+   "greenExit": 0,
+   "proved": true
+  },
+  {
+   "id": "M38b",
+   "file": "src/domain/outlets/search.ts",
+   "test": "an unpublished or unknown outlet id gives no shop context",
+   "redExit": 1,
+   "failure": "AssertionError: expected { \u2026(2) } to be null",
+   "restoredByteIdentical": true,
+   "greenExit": 0,
+   "proved": true
+  },
+  {
+   "id": "M38c",
+   "file": "src/app/api/v1/buyer/assistant/route.ts",
+   "test": "the route refuses an outlet it cannot resolve before any model call or limiter hit",
+   "redExit": 1,
+   "failure": "AssertionError: expected [ 200, undefined ] to deeply equal [ 404, 'not_found' ]",
+   "restoredByteIdentical": true,
+   "greenExit": 0,
+   "proved": true
+  },
+  {
+   "id": "M38d",
+   "file": "src/app/api/v1/buyer/assistant/route.ts",
+   "test": "the route takes the shop's name from the database and never from the browser",
+   "redExit": 1,
+   "failure": "AssertionError: expected '[{\"role\":\"system\",\"content\":\"You are \u2026' to contain 'out_hjoqgs2lvdl3qqf7hpf3pyuufy'",
+   "restoredByteIdentical": true,
+   "greenExit": 0,
+   "proved": true
+  },
+  {
+   "id": "M39a",
+   "file": "src/integrations/assistant/agent.ts",
+   "test": "shop text reaches the model only as data",
+   "redExit": 1,
+   "failure": "AssertionError: expected '\"You are Envoi\\'s reference buyer age\u2026' not to contain 'FIXTURE-INJECTION-NEEDLE'",
+   "restoredByteIdentical": true,
+   "greenExit": 0,
+   "proved": true
+  },
+  {
+   "id": "M39b",
+   "file": "src/integrations/assistant/agent.ts",
+   "test": "shop text reaches the model only as data",
+   "redExit": 1,
+   "failure": "SyntaxError: Unexpected token 'F', \"FIXTURE-IN\"... is not valid JSON",
+   "restoredByteIdentical": true,
+   "greenExit": 0,
+   "proved": true
+  },
+  {
+   "id": "M39c",
+   "file": "src/integrations/assistant/agent.ts",
+   "test": "shop text reaches the model only as data",
+   "redExit": 1,
+   "failure": "AssertionError: expected '{\"model\":\"FIXTURE-model\",\"input\":[{\"r\u2026' not to contain 'about one shop'",
+   "restoredByteIdentical": true,
+   "greenExit": 0,
+   "proved": true
+  },
+  {
+   "id": "M40a",
+   "file": "src/integrations/assistant/agent.ts",
+   "test": "a shop-scoped turn cannot propose another shop's items",
+   "redExit": 1,
+   "failure": "AssertionError: expected 'link' to be 'reply' // Object.is equality",
+   "restoredByteIdentical": true,
+   "greenExit": 0,
+   "proved": true
+  },
+  {
+   "id": "M40b",
+   "file": "src/integrations/assistant/tools.ts",
+   "test": "a shop-scoped turn cannot propose another shop's items",
+   "redExit": 1,
+   "failure": "AssertionError: expected 'link' to be 'reply' // Object.is equality",
+   "restoredByteIdentical": true,
+   "greenExit": 0,
+   "proved": true
+  }
+ ]
+}

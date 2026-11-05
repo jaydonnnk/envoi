@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { shopContext } from "@/domain/outlets/search";
 import { assistantSettings } from "@/integrations/ai/openai";
 import { MAX_ASSISTANT_TURN_CHARS, MAX_ASSISTANT_TURNS, runAssistantTurn, TURN_BUDGET_MS, type AssistantStep } from "@/integrations/assistant/agent";
 import { MAX_TOOL_CALLS } from "@/integrations/assistant/tools";
@@ -28,12 +29,14 @@ const body = z
       .min(1)
       .max(MAX_ASSISTANT_TURNS)
       .refine((turns) => turns.at(-1)?.role === "buyer"),
+    // S33: an id only. The server resolves it to a published outlet; the browser never supplies shop text.
+    outletId: z.string().max(64).optional(),
   })
   .strict();
 
 const STOPPED: Record<"tool_calls" | "time", string> = {
-  tool_calls: `I stopped after ${MAX_TOOL_CALLS} steps without finishing. No review was created. Try again, or pick a shop from the list.`,
-  time: `I stopped after ${TURN_BUDGET_MS / 1000} seconds without finishing. No review was created. Try again, or pick a shop from the list.`,
+  tool_calls: `I stopped after ${MAX_TOOL_CALLS} steps without finishing. No review was created.`,
+  time: `I stopped after ${TURN_BUDGET_MS / 1000} seconds without finishing. No review was created.`,
 };
 
 // Ask Envoi (S25): one buyer turn of the agent, which reads shops and menus and may ask Envoi for a
@@ -50,20 +53,26 @@ export async function POST(request: Request): Promise<Response> {
   const parsed = body.safeParse(parseJson(read.bytes));
   if (!parsed.success) return httpErr(invalid);
 
+  const outletId = parsed.data.outletId;
+  const shop = outletId === undefined ? null : await shopContext(webDb(), outletId);
+  if (outletId !== undefined && !shop) return httpErr(appError("not_found", "That shop is not on Envoi."));
+  // A shop-scoped buyer already has that shop's menu to fall back on.
+  const fallback = shop ? "Choose from this shop's menu instead." : "Pick a shop from the list instead.";
+
   const admission = await admit(webDb(), "buyer_assistant", principal.userId, ASSISTANT_LIMITS, now);
   if (admission.kind === "rate_limited") {
-    return httpErr(appError("rate_limited", "Too many messages to Ask Envoi. Pick a shop from the list instead.", { retryable: true, details: { window: admission.window } }));
+    return httpErr(appError("rate_limited", `Too many messages to Ask Envoi. ${fallback}`, { retryable: true, details: { window: admission.window } }));
   }
 
   const settings = assistantSettings();
-  if (!settings) return httpErr(appError("provider_unreachable", "Ask Envoi is not available. Pick a shop from the list instead."));
+  if (!settings) return httpErr(appError("provider_unreachable", `Ask Envoi is not available. ${fallback}`));
 
-  const result = await runAssistantTurn(settings, parsed.data.turns);
+  const result = await runAssistantTurn(settings, parsed.data.turns, shop ?? undefined);
   logSteps(result.kind, result.steps);
   if (result.kind === "failed") {
-    return httpErr(appError("provider_unreachable", "Ask Envoi could not answer. No review was created. Pick a shop from the list instead.", { retryable: true }));
+    return httpErr(appError("provider_unreachable", `Ask Envoi could not answer. No review was created. ${fallback}`, { retryable: true }));
   }
-  const reply = result.kind === "stopped" ? STOPPED[result.reason] : result.text;
+  const reply = result.kind === "stopped" ? `${STOPPED[result.reason]} Try again, or ${shop ? "choose from this shop's menu" : "pick a shop from the list"}.` : result.text;
   const link = result.kind === "link" ? { url: result.link.url, expiresAt: result.link.expiresAt } : null;
   return httpOk({ reply, steps: result.steps, link });
 }
