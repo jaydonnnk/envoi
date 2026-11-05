@@ -9,7 +9,7 @@ import { log, toSafeErrorRecord } from "@/lib/log";
 // false, a strict schema, no tools, no retries and a time budget. It receives the merchant's sentence
 // and the date. It never receives an order, and the sentence is never logged.
 
-export const ORDER_FILTER_PROMPT_VERSION = "order-filter-prompt-2026-11-06";
+const ORDER_FILTER_PROMPT_VERSION = "order-filter-prompt-2026-11-06";
 
 // [hypothesis] Five short fields fit well inside this, including a reasoning model's own tokens.
 const ORDER_FILTER_MAX_OUTPUT_TOKENS = 1_000;

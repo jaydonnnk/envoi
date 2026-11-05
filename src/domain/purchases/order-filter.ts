@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { MerchantOrder } from "@/domain/purchases/orders";
+import type { PurchaseState } from "@/domain/purchases/state";
 import { CURRENCIES, type Currency } from "@/lib/money";
 
 // Ask your orders (S35; Gate 2 "Flow: orders filter"). A merchant's sentence becomes a filter of five
@@ -8,7 +9,7 @@ import { CURRENCIES, type Currency } from "@/lib/money";
 
 // An order is a purchase that reached a payment. A review that never started one moved no money,
 // and any buyer can open many, so listing reviews would push real orders off the page.
-export const ORDER_STATES = ["pending_payment", "paid", "uncertain", "unpaid_closed"] as const;
+export const ORDER_STATES = ["pending_payment", "paid", "uncertain", "unpaid_closed"] as const satisfies readonly PurchaseState[];
 export type OrderState = (typeof ORDER_STATES)[number];
 
 const ORDER_RAILS = ["paypal", "pyusd"] as const;
