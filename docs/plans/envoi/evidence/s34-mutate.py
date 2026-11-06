@@ -1,17 +1,24 @@
 #!/usr/bin/env python3
-"""S34 offline guard proof. No build, server, model call or other source run may overlap this process."""
+"""S34 offline guard proof. No build, server, model call or other source run may overlap this process.
+
+The definitions and results are the original S34 pair by default; pass "button" for the accept button pair.
+"""
 import hashlib
 import json
 import os
 import re
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
 TEST = 'tests/unit/assistant.test.ts'
-BRANCH = 'envoi/slice-34-menu-advice'
+BRANCHES = ('envoi/slice-34-menu-advice', 'envoi/slice-34-accept-button')
+BUTTON = sys.argv[1:] == ['button']
+DEFS = 's34-button-mutation-defs.json' if BUTTON else 's34-mutation-defs.json'
+RESULTS = 's34-button-mutations.json' if BUTTON else 's34-mutations.json'
 ENV = dict(os.environ)
 ENV['PATH'] = f"{Path.home()}/.local/node/bin:{Path.home()}/.local/bin:{ENV.get('PATH', '')}"
 ENV['TEST_DATABASE_URL'] = 'postgres://postgres@127.0.0.1:5432/postgres'
@@ -21,11 +28,11 @@ for key in ('DATABASE_URL', 'MIGRATION_DATABASE_URL', 'MAINTENANCE_DATABASE_URL'
 
 def branch_check():
     branch = subprocess.check_output(['git', 'branch', '--show-current'], cwd=ROOT, text=True).strip()
-    assert branch == BRANCH, 'wrong branch; no edit authorized here'
+    assert branch in BRANCHES, 'wrong branch; no edit authorized here'
 
 
-def run_test(name):
-    command = ['npx', 'vitest', 'run', '--config', 'config/vitest.config.ts', '--project', 'unit', TEST, '--testNamePattern', '^.*' + re.escape(name) + '$']
+def run_test(name, test=TEST, project='unit'):
+    command = ['npx', 'vitest', 'run', '--config', 'config/vitest.config.ts', '--project', project, test, '--testNamePattern', '^.*' + re.escape(name) + '$']
     result = subprocess.run(command, cwd=ROOT, env=ENV, capture_output=True, text=True)
     return result.returncode, result.stdout + result.stderr, command
 
@@ -33,7 +40,7 @@ def run_test(name):
 ANSI = re.compile(r'\x1b\[[0-9;]*m')
 
 
-def evidence(output):
+def evidence(output, test=TEST):
     """The failing assertion and the source frame it failed at, with ANSI colour stripped.
 
     Vitest colours the word AssertionError, so a needle carrying its colon never matches the raw
@@ -41,17 +48,19 @@ def evidence(output):
     """
     plain = ANSI.sub('', output)
     assertion = next((line.strip() for line in plain.splitlines() if 'AssertionError' in line), '')
-    frame = next((line.strip() for line in plain.splitlines() if re.search(re.escape(TEST) + r':\d+:\d+', line)), '')
+    frame = next((line.strip() for line in plain.splitlines() if re.search(re.escape(test) + r':\d+:\d+', line)), '')
     return assertion, frame
 
 
 def main():
-    definitions = json.loads((HERE / 's34-mutation-defs.json').read_text())
+    definitions = json.loads((HERE / DEFS).read_text())
     targets = {ROOT / row['file'] for row in definitions}
     originals = {path: path.read_bytes() for path in targets}
     results = []
     try:
         for mutation in definitions:
+            test_file = mutation.get('testFile', TEST)
+            project = mutation.get('project', 'unit')
             target = ROOT / mutation['file']
             original = originals[target]
             source = original.decode()
@@ -60,14 +69,14 @@ def main():
             target.write_text(source.replace(mutation['find'], mutation['replace'], 1))
             log = Path('/tmp') / f"s34-mut-{mutation['id']}-red.log"
             try:
-                red, output, command = run_test(mutation['test'])
+                red, output, command = run_test(mutation['test'], test_file, project)
                 log.write_text(output)
-                assertion, frame = evidence(output)
+                assertion, frame = evidence(output, test_file)
             finally:
                 branch_check()
                 target.write_bytes(original)
             restored = target.read_bytes() == original
-            green, green_output, _ = run_test(mutation['test'])
+            green, green_output, _ = run_test(mutation['test'], test_file, project)
             proved = red != 0 and bool(assertion) and bool(frame) and mutation['test'] in output and restored and green == 0
             results.append({'id': mutation['id'], 'branch': mutation['branch'], 'file': str(target.relative_to(ROOT)), 'test': mutation['test'], 'find': mutation['find'], 'replace': mutation['replace'], 'redCommand': command, 'redExit': red, 'assertion': assertion, 'failedAt': frame, 'redLog': str(log), 'restoredByteIdentical': restored, 'greenExit': green, 'proved': proved})
             print(f"{mutation['id']}: proved={proved} redExit={red} failedAt={frame}", flush=True)
@@ -80,7 +89,7 @@ def main():
                 branch_check()
                 target.write_bytes(original)
         branch_check()
-        (HERE / 's34-mutations.json').write_text(json.dumps({
+        (HERE / RESULTS).write_text(json.dumps({
             'label': 'S34 FIXTURE budget-guard and advice-rule mutations; no real model, DB, build or server',
             'ranAt': datetime.now(timezone.utc).isoformat(),
             'filesSha256': {str(path.relative_to(ROOT)): hashlib.sha256(data).hexdigest() for path, data in sorted(originals.items())},

@@ -222,6 +222,28 @@ describe("Ask Envoi route", () => {
     expect(openai.toolOutputs().at(-1)).toContain("shownToBuyer");
   });
 
+  // S34: the answer's offer comes from the checked tool call, not from what the reply says.
+  it("the route answers offer only for an offer_basket call that passed its checks", async () => {
+    const cookie = await anonymousCookie(routes.auth.POST);
+    const words = "FIXTURE: Kopi C at S$1.80. Shall I make that basket?";
+    const lines = [{ menuItemId: "itm_kopic", quantity: 1 }];
+    const runWith = async (calls: FakeTurn[]) => {
+      const turns: FakeTurn[] = [{ kind: "tools", calls: [{ name: "read_menu", args: { outletId: TEST_SHOP.id } }] }, ...calls, { kind: "text", text: words }];
+      const start = openai.calls.length;
+      script = (index) => turns[index - start]!;
+      return ask(cookie, buyer("FIXTURE: what should I try under S$2?"));
+    };
+    const offered = await runWith([{ kind: "tools", calls: [{ name: "offer_basket", args: { outletId: TEST_SHOP.id, lines, budgetMinor: 200 } }] }]);
+    expect(offered.data).toMatchObject({ reply: words, link: null, offer: true });
+    const refused = await runWith([{ kind: "tools", calls: [{ name: "offer_basket", args: { outletId: TEST_SHOP.id, lines, budgetMinor: 100 } }] }]);
+    expect(refused.data).toMatchObject({ reply: words, link: null, offer: false });
+    const wordsOnly = await runWith([]);
+    expect(wordsOnly.data).toMatchObject({ reply: words, link: null, offer: false });
+    const linked = await runWith([{ kind: "tools", calls: [{ name: "propose_basket", args: { outletId: TEST_SHOP.id, lines } }] }]);
+    expect(linked.data).toMatchObject({ offer: false });
+    expect(linked.data!.link).not.toBeNull();
+  });
+
   // S33 named test 38, on the real schema: only a published outlet resolves.
   it("an unpublished or unknown outlet id gives no shop context", async () => {
     const { admin } = fixture.database;

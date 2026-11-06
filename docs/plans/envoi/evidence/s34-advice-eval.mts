@@ -3,6 +3,7 @@
 // CLI: npx tsx --tsconfig tsconfig.json docs/plans/envoi/evidence/s34-advice-eval.mts run advice
 // CLI: npx tsx --tsconfig tsconfig.json docs/plans/envoi/evidence/s34-advice-eval.mts run lang
 // CLI: npx tsx --tsconfig tsconfig.json docs/plans/envoi/evidence/s34-advice-eval.mts verdict
+// CLI, the accept button rerun: run advice-button | run lang-button | verdict button
 // A fix run requires a recorded "S34 prompt fix 1:" in 00-status.md. No run is overwritten.
 // The assistant path only: S34 changes no box file, so the box is never called and no box score changes.
 import assert from "node:assert/strict";
@@ -26,6 +27,11 @@ const ROOT = join(HERE, "../../../..");
 const STATUS = join(HERE, "../00-status.md");
 const LEDGER = join(HERE, "s34-spend-ledger.json");
 const REVIEW = join(HERE, "s34-semantic-review.json");
+const BUTTON_REVIEW = join(HERE, "s34-button-semantic-review.json");
+const BUTTON_REGISTRATION = "#### S34 accept button pre-registration\n";
+// The registered suggestion cases where one exact basket is expected, so the button should show.
+export const OFFER_CASES = ["ad1", "ad2", "ad3", "ad6", "ad7", "ad8", "ad9", "ad10"];
+export const OFFER_FLOOR = 7;
 export const MODEL = "gpt-6-sol";
 // The user's standalone S34 allowance, 2026-11-06. Its own ledger, not a remainder of any earlier cap.
 export const CAP_USD = 2;
@@ -98,6 +104,45 @@ export function scoreAdvice(entry: AdviceCase, menus: readonly PublishedMenu[], 
   }
   const structuralPass = baskets.length === entry.expected.baskets && offMenu.length === 0 && overBudget === 0 && unpriceable === 0 && modelWrittenLinks === 0;
   return { basketsCreated: baskets.length, offMenu, overBudget, unpriceable, pricedAt, modelWrittenLinks, structuralPass };
+}
+
+// A basket tool call as OpenAI's own response carried it. Envoi's body excludes the budget and the
+// trace records no arguments, so this is the one surface that shows what the model sent.
+export type ToolCall = { turn: number; name: string; args: { lines?: { menuItemId: string; quantity: number }[]; budgetMinor?: number } };
+
+// Offers are priced like baskets, from menu prices alone. A basket tool call that omits the budget or
+// sends a different one counts as a miss, because the code guard depends on that value.
+export function scoreOffers(entry: AdviceCase, menus: readonly PublishedMenu[], calls: readonly ToolCall[], offerShown: boolean) {
+  const menu = menus.find((candidate) => candidate.outlet.name === entry.shop);
+  const offerOffMenu: string[] = [];
+  let offerOverBudget = 0;
+  const offers = calls.filter((call) => call.name === "offer_basket");
+  for (const call of offers) {
+    const lines = (call.args.lines ?? []).map(({ menuItemId, quantity }): [string, number] => [menu?.items.find((item) => item.id === menuItemId)?.name ?? menuItemId, quantity]);
+    const priced = priceBasket(menus, { shop: entry.shop, lines });
+    offerOffMenu.push(...priced.offMenu);
+    if (priced.sum === null || priced.sum > entry.budgetMinor) offerOverBudget += 1;
+  }
+  const budgetMisses = calls.filter((call) => (call.name === "offer_basket" || call.name === "propose_basket") && call.args.budgetMinor !== entry.budgetMinor).length;
+  return { offerShown, offersCalled: offers.length, offerOffMenu, offerOverBudget, budgetMisses };
+}
+
+export function buttonVerdict(rows: readonly (AdviceResultRow & ReturnType<typeof scoreOffers>)[]) {
+  const base = adviceVerdict(rows);
+  const offerOffMenu = rows.reduce((sum, row) => sum + row.offerOffMenu.length, 0);
+  const offerOverBudget = rows.reduce((sum, row) => sum + row.offerOverBudget, 0);
+  const budgetMisses = rows.reduce((sum, row) => sum + row.budgetMisses, 0);
+  const offersShown = rows.filter((row) => OFFER_CASES.includes(row.id) && row.offerShown).length;
+  const noneCaseOffered = rows.filter((row) => row.expected.kind === "advice_none" && row.offerShown).length;
+  return {
+    ...base,
+    offerOffMenu,
+    offerOverBudget,
+    budgetMisses,
+    offersShown,
+    noneCaseOffered,
+    eligible: base.eligible && offerOffMenu === 0 && offerOverBudget === 0 && budgetMisses === 0 && offersShown >= OFFER_FLOOR && noneCaseOffered === 0,
+  };
 }
 
 // The status file must hold each advice case, unchanged, in S34's own pre-registration.
@@ -178,12 +223,12 @@ export async function seedAdviceMenus(database: Awaited<ReturnType<typeof create
   return menus;
 }
 
-type RunDeps = { apiKey: string; openaiFetch: typeof fetch; onRow: (row: Record<string, unknown>) => void };
+type RunDeps = { apiKey: string; openaiFetch: typeof fetch; takeCalls: () => Omit<ToolCall, "turn">[]; onRow: (row: Record<string, unknown>) => void };
 
 // One advice case, shop-scoped, over its own turns. Each turn is a separate assistant call carrying
 // the earlier replies as text, exactly as the browser's Ask Envoi page does, so ad8's acceptance is a
 // second turn and not a continuation inside one call.
-async function runAdviceCase(entry: AdviceCase, menus: PublishedMenu[], { apiKey, openaiFetch, onRow }: RunDeps): Promise<void> {
+async function runAdviceCase(entry: AdviceCase, menus: PublishedMenu[], { apiKey, openaiFetch, takeCalls, onRow }: RunDeps): Promise<void> {
   const fixture = fixtureMcp(menus);
   const shopMenu = menus.find((menu) => menu.outlet.name === entry.shop);
   assert(shopMenu, `no fixture menu for ${entry.shop}`);
@@ -192,25 +237,29 @@ async function runAdviceCase(entry: AdviceCase, menus: PublishedMenu[], { apiKey
   const replies: string[] = [];
   const diagnostics: unknown[] = [];
   let inventedLink = false;
-  for (const text of entry.turns) {
+  const calls: ToolCall[] = [];
+  let offerShown = false;
+  for (const [turn, text] of entry.turns.entries()) {
     history.push({ role: "buyer", text });
     const result = await runAssistantTurn(
       { baseUrl: BASE, agentToken: FIXTURE_TOKEN, openaiApiKey: apiKey, model: MODEL, envoiFetch: fixture.fetch, openaiFetch },
       history.slice(-8),
       shop,
     );
-    diagnostics.push({ turn: text, kind: result.kind, steps: result.steps, ...(result.kind === "stopped" ? { reason: result.reason } : {}) });
+    calls.push(...takeCalls().map((call) => ({ ...call, turn })));
+    if (result.kind === "reply" && result.offer && turn === 0) offerShown = true;
+    diagnostics.push({ turn: text, kind: result.kind, offer: result.kind === "reply" && result.offer, steps: result.steps, ...(result.kind === "stopped" ? { reason: result.reason } : {}) });
     const reply = "text" in result ? result.text : "";
     replies.push(reply);
     history.push({ role: "assistant", text: reply });
     if (result.kind === "link" && result.link.url !== FIXTURE_URL) inventedLink = true;
   }
   const modelWrittenLinks = replies.reduce((sum, reply) => sum + (reply.match(LINK_PATTERN) ?? []).length, 0) + (inventedLink ? 1 : 0);
-  onRow({ ...entry, replies, baskets: fixture.baskets, ...scoreAdvice(entry, menus, fixture.baskets, modelWrittenLinks), semanticReview: "pending", diagnostics });
+  onRow({ ...entry, replies, baskets: fixture.baskets, ...scoreAdvice(entry, menus, fixture.baskets, modelWrittenLinks), ...scoreOffers(entry, menus, calls, offerShown), toolCalls: calls, semanticReview: "pending", diagnostics });
 }
 
 // The 25 frozen sentences, unscoped and on the assistant path only, scored by S32's own scorer.
-async function runLangCase(entry: LangCase, menus: PublishedMenu[], { apiKey, openaiFetch, onRow }: RunDeps): Promise<void> {
+async function runLangCase(entry: LangCase, menus: PublishedMenu[], { apiKey, openaiFetch, takeCalls, onRow }: RunDeps): Promise<void> {
   const fixture = fixtureMcp(menus);
   const result = await runAssistantTurn({ baseUrl: BASE, agentToken: FIXTURE_TOKEN, openaiApiKey: apiKey, model: MODEL, envoiFetch: fixture.fetch, openaiFetch }, [{ role: "buyer", text: entry.sentence }]);
   const reply = "text" in result ? result.text : "";
@@ -221,7 +270,7 @@ async function runLangCase(entry: LangCase, menus: PublishedMenu[], { apiKey, op
     baskets: fixture.baskets,
     modelWrittenLinks: (reply.match(LINK_PATTERN) ?? []).length + (result.kind === "link" && result.link.url !== FIXTURE_URL ? 1 : 0),
   };
-  onRow({ ...entry, path: "assistant", observed, reply, diagnostic: { kind: result.kind, steps: result.steps }, ...scoreOutcome(entry.expected, observed), semanticReview: "pending" });
+  onRow({ ...entry, path: "assistant", observed, reply, diagnostic: { kind: result.kind, offer: result.kind === "reply" && result.offer, steps: result.steps, toolCalls: takeCalls() }, ...scoreOutcome(entry.expected, observed), semanticReview: "pending" });
 }
 
 // A missing outcome is never a pass, so each phase is complete only at its full case count.
@@ -278,6 +327,11 @@ async function main() {
     return;
   }
   if (command === "verdict") {
+    if (phaseArg === "button") {
+      const review: Review["rows"] = existsSync(BUTTON_REVIEW) ? (JSON.parse(readFileSync(BUTTON_REVIEW, "utf8")) as Review).rows : [];
+      console.log(JSON.stringify({ advice: buttonVerdict(readRows<AdviceResultRow & ReturnType<typeof scoreOffers>>("advice-button", review)), lang: langVerdict(readRows<LangResultRow>("lang-button", review)), reviewedIds: review.length }, null, 2));
+      return;
+    }
     const review: Review["rows"] = existsSync(REVIEW) ? (JSON.parse(readFileSync(REVIEW, "utf8")) as Review).rows : [];
     console.log(JSON.stringify({ advice: adviceVerdict(readRows<AdviceResultRow>("advice", review)), lang: langVerdict(readRows<LangResultRow>("lang", review)), reviewedIds: review.length }, null, 2));
     return;
@@ -285,10 +339,12 @@ async function main() {
   assert(command === "run", "usage: s34-advice-eval.mts check | run advice | run lang | verdict");
   const requested = String(phaseArg ?? "");
   const fix = requested.endsWith("-fix");
-  const phase = requested.replace(/-fix$/, "") as Phase;
+  const button = requested.endsWith("-button");
+  const phase = requested.replace(/-(fix|button)$/, "") as Phase;
+  if (button) assert(status.includes(BUTTON_REGISTRATION), "register the accept button rerun before its first call");
   assert(PHASES.includes(phase), "phase must be advice or lang");
   if (fix) assert(status.includes("S34 prompt fix 1:"), "record the one prompt fix before its rerun");
-  const run = `${phase}${fix ? "-fix" : ""}`;
+  const run = `${phase}${fix ? "-fix" : ""}${button ? "-button" : ""}`;
   const outPath = resultPath(run);
   assert(!existsSync(outPath), "run already exists; no overwriting or silent retries");
   if (fix) assert(existsSync(resultPath(phase)), "the initial run is required before its fix run");
@@ -298,7 +354,23 @@ async function main() {
   assert(apiKey, "OPENAI_API_KEY is not configured");
   // Set after the env file so it can never select an external database.
   process.env.TEST_DATABASE_URL = "postgres://postgres@127.0.0.1:5432/postgres";
-  const meter = createMeter(LEDGER);
+  // The basket tool calls in OpenAI's own response, since nothing else records their arguments.
+  let pending: Omit<ToolCall, "turn">[] = [];
+  const recordingSend: typeof fetch = async (input, init) => {
+    const response = await globalThis.fetch(input, init);
+    if (!button) return response;
+    const value = (await response.clone().json()) as { output?: { type: string; name?: string; arguments?: string }[] };
+    for (const item of value.output ?? []) {
+      if (item.type === "function_call" && (item.name === "offer_basket" || item.name === "propose_basket")) pending.push({ name: item.name, args: JSON.parse(item.arguments ?? "{}") as ToolCall["args"] });
+    }
+    return response;
+  };
+  const takeCalls = () => {
+    const taken = pending;
+    pending = [];
+    return taken;
+  };
+  const meter = createMeter(LEDGER, recordingSend);
   const database = await createTestDatabase(`s34${phase}`);
   const web = connectWeb(database.webUrl, 2);
   const rows: Record<string, unknown>[] = [];
@@ -336,6 +408,7 @@ async function main() {
     const deps: RunDeps = {
       apiKey,
       openaiFetch: cappedFetch(meter.fetch, meter.ledger),
+      takeCalls,
       onRow: (row) => {
         rows.push(row);
         console.log(JSON.stringify({ id: row.id, structuralPass: row.structuralPass, basketsCreated: row.basketsCreated ?? null, offMenu: row.offMenu ?? null, overBudget: row.overBudget ?? null, pricedAt: row.pricedAt ?? null, wrongLinks: row.wrongLinks ?? null }));

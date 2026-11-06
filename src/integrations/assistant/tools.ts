@@ -28,15 +28,18 @@ export type AgentToolsOptions = {
   // The link goes to the person, never to the model or the trace.
   onLink: (link: CreatedLink) => void;
   now?: () => number;
+  // S34: whether this turn's last offer_basket call passed its checks. It creates nothing.
+  onOffer?: (offered: boolean) => void;
 };
 
 export type ProposeBasketInput = { outletId: string; lines: { menuItemId: string; quantity: number }[]; budgetMinor?: number };
 
 export function createAgentTools(options: AgentToolsOptions) {
   const now = options.now ?? Date.now;
-  // The item ids and menu prices the last read_menu of each outlet returned. propose_basket accepts
-  // no other id, and checks any stated budget against these prices alone.
-  const menus = new Map<string, Map<string, number | null>>();
+  // The item ids, menu prices and availability the last read_menu of each outlet returned.
+  // propose_basket and offer_basket accept no other id, and check any stated budget against these
+  // prices alone.
+  const menus = new Map<string, Map<string, { unitMinor: number | null; available: boolean | null }>>();
 
   async function traced<T>(
     operation: TraceOperation,
@@ -69,23 +72,22 @@ export function createAgentTools(options: AgentToolsOptions) {
     );
     if (!result.ok) return { error: result.error };
     const { outlet, items } = result.value;
-    menus.set(outlet.id, new Map(items.map((item) => [item.id, item.unitMinor])));
+    menus.set(outlet.id, new Map(items.map((item) => [item.id, { unitMinor: item.unitMinor, available: item.available }])));
     return {
       shop: { id: outlet.id, name: outlet.name, area: outlet.area, isDemoFixture: outlet.isDemoFixture, currency: outlet.currency },
       items: items.map(({ id, name, unitMinor, currency, available }) => ({ id, name, unitMinor, currency, available })),
     };
   }
 
-  async function proposeBasket(input: ProposeBasketInput) {
-    const gate = options.gate();
-    gate.spend();
+  // The checks both basket tools share. A refusal is returned as text for the model to read.
+  function basketRefusal(input: ProposeBasketInput): string | null {
     const allowed = menus.get(input.outletId);
-    if (!allowed) return { refused: "Read this shop's menu with read_menu first." };
-    if (input.lines.length === 0) return { refused: "A basket needs at least one item." };
+    if (!allowed) return "Read this shop's menu with read_menu first.";
+    if (input.lines.length === 0) return "A basket needs at least one item.";
     for (const line of input.lines) {
-      if (!allowed.has(line.menuItemId)) return { refused: `Item ${line.menuItemId} is not on the menu read_menu last returned for this shop.` };
+      if (!allowed.has(line.menuItemId)) return `Item ${line.menuItemId} is not on the menu read_menu last returned for this shop.`;
       if (!Number.isInteger(line.quantity) || line.quantity < MIN_QUANTITY || line.quantity > MAX_QUANTITY) {
-        return { refused: `A quantity must be a whole number from ${MIN_QUANTITY} to ${MAX_QUANTITY}.` };
+        return `A quantity must be a whole number from ${MIN_QUANTITY} to ${MAX_QUANTITY}.`;
       }
     }
     // S34: a stated budget is checked here, on the prices read_menu returned, never on a sum the
@@ -94,14 +96,34 @@ export function createAgentTools(options: AgentToolsOptions) {
     if (input.budgetMinor !== undefined) {
       let sum = 0;
       for (const line of input.lines) {
-        const unitMinor = allowed.get(line.menuItemId) ?? null;
-        if (unitMinor === null) return { refused: "This shop's menu holds no price for one of those items, so Envoi cannot check them against a budget." };
+        const unitMinor = allowed.get(line.menuItemId)?.unitMinor ?? null;
+        if (unitMinor === null) return "This shop's menu holds no price for one of those items, so Envoi cannot check them against a budget.";
         sum += unitMinor * line.quantity;
       }
       if (sum > input.budgetMinor) {
-        return { refused: `Those items and quantities add to ${sum} in this shop's menu prices, over the stated budget of ${input.budgetMinor}. Suggest fewer or cheaper items, or ask the person for a larger budget.` };
+        return `Those items and quantities add to ${sum} in this shop's menu prices, over the stated budget of ${input.budgetMinor}. Suggest fewer or cheaper items, or ask the person for a larger budget.`;
       }
     }
+    return null;
+  }
+
+  // S34: records that the person may accept this basket. It calls nothing on Envoi and creates no
+  // link, so it checks availability itself: Envoi's own refusal is never reached here.
+  function offerBasket(input: ProposeBasketInput) {
+    options.gate().spend();
+    const allowed = menus.get(input.outletId);
+    const refused = input.lines.some((line) => allowed?.has(line.menuItemId) && allowed.get(line.menuItemId)?.available !== true)
+      ? "One of those items is not available at this shop today, so Envoi cannot offer it."
+      : basketRefusal(input);
+    options.onOffer?.(refused === null);
+    return refused === null ? { offered: true } : { refused };
+  }
+
+  async function proposeBasket(input: ProposeBasketInput) {
+    const gate = options.gate();
+    gate.spend();
+    const refused = basketRefusal(input);
+    if (refused !== null) return { refused };
     // The body is rebuilt from ids and quantities alone, so nothing else the model sent, such as a
     // price, total, budget or payee, can reach Envoi.
     const body = { outletId: input.outletId, lines: input.lines.map((line) => ({ menuItemId: line.menuItemId, quantity: line.quantity })) };
@@ -137,7 +159,17 @@ export function createAgentTools(options: AgentToolsOptions) {
       }),
       execute: (input) => proposeBasket(input),
     }),
+    offer_basket: tool({
+      description:
+        "Tell Envoi you have suggested exactly these items and quantities, so the person is shown a button to accept them. It creates no link and adds nothing to a basket. Use it for one exact basket you are about to ask them to accept, with item ids from read_menu, and with budgetMinor when they stated a budget.",
+      inputSchema: z.object({
+        outletId: z.string(),
+        lines: z.array(z.object({ menuItemId: z.string(), quantity: z.number() })),
+        budgetMinor: z.number().int().nonnegative().optional(),
+      }),
+      execute: async (input) => offerBasket(input),
+    }),
   };
 
-  return { tools, listShops, readMenu, proposeBasket };
+  return { tools, listShops, readMenu, proposeBasket, offerBasket };
 }

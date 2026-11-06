@@ -3,7 +3,10 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { webEnv } from "@/env";
 import { assistantSettings } from "@/integrations/ai/openai";
-import { runAssistantTurn } from "@/integrations/assistant/agent";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { AcceptOffer } from "@/app/buy/ask/ask-envoi";
+import { createAgent, runAssistantTurn } from "@/integrations/assistant/agent";
 import { createFakeEnvoiApi, FIXTURE_AGENT_TOKEN, FIXTURE_BASE_URL, FIXTURE_LINK, OTHER_SHOP, TEST_SHOP, US_SHOP, type FakeEnvoiApi } from "../support/fake-envoi-api";
 import { createFakeOpenAI, FIXTURE_AI_ENV, type FakeOpenAI, type FakeTurn } from "../support/fake-openai";
 import { webEnvFor } from "../support/session";
@@ -275,6 +278,73 @@ describe("Ask Envoi", () => {
 
   // S34: Gate 1's four advice rules reach the model as instructions. This proves presence on the
   // runtime surface, not behaviour; the behaviour is measured by the pre-registered evaluation.
+  // S34 named tests 59 to 61, Gate 3 reopening 2026-11-07. The menu prices are the fixture's, as above.
+  const offerTurn = async (calls: FakeTurn[], shop = TEST_SHOP, envoi = createFakeEnvoiApi()) => {
+    const turns: FakeTurn[] = [{ kind: "tools", calls: [{ name: "read_menu", args: { outletId: shop.id } }] }, ...calls, { kind: "text", text: "FIXTURE reply." }];
+    const fake = createFakeOpenAI((index) => turns[index]!);
+    const result = await runAssistantTurn(scopedConfig(envoi, fake), say("FIXTURE: what should I try?"), shop);
+    return { result, envoi, output: fake.toolOutputs().at(-1) ?? "" };
+  };
+  const offerCall = (args: Record<string, unknown>): FakeTurn => ({ kind: "tools", calls: [{ name: "offer_basket", args }] });
+  const offerOf = (run: { result: Awaited<ReturnType<typeof runAssistantTurn>> }) => (run.result.kind === "reply" ? run.result.offer : null);
+
+  it("offer_basket refuses a basket that is over budget, off the menu, unavailable or another shop's", async () => {
+    const atBudget = await offerTurn([offerCall({ outletId: TEST_SHOP.id, lines: twoItems, budgetMinor: 400 })]);
+    expect(offerOf(atBudget)).toBe(true);
+    const overBudget = await offerTurn([offerCall({ outletId: TEST_SHOP.id, lines: twoItems, budgetMinor: 399 })]);
+    expect(offerOf(overBudget)).toBe(false);
+    expect(overBudget.output).toContain("add to 400");
+    const offMenu = await offerTurn([offerCall({ outletId: TEST_SHOP.id, lines: [{ menuItemId: "itm_invented", quantity: 1 }] })]);
+    expect(offerOf(offMenu)).toBe(false);
+    expect(offMenu.output).toContain("not on the menu");
+    const unavailable = await offerTurn([offerCall({ outletId: TEST_SHOP.id, lines: [{ menuItemId: "itm_kaya", quantity: 1 }] })]);
+    expect(offerOf(unavailable)).toBe(false);
+    expect(unavailable.output).toContain("not available");
+    const badQuantity = await offerTurn([offerCall({ outletId: TEST_SHOP.id, lines: [{ menuItemId: "itm_kopic", quantity: 0 }] })]);
+    expect(offerOf(badQuantity)).toBe(false);
+    // The other shop's menu was read, so only the scope stops this offer, and it clears the earlier one.
+    const otherShop = await offerTurn([
+      { kind: "tools", calls: [{ name: "read_menu", args: { outletId: OTHER_SHOP.id } }] },
+      offerCall({ outletId: TEST_SHOP.id, lines: [{ menuItemId: "itm_kopic", quantity: 1 }] }),
+      offerCall({ outletId: OTHER_SHOP.id, lines: [{ menuItemId: "itm_otherkopi", quantity: 1 }] }),
+    ]);
+    expect(offerOf(otherShop)).toBe(false);
+    expect(otherShop.output).toContain("about one shop");
+    // A later refusal clears an earlier offer, so the button can never outlive what was checked.
+    const replaced = await offerTurn([
+      offerCall({ outletId: TEST_SHOP.id, lines: twoItems }),
+      offerCall({ outletId: TEST_SHOP.id, lines: twoItems, budgetMinor: 1 }),
+    ]);
+    expect(offerOf(replaced)).toBe(false);
+  });
+
+  it("offer_basket creates no link and calls nothing on Envoi", async () => {
+    const run = await offerTurn([offerCall({ outletId: TEST_SHOP.id, lines: twoItems, budgetMinor: 400 })]);
+    expect(run.result.kind).toBe("reply");
+    expect(offerOf(run)).toBe(true);
+    expect(created(run)).toEqual([]);
+    expect(run.result.steps.map((step) => step.operation)).toEqual(["getOutletMenu"]);
+    // A turn with no offer says so, and a kept conversation does not carry an offer into its next turn.
+    const turns: FakeTurn[] = [
+      { kind: "tools", calls: [{ name: "read_menu", args: { outletId: TEST_SHOP.id } }] },
+      offerCall({ outletId: TEST_SHOP.id, lines: twoItems }),
+      { kind: "text", text: "FIXTURE first reply." },
+      { kind: "text", text: "FIXTURE second reply." },
+    ];
+    const fake = createFakeOpenAI((index) => turns[index]!);
+    const agent = createAgent({ ...scopedConfig(createFakeEnvoiApi(), fake), writeTrace: () => {} });
+    expect(await agent.turn("FIXTURE: what should I try?")).toMatchObject({ kind: "reply", offer: true });
+    expect(await agent.turn("FIXTURE: thanks.")).toMatchObject({ kind: "reply", offer: false });
+  });
+
+  it("the accept button renders only when the server offered a basket", () => {
+    const render = (offer: boolean, busy = false) => renderToStaticMarkup(createElement(AcceptOffer, { offer, busy, onAccept: () => {} }));
+    expect(render(false)).toBe("");
+    expect(render(true)).toContain("Yes, make the basket");
+    expect(render(true)).not.toContain("disabled");
+    expect(render(true, true)).toContain("disabled");
+  });
+
   it("the advice rules reach the model as instructions", async () => {
     type Item = { role?: string; content?: unknown };
     // The system prompt reaches the Responses API as a privileged input message, not as `instructions`.
@@ -289,7 +359,10 @@ describe("Ask Envoi", () => {
     const instructions = privileged(unscoped);
     expect(instructions.length).toBeGreaterThan(0);
     for (const needle of [
-      "call propose_basket only after they accept",
+      "Call propose_basket only after they accept",
+      "call offer_basket with exactly those items and quantities",
+      "If offer_basket refuses, tell them and do not ask",
+      "budgetMinor on offer_basket and propose_basket",
       "a suggestion on its own never creates a link",
       "budgetMinor",
       "never call anything popular, a best seller",

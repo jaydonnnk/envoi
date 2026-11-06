@@ -13,7 +13,21 @@ const CLIENT_TIMEOUT_MS = 75_000;
 
 type Turn = { role: "buyer" | "assistant"; text: string };
 type Step = { operation: "listOutlets" | "getOutletMenu" | "createPurchaseRequest"; status: number | null; outletId: string | null; itemIds: string[]; expiresAt: string | null; ms: number };
-type Answer = { reply: string; steps: Step[]; link: { url: string; expiresAt: string } | null };
+type Answer = { reply: string; steps: Step[]; link: { url: string; expiresAt: string } | null; offer: boolean };
+
+// S34: the accept button. Tapping it sends this text as the visitor's own turn; typing yes works too.
+export const ACCEPT_TEXT = "Yes, make the basket";
+
+export function AcceptOffer({ offer, busy, onAccept }: { offer: boolean; busy: boolean; onAccept: () => void }) {
+  if (!offer) return null;
+  return (
+    <div className="actions">
+      <button type="button" className="button" disabled={busy} onClick={onAccept}>
+        {ACCEPT_TEXT}
+      </button>
+    </div>
+  );
+}
 
 // What each generated-client call did, written from the call's own operation and status, never from
 // the model's words.
@@ -45,22 +59,28 @@ export function AskEnvoi({ shop }: { shop?: AskShop }) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [steps, setSteps] = useState<Step[]>([]);
   const [link, setLink] = useState<Answer["link"]>(null);
+  const [offer, setOffer] = useState(false);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
   const message = useRef<HTMLTextAreaElement>(null);
   useRestoreFocus(busy);
 
-  async function submit(event: React.FormEvent) {
+  function submit(event: React.FormEvent) {
     event.preventDefault();
     const said = text.trim();
     if (said.length === 0) return;
+    setText("");
+    void send(said);
+  }
+
+  async function send(said: string) {
     const next = [...turns, { role: "buyer" as const, text: said }];
     setTurns(next);
-    setText("");
     setBusy(true);
     setFailure(null);
     setLink(null);
+    setOffer(false);
     try {
       await ensureBuyerSession();
       const result = await postJson<Answer>("/api/v1/buyer/assistant", { turns: history(next), ...(shop ? { outletId: shop.id } : {}) }, AbortSignal.timeout(CLIENT_TIMEOUT_MS));
@@ -71,6 +91,7 @@ export function AskEnvoi({ shop }: { shop?: AskShop }) {
       const answer = result.data;
       setSteps(answer.steps);
       setLink(answer.link);
+      setOffer(answer.offer);
       setTurns([...next, { role: "assistant", text: answer.reply }]);
     } catch (err) {
       setFailure(
@@ -100,6 +121,7 @@ export function AskEnvoi({ shop }: { shop?: AskShop }) {
           ))}
           {busy && <div className="bubble bot muted">Reading Envoi…</div>}
         </div>
+        <AcceptOffer offer={offer} busy={busy} onAccept={() => void send(ACCEPT_TEXT)} />
         {link && (
           <div className="actions">
             <a className="button" href={link.url}>

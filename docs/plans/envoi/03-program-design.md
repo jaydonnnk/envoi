@@ -46,7 +46,8 @@ Every earlier contract stays unless a row below changes it.
 | `src/integrations/assistant/agent.ts` | S32, S33, S34 | Reply in the person's language; "in Singapore" goes; optional shop context; advice rules |
 | `src/app/api/v1/buyer/assistant/route.ts` | S33 | Optional `outletId`, resolved to a published outlet |
 | `src/app/buy/ask/page.tsx`, `src/app/buy/ask/ask-envoi.tsx`, `src/app/buy/shop-basket.tsx` | S33 | Shop-scoped page and the link from the shop page |
-| `src/integrations/assistant/tools.ts` | S34 | `propose_basket` takes optional `budgetMinor`, refused in code when menu prices exceed it |
+| `src/integrations/assistant/tools.ts` | S34 | `propose_basket` takes optional `budgetMinor`, refused in code when menu prices exceed it; `offer_basket`, added 2026-11-07 |
+| `src/app/api/v1/buyer/assistant/route.ts`, `src/app/buy/ask/ask-envoi.tsx` | S34, added 2026-11-07 | The answer's `offer` field and the accept button |
 | `src/app/receipt/[purchaseId]/show-the-stall.tsx`, `src/app/receipt/[purchaseId]/page.tsx` | S42 | New client panel, rendered only when state is paid; lists `en`, `zh`, `ms`, `ta` and opens on `en`, making no translation request until another is chosen; uses the existing translations route, and shows original names when it fails. |
 | `src/app/merchant/orders/orders-grid.tsx`, `orders-view.tsx` | S35 | New grid, keeping Acknowledge, Delete and polling |
 | `src/app/api/v1/merchant/outlets/[id]/orders/filter/route.ts`, `src/integrations/ai/order-filter.ts`, `src/domain/purchases/order-filter.ts` | S35 | Route, model call, schema and applying function |
@@ -82,7 +83,7 @@ function cryptoAllowed(outlet: { country: Country }, sellerMerchantId: string, a
 - **Named tests (37 onward; each guard gets its own mutation):**
   - S32: 37 `the language evaluation counts a wrong basket link as a failure`.
   - S33: 38 `an unpublished or unknown outlet id gives no shop context`; 39 `shop text reaches the model only as data`; 40 `a shop-scoped turn cannot propose another shop's items`.
-  - S34: 41 `propose_basket refuses a basket over the stated budget`, with the sum from menu prices and not from the model.
+  - S34: 41 `propose_basket refuses a basket over the stated budget`, with the sum from menu prices and not from the model; added 2026-11-07: 59 `offer_basket refuses a basket that is over budget, off the menu, unavailable or another shop's`; 60 `offer_basket creates no link and calls nothing on Envoi`; 61 `the accept button renders only when the server offered a basket`.
   - S35: 42 `the filter schema refuses any field but the five`; 43 `the order filter call receives no order data`; 44 `a filter never turns a pending order into a paid row`; 45 `a non-member cannot call the filter route`.
   - S37: 46 `an agent token over its limit reaches no tool`; 47 `a revoked agent token reaches no tool`; 48 `the agents page holds no token value`, by a scan proved with a planted needle.
   - S42: 54 `show the stall renders only on a paid receipt`; 55 `the stall card's amount comes from the purchase, and its text cannot supply one`.
@@ -3119,3 +3120,17 @@ unpaid_closed -> uncertain   (reason crypto_read_unverified)
 **Approval host.** `ALLOWED_APPROVAL_HOSTS` gains `sandbox.paypal.com`.
 
 **Least confident.** [hypothesis] Webhook delivery alone settles a buyer who never returns; it reached Render within seconds for both completed orders, but Envoi quarantined them as unknown orders, so the settling path itself is untested.
+
+## Reopening 2026-11-07: S34 accept button
+
+**Status: approved 2026-11-07 ("Approve Gate 3").** S34 first shipped with a typed acceptance. The user then chose to build the mockup's button, which needs a server signal, because matching the reply's words would break in other languages.
+
+**`offer_basket`.** A new assistant tool with `propose_basket`'s input. It calls nothing on Envoi and creates no link. It refuses an item the last `read_menu` did not return, a bad quantity, a basket over `budgetMinor` by menu prices and, because Envoi's own refusal is never reached, any item whose `available` is not `true`. A shop-scoped turn refuses another shop's id.
+
+**Result.** `{ kind: "reply" }` gains `offer: boolean`: true only when the turn's last `offer_basket` call passed. The buyer route answers `offer` beside `reply`, `steps` and `link`. A failed or stopped turn, or one that made a link, answers false.
+
+**Screen.** `AcceptOffer` shows "Yes, make the basket" only when `offer` is true. Tapping sends those words as the visitor's own turn, so `propose_basket` still runs only after acceptance, and typing yes keeps working. The label stays in English.
+
+**Instructions.** The assistant calls `offer_basket` when suggesting one exact basket, tells the person if it refuses and does not ask, and calls `propose_basket` only after they accept.
+
+**Least confident.** [hypothesis] The model calls `offer_basket` reliably enough for the button to appear. A missed call loses only the button: typing yes still works, and the rerun measures it.

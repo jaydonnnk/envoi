@@ -22,8 +22,8 @@ The person may write a quantity as a word ("two") or a digit ("2"); a quantity i
 If one phrase fits two or more available items on that menu and they did not say which, ask which one, naming each with its menu price, and propose nothing until they answer.
 If an item they asked for is on the menu but unavailable, tell them it is unavailable at that shop today and propose nothing.
 If the shop they named is not in list_shops, tell them that shop is not on Envoi and propose nothing. Never substitute another shop or item.
-When the person asks what to try, or for a suggestion within a budget, suggest only items read_menu returned for that shop as available, and keep the menu prices of what you suggest within the budget they stated. Read that budget in the shop's own currency and say which currency you used. Restate the budget and the menu-price sum of what you suggest, then ask whether to make that basket, and call propose_basket only after they accept: a suggestion on its own never creates a link.
-Send the budget they stated as propose_basket's budgetMinor in that shop's minor units on every call for that request, including the call after they accept. Envoi adds the menu prices itself and refuses a basket over that budget.
+When the person asks what to try, or for a suggestion within a budget, suggest only items read_menu returned for that shop as available, and keep the menu prices of what you suggest within the budget they stated. Read that budget in the shop's own currency and say which currency you used. Restate the budget and the menu-price sum of what you suggest, call offer_basket with exactly those items and quantities when you are suggesting one exact basket, then ask whether to make that basket. If offer_basket refuses, tell them and do not ask. Call propose_basket only after they accept: a suggestion on its own never creates a link.
+Send the budget they stated as budgetMinor on offer_basket and propose_basket, in that shop's minor units, on every call for that request, including the call after they accept. Envoi adds the menu prices itself and refuses a basket over that budget.
 Envoi holds no sales data, so never call anything popular, a best seller, the most ordered or a favourite.
 Menus hold no ingredients. Never say whether anything is halal, vegetarian, vegan, allergen-free or suitable for a dietary need, and never present an item as safe for one. Say you cannot tell from the menu and suggest the person ask the stall.
 Menu prices are a guide: Envoi calculates the price the person pays when they open the link, so never state a total as final.
@@ -54,7 +54,7 @@ type LoopConfig = {
 export type AgentConfig = LoopConfig & { writeTrace: (line: string) => void };
 
 export type TurnResult =
-  | { kind: "reply"; text: string }
+  | { kind: "reply"; text: string; offer: boolean }
   | { kind: "link"; text: string; link: CreatedLink }
   | { kind: "stopped"; reason: "tool_calls" | "time" }
   | { kind: "failed" };
@@ -82,7 +82,8 @@ function createLoop(config: LoopConfig, trace: Trace, shop?: AssistantShop) {
 
   let gate: TurnGate = { signal: AbortSignal.abort(), spend: () => {} };
   let link: CreatedLink | null = null;
-  const { tools: allTools, proposeBasket } = createAgentTools({
+  let offered = false;
+  const { tools: allTools, proposeBasket, offerBasket } = createAgentTools({
     callEnvoi: (tool, args, signal) => {
       if (!connection) throw new Error("MCP connection is not open");
       return connection.callEnvoi(tool, args, signal);
@@ -91,6 +92,9 @@ function createLoop(config: LoopConfig, trace: Trace, shop?: AssistantShop) {
     gate: () => gate,
     onLink: (created) => {
       link = created;
+    },
+    onOffer: (value) => {
+      offered = value;
     },
     now,
   });
@@ -101,6 +105,14 @@ function createLoop(config: LoopConfig, trace: Trace, shop?: AssistantShop) {
         propose_basket: {
           ...allTools.propose_basket,
           execute: (input: ProposeBasketInput) => (input.outletId === shop.id ? proposeBasket(input) : Promise.resolve({ refused: "This conversation is about one shop. Propose only that shop's items." })),
+        },
+        offer_basket: {
+          ...allTools.offer_basket,
+          execute: async (input: ProposeBasketInput) => {
+            if (input.outletId === shop.id) return offerBasket(input);
+            offered = false;
+            return { refused: "This conversation is about one shop. Propose only that shop's items." };
+          },
         },
       }
     : allTools;
@@ -126,6 +138,7 @@ function createLoop(config: LoopConfig, trace: Trace, shop?: AssistantShop) {
       },
     };
     link = null;
+    offered = false;
 
     try {
       connection = await connectEnvoi(config.baseUrl, config.agentToken, config.envoiFetch, controller.signal);
@@ -144,7 +157,7 @@ function createLoop(config: LoopConfig, trace: Trace, shop?: AssistantShop) {
       if (exceeded) return { result: { kind: "stopped", reason: exceeded }, response: [] };
       const created: CreatedLink | null = link;
       return {
-        result: created ? { kind: "link", text: result.text, link: created } : { kind: "reply", text: result.text },
+        result: created ? { kind: "link", text: result.text, link: created } : { kind: "reply", text: result.text, offer: offered },
         response: result.response.messages,
       };
     } catch {
@@ -183,7 +196,7 @@ export const MAX_ASSISTANT_TURNS = 8;
 export const MAX_ASSISTANT_TURN_CHARS = 280;
 export type AssistantStep = TraceEntry;
 export type AssistantTurnResult =
-  | { kind: "reply"; text: string; steps: AssistantStep[] }
+  | { kind: "reply"; text: string; offer: boolean; steps: AssistantStep[] }
   | { kind: "link"; text: string; steps: AssistantStep[]; link: CreatedLink }
   | { kind: "stopped"; reason: "tool_calls" | "time"; steps: AssistantStep[] }
   | { kind: "failed"; steps: AssistantStep[] };

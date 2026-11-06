@@ -1160,7 +1160,7 @@ Branch: `envoi/slice-38-pay-with-crypto`. **First step.** One order with Envoi's
 
 #### S34 Advice
 
-Branch: `envoi/slice-34-menu-advice`. Depends on S33. **Visible result.** Per mockup. **Tests.** 41. **Evaluation.** Ten advice cases and the existing 25. **Falsifier.** Any over-budget or dietary assurance: not shipped. **Authorizations.** Starting S34; OpenAI spend; merge, push and deploy.
+Branch: `envoi/slice-34-menu-advice`. Depends on S33. The accept button, added 2026-11-07: `envoi/slice-34-accept-button`. **Visible result.** Per mockup, except its heading and intro text, because the page keeps S33's. **Tests.** 41, and added 2026-11-07: 59 to 61, with the [accept button reopening](03-program-design.md#reopening-2026-11-07-s34-accept-button), each with its own mutation. **Evaluation.** Ten advice cases and the existing 25, rerun for the changed instructions. **Falsifier.** Any over-budget or dietary assurance: not shipped. **Authorizations.** Starting S34; OpenAI spend; merge, push and deploy.
 
 ## Test assignment
 

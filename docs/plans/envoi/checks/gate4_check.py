@@ -430,7 +430,8 @@ for f, text in current.items():
 # 2026-10-29: the second build plan reopening, re-approved by the user ("Approve Gate 3"); 09bbb22c...22da59cb was the text before it.
 # 2026-10-29: the S25 limiter bucket reopening, re-approved by the user ("Approve Gate 3"); 04e8995f...c1aed5 was the approved text before it, fe423865...856b85a4 the draft.
 # 2026-11-02: the MCP client reopening, re-approved by the user ("Approved"); 48e7e159...945758c was the draft, bfa13baa...f048499 the approved S25 limiter bucket text before it.
-G3_REOPENING_SHA256 = "fc34268039d6fa582242032c1d8899e1f330e1e8746134e1d26926986e8f602b"
+# 2026-11-07: the S34 accept button reopening, re-approved by the user ("Approve Gate 3"); fc342680...8f602b was the pin before it.
+G3_REOPENING_SHA256 = "ef9bd80289dffaf72857a905f032eed8c34929052e4e9cf87619d1799bb2353a"
 # 02-architecture.md may likewise equal its continuation amendment text, re-approved by the user on 2026-10-25
 # (bc504e10...d0e47a9f was the shop QR and order archive text, re-approved on 2026-10-24,
 # 28d54654...45561154 the Phantom landing text of 2026-10-18, 938d0a99...f3bf30a6 the English-only text of 2026-10-15).
@@ -468,6 +469,8 @@ G1_MOCKUP_SHA256 = {
     os.path.join("mockups", "merchant-country.html"): "03bd22f1e4b6c214c8685ce51e3019d3fa717cf4112aaa7d0044e8c2269a62f8",
     os.path.join("mockups", "merchant-rewards.html"): "13c51061a482af064d67cedd2b3103997b72fc3a1e561564aab939855d2a346a",
     os.path.join("mockups", "merchant-web-import-review.html"): "83cb171c64d30ad4658e9cd04dc0d94b9d5c0094332c4a5c6d9aa203b2d75656",
+    # 2026-11-07: the S34 accept button note, pre-approved by the user ("I pre approve ur gate 1 and gatte 4 changes").
+    os.path.join("mockups", "buyer-menu-advice.html"): "a3a5cc39e6ada0409c9669d272d17c2712ea28420e28a41606fed8f508c70f4f",
 }
 # Current: the web menu import reopening, re-approved by the user on 2026-10-29, on top of the usability-study removal,
 # which is still DRAFTED AND NOT APPROVED (631a626b...3632271aa9 was the draft of both, 4718a3f5...701140e2 was the 2026-10-28 body with the approved round 5 allowance,

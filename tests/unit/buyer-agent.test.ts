@@ -170,7 +170,7 @@ describe("reference buyer agent", () => {
         { kind: "text", text: "FIXTURE: the link is on its way to you." } as FakeTurn,
       ][index]!,
     );
-    expect(await agent.turn(FIRST)).toEqual({ kind: "reply", text: "Which iced tea: Iced lemon tea S$2.20 or Iced milk tea S$2.50?" });
+    expect(await agent.turn(FIRST)).toEqual({ kind: "reply", text: "Which iced tea: Iced lemon tea S$2.20 or Iced milk tea S$2.50?", offer: false });
     const second = await agent.turn(SECOND);
     // The link reached the person, so it existed to leak.
     expect(second).toMatchObject({ kind: "link", link: { url: FIXTURE_LINK, expiresAt: FIXTURE_EXPIRES_AT } });

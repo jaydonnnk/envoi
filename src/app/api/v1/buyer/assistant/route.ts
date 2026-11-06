@@ -74,7 +74,9 @@ export async function POST(request: Request): Promise<Response> {
   }
   const reply = result.kind === "stopped" ? `${STOPPED[result.reason]} Try again, or ${shop ? "choose from this shop's menu" : "pick a shop from the list"}.` : result.text;
   const link = result.kind === "link" ? { url: result.link.url, expiresAt: result.link.expiresAt } : null;
-  return httpOk({ reply, steps: result.steps, link });
+  // S34: whether to show the accept button, from the turn's own checked offer_basket call, never the reply's words.
+  const offer = result.kind === "reply" && result.offer;
+  return httpOk({ reply, steps: result.steps, link, offer });
 }
 
 // One server log line per client call, from the same trace entries the buyer sees as steps.

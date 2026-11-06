@@ -4,11 +4,13 @@ import {
   adviceCases,
   adviceVerdict,
   assertAdviceRegistered,
+  buttonVerdict,
   cappedFetch,
   langCases,
   langVerdict,
   priceBasket,
   scoreAdvice,
+  scoreOffers,
   CAP_USD,
   REQUEST_BOUND_USD,
 } from "../../docs/plans/envoi/evidence/s34-advice-eval.mjs";
@@ -189,5 +191,45 @@ describe("S34 FIXTURE verdicts", () => {
     // An unreviewed row is not counted as passed, and 24 is exactly the registered floor.
     expect(langVerdict(rows.map((row, index) => (index === 0 ? langRow(row.id, { semantic: undefined }) : row)))).toMatchObject({ passed: 24, eligible: true });
     expect(langVerdict(rows.map((row, index) => (index < 2 ? langRow(row.id, { semantic: undefined }) : row)))).toMatchObject({ passed: 23, eligible: false });
+  });
+
+  describe("the accept button rerun's scoring", () => {
+    const shop = { id: "out_fixture", name: "FIXTURE shop" };
+    const item = (id: string, name: string, unitMinor: number | null, available = true) => ({ id, name, unitMinor, available });
+    const menus = [{ outlet: { ...shop, area: "FIXTURE", isDemoFixture: true }, items: [item("itm_a", "A", 300), item("itm_b", "B", 500), item("itm_off", "Off", 100, false)] }] as unknown as Parameters<typeof scoreOffers>[1];
+    const entry = { id: "ad1", shop: shop.name, turns: ["FIXTURE"], budgetMinor: 400, expected: { kind: "advice" as const, baskets: 0 } };
+    const call = (name: string, lines: { menuItemId: string; quantity: number }[], budgetMinor?: number) => ({ turn: 0, name, args: { lines, budgetMinor } });
+
+    it("prices an offer from the menu and counts an over-budget one", () => {
+      expect(scoreOffers(entry, menus, [call("offer_basket", [{ menuItemId: "itm_a", quantity: 1 }], 400)], true)).toMatchObject({ offerOverBudget: 0, offerOffMenu: [], budgetMisses: 0, offersCalled: 1 });
+      expect(scoreOffers(entry, menus, [call("offer_basket", [{ menuItemId: "itm_b", quantity: 1 }], 400)], true).offerOverBudget).toBe(1);
+      expect(scoreOffers(entry, menus, [call("offer_basket", [{ menuItemId: "itm_a", quantity: 2 }], 400)], true).offerOverBudget).toBe(1);
+    });
+
+    it("counts an unavailable or invented item as off the menu", () => {
+      expect(scoreOffers(entry, menus, [call("offer_basket", [{ menuItemId: "itm_off", quantity: 1 }], 400)], true).offerOffMenu).toEqual(["Off:unavailable"]);
+      expect(scoreOffers(entry, menus, [call("offer_basket", [{ menuItemId: "itm_none", quantity: 1 }], 400)], true).offerOffMenu).toEqual(["itm_none"]);
+    });
+
+    it("counts a missing or different budget on either basket tool", () => {
+      expect(scoreOffers(entry, menus, [call("propose_basket", [{ menuItemId: "itm_a", quantity: 1 }])], false).budgetMisses).toBe(1);
+      expect(scoreOffers(entry, menus, [call("offer_basket", [{ menuItemId: "itm_a", quantity: 1 }], 399)], true).budgetMisses).toBe(1);
+      expect(scoreOffers(entry, menus, [{ turn: 0, name: "read_menu", args: {} }], false).budgetMisses).toBe(0);
+    });
+
+    it("the verdict needs the offers shown and every count at zero", () => {
+      const row = (id: string, over: Record<string, unknown> = {}) => ({ id, expected: { kind: "advice" as const, baskets: 0 }, basketsCreated: 0, offMenu: [], overBudget: 0, modelWrittenLinks: 0, structuralPass: true, semantic: "pass" as const, offerShown: true, offersCalled: 1, offerOffMenu: [], offerOverBudget: 0, budgetMisses: 0, ...over });
+      const ids = ["ad1", "ad2", "ad3", "ad4", "ad5", "ad6", "ad7", "ad8", "ad9", "ad10"];
+      const clean = ids.map((id) => row(id, id === "ad5" ? { expected: { kind: "advice_none", baskets: 0 }, offerShown: false, offersCalled: 0 } : {}));
+      expect(buttonVerdict(clean).eligible).toBe(true);
+      const swap = (id: string, over: Record<string, unknown>) => clean.map((candidate) => (candidate.id === id ? row(id, over) : candidate));
+      // One missed offer is inside the floor of 7 of 8; two are not.
+      expect(buttonVerdict(swap("ad1", { offerShown: false })).eligible).toBe(true);
+      expect(buttonVerdict(swap("ad1", { offerShown: false }).map((candidate) => (candidate.id === "ad2" ? row("ad2", { offerShown: false }) : candidate))).eligible).toBe(false);
+      expect(buttonVerdict(swap("ad1", { offerOverBudget: 1 })).eligible).toBe(false);
+      expect(buttonVerdict(swap("ad1", { offerOffMenu: ["x"] })).eligible).toBe(false);
+      expect(buttonVerdict(swap("ad1", { budgetMisses: 1 })).eligible).toBe(false);
+      expect(buttonVerdict(swap("ad5", { expected: { kind: "advice_none", baskets: 0 } })).eligible).toBe(false);
+    });
   });
 });
