@@ -676,7 +676,8 @@ AG Grid Community stays the only grid; no paid module and no AG Studio.
 
 **Data.** Additive migrations only:
 - `0029`: two limiter buckets, `merchant_order_filter` and `agent_mcp`.
-- `0030`: `payment_attempts.paypal_funding`, `paypal` by default, `crypto` allowed.
+- `0030`: `outlets.hidden_at`, shipped 2026-11-06 by `0030_hide_outlets.sql` outside the build order (`hide-outlet` and `show-outlet`, demo fixtures only). A hidden shop leaves public lists and search; its direct link still works.
+- `0031`: `payment_attempts.paypal_funding`, `paypal` by default, `crypto` allowed. Renumbered from `0030` on 2026-11-06 as a record correction; no decision changed.
 No table stores a merchant's filter sentence.
 
 **Flow: scan to paid.** Scan or shop QR, then the shop page, then `/buy/ask?outlet=<id>`; the route resolves the outlet and tells the agent its id and name as data; the agent reads the menu through MCP; `propose_basket` makes the link; the buyer opens the existing review and pays as today.
@@ -685,7 +686,7 @@ No table stores a merchant's filter sentence.
 
 **Flow: crypto through PayPal.** The start route accepts `crypto` only for a US outlet with the switch on. Envoi creates the order with `payment_source.crypto`, the shop as payee, and `ORDER_COMPLETE_ON_PAYMENT_APPROVAL`. The buyer is redirected to `payer-action`. PayPal captures by itself [verified once 2026-11-04, simulated]. Completion reads the order and applies the existing paid verification, and **never calls capture**. The webhook inbox and maintenance reconcile remain the fallback.
 
-**Flow: judge token.** An operator-issued agent token labeled for judges reaches `/mcp` as any agent does, and a per-token limit applies before the tools run. Revoking it uses the existing `revoked_at`.
+**Flow: judge token.** An operator-issued agent token labeled for judges reaches `/mcp` as any agent does, and a per-token limit applies before the tools run. Every token is limited: 60 `/mcp` POSTs per 10 minutes, and 900 for the site's own `ASSISTANT_AGENT_TOKEN`, which all Ask Envoi buyers share. Revoking a token uses the existing `revoked_at`.
 
 **External.** Environment names added: `PAYPAL_CRYPTO_ENABLED`. Reused: `OPENAI_API_KEY`, `AI_MODEL`, `AI_MENU_TRANSLATION_MODEL`, `PAYPAL_*`. Show the stall's audio uses the browser's speech synthesis, with no provider, and is left out where the browser has no matching voice.
 

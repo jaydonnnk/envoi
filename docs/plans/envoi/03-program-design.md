@@ -49,9 +49,11 @@ Every earlier contract stays unless a row below changes it.
 | `src/app/merchant/orders/orders-grid.tsx`, `orders-view.tsx` | S35 | New grid, keeping Acknowledge, Delete and polling |
 | `src/app/api/v1/merchant/outlets/[id]/orders/filter/route.ts`, `src/integrations/ai/order-filter.ts`, `src/domain/purchases/order-filter.ts` | S35 | Route, model call, schema and applying function |
 | `drizzle/0029_*.sql`, `src/lib/db/schema.ts`, `src/lib/ratelimit.ts` | S35, S37 | Two buckets and their limits |
-| `src/app/agents/page.tsx`, `src/app/mcp/route.ts` | S37 | Setup page; per-token limit |
+| `src/app/agents/page.tsx`, `src/app/globals.css`, `src/app/mcp/route.ts` | S37 | Setup page; per-token limit |
+| `scripts/scan-agents-page.ts` | S37 | Test 48's scanner, run on the rendered page and on a served URL |
 | `src/operator/cli.ts` | S37, S41 | `revoke-agent-token` if absent; fixture renames and judge merchant through existing commands where they exist |
-| `drizzle/0030_*.sql`, `src/integrations/paypal/orders.ts`, `src/domain/payments/attempts.ts`, `src/app/api/v1/purchases/[id]/paypal/start/route.ts`, `src/app/review/[purchaseId]/` | S38 | Funding column, order body, no-capture completion, route and review option |
+| `drizzle/0030_hide_outlets.sql`, `src/lib/db/schema.ts`, `src/operator/cli.ts`, `src/domain/outlets/search.ts` | Outside the build order, 2026-11-06 | `outlets.hidden_at`; `hide-outlet` and `show-outlet`, demo fixtures only |
+| `drizzle/0031_*.sql`, `src/integrations/paypal/orders.ts`, `src/domain/payments/attempts.ts`, `src/app/api/v1/purchases/[id]/paypal/start/route.ts`, `src/app/review/[purchaseId]/` | S38 | Funding column, order body, no-capture completion, route and review option |
 
 - **Types and signatures (no bodies):**
 
@@ -88,7 +90,7 @@ function cryptoAllowed(outlet: { country: Country }, sellerMerchantId: string, a
   1. [hypothesis] Five languages (zh, ja, ko, es, ms): chosen for visitors plus Singapore's stalls, with no data behind the choice.
   2. The budget guard is at `propose_basket` only. A wrong sum in the assistant's words is caught by evaluation, not code.
   3. The filter applies to rows already loaded, so older pages need "load older" first. A server query would be more correct and larger.
-  4. A per-token limit on all MCP tools may slow a legitimate judge's assistant: 60 calls per 10 minutes is proposed.
+  4. A per-token limit on all MCP tools may slow a legitimate judge's assistant: 60 `/mcp` POSTs per 10 minutes is proposed, about 10 full sentences at 6 POSTs each. Decided 2026-11-06 [hypothesis: starting values]: the site's own `ASSISTANT_AGENT_TOKEN` gets 900 per 10 minutes, because all Ask Envoi buyers share it and its own limit allows 150 turns an hour at up to 6 POSTs each. The user accepted this as a value change without a gate reopening ("sure i accept the recommendatoins").
   5. The stall language is chosen by the visitor, with no shop setting, to avoid a migration. A shop setting would be more accurate.
   6. Whether the receipt's stored lines carry what the translations route needs is checked when S42 starts; if not, S42 stops and asks.
   7. S38's body may be refused with items or `invoice_id`; dropping `invoice_id` would lose the duplicate-payment guard, in which case S38 is cut rather than weakened.
