@@ -4,8 +4,8 @@ import { describe, expect, it } from "vitest";
 import { webEnv } from "@/env";
 import { assistantSettings } from "@/integrations/ai/openai";
 import { runAssistantTurn } from "@/integrations/assistant/agent";
-import { createFakeEnvoiApi, FIXTURE_AGENT_TOKEN, FIXTURE_BASE_URL, FIXTURE_LINK, OTHER_SHOP, TEST_SHOP } from "../support/fake-envoi-api";
-import { createFakeOpenAI, FIXTURE_AI_ENV, type FakeTurn } from "../support/fake-openai";
+import { createFakeEnvoiApi, FIXTURE_AGENT_TOKEN, FIXTURE_BASE_URL, FIXTURE_LINK, OTHER_SHOP, TEST_SHOP, US_SHOP, type FakeEnvoiApi } from "../support/fake-envoi-api";
+import { createFakeOpenAI, FIXTURE_AI_ENV, type FakeOpenAI, type FakeTurn } from "../support/fake-openai";
 import { webEnvFor } from "../support/session";
 
 // S25: Ask Envoi in the site, Gate 3 reopening 2026-10-29 named tests 1, 5, 6 and 7. Envoi's API and
@@ -196,5 +196,114 @@ describe("Ask Envoi", () => {
     ];
     const allowed = await runAssistantTurn(scopedConfig(ownEnvoi, createFakeOpenAI((index) => own[index]!)), say("One Kopi C"), TEST_SHOP);
     expect(allowed.kind === "link" && allowed.link.url).toBe(FIXTURE_LINK);
+  });
+
+  // S34 named test 41 and its sibling. Envoi and OpenAI stay faked at their boundaries, labeled
+  // FIXTURE. The fixture menu prices are Kopi C 180, Iced lemon tea 220 and Iced milk tea 250 at Test
+  // Shop, and FIXTURE Coffee 1295 at the US shop. Every sum below is theirs, and none is in the
+  // model's input.
+  const propose = async (args: Record<string, unknown>, shop = TEST_SHOP, envoi = createFakeEnvoiApi()) => {
+    const turns: FakeTurn[] = [
+      { kind: "tools", calls: [{ name: "read_menu", args: { outletId: shop.id } }] },
+      { kind: "tools", calls: [{ name: "propose_basket", args }] },
+      { kind: "text", text: "FIXTURE reply." },
+    ];
+    const fake = createFakeOpenAI((index) => turns[index]!);
+    const result = await runAssistantTurn(scopedConfig(envoi, fake), say("FIXTURE: what should I try?"), shop);
+    return { result, envoi, refusedWith: fake.toolOutputs().at(-1) ?? "" };
+  };
+  const twoItems = [{ menuItemId: "itm_kopic", quantity: 1 }, { menuItemId: "itm_lemontea", quantity: 1 }];
+  const created = (run: { envoi: FakeEnvoiApi }) => run.envoi.requests.filter((request) => request.tool === "create_purchase_request");
+
+  // Gate 3's clause on test 41: "with the sum from menu prices and not from the model".
+  it("the budget sum comes from menu prices, not from the model", async () => {
+    // A price inside a line and an asserted total are both dropped by the tool's schema, and the
+    // refusal still reports the menu's own 400 for 180 plus 220.
+    const lying = await propose({ outletId: TEST_SHOP.id, lines: [{ menuItemId: "itm_kopic", quantity: 1, unitMinor: 1 }, { menuItemId: "itm_lemontea", quantity: 1 }], budgetMinor: 399, totalMinor: 2 });
+    expect(lying.result.kind).toBe("reply");
+    expect(created(lying)).toEqual([]);
+    expect(lying.refusedWith).toContain("add to 400");
+    // The same lines with no model numbers at all are refused identically, so the sum came from the menu.
+    const plain = await propose({ outletId: TEST_SHOP.id, lines: twoItems, budgetMinor: 399 });
+    expect(plain.refusedWith).toBe(lying.refusedWith);
+  });
+
+  it("propose_basket refuses a basket over the stated budget", async () => {
+    // 180 + 220 = 400. One minor unit under it is refused; exactly at it is allowed.
+    const over = await propose({ outletId: TEST_SHOP.id, lines: twoItems, budgetMinor: 399 });
+    expect(over.result.kind).toBe("reply");
+    expect(created(over)).toEqual([]);
+    expect(over.refusedWith).toContain("add to 400");
+    expect(over.refusedWith).toContain("over the stated budget of 399");
+
+    const at = await propose({ outletId: TEST_SHOP.id, lines: twoItems, budgetMinor: 400 });
+    expect(at.result.kind === "link" && at.result.link.url).toBe(FIXTURE_LINK);
+
+    // Quantity multiplies the menu price: two Kopi C is 360, not 180.
+    const quantity = await propose({ outletId: TEST_SHOP.id, lines: [{ menuItemId: "itm_kopic", quantity: 2 }], budgetMinor: 359 });
+    expect(quantity.result.kind).toBe("reply");
+    expect(quantity.refusedWith).toContain("add to 360");
+
+    // No stated budget leaves the earlier behaviour exactly as it was, even at 20 times 180.
+    const unbudgeted = await propose({ outletId: TEST_SHOP.id, lines: [{ menuItemId: "itm_kopic", quantity: 20 }] });
+    expect(unbudgeted.result.kind === "link" && unbudgeted.result.link.url).toBe(FIXTURE_LINK);
+
+    // The budget never reaches Envoi: the body carries ids and quantities only.
+    expect(created(at)).toEqual([{ method: "POST", path: "/mcp", tool: "create_purchase_request", headers: created(at)[0]!.headers, body: { outletId: TEST_SHOP.id, lines: twoItems } }]);
+    expect(JSON.stringify(created(at)[0]!.body)).not.toContain("budget");
+
+    // The comparison is in the shop's own minor units, with no conversion: the US shop's 1295 coffee
+    // is refused at 1294 and allowed at 1295.
+    const usOver = await propose({ outletId: US_SHOP.id, lines: [{ menuItemId: "itm_uscoffee", quantity: 1 }], budgetMinor: 1294 }, US_SHOP);
+    expect(usOver.result.kind).toBe("reply");
+    expect(usOver.refusedWith).toContain("add to 1295");
+    const usAt = await propose({ outletId: US_SHOP.id, lines: [{ menuItemId: "itm_uscoffee", quantity: 1 }], budgetMinor: 1295 }, US_SHOP);
+    expect(usAt.result.kind === "link" && usAt.result.link.url).toBe(FIXTURE_LINK);
+
+    // A menu price Envoi does not hold cannot be checked, so it refuses instead of reading it as zero.
+    const priceless = createFakeEnvoiApi({
+      corrupt: (tool, answer) =>
+        tool === "get_menu"
+          ? { ...answer, items: (answer.items as { id: string }[]).map((item) => (item.id === "itm_kopic" ? { ...item, unitMinor: null } : item)) }
+          : answer,
+    });
+    const unknownPrice = await propose({ outletId: TEST_SHOP.id, lines: twoItems, budgetMinor: 100_000 }, TEST_SHOP, priceless);
+    expect(unknownPrice.result.kind).toBe("reply");
+    expect(created(unknownPrice)).toEqual([]);
+    expect(unknownPrice.refusedWith).toContain("holds no price");
+  });
+
+  // S34: Gate 1's four advice rules reach the model as instructions. This proves presence on the
+  // runtime surface, not behaviour; the behaviour is measured by the pre-registered evaluation.
+  it("the advice rules reach the model as instructions", async () => {
+    type Item = { role?: string; content?: unknown };
+    // The system prompt reaches the Responses API as a privileged input message, not as `instructions`.
+    const privileged = (fake: FakeOpenAI) =>
+      (fake.calls[0]!.body.input as Item[])
+        .filter((item) => item.role === "system" || item.role === "developer")
+        .map((item) => JSON.stringify(item.content))
+        .join();
+
+    const unscoped = createFakeOpenAI(() => ({ kind: "text", text: "FIXTURE reply." }));
+    await runAssistantTurn(scopedConfig(createFakeEnvoiApi(), unscoped), say("What should I try under S$10? Is it halal?"));
+    const instructions = privileged(unscoped);
+    expect(instructions.length).toBeGreaterThan(0);
+    for (const needle of [
+      "call propose_basket only after they accept",
+      "a suggestion on its own never creates a link",
+      "budgetMinor",
+      "never call anything popular, a best seller",
+      "Never say whether anything is halal",
+      "cannot tell from the menu",
+      "shop's own currency",
+    ]) {
+      expect(instructions, needle).toContain(needle);
+    }
+    // The shop-scoped rules still follow them, so one privileged surface carries both.
+    const scoped = createFakeOpenAI(() => ({ kind: "text", text: "FIXTURE reply." }));
+    await runAssistantTurn(scopedConfig(createFakeEnvoiApi(), scoped), say("What should I try?"), TEST_SHOP);
+    const scopedInstructions = privileged(scoped);
+    expect(scopedInstructions).toContain("cannot tell from the menu");
+    expect(scopedInstructions).toContain("about one shop");
   });
 });

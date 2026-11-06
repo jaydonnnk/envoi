@@ -1,0 +1,90 @@
+[
+  {
+    "id": "M01",
+    "branch": "the over-budget comparison never fires",
+    "file": "src/integrations/assistant/tools.ts",
+    "test": "propose_basket refuses a basket over the stated budget",
+    "find": "if (sum > input.budgetMinor) {",
+    "replace": "if (false) {"
+  },
+  {
+    "id": "M02",
+    "branch": "the boundary flips and refuses a basket exactly at the budget",
+    "file": "src/integrations/assistant/tools.ts",
+    "test": "propose_basket refuses a basket over the stated budget",
+    "find": "if (sum > input.budgetMinor) {",
+    "replace": "if (sum >= input.budgetMinor) {"
+  },
+  {
+    "id": "M03",
+    "branch": "quantity is dropped from the sum",
+    "file": "src/integrations/assistant/tools.ts",
+    "test": "propose_basket refuses a basket over the stated budget",
+    "find": "sum += unitMinor * line.quantity;",
+    "replace": "sum += unitMinor;"
+  },
+  {
+    "id": "M04",
+    "branch": "a menu price Envoi does not hold reads as zero instead of refusing",
+    "file": "src/integrations/assistant/tools.ts",
+    "test": "propose_basket refuses a basket over the stated budget",
+    "find": "const unitMinor = allowed.get(line.menuItemId) ?? null;",
+    "replace": "const unitMinor = allowed.get(line.menuItemId) ?? 0;"
+  },
+  {
+    "id": "M05",
+    "branch": "the budget leaks into the body sent to Envoi",
+    "file": "src/integrations/assistant/tools.ts",
+    "test": "propose_basket refuses a basket over the stated budget",
+    "find": "const body = { outletId: input.outletId, lines: input.lines.map((line) => ({ menuItemId: line.menuItemId, quantity: line.quantity })) };",
+    "replace": "const body = { outletId: input.outletId, lines: input.lines.map((line) => ({ menuItemId: line.menuItemId, quantity: line.quantity })), ...(input.budgetMinor === undefined ? {} : { budgetMinor: input.budgetMinor }) };"
+  },
+  {
+    "id": "M06",
+    "branch": "the sum stops coming from the menu prices read_menu returned",
+    "file": "src/integrations/assistant/tools.ts",
+    "test": "the budget sum comes from menu prices, not from the model",
+    "find": "menus.set(outlet.id, new Map(items.map((item) => [item.id, item.unitMinor])));",
+    "replace": "menus.set(outlet.id, new Map(items.map((item) => [item.id, 1])));"
+  },
+  {
+    "id": "M07",
+    "branch": "the accept-before-proposing rule leaves the instructions",
+    "file": "src/integrations/assistant/agent.ts",
+    "test": "the advice rules reach the model as instructions",
+    "find": "Restate the budget and the menu-price sum of what you suggest, then ask whether to make that basket, and call propose_basket only after they accept: a suggestion on its own never creates a link.",
+    "replace": "Restate the budget and the menu-price sum of what you suggest."
+  },
+  {
+    "id": "M08",
+    "branch": "the budgetMinor instruction leaves the instructions",
+    "file": "src/integrations/assistant/agent.ts",
+    "test": "the advice rules reach the model as instructions",
+    "find": "Send the budget they stated as propose_basket's budgetMinor in that shop's minor units on every call for that request, including the call after they accept. Envoi adds the menu prices itself and refuses a basket over that budget.",
+    "replace": "Envoi adds the menu prices itself and refuses a basket over that budget."
+  },
+  {
+    "id": "M09",
+    "branch": "the popularity prohibition leaves the instructions",
+    "file": "src/integrations/assistant/agent.ts",
+    "test": "the advice rules reach the model as instructions",
+    "find": "Envoi holds no sales data, so never call anything popular, a best seller, the most ordered or a favourite.",
+    "replace": "Envoi holds no sales data."
+  },
+  {
+    "id": "M10",
+    "branch": "the dietary prohibition leaves the instructions",
+    "file": "src/integrations/assistant/agent.ts",
+    "test": "the advice rules reach the model as instructions",
+    "find": "Never say whether anything is halal, vegetarian, vegan, allergen-free or suitable for a dietary need, and never present an item as safe for one. Say you cannot tell from the menu and suggest the person ask the stall.",
+    "replace": "Say nothing about ingredients."
+  },
+  {
+    "id": "M11",
+    "branch": "the shop-currency rule leaves the instructions",
+    "file": "src/integrations/assistant/agent.ts",
+    "test": "the advice rules reach the model as instructions",
+    "find": "Read that budget in the shop's own currency and say which currency you used.",
+    "replace": ""
+  }
+]

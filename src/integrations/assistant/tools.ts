@@ -30,12 +30,13 @@ export type AgentToolsOptions = {
   now?: () => number;
 };
 
-export type ProposeBasketInput = { outletId: string; lines: { menuItemId: string; quantity: number }[] };
+export type ProposeBasketInput = { outletId: string; lines: { menuItemId: string; quantity: number }[]; budgetMinor?: number };
 
 export function createAgentTools(options: AgentToolsOptions) {
   const now = options.now ?? Date.now;
-  // The item ids the last read_menu of each outlet returned. propose_basket accepts no other id.
-  const menus = new Map<string, Set<string>>();
+  // The item ids and menu prices the last read_menu of each outlet returned. propose_basket accepts
+  // no other id, and checks any stated budget against these prices alone.
+  const menus = new Map<string, Map<string, number | null>>();
 
   async function traced<T>(
     operation: TraceOperation,
@@ -68,7 +69,7 @@ export function createAgentTools(options: AgentToolsOptions) {
     );
     if (!result.ok) return { error: result.error };
     const { outlet, items } = result.value;
-    menus.set(outlet.id, new Set(items.map((item) => item.id)));
+    menus.set(outlet.id, new Map(items.map((item) => [item.id, item.unitMinor])));
     return {
       shop: { id: outlet.id, name: outlet.name, area: outlet.area, isDemoFixture: outlet.isDemoFixture, currency: outlet.currency },
       items: items.map(({ id, name, unitMinor, currency, available }) => ({ id, name, unitMinor, currency, available })),
@@ -87,8 +88,22 @@ export function createAgentTools(options: AgentToolsOptions) {
         return { refused: `A quantity must be a whole number from ${MIN_QUANTITY} to ${MAX_QUANTITY}.` };
       }
     }
+    // S34: a stated budget is checked here, on the prices read_menu returned, never on a sum the
+    // model wrote. A menu price Envoi does not hold cannot be checked, so it refuses rather than
+    // treating the missing price as zero.
+    if (input.budgetMinor !== undefined) {
+      let sum = 0;
+      for (const line of input.lines) {
+        const unitMinor = allowed.get(line.menuItemId) ?? null;
+        if (unitMinor === null) return { refused: "This shop's menu holds no price for one of those items, so Envoi cannot check them against a budget." };
+        sum += unitMinor * line.quantity;
+      }
+      if (sum > input.budgetMinor) {
+        return { refused: `Those items and quantities add to ${sum} in this shop's menu prices, over the stated budget of ${input.budgetMinor}. Suggest fewer or cheaper items, or ask the person for a larger budget.` };
+      }
+    }
     // The body is rebuilt from ids and quantities alone, so nothing else the model sent, such as a
-    // price, total or payee, can reach Envoi.
+    // price, total, budget or payee, can reach Envoi.
     const body = { outletId: input.outletId, lines: input.lines.map((line) => ({ menuItemId: line.menuItemId, quantity: line.quantity })) };
     const result = await traced(
       "createPurchaseRequest",
@@ -114,10 +129,11 @@ export function createAgentTools(options: AgentToolsOptions) {
     }),
     propose_basket: tool({
       description:
-        "Ask Envoi for a one-time link for exactly the items and quantities the buyer asked for at one shop. The buyer opens it, reviews Envoi's own price and approves payment themselves. Send item ids from read_menu and whole quantities only.",
+        "Ask Envoi for a one-time link for exactly the items and quantities the buyer asked for at one shop. The buyer opens it, reviews Envoi's own price and approves payment themselves. Send item ids from read_menu and whole quantities only. When the buyer stated a budget, send it as budgetMinor in that shop's own minor units, on every call for that request including the call after they accept; Envoi refuses a basket whose menu prices exceed it.",
       inputSchema: z.object({
         outletId: z.string(),
         lines: z.array(z.object({ menuItemId: z.string(), quantity: z.number() })),
+        budgetMinor: z.number().int().nonnegative().optional(),
       }),
       execute: (input) => proposeBasket(input),
     }),

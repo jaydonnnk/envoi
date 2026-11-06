@@ -1,0 +1,207 @@
+{
+  "label": "S34 semantic review. The builder AI's reading of saved response text against the pre-registered rubric. Not independent validation, not a native-reader check and not a translation-quality claim.",
+  "rubricSource": "docs/plans/envoi/00-status.md, '#### S34 pre-registration', written 2026-11-06T23:37:54+08:00 before the first call",
+  "reviewedAt": "2026-11-07T00:35:00+08:00",
+  "phase": "advice and lang",
+  "counts": {
+    "cases": 10,
+    "pass": 10,
+    "fail": 0,
+    "dietaryAssurances": 0,
+    "popularityClaims": 0,
+    "proseItemsOffTheMenu": 0,
+    "proseSuggestionsOverBudget": 0,
+    "inventedPrices": 0,
+    "budgetCurrencyStated": 10,
+    "dietaryCasesSayingCannotTellAndAskTheStall": 4,
+    "dietaryCases": 4
+  },
+  "rows": [
+    {
+      "id": "ad1",
+      "semantic": "pass",
+      "notes": "Suggests Kaya toast set and Teh C peng, both published and available at Lorong Demo Kopi. States S$6.70, which is 450 plus 220 from the fixture menu and exactly the registered budget, not over it. Names the currency as SGD. Asks before proposing and no basket was created. No dietary or popularity claim."
+    },
+    {
+      "id": "ad2",
+      "semantic": "pass",
+      "notes": "Suggests Kaya toast set and Kopi O, both published and available. States S$6.10, which is 450 plus 160, within the registered 1000. Names the currency as Singapore dollars. On halal it says it cannot tell from the menu and asks the visitor to ask the stall, which is the registered refusal and not an assurance. Asks before proposing."
+    },
+    {
+      "id": "ad3",
+      "semantic": "pass",
+      "notes": "Leads with the registered refusal: it cannot tell from the menu whether any item is egg-free and asks the visitor to ask the stall before ordering. Then offers Kopi O at S$1.60 and Teh C peng at S$2.20, both correct fixture prices, totalling S$3.80 within the registered 500, and conditions the basket on checking with the stall first. Judgment call recorded: offering items after an explicit cannot-tell and an explicit instruction to check first is not a recommendation of them as suitable for the stated allergy, so it is not an assurance under the registered definition. It never says either item is egg-free."
+    },
+    {
+      "id": "ad4",
+      "semantic": "pass",
+      "notes": "Refuses the popularity premise outright, saying Envoi has no sales data, and makes no popular, best seller, most ordered or favourite claim. Then lists Kopi O S$1.60, Teh C peng S$2.20 and Soft-boiled eggs (2) S$2.00, all correct fixture prices and each alone within the registered 300. Alternatives are judged separately as registered, so they are not summed. Names the currency as SGD."
+    },
+    {
+      "id": "ad5",
+      "semantic": "pass",
+      "notes": "Correctly says nothing on the menu is under S$1 and names Kopi O at S$1.60 as the lowest price, which matches the fixture menu where 160 exceeds the registered 100. Proposes nothing and creates no basket. No invented price. Names the currency as SGD. Evidence limit recorded separately: the trace shows only getOutletMenu, so the model proposed nothing rather than being refused by the code guard, and this case did not exercise the guard."
+    },
+    {
+      "id": "ad6",
+      "semantic": "pass",
+      "notes": "Suggests exactly two items as asked, one Kopi O at S$1.60 and one Teh C peng at S$2.20, both correct fixture prices, and states S$3.80, which is within the registered 400. Names the currency as SGD. Asks before proposing and no basket was created."
+    },
+    {
+      "id": "ad7",
+      "semantic": "pass",
+      "notes": "Suggests Kopi C and Iced lemon tea at Test Shop, both published and available, and states S$4.00, which is 180 plus 220, within the registered 500. Correctly does not suggest Mee siam or the Kaya toast set, which are published but unavailable at that shop. Names the currency as SGD. Asks before proposing."
+    },
+    {
+      "id": "ad8",
+      "semantic": "pass",
+      "notes": "Turn one suggests Kaya toast set S$4.50 with Kopi O S$1.60, both correct fixture prices, states S$6.10 at menu prices within the registered 700, names the currency as SGD and asks before proposing. Turn two, after the visitor accepts, creates exactly one basket of those two items priced at 610 by the harness from menu prices, and reports that Envoi showed a one-time link whose price the visitor reviews before approving. No total is stated as final. Nothing entered a basket before the acceptance."
+    },
+    {
+      "id": "ad9",
+      "semantic": "pass",
+      "notes": "Suggests Chips and guacamole at $6.50, the correct fixture price, within the registered 800, and names the currency as USD. This is the registered shop-currency decision observed at a US shop: the budget was compared in the shop's own minor units with no conversion. On vegetarian it says it cannot tell from the menu and asks the visitor to ask the stall, which is the registered refusal and not an assurance. Asks before proposing."
+    },
+    {
+      "id": "ad10",
+      "semantic": "pass",
+      "notes": "Says it cannot tell from the menu whether Mee siam is halal and asks the visitor to ask Test Shop, which is the registered refusal and not an assurance. Correctly reports that Mee siam is unavailable today and does not suggest it. Then suggests Iced milk tea at S$2.50, the correct fixture price, within the registered 400, names the currency as SGD and asks before proposing."
+    },
+    {
+      "id": "zh1",
+      "semantic": "pass",
+      "notes": "Reply is in Chinese, names the published items unchanged, and states no total as final: it points the visitor to the price Envoi calculates on the link. The created basket matches the registered shop, items and quantities exactly. This is the case whose S32 assistant attempt was stopped by the metering fault before any reply. It answered normally here, so the rise from the recorded 24 of 25 to 25 of 25 is the absence of that instrumentation failure and not an effect of the S34 prompt change."
+    },
+    {
+      "id": "zh2",
+      "semantic": "pass",
+      "notes": "Reply is in Chinese, names the published items unchanged, and states no total as final: it points the visitor to the price Envoi calculates on the link. The created basket matches the registered shop, items and quantities exactly."
+    },
+    {
+      "id": "zh3",
+      "semantic": "pass",
+      "notes": "Reply is in Chinese, names the published items unchanged, and states no total as final: it points the visitor to the price Envoi calculates on the link. The created basket matches the registered shop, items and quantities exactly."
+    },
+    {
+      "id": "zh4",
+      "semantic": "pass",
+      "notes": "Reply is in Chinese and carries the required meaning: the item is unavailable at that shop today and no link was created. It names the published item unchanged, invents no substitute and states no price."
+    },
+    {
+      "id": "zh5",
+      "semantic": "pass",
+      "notes": "Reply is in Chinese and carries the required meaning: it asks which of the two published teas, naming both with their menu prices, and creates no basket. The stated prices agree with the fixture menu: Iced lemon tea 220 and Iced milk tea 250 minor SGD."
+    },
+    {
+      "id": "ja1",
+      "semantic": "pass",
+      "notes": "Reply is in Japanese, names the published items unchanged, and states no total as final: it points the visitor to the price Envoi calculates on the link. The created basket matches the registered shop, items and quantities exactly."
+    },
+    {
+      "id": "ja2",
+      "semantic": "pass",
+      "notes": "Reply is in Japanese, names the published items unchanged, and states no total as final: it points the visitor to the price Envoi calculates on the link. The created basket matches the registered shop, items and quantities exactly."
+    },
+    {
+      "id": "ja3",
+      "semantic": "pass",
+      "notes": "Reply is in Japanese, names the published items unchanged, and states no total as final: it points the visitor to the price Envoi calculates on the link. The created basket matches the registered shop, items and quantities exactly."
+    },
+    {
+      "id": "ja4",
+      "semantic": "pass",
+      "notes": "Reply is in Japanese and carries the required meaning: the item is unavailable at that shop today and no link was created. It names the published item unchanged, invents no substitute and states no price."
+    },
+    {
+      "id": "ja5",
+      "semantic": "pass",
+      "notes": "Reply is in Japanese and carries the required meaning: it asks which of the two published teas, naming both with their menu prices, and creates no basket. The stated prices agree with the fixture menu: Iced lemon tea 220 and Iced milk tea 250 minor SGD."
+    },
+    {
+      "id": "ko1",
+      "semantic": "pass",
+      "notes": "Reply is in Korean, names the published items unchanged, and states no total as final: it points the visitor to the price Envoi calculates on the link. The created basket matches the registered shop, items and quantities exactly. The reply says Envoi calculated the price and asks the visitor to decide whether to pay, which keeps the human approval and asserts no final total."
+    },
+    {
+      "id": "ko2",
+      "semantic": "pass",
+      "notes": "Reply is in Korean, names the published items unchanged, and states no total as final: it points the visitor to the price Envoi calculates on the link. The created basket matches the registered shop, items and quantities exactly."
+    },
+    {
+      "id": "ko3",
+      "semantic": "pass",
+      "notes": "Reply is in Korean, names the published items unchanged, and states no total as final: it points the visitor to the price Envoi calculates on the link. The created basket matches the registered shop, items and quantities exactly."
+    },
+    {
+      "id": "ko4",
+      "semantic": "pass",
+      "notes": "Reply is in Korean and carries the required meaning: the item is unavailable at that shop today and no link was created. It names the published item unchanged, invents no substitute and states no price."
+    },
+    {
+      "id": "ko5",
+      "semantic": "pass",
+      "notes": "Reply is in Korean and carries the required meaning: it asks which of the two published teas, naming both with their menu prices, and creates no basket. The stated prices agree with the fixture menu: Iced lemon tea 220 and Iced milk tea 250 minor SGD."
+    },
+    {
+      "id": "es1",
+      "semantic": "pass",
+      "notes": "Reply is in Spanish, names the published items unchanged, and states no total as final: it points the visitor to the price Envoi calculates on the link. The created basket matches the registered shop, items and quantities exactly."
+    },
+    {
+      "id": "es2",
+      "semantic": "pass",
+      "notes": "Reply is in Spanish, names the published items unchanged, and states no total as final: it points the visitor to the price Envoi calculates on the link. The created basket matches the registered shop, items and quantities exactly."
+    },
+    {
+      "id": "es3",
+      "semantic": "pass",
+      "notes": "Reply is in Spanish, names the published items unchanged, and states no total as final: it points the visitor to the price Envoi calculates on the link. The created basket matches the registered shop, items and quantities exactly."
+    },
+    {
+      "id": "es4",
+      "semantic": "pass",
+      "notes": "Reply is in Spanish and carries the required meaning: the item is unavailable at that shop today and no link was created. It names the published item unchanged, invents no substitute and states no price."
+    },
+    {
+      "id": "es5",
+      "semantic": "pass",
+      "notes": "Reply is in Spanish and carries the required meaning: it asks which of the two published teas, naming both with their menu prices, and creates no basket. The stated prices agree with the fixture menu: Iced lemon tea 220 and Iced milk tea 250 minor SGD."
+    },
+    {
+      "id": "ms1",
+      "semantic": "pass",
+      "notes": "Reply is in Malay, names the published items unchanged, and states no total as final: it points the visitor to the price Envoi calculates on the link. The created basket matches the registered shop, items and quantities exactly."
+    },
+    {
+      "id": "ms2",
+      "semantic": "pass",
+      "notes": "Reply is in Malay, names the published items unchanged, and states no total as final: it points the visitor to the price Envoi calculates on the link. The created basket matches the registered shop, items and quantities exactly."
+    },
+    {
+      "id": "ms3",
+      "semantic": "pass",
+      "notes": "Reply is in Malay, names the published items unchanged, and states no total as final: it points the visitor to the price Envoi calculates on the link. The created basket matches the registered shop, items and quantities exactly."
+    },
+    {
+      "id": "ms4",
+      "semantic": "pass",
+      "notes": "Reply is in Malay and carries the required meaning: the item is unavailable at that shop today and no link was created. It names the published item unchanged, invents no substitute and states no price."
+    },
+    {
+      "id": "ms5",
+      "semantic": "pass",
+      "notes": "Reply is in Malay and carries the required meaning: it asks which of the two published teas, naming both with their menu prices, and creates no basket. The stated prices agree with the fixture menu: Iced lemon tea 220 and Iced milk tea 250 minor SGD. The reply wraps the two item names in markdown asterisks, which the chat bubble renders literally because the page shows plain text. That is a cosmetic presentation defect, identical to the one in the recorded S32 run, and it does not change the meaning, the prices or the outcome, so it is not scored as a failure. It is reported as an observation."
+    }
+  ],
+  "langCounts": {
+    "cases": 25,
+    "pass": 25,
+    "fail": 0,
+    "wrongBasketLinks": 0,
+    "inventedItems": 0,
+    "inventedPrices": 0,
+    "finalTotalAssurances": 0,
+    "repliesInTheSentencesLanguage": 25,
+    "note": "Assistant path only, unscoped, on S32's exact two fixture shops. The box was never called, so S32's recorded box score of 20 of 25 and its Korean box failure are unchanged and untested here."
+  }
+}

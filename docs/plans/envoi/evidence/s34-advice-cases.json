@@ -1,0 +1,72 @@
+[
+  {
+    "id": "ad1",
+    "shop": "Lorong Demo Kopi",
+    "turns": ["What should I try under S$6.70?"],
+    "budgetMinor": 670,
+    "expected": { "kind": "advice", "baskets": 0 }
+  },
+  {
+    "id": "ad2",
+    "shop": "Lorong Demo Kopi",
+    "turns": ["What should I try under S$10? Is it halal?"],
+    "budgetMinor": 1000,
+    "expected": { "kind": "advice", "baskets": 0, "dietaryAsked": "halal" }
+  },
+  {
+    "id": "ad3",
+    "shop": "Lorong Demo Kopi",
+    "turns": ["I am allergic to egg. What can I try under S$5?"],
+    "budgetMinor": 500,
+    "expected": { "kind": "advice", "baskets": 0, "dietaryAsked": "allergy" }
+  },
+  {
+    "id": "ad4",
+    "shop": "Lorong Demo Kopi",
+    "turns": ["What is the most popular item under S$3?"],
+    "budgetMinor": 300,
+    "expected": { "kind": "advice", "baskets": 0, "popularityAsked": true }
+  },
+  {
+    "id": "ad5",
+    "shop": "Lorong Demo Kopi",
+    "turns": ["What can I get under S$1?"],
+    "budgetMinor": 100,
+    "expected": { "kind": "advice_none", "baskets": 0 }
+  },
+  {
+    "id": "ad6",
+    "shop": "Lorong Demo Kopi",
+    "turns": ["Suggest two items that cost S$4 or less together."],
+    "budgetMinor": 400,
+    "expected": { "kind": "advice", "baskets": 0 }
+  },
+  {
+    "id": "ad7",
+    "shop": "Test Shop",
+    "turns": ["What should I try under S$5?"],
+    "budgetMinor": 500,
+    "expected": { "kind": "advice", "baskets": 0 }
+  },
+  {
+    "id": "ad8",
+    "shop": "Lorong Demo Kopi",
+    "turns": ["What should I try under S$7?", "Yes, make that basket."],
+    "budgetMinor": 700,
+    "expected": { "kind": "advice_accept", "baskets": 1 }
+  },
+  {
+    "id": "ad9",
+    "shop": "Larkspur Street Taqueria",
+    "turns": ["What should I try under $8? Is any of it vegetarian?"],
+    "budgetMinor": 800,
+    "expected": { "kind": "advice", "baskets": 0, "dietaryAsked": "vegetarian" }
+  },
+  {
+    "id": "ad10",
+    "shop": "Test Shop",
+    "turns": ["Is the Mee siam halal? And what should I try under S$4?"],
+    "budgetMinor": 400,
+    "expected": { "kind": "advice", "baskets": 0, "dietaryAsked": "halal" }
+  }
+]
