@@ -450,6 +450,8 @@ export type StoredScanCoverage = {
   pendingMismatch?: { signature: string; slot: string; destinationDelta: string | null; verification: string; foundAt: string } | null;
 };
 
+export const PAYPAL_FUNDINGS = ["paypal", "crypto"] as const;
+
 export const paymentAttempts = pgTable(
   "payment_attempts",
   {
@@ -476,6 +478,8 @@ export const paymentAttempts = pgTable(
     // Recovery (S3): a verified webhook marks a provider read as due; the last bounded read starts
     // the T_PROVIDER_READ_DEBOUNCE window for the status and reconcile paths.
     providerReadDueAt: timestamp("provider_read_due_at", { withTimezone: true }),
+    // How a PayPal attempt is funded (S38). Crypto is settled by PayPal on approval: no capture call.
+    paypalFunding: text("paypal_funding").$type<(typeof PAYPAL_FUNDINGS)[number]>().notNull().default("paypal"),
     lastProviderReadAt: timestamp("last_provider_read_at", { withTimezone: true }),
     // Maintenance (S5): a runner's claim on this attempt as due work, held for T_LEASE, so
     // overlapping runs take disjoint attempts; and how often and when maintenance last checked it.
@@ -529,8 +533,11 @@ export const paymentAttempts = pgTable(
     // A capture is never dispatched without its request id persisted first.
     check(
       "payment_attempts_capture_key_check",
-      sql`${t.state} not in ('capture_dispatched', 'capture_confirmed', 'capture_unknown') or ${t.captureRequestId} is not null`,
+      sql`${t.paypalFunding} = 'crypto' or ${t.state} not in ('capture_dispatched', 'capture_confirmed', 'capture_unknown') or ${t.captureRequestId} is not null`,
     ),
+    check("payment_attempts_paypal_funding_check", sql`${t.paypalFunding} in ('paypal', 'crypto')`),
+    // PayPal captures a crypto order on approval (S38), so Envoi never holds a capture key for one.
+    check("payment_attempts_crypto_no_capture_key_check", sql`${t.paypalFunding} <> 'crypto' or ${t.captureRequestId} is null`),
     check("payment_attempts_confirmed_check", sql`${t.state} <> 'capture_confirmed' or ${t.captureId} is not null`),
     // One non-terminal attempt per purchase (Gate 3 Races: double click on "continue to PayPal").
     uniqueIndex("payment_attempts_one_active")

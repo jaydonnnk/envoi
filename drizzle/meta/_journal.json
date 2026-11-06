@@ -218,6 +218,13 @@
       "when": 1793934525523,
       "tag": "0030_hide_outlets",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1793973429139,
+      "tag": "0031_crypto_funding",
+      "breakpoints": true
     }
   ]
 }

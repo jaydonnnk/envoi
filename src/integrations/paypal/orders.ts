@@ -1,3 +1,4 @@
+import type { PayPalFunding } from "@/domain/payments/state";
 import type { PayPalOrder } from "@/domain/purchases/reconcile";
 import { webEnv } from "@/env";
 import { money, toDecimalString, type Currency } from "@/lib/money";
@@ -19,6 +20,7 @@ export type CreateOrderInput = {
   currency: Currency;
   returnUrl: string;
   cancelUrl: string;
+  funding: PayPalFunding;
 };
 
 export type CreatedOrder = PayPalOrder;
@@ -34,7 +36,7 @@ export type PayPalWriteClient = {
 const amount = (currency: Currency, minor: number) => ({ currency_code: currency, value: toDecimalString(money(currency, minor)) });
 
 export function createOrderBody(input: CreateOrderInput): unknown {
-  return {
+  const order = {
     intent: "CAPTURE",
     purchase_units: [
       {
@@ -48,6 +50,25 @@ export function createOrderBody(input: CreateOrderInput): unknown {
         items: input.lines.map((line) => ({ name: line.name, quantity: String(line.quantity), unit_amount: amount(input.currency, line.unitMinor) })),
       },
     ],
+  };
+  if (input.funding === "crypto") {
+    return {
+      ...order,
+      // PayPal captures on approval, so Envoi never sends a capture for this order.
+      processing_instruction: "ORDER_COMPLETE_ON_PAYMENT_APPROVAL",
+      payment_source: {
+        crypto: {
+          // Crypto is offered for US shops only. Buyers are anonymous, so this is a fixed label and
+          // never a person's name.
+          country_code: "US",
+          name: { given_name: "Envoi", surname: "Fixture" },
+          experience_context: { locale: "en-US", return_url: input.returnUrl, cancel_url: input.cancelUrl },
+        },
+      },
+    };
+  }
+  return {
+    ...order,
     payment_source: {
       paypal: {
         experience_context: {

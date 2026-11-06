@@ -27,6 +27,11 @@ const webSchema = z.object({
   // Kill switch for new PayPal starts and captures (D10). Must be stated explicitly; reads,
   // reconcile, webhooks and maintenance never check it.
   PAYMENTS_ENABLED: z.enum(["true", "false"]).transform((value) => value === "true"),
+  // Crypto through PayPal (S38): a comma-separated allowlist of seller merchant ids; empty means off.
+  PAYPAL_CRYPTO_ENABLED: z
+    .string()
+    .default("")
+    .transform((value) => value.split(",").map((id) => id.trim()).filter(Boolean)),
   // Buyer text suggestions (S4). Both unset turns text entry off and leaves manual selection only;
   // AI_MODEL is the model chosen by the pre-registered R5 evaluation recorded in 00-status.md.
   OPENAI_API_KEY: z.string().min(1).optional(),

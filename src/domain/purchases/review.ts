@@ -1,4 +1,4 @@
-import type { Currency } from "@/lib/money";
+import type { Country, Currency } from "@/lib/money";
 import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import { buyerActor, recordAudit } from "@/domain/audit/events";
 import { computeBasketLockKey, computeCheckoutKey, type BasketLockKey } from "@/domain/purchases/checkout-key";
@@ -201,6 +201,8 @@ export type OwnPurchase = {
   outletId: string;
   outletName: string;
   outletIsDemoFixture: boolean;
+  outletCountry: Country;
+  outletArea: string;
   state: string;
   entryPoint: string;
   rail: string | null;
@@ -237,6 +239,8 @@ export async function getOwnPurchase(db: Conn, principal: BuyerPrincipal, purcha
       purchase: purchases,
       outletName: outlets.name,
       outletIsDemoFixture: outlets.isDemoFixture,
+      outletCountry: outlets.country,
+      outletArea: outlets.area,
       sellerMerchantId: paymentDestinations.sellerMerchantId,
       walletAddress: paymentDestinations.walletAddress,
       tokenAccount: paymentDestinations.tokenAccount,
@@ -257,6 +261,8 @@ export async function getOwnPurchase(db: Conn, principal: BuyerPrincipal, purcha
     outletId: purchase.outletId,
     outletName: row.outletName,
     outletIsDemoFixture: row.outletIsDemoFixture,
+    outletCountry: row.outletCountry,
+    outletArea: row.outletArea,
     state: purchase.state,
     entryPoint: purchase.entryPoint,
     rail: purchase.rail,

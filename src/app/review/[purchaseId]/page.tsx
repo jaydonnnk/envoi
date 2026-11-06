@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { SINGAPORE_CLOCK } from "@/app/purchase-copy";
 import { outletRails } from "@/domain/outlets/destination";
+import { cryptoAllowed } from "@/domain/payments/attempts";
 import { outletPyusdAvailability } from "@/app/pyusd-availability";
 import { formatPyusdAtomic, formatPyusdPerSgd } from "@/domain/pyusd/rate";
 import { getOwnPurchase, type OwnPurchase } from "@/domain/purchases/review";
@@ -13,6 +14,7 @@ import { isPrincipal, requireBuyerSession } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
 import { formatMoney, money } from "@/lib/money";
 import { ContinueToPayPal } from "./continue-to-paypal";
+import { ContinueWithCrypto } from "./continue-with-crypto";
 import { PyusdPay } from "./pyusd-pay";
 import { SwitchRail } from "./switch-rail";
 
@@ -80,13 +82,21 @@ export default async function ReviewPage({ params }: { params: Promise<{ purchas
   const total = formatMoney(money(purchase.currency, purchase.totalMinor));
   const pyusdAmount = pyusd ? formatPyusdAtomic(pyusd.atomicAmount) : null;
   const paypalRail = pyusd ? (await outletRails(webDb(), purchase.outletId)).paypal : true;
+  // One attempt per review: once a way to pay has started, only that way continues. The start route
+  // checks the allowlist again.
+  const started = purchase.attempt?.rail === "paypal" ? purchase.attempt.paypalFunding : null;
+  const cryptoOffered =
+    !pyusd && payable && started !== "paypal" && purchase.sellerMerchantId !== null && cryptoAllowed({ country: purchase.outletCountry }, purchase.sellerMerchantId, webEnv().PAYPAL_CRYPTO_ENABLED);
+  const city = purchase.outletArea.split(",").at(-1)?.trim();
 
   return (
     <main>
       <p className="eyebrow">Review</p>
-      <h1>Check the purchase</h1>
+      <h1>{cryptoOffered ? "Review your order" : "Check the purchase"}</h1>
       <p className="lead">
-        {pyusd
+        {cryptoOffered
+          ? `${total} to ${purchase.outletIsDemoFixture ? `a demo fixture shop in ${city}` : purchase.outletName}. Choose one way to pay.`
+          : pyusd
           ? "This is the last Envoi review before you approve in your wallet. Changed items, amount, recipient, currency or payment method need a fresh review."
           : "This is the last Envoi review before you approve in PayPal. Changed items, amount, recipient, currency or payment method need a fresh review."}
       </p>
@@ -182,13 +192,22 @@ export default async function ReviewPage({ params }: { params: Promise<{ purchas
               </>
             ) : (
               <>
-                <div className="rail" aria-current="true">
+                <div className={cryptoOffered ? "rail choice" : "rail"} aria-current={cryptoOffered ? undefined : "true"}>
                   <span className="rail-head">
                     <strong>PayPal sandbox, test money</strong>
-                    <span className="chip ok">Selected</span>
+                    <span className={`chip ${cryptoOffered ? "" : "ok"}`}>{cryptoOffered ? "Available" : "Selected"}</span>
                   </span>
                   <small>Purchase price {total}. Funding currency and any conversion are confirmed in PayPal.</small>
                 </div>
+                {cryptoOffered && (
+                  <div className="rail choice">
+                    <span className="rail-head">
+                      <strong>Crypto through PayPal</strong>
+                      <span className="chip">Available</span>
+                    </span>
+                    <small>Simulated in this test environment: no token is chosen and none moves.</small>
+                  </div>
+                )}
                 <Suspense fallback={<PyusdOptionPending />}>
                   <PyusdOption purchase={purchase} open={open} />
                 </Suspense>
@@ -212,14 +231,19 @@ export default async function ReviewPage({ params }: { params: Promise<{ purchas
               amount={pyusdAmount ?? ""}
               validUntil={SINGAPORE_CLOCK.format(purchase.reviewExpiresAt)}
             />
-          ) : payable ? (
-            <ContinueToPayPal
-              purchaseId={purchase.id}
-              outletId={purchase.outletId}
-              validUntil={SINGAPORE_CLOCK.format(purchase.reviewExpiresAt)}
-              clientId={webEnv().PAYPAL_CLIENT_ID}
-              currency={purchase.currency}
-            />
+          ) : payable && (started !== "crypto" || cryptoOffered) ? (
+            <>
+              {cryptoOffered && <ContinueWithCrypto purchaseId={purchase.id} />}
+              {started !== "crypto" && (
+                <ContinueToPayPal
+                  purchaseId={purchase.id}
+                  outletId={purchase.outletId}
+                  validUntil={SINGAPORE_CLOCK.format(purchase.reviewExpiresAt)}
+                  clientId={webEnv().PAYPAL_CLIENT_ID}
+                  currency={purchase.currency}
+                />
+              )}
+            </>
           ) : (
             <section className="card warning" aria-labelledby="closed-heading">
               <h2 id="closed-heading">{purchase.view.state === "paid" ? "Already paid" : "Payment cannot start here"}</h2>

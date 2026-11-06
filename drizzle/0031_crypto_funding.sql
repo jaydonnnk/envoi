@@ -1,0 +1,5 @@
+ALTER TABLE "payment_attempts" DROP CONSTRAINT "payment_attempts_capture_key_check";--> statement-breakpoint
+ALTER TABLE "payment_attempts" ADD COLUMN "paypal_funding" text DEFAULT 'paypal' NOT NULL;--> statement-breakpoint
+ALTER TABLE "payment_attempts" ADD CONSTRAINT "payment_attempts_paypal_funding_check" CHECK ("payment_attempts"."paypal_funding" in ('paypal', 'crypto'));--> statement-breakpoint
+ALTER TABLE "payment_attempts" ADD CONSTRAINT "payment_attempts_crypto_no_capture_key_check" CHECK ("payment_attempts"."paypal_funding" <> 'crypto' or "payment_attempts"."capture_request_id" is null);--> statement-breakpoint
+ALTER TABLE "payment_attempts" ADD CONSTRAINT "payment_attempts_capture_key_check" CHECK ("payment_attempts"."paypal_funding" = 'crypto' or "payment_attempts"."state" not in ('capture_dispatched', 'capture_confirmed', 'capture_unknown') or "payment_attempts"."capture_request_id" is not null);

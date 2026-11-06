@@ -1,6 +1,6 @@
 import { and, eq, inArray, lte, sql } from "drizzle-orm";
 import { recordAudit } from "@/domain/audit/events";
-import { canTransitionAttempt, isPreCapture, PRE_CAPTURE_STATES, type AttemptState } from "@/domain/payments/state";
+import { canTransitionAttempt, isPreCapture, PRE_CAPTURE_STATES, type AttemptState, type PayPalFunding } from "@/domain/payments/state";
 import { pyusdAttemptLocks, type PyusdAttemptState } from "@/domain/pyusd/state";
 import { paymentAttempts, purchases, type PURCHASE_STATES } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
@@ -11,7 +11,7 @@ export type PurchaseState = (typeof PURCHASE_STATES)[number];
 export type PurchaseRow = typeof purchases.$inferSelect;
 export type PaymentAttemptRow = typeof paymentAttempts.$inferSelect;
 
-export type PurchaseTransition = { from: PurchaseState; to: PurchaseState; reason: string };
+export type PurchaseTransition = { from: PurchaseState; to: PurchaseState; reason: string; funding?: PayPalFunding };
 
 const PURCHASE_TRANSITIONS: Record<PurchaseState, readonly PurchaseState[]> = {
   review_open: ["review_expired", "review_invalidated", "superseded", "pending_payment"],
@@ -28,7 +28,18 @@ const PURCHASE_TRANSITIONS: Record<PurchaseState, readonly PurchaseState[]> = {
 // verification that bound a finalized transfer (S16).
 const PAID_REASONS = new Set(["capture_confirmed", "pyusd_confirmed"]);
 
+// Why a crypto read that proves no payment still reopens a closed purchase as uncertain (S38).
+export const CRYPTO_READ_UNVERIFIED = "crypto_read_unverified";
+
+// The only ways out of unpaid_closed, for crypto funding only: PayPal captured on approval after the
+// review window closed, so a verified read must say so (Gate 3 reopening 2026-11-06).
+function isCryptoLateSettlement(t: PurchaseTransition): boolean {
+  if (t.funding !== "crypto" || t.from !== "unpaid_closed") return false;
+  return (t.to === "paid" && t.reason === "capture_confirmed") || (t.to === "uncertain" && t.reason === CRYPTO_READ_UNVERIFIED);
+}
+
 export function canTransitionPurchase(t: PurchaseTransition): boolean {
+  if (isCryptoLateSettlement(t)) return true;
   if (!PURCHASE_TRANSITIONS[t.from].includes(t.to)) return false;
   return t.to !== "paid" || PAID_REASONS.has(t.reason);
 }
@@ -91,9 +102,9 @@ type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
 
 // Compare-and-set from one of `from` to `to`. Throws on a transition the table forbids: that is a
 // programming error, never a runtime outcome. Returns whether this call moved the row.
-export async function transitionPurchase(db: Db | Tx, purchaseId: string, from: readonly PurchaseState[], to: PurchaseState, reason: string): Promise<boolean> {
+export async function transitionPurchase(db: Db | Tx, purchaseId: string, from: readonly PurchaseState[], to: PurchaseState, reason: string, funding: PayPalFunding = "paypal"): Promise<boolean> {
   for (const state of from) {
-    if (!canTransitionPurchase({ from: state, to, reason })) throw new Error(`illegal purchase transition ${state} -> ${to} (${reason})`);
+    if (!canTransitionPurchase({ from: state, to, reason, funding })) throw new Error(`illegal purchase transition ${state} -> ${to} (${reason})`);
   }
   const moved = await db
     .update(purchases)

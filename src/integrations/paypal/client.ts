@@ -8,7 +8,8 @@ import { log } from "@/lib/log";
 export const PAYPAL_SANDBOX_API_BASE = "https://api-m.sandbox.paypal.com";
 const ALLOWED_API_HOSTS: ReadonlySet<string> = new Set(["api-m.sandbox.paypal.com"]);
 // The buyer is only ever sent to the sandbox approval page.
-const ALLOWED_APPROVAL_HOSTS: ReadonlySet<string> = new Set(["www.sandbox.paypal.com"]);
+// PayPal's crypto link uses the bare host, which answers 301 to www (S38).
+const ALLOWED_APPROVAL_HOSTS: ReadonlySet<string> = new Set(["www.sandbox.paypal.com", "sandbox.paypal.com"]);
 
 export type PayPalConfig = {
   apiBase: string;

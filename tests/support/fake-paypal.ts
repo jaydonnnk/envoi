@@ -26,6 +26,8 @@ export type FakePayPal = {
   captures(): FakeCall[];
   reads(): FakeCall[];
   approve(orderId: string): void;
+  // PayPal completes a crypto order on approval, with no capture call from Envoi (S38).
+  payCrypto(orderId: string): void;
   // PayPal no longer holds the order, as after an uncaptured order expires: reads and captures 404.
   forget(orderId: string): void;
   // The next `times` calls of `op` suffer `fault`.
@@ -89,6 +91,12 @@ export function createFakePayPal(): FakePayPal {
       const order = orders.get(orderId);
       if (!order) throw new Error(`no fixture order ${orderId}`);
       order.status = "APPROVED";
+    },
+    payCrypto(orderId) {
+      const order = orders.get(orderId);
+      if (!order) throw new Error(`no fixture order ${orderId}`);
+      order.status = "COMPLETED";
+      order.captureId = `FIXTURE-CAPTURE-CRYPTO-${orderId}`;
     },
     forget(orderId) {
       orders.delete(orderId);

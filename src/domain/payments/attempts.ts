@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { and, eq, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { buyerActor, recordAudit } from "@/domain/audit/events";
-import { canTransitionAttempt, isPreCapture, TERMINAL_ATTEMPT_STATES, type AttemptState } from "@/domain/payments/state";
+import { canTransitionAttempt, CRYPTO_SETTLEABLE_STATES, isPreCapture, TERMINAL_ATTEMPT_STATES, type AttemptState, type PayPalFunding } from "@/domain/payments/state";
 import { pyusdAttemptLocks, type PyusdAttemptState } from "@/domain/pyusd/state";
 import type { PricedLine } from "@/domain/purchases/price";
 import {
@@ -17,6 +17,7 @@ import {
 import { assertPaymentEligible, basketLocked, findBasketLock, getOwnPurchase, latestAttempt, lockSameBasket, type OwnPurchase } from "@/domain/purchases/review";
 import {
   canTransitionPurchase,
+  CRYPTO_READ_UNVERIFIED,
   derivePurchaseView,
   storeDerivedTransitions,
   transitionPurchase,
@@ -28,11 +29,11 @@ import { isSandboxApprovalUrl } from "@/integrations/paypal/client";
 import type { PayPalWriteClient, ProviderResult } from "@/integrations/paypal/orders";
 import type { PayPalReadClient } from "@/integrations/paypal/orders-read";
 import type { BuyerPrincipal } from "@/lib/auth-context";
-import { paymentAttempts, paymentDestinations, PURCHASE_STATES, purchases, type StoredLine } from "@/lib/db/schema";
+import { outlets, paymentAttempts, paymentDestinations, PURCHASE_STATES, purchases, type StoredLine } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
 import { newId } from "@/lib/ids";
-import type { Currency } from "@/lib/money";
+import type { Country, Currency } from "@/lib/money";
 import { deadlineOf, durationMs, type Now } from "@/lib/time";
 
 // PayPal execution (Gate 3, Call stacks: paypal/start and paypal/complete). One active attempt per
@@ -42,7 +43,13 @@ import { deadlineOf, durationMs, type Now } from "@/lib/time";
 type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
 type Conn = Db | Tx;
 
-export type PayPalDeps = { db: Db; paypal: PayPalWriteClient; now: Now; appBaseUrl: string };
+// cryptoAllowlist: the sellers PAYPAL_CRYPTO_ENABLED lists; absent means crypto is off.
+export type PayPalDeps = { db: Db; paypal: PayPalWriteClient; now: Now; appBaseUrl: string; cryptoAllowlist?: readonly string[] };
+
+// Crypto through PayPal (S38): a US shop whose seller is on the allowlist, checked again at every start.
+export function cryptoAllowed(outlet: { country: Country }, sellerMerchantId: string, allowlist: readonly string[]): boolean {
+  return outlet.country === "US" && allowlist.includes(sellerMerchantId);
+}
 
 // Test-only barriers; production callers pass none.
 export type FlowHooks = {
@@ -72,9 +79,9 @@ type AttemptChanges = Partial<Pick<PaymentAttemptRow, "orderId" | "approvalUrl" 
 
 // Compare-and-set on the attempt. Throws on a transition the table forbids; returns whether this
 // call moved the row.
-export async function transitionAttempt(db: Conn, attemptId: string, from: readonly AttemptState[], to: AttemptState, now: Date, changes: AttemptChanges = {}): Promise<boolean> {
+export async function transitionAttempt(db: Conn, attemptId: string, from: readonly AttemptState[], to: AttemptState, now: Date, changes: AttemptChanges = {}, funding: PayPalFunding = "paypal"): Promise<boolean> {
   for (const state of from) {
-    if (!canTransitionAttempt(state, to)) throw new Error(`illegal attempt transition ${state} -> ${to}`);
+    if (!canTransitionAttempt(state, to, funding)) throw new Error(`illegal attempt transition ${state} -> ${to}`);
   }
   const moved = await db
     .update(paymentAttempts)
@@ -87,7 +94,7 @@ export async function transitionAttempt(db: Conn, attemptId: string, from: reado
 // Claims the purchase's one non-terminal attempt slot with a fresh create request id. A unique
 // violation is an error, never a reason to re-read: the purchase row lock keeps it unreachable,
 // and the partial unique index is only the backstop.
-async function claimSlot(tx: Tx, input: { purchaseId: string; payeeMerchantId: string; totalMinor: number; currency: Currency; now: Date }): Promise<PaymentAttemptRow> {
+async function claimSlot(tx: Tx, input: { purchaseId: string; payeeMerchantId: string; totalMinor: number; currency: Currency; now: Date; funding: PayPalFunding }): Promise<PaymentAttemptRow> {
   try {
     const [attempt] = await tx
       .insert(paymentAttempts)
@@ -99,6 +106,7 @@ async function claimSlot(tx: Tx, input: { purchaseId: string; payeeMerchantId: s
         totalMinor: input.totalMinor,
         currency: input.currency,
         createRequestId: randomUUID(),
+        paypalFunding: input.funding,
         createdAt: input.now,
         updatedAt: input.now,
       })
@@ -140,6 +148,7 @@ function createOrderFor(deps: PayPalDeps, purchase: LockedPurchase, attempt: Pay
       currency: purchase.currency,
       returnUrl: `${deps.appBaseUrl}/paypal/return?${query}`,
       cancelUrl: `${deps.appBaseUrl}/paypal/cancel?${query}`,
+      funding: attempt.paypalFunding,
     },
     paypalField(attempt.createRequestId, "create request id"),
   );
@@ -199,7 +208,7 @@ async function recoverCreate(tx: Tx, deps: PayPalDeps, purchase: LockedPurchase,
   if (decision === "safe_to_recreate") {
     const now = deps.now();
     await transitionAttempt(tx, current.id, ["create_unknown"], "abandoned", now, { outcomeReason: "create_recreated" });
-    const next = await claimSlot(tx, { purchaseId: purchase.id, payeeMerchantId: paypalField(current.payeeMerchantId, "payee"), totalMinor: purchase.totalMinor, currency: purchase.currency, now });
+    const next = await claimSlot(tx, { purchaseId: purchase.id, payeeMerchantId: paypalField(current.payeeMerchantId, "payee"), totalMinor: purchase.totalMinor, currency: purchase.currency, now, funding: current.paypalFunding });
     await recordAudit(tx, { at: now, actor: "system", action: "paypal_create_recreated", purchaseId: purchase.id, attemptId: next.id, operatorVisible: true, details: { replaces: current.id } });
     return createAndRecord(tx, deps, purchase, next);
   }
@@ -207,7 +216,7 @@ async function recoverCreate(tx: Tx, deps: PayPalDeps, purchase: LockedPurchase,
   return decision === "replay_same_key" ? createUnconfirmed() : appError("payment_uncertain", "We are still confirming the PayPal order for this review. Do not pay again.");
 }
 
-export async function startPayPal(deps: PayPalDeps, principal: BuyerPrincipal, purchaseId: string, hooks: FlowHooks = {}): Promise<StartResult | AppError> {
+export async function startPayPal(deps: PayPalDeps, principal: BuyerPrincipal, purchaseId: string, hooks: FlowHooks = {}, funding: PayPalFunding = "paypal"): Promise<StartResult | AppError> {
   try {
     return await deps.db.transaction(async (tx): Promise<StartResult | AppError> => {
       const basket = await lockSameBasket(tx, principal, purchaseId);
@@ -230,10 +239,24 @@ export async function startPayPal(deps: PayPalDeps, principal: BuyerPrincipal, p
         }
         return eligibility.error;
       }
+      if (funding === "crypto") {
+        const [shop] = await tx
+          .select({ country: outlets.country, sellerMerchantId: paymentDestinations.sellerMerchantId })
+          .from(purchases)
+          .innerJoin(outlets, eq(outlets.id, purchases.outletId))
+          .innerJoin(paymentDestinations, eq(paymentDestinations.id, purchases.destinationId))
+          .where(eq(purchases.id, purchaseId));
+        if (!shop?.sellerMerchantId || !cryptoAllowed(shop, shop.sellerMerchantId, deps.cryptoAllowlist ?? [])) {
+          return appError("validation_failed", "Crypto through PayPal is not offered for this shop. Nothing was charged.");
+        }
+      }
       const existingId = eligibility.attemptId;
       await hooks.afterExistingAttemptRead?.();
       if (existingId) {
         const [existing] = await tx.select().from(paymentAttempts).where(eq(paymentAttempts.id, existingId));
+        if (existing && existing.paypalFunding !== funding) {
+          return appError("validation_failed", "This review already started another way to pay. Review the basket again to change it.");
+        }
         if (existing?.state === "create_unknown") return recoverCreate(tx, deps, locked, existing);
         if (existing) return existingStartAnswer(existing);
       }
@@ -254,7 +277,7 @@ export async function startPayPal(deps: PayPalDeps, principal: BuyerPrincipal, p
       if (!destination) return appError("review_invalidated", "The shop changed how it is paid since you reviewed. Nothing was charged.");
 
       const now = deps.now();
-      const attempt = await claimSlot(tx, { purchaseId, payeeMerchantId: paypalField(destination.sellerMerchantId, "seller"), totalMinor: locked.totalMinor, currency: locked.currency, now });
+      const attempt = await claimSlot(tx, { purchaseId, payeeMerchantId: paypalField(destination.sellerMerchantId, "seller"), totalMinor: locked.totalMinor, currency: locked.currency, now, funding });
       await transitionPurchase(tx, purchaseId, ["review_open"], "pending_payment", "paypal_start");
       await recordAudit(tx, { at: now, actor: buyerActor(principal.userId), action: "paypal_attempt_created", purchaseId, attemptId: attempt.id, operatorVisible: false });
       return createAndRecord(tx, deps, locked, attempt);
@@ -366,11 +389,25 @@ async function recordOutcome(db: Db, purchase: OwnPurchase, attempt: PaymentAtte
   });
 }
 
+// Reads a crypto order on the buyer's return. A read only: PayPal captures on approval.
+async function completeCrypto(deps: PayPalDeps, principal: BuyerPrincipal, purchase: OwnPurchase, attempt: PaymentAttemptRow): Promise<CompleteResult | AppError> {
+  if (!attempt.orderId) return appError("payment_uncertain", "We are still confirming the PayPal order for this review. Do not pay again.");
+  const read = await deps.paypal.readOrder(attempt.orderId);
+  if (read.kind !== "ok") return appError("provider_unreachable", "PayPal could not be reached. Check the receipt; do not pay again.", { retryable: true });
+  const settled = await settleCrypto({ db: deps.db, now: deps.now, actor: "system" }, purchase.id, attempt.id, expectedPurchase(purchase, attempt), read.value);
+  const view = await currentView(deps.db, principal, purchase.id, deps.now());
+  if (settled.outcome === "paid") return { status: "paid", view, captureId: settled.captureId };
+  return { status: settled.outcome === "waiting" ? "awaiting_approval" : "uncertain", view, captureId: null };
+}
+
 export async function completePayPal(deps: PayPalDeps, principal: BuyerPrincipal, purchaseId: string, hooks: FlowHooks = {}): Promise<CompleteResult | AppError> {
   const { db, paypal, now } = deps;
   const purchase = await getOwnPurchase(db, principal, purchaseId, now());
   if (!purchase) return appError("not_found", "Purchase not found.");
   if (purchase.state === "paid") return { status: "paid", view: purchase.view, captureId: purchase.attempt?.captureId ?? null };
+  // Before eligibility: an expired review or the kill switch cannot hide a payment that PayPal
+  // already took. Nothing below is reachable for a crypto attempt, including captureOrder.
+  if (purchase.attempt?.rail === "paypal" && purchase.attempt.paypalFunding === "crypto") return completeCrypto(deps, principal, purchase, purchase.attempt);
 
   const eligibility = await assertPaymentEligible(db, purchaseId, principal, now());
   if (!eligibility.eligible) return eligibility.error;
@@ -494,8 +531,75 @@ const CAPTURE_STATES: readonly AttemptState[] = [...CAPTURE_IN_FLIGHT, "capture_
 
 // Every purchase state the transition table lets move to `to`. A recovery write therefore can
 // never take a purchase anywhere the table forbids, such as out of paid.
-function purchaseStatesInto(to: PurchaseState, reason: string): PurchaseState[] {
-  return PURCHASE_STATES.filter((from) => canTransitionPurchase({ from, to, reason }));
+function purchaseStatesInto(to: PurchaseState, reason: string, funding: PayPalFunding = "paypal"): PurchaseState[] {
+  return PURCHASE_STATES.filter((from) => canTransitionPurchase({ from, to, reason, funding }));
+}
+
+type CryptoSettlement = { outcome: "paid"; captureId: string } | { outcome: "uncertain" | "failed" | "waiting"; captureId: null };
+
+// What one PayPal read of a crypto order proves (Gate 3 reopening 2026-11-06), applied under the
+// purchase row lock. Paid only by decideCaptureOutcome. No capture call and no capture key exist on
+// this path. An order the buyer has not finished changes nothing.
+async function settleCrypto(deps: Pick<ReconcileDeps, "db" | "now" | "actor">, purchaseId: string, attemptId: string, expected: ExpectedPurchase, order: PayPalOrder): Promise<CryptoSettlement> {
+  const now = deps.now();
+  return deps.db.transaction(async (tx): Promise<CryptoSettlement> => {
+    const [purchase] = await tx.select({ state: purchases.state }).from(purchases).where(eq(purchases.id, purchaseId)).for("update");
+    const [attempt] = await tx.select().from(paymentAttempts).where(eq(paymentAttempts.id, attemptId));
+    if (!purchase || !attempt) throw new Error(`crypto settlement lost attempt ${attemptId}`);
+    if (attempt.state === "capture_confirmed" && attempt.captureId) return { outcome: "paid", captureId: attempt.captureId };
+    if (!(CRYPTO_SETTLEABLE_STATES as readonly string[]).includes(attempt.state)) return { outcome: "failed", captureId: null };
+    if (order.captures.length === 0 && order.status !== "COMPLETED") return { outcome: "waiting", captureId: null };
+
+    const audit = (action: string, operatorVisible: boolean, details: Record<string, string | number | boolean | null>) =>
+      recordAudit(tx, { at: now, actor: deps.actor, action, purchaseId, attemptId, operatorVisible, details: { orderId: attempt.orderId, ...details } });
+    const from = [...CRYPTO_SETTLEABLE_STATES];
+    const decision: CaptureDecision = order.id === attempt.orderId ? decideCaptureOutcome(order, expected, now) : { decision: "uncertain", reason: "basket_mismatch" };
+
+    if (decision.decision === "confirmed") {
+      const { evidence } = decision;
+      await transitionAttempt(tx, attemptId, from, "capture_confirmed", now, { captureId: evidence.captureId, captureGrossMinor: evidence.grossMinor, captureVerifiedAt: evidence.verifiedAt, outcomeReason: null }, "crypto");
+      await transitionPurchase(tx, purchaseId, purchaseStatesInto("paid", "capture_confirmed", "crypto"), "paid", "capture_confirmed", "crypto");
+      await audit("paypal_capture_confirmed", false, { captureId: evidence.captureId, grossMinor: evidence.grossMinor, payeeId: evidence.payeeId, funding: "crypto" });
+      if (purchase.state === "unpaid_closed") await audit("crypto_settled_after_close", true, { captureId: evidence.captureId });
+      return { outcome: "paid", captureId: evidence.captureId };
+    }
+
+    const [capture] = order.captures;
+    if (order.captures.length === 1 && (capture?.status === "DECLINED" || capture?.status === "FAILED")) {
+      await transitionAttempt(tx, attemptId, from, "capture_failed", now, { outcomeReason: `crypto_capture_${capture.status.toLowerCase()}` }, "crypto");
+      await transitionPurchase(tx, purchaseId, purchaseStatesInto("unpaid_closed", "capture_failed"), "unpaid_closed", "capture_failed");
+      await audit("paypal_capture_failed", true, { reason: capture.status, funding: "crypto" });
+      return { outcome: "failed", captureId: null };
+    }
+
+    // A completed order that does not prove this payment: never paid, operator alerted.
+    const { reason } = decision;
+    await transitionAttempt(tx, attemptId, ["order_created", "abandoned"], "capture_unknown", now, { outcomeReason: reason }, "crypto");
+    await transitionPurchase(tx, purchaseId, purchaseStatesInto("uncertain", CRYPTO_READ_UNVERIFIED, "crypto"), "uncertain", CRYPTO_READ_UNVERIFIED, "crypto");
+    await audit("paypal_capture_quarantined", true, { reason, funding: "crypto" });
+    return { outcome: "uncertain", captureId: null };
+  });
+}
+
+// The webhook, maintenance and "Check status" path for a crypto attempt. Read-only: `replay` is
+// never used, and neither is the capture lease, because no capture was ever sent.
+async function reconcileCrypto(deps: ReconcileDeps, attemptId: string): Promise<ReconcileOutcome> {
+  if (!(await claimProviderRead(deps.db, attemptId, deps.now()))) return "debounced";
+  const [attempt] = await deps.db.select().from(paymentAttempts).where(eq(paymentAttempts.id, attemptId));
+  if (!attempt?.orderId) throw new Error(`attempt ${attemptId} lost its order`);
+  const read = await deps.read.readOrder(attempt.orderId);
+  const answer = answerOf([read]);
+  if (answer === "unreachable") return "provider_unreachable";
+  if (read.kind === "ok") {
+    const [purchase] = await deps.db
+      .select({ id: purchases.id, outletId: purchases.outletId, lines: purchases.lines, totalMinor: purchases.totalMinor, currency: purchases.currency })
+      .from(purchases)
+      .where(eq(purchases.id, attempt.purchaseId));
+    if (!purchase) throw new Error(`attempt ${attemptId} lost its purchase`);
+    await settleCrypto(deps, purchase.id, attemptId, expectedPurchase(purchase, attempt), read.value);
+  }
+  await deps.db.update(paymentAttempts).set({ providerReadDueAt: null }).where(eq(paymentAttempts.id, attemptId));
+  return answer === "record" ? "read" : "no_record";
 }
 
 // Starts a debounce window by compare-and-set; false while one is still open.
@@ -623,6 +727,7 @@ export async function reconcileAttempt(deps: ReconcileDeps, attemptId: string, h
   const [initial] = await deps.db.select().from(paymentAttempts).where(eq(paymentAttempts.id, attemptId));
   if (!initial) throw new Error(`no attempt ${attemptId}`);
   if (!initial.orderId) return "no_order";
+  if (initial.paypalFunding === "crypto") return reconcileCrypto(deps, attemptId);
 
   // Only an in-flight capture is replayed, and only by the lease holder.
   const lease = CAPTURE_IN_FLIGHT.includes(initial.state as AttemptState) ? await acquireLease(deps.db, attemptId, deps.now()) : null;

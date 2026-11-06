@@ -138,7 +138,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ purcha
         {purchase.rail === "paypal" && (
           <div className="row">
             <span className="muted">Method</span>
-            <span>PayPal sandbox, test money</span>
+            <span>{purchase.attempt?.rail === "paypal" && purchase.attempt.paypalFunding === "crypto" ? "Crypto through PayPal" : "PayPal sandbox, test money"}</span>
           </div>
         )}
         {pyusd && (
@@ -157,6 +157,12 @@ export default async function ReceiptPage({ params }: { params: Promise<{ purcha
           <div className="row stacked">
             <span className="muted">{paid ? "Paid to (sandbox seller)" : "Recipient (sandbox seller)"}</span>
             <span className="mono">{purchase.sellerMerchantId}</span>
+          </div>
+        )}
+        {purchase.attempt?.rail === "paypal" && purchase.attempt.paypalFunding === "crypto" && (
+          <div className="row stacked">
+            <span className="muted">Simulated</span>
+            <span>Simulated in this test environment: no token is chosen and none moves.</span>
           </div>
         )}
         {paid && (

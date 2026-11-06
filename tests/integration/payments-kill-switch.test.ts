@@ -98,6 +98,7 @@ describe("payments kill switch refuses PayPal start and completion", () => {
         purchaseId,
         attemptId,
         correlationId: purchaseId,
+        funding: "paypal",
         payeeMerchantId: FIXTURE_SELLER,
         lines,
         totalMinor: purchase!.total_minor as number,
