@@ -461,6 +461,7 @@ S41 started 2026-11-04 on `envoi/slice-41-judge-ready` and is **done**, merged t
 S33 started 2026-11-05 on `envoi/slice-33-scan-to-ask` and is **done**, merged to `main` and deployed; see its [record](#s33-scan-opens-ask-envoi-2026-11-05).
 S42 started 2026-11-05 on `envoi/slice-42-show-the-stall` and is **done**, 2026-11-06, merged to `main` and deployed; see its [record](#s42-show-the-stall-2026-11-05).
 S35 started 2026-11-06 on `envoi/slice-35-orders-grid` and is **merged and deployed, and the judge merchant's view is checked**; see its [record](#s35-ask-your-orders-2026-11-06).
+S37 started 2026-11-06 on `envoi/slice-37-own-assistant` and is **built and checked locally, not yet committed, merged or deployed**; see its [record](#s37-bring-your-own-assistant-2026-11-06).
 
 Added 2026-10-29, outside the build order: the second build plan, S25 to S31, with Gates 1-4 re-approved the same day ([record](#gate-1-reopening-2026-10-29-second-build-plan), [plan](04-slices.md#second-build-plan-s25-to-s31-added-2026-10-29)). S25 started 2026-10-29 on `envoi/slice-25-ask-envoi`; its evaluation missed (22 of 25) and the falsifier was applied the same day: the assistant stays off on Render and no assistant claim is made ([record](#s25-ask-envoi-in-the-site-2026-10-29)). Its independent review found no code blocker; two of its findings are fixed on `envoi/slice-25-review-fixes` ([record](#s25-review-fixes-2026-10-30)). S25 is done on 2026-10-30: migration 0026 is on Neon, and `main` at `144292b` is pushed with CI green and deployed on Render with the assistant off ([record](#s25-merge-migration-and-deploy-2026-10-30)). S26 is done, recorded 2026-11-04 on the user's "Do your three" after checking its done rule: its commits are on `main`, deployed, its evidence and cleanup are recorded, and the terminal agent stands in for Ask Envoi under S25's falsifier ([record](#s26-the-connected-run-2026-10-30)). S27 is done on 2026-11-02: its [local MCP continuation](#s27-mcp-client-local-continuation-2026-11-02) is verified, its [payment verification results](#s27-payment-verification-results-2026-11-02) passed, and the evidence commit `7514eb3` is on `main` with CI run 41456616279 passing. S28 is done on 2026-11-03 on `envoi/slice-28-rewards-card`, deployed from `main` at `25e5230` with CI passing ([record](#s28-paypal-pyusd-rewards-card-2026-11-03)); S29 is done on 2026-11-03 on `envoi/slice-29-menu-translation`: migration 0028 is on Neon, `main` at `7c05082` is pushed with CI run 41668339516 passing, and translation is on on Render with `gpt-6-luna` ([record](#s29-the-menu-explained-and-translated-2026-11-03)); S30 is deployed on 2026-11-04 from `envoi/slice-30-review-aids`: `main` at `ff4d48d` is pushed with CI run 41780152741 passing; its signed-in check on Render is pending ([record](#s30-draft-review-aids-2026-11-04)); S31 is done on 2026-11-04 on `envoi/slice-31-paypal-buttons`, deployed from `main` with CI passing ([record](#s31-paypal-approval-over-the-review-page-2026-11-04)).
 Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never cut), S26 the connected run (`envoi/slice-26-connected-run`, never cut), S27 US shops and currency-explicit money (`envoi/slice-27-us-shops`), S28 PayPal PYUSD rewards card (`envoi/slice-28-rewards-card`), S29 the menu explained and translated (`envoi/slice-29-menu-translation`), S30 draft review aids (`envoi/slice-30-review-aids`) and S31 PayPal approval over the review page (`envoi/slice-31-paypal-buttons`); cut order S31, S30, S29, then S27 with S28.
@@ -520,6 +521,45 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 - **Evidence:** [payment verification JSON](evidence/s27-payment-verification-2026-11-02.json). Limits: sandbox/devnet only; the user approved every payment and signed the transfer; the SGD receipt screenshot was unavailable after the browser's buyer session was replaced and the US/PYUSD receipts are DOM text or user-pasted, each independently checked against Neon and, for PYUSD, the finalized devnet transaction; the first PYUSD attempt's wallet-side cause is unknown; no application code, test, migration, configuration, dependency or secret changed in this verification.
 - **Post-slice cleanup [verified], 2026-11-02:** the architect-reviewer pass found no orphan S27 module, dead fixture or stale test file. Every S27 module is imported, named tests 17 and 36 and the MCP-client guards exist, the OpenAPI document carries `unitMinor` and `currency`, and code, tests and CI carry no generated-client import or `typecheck:client` reference. One deferred wording divergence: the Gate 1 approved Ask Envoi mockup and page still name an APIMatic-generated client while the runtime uses the MCP client; Ask Envoi is off on Render, and changing that copy needs a Gate 1 decision, so it was not changed here. It was fixed on 2026-11-03 under the [Gate 1 wording reopening](#gate-1-reopening-2026-11-03-ask-envoi-mcp-wording). The historical `s27-mcp-session-transfer-2026-11-02.md` keeps its superseding note; the protected RTF, four untracked handoff text files and `PROGRESS.md` remain uncommitted.
 - **Publication and completion [verified], 2026-11-02:** the seven-file documentation and evidence commit `7514eb34c1ed427e2f5865a288aa044f563c0464` is pushed to `main`; [CI run 41456616279](https://github.com/jaydonnnk/envoi/actions/runs/41456616279) passed typecheck, lint, unit, integration, build, build scan and the local-fixture public HTTP/MCP check. The commit changes no runtime code; Render auto-deploys `main`, the app health read 200 after the push, and the deployment id was not read because the Render dashboard session was signed out. S27 is complete: the SGD, US/USD and PYUSD visible results, the technical release, the evidence in this section and the post-slice cleanup are all recorded. The next step is the closing slice question.
+
+### S37 Bring your own assistant, 2026-11-06
+
+- **State: built and checked locally, 2026-11-06.** Not committed, merged, pushed or deployed. No judge token issued, no run on Render and no sandbox purchase yet.
+- **Authority, the user's words:** "sure i accept the recommendatoins. Start s37". Commit, merge, push, deploy, issuing the token on Neon and the one sandbox purchase are still requested by name.
+- **Decisions accepted in those words:**
+  Every token is limited: 60 `/mcp` POSTs per 10 minutes, and 900 for the site's own `ASSISTANT_AGENT_TOKEN` [hypothesis: starting values].
+  The reason: all Ask Envoi buyers share that token, each turn sends up to 6 POSTs, and 60 would have stopped Ask Envoi after about 10 turns across all buyers.
+  No gate reopening for that value, because 60 was only a proposal.
+  No gate reopening for the migration record correction: S38's migration becomes `0031`, and `outlets.hidden_at`, `hide-outlet` and `show-outlet` are recorded in Gates 2 and 3.
+  The filmed assistant is Claude Code.
+  The user runs `issue-agent-token` in their own terminal, so the value never enters chat or logs.
+- **Built:** `GET /agents`, the limit in `src/app/mcp/route.ts` before the body is read, `AGENT_MCP_LIMITS` and `SITE_ASSISTANT_MCP_LIMITS`, `revoke-agent-token`, and `scripts/scan-agents-page.ts`. No migration: `agent_mcp` came with `0029`.
+- **Tests [verified, local PostgreSQL]:** 46 `an agent token over its limit reaches no tool`, 47 `a revoked agent token reaches no tool`, 48 `the agents page holds no token value`, with named additions in `tests/integration/agent-limit.test.ts` and `tests/unit/agents-page.test.ts`.
+- **Mutations [verified]:** each applied alone and restored, with 12 of 12 passing after every restore.
+
+  | Mutation | Failing check |
+  | --- | --- |
+  | Limit check removed in `/mcp` | 46; also the window and site token checks, which need the same refusal |
+  | Limit shared across tokens | `the limit is counted per token, apart from other agents`; also the site token check, whose hits are keyed by token |
+  | 60 becomes 61 | 46 only |
+  | Window 10 becomes 5 minutes | `the allowance returns after 10 minutes` only |
+  | Site token gets no larger allowance | site token check only |
+  | Every token gets the site allowance | 46; also the window check, which spends until refused |
+  | 900 becomes 901 | site token check only |
+  | Auth stops checking `revoked_at` | 47 only |
+  | Revoke writes nothing | 47; also `revoking records the act`, which calls the same command |
+  | Revoke touches every token | `revoking records the act` only |
+  | Revoke records no audit | `revoking records the act` only |
+  | Page prints the site token from the environment | 48 only |
+  | Scanner loses its prefixed rule | planted prefixed token only |
+  | Scanner loses its bare-secret rule | planted bare secret only |
+  | Scanner ignores known values | planted known value only |
+  | Served scan skips scripts | served scan check only |
+
+- **Scanner on the served surface [verified]:** a production build with a generated FIXTURE token planted in the page, served on port 3138, gave `scan-agents-page: token value in /agents` and exit 1. The restored build on port 3137 gave `scan-agents-page: no token value in the page or its 6 scripts.` and exit 0. The value was not recorded.
+- **Local checks [verified]:** typecheck, lint, `scan-build` and `git diff --check` clean; full suite 108 files and 838 tests passed.
+- **Browser [verified, local production build]:** `/agents` at 1280 px and 390 px matches the mockup, with no horizontal scroll at 390 px and the test-environment badge, notice and footer present. The first look showed no step numbers, because the list rendered with no marker; `.steps` now sets `list-style: decimal`.
+- **Open [unknown]:** the page is not linked from any other page, as the mockup shows none, so a judge reaches it by its address.
 
 ### S35 Ask your orders, 2026-11-06
 

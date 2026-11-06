@@ -20,7 +20,7 @@ export type MerchantAccountPrincipal = { kind: "merchant_account"; userId: strin
 // A merchant acting on one outlet: the live membership row for this user and this outlet.
 export type OutletMemberPrincipal = { kind: "outlet_member"; userId: string; outletId: string; membershipId: string };
 
-function bearerOf(headers: Headers): string | null {
+export function bearerOf(headers: Headers): string | null {
   const value = headers.get("authorization");
   if (value === null) return null;
   const match = /^Bearer[ \t]+(\S+)[ \t]*$/i.exec(value);

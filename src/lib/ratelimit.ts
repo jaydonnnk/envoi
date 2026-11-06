@@ -47,6 +47,22 @@ export const ORDER_FILTER_LIMITS: RateLimits = {
   global: { max: 60, windowMs: 60 * 60_000 },
 };
 
+// S37, Gate 3 third build plan [hypothesis: starting values]: at most 60 /mcp POSTs per agent token in
+// 10 minutes, about 10 full sentences at 6 POSTs each (handshake, tool list, three tools). Each token
+// has its own allowance, so no global window applies.
+export const AGENT_MCP_LIMITS: RateLimits = {
+  perSubject: { max: 60, windowMs: 10 * 60_000 },
+  global: null,
+};
+
+// S37, decided 2026-11-06 [hypothesis: starting value]: every Ask Envoi buyer shares the site's own
+// token, so it gets 900, which is ASSISTANT_LIMITS' 150 turns at up to 6 POSTs each. The turn limit
+// stays the real limit on Ask Envoi; this one only stops the token if it leaks.
+export const SITE_ASSISTANT_MCP_LIMITS: RateLimits = {
+  perSubject: { max: 900, windowMs: 10 * 60_000 },
+  global: null,
+};
+
 // S16, Gate 3 "PYUSD merchant wallet and rate": at most 10 wallet challenges per outlet in an hour.
 // The subject is the outlet, so a member cannot spread requests across sessions to exceed it.
 export const WALLET_CHALLENGE_LIMITS: RateLimits = {

@@ -6,12 +6,14 @@ import { searchRegistry } from "@/domain/handoffs/registry";
 import { getPublishedMenu } from "@/domain/outlets/search";
 import { envoiTools, TEST_NOTICE } from "@/integrations/mcp/contracts";
 import { webEnv } from "@/env";
-import { isAgent, requireAgentToken, type AgentPrincipal } from "@/lib/auth-context";
+import { bearerOf, isAgent, requireAgentToken, type AgentPrincipal } from "@/lib/auth-context";
 import { webDb, type Db } from "@/lib/db/web";
 import { appError } from "@/lib/errors";
 import { readCountedBody } from "@/lib/http/bounded-body";
 import { httpErr } from "@/lib/http/respond";
+import { hashToken } from "@/lib/ids";
 import { log } from "@/lib/log";
+import { admit, AGENT_MCP_LIMITS, SITE_ASSISTANT_MCP_LIMITS, type RateLimits } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -55,6 +57,14 @@ function sameSite(request: Request): "ok" | "origin" | "host" {
   if (origin !== null && origin !== base.origin) return "origin";
   if (request.headers.get("host") !== base.host) return "host";
   return "ok";
+}
+
+// Every token is limited. Only the site's own Ask Envoi token, shared by all buyers, gets the larger
+// allowance; digests are compared so no token value is compared directly.
+function limitsFor(headers: Headers): RateLimits {
+  const site = webEnv().ASSISTANT_AGENT_TOKEN;
+  const presented = bearerOf(headers);
+  return site && presented && hashToken(presented) === hashToken(site) ? SITE_ASSISTANT_MCP_LIMITS : AGENT_MCP_LIMITS;
 }
 
 function json(value: Record<string, unknown>) {
@@ -125,6 +135,13 @@ export async function POST(request: Request): Promise<Response> {
 
   const site = sameSite(request);
   if (site !== "ok") return httpErr(appError("forbidden_origin", "This request did not come from an allowed origin.", { details: { reason: site } }));
+
+  // Before the body is read, so an agent over its limit reaches no tool and costs no parsing.
+  const admission = await admit(db, "agent_mcp", agent.agentTokenId, limitsFor(request.headers), new Date());
+  if (admission.kind === "rate_limited") {
+    log("warn", "mcp_rate_limited", { agentTokenId: agent.agentTokenId });
+    return httpErr(appError("rate_limited", "This agent token has reached its limit. Try again in 10 minutes.", { retryable: true, details: { window: admission.window } }));
+  }
 
   const read = await readCountedBody(request.body, MAX_BODY_BYTES, BODY_READ_MS, request.signal);
   if (!read.ok) return httpErr(appError("validation_failed", "The MCP request body is too large or too slow.", { details: { reason: read.reason } }));

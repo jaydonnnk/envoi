@@ -223,6 +223,19 @@ export async function issueAgentToken(db: OperatorDb, label: string, now: Date =
   return { agentTokenId, label: trimmed, token };
 }
 
+// S37: revokes an agent token by the id issue-agent-token printed, so a judge token can be withdrawn
+// at once. requireAgentToken looks up live tokens only, so /mcp refuses the token from then on.
+export async function revokeAgentToken(db: OperatorDb, agentTokenId: string, now: Date = new Date()) {
+  return db.transaction(async (tx) => {
+    const [token] = await tx.select({ revokedAt: schema.agentTokens.revokedAt }).from(schema.agentTokens).where(eq(schema.agentTokens.id, agentTokenId)).for("update");
+    if (!token) throw new Error(`Agent token ${agentTokenId} does not exist.`);
+    if (token.revokedAt !== null) return { status: "unchanged" as const, agentTokenId };
+    await tx.update(schema.agentTokens).set({ revokedAt: now }).where(eq(schema.agentTokens.id, agentTokenId));
+    await recordAudit(tx, { at: now, actor: "operator", action: "agent_token_revoked", operatorVisible: true, details: { agentTokenId } });
+    return { status: "revoked" as const, agentTokenId };
+  });
+}
+
 // Merchant accounts (S6). Public signup is off, so this is the only way a permanent account comes
 // into being. The password is typed by the operator at a hidden prompt and passed here in memory;
 // only Better Auth's scrypt hash is stored, and the password is never printed, logged or written.
@@ -653,6 +666,7 @@ const COMMANDS = [
   "seed-judge-fixtures",
   "assign-paypal-destination",
   "issue-agent-token",
+  "revoke-agent-token",
   "create-merchant",
   "approve-membership",
   "approve-enrollment",
@@ -725,7 +739,7 @@ export async function addDemoIcedTeas(db: OperatorDb, now: Date = new Date()): P
 }
 
 const USAGE =
-  "usage: npm run operator -- hide-outlet <outletId> | show-outlet <outletId> | seed-demo-fixture | seed-judge-fixtures | assign-paypal-destination <outletId> <sellerMerchantId> | issue-agent-token <label> | create-merchant <email> <name> | approve-membership <email> [evidenceRef] | approve-enrollment <outletId> [evidenceRef] | approve-identifier [identifierId [evidenceRef]] | grant-operator <email> [evidenceRef] | resolve-pyusd-mismatch <operatorEmail> <attemptId> <reason> <evidenceRef> | record-extra-transfer-refund <operatorEmail> <attemptId> <signature> <reason> <refundReference> | unarchive-order <purchaseId> | export-archived-orders [outletId] | add-demo-iced-teas";
+  "usage: npm run operator -- hide-outlet <outletId> | show-outlet <outletId> | seed-demo-fixture | seed-judge-fixtures | assign-paypal-destination <outletId> <sellerMerchantId> | issue-agent-token <label> | revoke-agent-token <agentTokenId> | create-merchant <email> <name> | approve-membership <email> [evidenceRef] | approve-enrollment <outletId> [evidenceRef] | approve-identifier [identifierId [evidenceRef]] | grant-operator <email> [evidenceRef] | resolve-pyusd-mismatch <operatorEmail> <attemptId> <reason> <evidenceRef> | record-extra-transfer-refund <operatorEmail> <attemptId> <signature> <reason> <refundReference> | unarchive-order <purchaseId> | export-archived-orders [outletId] | add-demo-iced-teas";
 
 async function run(db: OperatorDb, argv: string[]): Promise<number> {
   const [command, ...args] = argv;
@@ -775,6 +789,11 @@ async function run(db: OperatorDb, argv: string[]): Promise<number> {
     const issued = await issueAgentToken(db, args[0]!);
     console.log(`issued agent token ${issued.agentTokenId} for "${issued.label}". Copy it into the MCP client now; Envoi keeps only its digest and cannot show it again:`);
     console.log(issued.token);
+    return 0;
+  }
+  if (command === "revoke-agent-token" && args.length === 1) {
+    const result = await revokeAgentToken(db, args[0]!);
+    console.log(result.status === "unchanged" ? `agent token ${result.agentTokenId} was already revoked; nothing changed` : `revoked agent token ${result.agentTokenId}`);
     return 0;
   }
   if (command === "create-merchant" && args.length === 2) {
