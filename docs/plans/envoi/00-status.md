@@ -1,6 +1,6 @@
 # Status: Envoi
 
-Updated: 2026-11-06 (Asia/Singapore).
+Updated: 2026-11-07 (Asia/Singapore).
 
 - Gate 1 - Product: **REOPENED and RE-APPROVED 2026-11-06 for the Show the stall language order** ("Yes . Reopen gates 1 to 3 for that minor fix and fix it . I pre approve the changes"); see the [record](#show-the-stall-language-order-2026-11-06).
   **REOPENED and RE-APPROVED 2026-11-04 to add Show the stall (S42)** ("Alright fine, reopne gates 1 to 4 to add this in and then add it to the build plan"). See the [record](#gates-1-2-3-and-4-reopening-2026-11-04-show-the-stall). Before that:
@@ -653,7 +653,7 @@ ad10 is feasible at 180 plus 220, and Mee siam is unavailable.
 - **Integration flake, recorded not waived [verified]:** one full local integration run failed 8 tests in 7 files.
   Seven were 30-second timeouts in files that share no code path with S34's two changed sources, and the eighth, an assertion in `buyer-assistant`, is explained by the test before it timing out at its own 20-second limit: vitest does not cancel a timed-out test's in-flight requests, so those orphaned calls consumed indices of that file's module-level shared fake script and shifted this test's scripted turns by one, which is exactly the observed `getOutletMenu` first instead of `listOutlets`.
   The suite then passed alone at 484 of 484 and again in the unit-then-integration order at 484 of 484, and CI passed it on clean infrastructure.
-  The slowdown's own cause is [unknown] and load is a [hypothesis], so this is recorded as a fail-then-pass flake, not as clean proof from a rerun. The failure evidence is kept at `/tmp/s34-final-integration.log`.
+  The slowdown's own cause is [unknown] and load is a [hypothesis], so this is recorded as a fail-then-pass flake, not as clean proof from a rerun. The failure evidence is kept at [the run log](evidence/s34-integration-flake-2026-11-07.log), with its colour codes stripped.
 - **Render screens [verified behaviourally at 2026-11-06T17:21Z on the FIXTURE shop Lorong Demo Kopi, `out_wgoyp6kgg75472b6s772dplgoq`]:** [s34-render-check.mts](evidence/s34-render-check.mts) drives real headless Chrome over the DevTools Protocol, so the widths are real and not a CSS inference, and makes real model calls on the deployed site with test money only. No payment is approved: the run stops at the one-time link and never opens it.
   At **390 px and 1280 px** the page holds the TEST ENVIRONMENT badge, the demo-fixture notice and the fixture chip, and `innerWidth == scrollWidth` on both turns at both widths, so there is no horizontal overflow.
   The advice turn creates **no link**: the assistant suggests one Kaya toast set at S$4.50 within the stated S$6 budget, names the currency as SGD, says it cannot tell whether it is halal and asks the visitor to ask the stall, then asks before proposing.
@@ -663,6 +663,16 @@ ad10 is feasible at 180 plus 220, and Mee siam is unavailable.
   The second attempt hung inside a CDP command that never answered; its cause is [unknown], it was killed, and it wrote no metrics and spent nothing. Every CDP command is now bounded at 30 seconds so the turn deadline can always be reached, and the third attempt completed in 44 seconds.
 - **Deployment liveness:** the observed dietary refusal and named currency exist only in S34's instructions, so the deployed behaviour shows the new code is live. The deployment SHA on the Render service page is still to be confirmed by the user and remains [unknown] until then; a client-chunk comparison cannot decide it, because S34 changes only server modules.
 - **Render spend [hypothesis, estimated]:** the eight Render turns across the three attempts are not metered by the harness ledger, which covers the local evaluation only. At the evaluation's mean of US$0.002966 per request and about three requests per turn, they cost roughly US$0.07 in total, inside the remaining headroom of the authorized US$2. The actual invoice is [unknown].
+- **Post-slice cleanup [verified], 2026-11-07:** the `architect-reviewer` skill ran in post-slice cleanup mode over S34's footprint.
+  Every added evidence, test and harness file is referenced by a loader, a runner or this record, S34's files hold no TODO and no skipped or focused test, and nothing needs deleting.
+  It found and fixed one defect outside S34's sources: `npm run test:integration` failed on a machine whose `TEST_DATABASE_URL` is only in the local env file, and CI missed it because CI sets the variable.
+  `s32-language-eval` and `s34-advice-eval` asserted the variable before anything loaded the file, and `buy-page-text-off` deleted the AI names before the fixture's load restored them.
+  The red run failed those three files; after the fix the suite passes 484 of 484 both without the variable and with CI's value.
+  The two commits after the slice, `26725de` and `8e80b0d`, are documents only, and [CI run 42262624450](https://github.com/jaydonnnk/envoi/actions/runs/42262624450) passed on `8e80b0d`.
+- **Flake, still unresolved [verified as far as stated]:** `buyer-assistant` and `pyusd-recovery` also failed in S38's one bad run, so this is a repeat.
+  A deliberate run with 36 busy loops on 12 cores passed 484 of 484 in 42 s, so CPU load alone did not reproduce it and the load [hypothesis] is weaker.
+  The failing run took 53.85 s against about 18 s, with failures spread over seven files, which fits a single stall of about 35 s across all workers [hypothesis]; its cause is [unknown].
+- **Open after the cleanup, each for the user:** whether the model sends `budgetMinor` at all is still [unknown]; Gate 4 says "Per mockup" and the approved mockup still shows the button and heading that decision 1 removed; the Render deployment SHA is unconfirmed; and `envoi_t_s42preview_6e6d1855` and `envoi_t_s42preview_85ef5a3e` were reported leaked in the local PostgreSQL and were not deleted.
 
 ### S38 Crypto through PayPal, 2026-11-06
 

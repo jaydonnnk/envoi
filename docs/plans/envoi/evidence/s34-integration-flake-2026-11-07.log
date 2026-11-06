@@ -1,0 +1,546 @@
+
+> envoi@0.0.0 test:integration
+> vitest run --config config/vitest.config.ts --project integration
+
+
+ RUN  v5.0.3 <repo>
+
+ ❯  integration  tests/integration/buyer-assistant.test.ts (8 tests | 2 failed) 33930ms
+   ❯ Ask Envoi route (8)
+     ✓ the assistant is refused by its limiter before any model call 791ms
+     ✓ the assistant accepts text turns only 56ms
+     ✓ the assistant reads a body of at most 16 KiB 23ms
+     × the assistant reads its body within 5 seconds 31097ms
+     × the assistant's link never reaches the model, its reply or its steps 224ms
+     ✓ an unpublished or unknown outlet id gives no shop context 23ms
+     ✓ the route refuses an outlet it cannot resolve before any model call or limiter hit 143ms
+     ✓ the route takes the shop's name from the database and never from the browser 44ms
+stderr | tests/integration/menu-import-route.test.ts > menu vision request > menu vision call is never retried
+{"at":"2026-11-06T16:42:55.258Z","level":"warn","event":"menu_vision_failed","model":"FIXTURE-vision-model","error":{"name":"AI_APICallError","status":500,"retryable":null,"provider":"openai"}}
+
+ ✓  integration  tests/integration/menu-import-admission.test.ts (15 tests) 37030ms
+   ✓ menu import admission (12)
+     ✓ second live import for an outlet is refused 346ms
+     ✓ fifty-first import in a UTC day is refused 621ms
+     ✓ usage above its reservation stops further imports 27752ms
+     ✓ an attempt closed before the model call releases its reservation 2159ms
+   ✓ concurrent admissions admit one (1)
+     ✓ concurrent admissions admit one 1220ms
+ ✓  integration  tests/integration/merchant-draft.test.ts (21 tests) 38513ms
+   ✓ merchant sign-in and manual menu draft (21)
+     ✓ anonymous buyer cannot reach a merchant route 459ms
+     ✓ linking preserves purchase ownership 27891ms
+     ✓ membership is per outlet 3397ms
+     ✓ an approved membership creates exactly one outlet 318ms
+     ✓ the database refuses a zero price from the web role 322ms
+     ✓ a confirmation of an older version is rejected 805ms
+     ✓ editing a confirmed draft invalidates its confirmation 365ms
+     ✓ a confirmed draft stays invisible to buyers 314ms
+     ✓ a revoked membership reaches nothing 351ms
+     ✓ the web role cannot create a published outlet, an approved enrollment or a confirmed revision 369ms
+ ✓  integration  tests/integration/pyusd-merchant.test.ts (21 tests) 38449ms
+   ✓ PYUSD merchant routes (21)
+     ✓ merchant PYUSD routes (17)
+       ✓ wallet challenge refuses while the rail is disabled 320ms
+       ✓ wallet proof refuses on an identity mismatch 29897ms
+       ✓ wallet challenge names Envoi's configured domain and devnet 1068ms
+       ✓ wallet challenges are rate limited per outlet 648ms
+       ✓ invalid wallet signature is refused 380ms
+       ✓ wallet challenge expires after five minutes 319ms
+       ✓ wallet challenge for another outlet is refused 391ms
+       ✓ merchant token account is derived, never supplied 816ms
+       ✓ missing merchant token account is refused 384ms
+       ✓ wallet proof creates no membership or enrollment 356ms
+     ✓ PYUSD wallet proof standalone tests (4)
+       ✓ wallet proof verifies the saved challenge bytes 307ms
+       ✓ two concurrent first proofs from two challenges both record a destination 466ms
+       ✓ a PYUSD-only shop cannot publish while PYUSD is disabled 311ms
+ ❯  integration  tests/integration/order-archive.test.ts (11 tests | 1 failed) 38691ms
+   ❯ merchant order archive (11)
+     ✓ archive hides an order and keeps its record 585ms
+     ✓ archive works on every order state 597ms
+     × archive repeat changes nothing 30021ms
+     ✓ another outlet's order cannot be archived 1835ms
+     ✓ an agent token or buyer session cannot archive 467ms
+     ✓ an order archived before it was paid comes back as Paid 482ms
+     ✓ a paid order archived stays hidden 994ms
+     ✓ archived count matches the hidden orders 877ms
+     ✓ the web role cannot clear an archive 534ms
+     ✓ maintenance still reconciles an archived uncertain order 619ms
+     ✓ export writes one receipt per archived order without buyer identity 400ms
+stdout | tests/integration/menu-web-import.test.ts > web import counts toward the photo import caps and spend ceiling > a photo import and a web import share the per-outlet daily cap
+{"at":"2026-11-06T16:42:58.300Z","level":"info","event":"kernel_session_deleted","sessionId":"FIXTURE-kernel-session"}
+
+stdout | tests/integration/menu-web-import.test.ts > a page with no printed price makes no model call > closes as picture_menu after one Kernel read, with the reservation released
+{"at":"2026-11-06T16:42:58.688Z","level":"info","event":"kernel_session_deleted","sessionId":"FIXTURE-kernel-session"}
+
+stdout | tests/integration/menu-web-import.test.ts > a page with no printed price makes no model call > a PDF link answers as a PDF menu, closes as picture_menu and makes no model call
+{"at":"2026-11-06T16:42:58.878Z","level":"info","event":"kernel_session_deleted","sessionId":"FIXTURE-kernel-session"}
+
+ ❯  integration  tests/integration/merchant-publication.test.ts (16 tests | 1 failed) 39438ms
+   ❯ merchant destination and publication (16)
+     ✓ publication requires all four preconditions 1195ms
+     × editing a published menu creates an unpublished revision 30491ms
+     ✓ two first edits of a published menu make one draft 911ms
+     ✓ republication invalidates an open review at execution 633ms
+     ✓ destination change invalidates an open review 363ms
+     ✓ an open review pinned to a changed destination is replaced, not reused 399ms
+     ✓ arbitrary merchant id cannot connect 646ms
+     ✓ editing shop details clears their confirmation 334ms
+     ✓ approve-enrollment approves once and repeats unchanged 246ms
+     ✓ database guards (7)
+       ✓ a published menu's items refuse every write 422ms
+       ✓ a published revision refuses every change 383ms
+       ✓ the published pointer names only a confirmed revision of its own outlet 1008ms
+       ✓ a temporary table cannot shadow the published-menu guard 270ms
+       ✓ a published pointer is never cleared 296ms
+       ✓ a published revision is never deleted 240ms
+       ✓ a bound membership is never rebound 162ms
+stdout | tests/integration/menu-web-import.test.ts > a page with no printed price makes no model call > a refused, timed-out or unreachable page closes with its outcome and no model call
+{"at":"2026-11-06T16:42:59.078Z","level":"info","event":"kernel_session_deleted","sessionId":"FIXTURE-kernel-session"}
+
+stdout | tests/integration/menu-web-import.test.ts > a page with no printed price makes no model call > a refused, timed-out or unreachable page closes with its outcome and no model call
+{"at":"2026-11-06T16:42:59.379Z","level":"info","event":"kernel_session_deleted","sessionId":"FIXTURE-kernel-session"}
+
+ ❯  integration  tests/integration/menu-import-route.test.ts (27 tests | 1 failed) 39820ms
+   ✓ import route refusals read no body (3)
+     ✓ import route rejects a foreign Origin 299ms
+     ✓ stale consent version is refused before admission 182ms
+     ✓ refused admission reads no image bytes 191ms
+   ❯ import upload and photo rejects (8)
+     ✓ import body is counted, not trusted from Content-Length 177ms
+     ✓ slow upload stops at its read bound 266ms
+     ✓ non-multipart body is refused 192ms
+     × second photo part is refused 30052ms
+     ✓ body without a photo part is refused 951ms
+     ✓ JPEG over 2 MiB is refused inside a legal body 396ms
+     ✓ non-JPEG content is refused even when labeled JPEG 485ms
+     ✓ JPEG over 2,048 pixels per side is refused before decode 286ms
+   ✓ menu vision request (8)
+     ✓ menu vision request sets store false 364ms
+     ✓ menu vision request carries no tools 205ms
+     ✓ menu vision call is never retried 605ms
+     ✓ menu vision schema is strict with required nullable fields 374ms
+     ✓ menu vision output is capped at the reviewed token bound 305ms
+     ✓ menu vision uses AI_MENU_MODEL, not AI_MODEL 324ms
+     ✓ model budget keeps the commit reserve 373ms
+     ✓ client disconnect aborts the model call 309ms
+   ✓ re-encoded photo carries no metadata (1)
+     ✓ re-encoded photo carries no metadata 551ms
+   ✓ import writes nothing to disk (1)
+     ✓ import writes nothing to disk 415ms
+   ✓ model dispatch is recorded before the call (1)
+     ✓ model dispatch is recorded before the call 188ms
+   ✓ image bytes never reach logs, responses or audit (1)
+     ✓ image bytes never reach logs, responses or audit 143ms
+   ✓ an abandoned import reads as expired with no write (1)
+     ✓ an abandoned import reads as expired with no write 139ms
+   ✓ draft reload reports the latest import outcome (1)
+     ✓ draft reload reports the latest import outcome 176ms
+   ✓ admission refusals say whether a retry can pass (1)
+     ✓ only a refusal a later attempt can pass is retryable 374ms
+   ✓ a missing Origin is refused (1)
+     ✓ import route rejects a request with no Origin 166ms
+stdout | tests/integration/menu-web-import.test.ts > a page with no printed price makes no model call > a refused, timed-out or unreachable page closes with its outcome and no model call
+{"at":"2026-11-06T16:42:59.619Z","level":"info","event":"kernel_session_deleted","sessionId":"FIXTURE-kernel-session"}
+
+stdout | tests/integration/menu-web-import.test.ts > a completed web import > drafts printed prices, blanks the rest as not_on_page and leaves out names not on the page
+{"at":"2026-11-06T16:42:59.814Z","level":"info","event":"kernel_session_deleted","sessionId":"FIXTURE-kernel-session"}
+
+stdout | tests/integration/menu-web-import.test.ts > a web draft lands unconfirmed and publishes nothing > the published revision and its confirmation are untouched after a completed web import
+{"at":"2026-11-06T16:43:00.242Z","level":"info","event":"kernel_session_deleted","sessionId":"FIXTURE-kernel-session"}
+
+stdout | tests/integration/menu-web-import.test.ts > page excerpts stay in the success answer > each drafted row gets the page's words, by name and portion
+{"at":"2026-11-06T16:43:00.790Z","level":"info","event":"kernel_session_deleted","sessionId":"FIXTURE-kernel-session"}
+
+ ✓  integration  tests/integration/menu-web-import.test.ts (17 tests) 6226ms
+   ✓ a menu page link must be public https (route) (6)
+     ✓ http://fixture-shop.example/menu refuses as not_https before admission, with no Kernel or model call 400ms
+     ✓ https://10.0.0.8/menu refuses as ip_or_local_host before admission, with no Kernel or model call 319ms
+     ✓ https://fixture-shop.example:8080/menu refuses as bad_port before admission, with no Kernel or model call 308ms
+   ✓ a page with no printed price makes no model call (3)
+     ✓ a refused, timed-out or unreachable page closes with its outcome and no model call 741ms
+   ✓ a web draft lands unconfirmed and publishes nothing (1)
+     ✓ the published revision and its confirmation are untouched after a completed web import 414ms
+   ✓ page excerpts stay in the success answer (2)
+     ✓ each drafted row gets the page's words, by name and portion 304ms
+ ✓  integration  tests/integration/sgqr-identifiers.test.ts (10 tests) 3888ms
+   ✓ merchant SGQR identifier mapping (10)
+     ✓ a shop submits at most five identifiers 304ms
+     ✓ only the operator approves an identifier mapping 580ms
+     ✓ raw QR payload is not logged 431ms
+ ✓  integration  tests/integration/pyusd-cross-rail.test.ts (4 tests) 3589ms
+   ✓ PYUSD across rails (4)
+     ✓ an unresolved payment blocks the same basket on the other rail 744ms
+     ✓ an abandoned PayPal order does not lock its basket 442ms
+     ✓ two open reviews of one basket cannot both start payment 504ms
+     ✓ PYUSD failure leaves PayPal working 1348ms
+stderr | tests/integration/order-filter-route.test.ts > the orders filter route > refuses a model answer outside the schema and changes nothing
+{"at":"2026-11-06T16:43:03.468Z","level":"warn","event":"order_filter_failed","model":"FIXTURE-model","error":{"name":"AI_NoObjectGeneratedError","status":null,"retryable":null,"provider":"openai"}}
+
+stderr | tests/integration/order-filter-route.test.ts > the orders filter route > refuses a model answer outside the schema and changes nothing
+{"at":"2026-11-06T16:43:03.482Z","level":"warn","event":"order_filter_failed","model":"FIXTURE-model","error":{"name":"AI_NoObjectGeneratedError","status":null,"retryable":null,"provider":"openai"}}
+
+ ❯  integration  tests/integration/pyusd-recovery.test.ts (17 tests | 1 failed) 44371ms
+   ❯ PYUSD recovery (17)
+     ❯ PYUSD recovery over a fake chain (15)
+       ✓ release waits for finalized height past the saved bound 734ms
+       ✓ scan starts only after expiry is final 418ms
+       × scan that never reaches before preparation is incomplete 30122ms
+       ✓ scan stops at the page cap without releasing 1780ms
+       ✓ scan stops at the fetch cap without releasing 606ms
+       ✓ scan resumes from its saved cursor 1052ms
+       ✓ 429 or null transaction keeps the attempt locked 1896ms
+       ✓ a successful transaction with our reference that fails verification blocks release 446ms
+       ✓ automatic unpaid release stays off until its proofs are recorded 377ms
+       ✓ a complete empty scan closes the attempt once release is enabled 366ms
+       ✓ devnet reset stops verification and scanning 582ms
+       ✓ a confirmed or mismatched attempt is still scanned after expiry 1093ms
+       ✓ the scan continues after a transfer binds 573ms
+       ✓ an extra transfer keeps the purchase paid and alerts the operator 467ms
+       ✓ an extra transfer is recorded once per attempt 534ms
+     ✓ FIXTURE transcript: lost wallet responses recovered over a fake chain 1537ms
+     ✓ web and runner cannot scan one attempt at once 381ms
+ ✓  integration  tests/integration/merchant-orders.test.ts (5 tests) 6324ms
+   ✓ merchant orders and acknowledgment (5)
+     ✓ acknowledgment requires a verified payment 601ms
+     ✓ acknowledgment never changes payment state 485ms
+     ✓ the orders list shows only the outlet's orders, with states derived on read 818ms
+     ✓ a paid order stays reachable however many orders follow it 2990ms
+     ✓ a merchant reaches only its own outlets' orders 509ms
+ ❯  integration  tests/integration/sgqr-resolve.test.ts (14 tests | 1 failed) 44543ms
+   ❯ buyer SGQR resolution (14)
+     ✓ unenrolled sticker yields no purchase 24ms
+     ✓ shared identifier asks which outlet 754ms
+     × scan grants no destination and no rail 30164ms
+     ✓ a pending mapping does not resolve 1624ms
+     ✓ an unpublished outlet does not resolve 442ms
+     ✓ a personal proxy does not resolve, even when it reads like a UEN 365ms
+     ✓ a misread sticker does not resolve 241ms
+     ✓ a code with no business identifier is unsupported, not unenrolled 28ms
+     ✓ the sticker contents are bounded 132ms
+     ✓ the request body is bounded at 4 KiB 25ms
+     ✓ one outlet carrying two mapped identifiers is one candidate 1104ms
+     ✓ a shared identifier lists at most 20 outlets, by name 7804ms
+     ✓ a buyer session is required 0ms
+     ✓ raw QR payload is not logged by the scan route 275ms
+ ✓  integration  tests/integration/pyusd-operator-acts.test.ts (7 tests) 4999ms
+   ✓ PYUSD extra transfers and operator acts (7)
+     ✓ merchant orders show a detected extra transfer 674ms
+     ✓ mismatch resolution waits for a complete window scan 619ms
+     ✓ mismatch resolution needs recorded evidence 708ms
+     ✓ a refund needs an out-of-band reference 473ms
+     ✓ a refund reference changes no payment state 447ms
+     ✓ mismatch resolution needs a flagged operator account 511ms
+     ✓ a refund reference needs a flagged operator account 399ms
+ ✓  integration  tests/integration/maintenance.test.ts (22 tests) 44829ms
+   ✓ maintenance runner (fixture PayPal) (22)
+     ✓ a run stops taking work 10,000 ms before T_MAINT_RUN to finish its report 342ms
+     ✓ a task that times out takes no further item and the next task waits for the one it was running 2574ms
+     ✓ maintenance checks every due attempt in turn when more are due than one run takes 496ms
+     ✓ maintenance run is finite 1258ms
+     ✓ the runner started through a symlink in a path with a space still runs 633ms
+     ✓ operator health view (9)
+       ✓ only an operator reads the operator health view 329ms
+       ✓ an operator page answers everyone but the operator as an unknown address 386ms
+ ✓  integration  tests/integration/us-shops.test.ts (14 tests) 4563ms
+   ✓ US shops (S27) (14)
+     ✓ an outlet's country cannot change after its first publication (2)
+       ✓ the merchant route answers country_locked once the shop has published 443ms
+     ✓ PYUSD preparation refuses a purchase that is not in SGD 429ms
+     ✓ a US shop's PYUSD wallet never stands in for its PayPal connection 556ms
+     ✓ SGQR resolution never returns a US outlet 301ms
+ ✓  integration  tests/integration/order-filter-route.test.ts (7 tests) 4585ms
+   ✓ the orders filter route (7)
+     ✓ answers a member's sentence with the validated filter, from one tool-free call 505ms
+     ✓ the order filter call receives no order data 537ms
+     ✓ a non-member cannot call the filter route 780ms
+     ✓ refuses a model answer outside the schema and changes nothing 408ms
+     ✓ limits each outlet before the model, under its own bucket, and stores no sentence 533ms
+ ✓  integration  tests/integration/basket-lock.test.ts (5 tests) 2946ms
+   ✓ PayPal basket lock across republication (5)
+     ✓ a payment that can still move blocks the same basket on a republished menu 477ms
+     ✓ two PayPal reviews of one basket across a republish cannot both start 395ms
+     ✓ two starts of one basket across a republish do not deadlock 414ms
+     ✓ the migration backfill computes the application's basket lock key 486ms
+ ✓  integration  tests/integration/crypto-through-paypal.test.ts (20 tests) 2518ms
+stderr | tests/integration/agent-limit.test.ts > agent token limit and revocation on /mcp > an agent token over its limit reaches no tool
+{"at":"2026-11-06T08:00:00.000Z","level":"warn","event":"mcp_rate_limited","agentTokenId":"agt_pzxa3g44sfpsp5y7htdxugzlda"}
+
+ ✓  integration  tests/integration/menu-import-review-fixes.test.ts (3 tests) 1992ms
+   ✓ menu import lifecycle, review fixes (3)
+     ✓ an import on a published menu adds to a new draft and keeps the published items' keys 440ms
+     ✓ an import never grows a menu past 100 items 309ms
+ ✓  integration  tests/integration/s17-review-fixes.test.ts (5 tests) 3717ms
+   ✓ S17 review fixes (5)
+     ✓ a held attempt is due again once release is enabled 505ms
+     ✓ a held attempt closes unpaid once release is enabled 595ms
+     ✓ a verifying landing wins over a newer failing one 446ms
+     ✓ the oldest failing landing is the mismatch when nothing verifies 476ms
+     ✓ merchant orders say an operator-closed mismatch may have reached the shop 935ms
+ ✓  integration  tests/integration/menu-import-commit.test.ts (5 tests) 1739ms
+stderr | tests/integration/agent-limit.test.ts > agent token limit and revocation on /mcp > the allowance returns after 10 minutes
+{"at":"2026-11-06T07:59:59.000Z","level":"warn","event":"mcp_rate_limited","agentTokenId":"agt_gpzkat7erf5o2jztlaxvgzllee"}
+
+stderr | tests/integration/agent-limit.test.ts > agent token limit and revocation on /mcp > the allowance returns after 10 minutes
+{"at":"2026-11-06T08:09:58.000Z","level":"warn","event":"mcp_rate_limited","agentTokenId":"agt_gpzkat7erf5o2jztlaxvgzllee"}
+
+stderr | tests/integration/agent-limit.test.ts > agent token limit and revocation on /mcp > the site's own token has 900 where any other token has 60, and is still limited
+{"at":"2026-11-06T08:00:00.000Z","level":"warn","event":"mcp_rate_limited","agentTokenId":"agt_fixture_site"}
+
+ ❯  integration  tests/integration/pyusd-purchase.test.ts (31 tests | 1 failed) 47107ms
+   ❯ PYUSD purchase (31)
+     ✓ PYUSD pricing (2)
+       ✓ PYUSD pricing refuses while the rail is disabled 587ms
+       ✓ rate older than 30 days makes PYUSD unavailable 374ms
+     ❯ PYUSD preparation (15)
+       ✓ preparation refuses while the rail is disabled 330ms
+       × preparation rejects a foreign Origin 30102ms
+       ✓ preparation requires the owning buyer 1619ms
+       ✓ payments kill switch refuses PYUSD preparation 558ms
+       ✓ stale review cannot prepare PYUSD 829ms
+       ✓ preparation refuses on an identity mismatch 760ms
+       ✓ preparation refuses an ineligible mint 657ms
+       ✓ rate change invalidates an unexecuted PYUSD review at preparation 753ms
+       ✓ rate expiry between review and preparation refuses preparation 495ms
+       ✓ buyer without enough PYUSD cannot prepare 391ms
+       ✓ frozen buyer token account cannot prepare 277ms
+       ✓ merchant token account is rechecked at preparation 375ms
+       ✓ no unsigned bytes leave before the attempt is saved 465ms
+       ✓ a prepared purchase never releases bytes again 545ms
+       ✓ released transaction bytes are never stored 550ms
+     ✓ PYUSD attempt constraints (2)
+       ✓ memo reference is unique per attempt 382ms
+       ✓ a finalized signature binds to one attempt 438ms
+     ✓ PYUSD preparation standalone tests (2)
+       ✓ rate change never alters a prepared attempt 588ms
+       ✓ cancel after PYUSD preparation reports checking 596ms
+     ✓ signature hints and reconcile before expiry (8)
+       ✓ signature hint rejects a foreign Origin 471ms
+       ✓ signature hint requires the owning buyer 377ms
+       ✓ submitted signature is only a hint 368ms
+       ✓ user-triggered PYUSD reads are debounced 345ms
+       ✓ a failed landing leaves the attempt prepared 381ms
+       ✓ a later hint is verified when the first is not ours 893ms
+       ✓ hints beyond the per-attempt cap are not read 536ms
+       ✓ disabled rail still reconciles prepared attempts 394ms
+     ✓ one preparation makes five RPC reads and reads the mint once 400ms
+     ✓ FIXTURE self-check: the buyer's source is its derived PYUSD account 351ms
+ ✓  integration  tests/integration/agent-limit.test.ts (6 tests) 2511ms
+   ✓ agent token limit and revocation on /mcp (6)
+     ✓ an agent token over its limit reaches no tool 680ms
+     ✓ the limit is counted per token, apart from other agents 495ms
+     ✓ the allowance returns after 10 minutes 402ms
+ ✓  integration  tests/integration/paypal-recovery.test.ts (14 tests) 2297ms
+   ✓ PayPal recovery (fixture fault injection) (14)
+     ✓ lost create response replays the same key 345ms
+ ✓  integration  tests/integration/menu-translation.test.ts (6 tests) 1766ms
+   ✓ menu translation (6)
+     ✓ the translation route is refused by its limiter before any model call 406ms
+ ✓  integration  tests/integration/agent-handoff-republication.test.ts (3 tests) 2226ms
+   ✓ agent handoff across republication (3)
+     ✓ handoff carries no amount 528ms
+     ✓ a basket that no longer prices is refused and stays redeemable 438ms
+     ✓ a handoff redeemed after republication prices the republished menu 392ms
+ ✓  integration  tests/integration/suggestion-rate-limits.test.ts (4 tests) 2797ms
+   ✓ text suggestion rate limits (4)
+     ✓ text suggestions are rate limited per buyer session 374ms
+     ✓ text suggestions are rate limited across all sessions 931ms
+stderr | tests/integration/buyer-suggestions.test.ts > buyer text suggestions > a failed model call offers manual selection
+{"at":"2026-11-06T16:43:07.547Z","level":"warn","event":"ai_suggestion_failed","model":"FIXTURE-model","error":{"name":"AI_APICallError","status":500,"retryable":null,"provider":"openai"}}
+
+stderr | tests/integration/buyer-suggestions.test.ts > buyer text suggestions > a failed model call offers manual selection
+{"at":"2026-11-06T16:43:07.547Z","level":"warn","event":"ai_suggestion","model":"FIXTURE-model","outcome":"failed","toolCalls":0,"ms":12,"anonymous":true}
+
+stderr | tests/integration/buyer-suggestions.test.ts > buyer text suggestions > a failed model call is not retried
+{"at":"2026-11-06T16:43:08.075Z","level":"warn","event":"ai_suggestion_failed","model":"FIXTURE-model","error":{"name":"AI_APICallError","status":500,"retryable":null,"provider":"openai"}}
+
+stderr | tests/integration/buyer-suggestions.test.ts > buyer text suggestions > a failed model call is not retried
+{"at":"2026-11-06T16:43:08.075Z","level":"warn","event":"ai_suggestion","model":"FIXTURE-model","outcome":"failed","toolCalls":0,"ms":9,"anonymous":true}
+
+ ✓  integration  tests/integration/show-the-stall.test.ts (2 tests) 1819ms
+   ✓ show the stall on the receipt (fixture PayPal) (2)
+     ✓ show the stall renders only on a paid receipt 659ms
+stderr | tests/integration/paypal-webhook.test.ts > PayPal webhook inbox (fixture deliveries) > unverified webhook signature is rejected
+{"at":"2026-11-06T16:43:08.545Z","level":"warn","event":"paypal_webhook_rejected","reason":"signature_rejected"}
+
+stderr | tests/integration/paypal-webhook.test.ts > PayPal webhook inbox (fixture deliveries) > unverified webhook signature is rejected
+{"at":"2026-11-06T16:43:08.549Z","level":"warn","event":"paypal_webhook_rejected","reason":"signature_rejected"}
+
+ ✓  integration  tests/integration/buyer-suggestions.test.ts (36 tests) 2322ms
+ ✓  integration  tests/integration/currency-migration.test.ts (2 tests) 1013ms
+ ✓  integration  tests/integration/merchant-operator.test.ts (6 tests) 1388ms
+ ✓  integration  tests/integration/paypal-webhook.test.ts (6 tests) 1638ms
+ ✓  integration  tests/integration/menu-import-disabled.test.ts (1 test) 1137ms
+   ✓ import route refusals read no body (1)
+     ✓ imports refuse while disabled 468ms
+ ✓  integration  tests/integration/review-pricing.test.ts (5 tests) 1331ms
+ ✓  integration  tests/integration/agent-handoff.test.ts (15 tests) 1815ms
+ ✓  integration  tests/integration/menu-web-import-disabled.test.ts (1 test) 1044ms
+   ✓ web import with its switch off reaches neither Kernel nor the model (1)
+     ✓ the route refuses with web_imports_disabled and the setup page offers no link field 486ms
+ ✓  integration  tests/integration/assign-paypal-destination.test.ts (2 tests) 572ms
+ ✓  integration  tests/integration/demo-iced-teas.test.ts (3 tests) 2293ms
+   ✓ demo iced teas (3)
+     ✓ the demo iced teas are added once and published through the menu rules 418ms
+     ✓ the demo iced teas never publish a merchant's own unpublished changes 355ms
+     ✓ the demo iced teas never change a price the shop already set 418ms
+ ✓  integration  tests/integration/paypal-complete.test.ts (9 tests) 1570ms
+ ✓  integration  tests/integration/seed-demo-fixture.test.ts (1 test) 723ms
+ ✓  integration  tests/integration/public-api-contract.test.ts (2 tests) 1015ms
+ ✓  integration  tests/integration/pyusd-recovery-grants.test.ts (5 tests) 882ms
+ ✓  integration  tests/integration/hide-outlet.test.ts (6 tests) 869ms
+ ✓  integration  tests/integration/paypal-return.test.ts (1 test) 1227ms
+   ✓ PayPal return landing (1)
+     ✓ GET return page cannot capture 389ms
+ ✓  integration  tests/integration/rewards-card.test.ts (3 tests) 863ms
+ ✓  integration  tests/integration/pyusd-limiter.test.ts (5 tests) 978ms
+ ✓  integration  tests/integration/receipt-privacy.test.ts (1 test) 1057ms
+ ✓  integration  tests/integration/buy-page-text-off.test.ts (1 test) 833ms
+   ✓ buyer page without the AI (1)
+     ✓ the buyer page reads correctly with text suggestions off 339ms
+ ✓  integration  tests/integration/payments-kill-switch.test.ts (4 tests) 1210ms
+stdout | tests/integration/s32-language-eval.test.ts > S32 FIXTURE evaluation wiring > runs the real box adapter and settlement on the S32 local seed
+{"at":"2026-11-06T16:43:11.255Z","level":"info","event":"ai_suggestion","model":"gpt-6-sol","outcome":"proposal","toolCalls":2,"ms":14,"anonymous":true,"suggestion":"basket"}
+
+ ✓  integration  tests/integration/s32-language-eval.test.ts (2 tests) 499ms
+ ✓  integration  tests/integration/paypal-start.test.ts (6 tests) 947ms
+ ✓  integration  tests/integration/pyusd-grants.test.ts (5 tests) 618ms
+ ✓  integration  tests/integration/seed-judge-fixtures.test.ts (4 tests) 636ms
+stdout | tests/integration/s33-chinese-followup.test.ts > S33 FIXTURE Chinese follow-up wiring > runs both paths and prices a missing cache-write lifetime at the highest rate
+{"at":"2026-11-06T16:43:11.959Z","level":"info","event":"ai_suggestion","model":"gpt-6-sol","outcome":"proposal","toolCalls":2,"ms":17,"anonymous":true,"suggestion":"basket"}
+
+ ✓  integration  tests/integration/auth-schema-pin.test.ts (1 test) 557ms
+ ✓  integration  tests/integration/s33-chinese-followup.test.ts (3 tests) 599ms
+ ✓  integration  tests/integration/s34-advice-eval.test.ts (8 tests) 923ms
+   ✓ S34 FIXTURE evaluation wiring (8)
+     ✓ keeps the language phase on S32's exact two shops 355ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   integration  tests/integration/buyer-assistant.test.ts > Ask Envoi route > the assistant reads its body within 5 seconds
+Error: Test timed out in 20000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/integration/buyer-assistant.test.ts:159:3
+    157|   });
+    158|
+    159|   it("the assistant reads its body within 5 seconds", async () => {
+       |   ^
+    160|     const cookie = await anonymousCookie(routes.auth.POST);
+    161|     // A FIXTURE body that arrives whole after a delay, as a slow clie…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL   integration  tests/integration/buyer-assistant.test.ts > Ask Envoi route > the assistant's link never reaches the model, its reply or its steps
+AssertionError: expected [ [ 'getOutletMenu', 200 ], …(1) ] to deeply equal [ [ 'listOutlets', 200 ], …(2) ]
+
+- Expected
++ Received
+
+@@ -1,11 +1,7 @@
+  [
+    [
+-     "listOutlets",
+-     200,
+-   ],
+-   [
+      "getOutletMenu",
+      200,
+    ],
+    [
+      "createPurchaseRequest",
+
+ ❯ tests/integration/buyer-assistant.test.ts:197:77
+    195|     // The link reached the buyer beside the reply, so it existed to l…
+    196|     expect(answer.data!.link).toEqual({ url: FIXTURE_LINK, expiresAt: …
+    197|     expect(answer.data!.steps.map((step) => [step.operation, step.stat…
+       |                                                                             ^
+    198|       ["listOutlets", 200],
+    199|       ["getOutletMenu", 200],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL   integration  tests/integration/menu-import-route.test.ts > import upload and photo rejects > second photo part is refused
+Error: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/integration/menu-import-route.test.ts:196:3
+    194|   });
+    195|
+    196|   it("second photo part is refused", async () => {
+       |   ^
+    197|     const target = await shop("two-parts");
+    198|     const jpeg = await solidJpeg();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL   integration  tests/integration/merchant-publication.test.ts > merchant destination and publication > editing a published menu creates an unpublished revision
+Error: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/integration/merchant-publication.test.ts:94:3
+     92|   });
+     93|
+     94|   it("editing a published menu creates an unpublished revision", async…
+       |   ^
+     95|     const { shop } = await api.publishedShop("edit-published");
+     96|     const before = await publishedItems(fixture.database, shop.outletI…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL   integration  tests/integration/order-archive.test.ts > merchant order archive > archive repeat changes nothing
+Error: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/integration/order-archive.test.ts:149:3
+    147|   });
+    148|
+    149|   it("archive repeat changes nothing", async () => {
+       |   ^
+    150|     const { shop } = await api.publishedShop("repeat");
+    151|     const order = await buy(shop, "paid");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL   integration  tests/integration/pyusd-purchase.test.ts > PYUSD purchase > PYUSD preparation > preparation rejects a foreign Origin
+Error: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/integration/pyusd-purchase.test.ts:215:5
+    213|     });
+    214|
+    215|     it("preparation rejects a foreign Origin", async () => {
+       |     ^
+    216|       const review = await pyusdReview(await pyusdShop("prep-origin"));
+    217|       const response = await prepare(review, review.buyer.address, { o…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL   integration  tests/integration/pyusd-recovery.test.ts > PYUSD recovery > PYUSD recovery over a fake chain > scan that never reaches before preparation is incomplete
+Error: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/integration/pyusd-recovery.test.ts:96:5
+     94|     });
+     95|
+     96|     it("scan that never reaches before preparation is incomplete", asy…
+       |     ^
+     97|       const prepared = await h.preparedAttempt("rec-incomplete");
+     98|       h.expireAll();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+ FAIL   integration  tests/integration/sgqr-resolve.test.ts > buyer SGQR resolution > scan grants no destination and no rail
+Error: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/integration/sgqr-resolve.test.ts:119:3
+    117|   }
+    118|
+    119|   it("scan grants no destination and no rail", async () => {
+       |   ^
+    120|     const solo = freshUen();
+    121|     const { shop } = await api.publishedShop("solo");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
+
+
+ Test Files  7 failed | 50 passed (57)
+      Tests  8 failed | 476 passed (484)
+   Start at  00:42:18
+   Duration  53.85s (tests 93%, import 6%, transform 1%)
+
