@@ -4,6 +4,7 @@ import { getOwnPurchase } from "@/domain/purchases/review";
 import { getAuth } from "@/lib/auth";
 import { isPrincipal, requireBuyerSession } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
+import { purchaseIdFromReturn } from "../purchase-param";
 import { CompletePayment } from "./complete-payment";
 
 export const dynamic = "force-dynamic";
@@ -13,8 +14,8 @@ export const dynamic = "force-dynamic";
 export default async function PayPalReturnPage({ searchParams }: { searchParams: Promise<{ purchase?: string | string[] }> }) {
   const principal = await requireBuyerSession(getAuth(), await headers());
   if (!isPrincipal(principal)) notFound();
-  const { purchase: purchaseId } = await searchParams;
-  if (typeof purchaseId !== "string") notFound();
+  const purchaseId = purchaseIdFromReturn((await searchParams).purchase);
+  if (!purchaseId) notFound();
   const purchase = await getOwnPurchase(webDb(), principal, purchaseId);
   if (!purchase) notFound();
 
