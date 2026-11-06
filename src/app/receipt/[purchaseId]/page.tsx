@@ -46,6 +46,9 @@ function statusOf(purchase: OwnPurchase): Status {
       return { title: "Paid", chip: "Paid", tone: "ok", body: "PayPal sandbox confirmed this capture to the shop's sandbox seller. Test money only: no real money moved." };
     case "pending_payment":
       if (purchase.view.paypalAttempt && CAPTURE_IN_FLIGHT.has(purchase.view.paypalAttempt)) return CHECKING;
+      // PayPal captures a crypto order on approval and may still be finishing when the buyer returns,
+      // so this never says nothing was charged.
+      if (purchase.attempt?.rail === "paypal" && purchase.attempt.paypalFunding === "crypto" && purchase.view.paypalAttempt === "order_created") return CHECKING;
       if (purchase.view.paypalAttempt === "create_unknown") {
         return {
           title: "Not paid yet",
