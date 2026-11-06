@@ -1,0 +1,70 @@
+{
+  "label": "S34 Render screen check; FIXTURE shop; real model; test money only; no payment approved",
+  "site": "https://envoi-helx.onrender.com",
+  "page": "https://envoi-helx.onrender.com/buy/ask?outlet=out_wgoyp6kgg75472b6s772dplgoq",
+  "outletId": "out_wgoyp6kgg75472b6s772dplgoq",
+  "startedAt": "2026-11-06T17:00:53.730Z",
+  "widths": [
+    {
+      "width": "390",
+      "badge": true,
+      "fixture": true,
+      "heading": "Ask about Lorong Demo Kopi",
+      "advice": {
+        "link": false,
+        "bubbles": 2,
+        "innerWidth": 390,
+        "scrollWidth": 390,
+        "reply": [
+          "I’d try the Kaya toast set. It’s S$4.50 on the menu, within your S$6 budget in Singapore dollars; Envoi will calculate the price when you open a link. I can’t tell from the menu whether it’s halal, so please ask the stall—would you like me to make a basket for one set?"
+        ]
+      },
+      "accept": {
+        "link": true,
+        "linkHrefIsEnvoi": false,
+        "bubbles": 4,
+        "innerWidth": 390,
+        "scrollWidth": 390,
+        "reply": [
+          "I’d try the Kaya toast set. It’s S$4.50 on the menu, within your S$6 budget in Singapore dollars; Envoi will calculate the price when you open a link. I can’t tell from the menu whether it’s halal, so please ask the stall—would you like me to make a basket for one set?",
+          "Envoi has shown you a one-time link for one Kaya toast set. You can review the price there before approving payment."
+        ]
+      },
+      "noOverflowOnAdvice": true,
+      "noOverflowOnAccept": true,
+      "adviceScreenshot": "evidence/s34-render-390-advice.jpg",
+      "acceptScreenshot": "evidence/s34-render-390-accept.jpg"
+    },
+    {
+      "width": "1280",
+      "badge": true,
+      "fixture": true,
+      "heading": "Ask about Lorong Demo Kopi",
+      "advice": {
+        "link": false,
+        "bubbles": 2,
+        "innerWidth": 1280,
+        "scrollWidth": 1280,
+        "reply": [
+          "I’d suggest the Kaya toast set: its menu price is S$4.50, within your S$6 budget in Singapore dollars. I can’t tell whether it’s halal from the menu; please ask the stall. Would you like me to make a basket for one set?"
+        ]
+      },
+      "accept": {
+        "link": true,
+        "linkHrefIsEnvoi": false,
+        "bubbles": 4,
+        "innerWidth": 1280,
+        "scrollWidth": 1280,
+        "reply": [
+          "I’d suggest the Kaya toast set: its menu price is S$4.50, within your S$6 budget in Singapore dollars. I can’t tell whether it’s halal from the menu; please ask the stall. Would you like me to make a basket for one set?",
+          "Envoi has shown you a one-time link for one Kaya toast set. Open it to review the price and approve payment yourself."
+        ]
+      },
+      "noOverflowOnAdvice": true,
+      "noOverflowOnAccept": true,
+      "adviceScreenshot": "evidence/s34-render-1280-advice.jpg",
+      "acceptScreenshot": "evidence/s34-render-1280-accept.jpg"
+    }
+  ],
+  "finishedAt": "2026-11-06T17:01:47.084Z"
+}
