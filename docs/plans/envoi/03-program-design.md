@@ -78,7 +78,7 @@ type CreateOrderInput = /* existing fields */ { funding: PayPalFunding };
 function cryptoAllowed(outlet: { country: Country }, sellerMerchantId: string, allowlist: readonly string[]): boolean;
 ```
 
-- **Call stack (crypto):** review, then `paypal/start` with `crypto`, then `cryptoAllowed`, then `createOrder`, then redirect; on return `paypal/complete`, then `readOrder`, then the existing checks of amount, currency and payee, then paid only on capture `COMPLETED`. `captureOrder` is not reachable for a crypto attempt.
+- **Call stack (crypto):** review, then `paypal/start` with `crypto`, then `cryptoAllowed`, then `createOrder`, then redirect; on return `paypal/complete`, then `readOrder`, then the existing checks of amount, currency and payee, then paid only on capture `COMPLETED`. `captureOrder` is not reachable for a crypto attempt. Amended by the [crypto settlement reopening](#reopening-2026-11-06-crypto-settlement).
 - **Named tests (37 onward; each guard gets its own mutation):**
   - S32: 37 `the language evaluation counts a wrong basket link as a failure`.
   - S33: 38 `an unpublished or unknown outlet id gives no shop context`; 39 `shop text reaches the model only as data`; 40 `a shop-scoped turn cannot propose another shop's items`.
@@ -86,7 +86,7 @@ function cryptoAllowed(outlet: { country: Country }, sellerMerchantId: string, a
   - S35: 42 `the filter schema refuses any field but the five`; 43 `the order filter call receives no order data`; 44 `a filter never turns a pending order into a paid row`; 45 `a non-member cannot call the filter route`.
   - S37: 46 `an agent token over its limit reaches no tool`; 47 `a revoked agent token reaches no tool`; 48 `the agents page holds no token value`, by a scan proved with a planted needle.
   - S42: 54 `show the stall renders only on a paid receipt`; 55 `the stall card's amount comes from the purchase, and its text cannot supply one`.
-  - S38: 49 `a crypto attempt never calls capture`; 50 `crypto is refused for a Singapore shop and an unlisted seller`; 51 `a crypto order that is not COMPLETED never reads paid`; 52 `a crypto order with a wrong payee or amount never reads paid`; 53 `a PayPal attempt's order body is unchanged`.
+  - S38: 49 `a crypto attempt never calls capture`; 50 `crypto is refused for a Singapore shop and an unlisted seller`; 51 `a crypto order that is not COMPLETED never reads paid`; 52 `a crypto order with a wrong payee or amount never reads paid`; 53 `a PayPal attempt's order body is unchanged`; added 2026-11-06: 56 `a crypto approval after the review window reads paid`; 57 `a PayPal attempt never leaves abandoned and a PayPal purchase never leaves unpaid_closed`; 58 `the approval link accepts sandbox.paypal.com and refuses any other host`.
 - **Evaluations, written into `00-status.md` before the first call:** the two in Gate 1's success measure. One run per model on FIXTURE shops, with the sentences fixed first.
 - **Least confident decisions:**
   1. [hypothesis] Five languages (zh, ja, ko, es, ms): chosen for visitors plus Singapore's stalls, with no data behind the choice.
@@ -3077,3 +3077,45 @@ It would not authorize real merchant photos, any OpenAI call or evaluation spend
 The user's OpenAI data-sharing setting, daily spend ceiling, models and faucet access remain open and are not inferred from any approval.
 The revision itself used only read-only registry, GitHub and devnet reads; it installed, provisioned, spent and committed nothing.
 The revision after the user's review used no external read at all, and neither did fixes L and M, which follow Gate 2's reopening and re-approval on 2026-10-11.
+
+## Reopening 2026-11-06: crypto settlement
+
+**Status: approved 2026-11-06 ("Approve Gates 2, 3, 4").** It implements the [Gate 2 amendment](02-architecture.md#crypto-settlement-amendment-2026-11-06).
+The earlier sentence that abandonment before dispatch is safe because dispatch requires the review deadline stays true for `paypal` funding and does not hold for `crypto`.
+
+**Migration `0031`, in addition to `payment_attempts.paypal_funding`.**
+- `payment_attempts_capture_key_check` no longer requires `capture_request_id` for a `crypto` attempt.
+- A new check refuses a `crypto` attempt holding a `capture_request_id`, so one can never have dispatched a capture.
+
+**Attempt transitions, `crypto` funding only, each from a PayPal read.**
+
+```
+order_created | abandoned -> capture_confirmed   (order COMPLETED, every decideCaptureOutcome check passes)
+order_created | abandoned -> capture_unknown     (order COMPLETED, the checks do not pass or the capture is not final)
+order_created | abandoned -> capture_failed      (a verified failed capture)
+capture_unknown -> capture_confirmed | capture_failed   (existing, by read only; replay is never used)
+```
+
+`canTransitionAttempt` gains a funding argument, and these edges are refused for `paypal` funding.
+
+**Purchase transitions, `crypto` funding only.**
+
+```
+unpaid_closed -> paid        (reason capture_confirmed)
+unpaid_closed -> uncertain   (reason crypto_read_unverified)
+```
+
+`canTransitionPurchase` allows them only with `crypto` funding. An audit event `crypto_settled_after_close` records each one, and no protected record is rewritten.
+
+**Read paths.**
+- `completePayPal` reads a crypto order before `assertPaymentEligible`, so an expired review or `PAYMENTS_ENABLED` off cannot hide a payment that already happened.
+- `CREATED` or `PAYER_ACTION_REQUIRED` changes nothing.
+- `reconcileAttempt` applies the same read for a crypto attempt in `order_created` or `abandoned`, with `replay` never used. The webhook and maintenance reach it unchanged.
+- `cancelPurchase` is unchanged. A later verified read can still settle the purchase.
+- Maintenance reads a closed crypto attempt only when a webhook made its read due, so no sweep runs against an order that never completes.
+
+**Body.** `createOrderBody` with `funding: "crypto"` removes `payment_source.paypal`, adds `payment_source.crypto` with `country_code`, the name `Envoi Fixture`, and `experience_context`, and adds `processing_instruction: "ORDER_COMPLETE_ON_PAYMENT_APPROVAL"`. The body for `funding: "paypal"` is unchanged, by test 53.
+
+**Approval host.** `ALLOWED_APPROVAL_HOSTS` gains `sandbox.paypal.com`.
+
+**Least confident.** [hypothesis] Webhook delivery alone settles a buyer who never returns; it reached Render within seconds for both completed orders, but Envoi quarantined them as unknown orders, so the settling path itself is untested.

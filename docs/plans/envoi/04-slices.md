@@ -1156,7 +1156,7 @@ Branch: `envoi/slice-37-own-assistant`. **Visible result.** An outside assistant
 
 #### S38 Crypto through PayPal
 
-Branch: `envoi/slice-38-pay-with-crypto`. **First step.** One order with Envoi's real body, on the enabled seller, including Failed and Cancelled, and webhook delivery. [verified 2026-11-04] order `1RP01000A2096744K` reached `COMPLETED`, capture `6VY93897R24256104`, with a minimal body and simulator only. **Visible result.** Per mockup on one US FIXTURE shop, through a Paid receipt, labeled simulated. **Tests.** 49 to 53. **Falsifier.** The real body is refused without dropping a guard, or not done by 10 Nov: cut, no claim. **Authorizations.** Starting S38; sandbox orders; migration 0031; setting `PAYPAL_CRYPTO_ENABLED` on Render; merge, push and deploy.
+Branch: `envoi/slice-38-pay-with-crypto`. **First step.** One order with Envoi's real body, on the enabled seller, including Failed and Cancelled, and webhook delivery. [verified 2026-11-04] order `1RP01000A2096744K` reached `COMPLETED`, capture `6VY93897R24256104`, with a minimal body and simulator only. **Visible result.** Per mockup on one US FIXTURE shop, through a Paid receipt, labeled simulated. **Tests.** 49 to 53, and added 2026-11-06: 56 to 58, with the [crypto settlement reopening](03-program-design.md#reopening-2026-11-06-crypto-settlement), each with its own mutation. **Falsifier.** The real body is refused without dropping a guard, or not done by 10 Nov: cut, no claim. **Authorizations.** Starting S38; sandbox orders; migration 0031; setting `PAYPAL_CRYPTO_ENABLED` on Render; merge, push and deploy.
 
 #### S34 Advice
 

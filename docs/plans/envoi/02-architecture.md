@@ -687,6 +687,7 @@ No table stores a merchant's filter sentence.
 **Flow: orders filter.** The merchant's sentence goes to one tool-free model call with a strict schema and the outlet's date; the answer contains only states, rails, currencies and a date range; the browser applies it to rows it already holds. The model never sees an order.
 
 **Flow: crypto through PayPal.** The start route accepts `crypto` only for a US outlet with the switch on. Envoi creates the order with `payment_source.crypto`, the shop as payee, and `ORDER_COMPLETE_ON_PAYMENT_APPROVAL`. The buyer is redirected to `payer-action`. PayPal captures by itself [verified once 2026-11-04, simulated]. Completion reads the order and applies the existing paid verification, and **never calls capture**. The webhook inbox and maintenance reconcile remain the fallback.
+This flow is amended by the [crypto settlement amendment](#crypto-settlement-amendment-2026-11-06).
 
 **Flow: judge token.** An operator-issued agent token labeled for judges reaches `/mcp` as any agent does, and a per-token limit applies before the tools run. Every token is limited: 60 `/mcp` POSTs per 10 minutes, and 900 for the site's own `ASSISTANT_AGENT_TOKEN`, which all Ask Envoi buyers share. Revoking a token uses the existing `revoked_at`.
 
@@ -696,3 +697,25 @@ No table stores a merchant's filter sentence.
 - R-T2 [unknown]: webhook delivery for crypto orders, and whether line items, `invoice_id` and `custom_id` are accepted beside `payment_source.crypto`. S38's first step tests them; the 2026-11-04 order had none of them.
 - R-T3: only an enabled seller can take crypto; another seller answers 422 `NOT_ENABLED_FOR_PAYMENT_SOURCE`, so the switch must stay per shop by allowlist in the environment value.
 - R-T4: a public agent page invites abuse; the token is never published and every link still needs a human.
+
+## Crypto settlement amendment, 2026-11-06
+
+**Status: approved 2026-11-06 ("Approve Gates 2, 3, 4").** It changes the crypto flow of the third build plan only. A PayPal attempt and a PYUSD attempt behave exactly as before.
+
+**Why.** Envoi's rule that money cannot move after `T_REVIEW` holds because Envoi sends the capture itself, and only inside the deadline.
+PayPal captures a crypto order the moment the buyer approves, with no call from Envoi, so Envoi cannot enforce that deadline.
+A buyer who approves after 5 minutes would pay while the purchase reads `unpaid_closed`, which today has no way out.
+
+**Decision.** A crypto attempt closes at `T_REVIEW` as today, and a verified `COMPLETED` read can still settle it later.
+The purchase then moves from `unpaid_closed` to `paid`, because the money did move and the receipt must say so.
+This is the only way out of `unpaid_closed`, it needs a PayPal read that passes every existing check, and it is audited.
+No hold and no longer basket lock are added, because PayPal's expiry for an unapproved order is [unknown]; orders were still open after about 3 hours [verified 2026-11-06].
+
+**Failure modes accepted.**
+- A buyer who starts a second order and then finishes the first pays twice, and both receipts truthfully read Paid. This needs a deliberate second approval, on one allowlisted fixture seller, in sandbox.
+- A purchase can read closed and later read Paid. It never reads Paid without a verified capture.
+
+**Also from the first step.**
+- PayPal's crypto link uses `sandbox.paypal.com`, so that host joins `www.sandbox.paypal.com` in the approval allowlist. It answered 301 to `www.` [verified 2026-11-06].
+- `payment_source.crypto` carries a buyer name, which is required [vendor claim]. Buyers are anonymous, so Envoi sends the fixed label `Envoi Fixture`, never a person's name.
+- A PayPal error on the simulator returns the buyer through the cancel URL, and the purchase closes unpaid like any cancel. The buyer starts a new review, and no separate retry path is built.
