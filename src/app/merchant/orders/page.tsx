@@ -58,7 +58,7 @@ export default async function MerchantOrdersPage() {
     <main>
       <p className="eyebrow">Merchant</p>
       <h1>Orders</h1>
-      <p className="lead">Ask in your own words, or sort and filter the table. Asking changes no order.</p>
+      <p className="lead">{shops.some((shop) => shop.orders.length > 0) ? "Ask in your own words, or sort and filter the table. Asking changes no order." : "Orders appear here once a buyer starts one at your shop."}</p>
       {shops.length === 0 && (
         <section className="card">
           <h2>No shop yet</h2>
