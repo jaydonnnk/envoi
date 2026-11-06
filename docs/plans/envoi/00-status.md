@@ -672,7 +672,16 @@ ad10 is feasible at 180 plus 220, and Mee siam is unavailable.
 - **Flake, still unresolved [verified as far as stated]:** `buyer-assistant` and `pyusd-recovery` also failed in S38's one bad run, so this is a repeat.
   A deliberate run with 36 busy loops on 12 cores passed 484 of 484 in 42 s, so CPU load alone did not reproduce it and the load [hypothesis] is weaker.
   The failing run took 53.85 s against about 18 s, with failures spread over seven files, which fits a single stall of about 35 s across all workers [hypothesis]; its cause is [unknown].
-- **Open after the cleanup, each for the user:** whether the model sends `budgetMinor` at all is still [unknown]; Gate 4 says "Per mockup" and the approved mockup still shows the button and heading that decision 1 removed; the Render deployment SHA is unconfirmed; and `envoi_t_s42preview_6e6d1855` and `envoi_t_s42preview_85ef5a3e` were reported leaked in the local PostgreSQL and were not deleted.
+- **`budgetMinor` probe result [verified as this small sample], 2026-11-07:** both `propose_basket` calls carried the stated budget: `p1` sent 700 and `p3` sent 500, each on the acceptance turn, and each created one basket within budget ([run](evidence/s34-budget-probe.json)).
+  `p2` made no `propose_basket` call, because the model itself declined S$4.50 against S$3, so it says nothing either way.
+  This answers Limit 1's [unknown] for these two calls only: the guard is reached in these samples, which is not proof it always is, and the guard itself still has not fired on the real model.
+  Spend: US$0.0262564 over 12 requests against the US$0.05 cap, with nothing left reserved, in [its own ledger](evidence/s34-budget-probe-ledger.json), so it is outside the US$0.3352114 evaluation figure. The actual invoice is [unknown].
+- **Open after the cleanup, each for the user:** Gate 4 says "Per mockup" and the approved mockup still shows the button and heading that decision 1 removed; the Render deployment SHA is unconfirmed; and `envoi_t_s42preview_6e6d1855` and `envoi_t_s42preview_85ef5a3e` were reported leaked in the local PostgreSQL and were not deleted.
+- **`budgetMinor` probe, registered 2026-11-07 before its first call [verified as written first]:** the user said "Yes, run probe", answering whether to run it capped at US$0.05 under S34's US$2 allowance.
+  It is a diagnostic and not part of the scored evaluation, whose results stay as recorded.
+  [The script](evidence/s34-budget-probe.mts) runs once, with no retry, on the FIXTURE shop Lorong Demo Kopi with simulated links and no payment, and reads the tool calls in OpenAI's own responses, with no application change.
+  Sentences: `p1` "What should I try under S$7?" then "Yes, make that basket."; `p2` "I want one Kaya toast set. My budget is S$3."; `p3` "What should I try under S$5?" then "Yes, make that basket."
+  Reading fixed first: if every `propose_basket` call carries the stated budget, the guard is reached in these samples only, which is not proof it always is; if any call omits it or sends a different value, the code guard is not reliable on the real model; a case with no `propose_basket` call says nothing either way.
 
 ### S38 Crypto through PayPal, 2026-11-06
 

@@ -1,0 +1,122 @@
+{
+  "label": "S34 diagnostic, not scored: FIXTURE shop, real OpenAI, simulated links, no payment and no deployment",
+  "model": "gpt-6-sol",
+  "capUsd": 0.05,
+  "agentSha256": "cac5f57302c77ca0907a0b7626892a1cb69756a14e199343df9819488ac963c5",
+  "toolsSha256": "425585987486156e42553b380945623a10b2d9e68411169d6dafb116bb1953c5",
+  "meter": {
+    "spentUsd": 0.026256400000000003,
+    "reservedUsd": 0,
+    "requests": 12,
+    "inputTokens": 15894,
+    "cachedTokens": 12822,
+    "outputTokens": 844,
+    "cacheWriteTokens": 3036,
+    "longCacheWriteTokens": 0,
+    "cacheUpperBoundTokens": 3036
+  },
+  "stopped": null,
+  "rows": [
+    {
+      "id": "p1",
+      "statedBudgetMinor": 700,
+      "turns": [
+        "What should I try under S$7?",
+        "Yes, make that basket."
+      ],
+      "kinds": [
+        "reply",
+        "link"
+      ],
+      "replies": [
+        "I’d try a Kaya toast set with a Kopi O. Their menu prices add up to S$6.10, within your S$7 budget in Singapore dollars; shall I make that basket?",
+        "Envoi has shown you a one-time link for one Kaya toast set and one Kopi O. Open it to review Envoi’s price and approve payment yourself."
+      ],
+      "baskets": [
+        {
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Kaya toast set",
+              1
+            ],
+            [
+              "Kopi O",
+              1
+            ]
+          ]
+        }
+      ],
+      "proposals": [
+        {
+          "turn": 1,
+          "budgetMinor": 700,
+          "lines": [
+            {
+              "menuItemId": "itm_5zfkqzx656sphjp442yz472mhu",
+              "quantity": 1
+            },
+            {
+              "menuItemId": "itm_gywqfzaizbfqadnvpotx534zuq",
+              "quantity": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "statedBudgetMinor": 300,
+      "turns": [
+        "I want one Kaya toast set. My budget is S$3."
+      ],
+      "kinds": [
+        "reply"
+      ],
+      "replies": [
+        "The Kaya toast set is listed at S$4.50, which exceeds your S$3 budget, so I can’t make that basket within it."
+      ],
+      "baskets": [],
+      "proposals": []
+    },
+    {
+      "id": "p3",
+      "statedBudgetMinor": 500,
+      "turns": [
+        "What should I try under S$5?",
+        "Yes, make that basket."
+      ],
+      "kinds": [
+        "reply",
+        "link"
+      ],
+      "replies": [
+        "I’d try the Kaya toast set at a menu price of S$4.50, within your S$5 budget in Singapore dollars. Want me to make a basket for one?",
+        "Envoi has shown you a one-time link for one Kaya toast set. You can review the price there before approving payment."
+      ],
+      "baskets": [
+        {
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Kaya toast set",
+              1
+            ]
+          ]
+        }
+      ],
+      "proposals": [
+        {
+          "turn": 1,
+          "budgetMinor": 500,
+          "lines": [
+            {
+              "menuItemId": "itm_5zfkqzx656sphjp442yz472mhu",
+              "quantity": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
