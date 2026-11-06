@@ -1,4 +1,4 @@
-import { and, asc, eq, isNotNull, sql } from "drizzle-orm";
+import { and, asc, eq, isNotNull, isNull, sql } from "drizzle-orm";
 import { menuItems, menuRevisions, outlets } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { isId } from "@/lib/ids";
@@ -13,12 +13,13 @@ export type PublishedMenu = { outlet: PublishedOutletSummary; menuRevisionId: st
 
 const withCurrency = <T extends { country: Country }>(outlet: T): T & { currency: Currency } => ({ ...outlet, currency: CURRENCY_BY_COUNTRY[outlet.country] });
 
-// Only outlets with a published, confirmed revision are buyer-readable.
+// Only outlets with a published, confirmed revision are buyer-readable. A hidden outlet leaves the
+// lists and searches here, but getPublishedMenu and shopContext still answer its direct links.
 export async function listPublishedOutlets(db: Db, limit = 50): Promise<PublishedOutletSummary[]> {
   const rows = await db
     .select({ id: outlets.id, name: outlets.name, area: outlets.area, isDemoFixture: outlets.isDemoFixture, country: outlets.country })
     .from(outlets)
-    .where(isNotNull(outlets.publishedMenuRevisionId))
+    .where(and(isNotNull(outlets.publishedMenuRevisionId), isNull(outlets.hiddenAt)))
     .orderBy(asc(outlets.name), asc(outlets.id))
     .limit(limit);
   return rows.map(withCurrency);
@@ -80,7 +81,7 @@ export async function searchPublishedOutlets(db: Db, search: OutletSearch, limit
   const rows = await db
     .select({ id: outlets.id, name: outlets.name, area: outlets.area, isDemoFixture: outlets.isDemoFixture, country: outlets.country })
     .from(outlets)
-    .where(and(isNotNull(outlets.publishedMenuRevisionId), overlapsInsensitive(outlets.area, search.area), overlapsInsensitive(outlets.name, search.name)))
+    .where(and(isNotNull(outlets.publishedMenuRevisionId), isNull(outlets.hiddenAt), overlapsInsensitive(outlets.area, search.area), overlapsInsensitive(outlets.name, search.name)))
     .orderBy(asc(outlets.name), asc(outlets.id))
     .limit(limit);
   return rows.map(withCurrency);
@@ -92,7 +93,7 @@ export async function listPublishedItemNames(db: Db, area: string | null, limit 
     .from(outlets)
     .innerJoin(menuRevisions, and(eq(menuRevisions.id, outlets.publishedMenuRevisionId), eq(menuRevisions.status, "confirmed")))
     .innerJoin(menuItems, eq(menuItems.menuRevisionId, menuRevisions.id))
-    .where(overlapsInsensitive(outlets.area, area))
+    .where(and(isNull(outlets.hiddenAt), overlapsInsensitive(outlets.area, area)))
     .orderBy(asc(outlets.name), asc(outlets.id), asc(menuItems.position))
     .limit(limit);
 }

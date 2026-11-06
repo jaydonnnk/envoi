@@ -99,6 +99,9 @@ export const outlets = pgTable("outlets", {
   // The shop's country (S27) sets its menu's currency. It may change only until the outlet's first
   // publication; after that the trigger in migration 0027 refuses any change.
   country: text("country").$type<Country>().notNull().default("SG"),
+  // Set by the operator to drop a demo fixture from public lists and search. Its direct links, orders
+  // and merchant screens keep working, and clearing it brings the shop back.
+  hiddenAt: timestamp("hidden_at", { withTimezone: true }),
 }, (t) => [check("outlets_country_check", sql`${t.country} in ('SG', 'US')`)]);
 
 export const menuRevisions = pgTable(

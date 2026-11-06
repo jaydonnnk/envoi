@@ -627,7 +627,28 @@ export function promptHidden(prompt: string, input: HiddenInput = process.stdin,
   });
 }
 
+// Hides a demo fixture from public lists and search, or shows it again. Real shops are refused, and
+// no order, menu or payment row changes. Run again, it changes nothing.
+export async function setOutletHidden(db: OperatorDb, input: { outletId: string; hidden: boolean }) {
+  return db.transaction(async (tx) => {
+    const [outlet] = await tx
+      .select({ isDemoFixture: schema.outlets.isDemoFixture, hiddenAt: schema.outlets.hiddenAt })
+      .from(schema.outlets)
+      .where(eq(schema.outlets.id, input.outletId))
+      .for("update");
+    if (!outlet) throw new Error(`Outlet ${input.outletId} does not exist.`);
+    if (!outlet.isDemoFixture) throw new Error(`Outlet ${input.outletId} is not a demo fixture; only a demo fixture can be hidden.`);
+    if ((outlet.hiddenAt !== null) === input.hidden) return { status: "unchanged" as const, outletId: input.outletId };
+    const now = new Date();
+    await tx.update(schema.outlets).set({ hiddenAt: input.hidden ? now : null }).where(eq(schema.outlets.id, input.outletId));
+    await recordAudit(tx, { at: now, actor: "operator", action: input.hidden ? "outlet_hidden" : "outlet_shown", outletId: input.outletId, operatorVisible: true });
+    return { status: input.hidden ? ("hidden" as const) : ("shown" as const), outletId: input.outletId };
+  });
+}
+
 const COMMANDS = [
+  "hide-outlet",
+  "show-outlet",
   "seed-demo-fixture",
   "seed-judge-fixtures",
   "assign-paypal-destination",
@@ -704,10 +725,15 @@ export async function addDemoIcedTeas(db: OperatorDb, now: Date = new Date()): P
 }
 
 const USAGE =
-  "usage: npm run operator -- seed-demo-fixture | seed-judge-fixtures | assign-paypal-destination <outletId> <sellerMerchantId> | issue-agent-token <label> | create-merchant <email> <name> | approve-membership <email> [evidenceRef] | approve-enrollment <outletId> [evidenceRef] | approve-identifier [identifierId [evidenceRef]] | grant-operator <email> [evidenceRef] | resolve-pyusd-mismatch <operatorEmail> <attemptId> <reason> <evidenceRef> | record-extra-transfer-refund <operatorEmail> <attemptId> <signature> <reason> <refundReference> | unarchive-order <purchaseId> | export-archived-orders [outletId] | add-demo-iced-teas";
+  "usage: npm run operator -- hide-outlet <outletId> | show-outlet <outletId> | seed-demo-fixture | seed-judge-fixtures | assign-paypal-destination <outletId> <sellerMerchantId> | issue-agent-token <label> | create-merchant <email> <name> | approve-membership <email> [evidenceRef] | approve-enrollment <outletId> [evidenceRef] | approve-identifier [identifierId [evidenceRef]] | grant-operator <email> [evidenceRef] | resolve-pyusd-mismatch <operatorEmail> <attemptId> <reason> <evidenceRef> | record-extra-transfer-refund <operatorEmail> <attemptId> <signature> <reason> <refundReference> | unarchive-order <purchaseId> | export-archived-orders [outletId] | add-demo-iced-teas";
 
 async function run(db: OperatorDb, argv: string[]): Promise<number> {
   const [command, ...args] = argv;
+  if ((command === "hide-outlet" || command === "show-outlet") && args.length === 1) {
+    const result = await setOutletHidden(db, { outletId: args[0]!, hidden: command === "hide-outlet" });
+    console.log(result.status === "unchanged" ? `outlet ${result.outletId} already in that state; nothing changed` : `outlet ${result.outletId} ${result.status}`);
+    return 0;
+  }
   if (command === "seed-demo-fixture" && args.length === 0) {
     const result = await seedDemoFixture(db);
     console.log(
