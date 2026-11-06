@@ -708,6 +708,17 @@ ad10 is feasible at 180 plus 220, and Mee siam is unavailable.
 - **Not tested here:** `ad8` accepts with its registered words, "Yes, make that basket.". The button's own words reach the model only in the Render check.
 - **Claim boundary:** as the first pre-registration: ten and twenty-five fixed sentences on fixture shops with simulated links, proving no advice quality, language or payment claim.
 
+#### S34 accept button results
+
+- **Built [verified]:** `offer_basket` in `tools.ts`, the instructions and the scoped refusal in `agent.ts`, `offer` in the buyer route and `AcceptOffer` in `ask-envoi.tsx`, as the [Gate 3 reopening](03-program-design.md#reopening-2026-11-07-s34-accept-button) lists. No migration, dependency or environment name.
+- **Evaluation [verified as this fixed fixture record]:** advice **10 of 10** with 0 off the menu, 0 over budget and 0 dietary assurances, 0 baskets on the nine advice-only cases and exactly 1 on `ad8` at 610 against 700. Language **25 of 25 with 0 wrong basket links**. The falsifier did not trip. [Advice run](evidence/s34-eval-advice-button.json), [language run](evidence/s34-eval-lang-button.json), [review](evidence/s34-button-semantic-review.json).
+- **The added thresholds [verified]:** every offer was priced within budget and on the menu. The button showed on the first turn of **8 of the 8** expected cases and not on `ad5`, and `ad4` made no offer. All 9 basket tool calls carried their case's exact budget.
+  With the probe, that answers Limit 1 for these samples; the guard has still not fired on the real model, because the model stayed within budget.
+- **Limit, the review is partial on item names:** the run stores item ids and its database is dropped, so offered names are checked by line count, quantity and, for `ad1`, `ad2` and `ad8`, the ids `ad8`'s basket names. Budget and availability are checked by code on every offer.
+- **Limit, English button:** the label is English in every language, and no language case exercises it. Advice in other languages stays untested.
+- **Spend [verified as conservative accounting]:** this rerun added US$0.2043786 over 121 requests. The ledger holds **US$0.53959 of US$2**, with nothing reserved. With the probe's US$0.0262564 and the Render turns' estimated US$0.07, the total is about US$0.64. The actual invoice is [unknown].
+- **Mutation proof [verified]:** [22 mutations](evidence/s34-button-mutations.json), from [these definitions](evidence/s34-button-mutation-defs.json), each failed its named test and restored its source byte-identical. They cover every S34 guard on the changed code, not only the new ones; the original 11 stay as history against the code they ran on.
+
 ### S38 Crypto through PayPal, 2026-11-06
 
 - **Authority [verified], 2026-11-06, the user's words:** "accept yep, then start s38 branch only".

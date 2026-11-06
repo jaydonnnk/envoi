@@ -1,6 +1,7 @@
 // S34 Render screen check: the deployed shop-scoped Ask Envoi at 390 px and 1280 px, driven over the
 // Chrome DevTools Protocol so the viewport width is real and not a CSS inference.
 // CLI: npx tsx --tsconfig tsconfig.json docs/plans/envoi/evidence/s34-render-check.mts
+// CLI, tapping the accept button instead of typing: ... s34-render-check.mts button
 // It makes real model calls on the deployed site, on a FIXTURE shop, with test money only. No payment
 // is approved: the run stops at the one-time link and never opens it.
 import { spawn } from "node:child_process";
@@ -17,6 +18,9 @@ const OUTLET = "out_wgoyp6kgg75472b6s772dplgoq";
 const PAGE = `${SITE}/buy/ask?outlet=${OUTLET}`;
 const ADVICE = "What should I try under S$6? Is it halal?";
 const ACCEPT = "Yes, make that basket.";
+const BUTTON = process.argv[2] === "button";
+const ACCEPT_BUTTON = ".actions button.button";
+const PREFIX = BUTTON ? "s34-render-button" : "s34-render";
 const WIDTHS = [
   { name: "390", width: 390, height: 844, mobile: true },
   { name: "1280", width: 1280, height: 900, mobile: false },
@@ -192,28 +196,37 @@ async function main() {
       await evaluate(cdp, `document.querySelector('form button[type="submit"]').click(); true`);
       await waitForTurn(cdp, 2);
       const afterAdvice = JSON.parse(String(await evaluate(cdp, `JSON.stringify({ link: !!document.querySelector('a.button[href]'), bubbles: document.querySelectorAll('.chat .bubble').length, innerWidth: window.innerWidth, scrollWidth: document.documentElement.scrollWidth, reply: Array.from(document.querySelectorAll('.chat .bubble.bot')).map((n) => n.textContent.trim()) })`))) as Record<string, unknown>;
-      const adviceShot = join(HERE, `s34-render-${size.name}-advice.jpg`);
+      const adviceShot = join(HERE, `${PREFIX}-${size.name}-advice.jpg`);
       await shoot(cdp, adviceShot);
 
       // Turn two: the visitor accepts, and only now may a link appear.
-      if (!(await evaluate(cdp, typeInto("#ask", ACCEPT)))) throw new Error("could not fill the acceptance");
-      await evaluate(cdp, `document.querySelector('form button[type="submit"]').click(); true`);
+      const buttonText = String(await evaluate(cdp, `document.querySelector(${JSON.stringify(ACCEPT_BUTTON)})?.textContent ?? ""`));
+      if (BUTTON) {
+        if (buttonText !== "Yes, make the basket") throw new Error(`no accept button after the advice turn; found "${buttonText}"`);
+        await evaluate(cdp, `document.querySelector(${JSON.stringify(ACCEPT_BUTTON)}).click(); true`);
+      } else {
+        if (!(await evaluate(cdp, typeInto("#ask", ACCEPT)))) throw new Error("could not fill the acceptance");
+        await evaluate(cdp, `document.querySelector('form button[type="submit"]').click(); true`);
+      }
       await waitForTurn(cdp, 4);
+      const buttonAfterAccept = String(await evaluate(cdp, `Array.from(document.querySelectorAll(${JSON.stringify(ACCEPT_BUTTON)})).map((node) => node.textContent).join("|")`));
       // The link's own value is a one-time payment token, so only its shape is recorded: Envoi's own
       // same-origin approve path, and never a URL the model wrote.
       const afterAccept = JSON.parse(String(await evaluate(cdp, `JSON.stringify({ link: !!document.querySelector('a.button[href]'), linkIsEnvoiApprove: (() => { const href = document.querySelector('a.button[href]')?.getAttribute('href') ?? ''; if (!href) return false; try { const url = new URL(href, location.origin); return url.origin === location.origin && url.pathname.startsWith('/approve/') && url.pathname.length > '/approve/'.length; } catch { return false; } })(), bubbles: document.querySelectorAll('.chat .bubble').length, innerWidth: window.innerWidth, scrollWidth: document.documentElement.scrollWidth, reply: Array.from(document.querySelectorAll('.chat .bubble.bot')).map((n) => n.textContent.trim()) })`))) as Record<string, unknown>;
-      const acceptShot = join(HERE, `s34-render-${size.name}-accept.jpg`);
+      const acceptShot = join(HERE, `${PREFIX}-${size.name}-accept.jpg`);
       await shoot(cdp, acceptShot);
 
       metrics.widths.push({
         width: size.name,
         ...JSON.parse(String(badge)),
+        buttonText,
+        buttonAfterAccept,
         advice: afterAdvice,
         accept: afterAccept,
         noOverflowOnAdvice: afterAdvice.innerWidth === afterAdvice.scrollWidth,
         noOverflowOnAccept: afterAccept.innerWidth === afterAccept.scrollWidth,
-        adviceScreenshot: `evidence/s34-render-${size.name}-advice.jpg`,
-        acceptScreenshot: `evidence/s34-render-${size.name}-accept.jpg`,
+        adviceScreenshot: `evidence/${PREFIX}-${size.name}-advice.jpg`,
+        acceptScreenshot: `evidence/${PREFIX}-${size.name}-accept.jpg`,
       });
     }
     metrics.finishedAt = new Date().toISOString();
@@ -224,7 +237,7 @@ async function main() {
   } finally {
     cdp?.close();
     chrome.kill("SIGTERM");
-    writeFileSync(join(HERE, "s34-render-check.json"), JSON.stringify(metrics, null, 2) + "\n");
+    writeFileSync(join(HERE, `${PREFIX === "s34-render" ? "s34-render-check" : "s34-render-button-check"}.json`), JSON.stringify(metrics, null, 2) + "\n");
     // The throwaway profile is this script's own scratch, so it does not stay behind in the temp dir.
     await sleep(1500);
     rmSync(profile, { recursive: true, force: true });

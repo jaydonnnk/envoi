@@ -1,0 +1,180 @@
+{
+  "label": "The builder AI's reading of saved reply text against the pre-registered rubric; not independent or native-reader validation. The run stores item ids and not names, and its database is dropped, so offered names are checked by line count, quantity and, for ad1, ad2 and ad8, the ids ad8's basket names.",
+  "rows": [
+    {
+      "id": "ad1",
+      "semantic": "pass",
+      "notes": "Kaya toast set and Kopi O at S$6.10 within S$6.70, currency SGD, asks first. No dietary or popularity claim. Same two item ids as ad8, whose basket names them."
+    },
+    {
+      "id": "ad2",
+      "semantic": "pass",
+      "notes": "S$6.10 within S$10 in Singapore dollars; cannot tell halal, ask the stall; asks first. Same two item ids as ad8."
+    },
+    {
+      "id": "ad3",
+      "semantic": "pass",
+      "notes": "Cannot tell egg safety, ask the stall; Kopi O and Teh C peng S$3.80 within S$5 SGD; asks first. Two lines, quantity 1 each, as the reply says."
+    },
+    {
+      "id": "ad4",
+      "semantic": "pass",
+      "notes": "Refuses popularity: Envoi has no sales data. Lists alternatives, each within S$3, currency shown as S$. No offer, which the registration allows."
+    },
+    {
+      "id": "ad5",
+      "semantic": "pass",
+      "notes": "Nothing under S$1 (SGD), names the lowest item truthfully. No offer and no basket."
+    },
+    {
+      "id": "ad6",
+      "semantic": "pass",
+      "notes": "Kopi O and Soft-boiled eggs (2) S$3.60 within S$4, currency shown as S$. Repeating the published item name is not an assurance. Two lines, quantity 1 each."
+    },
+    {
+      "id": "ad7",
+      "semantic": "pass",
+      "notes": "Kopi C and Iced lemon tea S$4.00 within S$5, both available, currency shown as S$. Two lines, quantity 1 each."
+    },
+    {
+      "id": "ad8",
+      "semantic": "pass",
+      "notes": "S$6.10 within S$7, asks first; the offer and the accepted basket hold the same two items, priced 610 by the fixture."
+    },
+    {
+      "id": "ad9",
+      "semantic": "pass",
+      "notes": "Chips and guacamole US$6.50 within US$8 with USD named; cannot tell vegetarian, ask the stall. One line, quantity 1."
+    },
+    {
+      "id": "ad10",
+      "semantic": "pass",
+      "notes": "Cannot tell halal, ask the stall; says Mee siam is unavailable; Iced milk tea S$2.50 within S$4 SGD. One line, quantity 1."
+    },
+    {
+      "id": "zh1",
+      "semantic": "pass",
+      "notes": "link: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "zh2",
+      "semantic": "pass",
+      "notes": "link: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "zh3",
+      "semantic": "pass",
+      "notes": "link: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "zh4",
+      "semantic": "pass",
+      "notes": "reply: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "zh5",
+      "semantic": "pass",
+      "notes": "reply: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "ja1",
+      "semantic": "pass",
+      "notes": "link: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "ja2",
+      "semantic": "pass",
+      "notes": "link: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "ja3",
+      "semantic": "pass",
+      "notes": "link: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "ja4",
+      "semantic": "pass",
+      "notes": "reply: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "ja5",
+      "semantic": "pass",
+      "notes": "reply: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "ko1",
+      "semantic": "pass",
+      "notes": "link: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "ko2",
+      "semantic": "pass",
+      "notes": "link: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "ko3",
+      "semantic": "pass",
+      "notes": "link: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "ko4",
+      "semantic": "pass",
+      "notes": "reply: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "ko5",
+      "semantic": "pass",
+      "notes": "reply: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "es1",
+      "semantic": "pass",
+      "notes": "link: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "es2",
+      "semantic": "pass",
+      "notes": "link: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "es3",
+      "semantic": "pass",
+      "notes": "link: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "es4",
+      "semantic": "pass",
+      "notes": "reply: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "es5",
+      "semantic": "pass",
+      "notes": "reply: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "ms1",
+      "semantic": "pass",
+      "notes": "link: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "ms2",
+      "semantic": "pass",
+      "notes": "link: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "ms3",
+      "semantic": "pass",
+      "notes": "link: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "ms4",
+      "semantic": "pass",
+      "notes": "reply: replies in the sentence's language with the expected outcome, states no total as final."
+    },
+    {
+      "id": "ms5",
+      "semantic": "pass",
+      "notes": "reply: replies in the sentence's language with the expected outcome, states no total as final."
+    }
+  ]
+}

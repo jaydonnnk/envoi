@@ -1,11 +1,11 @@
 {
-  "spentUsd": 0.3352114000000001,
+  "spentUsd": 0.5395900000000003,
   "reservedUsd": 0,
-  "requests": 113,
-  "inputTokens": 138358,
-  "cachedTokens": 70157,
-  "outputTokens": 5369,
-  "cacheWriteTokens": 43696,
+  "requests": 234,
+  "inputTokens": 307372,
+  "cachedTokens": 216095,
+  "outputTokens": 11459,
+  "cacheWriteTokens": 66409,
   "longCacheWriteTokens": 0,
-  "cacheUpperBoundTokens": 43696
+  "cacheUpperBoundTokens": 66409
 }

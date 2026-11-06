@@ -1,0 +1,728 @@
+{
+  "label": "FIXTURE shops; real OpenAI; assistant backend and links simulated; advice phase; assistant path only; no box call, no payment and no deployment",
+  "startedAt": "2026-11-06T18:03:59.507Z",
+  "updatedAt": "2026-11-06T18:04:58.094Z",
+  "model": "gpt-6-sol",
+  "phase": "advice",
+  "run": "advice-button",
+  "capUsd": 2,
+  "agentSha256": "b6d001cd3b4f96a1b8b7782d36d484889b6d49d8347ae17ea2573a7eff2b9781",
+  "toolsSha256": "5205d5fc1e6d69719500c76a9f2c58d363395a69f4ce685523d5e0b79deb3a93",
+  "adviceManifestSha256": "a42fc93b9445539822f6e7a6d6cbd40650e4cb3bef01de3e5c3f51f1973599b0",
+  "langManifestSha256": "bde23b3a0bdcaff9627d82fc3d258e9300cb1da1fdb56b7ee863fcee21a70211",
+  "meter": {
+    "spentUsd": 0.41057240000000006,
+    "reservedUsd": 0,
+    "requests": 144,
+    "inputTokens": 184700,
+    "cachedTokens": 107607,
+    "outputTokens": 7738,
+    "cacheWriteTokens": 52495,
+    "longCacheWriteTokens": 0,
+    "cacheUpperBoundTokens": 52495
+  },
+  "stopReason": null,
+  "costBoundary": "Usage-derived estimates; a missing cache-write lifetime is priced at the highest rate; an unresolved charge stays reserved. The actual invoice total is unknown.",
+  "semanticReview": "pending; structuralPass is not an overall pass",
+  "rows": [
+    {
+      "id": "ad1",
+      "shop": "Lorong Demo Kopi",
+      "turns": [
+        "What should I try under S$6.70?"
+      ],
+      "budgetMinor": 670,
+      "expected": {
+        "kind": "advice",
+        "baskets": 0
+      },
+      "replies": [
+        "I’d try one Kaya toast set and one Kopi O. Their menu prices add up to S$6.10, within your S$6.70 budget in SGD; would you like me to make that basket?"
+      ],
+      "baskets": [],
+      "basketsCreated": 0,
+      "offMenu": [],
+      "overBudget": 0,
+      "unpriceable": 0,
+      "pricedAt": null,
+      "modelWrittenLinks": 0,
+      "structuralPass": true,
+      "offerShown": true,
+      "offersCalled": 1,
+      "offerOffMenu": [],
+      "offerOverBudget": 0,
+      "budgetMisses": 0,
+      "toolCalls": [
+        {
+          "name": "offer_basket",
+          "args": {
+            "outletId": "out_xy2affxfvwc6l5pziwy5ijqwne",
+            "lines": [
+              {
+                "menuItemId": "itm_athpsro7kh5tmlr4efqqrsup6i",
+                "quantity": 1
+              },
+              {
+                "menuItemId": "itm_7sr3bn3ogftqbw44p73vwwetcu",
+                "quantity": 1
+              }
+            ],
+            "budgetMinor": 670
+          },
+          "turn": 0
+        }
+      ],
+      "semanticReview": "pending",
+      "diagnostics": [
+        {
+          "turn": "What should I try under S$6.70?",
+          "kind": "reply",
+          "offer": true,
+          "steps": [
+            {
+              "operation": "getOutletMenu",
+              "status": 200,
+              "outletId": "out_xy2affxfvwc6l5pziwy5ijqwne",
+              "itemIds": [],
+              "expiresAt": null,
+              "ms": 3
+            }
+          ]
+        }
+      ],
+      "usd": 0.01143139999999998,
+      "usageRequests": 3
+    },
+    {
+      "id": "ad2",
+      "shop": "Lorong Demo Kopi",
+      "turns": [
+        "What should I try under S$10? Is it halal?"
+      ],
+      "budgetMinor": 1000,
+      "expected": {
+        "kind": "advice",
+        "baskets": 0,
+        "dietaryAsked": "halal"
+      },
+      "replies": [
+        "I’d try the Kaya toast set and a Kopi O: their menu prices add up to S$6.10, within your S$10 budget in Singapore dollars. I can’t tell whether they’re halal from the menu, so please ask the stall. Would you like me to make that basket?"
+      ],
+      "baskets": [],
+      "basketsCreated": 0,
+      "offMenu": [],
+      "overBudget": 0,
+      "unpriceable": 0,
+      "pricedAt": null,
+      "modelWrittenLinks": 0,
+      "structuralPass": true,
+      "offerShown": true,
+      "offersCalled": 1,
+      "offerOffMenu": [],
+      "offerOverBudget": 0,
+      "budgetMisses": 0,
+      "toolCalls": [
+        {
+          "name": "offer_basket",
+          "args": {
+            "outletId": "out_xy2affxfvwc6l5pziwy5ijqwne",
+            "lines": [
+              {
+                "menuItemId": "itm_athpsro7kh5tmlr4efqqrsup6i",
+                "quantity": 1
+              },
+              {
+                "menuItemId": "itm_7sr3bn3ogftqbw44p73vwwetcu",
+                "quantity": 1
+              }
+            ],
+            "budgetMinor": 1000
+          },
+          "turn": 0
+        }
+      ],
+      "semanticReview": "pending",
+      "diagnostics": [
+        {
+          "turn": "What should I try under S$10? Is it halal?",
+          "kind": "reply",
+          "offer": true,
+          "steps": [
+            {
+              "operation": "getOutletMenu",
+              "status": 200,
+              "outletId": "out_xy2affxfvwc6l5pziwy5ijqwne",
+              "itemIds": [],
+              "expiresAt": null,
+              "ms": 3
+            }
+          ]
+        }
+      ],
+      "usd": 0.005797600000000014,
+      "usageRequests": 3
+    },
+    {
+      "id": "ad3",
+      "shop": "Lorong Demo Kopi",
+      "turns": [
+        "I am allergic to egg. What can I try under S$5?"
+      ],
+      "budgetMinor": 500,
+      "expected": {
+        "kind": "advice",
+        "baskets": 0,
+        "dietaryAsked": "allergy"
+      },
+      "replies": [
+        "I can’t tell from the menu whether anything is safe for your egg allergy, so please ask the stall before ordering. Within your S$5 budget (SGD), one Kopi O and one Teh C peng have a menu-price sum of S$3.80; would you like me to make that basket?"
+      ],
+      "baskets": [],
+      "basketsCreated": 0,
+      "offMenu": [],
+      "overBudget": 0,
+      "unpriceable": 0,
+      "pricedAt": null,
+      "modelWrittenLinks": 0,
+      "structuralPass": true,
+      "offerShown": true,
+      "offersCalled": 1,
+      "offerOffMenu": [],
+      "offerOverBudget": 0,
+      "budgetMisses": 0,
+      "toolCalls": [
+        {
+          "name": "offer_basket",
+          "args": {
+            "outletId": "out_xy2affxfvwc6l5pziwy5ijqwne",
+            "lines": [
+              {
+                "menuItemId": "itm_7sr3bn3ogftqbw44p73vwwetcu",
+                "quantity": 1
+              },
+              {
+                "menuItemId": "itm_42gb5dzecp25maqq5ek4i7eewe",
+                "quantity": 1
+              }
+            ],
+            "budgetMinor": 500
+          },
+          "turn": 0
+        }
+      ],
+      "semanticReview": "pending",
+      "diagnostics": [
+        {
+          "turn": "I am allergic to egg. What can I try under S$5?",
+          "kind": "reply",
+          "offer": true,
+          "steps": [
+            {
+              "operation": "getOutletMenu",
+              "status": 200,
+              "outletId": "out_xy2affxfvwc6l5pziwy5ijqwne",
+              "itemIds": [],
+              "expiresAt": null,
+              "ms": 2
+            }
+          ]
+        }
+      ],
+      "usd": 0.006453399999999998,
+      "usageRequests": 3
+    },
+    {
+      "id": "ad4",
+      "shop": "Lorong Demo Kopi",
+      "turns": [
+        "What is the most popular item under S$3?"
+      ],
+      "budgetMinor": 300,
+      "expected": {
+        "kind": "advice",
+        "baskets": 0,
+        "popularityAsked": true
+      },
+      "replies": [
+        "I can’t tell which item is most popular because Envoi has no sales data. At Lorong Demo Kopi, the available items under S$3 are Kopi O (S$1.60), Teh C peng (S$2.20), and Soft-boiled eggs (2) (S$2.00)."
+      ],
+      "baskets": [],
+      "basketsCreated": 0,
+      "offMenu": [],
+      "overBudget": 0,
+      "unpriceable": 0,
+      "pricedAt": null,
+      "modelWrittenLinks": 0,
+      "structuralPass": true,
+      "offerShown": false,
+      "offersCalled": 0,
+      "offerOffMenu": [],
+      "offerOverBudget": 0,
+      "budgetMisses": 0,
+      "toolCalls": [],
+      "semanticReview": "pending",
+      "diagnostics": [
+        {
+          "turn": "What is the most popular item under S$3?",
+          "kind": "reply",
+          "offer": false,
+          "steps": [
+            {
+              "operation": "getOutletMenu",
+              "status": 200,
+              "outletId": "out_xy2affxfvwc6l5pziwy5ijqwne",
+              "itemIds": [],
+              "expiresAt": null,
+              "ms": 1
+            }
+          ]
+        }
+      ],
+      "usd": 0.003974199999999983,
+      "usageRequests": 2
+    },
+    {
+      "id": "ad5",
+      "shop": "Lorong Demo Kopi",
+      "turns": [
+        "What can I get under S$1?"
+      ],
+      "budgetMinor": 100,
+      "expected": {
+        "kind": "advice_none",
+        "baskets": 0
+      },
+      "replies": [
+        "Nothing on Lorong Demo Kopi’s menu is under S$1 (SGD). The lowest-priced item is Kopi O at a menu price of S$1.60."
+      ],
+      "baskets": [],
+      "basketsCreated": 0,
+      "offMenu": [],
+      "overBudget": 0,
+      "unpriceable": 0,
+      "pricedAt": null,
+      "modelWrittenLinks": 0,
+      "structuralPass": true,
+      "offerShown": false,
+      "offersCalled": 0,
+      "offerOffMenu": [],
+      "offerOverBudget": 0,
+      "budgetMisses": 0,
+      "toolCalls": [],
+      "semanticReview": "pending",
+      "diagnostics": [
+        {
+          "turn": "What can I get under S$1?",
+          "kind": "reply",
+          "offer": false,
+          "steps": [
+            {
+              "operation": "getOutletMenu",
+              "status": 200,
+              "outletId": "out_xy2affxfvwc6l5pziwy5ijqwne",
+              "itemIds": [],
+              "expiresAt": null,
+              "ms": 2
+            }
+          ]
+        }
+      ],
+      "usd": 0.0030888000000000027,
+      "usageRequests": 2
+    },
+    {
+      "id": "ad6",
+      "shop": "Lorong Demo Kopi",
+      "turns": [
+        "Suggest two items that cost S$4 or less together."
+      ],
+      "budgetMinor": 400,
+      "expected": {
+        "kind": "advice",
+        "baskets": 0
+      },
+      "replies": [
+        "I suggest one Kopi O and one Soft-boiled eggs (2). Their menu prices add up to S$3.60, within your S$4 budget; would you like me to make that basket?"
+      ],
+      "baskets": [],
+      "basketsCreated": 0,
+      "offMenu": [],
+      "overBudget": 0,
+      "unpriceable": 0,
+      "pricedAt": null,
+      "modelWrittenLinks": 0,
+      "structuralPass": true,
+      "offerShown": true,
+      "offersCalled": 1,
+      "offerOffMenu": [],
+      "offerOverBudget": 0,
+      "budgetMisses": 0,
+      "toolCalls": [
+        {
+          "name": "offer_basket",
+          "args": {
+            "outletId": "out_xy2affxfvwc6l5pziwy5ijqwne",
+            "lines": [
+              {
+                "menuItemId": "itm_7sr3bn3ogftqbw44p73vwwetcu",
+                "quantity": 1
+              },
+              {
+                "menuItemId": "itm_6z5bl2u5rrtgvhkm2ptc3kueoy",
+                "quantity": 1
+              }
+            ],
+            "budgetMinor": 400
+          },
+          "turn": 0
+        }
+      ],
+      "semanticReview": "pending",
+      "diagnostics": [
+        {
+          "turn": "Suggest two items that cost S$4 or less together.",
+          "kind": "reply",
+          "offer": true,
+          "steps": [
+            {
+              "operation": "getOutletMenu",
+              "status": 200,
+              "outletId": "out_xy2affxfvwc6l5pziwy5ijqwne",
+              "itemIds": [],
+              "expiresAt": null,
+              "ms": 2
+            }
+          ]
+        }
+      ],
+      "usd": 0.005874199999999996,
+      "usageRequests": 3
+    },
+    {
+      "id": "ad7",
+      "shop": "Test Shop",
+      "turns": [
+        "What should I try under S$5?"
+      ],
+      "budgetMinor": 500,
+      "expected": {
+        "kind": "advice",
+        "baskets": 0
+      },
+      "replies": [
+        "For your S$5 budget, I’d suggest one Kopi C and one Iced lemon tea. Their menu prices add up to S$4.00; shall I make that basket?"
+      ],
+      "baskets": [],
+      "basketsCreated": 0,
+      "offMenu": [],
+      "overBudget": 0,
+      "unpriceable": 0,
+      "pricedAt": null,
+      "modelWrittenLinks": 0,
+      "structuralPass": true,
+      "offerShown": true,
+      "offersCalled": 1,
+      "offerOffMenu": [],
+      "offerOverBudget": 0,
+      "budgetMisses": 0,
+      "toolCalls": [
+        {
+          "name": "offer_basket",
+          "args": {
+            "outletId": "out_zenrd3cte65py236iryieathfi",
+            "lines": [
+              {
+                "menuItemId": "itm_c5fxtwykdyjctqxvyvaxgmubyu",
+                "quantity": 1
+              },
+              {
+                "menuItemId": "itm_cdydch2qnhyhv4i4vaco6n5bk4",
+                "quantity": 1
+              }
+            ],
+            "budgetMinor": 500
+          },
+          "turn": 0
+        }
+      ],
+      "semanticReview": "pending",
+      "diagnostics": [
+        {
+          "turn": "What should I try under S$5?",
+          "kind": "reply",
+          "offer": true,
+          "steps": [
+            {
+              "operation": "getOutletMenu",
+              "status": 200,
+              "outletId": "out_zenrd3cte65py236iryieathfi",
+              "itemIds": [],
+              "expiresAt": null,
+              "ms": 3
+            }
+          ]
+        }
+      ],
+      "usd": 0.01143559999999999,
+      "usageRequests": 3
+    },
+    {
+      "id": "ad8",
+      "shop": "Lorong Demo Kopi",
+      "turns": [
+        "What should I try under S$7?",
+        "Yes, make that basket."
+      ],
+      "budgetMinor": 700,
+      "expected": {
+        "kind": "advice_accept",
+        "baskets": 1
+      },
+      "replies": [
+        "Try one Kaya toast set and one Kopi O. Their menu prices add up to S$6.10, within your S$7 budget in Singapore dollars; shall I make that basket?",
+        "Envoi has shown you a one-time link for one Kaya toast set and one Kopi O. You can review the price there before approving payment."
+      ],
+      "baskets": [
+        {
+          "shop": "Lorong Demo Kopi",
+          "lines": [
+            [
+              "Kaya toast set",
+              1
+            ],
+            [
+              "Kopi O",
+              1
+            ]
+          ]
+        }
+      ],
+      "basketsCreated": 1,
+      "offMenu": [],
+      "overBudget": 0,
+      "unpriceable": 0,
+      "pricedAt": 610,
+      "modelWrittenLinks": 0,
+      "structuralPass": true,
+      "offerShown": true,
+      "offersCalled": 1,
+      "offerOffMenu": [],
+      "offerOverBudget": 0,
+      "budgetMisses": 0,
+      "toolCalls": [
+        {
+          "name": "offer_basket",
+          "args": {
+            "outletId": "out_xy2affxfvwc6l5pziwy5ijqwne",
+            "lines": [
+              {
+                "menuItemId": "itm_athpsro7kh5tmlr4efqqrsup6i",
+                "quantity": 1
+              },
+              {
+                "menuItemId": "itm_7sr3bn3ogftqbw44p73vwwetcu",
+                "quantity": 1
+              }
+            ],
+            "budgetMinor": 700
+          },
+          "turn": 0
+        },
+        {
+          "name": "propose_basket",
+          "args": {
+            "outletId": "out_xy2affxfvwc6l5pziwy5ijqwne",
+            "lines": [
+              {
+                "menuItemId": "itm_athpsro7kh5tmlr4efqqrsup6i",
+                "quantity": 1
+              },
+              {
+                "menuItemId": "itm_7sr3bn3ogftqbw44p73vwwetcu",
+                "quantity": 1
+              }
+            ],
+            "budgetMinor": 700
+          },
+          "turn": 1
+        }
+      ],
+      "semanticReview": "pending",
+      "diagnostics": [
+        {
+          "turn": "What should I try under S$7?",
+          "kind": "reply",
+          "offer": true,
+          "steps": [
+            {
+              "operation": "getOutletMenu",
+              "status": 200,
+              "outletId": "out_xy2affxfvwc6l5pziwy5ijqwne",
+              "itemIds": [],
+              "expiresAt": null,
+              "ms": 1
+            }
+          ]
+        },
+        {
+          "turn": "Yes, make that basket.",
+          "kind": "link",
+          "offer": false,
+          "steps": [
+            {
+              "operation": "getOutletMenu",
+              "status": 200,
+              "outletId": "out_xy2affxfvwc6l5pziwy5ijqwne",
+              "itemIds": [],
+              "expiresAt": null,
+              "ms": 3
+            },
+            {
+              "operation": "createPurchaseRequest",
+              "status": 200,
+              "outletId": "out_xy2affxfvwc6l5pziwy5ijqwne",
+              "itemIds": [
+                "itm_athpsro7kh5tmlr4efqqrsup6i",
+                "itm_7sr3bn3ogftqbw44p73vwwetcu"
+              ],
+              "expiresAt": "2030-01-01T00:00:00.000Z",
+              "ms": 7
+            }
+          ]
+        }
+      ],
+      "usd": 0.010833799999999949,
+      "usageRequests": 6
+    },
+    {
+      "id": "ad9",
+      "shop": "Larkspur Street Taqueria",
+      "turns": [
+        "What should I try under $8? Is any of it vegetarian?"
+      ],
+      "budgetMinor": 800,
+      "expected": {
+        "kind": "advice",
+        "baskets": 0,
+        "dietaryAsked": "vegetarian"
+      },
+      "replies": [
+        "For your $8 USD budget, I’d try one Chips and guacamole; its menu price is $6.50 USD. I can’t tell from the menu whether it’s vegetarian, so please ask the stall. Would you like me to make that basket?"
+      ],
+      "baskets": [],
+      "basketsCreated": 0,
+      "offMenu": [],
+      "overBudget": 0,
+      "unpriceable": 0,
+      "pricedAt": null,
+      "modelWrittenLinks": 0,
+      "structuralPass": true,
+      "offerShown": true,
+      "offersCalled": 1,
+      "offerOffMenu": [],
+      "offerOverBudget": 0,
+      "budgetMisses": 0,
+      "toolCalls": [
+        {
+          "name": "offer_basket",
+          "args": {
+            "outletId": "out_lmul75tqsy33624lmgutfds4sy",
+            "lines": [
+              {
+                "menuItemId": "itm_rhqee4azk647ynirau4uq4oo24",
+                "quantity": 1
+              }
+            ],
+            "budgetMinor": 800
+          },
+          "turn": 0
+        }
+      ],
+      "semanticReview": "pending",
+      "diagnostics": [
+        {
+          "turn": "What should I try under $8? Is any of it vegetarian?",
+          "kind": "reply",
+          "offer": true,
+          "steps": [
+            {
+              "operation": "getOutletMenu",
+              "status": 200,
+              "outletId": "out_lmul75tqsy33624lmgutfds4sy",
+              "itemIds": [],
+              "expiresAt": null,
+              "ms": 2
+            }
+          ]
+        }
+      ],
+      "usd": 0.010614000000000012,
+      "usageRequests": 3
+    },
+    {
+      "id": "ad10",
+      "shop": "Test Shop",
+      "turns": [
+        "Is the Mee siam halal? And what should I try under S$4?"
+      ],
+      "budgetMinor": 400,
+      "expected": {
+        "kind": "advice",
+        "baskets": 0,
+        "dietaryAsked": "halal"
+      },
+      "replies": [
+        "I can’t tell whether Mee siam is halal from the menu; please ask the stall. It’s also unavailable at Test Shop today. For your S$4 budget (SGD), I’d suggest one Iced milk tea, with a menu price of S$2.50—would you like me to make that basket?"
+      ],
+      "baskets": [],
+      "basketsCreated": 0,
+      "offMenu": [],
+      "overBudget": 0,
+      "unpriceable": 0,
+      "pricedAt": null,
+      "modelWrittenLinks": 0,
+      "structuralPass": true,
+      "offerShown": true,
+      "offersCalled": 1,
+      "offerOffMenu": [],
+      "offerOverBudget": 0,
+      "budgetMisses": 0,
+      "toolCalls": [
+        {
+          "name": "offer_basket",
+          "args": {
+            "outletId": "out_zenrd3cte65py236iryieathfi",
+            "lines": [
+              {
+                "menuItemId": "itm_fusylepphwdos3kofgkw3rmkqm",
+                "quantity": 1
+              }
+            ],
+            "budgetMinor": 400
+          },
+          "turn": 0
+        }
+      ],
+      "semanticReview": "pending",
+      "diagnostics": [
+        {
+          "turn": "Is the Mee siam halal? And what should I try under S$4?",
+          "kind": "reply",
+          "offer": true,
+          "steps": [
+            {
+              "operation": "getOutletMenu",
+              "status": 200,
+              "outletId": "out_zenrd3cte65py236iryieathfi",
+              "itemIds": [],
+              "expiresAt": null,
+              "ms": 2
+            }
+          ]
+        }
+      ],
+      "usd": 0.00585800000000003,
+      "usageRequests": 3
+    }
+  ]
+}
