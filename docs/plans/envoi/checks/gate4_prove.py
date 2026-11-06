@@ -152,7 +152,7 @@ fault(["R10"], "reopened Gate 3 English-only text edited after approval", lambda
 fault(["R14"], "D10 part of the contract split miscounted", lambda d: sub(d, "04-slices.md", "and the one D10 kill switch", "and the two D10 kill switch"))
 fault(["R4"], "kill-switch addition loses its mutation", lambda d: sub(d, "04-slices.md", "| Skip the `PAYMENTS_ENABLED` check in PayPal eligibility; the test fails. |", "| |"))
 # Faults for the approval record of 2026-10-12; the earlier approval-claim faults retired with R9's heuristic
-fault(["R9"], "Gate 4 approval reverted in the status line", lambda d: sub(d, "00-status.md", "- Gate 4 - Slice plan: **APPROVED 2026-10-12** by the user", "- Gate 4 - Slice plan: **in progress** by the user"))
+fault(["R9"], "Gate 4 approval reverted in the status line", lambda d: sub(d, "00-status.md", "Before that: **APPROVED 2026-10-12** by the user", "Before that: **in progress 2026-10-12** by the user"))
 fault(["R9"], "Gate 3 re-approval reverted in the status line", lambda d: sub(d, "00-status.md", "**RE-APPROVED 2026-10-12** by the user", "**reopened 2026-10-12** by the user", count=-1))
 fault(["R9"], "Gate 4 checklist item unticked", lambda d: sub(d, "00-status.md", "- [x] Explicit user approval of Gate 4, 2026-10-12", "- [ ] Explicit user approval of Gate 4, 2026-10-12"))
 fault(["R9"], "approval missing from the history", lambda d: sub(d, "00-status.md", '- 2026-10-12: the user said "I approve both pls publish', '- 2026-10-12: the user said "I will approve later, pls publish'))

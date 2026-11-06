@@ -371,7 +371,13 @@ if hits:
 status, handoff = md["00-status.md"], md["handoff.md"]
 QUOTE = "I approve both pls publish the branches and commit all the changes to main"
 if not re.search(r"^- Gate 4 - Slice plan: \*\*APPROVED 2026-10-12\*\* by the user", status, flags=re.M):
-    fail("R9", "00-status.md Gate 4 line does not record the 2026-10-12 approval")
+    # A later reopening may lead the Gate 4 entry too, as the 2026-11-06 S38 reopening does, so the
+    # 2026-10-12 approval is looked for in the whole entry, from its bullet to the next heading,
+    # exactly as the Gate 3 entry below is treated. Requiring it at the start of the line would make
+    # the rule unsatisfiable by any later reopening of Gate 4.
+    g4_entry = re.search(r"^- Gate 4 - Slice plan: .*?(?=^### |\Z)", status, flags=re.M | re.S)
+    if not g4_entry or "**APPROVED 2026-10-12** by the user" not in g4_entry.group(0):
+        fail("R9", "00-status.md Gate 4 line does not record the 2026-10-12 approval")
 # A later reopening may lead the Gate 3 entry (2026-10-24), so the 2026-10-12 re-approval is looked for in the
 # whole entry, from its bullet to the Gate 4 bullet, not only at its start.
 g3_entry = re.search(r"^- Gate 3 - Program Design: .*?(?=^- Gate 4 )", status, flags=re.M | re.S)
