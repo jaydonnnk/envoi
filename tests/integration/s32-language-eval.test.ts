@@ -1,3 +1,4 @@
+import { loadLocalEnvFile } from "@/env";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { fixtureMcp, seedFixtureMenus } from "../../docs/plans/envoi/evidence/s32-language-eval.mjs";
 import { suggestFromText } from "@/domain/suggestions/suggest";
@@ -13,6 +14,7 @@ describe("S32 FIXTURE evaluation wiring", () => {
   let web: ReturnType<typeof connectWeb>;
   let menus: Awaited<ReturnType<typeof seedFixtureMenus>>;
   beforeAll(async () => {
+    if (!process.env.TEST_DATABASE_URL) loadLocalEnvFile();
     expect(process.env.TEST_DATABASE_URL).toMatch(/^postgres:\/\/postgres@127\.0\.0\.1:5432\//);
     database = await createTestDatabase("s32wiring");
     web = connectWeb(database.webUrl, 2);

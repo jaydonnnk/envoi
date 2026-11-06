@@ -1,3 +1,4 @@
+import { loadLocalEnvFile } from "@/env";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { runAssistantTurn } from "@/integrations/assistant/agent";
 import { connectWeb } from "@/lib/db/web";
@@ -18,6 +19,7 @@ describe("S34 FIXTURE evaluation wiring", () => {
   let menus: Awaited<ReturnType<typeof seedAdviceMenus>>;
 
   beforeAll(async () => {
+    if (!process.env.TEST_DATABASE_URL) loadLocalEnvFile();
     expect(process.env.TEST_DATABASE_URL).toMatch(/^postgres:\/\/postgres@127\.0\.0\.1:5432\//);
     database = await createTestDatabase("s34wiring");
     web = connectWeb(database.webUrl, 2);
@@ -25,8 +27,8 @@ describe("S34 FIXTURE evaluation wiring", () => {
   });
 
   afterAll(async () => {
-    await web.close();
-    await database.drop();
+    await web?.close();
+    await database?.drop();
   });
 
   it("seeds the three pre-registered advice shops with their exact menus", () => {

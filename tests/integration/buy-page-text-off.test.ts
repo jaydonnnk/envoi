@@ -9,8 +9,9 @@ describe("buyer page without the AI", () => {
   let fixture: PaymentsFixture;
 
   beforeAll(async () => {
-    for (const name of ["OPENAI_API_KEY", "AI_MODEL", "ASSISTANT_AGENT_TOKEN"]) delete process.env[name];
     fixture = await createPaymentsFixture("buytextoff");
+    // After the fixture: creating it can load the local env file, which would restore these names.
+    for (const name of ["OPENAI_API_KEY", "AI_MODEL", "ASSISTANT_AGENT_TOKEN"]) delete process.env[name];
   });
 
   afterAll(async () => {
