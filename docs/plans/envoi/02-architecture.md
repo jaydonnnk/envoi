@@ -1,5 +1,7 @@
 # Architecture: Envoi
 
+**REOPENED and RE-APPROVED 2026-11-06 for the Show the stall language order** ("Yes . Reopen gates 1 to 3 for that minor fix and fix it . I pre approve the changes"): English, 中文, Melayu, தமிழ், opening on English. No architecture content changes: no route, table, migration or environment name. Approval authorizes no commit, merge, push or deploy.
+
 **REOPENED and RE-APPROVED 2026-11-04 to add Show the stall (S42)** ("Alright fine, reopne gates 1 to 4 to add this in and then add it to the build plan").
 
 **REOPENED 2026-11-04 for the [third build plan amendment](#third-build-plan-amendment-2026-11-04); RE-APPROVED 2026-11-04** ("I dont need s39 and s40. Other than that, all is approved, after u redo the build order").

@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fetchStallTranslation, spokenOrder, StallCard, stallRows, voiceMatches, type StallStatus } from "@/app/receipt/[purchaseId]/show-the-stall";
+import { fetchStallTranslation, ShowTheStall, spokenOrder, StallCard, stallRows, voiceMatches, type StallStatus } from "@/app/receipt/[purchaseId]/show-the-stall";
 
 // S42: the panel's own rules, Gate 3 third build plan. Every line, translation and amount here is a
 // FIXTURE; no model is called and no payment exists.
@@ -19,6 +19,21 @@ const card = (status: StallStatus, rows = stallRows(LINES, ZH), onPlay: (() => v
   renderToStaticMarkup(createElement(StallCard, { rows, language: "zh", choose: () => undefined, status, paidAmount: "S$6.70", onPlay }));
 
 describe("show the stall card", () => {
+  const opened = () => renderToStaticMarkup(createElement(ShowTheStall, { outletId: "out_fixture", lines: LINES, paidAmount: "S$6.70", translationAvailable: true }));
+
+  it("lists the languages as English, Chinese, Malay, Tamil", () => {
+    const labels = [...opened().matchAll(/class="stall-language"[^>]*>([^<]+)</g)].map((match) => match[1]);
+    expect(labels).toEqual(["English", "中文", "Melayu", "தமிழ்"]);
+  });
+
+  it("opens on English with the shop's own names and no translation label", () => {
+    const html = opened();
+    expect(html).toMatch(/lang="en" aria-pressed="true"[^>]*>English</);
+    expect(html).not.toContain("Translating the order.");
+    expect(html).not.toContain("AI translation");
+    expect(html).toContain("Kaya toast set × 1");
+  });
+
   it("a translated order keeps the original names and amount, and is labeled as AI translation", () => {
     const html = card("translated");
     expect(html).toContain("AI translation.");

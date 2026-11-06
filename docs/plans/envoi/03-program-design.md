@@ -1,5 +1,7 @@
 # Program Design: Envoi
 
+**REOPENED and RE-APPROVED 2026-11-06 for the Show the stall language order** ("Yes . Reopen gates 1 to 3 for that minor fix and fix it . I pre approve the changes"): English, 中文, Melayu, தமிழ், opening on English. No type, route or named test changes. Approval authorizes no commit, merge, push or deploy.
+
 **REOPENED and RE-APPROVED 2026-11-04 to add Show the stall (S42)** ("Alright fine, reopne gates 1 to 4 to add this in and then add it to the build plan").
 
 **REOPENED 2026-11-04 for the [third build plan](#reopening-2026-11-04-third-build-plan); RE-APPROVED 2026-11-04** ("I dont need s39 and s40. Other than that, all is approved, after u redo the build order").
@@ -45,7 +47,7 @@ Every earlier contract stays unless a row below changes it.
 | `src/app/api/v1/buyer/assistant/route.ts` | S33 | Optional `outletId`, resolved to a published outlet |
 | `src/app/buy/ask/page.tsx`, `src/app/buy/ask/ask-envoi.tsx`, `src/app/buy/shop-basket.tsx` | S33 | Shop-scoped page and the link from the shop page |
 | `src/integrations/assistant/tools.ts` | S34 | `propose_basket` takes optional `budgetMinor`, refused in code when menu prices exceed it |
-| `src/app/receipt/[purchaseId]/show-the-stall.tsx`, `src/app/receipt/[purchaseId]/page.tsx` | S42 | New client panel, rendered only when state is paid; uses the existing translations route, and shows original names when it fails. |
+| `src/app/receipt/[purchaseId]/show-the-stall.tsx`, `src/app/receipt/[purchaseId]/page.tsx` | S42 | New client panel, rendered only when state is paid; lists `en`, `zh`, `ms`, `ta` and opens on `en`, making no translation request until another is chosen; uses the existing translations route, and shows original names when it fails. |
 | `src/app/merchant/orders/orders-grid.tsx`, `orders-view.tsx` | S35 | New grid, keeping Acknowledge, Delete and polling |
 | `src/app/api/v1/merchant/outlets/[id]/orders/filter/route.ts`, `src/integrations/ai/order-filter.ts`, `src/domain/purchases/order-filter.ts` | S35 | Route, model call, schema and applying function |
 | `drizzle/0029_*.sql`, `src/lib/db/schema.ts`, `src/lib/ratelimit.ts` | S35, S37 | Two buckets and their limits |

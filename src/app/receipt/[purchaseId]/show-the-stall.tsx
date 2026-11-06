@@ -9,10 +9,10 @@ import { postJson } from "@/lib/browser/session";
 // the paid amount, which come only from the purchase: nothing here can change or state a payment.
 
 export const STALL_LANGUAGES = [
+  { tag: "en", label: "English" },
   { tag: "zh", label: "中文" },
   { tag: "ms", label: "Melayu" },
   { tag: "ta", label: "தமிழ்" },
-  { tag: "en", label: "English" },
 ] as const;
 
 export type StallLanguage = (typeof STALL_LANGUAGES)[number]["tag"];
@@ -136,7 +136,7 @@ export function ShowTheStall({
   paidAmount: string;
   translationAvailable: boolean;
 }) {
-  const [language, setLanguage] = useState<StallLanguage>(translationAvailable ? "zh" : "en");
+  const [language, setLanguage] = useState<StallLanguage>("en");
   // The answer per language: names, or null when none could be made. Absent means not answered yet.
   const [answers, setAnswers] = useState<Partial<Record<StallLanguage, ProposedName[] | null>>>({});
   const voices = useSyncExternalStore(subscribeVoices, voiceLangs, noVoices);

@@ -1,8 +1,9 @@
 # Status: Envoi
 
-Updated: 2026-11-05 (Asia/Singapore).
+Updated: 2026-11-06 (Asia/Singapore).
 
-- Gate 1 - Product: **REOPENED and RE-APPROVED 2026-11-04 to add Show the stall (S42)** ("Alright fine, reopne gates 1 to 4 to add this in and then add it to the build plan"). See the [record](#gates-1-2-3-and-4-reopening-2026-11-04-show-the-stall). Before that:
+- Gate 1 - Product: **REOPENED and RE-APPROVED 2026-11-06 for the Show the stall language order** ("Yes . Reopen gates 1 to 3 for that minor fix and fix it . I pre approve the changes"); see the [record](#show-the-stall-language-order-2026-11-06).
+  **REOPENED and RE-APPROVED 2026-11-04 to add Show the stall (S42)** ("Alright fine, reopne gates 1 to 4 to add this in and then add it to the build plan"). See the [record](#gates-1-2-3-and-4-reopening-2026-11-04-show-the-stall). Before that:
   **REOPENED and RE-APPROVED 2026-11-04 for the third build plan** ("I dont need s39 and s40. Other than that, all is approved, after u redo the build order"); approval starts no slice and authorizes no migration, model call, commit, merge, push or deploy; see the [record](#gates-1-2-3-and-4-reopening-2026-11-04-third-build-plan). Before that:
   **REOPENED and RE-APPROVED 2026-11-03** for one Ask Envoi wording change, pre-approved by the user ("fix the wording, i pre approve the gate 1 change"); see the [record](#gate-1-reopening-2026-11-03-ask-envoi-mcp-wording).
   Before that it was **REOPENED 2026-10-29 a third time for the second build plan and RE-APPROVED 2026-10-29** ("Approve Gate 1"); see the [record](#gate-1-reopening-2026-10-29-second-build-plan). Approval accepts the product proposal only; it starts no slice and authorizes no architecture, contract, install, model call, PayPal or APIMatic action, merge, push or deploy. Gates 2, 3 and 4 are reopened for it next.
@@ -15,7 +16,8 @@ Updated: 2026-11-05 (Asia/Singapore).
   Before that it was **RE-APPROVED 2026-10-21** by the user ("Yep this works for now.  I approve gate 1") after being reopened the same day for one change: a landing page at the site's root address; see the [record](#reopening-2026-10-21-landing-page).
   Before that it was **RE-APPROVED 2026-10-16** by the user ("I approve Gate 1.") after being reopened on 2026-10-15 for one change: menu photo drafting is deferred to "good to have" after the slices, and the merchant enters the menu by hand; see the [record](#reopening-2026-10-15-menu-photo-drafting-deferred).
   Before that it was **RE-APPROVED 2026-10-10** by the user ("I approve gate one") after being reopened and revised the same day to remove Zapier, which the user rejected as paid, and to record the PYUSD decisions; see the [reopening record](#reopening-2026-10-10-zapier-removed). Previously **APPROVED 2026-10-07** by the user after reopening it to add a buyer-side scan entry point. Approval covers product scope and buyer/merchant journeys, including text and scan/paste entry points.
-- Gate 2 - Architecture: **REOPENED and RE-APPROVED 2026-11-04 to add Show the stall (S42)** ("Alright fine, reopne gates 1 to 4 to add this in and then add it to the build plan"). See the [record](#gates-1-2-3-and-4-reopening-2026-11-04-show-the-stall). Before that:
+- Gate 2 - Architecture: **REOPENED and RE-APPROVED 2026-11-06 for the Show the stall language order** ("Yes . Reopen gates 1 to 3 for that minor fix and fix it . I pre approve the changes"); see the [record](#show-the-stall-language-order-2026-11-06).
+  **REOPENED and RE-APPROVED 2026-11-04 to add Show the stall (S42)** ("Alright fine, reopne gates 1 to 4 to add this in and then add it to the build plan"). See the [record](#gates-1-2-3-and-4-reopening-2026-11-04-show-the-stall). Before that:
   **REOPENED and RE-APPROVED 2026-11-04 for the third build plan** ("I dont need s39 and s40. Other than that, all is approved, after u redo the build order"); approval starts no slice and authorizes no migration, model call, commit, merge, push or deploy; see the [record](#gates-1-2-3-and-4-reopening-2026-11-04-third-build-plan). Before that:
   **REOPENED 2026-11-02 for the MCP client and RE-APPROVED 2026-11-02** ("yes i authroize gate 2"); it accepts the amendment as a proposal and authorizes no Gate 3 or 4 change, code change, upload, commit, push or deploy: the assistant calls Envoi's own `/mcp` through the MCP SDK client and the APIMatic-generated client is removed; see the [record](#gate-2-3-and-4-reopening-2026-11-02-mcp-client) and the [amendment](02-architecture.md#mcp-client-amendment-2026-11-02).
   **REOPENED 2026-10-29 for the S25 limiter bucket and RE-APPROVED 2026-10-29** ("Approve Gate 2"); it accepts the wording as a proposal and authorizes no Gate 3 or 4 change, migration, merge, push or deploy; see the [record](#gate-2-3-and-4-reopening-2026-10-29-s25-limiter-bucket).
@@ -29,7 +31,8 @@ Updated: 2026-11-05 (Asia/Singapore).
   Preparation releases the unsigned bytes exactly once and never stores them, and the post-expiry window scan runs for every released attempt and records any extra transfer; see the [record](#gate-2-reopening-for-double-payment-fixes-2026-10-11).
   **Reopened and RE-APPROVED 2026-10-15** for one change, approved by the user in advance: menu photos are English only, so the consented test photos and the vision falsifier samples no longer require Chinese text; see the [record](#reopening-2026-10-15-english-only-menu-photos).
   **Reopened and RE-APPROVED 2026-10-18** ("Yea sure i approve the gates then make the relevant changes and push to main thnaks"): the phone path's Browse link also names the PYUSD rail and Phantom's browser opens the PYUSD review directly; see the [record](#reopening-2026-10-18-phantom-landing).
-- Gate 3 - Program Design: **REOPENED and RE-APPROVED 2026-11-04 to add Show the stall (S42)** ("Alright fine, reopne gates 1 to 4 to add this in and then add it to the build plan"). See the [record](#gates-1-2-3-and-4-reopening-2026-11-04-show-the-stall). Before that:
+- Gate 3 - Program Design: **REOPENED and RE-APPROVED 2026-11-06 for the Show the stall language order** ("Yes . Reopen gates 1 to 3 for that minor fix and fix it . I pre approve the changes"); see the [record](#show-the-stall-language-order-2026-11-06).
+  **REOPENED and RE-APPROVED 2026-11-04 to add Show the stall (S42)** ("Alright fine, reopne gates 1 to 4 to add this in and then add it to the build plan"). See the [record](#gates-1-2-3-and-4-reopening-2026-11-04-show-the-stall). Before that:
   **REOPENED and RE-APPROVED 2026-11-04 for the third build plan** ("I dont need s39 and s40. Other than that, all is approved, after u redo the build order"); approval starts no slice and authorizes no migration, model call, commit, merge, push or deploy; see the [record](#gates-1-2-3-and-4-reopening-2026-11-04-third-build-plan). Before that:
   **REOPENED 2026-11-02 for the MCP client and RE-APPROVED 2026-11-02** ("Approved"): output schemas on `/mcp`, the assistant on the MCP SDK client, test 17 replaced and test 36 added; see the [record](#gate-2-3-and-4-reopening-2026-11-02-mcp-client) and the [reopening](03-program-design.md#reopening-2026-11-02-mcp-client).
   **REOPENED 2026-10-29 for the S25 limiter bucket and RE-APPROVED 2026-10-29** ("Approve Gate 3"); it accepts the contracts as a proposal and authorizes no Gate 4 change, migration, merge, push or deploy; see the [record](#gate-2-3-and-4-reopening-2026-10-29-s25-limiter-bucket).
@@ -603,6 +606,23 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
   In the live table, a row opened its full record. "paid PayPal orders this week" gave "Filters set: Paid · PayPal · 31 Oct to 6 Nov." with all three rows, "orders still pending" gave "Not paid yet" with no rows, and "mark every order as paid" gave "That sentence names no filter, so no filter changed." Clear restored the three rows. At 390 px the page has no sideways scroll.
   [unknown] Why the browser reported a clipboard write when a menu row's Remove button was clicked: Envoi's merchant code writes the clipboard only in `shop-qr.tsx`.
 - **Test fixtures hidden, 2026-11-06:** on the user's instruction, S26 Fixture Shop and S27 US Fixture Shop left the public list. This supersedes S41's "old ones stay" for those two shops. Migration 0030 adds `outlets.hidden_at`, and `hide-outlet` and `show-outlet` set it for demo fixtures only. Publication itself is unchanged and the guard against unpublishing still holds. Direct links, orders and merchant screens keep working (direct menu returned 200). Tests are in `tests/integration/hide-outlet.test.ts`; five guards were each mutated and each failed its own test. Commit `e690d0f`; the live list now reads Ah Seng Chicken Rice, Judge Demo Cafe, Larkspur Street Taqueria, Lorong Demo Kopi, Test Shop, Tiong Bahru Kopi House.
+
+### Show the stall language order, 2026-11-06
+
+- **Authority [verified], the user's words:** "Yes . Reopen gates 1 to 3 for that minor fix and fix it . I pre approve the changes"
+  Gates 1, 2 and 3 are reopened and re-approved for this one change; Gate 2's content does not change.
+  This authorizes no commit, merge, push or deploy.
+- **Change:** the panel lists English, 中文, Melayu, தமிழ் and opens on English.
+  Opening on English makes no translation request and shows no AI label until the visitor chooses another language.
+  The user called the third language Hindi; the panel's language is Tamil, unchanged, and no Hindi was added.
+- **Branch:** `envoi/show-the-stall-language-order`, separate from S38.
+- **Mutations [verified]:** defaulting to `zh` failed only `opens on English with the shop's own names and no translation label`; putting `zh` first failed only `lists the languages as English, Chinese, Malay, Tamil`. The file was restored and all 11 unit tests pass on rerun.
+- **Local checks [verified]:** typecheck and lint exit 0; 840 tests in 108 files pass; production build exit 0; `git diff --check` clean.
+  `gate4_check.py` reports R10 against `main` because it protects gate documents from change; it is not in CI, and this reopening changes them on purpose.
+- **Local browser [verified at 375 px and 1280 px, no horizontal overflow, FIXTURE]:** a FIXTURE Paid purchase on a disposable database, with a fixture key and no model call.
+  English shows pressed and first, then 中文, Melayu, தமிழ்; the shop's names show; no AI label; zero requests to the translations route on opening.
+  Choosing another language was not exercised locally, and that code is unchanged.
+- **Not done:** commit, merge, push, deploy and a Render check, none of them authorized yet.
 
 ### S42 Show the stall, 2026-11-05
 

@@ -1,5 +1,7 @@
 # Product: Envoi
 
+**REOPENED and RE-APPROVED 2026-11-06 for the Show the stall language order** ("Yes . Reopen gates 1 to 3 for that minor fix and fix it . I pre approve the changes"): English, 中文, Melayu, தமிழ், opening on English. This replaces the mockup's opening on 中文. Approval authorizes no commit, merge, push or deploy.
+
 **REOPENED and RE-APPROVED 2026-11-04 to add Show the stall (S42)** ("Alright fine, reopne gates 1 to 4 to add this in and then add it to the build plan"). See the [third build plan](#third-build-plan-proposed-2026-11-04).
 
 **REOPENED and RE-APPROVED 2026-11-04 for the third build plan** ("I dont need s39 and s40. Other than that, all is approved, after u redo the build order").
@@ -269,7 +271,7 @@ The user's own pitch was tourists paying with PayPal through a QR code, with mer
 - **Order in your own language.** The assistant and the one box accept the languages that pass an evaluation, and the assistant replies in the visitor's language. The claim names only the languages that passed.
 - **Scan, then ask.** Scanning a sticker or shop QR opens the assistant already at that shop. Screen: `mockups/buyer-scan-to-ask.html`.
 - **"What should I try under S$10?"** The assistant suggests items from the published menu within the stated budget, and nothing enters a basket until the visitor accepts. It never says "popular" or "best seller". It gives no allergy, halal or dietary assurance; it says it cannot tell and suggests asking the stall. Screen: `mockups/buyer-menu-advice.html`.
-- **Show the stall.** After a Paid receipt, the visitor can show the order in large text in a language they choose for the stall, and play it aloud. Original names and the paid amount stay on screen, the text is labeled as AI translation, and it never appears before Paid. It cannot change a payment. If a translation cannot be made, the original names show alone. Screen: `mockups/receipt-show-the-stall.html`.
+- **Show the stall.** After a Paid receipt, the visitor can show the order in large text in a language they choose for the stall, and play it aloud. It lists English, 中文, Melayu and தமிழ் in that order and opens on English, the shop's own text, so no translation is made until the visitor chooses one. Original names and the paid amount stay on screen, the text is labeled as AI translation, and it never appears before Paid. It cannot change a payment. If a translation cannot be made, the original names show alone. Screen: `mockups/receipt-show-the-stall.html`.
 - **Bring your own assistant.** A public page shows how to connect an outside AI assistant to Envoi. A judge's test credential is given only in the submission form. It can read shops and menus and make a one-time link, and it cannot pay, approve or read a receipt. Screen: `mockups/buyer-own-assistant.html`.
 - **Pay with crypto through PayPal, US shops only, conditional.** On an enabled US shop the review offers it as a separate choice of one payment method. PayPal's test environment simulates it: no token is chosen and none moves, and the screen says so. The shop receives dollars in PayPal [vendor claim]. Singapore's PYUSD is unchanged. Screen: `mockups/review-us-crypto.html`.
 
