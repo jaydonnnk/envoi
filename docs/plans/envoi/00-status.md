@@ -726,6 +726,10 @@ ad10 is feasible at 180 plus 220, and Mee siam is unavailable.
 - **Render spend [hypothesis, estimated]:** the two runs' eight turns are outside the ledger, about US$0.07, so S34's total is about US$0.71 of US$2. The actual invoice is [unknown].
 - **Post-slice cleanup [verified]:** every added file is referenced by this record, a runner or a test, no TODO or skipped test was added, and nothing needs deleting.
 
+- **Final Ask Envoi to Paid run [verified from the Render receipt], 2026-11-07, Lorong Demo Kopi (FIXTURE), PayPal sandbox test money:** the assistant suggested one Kaya toast set within S$6, the accept button made the link, the review showed S$4.50, and the user approved in PayPal ("Approved"). The receipt reads Paid, S$4.50, purchase `pur_zghxhkjcvpnwnexlwnvkzmgopm`, order `1AE47630TF063540B`, capture `8TS822397Y3049101`.
+  It ran on the deployed build holding `248b64e`. The plan's date for this rerun was after an 11 Nov freeze, so any later code change needs it again.
+  Show the stall appears on this Singapore Paid receipt with English, Chinese, Malay and Tamil, "Kaya toast set × 1", "S$4.50 paid" and Play aloud. This run checked the panel in the browser pane only, not audio or translation quality. The merchant's view of the order was not checked.
+
 ### S38 Crypto through PayPal, 2026-11-06
 
 - **Authority [verified], 2026-11-06, the user's words:** "accept yep, then start s38 branch only".
