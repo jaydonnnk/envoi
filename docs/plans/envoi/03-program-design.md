@@ -3139,6 +3139,7 @@ unpaid_closed -> uncertain   (reason crypto_read_unverified)
 
 ## Reopening 2026-11-07: fourth build plan
 
+**Reopened 2026-11-08 for S45's lost refund response ("Refund route resends") and re-approved 2026-11-08 ("Approve Gate 3").** The refund call stack's last sentence changes; see the [S45 record](00-status.md#s45-merchant-copilot-2026-11-07).
 **Reopened again 2026-11-07 for S45's first check ("Yes to both", "Demo shop only") and re-approved 2026-11-07 ("i approve both gates").** See the [S45 record](00-status.md#s45-merchant-copilot-2026-11-07).
 
 **Amended for S44 and re-approved 2026-11-07 ("Yes to gate 1 and gate 3 changes as well"): test 64 and the fee constants below.**
@@ -3242,7 +3243,7 @@ function triggerTouristReady(input: { outletId: string; revisionId: string }, tr
 
 **Copilot turn.** `copilot/route.ts`, then `requireOutletMembership`, the enrollment check, the demo seller check (the outlet's seller equals `PAYPAL_DEMO_SELLER_MERCHANT_ID`, else not found), `admit("merchant_copilot")`, `runCopilotTurn`, `connectPayPalTools`, `generateText` with local tools, then each allowed call and an outlet filter on its result, then `close` in `finally`.
 
-**Refund.** `refund/route.ts`, then membership, the same demo seller check, `sendFullRefund` with the demo seller's write client, a transaction that claims one refund row by unique attempt and idempotency key, `PayPalWriteClient.refundCapture` outside the transaction, then the state update and audit. A lost response stays `checking`, and maintenance's read decides it.
+**Refund.** `refund/route.ts`, then membership, the same demo seller check, `sendFullRefund` with the demo seller's write client, a transaction that claims one refund row by unique attempt and idempotency key, `PayPalWriteClient.refundCapture` outside the transaction, then the state update and audit. A lost response stays `checking`. Revised 2026-11-08: the member's next confirm on that order resends the same refund with the stored idempotency key as `PayPal-Request-Id` on the demo seller's write client, and PayPal's answer decides it. Maintenance holds no demo seller credentials, so it never reads or sends a refund.
 
 **Fee.** The existing capture or read path, then `mapOrder`, the existing verification unchanged, then the same attempt update adding fee, net and country when present.
 

@@ -725,6 +725,7 @@ No hold and no longer basket lock are added, because PayPal's expiry for an unap
 ## Fourth build plan amendment, 2026-11-07
 
 **Status: approved 2026-11-07 ("Approve Gate 2"), not built.** For [Gate 1's fourth build plan](01-product.md#fourth-build-plan-proposed-2026-11-07), approved 2026-11-07.
+**Reopened 2026-11-08 for S45's lost refund response ("Refund route resends") and re-approved 2026-11-08 ("Approve Gate 2"):** refund step 5 changes.
 **Reopened 2026-11-07 for S45's first check ("Yes to both", "Demo shop only") and re-approved 2026-11-07 ("i approve both gates").** It changes the copilot turn, the refund's credentials, the names and R-F1 and R-F2 only; see the [S45 record](00-status.md#s45-merchant-copilot-2026-11-07).
 Approval accepts this as a proposal and authorizes no code change, install, migration, model call, spend, merge, push or deploy.
 Every earlier authority rule stands: no model sets a price, approves a payment or moves money, and Envoi is never the payee.
@@ -785,7 +786,7 @@ Totals are computed on the server, because the browser holds only one loaded pag
 2. The server re-checks membership, the Paid state and that no refund exists.
 3. A PayPal write client built from the demo seller's own credentials calls `POST /v2/payments/captures/{id}/refund` with an idempotency key, for the full amount only. Envoi's platform credentials were refused with 403 `PERMISSION_DENIED` [verified 2026-11-07], so they never send a refund.
 4. The refund is stored beside the capture. `paid` does not change, and the receipt and orders screen add a refund line.
-5. A lost response stays "checking" until a read decides it, as a capture does.
+5. A lost response stays "checking". Revised 2026-11-08: the member's next confirm on that order resends the same request with the same idempotency key, and PayPal's answer decides it. Maintenance holds no demo seller credentials, so it never reads or sends a refund.
 
 ### Flow: fee and country
 
