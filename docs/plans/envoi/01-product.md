@@ -1,5 +1,7 @@
 # Product: Envoi
 
+**REOPENED and RE-APPROVED 2026-11-07 for the fourth build plan, including admin approval of sign-ups** ("Approve Gate 1", given twice). Approval accepts the product proposal only; it starts no slice and authorizes no install, model call, migration, spend, publication, commit, merge, push or deploy. See the [fourth build plan section](#fourth-build-plan-proposed-2026-11-07).
+
 **REOPENED and RE-APPROVED 2026-11-06 for the Show the stall language order** ("Yes . Reopen gates 1 to 3 for that minor fix and fix it . I pre approve the changes"): English, 中文, Melayu, தமிழ், opening on English. This replaces the mockup's opening on 中文. Approval authorizes no commit, merge, push or deploy.
 
 **REOPENED and RE-APPROVED 2026-11-04 to add Show the stall (S42)** ("Alright fine, reopne gates 1 to 4 to add this in and then add it to the build plan"). See the [third build plan](#third-build-plan-proposed-2026-11-04).
@@ -310,6 +312,83 @@ The user's own pitch was tourists paying with PayPal through a QR code, with mer
 
 The landing change, judge access, corrected documents, the language evaluation and scan then ask are never cut.
 
+## Fourth build plan (proposed 2026-11-07)
+
+Status: **approved 2026-11-07 ("Approve Gate 1", given again after the admin approval change), not built.**
+The user's words: "Yes reopen the gates".
+It adds to the approved product; every earlier rule, journey and failure state still holds unless a point below says otherwise.
+The plan's detail is in [`fourth-build-plan.md`](fourth-build-plan.md), and this section wins where they differ.
+
+### The problem and the pitch
+
+Buyer: "I'm visiting Singapore from the UK, the US or Australia. This stall shows an SGQR sticker, and my card does not work here. I have PayPal."
+
+Merchant: "I keep my SGQR. Visitors whose apps cannot pay it can still pay me, in my own PayPal, and I add no hardware."
+
+**Proposed headline:** "Scan the stall's SGQR. Pay with the PayPal you already have."
+It replaces "Your language. One scan. PayPal." on the landing page, and the supported languages stay listed below it.
+
+- Chinese visitors already have Alipay+ and Weixin at stalls that enabled them, so Western visitors are the first audience [hypothesis].
+- The user has seen this gap first-hand as a Singaporean [user-reported, 2026-11-07]. No interview or study runs, by the user's decision. It may be stated as the founder's own observation, never as measured demand.
+- US shops stay a smaller second market, with translated menus and PayPal or PYUSD for foreign visitors.
+
+**Limits the product and pitch must say:**
+
+- PayPal is not on SGQR. Envoi identifies an enrolled shop from the sticker and pays that shop's own PayPal. An unenrolled sticker stays unpayable, as approved.
+- A phone camera does not open Envoi from an SGQR sticker [hypothesis], so the visitor opens Envoi's scanner and a counter poster tells them to.
+- Never say cheaper than cards. A tourist's PayPal payment in Singapore costs 4.40% + S$0.50, which is S$0.70 on S$4.50 [the user's pasted review of PayPal's page, to be re-read before any screen prints it].
+- Wise says customers outside Singapore can pay PayNow QR codes at businesses [vendor claim]. It is the real alternative, and its coverage far exceeds Envoi's.
+- A licensed partner paying a stall's PayNow is the only route that would make any SGQR payable. It stays roadmap and is not built.
+
+### What changes for the buyer
+
+- **The landing page speaks to the Western visitor.** Screen: `mockups/landing-tourist.html`.
+- **Ask Envoi drops developer wording.** The steps collapse under "How this was checked". Screen: `mockups/buyer-ask-checked.html`.
+- **An unenrolled sticker is no longer a dead end.** The visitor can show the stall a reviewed card in English, 中文, Melayu or தமிழ், with a way to learn about joining. Envoi keeps only a count of scans under a scrambled code: no stall name, no sticker text and nothing about the visitor. This changes the rule that a scan records nothing. Screen: `mockups/buyer-unenrolled-scan.html`.
+- **Show the stall is presented as the handoff** from visitor to stall.
+
+### What changes for the merchant
+
+- **A page for shops before sign-in,** with the pitch and an honest fee calculator. A rate that cannot be confirmed shows as unknown. Screen: `mockups/for-shops.html`.
+- **A sales desk as the merchant's home:** paid sales, PayPal's fee and the net per order, totals, sales by payment method, a chart and a CSV export. A missing fee reads unknown, never zero. An order is called overseas only from the country PayPal gives. Ask your orders also sorts and chooses views. Screen: `mockups/merchant-desk.html`.
+- **A weekly summary written by AI,** in English, 中文, Melayu or தமிழ், labeled as AI. Code computes every figure, and a summary holding any other figure is refused. It appears on the same screen.
+- **A payments copilot.** The merchant asks about their sandbox PayPal records, using PayPal's hosted agent tools if they work with Envoi. It sees only that shop's orders. It can suggest a refund, and only the merchant's own confirmation sends it. It can never take a payment. A refund sits beside the Paid record and does not rewrite it. Screen: `mockups/merchant-copilot.html`.
+- **A printable counter poster.** It is labeled a test shop while it is one, and its QR is not a payment code. Screen: `mockups/merchant-poster.html`.
+- **Merchant sign-up, replacing "There is still no public sign-up".** Anyone can create an account and one pending shop, with no email verification or password reset in the test environment, stated on the form. An admin still approves every shop, and until then it has no public page and takes no payment. The merchant submits a sandbox seller id for that review. Every self-created shop is labeled a test shop. Screen: `mockups/merchant-signup.html`.
+
+### What changes for the demo and the record
+
+- The public list drops internal-looking names such as "Test Shop" and "Judge Demo Cafe", unless the demo needs them.
+- One SGQR scan to Paid at a Singapore fixture shop with a US sandbox buyer is recorded for the video.
+- The README, video script, evidence pack and demo guide are corrected to this pitch.
+- Render stops sleeping, so a judge's first visit is not a cold start.
+- Translations and explanations are prepared when a shop publishes, so a visitor's first tap is instant. A failure leaves today's on-demand translation working.
+
+### Success measure for this plan
+
+**Proposed target: one recorded run on the deployed site in which a US sandbox buyer scans a Singapore fixture shop's SGQR and reaches a Paid receipt, with the PayPal record matching the approved purchase.**
+
+- **Merchant figures:** zero invented amounts across the copilot's and the summary's fixed cases, with thresholds written before any paid run.
+- The earlier 4-of-5 target stays unmeasured.
+- No usability, completion, timing, adoption, demand, savings, return or prize claim is made.
+
+### Flagged for review, beyond the user's words
+
+- A hawker may not open a PayPal business account for a few tourists, given the fee on small orders [hypothesis]. Nothing here fixes that without a settlement partner.
+- Western visitors read English, so translation does little for them. Their AI value is dish help, ordering and Show the stall [hypothesis].
+- The copilot depends on PayPal's agent tools working with Envoi's software and on Envoi being allowed to read a shop's records. Both are [unknown] until the first check.
+- A scan count can be inflated, so it reads "scans", never sales or demand.
+- Admin approval means a judge who signs up waits for someone to approve them, so the judge's merchant account stays the demo path. A submitted seller id still does not prove ownership by itself; the admin decides.
+
+### Cuts, in order, if time runs short
+
+1. Merchant sign-up.
+2. Preparing translations on publish. Render staying awake is kept.
+3. The weekly summary.
+4. The unenrolled sticker card.
+
+The pitch, shops page, copilot, sales desk and demo fixes are never cut, unless the copilot's first check fails.
+
 ## Screens
 
 Each `.html` file in `mockups/` is a plain, throwaway product mockup. The directory is the location convention required by software-factory, not an implementation design. `mockups/review-preview.jpg` is a superseded historical image and not a current screen; review the HTML.
@@ -331,6 +410,7 @@ Each `.html` file in `mockups/` is a plain, throwaway product mockup. The direct
   - `mockups/merchant-country.html`: the merchant chooses Singapore or the United States, which sets currency and payment methods.
   - `mockups/merchant-rewards.html`: the PayPal PYUSD rewards card for a US shop, with a labeled illustration, and for a Singapore shop, which cannot earn it yet.
   - `mockups/merchant-web-import-review.html`: the draft table showing only rows that need review, a next-problem button and the page text behind each row.
+- *Added 2026-11-07 (fourth plan), approved:* `mockups/landing-tourist.html`, `mockups/buyer-ask-checked.html`, `mockups/buyer-unenrolled-scan.html`, `mockups/for-shops.html`, `mockups/merchant-desk.html`, `mockups/merchant-copilot.html`, `mockups/merchant-poster.html`, `mockups/merchant-signup.html`.
 - *Added 2026-11-04 (third plan), approved:* `mockups/landing-ai.html`, `mockups/buyer-scan-to-ask.html`, `mockups/buyer-menu-advice.html`, `mockups/receipt-show-the-stall.html`, `mockups/buyer-own-assistant.html`, `mockups/review-us-crypto.html`, `mockups/merchant-orders-grid.html`.
 - `mockups/index.html`: review navigation for the five screens above it; not a product screen. The landing page is opened directly.
 
@@ -345,6 +425,7 @@ No mockup uploads an image, extracts data, publishes a shop or performs a paymen
 - The PYUSD rate is visibly the shop's own dated rate, and an expired rate or an unproven PYUSD test leaves PayPal working.
 - Scope, audience, cuts, and the proposed measurement are accepted.
 - *Added 2026-10-29:* the proposed measurement is accepted as a target that this hackathon does not measure, and no usability, completion-rate or timing claim is made in its place.
+- *Added 2026-11-07 (fourth plan):* an unenrolled sticker visibly stays unpayable; fees are never shown as savings; a missing fee reads unknown; the copilot visibly cannot send a refund or take a payment without the merchant; AI summary figures visibly come from Envoi; a self-created shop is visibly a test shop and visibly cannot sell before an admin approves it.
 - External approval, single-method payment, honest cost uncertainty, and order acknowledgment are explicit.
 - Seeded merchants and test transactions cannot be mistaken for live adoption or live money.
 - *Added 2026-10-29 (web import):* a draft from the merchant's page is visibly a draft, shows every blank price with its reason, cannot be confirmed while a price is blank, and cannot be mistaken for photo import.

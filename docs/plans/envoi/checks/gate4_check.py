@@ -431,7 +431,8 @@ for f, text in current.items():
 # 2026-10-29: the S25 limiter bucket reopening, re-approved by the user ("Approve Gate 3"); 04e8995f...c1aed5 was the approved text before it, fe423865...856b85a4 the draft.
 # 2026-11-02: the MCP client reopening, re-approved by the user ("Approved"); 48e7e159...945758c was the draft, bfa13baa...f048499 the approved S25 limiter bucket text before it.
 # 2026-11-07: the S34 accept button reopening, re-approved by the user ("Approve Gate 3"); fc342680...8f602b was the pin before it.
-G3_REOPENING_SHA256 = "ef9bd80289dffaf72857a905f032eed8c34929052e4e9cf87619d1799bb2353a"
+# 2026-11-07: the fourth build plan, re-approved by the user ("Approve Gate 3").
+G3_REOPENING_SHA256 = "f73dcb41af93182490fa862aee620dc62f3531b0aeebd655b6609c9a3b5b8e0f"
 # 02-architecture.md may likewise equal its continuation amendment text, re-approved by the user on 2026-10-25
 # (bc504e10...d0e47a9f was the shop QR and order archive text, re-approved on 2026-10-24,
 # 28d54654...45561154 the Phantom landing text of 2026-10-18, 938d0a99...f3bf30a6 the English-only text of 2026-10-15).
@@ -445,7 +446,8 @@ G3_REOPENING_SHA256 = "ef9bd80289dffaf72857a905f032eed8c34929052e4e9cf87619d1799
 # 2026-10-29: the second build plan amendment, re-approved by the user ("Approve Gate 2"); caa653f1...a8e2182d was the text before it.
 # 2026-10-29: the S25 limiter bucket reopening, re-approved by the user ("Approve Gate 2"); b1c2513f...b08f2 was the approved text before it, 63c408aa...2254ba78 the draft.
 # 2026-11-02: the MCP client amendment, re-approved by the user ("yes i authroize gate 2"); a2f88604...93a5bd06 was the approved S25 limiter bucket text before it.
-G2_REOPENING_SHA256 = "ee8ec728d9ba7c857c6caaa68cf5b45deddf110ba6c7b7693c2ab36f0cff5eca"
+# 2026-11-07: the fourth build plan, re-approved by the user ("Approve Gate 2").
+G2_REOPENING_SHA256 = "80b3e947d94b30cb43e36e1472b927e630e40b4dbdba3676f6ba528045725b7e"
 # Gate 1, re-approved 2026-10-16 after deferring menu photo drafting and again on 2026-10-21 for the
 # landing page, and on 2026-10-24 for the shop QR and order archive, then reopened and re-approved on 2026-10-25 for S19-S22:
 # the revised and added mockups, and 01-product.md without its closing status line, which keeps changing as slices finish
@@ -453,6 +455,15 @@ G2_REOPENING_SHA256 = "ee8ec728d9ba7c857c6caaa68cf5b45deddf110ba6c7b7693c2ab36f0
 # Current: re-approved 2026-10-28 for the menu photo round 5 allowance, the one part of that reopening the user approved;
 # the Gate 2, 3 and 4 drafts of the same day were withdrawn, so only this pin moved (c11ec26f...24b78e93 was the 2026-10-25 body).
 G1_MOCKUP_SHA256 = {
+    # 2026-11-07: the fourth build plan, approved by the user ("Approve Gate 1").
+    os.path.join("mockups", "landing-tourist.html"): "84f6dfab3c87830603ef0f938a0b621159fd42ad9e48f3afa82a4f4f79c15775",
+    os.path.join("mockups", "buyer-ask-checked.html"): "4ec8537c13de5d5efabeffe7315937bc046f92733e0babec9ba876ecae1cb53d",
+    os.path.join("mockups", "buyer-unenrolled-scan.html"): "ccd23145abb0e71ea044a954e45be5d925825a1efbd100d46c5998af16e9becc",
+    os.path.join("mockups", "for-shops.html"): "d5c51c10707e0b4951d76db191f332690fd559583e3247dce58426f8c7eb2167",
+    os.path.join("mockups", "merchant-desk.html"): "ec8146f8649586f54dfcfe3e137be8fd682f528afd80f00df3dc81587bbfde6d",
+    os.path.join("mockups", "merchant-copilot.html"): "a82787d6a0e8bdd5edb27bc8480a00940753cda0d4e4b84745ea0b33b07b1412",
+    os.path.join("mockups", "merchant-poster.html"): "239511e5117789b220220c902afa2f8a23f55c4cc6086a130a957760f5e2b7a5",
+    os.path.join("mockups", "merchant-signup.html"): "43e211a2c47a7810b3b139e722a6ad1ba64032760b7aabfaf639c9fe9d90cd84",
     os.path.join("mockups", "merchant-onboarding.html"): "d376e4517de5b7f0c4c892675b0e033111cbac0af1b157519f23078ade16f568",
     os.path.join("mockups", "landing.html"): "973c92b63f946b51c9911aa7f8ec75891041e5d0af1c41a086e09f917c923744",
     os.path.join("mockups", "merchant-shop-qr.html"): "15fb8ab1666648de1a1ca102901d3bb01efe73bb4f2c4a27b748dc0fe75b54ce",
@@ -478,7 +489,8 @@ G1_MOCKUP_SHA256 = {
 # 2026-10-29: the web import audience reopening, re-approved by the user the same day ("Approve Gate 1"); be5395a0...0c0a was the body before it.
 # 2026-10-29: the PDF answer, by the user's decision "Add a PDF answer" (be9105a2...82e9a2da was the text before it).
 # 2026-10-29: the second build plan, re-approved by the user ("Approve Gate 1"); 74f101fc...c52418d3 was the body before it.
-G1_BODY_SHA256 = "5c7f78c6dc0bb180fbc0b631a006cd2ea3bf03b9ad399efd3024cff902d0ac9e"
+# 2026-11-07: the fourth build plan, re-approved by the user ("Approve Gate 1").
+G1_BODY_SHA256 = "c807a0282fb311286cd10fceb2b0aefeb875c3618d1ea195c535a1bc7324de32"
 for root, _, files in os.walk(folder):
     for name in sorted(files):
         rel = os.path.relpath(os.path.join(root, name), folder)

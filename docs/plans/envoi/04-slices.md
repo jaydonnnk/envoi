@@ -1,5 +1,7 @@
 # Vertical Slices: Envoi
 
+**REOPENED and RE-APPROVED 2026-11-07 for the fourth build plan** ("Approve Gate 4"). Approval starts no slice and authorizes no install, migration, model call, spend, publication, merge, push or deploy. See the [slice plan](#fourth-build-plan-s44-to-s50-and-s43-approved-2026-11-07).
+
 **REOPENED and RE-APPROVED 2026-11-04 to add Show the stall (S42)** ("Alright fine, reopne gates 1 to 4 to add this in and then add it to the build plan").
 
 **REOPENED 2026-11-04 for the third build plan (S41, S32 to S35, S37, S38); RE-APPROVED 2026-11-04** ("I dont need s39 and s40. Other than that, all is approved, after u redo the build order").
@@ -1161,6 +1163,64 @@ Branch: `envoi/slice-38-pay-with-crypto`. **First step.** One order with Envoi's
 #### S34 Advice
 
 Branch: `envoi/slice-34-menu-advice`. Depends on S33. The accept button, added 2026-11-07: `envoi/slice-34-accept-button`. **Visible result.** Per mockup, except its heading and intro text, because the page keeps S33's. **Tests.** 41, and added 2026-11-07: 59 to 61, with the [accept button reopening](03-program-design.md#reopening-2026-11-07-s34-accept-button), each with its own mutation. **Evaluation.** Ten advice cases and the existing 25, rerun for the changed instructions. **Falsifier.** Any over-budget or dietary assurance: not shipped. **Authorizations.** Starting S34; OpenAI spend; merge, push and deploy.
+
+### Fourth build plan: S44 to S50 and S43 (approved 2026-11-07)
+
+**APPROVED 2026-11-07 ("Approve Gate 4").** Approval accepts this order, test assignment and cut order. It starts no slice and authorizes no install, migration, model call, spend, publication, merge, push or deploy.
+All come after S34, outside the build-order table, each with its own authorization by ID and its own branch from the current tip of `main`.
+The plan-wide rules of the second build plan and [Rules for every slice](#rules-for-every-slice) apply. The numbered tests are in the [Gate 3 reopening](03-program-design.md#reopening-2026-11-07-fourth-build-plan).
+
+| Order | Slice | Target date [hypothesis] | Cut position |
+| --- | --- | --- | --- |
+| 1 | S44 The tourist pitch | 8 Nov | never |
+| 2 | S45 Merchant copilot on PayPal's MCP server | 8 to 9 Nov | never, unless its first check fails |
+| 3 | S46 Tourist Sales Desk | 9 to 10 Nov | never |
+| 4 | S48 Stall demand | 10 Nov | 4 |
+| 5 | S49 Demo polish | 11 Nov | never |
+| 6 | S47 The tourist digest | 11 Nov | 3 |
+| 7 | S50 Render Starter and the Tourist-ready Workflow | 12 Nov | 2, and Starter alone stays |
+| 8 | S43 Merchant sign-up | 12 Nov | 1 |
+
+Freeze 12 Nov, moved one day by the user on 2026-11-07, with the video recorded after it and the cutoff unchanged at 13 Nov 04:00 SGT. Build days are 8 to 12 Nov.
+An unfinished slice at the freeze is cut, not rushed.
+Ask Envoi to Paid runs again last, on the final build.
+
+**Before S44, outside any slice:** the secret scan and repository publication, by name; the commit of the corrected `README.md` and `render.yaml`; the judges' logins in the Devpost notes; the video script after S49.
+
+#### S44 The tourist pitch
+
+Branch: `envoi/slice-44-tourist-pitch`. **Visible result.** `mockups/landing-tourist.html`, `mockups/for-shops.html` and `mockups/buyer-ask-checked.html`, on Render at 390 px and 1280 px. **Tests.** 62 to 64, and the revised landing test. **First step.** Read each rate from PayPal's own page; a rate not read shows as unknown. **Falsifier.** Any screen implies savings. **Authorizations.** Start, then merge, push and deploy.
+
+#### S45 Merchant copilot on PayPal's MCP server
+
+Branch: `envoi/slice-45-paypal-mcp-copilot`. Depends on S44's merchant wording only by order, not by code. **Visible result.** `mockups/merchant-copilot.html` on Render, with one proposed and confirmed sandbox refund. **Tests.** 65 to 72. **Migration.** `0032`. **Evaluation.** Pre-registered questions, zero invented amounts. **First step.** A check outside the repository: the MCP path, the `Unsupported cache mode: default` report, and whether Envoi's token reads and refunds a seller's capture. **Falsifiers.** The server cannot serve Envoi: stop and ask, and direct REST is built only if the user agrees, with no claim to use PayPal's agent tools. The token cannot read a seller: use one labeled seller's credentials. Any route lets the model move money: the slice does not ship. **Authorizations.** Start, the OpenAI spend, migration on Neon, a sandbox purchase and refund, then merge, push and deploy.
+
+#### S46 Tourist Sales Desk
+
+Branch: `envoi/slice-46-sales-desk`. **Visible result.** `mockups/merchant-desk.html` on Render, without the digest. **Tests.** 73 to 77. **Migration.** `0033`. **Evaluation.** The S35 sentences, plus sort and view cases, pre-registered. **First step.** One ordinary sandbox capture read for its fee, net and payer country. **Falsifier.** Sandbox returns no fee: it reads unknown, and no fee is invented. **Authorizations.** Start, the install of AG Charts Community, the OpenAI spend, migration and labeled seed on Neon, then merge, push and deploy.
+
+#### S48 Stall demand
+
+Branch: `envoi/slice-48-stall-demand`. Depends on S44's `/for-shops`. **Visible result.** `mockups/buyer-unenrolled-scan.html` on Render, and the count at enrollment. **Tests.** 80 to 84. **Migration.** `0034`. **Falsifier.** A stored field can identify a scanner or stall: the slice does not ship. **Authorizations.** Start, `STICKER_HASH_KEY`, migration on Neon, then merge, push and deploy.
+
+#### S49 Demo polish
+
+Branch: `envoi/slice-49-demo-polish`. **Visible result.** `mockups/merchant-poster.html`, Show the stall as the handoff, the cleaned public list, and one recorded scan to Paid at a Singapore fixture shop with a US sandbox buyer. **Tests.** 85 and 86. **Falsifier.** A native reader cannot be found for the poster's Chinese, Malay or Tamil: those lines are labeled as draft translations. **Authorizations.** Start, `hide-outlet` on Neon, the sandbox purchase, then merge, push and deploy.
+
+#### S47 The tourist digest
+
+Branch: `envoi/slice-47-digest`. Depends on S46. **Visible result.** The summary card in `mockups/merchant-desk.html` on Render. **Tests.** 78 and 79. **Evaluation.** Pre-registered cases, zero invented figures. **Falsifier.** Any figure reaches the screen other than from code: the slice does not ship. **Authorizations.** Start, the OpenAI spend, then merge, push and deploy.
+
+#### S50 Render Starter and the Tourist-ready Workflow
+
+Branch: `envoi/slice-50-render-workflow`. **Visible result.** No cold start on Render, and a publish that prepares translations before the first visitor. **Tests.** 87 and 88. **First step.** Whether a Hobby workspace can create a Workflow, and whether it needs a card. **Falsifier.** It needs what the user will not add: keep Starter, cut the Workflow, and make no Workflows claim. **Authorizations.** Start, the Render plan change and spend of about $8 a month, `RENDER_API_KEY`, `RENDER_WORKFLOW_SLUG`, the install of Render's SDK, then merge, push and deploy.
+
+#### S43 Merchant sign-up
+
+Branch: `envoi/slice-43-merchant-signup`. **Visible result.** `mockups/merchant-signup.html` on Render: one new account from sign-up, through the operator's approval, to a Paid receipt with sandbox money. **Tests.** 89 to 98. **Migration.** `0035`. **First step.** Prove Better Auth's `hooks.before` can refuse before creating anything. **Falsifiers.** Cross-merchant access, payment before approval, an unlabeled self-created shop, or any model or Kernel spend by an unapproved account: the slice does not ship. **Authorizations.** Start, `MERCHANT_SIGNUP_ENABLED`, migration on Neon, the operator approval on Neon, the sandbox purchase, then merge, push and deploy.
+
+**Counts:** 37 named tests, numbered 62 to 98. Earlier counts are unchanged.
+**Not in this plan:** amount mode, a settlement partner paying PayNow, Agent Ready, Store Sync, WebMCP, voice input, interviews and any admin screen.
 
 ## Test assignment
 

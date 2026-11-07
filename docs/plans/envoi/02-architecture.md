@@ -1,5 +1,7 @@
 # Architecture: Envoi
 
+**REOPENED and RE-APPROVED 2026-11-07 for the fourth build plan** ("Approve Gate 2"). Approval accepts the architecture proposal only and authorizes no code change, install, migration, model call, spend, merge, push or deploy. See the [amendment](#fourth-build-plan-amendment-2026-11-07).
+
 **REOPENED and RE-APPROVED 2026-11-06 for the Show the stall language order** ("Yes . Reopen gates 1 to 3 for that minor fix and fix it . I pre approve the changes"): English, 中文, Melayu, தமிழ், opening on English. No architecture content changes: no route, table, migration or environment name. Approval authorizes no commit, merge, push or deploy.
 
 **REOPENED and RE-APPROVED 2026-11-04 to add Show the stall (S42)** ("Alright fine, reopne gates 1 to 4 to add this in and then add it to the build plan").
@@ -719,3 +721,129 @@ No hold and no longer basket lock are added, because PayPal's expiry for an unap
 - PayPal's crypto link uses `sandbox.paypal.com`, so that host joins `www.sandbox.paypal.com` in the approval allowlist. It answered 301 to `www.` [verified 2026-11-06].
 - `payment_source.crypto` carries a buyer name, which is required [vendor claim]. Buyers are anonymous, so Envoi sends the fixed label `Envoi Fixture`, never a person's name.
 - A PayPal error on the simulator returns the buyer through the cancel URL, and the purchase closes unpaid like any cancel. The buyer starts a new review, and no separate retry path is built.
+
+## Fourth build plan amendment, 2026-11-07
+
+**Status: approved 2026-11-07 ("Approve Gate 2"), not built.** For [Gate 1's fourth build plan](01-product.md#fourth-build-plan-proposed-2026-11-07), approved 2026-11-07.
+Approval accepts this as a proposal and authorizes no code change, install, migration, model call, spend, merge, push or deploy.
+Every earlier authority rule stands: no model sets a price, approves a payment or moves money, and Envoi is never the payee.
+
+### Fit
+
+- **Landing and shops page:** `src/app/page.tsx` and a new public `/for-shops`, with reviewed rate constants in a new `src/domain/fees/`.
+- **Copilot:** a new `src/integrations/assistant/merchant-copilot.ts` beside the buyer agent, using the same turn gate and budgets, with PayPal's hosted MCP server behind a new `src/integrations/paypal/agent-tools.ts`, using the MCP SDK client Envoi already has.
+- **Sales desk:** `src/app/merchant/orders/`, `src/domain/purchases/orders.ts`, `src/integrations/paypal/map.ts` and the existing order filter.
+- **Stall demand:** the existing `resolve-sgqr` route, plus a new `src/domain/sgqr/demand.ts`.
+- **Sign-up:** `src/lib/auth.ts`, `src/domain/outlets/merchant.ts`, `destination.ts` and `publish.ts`.
+- **Workflow:** a new top-level `workflows/` service that reuses `getOrCreateTranslation`.
+- AG Grid Community stays the only grid, with no Enterprise module and no AG Studio.
+
+### Endpoints
+
+| Route | Purpose |
+| --- | --- |
+| `GET /for-shops` | New public page; reads no database |
+| `POST /api/v1/merchant/outlets/[id]/copilot` | One copilot turn for a member; answers text, the calls it made and any refund proposal |
+| `POST /api/v1/merchant/outlets/[id]/orders/[orderId]/refund` | Sends a full refund only from the member's own confirmation; the model cannot call it |
+| `GET /api/v1/merchant/outlets/[id]/sales-summary` | Server-computed totals, by payment method, over paid orders |
+| `POST /api/v1/merchant/outlets/[id]/digest` | The weekly AI summary |
+| `POST /api/v1/merchant/outlets/[id]/orders/filter` | Changed: the answer may also hold a sort and a view |
+| `POST /api/v1/outlets/resolve-sgqr` | Changed: a no-match scan adds to a keyed count |
+| `POST /api/auth/sign-up/email` | Changed: open, limited, and off unless `MERCHANT_SIGNUP_ENABLED` is `true` |
+| `POST /api/v1/merchant/outlets/[id]/destinations/paypal/request` | New: a pending shop's member submits a sandbox seller id for the operator's review |
+| `/merchant/setup/poster` | New printable page for a member |
+
+### Data
+
+Additive migrations, numbered when built, in build order:
+
+1. **S45, `0032`:** a `refunds` table holding the attempt, PayPal's refund id, amount, status, the confirming member and an idempotency key; the bucket `merchant_copilot`.
+2. **S46, `0033`:** nullable `payment_attempts.capture_fee_minor`, `capture_net_minor` and `payer_country`; the bucket `merchant_digest`. Null means unknown, never zero, and older orders stay null.
+3. **S48, `0034`:** `sticker_scan_counts`, holding a keyed hash, a week and a count, with the bucket `sticker_scan`. It holds no name, sticker text, session or user.
+4. **S43, `0035`:** the submitted seller id on enrollment, the bucket `merchant_signup`, and a marker on outlets that a stranger created.
+
+No table stores a copilot message, digest or merchant sentence.
+Totals are computed on the server, because the browser holds only one loaded page of orders.
+
+### Flow: copilot turn
+
+1. A member's message reaches the route; membership and the limiter run first.
+2. One model loop runs on `AI_MODEL`, with `store: false`, six tool calls and 60 seconds, as the buyer agent has.
+3. Envoi connects to `mcp.sandbox.paypal.com` with a Bearer token from its client credentials, and lists the server's tools. Only an explicit allow-list in Envoi's own code reaches the model: `get_order`, `get_merchant_insights`, `list_transaction`, `list_disputes` and `get_dispute`, plus Envoi's own orders for this outlet. The host is a sandbox-only code constant, never a setting.
+4. `get_order` runs only for an order id Envoi holds for this outlet, and any result whose payee is not this outlet's seller is dropped.
+5. `propose_refund` is a local tool that checks the order and creates nothing. The route returns the proposal, and the browser shows the confirmation.
+6. PayPal and merchant text reaches the model as data, never as instructions.
+
+`pay_order`, `create_order`, `create_refund` and every other PayPal write tool are never given to the model.
+
+### Flow: refund
+
+1. The member taps Confirm, and the browser calls the refund route with the order id.
+2. The server re-checks membership, the Paid state and that no refund exists.
+3. The existing PayPal write client calls `POST /v2/payments/captures/{id}/refund` with an idempotency key, for the full amount only.
+4. The refund is stored beside the capture. `paid` does not change, and the receipt and orders screen add a refund line.
+5. A lost response stays "checking" until a read decides it, as a capture does.
+
+### Flow: fee and country
+
+`src/integrations/paypal/map.ts` reads `seller_receivable_breakdown` and any payer country when a capture is verified, through the existing paths.
+Absent fields stay null and never block Paid: they change nothing in payment verification.
+A sandbox crypto capture showed a fee of USD 0.02 [verified 2026-11-04]. An ordinary sandbox capture and any payer country are [unknown] until S46's first check.
+
+### Flow: filter, sort and view
+
+The model call stays tool-free and never sees an order.
+Its strict schema adds `sort` and `view`, each from a fixed list, and the browser applies them with Community grid calls.
+
+### Flow: digest
+
+1. Code computes the week's figures on the server.
+2. One tool-free model call receives only placeholder names, such as `{{paid_total}}`, and never the figures.
+3. A template holding any digit or unknown placeholder is refused, and the desk shows no summary.
+4. The server substitutes the figures. An empty week makes no model call.
+
+### Flow: stall demand
+
+1. `resolve-sgqr` decodes the sticker in request memory, as today.
+2. On a no-match with a usable identifier, it computes HMAC-SHA256 of scheme and identifier with `STICKER_HASH_KEY`, and adds one to that week's count, inside the `sticker_scan` limit.
+3. The browser shows the reviewed static card, with no model call.
+4. When a merchant later submits that sticker, the same hash reads the count, and setup shows it as "scans".
+
+This amends the rule that the buyer scan writes nothing and that the sticker is never stored: the sticker and its identifier still are not stored, and only the keyed hash is.
+The key lives only in the environment, so the hash cannot be matched to a public UEN list without it.
+
+### Flow: sign-up
+
+1. Better Auth's sign-up opens with a global and per-address limit, in a `hooks.before` guard. `onLinkAccount` still creates no membership.
+2. A self-created outlet atomically creates the outlet, its membership and a `pending` enrollment, one per account, with the demo fixture label on. It has no public page, and it takes no payment, because the existing publication checks fail.
+3. The member drafts a menu by hand and submits a sandbox seller id, stored for review and not used as a destination.
+4. The operator runs the existing `assign-paypal-destination` and `approve-enrollment` commands. The member then accepts the connection and publishes, as today.
+5. Web import and the copilot stay off until enrollment is approved, so a stranger cannot spend Kernel or model budget.
+
+### Flow: Tourist-ready Workflow
+
+1. After a publish commits, the web service triggers one Workflow run with the outlet and revision ids, using a short timeout. Publication never waits on it or fails because of it.
+2. The flow runs one retried step per language, `en`, `zh`, `ms`, `es` and `ja`, through `getOrCreateTranslation`, which already stores one row per revision and language.
+3. A failed run leaves today's on-demand translation working.
+
+### External
+
+**New environment names:** `MERCHANT_SIGNUP_ENABLED`, `STICKER_HASH_KEY`, `RENDER_API_KEY`, `RENDER_WORKFLOW_SLUG`.
+**Conditional names,** only if the platform cannot read a seller's data: `PAYPAL_DEMO_SELLER_CLIENT_ID`, `PAYPAL_DEMO_SELLER_CLIENT_SECRET`, for one labeled sandbox seller.
+**Reused:** `OPENAI_API_KEY`, `AI_MODEL`, `AI_MENU_TRANSLATION_MODEL`, `PAYPAL_*`, `DATABASE_URL`.
+
+**New dependencies, each installed only inside its slice:** `ag-charts-community` and `ag-charts-react` (S46), and Render's TypeScript SDK (S50).
+
+**PayPal surface added:** capture refund, seller receivable breakdown, and reads through PayPal's hosted MCP server at `mcp.sandbox.paypal.com`, over SSE or Streamable HTTP [vendor claim]. `@paypal/agent-toolkit` is not installed: it requires `ai` ^4 and `zod` ^3, while Envoi runs `ai` 7.0.130 and `zod` 4 [verified].
+
+**Render:** `plan: starter` at $7 a month [vendor claim], plus Workflow compute by the second. Workflows has no free instance [vendor claim]. GitHub Actions keeps the maintenance runner.
+
+### Risks and falsifiers
+
+- **R-F1 [unknown], PayPal's sandbox server.** Which path works with Envoi's client is unsettled, and one public issue reports every sandbox tool failing with `Unsupported cache mode: default`. S45's first check is outside the repository. If the server cannot serve Envoi, stop and ask. Direct REST reads are built only if the user agrees, and then no claim to use PayPal's agent tools is made.
+- **R-F2 [unknown], reading a seller.** App credentials may not read another seller's transactions, or refund their capture without the seller's permission. S45 tests both on sandbox first. If not, the demo uses one labeled seller's own credentials, and the copilot's `list_transaction` and `get_merchant_insights` stay off for every other shop.
+- **R-F3, write tools on the server.** PayPal's server exposes write tools such as `pay_order` to any token that may call them. Envoi's allow-list filters them before the model, and a test proves an unlisted call is refused before it leaves Envoi.
+- **R-F4, ownership.** A submitted seller id does not prove ownership. The operator decides at approval.
+- **R-F5 [unknown], Workflows access.** A Hobby workspace may need a card. If the user will not add one, keep Starter, cut the Workflow and make no Workflows claim.
+- **R-F6, scan counts.** They can be inflated within the limit, so they read "scans".
+- **R-F7, sign-up abuse.** Strangers can create accounts and pending shops. The limits, the absence of any public page before approval and `MERCHANT_SIGNUP_ENABLED` as a kill switch bound it.

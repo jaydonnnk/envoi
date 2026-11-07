@@ -1,5 +1,7 @@
 # Program Design: Envoi
 
+**REOPENED and RE-APPROVED 2026-11-07 for the fourth build plan** ("Approve Gate 3"). Approval authorizes no code change, install, migration, model call, spend, merge, push or deploy. See the [reopening](#reopening-2026-11-07-fourth-build-plan).
+
 **REOPENED and RE-APPROVED 2026-11-06 for the Show the stall language order** ("Yes . Reopen gates 1 to 3 for that minor fix and fix it . I pre approve the changes"): English, 中文, Melayu, தமிழ், opening on English. No type, route or named test changes. Approval authorizes no commit, merge, push or deploy.
 
 **REOPENED and RE-APPROVED 2026-11-04 to add Show the stall (S42)** ("Alright fine, reopne gates 1 to 4 to add this in and then add it to the build plan").
@@ -3134,3 +3136,175 @@ unpaid_closed -> uncertain   (reason crypto_read_unverified)
 **Instructions.** The assistant calls `offer_basket` when suggesting one exact basket, tells the person if it refuses and does not ask, and calls `propose_basket` only after they accept.
 
 **Least confident.** [hypothesis] The model calls `offer_basket` reliably enough for the button to appear. A missed call loses only the button: typing yes still works, and the rerun measures it.
+
+## Reopening 2026-11-07: fourth build plan
+
+**Status: approved 2026-11-07 ("Approve Gate 3"), not built.** For [Gate 1](01-product.md#fourth-build-plan-proposed-2026-11-07) and [Gate 2](02-architecture.md#fourth-build-plan-amendment-2026-11-07), both approved 2026-11-07.
+Approval authorizes no code change, install, migration, model call, spend, merge, push or deploy.
+
+### Files
+
+| File | Slice | Why |
+| --- | --- | --- |
+| `src/app/page.tsx` | S44 | New headline and buttons |
+| `src/app/for-shops/page.tsx` | S44 | Public shops page; reads no database |
+| `src/app/for-shops/fee-calculator.tsx` | S44 | Client calculator over the rate constants |
+| `src/domain/fees/paypal-rates.ts` | S44 | Reviewed rates with source and date, and the pure fee function |
+| `src/app/buy/ask/ask-envoi.tsx` | S44 | Collapses the steps under "How this was checked" |
+| `src/integrations/paypal/agent-tools.ts` | S45 | Connection to PayPal's MCP server and the allow-list |
+| `src/integrations/assistant/merchant-copilot.ts` | S45 | One copilot turn, reusing the turn gate pattern |
+| `src/app/api/v1/merchant/outlets/[id]/copilot/route.ts` | S45 | Member-only turn route |
+| `src/app/api/v1/merchant/outlets/[id]/orders/[orderId]/refund/route.ts` | S45 | Member-only refund from a confirmation |
+| `src/domain/payments/refunds.ts` | S45 | Refund rules and state |
+| `src/integrations/paypal/orders.ts` | S45 | Adds `refundCapture` to `PayPalWriteClient` |
+| `src/app/merchant/orders/copilot-panel.tsx` | S45 | Chat, calls made and refund confirmation |
+| `src/integrations/paypal/map.ts`, `src/domain/purchases/reconcile.ts`, `src/domain/payments/attempts.ts` | S46 | Reads and stores fee, net and country |
+| `src/domain/purchases/sales-summary.ts`, its route | S46 | Server totals |
+| `src/domain/purchases/order-filter.ts`, `src/integrations/ai/order-filter.ts` | S46 | Adds `sort` and `view` |
+| `src/app/merchant/orders/orders-grid.tsx`, `orders-view.tsx`, `sales-chart.tsx` | S46 | Columns, pinned totals, CSV, second grid and chart |
+| `src/domain/purchases/digest.ts`, `src/integrations/ai/digest.ts`, its route | S47 | Figures, template call and substitution |
+| `src/domain/sgqr/demand.ts`, `src/app/api/v1/outlets/resolve-sgqr/route.ts`, `src/app/buy/scan/scan-sticker.tsx` | S48 | Count and card |
+| `src/app/merchant/setup/poster/page.tsx` | S49 | Printable poster |
+| `render.yaml`, `workflows/tourist-ready.ts`, `src/domain/menu/prepare.ts` | S50 | Plan, flow and trigger |
+| `src/lib/auth.ts`, `src/domain/outlets/merchant.ts`, `src/domain/outlets/destination.ts`, `src/app/merchant/setup/*` | S43 | Sign-up, pending shop, seller request and waiting state |
+| `src/lib/ratelimit.ts`, `src/lib/db/schema.ts`, `drizzle/0032` to `0035` | Each | Buckets and additive columns |
+| `src/env.ts`, `.env.example`, `render.yaml`, `README.md` | Each | Every new name and claim, kept in step |
+
+### Types and signatures
+
+```ts
+// src/domain/fees/paypal-rates.ts
+type PayPalRate = { percentBasisPoints: number | null; fixedMinor: number | null; source: string; readOn: string };
+type FeeResult = { kind: "known"; feeMinor: number; netMinor: number } | { kind: "unknown" };
+function feeOn(orderMinor: number, rate: PayPalRate): FeeResult;
+
+// src/integrations/paypal/agent-tools.ts
+const PAYPAL_MCP_HOST: "https://mcp.sandbox.paypal.com"; // a code constant, never a setting
+const ALLOWED_PAYPAL_TOOLS: readonly ["get_order", "get_merchant_insights", "list_transaction", "list_disputes", "get_dispute"];
+type PayPalTools = { names: readonly string[]; call(name: AllowedPayPalTool, args: unknown, signal: AbortSignal): Promise<ToolAnswer>; close(): Promise<void> };
+function connectPayPalTools(token: () => Promise<string>, fetch?: typeof globalThis.fetch): Promise<PayPalTools>;
+
+// src/integrations/assistant/merchant-copilot.ts
+type RefundProposal = { orderId: string; amountMinor: number; currency: Currency };
+type CopilotStep = { operation: string; status: number | null; ms: number };
+type CopilotResult =
+  | { kind: "reply"; text: string; steps: CopilotStep[]; refund: RefundProposal | null }
+  | { kind: "stopped"; reason: "tool_calls" | "time"; steps: CopilotStep[] }
+  | { kind: "failed"; steps: CopilotStep[] };
+function runCopilotTurn(config: CopilotConfig, outletId: string, turns: readonly CopilotTurn[]): Promise<CopilotResult>;
+
+// src/domain/payments/refunds.ts
+type RefundState = "sent" | "completed" | "failed" | "checking";
+function sendFullRefund(db: Db, client: PayPalWriteClient, input: { outletId: string; orderId: string; actorUserId: string; now: Date }): Promise<Refund | AppError>;
+
+// src/integrations/paypal/orders.ts
+refundCapture(captureId: string, requestId: string): Promise<ProviderResult<ProviderRefund>>;
+
+// src/domain/purchases/reconcile.ts
+type ProviderCapture = { id: string | null; status: string; amount: ProviderAmount | null; feeMinor: number | null; netMinor: number | null };
+// PayPalOrder gains payerCountry: string | null
+
+// src/domain/purchases/sales-summary.ts
+type SalesSummary = { currency: Currency; paidMinor: number; paidCount: number; knownFeeMinor: number; knownNetMinor: number; unknownFeeCount: number; byRail: RailTotal[] };
+function salesSummary(db: Db, outletId: string, from: Date, to: Date): Promise<SalesSummary[]>; // one per currency
+
+// src/domain/purchases/order-filter.ts, added to OrderFilterSchema
+sort?: { column: "time" | "total" | "fee" | "net"; direction: "asc" | "desc" };
+view?: "all" | "paid" | "needs_attention" | "overseas";
+
+// src/domain/purchases/digest.ts
+const DIGEST_PLACEHOLDERS: readonly ["paid_total", "paid_count", "net_total", "fee_total"];
+function fillDigest(template: string, figures: DigestFigures): { kind: "ok"; text: string } | { kind: "refused"; reason: "digit" | "unknown_placeholder" };
+
+// src/domain/sgqr/demand.ts
+function stickerHash(scheme: string, identifier: string, key: string): string; // HMAC-SHA256, hex
+function recordNoMatchScan(db: Db, hash: string, subject: string, now: Date): Promise<void>; // never throws to the buyer
+function scanCount(db: Db, hash: string): Promise<number>;
+
+// src/domain/outlets/merchant.ts
+function createPendingOutlet(db: Db, input: OutletInput & { userId: string; now: Date }): Promise<CreatedOutlet | AppError>;
+function requestSeller(db: Db, input: { outletId: string; sellerMerchantId: string; userId: string; now: Date }): Promise<MerchantOutlet | AppError>;
+
+// src/domain/menu/prepare.ts
+function triggerTouristReady(input: { outletId: string; revisionId: string }, trigger: WorkflowTrigger): Promise<void>; // logs and returns on any failure
+```
+
+### Call stacks
+
+**Copilot turn.** `copilot/route.ts`, then `requireOutletMembership`, the enrollment check, `admit("merchant_copilot")`, `runCopilotTurn`, `connectPayPalTools`, `generateText` with local tools, then each allowed call and an outlet filter on its result, then `close` in `finally`.
+
+**Refund.** `refund/route.ts`, then membership, `sendFullRefund`, a transaction that claims one refund row by unique attempt and idempotency key, `PayPalWriteClient.refundCapture` outside the transaction, then the state update and audit. A lost response stays `checking`, and maintenance's read decides it.
+
+**Fee.** The existing capture or read path, then `mapOrder`, the existing verification unchanged, then the same attempt update adding fee, net and country when present.
+
+**Sales desk.** `page.tsx`, then the existing orders route and `sales-summary` route. The grid takes `pinnedBottomRowData` from the summary, never from loaded rows.
+
+**Digest.** `digest/route.ts`, then membership, enrollment, `admit("merchant_digest")`, `salesSummary`. An empty week returns no summary and makes no call. Otherwise the model call, then `fillDigest`.
+
+**Stall scan.** `resolve-sgqr/route.ts`, then `resolveSgqr`, and only on `no_match` with an identifier, `stickerHash`, `admit("sticker_scan")` and `recordNoMatchScan`. A failure to count changes nothing the buyer sees.
+
+**Sign-up.** `POST /api/auth/sign-up/email`, then a `hooks.before` guard checking `MERCHANT_SIGNUP_ENABLED` and `admit("merchant_signup")`, then Better Auth, `createPendingOutlet`, `requestSeller`, and later the operator's `assign-paypal-destination` and `approve-enrollment`, `acceptPayPalConnection` and `publishOutlet`, all unchanged.
+
+**Workflow.** `publish/route.ts`, then `publishOutlet` commits, then `triggerTouristReady` with a short timeout. In the Workflow: one retried step per language, each calling `getOrCreateTranslation`.
+
+### Test plan
+
+Numbers continue from test 61. Each guard gets its own mutation with a distinct failing check. Provider fakes stay at the existing boundaries, and PayPal's MCP server is faked at its fetch boundary.
+
+| # | Slice | Name | Asserts |
+| --- | --- | --- | --- |
+| 62 | S44 | `the fee calculator matches the rate exactly` | S$4.50, S$15 and S$50, domestic and international |
+| 63 | S44 | `no shops or landing copy says cheaper` | The served pages hold no savings claim |
+| 64 | S44 | `a rate shows its date or reads unknown` | A null rate gives `unknown`, never zero |
+| 65 | S45 | `the copilot cannot reach a tool outside its allow-list` | `pay_order` listed by the server never reaches the model or the transport |
+| 66 | S45 | `a model request cannot send a refund` | No model output reaches `refundCapture` |
+| 67 | S45 | `a refund needs the signed-in merchant's confirmation` | Another member, a buyer and no session are refused |
+| 68 | S45 | `one merchant's question reads no other merchant's order` | A foreign order id or payee is dropped |
+| 69 | S45 | `PayPal text is data, not instructions` | An injected note changes no tool call |
+| 70 | S45 | `a refund leaves the Paid record intact` | State stays `paid`, with a refund beside it |
+| 71 | S45 | `an expired PayPal token is refreshed once` | One retry, then a failed turn |
+| 72 | S45 | `a second refund of one capture sends nothing` | The unique claim holds under concurrency |
+| 73 | S46 | `a missing fee shows as unknown, never zero` | Null fields survive to the row and the totals |
+| 74 | S46 | `a missing fee never blocks Paid` | Verification's result does not change |
+| 75 | S46 | `totals count paid orders only` | Pending and uncertain rows add nothing |
+| 76 | S46 | `the model's answer can change only filters, sort and view` | Other fields make the answer no filter |
+| 77 | S46 | `an order is called overseas only from PayPal's country` | Null or the shop's own country is not overseas |
+| 78 | S47 | `a digest holding a figure the code did not compute is refused` | Any digit or unknown placeholder refuses |
+| 79 | S47 | `no sales language is invented on an empty week` | No model call, no summary |
+| 80 | S48 | `an unenrolled scan stores no name or sticker text` | Row columns and logs hold neither, proved with a planted needle |
+| 81 | S48 | `the hash cannot be read back without the key` | A different key gives a different hash |
+| 82 | S48 | `one session cannot inflate a count past its limit` | The bucket stops the write |
+| 83 | S48 | `the card appears only for a no-match scan` | Ambiguous and matched scans do not show it |
+| 84 | S48 | `a failure to count changes nothing for the buyer` | The answer is unchanged |
+| 85 | S49 | `the poster labels the shop as a test shop while it is one` | The label and "not a payment code" render |
+| 86 | S49 | `a hidden shop stays reachable by its own link` | Off the list, open by link |
+| 87 | S50 | `a failed run leaves publication and on-demand translation working` | A thrown trigger still answers 200 |
+| 88 | S50 | `a repeated run makes no duplicate translation` | One row per revision and language |
+| 89 | S43 | `a stranger can sign up and create one pending shop` | Replaces `public signup is refused`, through this recorded change |
+| 90 | S43 | `sign-up stays refused while its switch is off` | Keeps the old guard's meaning when off |
+| 91 | S43 | `a pending shop cannot publish or take a payment` | Publication and start both refuse |
+| 92 | S43 | `an approved shop can publish` | The operator's commands open it |
+| 93 | S43 | `a signed-up account reaches no other merchant's outlet or orders` | Every member route refuses |
+| 94 | S43 | `sign-up over its limit creates no account` | Both windows |
+| 95 | S43 | `a buyer session that signs up keeps its receipts and gains no membership` | `onLinkAccount` unchanged |
+| 96 | S43 | `a second self-created shop is refused` | One per account |
+| 97 | S43 | `a pending shop reaches no web import or copilot` | No Kernel or model call |
+| 98 | S43 | `a self-created shop shows its test label on the buyer's screens` | Label on list, shop, review and receipt |
+
+**Revised, with this record:** `tests/unit/landing-page.test.ts` for the new headline, and `public signup is refused`, replaced by tests 89 and 90.
+
+**Evaluations, pre-registered before any paid call:** copilot fixed questions with zero invented amounts; order filter sentences with sort and view; digest cases with zero refused outputs reaching a screen.
+
+**OpenAI spend:** one ledger and meter, capped at US$5, if the user authorizes it.
+
+### Least confident decisions
+
+1. **PayPal's MCP server from a web route.** One connection per turn copies the buyer agent, but sandbox reliability is [unknown]. If each connect is slow, the 60-second turn suffers.
+2. **Platform token.** The token may see Envoi's own account only. Then `list_transaction` and `get_merchant_insights` show the wrong data, so they stay off unless S45's check proves them, and the copilot uses `get_order` and Envoi's own orders.
+3. **Refund permission.** A refund on another seller's capture may need the seller's permission. If so, it runs only for the labeled demo seller's credentials.
+4. **`hooks.before` for the limit.** Better Auth's hook API must allow a refusal before creating anything. S43 proves it before building on it.
+5. **Pending shop without a membership approval.** `createMerchantOutlet` today consumes an approved membership. `createPendingOutlet` bypasses that and relies on one-per-account and the unchanged publication checks.
+6. **Fixed views and sorts.** A small list limits what "ask your orders" can do, but keeps the model unable to change anything else.
+7. **No digits in the digest template.** It refuses even a harmless "2 tips", so some outputs show nothing. That is the safer failure.
+8. **Five prepared languages.** `en`, `zh`, `ms`, `es` and `ja` follow the supported list, plus English explanations for Western visitors. The translation evaluation did not cover every pair, so the language claim stays as it is.
+9. **Workflow database access.** It reuses the web role and its URL as a dashboard secret. A narrower role would be cleaner, but costs a migration before the freeze.
