@@ -1,6 +1,6 @@
 {
- "note": "S44 mutations, 2026-11-07. Unit project over tests/unit/for-shops, landing-page and ask-envoi-checked; each applied alone and restored.",
- "baseline_tests": 46,
+ "note": "S44 mutations, 2026-11-07, rerun after the /for-shops review. Unit project over tests/unit/for-shops, landing-page and ask-envoi-checked; each applied alone and restored.",
+ "baseline_tests": 49,
  "results": [
   {
    "mutation": "M62a fee rounds down, not half up",
@@ -8,8 +8,7 @@
    "failing": [
     "the fee calculator matches the rate exactly international 450",
     "the fee calculator matches the rate exactly domestic 450",
-    "the fee calculator matches the rate exactly domestic 1500",
-    "the fee calculator matches the rate exactly shows the approved worked orders on the page"
+    "the fee calculator matches the rate exactly domestic 1500"
    ],
    "restored_passes": true
   },
@@ -23,7 +22,11 @@
     "the fee calculator matches the rate exactly domestic 450",
     "the fee calculator matches the rate exactly domestic 1500",
     "the fee calculator matches the rate exactly domestic 5000",
-    "the fee calculator matches the rate exactly shows the approved worked orders on the page",
+    "the fee calculator matches the rate exactly micropayment 450",
+    "the fee calculator matches the rate exactly micropayment 1500",
+    "the fee calculator matches the rate exactly micropayment 5000",
+    "the fee calculator matches the rate exactly shows the typed order's fee and what the shop keeps",
+    "the fee calculator matches the rate exactly the micropayment rate costs more above the S$26 the pitch names",
     "the fee calculator matches the rate exactly gives no number when the fee would pass the order"
    ],
    "restored_passes": true
@@ -36,9 +39,9 @@
     "the fee calculator matches the rate exactly international 1500",
     "the fee calculator matches the rate exactly international 5000",
     "the fee calculator matches the rate exactly holds the rates read from PayPal's own page",
-    "the fee calculator matches the rate exactly states the fee as a share of the order, before rounding to the cent",
-    "the fee calculator matches the rate exactly shows the approved worked orders on the page",
-    "a rate shows its date or reads unknown the page shows each read rate with its source and date"
+    "the fee calculator matches the rate exactly shows the typed order's fee and what the shop keeps",
+    "the fee calculator matches the rate exactly the micropayment rate costs more above the S$26 the pitch names",
+    "a rate holds its date or reads unknown the page says each rate in plain words, with its source and no date"
    ],
    "restored_passes": true
   },
@@ -50,13 +53,38 @@
     "the fee calculator matches the rate exactly domestic 1500",
     "the fee calculator matches the rate exactly domestic 5000",
     "the fee calculator matches the rate exactly holds the rates read from PayPal's own page",
-    "the fee calculator matches the rate exactly shows the approved worked orders on the page",
-    "a rate shows its date or reads unknown the page shows each read rate with its source and date"
+    "a rate holds its date or reads unknown the page says each rate in plain words, with its source and no date"
    ],
    "restored_passes": true
   },
   {
-   "mutation": "M62e net is not order minus fee",
+   "mutation": "M62e micropayment percent read wrong",
+   "file": "src/domain/fees/paypal-rates.ts",
+   "failing": [
+    "the fee calculator matches the rate exactly micropayment 450",
+    "the fee calculator matches the rate exactly micropayment 1500",
+    "the fee calculator matches the rate exactly micropayment 5000",
+    "the fee calculator matches the rate exactly shows the typed order's fee and what the shop keeps",
+    "the fee calculator matches the rate exactly the micropayment rate costs more above the S$26 the pitch names",
+    "the shops page states the approved pitch and what it costs"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "M62f micropayment fixed fee read wrong",
+   "file": "src/domain/fees/paypal-rates.ts",
+   "failing": [
+    "the fee calculator matches the rate exactly micropayment 450",
+    "the fee calculator matches the rate exactly micropayment 1500",
+    "the fee calculator matches the rate exactly micropayment 5000",
+    "the fee calculator matches the rate exactly shows the typed order's fee and what the shop keeps",
+    "the fee calculator matches the rate exactly the micropayment rate costs more above the S$26 the pitch names",
+    "the shops page states the approved pitch and what it costs"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "M62g net is not order minus fee",
    "file": "src/domain/fees/paypal-rates.ts",
    "failing": [
     "the fee calculator matches the rate exactly international 450",
@@ -65,12 +93,15 @@
     "the fee calculator matches the rate exactly domestic 450",
     "the fee calculator matches the rate exactly domestic 1500",
     "the fee calculator matches the rate exactly domestic 5000",
-    "the fee calculator matches the rate exactly shows the approved worked orders on the page"
+    "the fee calculator matches the rate exactly micropayment 450",
+    "the fee calculator matches the rate exactly micropayment 1500",
+    "the fee calculator matches the rate exactly micropayment 5000",
+    "the fee calculator matches the rate exactly shows the typed order's fee and what the shop keeps"
    ],
    "restored_passes": true
   },
   {
-   "mutation": "M62f invalid order gets a number",
+   "mutation": "M62h invalid order gets a number",
    "file": "src/domain/fees/paypal-rates.ts",
    "failing": [
     "the fee calculator matches the rate exactly gives no number for an order that is not a positive whole amount"
@@ -78,19 +109,10 @@
    "restored_passes": true
   },
   {
-   "mutation": "M62g fee past the order gets a number",
+   "mutation": "M62i fee past the order gets a number",
    "file": "src/domain/fees/paypal-rates.ts",
    "failing": [
     "the fee calculator matches the rate exactly gives no number when the fee would pass the order"
-   ],
-   "restored_passes": true
-  },
-  {
-   "mutation": "M62h percent taken from the rounded fee",
-   "file": "src/domain/fees/paypal-rates.ts",
-   "failing": [
-    "the fee calculator matches the rate exactly states the fee as a share of the order, before rounding to the cent",
-    "the fee calculator matches the rate exactly shows the approved worked orders on the page"
    ],
    "restored_passes": true
   },
@@ -140,7 +162,7 @@
    "mutation": "M64a null percent no longer unknown",
    "file": "src/domain/fees/paypal-rates.ts",
    "failing": [
-    "a rate shows its date or reads unknown a null percent gives unknown, never zero"
+    "a rate holds its date or reads unknown a null percent gives unknown, never zero"
    ],
    "restored_passes": true
   },
@@ -148,7 +170,7 @@
    "mutation": "M64b null fixed fee no longer unknown",
    "file": "src/domain/fees/paypal-rates.ts",
    "failing": [
-    "a rate shows its date or reads unknown a null fixed fee gives unknown, never zero"
+    "a rate holds its date or reads unknown a null fixed fee gives unknown, never zero"
    ],
    "restored_passes": true
   },
@@ -156,7 +178,7 @@
    "mutation": "M64c missing date no longer unknown",
    "file": "src/domain/fees/paypal-rates.ts",
    "failing": [
-    "a rate shows its date or reads unknown a rate with no read date gives unknown"
+    "a rate holds its date or reads unknown a rate with no read date gives unknown"
    ],
    "restored_passes": true
   },
@@ -164,15 +186,16 @@
    "mutation": "M64d unknown prints zero",
    "file": "src/app/for-shops/fee-calculator.tsx",
    "failing": [
-    "a rate shows its date or reads unknown the calculator prints Unknown and no amount for an unread rate"
+    "a rate holds its date or reads unknown the calculator prints Unknown and no amount for an unread rate"
    ],
    "restored_passes": true
   },
   {
-   "mutation": "M64e rate line loses its date",
+   "mutation": "M64e a date returns to the screen",
    "file": "src/app/for-shops/fee-calculator.tsx",
    "failing": [
-    "a rate shows its date or reads unknown the page shows each read rate with its source and date"
+    "a rate holds its date or reads unknown the page says each rate in plain words, with its source and no date",
+    "the shops page states the approved pitch and what it costs"
    ],
    "restored_passes": true
   },
@@ -180,7 +203,7 @@
    "mutation": "M64f source link removed",
    "file": "src/app/for-shops/fee-calculator.tsx",
    "failing": [
-    "a rate shows its date or reads unknown the page shows each read rate with its source and date"
+    "a rate holds its date or reads unknown the page says each rate in plain words, with its source and no date"
    ],
    "restored_passes": true
   },
@@ -188,7 +211,7 @@
    "mutation": "M64g unread rate line prints no unknown",
    "file": "src/app/for-shops/fee-calculator.tsx",
    "failing": [
-    "a rate shows its date or reads unknown the calculator prints Unknown and no amount for an unread rate"
+    "a rate holds its date or reads unknown the calculator prints Unknown and no amount for an unread rate"
    ],
    "restored_passes": true
   },
@@ -213,6 +236,22 @@
    "file": "src/app/for-shops/page.tsx",
    "failing": [
     "the shops page promises no public sign-up and no poster before their slices exist"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "MF4 micropayment catch removed",
+   "file": "src/app/for-shops/page.tsx",
+   "failing": [
+    "the shops page states the approved pitch and what it costs"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "MF5 micropayment row removed",
+   "file": "src/app/for-shops/fee-calculator.tsx",
+   "failing": [
+    "the fee calculator matches the rate exactly shows the typed order's fee and what the shop keeps"
    ],
    "restored_passes": true
   },

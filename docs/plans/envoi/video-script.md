@@ -32,3 +32,15 @@ Each spoken claim must appear in the [evidence pack](evidence-pack.md); cut any 
 - Any secret: `.env.local`, Render or GitHub settings, a PayPal or Neon console with credentials, a wallet seed phrase, the judge merchant's password.
 - AI menu drafting from photos, which is not claimed: no vision model met its threshold in four rounds.
 - Any usability, completion-rate, timing or ease-of-use claim.
+
+## Lines for the rewrite
+
+Use this when the script is rewritten after S49.
+
+**PayPal World line, chosen by the user on 2026-11-07:**
+
+> PayPal World connects wallets to local QR networks, but it has not reached Singapore. Envoi shows what that could look like for visitors here, one enrolled shop at a time.
+
+- **Angle:** it has not been done in Singapore yet, so Envoi shows the idea working.
+- **Do not say:** that Envoi works for or with PayPal, connects to SGQR or PayPal World, or is a partner.
+- **Check first:** re-read whether PayPal World has reached Singapore on the day of recording; a change makes this line wrong. See the [evidence pack](evidence-pack.md).

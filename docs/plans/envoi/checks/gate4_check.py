@@ -432,7 +432,8 @@ for f, text in current.items():
 # 2026-11-02: the MCP client reopening, re-approved by the user ("Approved"); 48e7e159...945758c was the draft, bfa13baa...f048499 the approved S25 limiter bucket text before it.
 # 2026-11-07: the S34 accept button reopening, re-approved by the user ("Approve Gate 3"); fc342680...8f602b was the pin before it.
 # 2026-11-07: the fourth build plan, re-approved by the user ("Approve Gate 3").
-G3_REOPENING_SHA256 = "f73dcb41af93182490fa862aee620dc62f3531b0aeebd655b6609c9a3b5b8e0f"
+# 2026-11-07: S44 test 64 and fee constants, re-approved by the user ("Yes to gate 1 and gate 3 changes as well").
+G3_REOPENING_SHA256 = "d4161092b905d156ce3199d50ea0548278b4668b15d8eaa05cfd47f14e080592"
 # 02-architecture.md may likewise equal its continuation amendment text, re-approved by the user on 2026-10-25
 # (bc504e10...d0e47a9f was the shop QR and order archive text, re-approved on 2026-10-24,
 # 28d54654...45561154 the Phantom landing text of 2026-10-18, 938d0a99...f3bf30a6 the English-only text of 2026-10-15).
@@ -459,7 +460,7 @@ G1_MOCKUP_SHA256 = {
     os.path.join("mockups", "landing-tourist.html"): "84f6dfab3c87830603ef0f938a0b621159fd42ad9e48f3afa82a4f4f79c15775",
     os.path.join("mockups", "buyer-ask-checked.html"): "4ec8537c13de5d5efabeffe7315937bc046f92733e0babec9ba876ecae1cb53d",
     os.path.join("mockups", "buyer-unenrolled-scan.html"): "ccd23145abb0e71ea044a954e45be5d925825a1efbd100d46c5998af16e9becc",
-    os.path.join("mockups", "for-shops.html"): "d5c51c10707e0b4951d76db191f332690fd559583e3247dce58426f8c7eb2167",
+    os.path.join("mockups", "for-shops.html"): "21d16b9386f763306cc461b818888b976cd824b55004ab2dddf73b30842e4892",
     os.path.join("mockups", "merchant-desk.html"): "ec8146f8649586f54dfcfe3e137be8fd682f528afd80f00df3dc81587bbfde6d",
     os.path.join("mockups", "merchant-copilot.html"): "a82787d6a0e8bdd5edb27bc8480a00940753cda0d4e4b84745ea0b33b07b1412",
     os.path.join("mockups", "merchant-poster.html"): "239511e5117789b220220c902afa2f8a23f55c4cc6086a130a957760f5e2b7a5",
@@ -490,7 +491,8 @@ G1_MOCKUP_SHA256 = {
 # 2026-10-29: the PDF answer, by the user's decision "Add a PDF answer" (be9105a2...82e9a2da was the text before it).
 # 2026-10-29: the second build plan, re-approved by the user ("Approve Gate 1"); 74f101fc...c52418d3 was the body before it.
 # 2026-11-07: the fourth build plan, re-approved by the user ("Approve Gate 1").
-G1_BODY_SHA256 = "c807a0282fb311286cd10fceb2b0aefeb875c3618d1ea195c535a1bc7324de32"
+# 2026-11-07: the S44 shops page, re-approved by the user ("Yes to gate 1 and gate 3 changes as well").
+G1_BODY_SHA256 = "2cdcfd3b166d856ca7db7c3242efb5d227bb885c9e4b7e7d8914e7feb4730734"
 for root, _, files in os.walk(folder):
     for name in sorted(files):
         rel = os.path.relpath(os.path.join(root, name), folder)

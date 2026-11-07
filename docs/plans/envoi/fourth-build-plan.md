@@ -76,7 +76,7 @@ Branch: `envoi/slice-44-tourist-pitch`.
 
 - **Visible result.** The landing page leads with the new headline. "I run a shop" opens a new `/for-shops` page, with the pitch and a fee calculator, before any sign-in.
 - **Builds.** `src/app/page.tsx` copy; `/for-shops`; the calculator from reviewed rate constants, each with its source and date; developer wording on `/buy/ask` collapsed under "How this was checked".
-- **Tests.** The calculator's exact results for S$4.50, S$15 and S$50, domestic and international; no screen says "cheaper"; every rate shows its date. `tests/unit/landing-page.test.ts` is revised through a recorded Gate 3 change.
+- **Tests.** The calculator's exact results for S$4.50, S$15 and S$50, domestic and international; no screen says "cheaper"; every rate holds its date, off screen by the user's 2026-11-07 review. `tests/unit/landing-page.test.ts` is revised through a recorded Gate 3 change.
 - **Falsifier.** A rate cannot be read from PayPal's own page: that rate shows as unknown, not as a number.
 - **Authorizations.** Start, then merge, push and deploy.
 
@@ -220,6 +220,10 @@ A stranger can apply without the operator making an account, and an admin still 
 Ask the hackathon contacts:
 
 > Your US fee page lists a lower rate for QR code payments, including through a third-party integrator, so if a tourist scans a shop's QR in our app and pays through normal PayPal Checkout, does the shop pay that QR rate or the standard rate, and does Singapore have a QR rate at all?
+
+Added 2026-11-07, from the S44 review:
+
+> Is the micropayment rate open to a Singapore food stall selling physical goods? Your help article speaks of digital goods. Does a payment through normal PayPal Checkout at a counter count for Seller Protection, given your terms name a goods and services QR code?
 
 The answer changes the fee calculator and the merchant pitch. It blocks no slice: the standard rate stands until PayPal says otherwise.
 

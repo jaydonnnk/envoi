@@ -2,7 +2,7 @@
 
 Updated: 2026-11-07 (Asia/Singapore).
 
-- Gate 1 - Product: **REOPENED and RE-APPROVED 2026-11-07 for the fourth build plan, including admin approval of sign-ups** ("Approve Gate 1", given twice); approval starts no slice and authorizes no install, model call, migration, spend, publication, commit, merge, push or deploy; see the [record](#gates-1-2-3-and-4-reopening-2026-11-07-fourth-build-plan). Before that: **REOPENED and RE-APPROVED 2026-11-07 for the S34 accept button** ("I pre approve ur gate 1 and gatte 4 changes"); see the [record](#s34-accept-button-2026-11-07). Before that: **REOPENED and RE-APPROVED 2026-11-06 for the Show the stall language order** ("Yes . Reopen gates 1 to 3 for that minor fix and fix it . I pre approve the changes"); see the [record](#show-the-stall-language-order-2026-11-06).
+- Gate 1 - Product: **REOPENED and RE-APPROVED 2026-11-07 for the S44 shops page** ("Yes to gate 1 and gate 3 changes as well"); see the [S44 record](#s44-the-tourist-pitch-2026-11-07). Before that: **REOPENED and RE-APPROVED 2026-11-07 for the fourth build plan, including admin approval of sign-ups** ("Approve Gate 1", given twice); approval starts no slice and authorizes no install, model call, migration, spend, publication, commit, merge, push or deploy; see the [record](#gates-1-2-3-and-4-reopening-2026-11-07-fourth-build-plan). Before that: **REOPENED and RE-APPROVED 2026-11-07 for the S34 accept button** ("I pre approve ur gate 1 and gatte 4 changes"); see the [record](#s34-accept-button-2026-11-07). Before that: **REOPENED and RE-APPROVED 2026-11-06 for the Show the stall language order** ("Yes . Reopen gates 1 to 3 for that minor fix and fix it . I pre approve the changes"); see the [record](#show-the-stall-language-order-2026-11-06).
   **REOPENED and RE-APPROVED 2026-11-04 to add Show the stall (S42)** ("Alright fine, reopne gates 1 to 4 to add this in and then add it to the build plan"). See the [record](#gates-1-2-3-and-4-reopening-2026-11-04-show-the-stall). Before that:
   **REOPENED and RE-APPROVED 2026-11-04 for the third build plan** ("I dont need s39 and s40. Other than that, all is approved, after u redo the build order"); approval starts no slice and authorizes no migration, model call, commit, merge, push or deploy; see the [record](#gates-1-2-3-and-4-reopening-2026-11-04-third-build-plan). Before that:
   **REOPENED and RE-APPROVED 2026-11-03** for one Ask Envoi wording change, pre-approved by the user ("fix the wording, i pre approve the gate 1 change"); see the [record](#gate-1-reopening-2026-11-03-ask-envoi-mcp-wording).
@@ -31,7 +31,7 @@ Updated: 2026-11-07 (Asia/Singapore).
   Preparation releases the unsigned bytes exactly once and never stores them, and the post-expiry window scan runs for every released attempt and records any extra transfer; see the [record](#gate-2-reopening-for-double-payment-fixes-2026-10-11).
   **Reopened and RE-APPROVED 2026-10-15** for one change, approved by the user in advance: menu photos are English only, so the consented test photos and the vision falsifier samples no longer require Chinese text; see the [record](#reopening-2026-10-15-english-only-menu-photos).
   **Reopened and RE-APPROVED 2026-10-18** ("Yea sure i approve the gates then make the relevant changes and push to main thnaks"): the phone path's Browse link also names the PYUSD rail and Phantom's browser opens the PYUSD review directly; see the [record](#reopening-2026-10-18-phantom-landing).
-- Gate 3 - Program Design: **REOPENED and RE-APPROVED 2026-11-07 for the fourth build plan** ("Approve Gate 3"); approval authorizes no code change, install, migration, model call, spend, merge, push or deploy. Reopened by "Yes reopen the gates"; see the [record](#gates-1-2-3-and-4-reopening-2026-11-07-fourth-build-plan). Before that: **REOPENED and RE-APPROVED 2026-11-07 for the S34 accept button** ("Approve Gate 3"); see the [record](#s34-accept-button-2026-11-07). Before that: **REOPENED and RE-APPROVED 2026-11-06 for crypto settlement** ("Approve Gates 2, 3, 4"); see the [record](#s38-crypto-through-paypal-2026-11-06). Before that: **REOPENED and RE-APPROVED 2026-11-06 for the Show the stall language order** ("Yes . Reopen gates 1 to 3 for that minor fix and fix it . I pre approve the changes"); see the [record](#show-the-stall-language-order-2026-11-06).
+- Gate 3 - Program Design: **REOPENED and RE-APPROVED 2026-11-07 for S44's test 64 and fee constants** ("Yes to gate 1 and gate 3 changes as well"); see the [S44 record](#s44-the-tourist-pitch-2026-11-07). Before that: **REOPENED and RE-APPROVED 2026-11-07 for the fourth build plan** ("Approve Gate 3"); approval authorizes no code change, install, migration, model call, spend, merge, push or deploy. Reopened by "Yes reopen the gates"; see the [record](#gates-1-2-3-and-4-reopening-2026-11-07-fourth-build-plan). Before that: **REOPENED and RE-APPROVED 2026-11-07 for the S34 accept button** ("Approve Gate 3"); see the [record](#s34-accept-button-2026-11-07). Before that: **REOPENED and RE-APPROVED 2026-11-06 for crypto settlement** ("Approve Gates 2, 3, 4"); see the [record](#s38-crypto-through-paypal-2026-11-06). Before that: **REOPENED and RE-APPROVED 2026-11-06 for the Show the stall language order** ("Yes . Reopen gates 1 to 3 for that minor fix and fix it . I pre approve the changes"); see the [record](#show-the-stall-language-order-2026-11-06).
   **REOPENED and RE-APPROVED 2026-11-04 to add Show the stall (S42)** ("Alright fine, reopne gates 1 to 4 to add this in and then add it to the build plan"). See the [record](#gates-1-2-3-and-4-reopening-2026-11-04-show-the-stall). Before that:
   **REOPENED and RE-APPROVED 2026-11-04 for the third build plan** ("I dont need s39 and s40. Other than that, all is approved, after u redo the build order"); approval starts no slice and authorizes no migration, model call, commit, merge, push or deploy; see the [record](#gates-1-2-3-and-4-reopening-2026-11-04-third-build-plan). Before that:
   **REOPENED 2026-11-02 for the MCP client and RE-APPROVED 2026-11-02** ("Approved"): output schemas on `/mcp`, the assistant on the MCP SDK client, test 17 replaced and test 36 added; see the [record](#gate-2-3-and-4-reopening-2026-11-02-mcp-client) and the [reopening](03-program-design.md#reopening-2026-11-02-mcp-client).
@@ -553,6 +553,14 @@ Authority: "Make a copy paste handoff prompt for the next agent to start slice 4
 Merge, push and deploy are requested by name.
 CI run 42349204583 on `6cf2b96` passed [verified, `gh run view`, 2026-11-07].
 
+**Gates 1 and 3 reopened and re-approved 2026-11-07 for the shops page, the user's words:** "Yes to gate 1 and gate 3 changes as well".
+The user reviewed the built page on localhost and asked for it to be less wordy, with fewer numbers and no dates ("dont need to add the dates as well"), coherent for merchants, with a reason to prefer it to cards, and with this pitch: "Under S$26, PayPal's micropayment rate can about halve the fee on small orders. Keep your SGQR, add no hardware", "more concise and less tacky".
+- **Gate 1:** the [amendment](01-product.md#fourth-build-plan-proposed-2026-11-07) and `mockups/for-shops.html`.
+- **Gate 3:** [test 64](03-program-design.md#reopening-2026-11-07-fourth-build-plan) now asserts the date is held and off screen, plus `PAYPAL_SG_MICROPAYMENT_INTERNATIONAL` and `readRate`.
+- **Falsifier reading, accepted by the user:** "Any screen implies savings" still stops the slice for any comparison with cards. "Costs less" on `/for-shops` compares PayPal's own two rates only.
+- **Checker pins moved [verified]:** `checks/gate4_check.py` pins the new Gate 1 body, the mockup and the Gate 3 text.
+- Gates 2 and 4 do not change. Approval authorizes no merge, push or deploy.
+
 **Rates, read first, in a browser, from PayPal's own page.**
 Source: <https://www.paypal.com/sg/business/paypal-business-fees>, Merchant tab, which says "Last Updated: 28, October 2026".
 Read on 2026-11-07.
@@ -562,60 +570,57 @@ Read on 2026-11-07.
 | Domestic, Singapore | 3.90% + fixed fee | "Standard rate for receiving domestic transactions", row MY & SG | [verified] |
 | International, Singapore seller | 4.40% + fixed fee | "Receiving international transactions": SG is in no named row, so "All other markets, All markets" applies | [verified] |
 | Fixed fee, SGD | 0.50 SGD | "Fixed fee for commercial transactions", Singapore dollar | [verified] |
+| Micropayment, international | 6.00% + 0.08 SGD | "Receiving micropayments", "All other markets (where available)", and the micropayments fixed fee; by application and pre-approval, then on all commercial payments | [verified] the rate; Singapore availability [unknown] |
 | QR rate | none listed; the word "QR" is not on the page | Whole page searched | [unknown] whether one applies; the question to PayPal stays open |
 
 These confirm the values in the user's pasted review, and no rate reads unknown.
 They are estimates for a shop deciding whether to enroll: no sale's fee was read, and S46 owns that.
 
-**Calculated at those rates, in whole cents, rounding half up.**
+**Calculated, in whole cents, rounding half up.**
 
-| Order | International | You keep | Domestic | You keep |
-| --- | --- | --- | --- | --- |
-| S$4.50 | S$0.70 (15.5%) | S$3.80 | S$0.68 (15.0%) | S$3.82 |
-| S$15.00 | S$1.16 (7.7%) | S$13.84 | S$1.09 (7.2%) | S$13.91 |
-| S$50.00 | S$2.70 (5.4%) | S$47.30 | S$2.45 (4.9%) | S$47.55 |
+| Order | International fee | Domestic fee | Micropayment fee, international |
+| --- | --- | --- | --- |
+| S$4.50 | S$0.70 | S$0.68 | S$0.35 |
+| S$15.00 | S$1.16 | S$1.09 | S$0.98 |
+| S$50.00 | S$2.70 | S$2.45 | S$3.08 |
 
-The percentage is before rounding the fee to the cent, which is how the approved mockup's 15.5% arises (S$0.698 on S$4.50), and the page says so.
+The two international lines cross at S$26.25, which is the pitch's "Under S$26".
 PayPal's page does not say how a fee larger than the sale is treated, so such an order reads unknown.
 
+**Open facts behind the pitch.**
+- Whether a food stall qualifies for micropayments is [unknown]: [PayPal's help article](https://www.paypal.com/sg/cshelp/article/what-are-micropayments-help519) says "small payments for digital goods", while the fee page has a separate digital goods table. The question is in [section 8 of the plan](fourth-build-plan.md#8-questions-only-paypal-can-answer).
+- The user's pasted answer gave 5.5% for domestic micropayments; PayPal's page gives 5.00%, so no domestic micropayment rate is on screen.
+- Its claims on group rates and Seller Protection are not in the article it cites, so both stay [unknown]. Holding shops' money as merchant of record is excluded by the rule that Envoi never holds it.
+
 **Built.**
-- `src/domain/fees/paypal-rates.ts`: `PayPalRate`, `FeeResult` and `feeOn` as Gate 3 signs them, plus `feePercentLabel` and `readRate`.
+- `src/domain/fees/paypal-rates.ts`: `PayPalRate`, `FeeResult` and `feeOn` as Gate 3 signs them, plus `readRate` and the micropayment rate.
 - `src/app/for-shops/page.tsx` and `fee-calculator.tsx`: public, and the test fails if the page imports the web database.
 - `src/app/page.tsx`: the approved headline, lead, four cards and the buttons "Scan a sticker", "Ask Envoi" and "I run a shop", which opens `/for-shops`.
-- `src/app/buy/ask/ask-envoi.tsx`: the steps closed under "How this was checked".
+- `src/app/buy/ask/ask-envoi.tsx` and `page.tsx`: the steps closed under "How this was checked", and the mockup's lead.
 - Orphaned by this slice and removed in cleanup: the `.landing-steps` and `.card.tint` styles.
 
-**Changes beyond the Gate 3 file list, none changing a decision.**
-- `src/app/buy/ask/page.tsx`: the mockup's lead replaces the developer wording that lived in this file.
-- `src/app/globals.css`, `tests/support/savings-claim.ts` and `tests/unit/ask-envoi-checked.test.ts`.
-
-**Departures from the approved mockups, for the user to accept or change.**
-1. `for-shops.html` shows "Set up my shop" and "Sign in". The page has one button, "Set up my shop", to `/merchant/setup`, plus "Shops on this test build use an account made by Envoi's operator. There is no public sign-up yet." The handoff asked for this until S43 exists.
-2. `for-shops.html` lists "A counter poster that tells visitors to scan." The line is held back because S49 builds the poster, and S49 must add it back.
-3. `landing-tourist.html` has no shop list link. "See all shops", GitHub and Evidence stay below the cards, because a visitor with no sticker and the assistant off would otherwise have no path.
-4. The mockup's calculator shows only the international rate. The page also shows the typed order at the domestic rate, because Gate 3 test 62 covers both.
-5. The language line follows the mockup, "Also available in Japanese, Malay, Spanish and Chinese.", in place of "Supported languages: ...".
-
-**Copy to watch [hypothesis].**
-"Orders already priced from your menu, shown to you in your language" is approved copy. It rests on Show the stall, which the visitor shows on their phone; the merchant's own orders screen has no language setting.
+**Departures from the other mockups, flagged to the user.**
+1. `landing-tourist.html` has no shop list link. "See all shops", GitHub and Evidence stay below the cards, because a visitor with no sticker and the assistant off would otherwise have no path.
+2. The language line follows the mockup, "Also available in Japanese, Malay, Spanish and Chinese.", in place of "Supported languages: ...".
+3. The counter poster line is gone from `/for-shops`, which keeps it truthful until S49 builds the poster. S49 may add a line.
 
 **Tests.**
-- 62 `the fee calculator matches the rate exactly`, 63 `no shops or landing copy says cheaper` and 64 `a rate shows its date or reads unknown`, in `tests/unit/for-shops.test.ts`.
+- 62 `the fee calculator matches the rate exactly`, 63 `no shops or landing copy says cheaper` and 64 `a rate holds its date or reads unknown`, in `tests/unit/for-shops.test.ts`.
 - `tests/unit/landing-page.test.ts` revised for the new headline, under the Gate 3 record.
 - Named additions: `the shops page` and `Ask Envoi's steps`.
 
-**Mutations.** 31 applied alone, each with a failing check and each restored to a passing run; none survived: [`evidence/s44-mutations.json`](evidence/s44-mutations.json).
+**Mutations.** 34 applied alone, each with a failing check and each restored to a passing run; none survived: [`evidence/s44-mutations.json`](evidence/s44-mutations.json).
 Fee faults fail several rows of test 62 by design, because each row is an exact amount, so those rows prove the rates together and not separately.
-Test 63's scanner was also proved on the page's own markup, with ten planted savings phrases.
+Test 63's scanner was also proved on the page's own markup, with ten planted savings phrases. It does not catch "costs less", and the reading above is why.
 
 **Checks, fresh, 2026-11-07, on the local disposable PostgreSQL.**
-Typecheck and lint pass; unit 443 of 443; integration 485 of 485; `npm run build`; `scripts/scan-build.ts`; `tests/e2e/run-public-api.ts`, labeled local FIXTURE only; `git diff --check`; and `gate4_check.py` all pass.
-Served HTML from `next start`: `/`, `/for-shops` and `/buy/ask` answer 200, with no savings wording and with the test badge and notice.
+Typecheck and lint pass; unit 446 of 446; integration 485 of 485; `npm run build`; `scripts/scan-build.ts`; `tests/e2e/run-public-api.ts`, labeled local FIXTURE only; `git diff --check`; and `gate4_check.py` all pass.
 
 **Screens, local only.**
-Checked in a real browser at 390 px and 1280 px: no horizontal overflow at 390 px on all three, with badge and notice present.
-Typed in the calculator: 4.50 gives S$0.70 and S$0.68, abc asks for an amount and prints no fee, and 0.40 reads Unknown.
+Checked in a real browser at 390 px and 1280 px, with badge and notice present.
 No model was called, and no message was sent in Ask Envoi, so a filled conversation and its open steps with real calls were not seen on this build.
+
+**Video note.** The user's PayPal World line is kept in [`video-script.md`](video-script.md#lines-for-the-rewrite) for the rewrite after S49.
 
 **Post-slice cleanup.** The two orphaned styles above were removed. `mockups/index.html` does not list the fourth build plan's mockups; left as it is, because each file is named directly in `01-product.md`.
 
@@ -623,7 +628,7 @@ No model was called, and no message was sent in Ask Envoi, so a filled conversat
 - [ ] Merge, push and deploy, by name, from the user.
 - [ ] The three screens on Render at 390 px and 1280 px, with the deployed commit and its CI run recorded here.
 
-**What this does not establish.** No demand, usability, savings or sales result, no fee on any actual sale, and nothing about Render until the open check runs.
+**What this does not establish.** No demand, usability, savings or sales result, no fee on any actual sale, no PayPal approval of any shop for micropayments, and nothing about Render until the open check runs.
 
 ### S34 Menu advice, 2026-11-06
 
@@ -3963,6 +3968,7 @@ All unaffected risk dispositions stand; the 2026-10-11 Gate 3 revision of the af
   It was not Gate 2, Gate 3 or Gate 4 approval, it did not start S23, and it authorized no OpenAI call, spend, photo processing, `src/` change, commit, merge, push or deploy.
   The photo-set choice was made after the builder twice recorded that F1 to F4 excludes E3, one of round 4's two real misreads, and that F1 and F2 produced the corrections the round would test.
 - 2026-10-28: the user then said "Okay lets stop photo work and finish s15", which stopped menu photo import before the 13 Nov cutoff.
+- 2026-11-07: user approved the S44 changes to Gates 1 and 3 ("Yes to gate 1 and gate 3 changes as well"), after reviewing `/for-shops` on localhost: the shorter page, no on-screen dates, the micropayment line, and test 64 revised. No merge, push or deploy is authorized by it.
   The unapproved Gate 2, Gate 3 and Gate 4 drafts were withdrawn, those three documents and their pins were restored to their approved values, S23 was removed, and no round 5 ran.
   The approved Gate 1 paragraph stays as an unused allowance, and the withdrawn drafts' substance is preserved in [`photo-import-gap-analysis.md`](photo-import-gap-analysis.md).
   It authorizes no commit, push, merge or deploy; the user asked to be shown the result first.

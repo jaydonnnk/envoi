@@ -3139,6 +3139,7 @@ unpaid_closed -> uncertain   (reason crypto_read_unverified)
 
 ## Reopening 2026-11-07: fourth build plan
 
+**Amended for S44 and re-approved 2026-11-07 ("Yes to gate 1 and gate 3 changes as well"): test 64 and the fee constants below.**
 **Status: approved 2026-11-07 ("Approve Gate 3"), not built.** For [Gate 1](01-product.md#fourth-build-plan-proposed-2026-11-07) and [Gate 2](02-architecture.md#fourth-build-plan-amendment-2026-11-07), both approved 2026-11-07.
 Approval authorizes no code change, install, migration, model call, spend, merge, push or deploy.
 
@@ -3151,6 +3152,7 @@ Approval authorizes no code change, install, migration, model call, spend, merge
 | `src/app/for-shops/fee-calculator.tsx` | S44 | Client calculator over the rate constants |
 | `src/domain/fees/paypal-rates.ts` | S44 | Reviewed rates with source and date, and the pure fee function |
 | `src/app/buy/ask/ask-envoi.tsx` | S44 | Collapses the steps under "How this was checked" |
+| `src/app/buy/ask/page.tsx`, `src/app/globals.css`, `tests/support/savings-claim.ts` | S44 | Added 2026-11-07: the lead that held developer wording, the styles, and the savings scanner |
 | `src/integrations/paypal/agent-tools.ts` | S45 | Connection to PayPal's MCP server and the allow-list |
 | `src/integrations/assistant/merchant-copilot.ts` | S45 | One copilot turn, reusing the turn gate pattern |
 | `src/app/api/v1/merchant/outlets/[id]/copilot/route.ts` | S45 | Member-only turn route |
@@ -3177,6 +3179,8 @@ Approval authorizes no code change, install, migration, model call, spend, merge
 type PayPalRate = { percentBasisPoints: number | null; fixedMinor: number | null; source: string; readOn: string };
 type FeeResult = { kind: "known"; feeMinor: number; netMinor: number } | { kind: "unknown" };
 function feeOn(orderMinor: number, rate: PayPalRate): FeeResult;
+const PAYPAL_SG_MICROPAYMENT_INTERNATIONAL: PayPalRate; // added 2026-11-07: 6.00% + S$0.08, by PayPal's approval
+function readRate(rate: PayPalRate): { percentBasisPoints: number; fixedMinor: number } | null; // added 2026-11-07
 
 // src/integrations/paypal/agent-tools.ts
 const PAYPAL_MCP_HOST: "https://mcp.sandbox.paypal.com"; // a code constant, never a setting
@@ -3255,7 +3259,7 @@ Numbers continue from test 61. Each guard gets its own mutation with a distinct 
 | --- | --- | --- | --- |
 | 62 | S44 | `the fee calculator matches the rate exactly` | S$4.50, S$15 and S$50, domestic and international |
 | 63 | S44 | `no shops or landing copy says cheaper` | The served pages hold no savings claim |
-| 64 | S44 | `a rate shows its date or reads unknown` | A null rate gives `unknown`, never zero |
+| 64 | S44 | `a rate holds its date or reads unknown` | A null rate or missing read date gives `unknown`, never zero. Revised 2026-11-07: the date stays in the constant and the record, not on screen, and the screen links the source |
 | 65 | S45 | `the copilot cannot reach a tool outside its allow-list` | `pay_order` listed by the server never reaches the model or the transport |
 | 66 | S45 | `a model request cannot send a refund` | No model output reaches `refundCapture` |
 | 67 | S45 | `a refund needs the signed-in merchant's confirmation` | Another member, a buyer and no session are refused |

@@ -69,7 +69,7 @@ The deployed site holds three more fixture shops that a local seed does not crea
 3. S32 and the S33 follow-up bound the language list to Japanese, Malay, Spanish and Chinese, each 5/5 on both fixture paths. This is not general accuracy or native-reader validation.
 4. With the assistant off, "Ask Envoi" is absent and "Scan a sticker" stays the filled button, because `/buy/ask` answers 404 when the assistant is off and the landing page must not link there.
 5. Resize to phone width (390 px): no sideways scroll.
-6. Press "I run a shop". `/for-shops` opens with no sign-in. Check: the headline "Take PayPal from visitors whose cards do not work at your stall."; "What it costs you"; the fee table S$0.70 (15.5%) on S$4.50, S$1.16 (7.7%) on S$15 and S$2.70 (5.4%) on S$50; each rate's read date and the link to PayPal's page; and the line saying accounts are made by Envoi's operator. Type 4.50: the top table reads S$0.70 and S$0.68. Type abc: it asks for an amount and prints no fee.
+6. Press "I run a shop". `/for-shops` opens with no sign-in. Check: the headline "Take PayPal from visitors whose cards do not work at your stall."; the lead naming the micropayment rate; "Why add Envoi"; "What it costs you"; and the line saying Envoi's operator makes test accounts. At the default 15.00 the calculator reads You keep S$13.84, PayPal fee S$1.16, On the micropayment rate S$0.98. Type 4.50: S$3.80, S$0.70, S$0.35. Type abc: it asks for an amount and prints no fee. Open "How PayPal works out the fee" for the three rates and the link to PayPal's page.
 
 ## 3. Buyer: Ask Envoi, or find a shop by text
 

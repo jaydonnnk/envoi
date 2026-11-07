@@ -315,6 +315,7 @@ The landing change, judge access, corrected documents, the language evaluation a
 ## Fourth build plan (proposed 2026-11-07)
 
 Status: **approved 2026-11-07 ("Approve Gate 1", given again after the admin approval change), not built.**
+The shops page was amended and re-approved the same day ("Yes to gate 1 and gate 3 changes as well"), below.
 The user's words: "Yes reopen the gates".
 It adds to the approved product; every earlier rule, journey and failure state still holds unless a point below says otherwise.
 The plan's detail is in [`fourth-build-plan.md`](fourth-build-plan.md), and this section wins where they differ.
@@ -336,7 +337,7 @@ It replaces "Your language. One scan. PayPal." on the landing page, and the supp
 
 - PayPal is not on SGQR. Envoi identifies an enrolled shop from the sticker and pays that shop's own PayPal. An unenrolled sticker stays unpayable, as approved.
 - A phone camera does not open Envoi from an SGQR sticker [hypothesis], so the visitor opens Envoi's scanner and a counter poster tells them to.
-- Never say cheaper than cards. A tourist's PayPal payment in Singapore costs 4.40% + S$0.50, which is S$0.70 on S$4.50 [the user's pasted review of PayPal's page, to be re-read before any screen prints it].
+- Never say cheaper than cards. A tourist's PayPal payment in Singapore costs 4.40% + S$0.50, which is S$0.70 on S$4.50 [re-read on PayPal's own page on 2026-11-07; see the [S44 record](00-status.md#s44-the-tourist-pitch-2026-11-07)].
 - Wise says customers outside Singapore can pay PayNow QR codes at businesses [vendor claim]. It is the real alternative, and its coverage far exceeds Envoi's.
 - A licensed partner paying a stall's PayNow is the only route that would make any SGQR payable. It stays roadmap and is not built.
 
@@ -350,6 +351,7 @@ It replaces "Your language. One scan. PayPal." on the landing page, and the supp
 ### What changes for the merchant
 
 - **A page for shops before sign-in,** with the pitch and an honest fee calculator. A rate that cannot be confirmed shows as unknown. Screen: `mockups/for-shops.html`.
+  **Amended 2026-11-07 by the user's review of the built page ("Yes to gate 1 and gate 3 changes").** The lead is "Keep your SGQR. Add no hardware. Under S$26, PayPal's micropayment rate costs less." The case is access and hardware; rates are stated in plain words with their source, and no read date or percentage appears on screen. The calculator shows what the shop keeps, PayPal's fee, and the fee on the micropayment rate, which needs PayPal's approval and then applies to every sale. Whether a food stall qualifies is [unknown]: PayPal's help article speaks of digital goods. "Never say cheaper than cards" still holds: "costs less" compares PayPal's own two rates only, a reading the user accepted for the S44 falsifier.
 - **A sales desk as the merchant's home:** paid sales, PayPal's fee and the net per order, totals, sales by payment method, a chart and a CSV export. A missing fee reads unknown, never zero. An order is called overseas only from the country PayPal gives. Ask your orders also sorts and chooses views. Screen: `mockups/merchant-desk.html`.
 - **A weekly summary written by AI,** in English, 中文, Melayu or தமிழ், labeled as AI. Code computes every figure, and a summary holding any other figure is refused. It appears on the same screen.
 - **A payments copilot.** The merchant asks about their sandbox PayPal records, using PayPal's hosted agent tools if they work with Envoi. It sees only that shop's orders. It can suggest a refund, and only the merchant's own confirmation sends it. It can never take a payment. A refund sits beside the Paid record and does not rewrite it. Screen: `mockups/merchant-copilot.html`.
