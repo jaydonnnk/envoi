@@ -590,6 +590,15 @@ The user's words: "Yes to both" (reopen Gates 2 and 3 for the tool fixes, and on
 - **Checker:** `checks/gate4_check.py` pins the re-approved Gate 2 and Gate 3 text.
 - **Still [unknown]:** whether the demo seller's own token reads the orders Envoi created for it. A read-only check runs once the user has created the seller's sandbox app and its credentials exist locally.
 
+**Demo seller token check, read-only, 2026-11-07 [verified].**
+The user added the three `PAYPAL_DEMO_SELLER_*` names to `.env.local` and Render (user's report; Render not read). `PAYPAL_DEMO_SELLER_MERCHANT_ID` reads `EQN6264CF9F4Y`.
+- Token: 200. MCP over SSE: connected in about 2.2 s, 46 tools.
+- `GET /v2/checkout/orders/3LC60058BU074993J` and MCP `get_order`: 404 `RESOURCE_NOT_FOUND`. The order Envoi's app created is not visible to the seller's app.
+- `GET /v2/payments/captures/13X59411JL1833901`: 401 `NOT_AUTHORIZED`.
+- `GET /v1/reporting/transactions` and MCP `list_transactions`: 403 `NOT_AUTHORIZED`. A newly created app may lack the Transaction search feature [hypothesis].
+- Whether this app is attached to sandbox account `EQN6264CF9F4Y` is [unknown]: a client-credentials token does not name its account.
+- No write was sent. Product code stays unstarted until the seller's token can read its own capture.
+
 **Gate text that the check contradicted, now in the drafts above.**
 - Gate 2 step 3 and Gate 3's `ALLOWED_PAYPAL_TOOLS` name `list_transaction`; PayPal's tool is `list_transactions`.
 - `get_merchant_insights` cannot work in sandbox, so in practice the model gets `get_order`, `list_disputes` and `get_dispute` from PayPal, plus Envoi's own orders.
