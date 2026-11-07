@@ -468,7 +468,7 @@ S37 started 2026-11-06 on `envoi/slice-37-own-assistant` and is **done, merged t
 S38 started 2026-11-06 on `envoi/slice-38-pay-with-crypto` and is **its first step recorded, with Gates 2, 3 and 4 re-approved for crypto settlement; merged, deployed and run on Render**; see its [record](#s38-crypto-through-paypal-2026-11-06).
 S34 started 2026-11-06 on `envoi/slice-34-menu-advice`, last in the build order, and shipped on 2026-11-07 at `6c41214`, deployed in `b658406` by the user's report. It was reopened the same day for the accept button on `envoi/slice-34-accept-button` and is **done 2026-11-07: on `main` at `248b64e` and live on Render**; see its [record](#s34-menu-advice-2026-11-06) and the [accept button record](#s34-accept-button-2026-11-07).
 Drafted 2026-11-07, not approved and outside the build order: the [fourth build plan](fourth-build-plan.md), proposing S44, S45, S46, S48, S49, S47, S50 and S43 in that order on the user's "recommended defaults". Gates 1 to 4 are re-approved for it, in the order S44, S45, S46, S48, S49, S47, S50, S43, and no slice is started; see the [record](#gates-1-2-3-and-4-reopening-2026-11-07-fourth-build-plan).
-S44 started 2026-11-07 on `envoi/slice-44-tourist-pitch` and is **built and locally verified, committed on its branch, not merged, pushed or deployed**, so it is not done; see its [record](#s44-the-tourist-pitch-2026-11-07).
+S44 started 2026-11-07 on `envoi/slice-44-tourist-pitch` and is **done, merged to `main` at `87eb547` and deployed**; see its [record](#s44-the-tourist-pitch-2026-11-07).
 
 Added 2026-10-29, outside the build order: the second build plan, S25 to S31, with Gates 1-4 re-approved the same day ([record](#gate-1-reopening-2026-10-29-second-build-plan), [plan](04-slices.md#second-build-plan-s25-to-s31-added-2026-10-29)). S25 started 2026-10-29 on `envoi/slice-25-ask-envoi`; its evaluation missed (22 of 25) and the falsifier was applied the same day: the assistant stays off on Render and no assistant claim is made ([record](#s25-ask-envoi-in-the-site-2026-10-29)). Its independent review found no code blocker; two of its findings are fixed on `envoi/slice-25-review-fixes` ([record](#s25-review-fixes-2026-10-30)). S25 is done on 2026-10-30: migration 0026 is on Neon, and `main` at `144292b` is pushed with CI green and deployed on Render with the assistant off ([record](#s25-merge-migration-and-deploy-2026-10-30)). S26 is done, recorded 2026-11-04 on the user's "Do your three" after checking its done rule: its commits are on `main`, deployed, its evidence and cleanup are recorded, and the terminal agent stands in for Ask Envoi under S25's falsifier ([record](#s26-the-connected-run-2026-10-30)). S27 is done on 2026-11-02: its [local MCP continuation](#s27-mcp-client-local-continuation-2026-11-02) is verified, its [payment verification results](#s27-payment-verification-results-2026-11-02) passed, and the evidence commit `7514eb3` is on `main` with CI run 41456616279 passing. S28 is done on 2026-11-03 on `envoi/slice-28-rewards-card`, deployed from `main` at `25e5230` with CI passing ([record](#s28-paypal-pyusd-rewards-card-2026-11-03)); S29 is done on 2026-11-03 on `envoi/slice-29-menu-translation`: migration 0028 is on Neon, `main` at `7c05082` is pushed with CI run 41668339516 passing, and translation is on on Render with `gpt-6-luna` ([record](#s29-the-menu-explained-and-translated-2026-11-03)); S30 is deployed on 2026-11-04 from `envoi/slice-30-review-aids`: `main` at `ff4d48d` is pushed with CI run 41780152741 passing; its signed-in check on Render is pending ([record](#s30-draft-review-aids-2026-11-04)); S31 is done on 2026-11-04 on `envoi/slice-31-paypal-buttons`, deployed from `main` with CI passing ([record](#s31-paypal-approval-over-the-review-page-2026-11-04)).
 Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never cut), S26 the connected run (`envoi/slice-26-connected-run`, never cut), S27 US shops and currency-explicit money (`envoi/slice-27-us-shops`), S28 PayPal PYUSD rewards card (`envoi/slice-28-rewards-card`), S29 the menu explained and translated (`envoi/slice-29-menu-translation`), S30 draft review aids (`envoi/slice-30-review-aids`) and S31 PayPal approval over the review page (`envoi/slice-31-paypal-buttons`); cut order S31, S30, S29, then S27 with S28.
@@ -548,9 +548,9 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 
 ### S44 The tourist pitch, 2026-11-07
 
-**Status: built and locally verified on `envoi/slice-44-tourist-pitch`, from `main` at `6cf2b96`. Not merged, pushed or deployed, so the Render check below is open and the slice is not done.**
+**Status: done 2026-11-07. Built on `envoi/slice-44-tourist-pitch`, from `main` at `6cf2b96`, fast-forwarded to `main` at `87eb547`, pushed and deployed.**
 Authority: "Make a copy paste handoff prompt for the next agent to start slice 44", read in the handoff as the start of S44, its local branch and commits only.
-Merge, push and deploy are requested by name.
+The user's words for the release: "Merge, push, deploy".
 CI run 42349204583 on `6cf2b96` passed [verified, `gh run view`, 2026-11-07].
 
 **Gates 1 and 3 reopened and re-approved 2026-11-07 for the shops page, the user's words:** "Yes to gate 1 and gate 3 changes as well".
@@ -624,11 +624,15 @@ No model was called, and no message was sent in Ask Envoi, so a filled conversat
 
 **Post-slice cleanup.** The two orphaned styles above were removed. `mockups/index.html` does not list the fourth build plan's mockups; left as it is, because each file is named directly in `01-product.md`.
 
-**Open.**
-- [ ] Merge, push and deploy, by name, from the user.
-- [ ] The three screens on Render at 390 px and 1280 px, with the deployed commit and its CI run recorded here.
+**Deployed, 2026-11-07 [verified].**
+- `git ls-remote` shows `main` at `87eb547`; CI run 42353118184 on that commit passed.
+- Render serves the new page. The Render dashboard was not read, so the deployed commit is inferred from `/for-shops` serving text first added in `87eb547`.
+- `/`, `/for-shops` and `/buy/ask` were checked on <https://envoi-helx.onrender.com> in a real browser at 390 px and 1280 px: no horizontal overflow, with the test badge and notice present on each.
+- `/for-shops` reads You keep S$13.84, PayPal fee S$1.16 and On the micropayment rate S$0.98 at 15.00. "How this was checked" is closed on `/buy/ask`.
+- The served HTML of all three holds no savings wording, with the scanner's planted needle detected.
+- No model call, payment or Neon write was made for this slice, and Ask Envoi was not sent a message on Render.
 
-**What this does not establish.** No demand, usability, savings or sales result, no fee on any actual sale, no PayPal approval of any shop for micropayments, and nothing about Render until the open check runs.
+**What this does not establish.** No demand, usability, savings or sales result, no fee on any actual sale, no PayPal approval of any shop for micropayments, and no Ask Envoi run on this build.
 
 ### S34 Menu advice, 2026-11-06
 
