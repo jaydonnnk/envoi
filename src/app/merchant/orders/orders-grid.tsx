@@ -16,7 +16,7 @@ import {
 import { AgGridReact } from "ag-grid-react";
 import { useMemo } from "react";
 import type { MerchantOrder } from "@/domain/purchases/orders";
-import { orderStatus, orderTotal, paidVia } from "./order-copy";
+import { orderStatus, orderTotal, paidVia, refundCopy } from "./order-copy";
 
 // The merchant's orders table (S35; Gate 3 file map): AG Grid Community, sorting and column filters in
 // the browser only. It displays rows and edits nothing. Every word in the Payment column comes from
@@ -61,6 +61,7 @@ function PaymentCell({ data }: ICellRendererParams<MerchantOrder>) {
     <span className="chips">
       <span className={`chip${status.tone === "plain" ? "" : ` ${status.tone}`}`}>{status.chip}</span>
       {data.pyusd && data.pyusd.extraTransfers.length > 0 && <span className="chip warn">Extra transfer</span>}
+      {data.refund && <span className={`chip${refundCopy(data.refund).tone === "plain" ? "" : " warn"}`}>{refundCopy(data.refund).chip}</span>}
     </span>
   );
 }

@@ -141,3 +141,18 @@ export function filterWords(filter: OrderFilter): string[] {
     ...[dateWords(filter.from, filter.to)].filter((words) => words !== null),
   ];
 }
+
+// S45: a refund is its own line beside the payment state. A refunded order stays Paid.
+export function refundCopy(refund: NonNullable<MerchantOrder["refund"]>): { chip: string; tone: "ok" | "warn" | "plain"; body: string } {
+  const amount = formatMoney(money(refund.currency, refund.amountMinor));
+  switch (refund.state) {
+    case "completed":
+      return { chip: "Refunded", tone: "plain", body: `${amount} refunded to the customer in PayPal sandbox. Test money. The order stays recorded as Paid.` };
+    case "sent":
+      return { chip: "Refund sent", tone: "warn", body: `A ${amount} refund was sent to PayPal sandbox and is not completed yet. The order stays recorded as Paid.` };
+    case "checking":
+      return { chip: "Refund checking", tone: "warn", body: `PayPal's answer to the ${amount} refund did not arrive. Confirm it again to check: Envoi resends the same request, so the customer is never refunded twice.` };
+    case "failed":
+      return { chip: "Refund refused", tone: "warn", body: `PayPal refused the ${amount} refund, so no money went back. The order stays recorded as Paid.` };
+  }
+}

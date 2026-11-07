@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { webEnv } from "@/env";
 import { listMerchantOutlets } from "@/domain/outlets/merchant";
+import { isDemoSellerOutlet } from "@/domain/payments/refunds";
 import { listOutletOrders, type OutletOrders } from "@/domain/purchases/orders";
 import { orderFilterEnabled } from "@/integrations/ai/openai";
+import { demoSellerCopilot } from "@/integrations/assistant/merchant-copilot";
 import { getAuth } from "@/lib/auth";
 import { isMerchantAccount, requireMerchantMembership } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
@@ -48,17 +51,19 @@ export default async function MerchantOrdersPage() {
   const { outlets } = await listMerchantOutlets(webDb(), principal.userId);
   const now = new Date();
   const askEnabled = orderFilterEnabled();
-  const shops: OutletOrders[] = [];
+  // S45: the copilot panel appears only for the labeled demo shop, and only while the copilot is on.
+  const copilot = demoSellerCopilot(webEnv());
+  const shops: { orders: OutletOrders; copilot: boolean }[] = [];
   for (const outlet of outlets) {
     const orders = await listOutletOrders(webDb(), outlet.id, now);
-    if (orders && !isAppError(orders)) shops.push(orders);
+    if (orders && !isAppError(orders)) shops.push({ orders, copilot: copilot !== null && (await isDemoSellerOutlet(webDb(), outlet.id, copilot.merchantId)) });
   }
 
   return (
     <main>
       <p className="eyebrow">Merchant</p>
       <h1>Orders</h1>
-      <p className="lead">{shops.some((shop) => shop.orders.length > 0) ? "Ask in your own words, or sort and filter the table. Asking changes no order." : "Orders appear here once a buyer starts one at your shop."}</p>
+      <p className="lead">{shops.some((shop) => shop.orders.orders.length > 0) ? "Ask in your own words, or sort and filter the table. Asking changes no order." : "Orders appear here once a buyer starts one at your shop."}</p>
       {shops.length === 0 && (
         <section className="card">
           <h2>No shop yet</h2>
@@ -66,7 +71,7 @@ export default async function MerchantOrdersPage() {
         </section>
       )}
       {shops.map((shop) => (
-        <OrdersView key={shop.outlet.id} initial={shop} askEnabled={askEnabled} />
+        <OrdersView key={shop.orders.outlet.id} initial={shop.orders} askEnabled={askEnabled} copilot={shop.copilot} />
       ))}
       <div className="actions">
         <a className="button secondary" href="/merchant/setup">

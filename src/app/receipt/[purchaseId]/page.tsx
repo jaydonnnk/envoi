@@ -84,6 +84,20 @@ function statusOf(purchase: OwnPurchase): Status {
   }
 }
 
+// S45: a shop's refund is a line beside Paid, which it never changes.
+function receiptRefundLine(refund: NonNullable<OwnPurchase["refund"]>): string {
+  const amount = formatMoney(money(refund.currency, refund.amountMinor));
+  switch (refund.state) {
+    case "completed":
+      return `The shop refunded ${amount} to your PayPal sandbox account. Test money. This payment stays recorded as Paid.`;
+    case "sent":
+    case "checking":
+      return `The shop sent a ${amount} refund. PayPal has not confirmed it yet.`;
+    case "failed":
+      return `The shop tried a ${amount} refund and PayPal refused it, so no money went back.`;
+  }
+}
+
 export default async function ReceiptPage({ params }: { params: Promise<{ purchaseId: string }> }) {
   const principal = await requireBuyerSession(getAuth(), await headers());
   if (!isPrincipal(principal)) notFound();
@@ -178,6 +192,13 @@ export default async function ReceiptPage({ params }: { params: Promise<{ purcha
               <span className="muted">PayPal sandbox order</span>
               <span className="mono">{purchase.attempt?.orderId}</span>
             </div>
+            {purchase.refund && (
+              <div className="row stacked refund-line">
+                <span className="muted">Refund</span>
+                <span>{receiptRefundLine(purchase.refund)}</span>
+                {purchase.refund.paypalRefundId && <span className="mono">{purchase.refund.paypalRefundId}</span>}
+              </div>
+            )}
           </>
         )}
         <div className="row">

@@ -33,6 +33,12 @@ AI here is only ever a reader and a drafter. No model sets a price, approves a p
   The draft never publishes itself; the merchant confirms every row.
 - **Ask your orders** at `/merchant/orders`: one sentence from the merchant becomes filters on the orders table.
   The model sees the sentence and the date, never an order, and it cannot change anything.
+- **Merchant copilot** at `/merchant/orders`, for one labeled demo shop only: the merchant asks about their own sandbox PayPal records in plain words.
+  It reads Envoi's own orders of that shop and four PayPal reads (`get_order`, `list_transactions`, `list_disputes`, `get_dispute`) through PayPal's hosted MCP server over SSE, on the demo seller's own sandbox credentials.
+  Every PayPal result is filtered to that shop and stripped of the payer's name, email and account id before the model sees it, and PayPal's write tools never reach the model.
+  It can suggest a full refund of one paid order, but only the merchant's own tap on Confirm sends it, and the order stays recorded as Paid with the refund beside it.
+  It is on only when `PAYPAL_DEMO_SELLER_CLIENT_ID`, `PAYPAL_DEMO_SELLER_CLIENT_SECRET`, `PAYPAL_DEMO_SELLER_MERCHANT_ID`, `OPENAI_API_KEY` and `AI_MODEL` are all set, and only for the shop whose PayPal seller is that merchant id.
+  Built and tested against FIXTURE fakes; its pre-registered evaluation has not run and it is not yet deployed.
 - **Bring your own assistant** at `/agents`: how to connect an outside MCP assistant with an operator-issued token, limited to 60 `/mcp` requests per 10 minutes and revocable.
   It gets the same reads and the same one-time link, and the person still approves the payment.
 - **Reference buyer agent** at `clients/buyer-agent/` (`npm run agent`): an agent on the person's own machine over the same MCP endpoint.
@@ -71,6 +77,7 @@ The app shows these labels on every screen. Pending, failed or uncertain payment
 | Render Free | Hosts the deployed test environment from `main`; `render.yaml` records its settings and is not applied as a Blueprint | Sleeps when idle; a cold first visit took about 28 s from Singapore |
 | Neon Postgres | The database, over three roles: `DATABASE_URL`, `MIGRATION_DATABASE_URL` and `MAINTENANCE_DATABASE_URL` | Holds fixture shops and sandbox payments only |
 | PayPal sandbox | The buyer's approval, and the shop's own seller account as payee | Sandbox money only; Envoi is never the payee |
+| PayPal's MCP server | The merchant copilot's reads at `mcp.sandbox.paypal.com/sse`, on the demo seller's own token | Sandbox only; Envoi passes on four read tools and no write tool |
 | Solana devnet | PYUSD test tokens, off unless `PYUSD_ENABLED` is `true` | Devnet only, never mainnet; Envoi prepares, the wallet signs |
 | OpenAI | `AI_MODEL` for the assistant, the box and Ask your orders, `AI_MENU_TRANSLATION_MODEL` for translations, `AI_WEB_MENU_MODEL` for the web import, through the Vercel AI SDK | Faked at its fetch boundary in every test; real calls happen only in recorded runs |
 | Kernel | One hosted headless browser session per web menu import, which reads the merchant's own public page | Deleted in a `finally` block on every path; no PDF, no link following, no live view |
@@ -124,7 +131,7 @@ TEST_DATABASE_URL=postgres://postgres@127.0.0.1:5432/envoi_test npm run test:int
 ```
 
 Integration tests create and drop their own databases on the server `TEST_DATABASE_URL` names; give them a disposable local server.
-External providers are replaced by labeled fixtures in tests: PayPal at its write client, OpenAI at its fetch boundary, Kernel at its SDK's fetch boundary, Solana at its RPC transport, and Envoi's own MCP server as the real `McpServer` over an in-memory transport.
+External providers are replaced by labeled fixtures in tests: PayPal at its write client, PayPal's MCP server at its fetch boundary, OpenAI at its fetch boundary, Kernel at its SDK's fetch boundary, Solana at its RPC transport, and Envoi's own MCP server as the real `McpServer` over an in-memory transport.
 `npm run build && npx tsx tests/e2e/run-public-api.ts 3100` checks the public read API and the MCP client over HTTP against the production build and a disposable database it creates and drops.
 
 ## Maintenance

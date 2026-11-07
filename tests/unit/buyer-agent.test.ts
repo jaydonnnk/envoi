@@ -74,7 +74,8 @@ afterEach(async () => {
 describe("reference buyer agent", () => {
   it("agent tools call only the MCP client", async () => {
     // Only the shared MCP client may carry requests.
-    const sources = agentSources();
+    // S45's merchant copilot shares the directory by Gate 3's file map and is checked on its own.
+    const sources = agentSources().filter((source) => source.file !== "merchant-copilot.ts");
     expect(sources.map((source) => source.file).sort()).toEqual(["agent.ts", "envoi-mcp.ts", "tools.ts", "trace.ts"]);
     for (const { file, text } of sources) {
       expect(text.match(/\bfetch\s*\(/g), file).toBeNull();

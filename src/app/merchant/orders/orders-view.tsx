@@ -5,7 +5,8 @@ import { SINGAPORE_TIME } from "@/app/purchase-copy";
 import { applyOrderFilter, type OrderFilter } from "@/domain/purchases/order-filter";
 import type { MerchantOrder, OutletOrders } from "@/domain/purchases/orders";
 import { requestJson } from "@/lib/browser/session";
-import { archivedCountLine, DELETE_COPY, extraTransferNote, filterWords, mayStillBePaid, needsReading, orderStatus, orderTotal } from "./order-copy";
+import { archivedCountLine, DELETE_COPY, extraTransferNote, filterWords, mayStillBePaid, needsReading, orderStatus, orderTotal, refundCopy } from "./order-copy";
+import { CopilotPanel } from "./copilot-panel";
 import { OrdersGrid } from "./orders-grid";
 import { startOrdersPolling, withNewest, withOlder, type PolledOrder } from "./polling";
 import { useRestoreFocus } from "@/lib/browser/focus";
@@ -113,6 +114,21 @@ function OrderCard({
           {paid && order.payment?.captureId ? <span className="mono">{order.payment.captureId}</span> : <span>None, not paid</span>}
         </div>
       )}
+      {order.refund && (
+        <>
+          <div className="row">
+            <strong>Refund</strong>
+            <span className={`chip${refundCopy(order.refund).tone === "plain" ? "" : " warn"}`}>{refundCopy(order.refund).chip}</span>
+          </div>
+          <p className="muted order-note">{refundCopy(order.refund).body}</p>
+          {order.refund.paypalRefundId && (
+            <div className="row stacked">
+              <span className="muted">PayPal sandbox refund</span>
+              <span className="mono">{order.refund.paypalRefundId}</span>
+            </div>
+          )}
+        </>
+      )}
       <div className="row stacked">
         <span className="muted">Envoi reference</span>
         <span className="mono">{order.id}</span>
@@ -161,7 +177,8 @@ function OrderCard({
 
 // One outlet's orders, kept current within the S3 polling bounds. Polls and "Check for new orders"
 // re-read the newest page; "Show older orders" adds the page before the oldest order shown.
-export function OrdersView({ initial, askEnabled }: { initial: OutletOrders; askEnabled: boolean }) {
+// copilot is true only for the labeled demo shop while the copilot is on (S45).
+export function OrdersView({ initial, askEnabled, copilot = false }: { initial: OutletOrders; askEnabled: boolean; copilot?: boolean }) {
   const [data, setData] = useState(initial);
   // Whether the list holds every order back to the oldest. A poll only adds newer orders, and no
   // order shown is ever dropped, so only loading the last older page completes it.
@@ -287,6 +304,7 @@ export function OrdersView({ initial, askEnabled }: { initial: OutletOrders; ask
           {data.orders.some((order) => order.pyusd) && <span className="chip warn">Devnet: test tokens only</span>}
         </span>
       </div>
+      {copilot && <CopilotPanel outletId={outletId} orders={data.orders} onRefunded={checkNow} />}
       {data.orders.length === 0 ? (
         <p className="muted">No orders yet.</p>
       ) : (

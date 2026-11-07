@@ -79,6 +79,10 @@ try {
     KERNEL_API_KEY: "fixture-unused",
     // S25: no route this run calls is the assistant's, so its agent token is a placeholder too.
     ASSISTANT_AGENT_TOKEN: "fixture-unused",
+    // S45: no route this run calls is the copilot's, and no seller in this run is the demo seller.
+    PAYPAL_DEMO_SELLER_CLIENT_ID: "fixture-unused",
+    PAYPAL_DEMO_SELLER_CLIENT_SECRET: "fixture-unused",
+    PAYPAL_DEMO_SELLER_MERCHANT_ID: "FXTRUNUSED0AA",
     // S38: no seller in this run is on the allowlist, so crypto stays off.
     PAYPAL_CRYPTO_ENABLED: "FIXTURE-UNLISTED-SELLER",
     SOLANA_RPC_URL: "http://127.0.0.1:9/fixture-unused",

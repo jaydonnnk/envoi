@@ -47,6 +47,14 @@ export const ORDER_FILTER_LIMITS: RateLimits = {
   global: { max: 60, windowMs: 60 * 60_000 },
 };
 
+// S45, Gate 2 fourth build plan [hypothesis: starting values]: at most 20 copilot turns per outlet in
+// 10 minutes and 60 across all outlets in an hour. Each admitted turn spends model money and PayPal
+// sandbox calls, so the limiter runs before both. The subject is the outlet, so members share it.
+export const COPILOT_LIMITS: RateLimits = {
+  perSubject: { max: 20, windowMs: 10 * 60_000 },
+  global: { max: 60, windowMs: 60 * 60_000 },
+};
+
 // S37, Gate 3 third build plan [hypothesis: starting values]: at most 60 /mcp POSTs per agent token in
 // 10 minutes, about 10 full sentences at 6 POSTs each (handshake, tool list, three tools). Each token
 // has its own allowance, so no global window applies.

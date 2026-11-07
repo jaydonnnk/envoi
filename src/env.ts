@@ -56,6 +56,13 @@ const webSchema = z.object({
   // The menu explained and translated (S29). The text model chosen by the pre-registered translation
   // evaluation in 00-status.md; translation is off unless it and OPENAI_API_KEY are set.
   AI_MENU_TRANSLATION_MODEL: z.string().min(1).optional(),
+  // Merchant copilot (S45, Gate 2 "Demo seller names"). One labeled sandbox seller's own REST app:
+  // Envoi's platform token cannot read a seller's transactions or refund its capture [verified
+  // 2026-11-07]. The copilot runs only for the outlet whose PayPal seller is
+  // PAYPAL_DEMO_SELLER_MERCHANT_ID, and is off unless all three, OPENAI_API_KEY and AI_MODEL are set.
+  PAYPAL_DEMO_SELLER_CLIENT_ID: z.string().min(1).optional(),
+  PAYPAL_DEMO_SELLER_CLIENT_SECRET: z.string().min(1).optional(),
+  PAYPAL_DEMO_SELLER_MERCHANT_ID: z.string().regex(/^[A-Z0-9]{13}$/, "must be a 13-character PayPal merchant id").optional(),
   // PYUSD on Solana devnet (S16). These are the rail's only two settings: the cluster, genesis hash,
   // mint, token program and decimals are reviewed code constants in src/domain/pyusd/constants.ts,
   // and any other PYUSD_ or SOLANA_ name refuses to boot. The RPC URL is checked against the pinned

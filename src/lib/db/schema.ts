@@ -546,6 +546,52 @@ export const paymentAttempts = pgTable(
   ],
 );
 
+// Refunds (S45, Gate 2 "Flow: refund"). One full refund per PayPal attempt, ever, sent only from a
+// member's own confirmation on the labeled demo seller's credentials. A row is claimed as `sent`
+// before PayPal is called, with its idempotency key, so two confirmations cannot both send. A lost
+// answer leaves it `checking` until the member's next confirm resends the same key. The purchase and
+// its attempt never change: a refunded order stays recorded as Paid, with this row beside it.
+
+export const REFUND_STATES = ["sent", "completed", "failed", "checking"] as const;
+
+export const refunds = pgTable(
+  "refunds",
+  {
+    id: text("id").primaryKey(),
+    attemptId: text("attempt_id")
+      .notNull()
+      .references(() => paymentAttempts.id),
+    purchaseId: text("purchase_id")
+      .notNull()
+      .references(() => purchases.id),
+    outletId: text("outlet_id")
+      .notNull()
+      .references(() => outlets.id),
+    captureId: text("capture_id").notNull(),
+    paypalRefundId: text("paypal_refund_id").unique(),
+    amountMinor: integer("amount_minor").notNull(),
+    currency: text("currency").$type<Currency>().notNull(),
+    state: text("state").$type<(typeof REFUND_STATES)[number]>().notNull(),
+    // PayPal's upper-case error name and issue codes on a refused refund, never the body.
+    outcomeReason: text("outcome_reason"),
+    confirmedByUserId: text("confirmed_by_user_id")
+      .notNull()
+      .references(() => user.id),
+    idempotencyKey: text("idempotency_key").notNull().unique(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    check("refunds_state_check", sql`${t.state} in ('sent', 'completed', 'failed', 'checking')`),
+    check("refunds_currency_check", sql`${t.currency} in ('SGD', 'USD')`),
+    check("refunds_amount_check", sql`${t.amountMinor} > 0`),
+    check("refunds_completed_check", sql`${t.state} <> 'completed' or ${t.paypalRefundId} is not null`),
+    // Full refunds only, so one capture is refunded at most once.
+    uniqueIndex("refunds_one_per_attempt").on(t.attemptId),
+    index("refunds_purchase_idx").on(t.purchaseId),
+  ],
+);
+
 // Verified PayPal webhook inbox. One row per provider event id: a duplicate delivery inserts
 // nothing and changes nothing. Rows hold identifiers and the disposition only, never the event
 // body. Event content never marks anything paid; it can only make a provider read due.
@@ -597,7 +643,7 @@ export const auditEvents = pgTable(
 // nothing. Admission prunes rows older than the bucket's longest window, so the table stays small
 // without a maintenance task.
 
-export const RATE_LIMIT_BUCKETS = ["buyer_suggestion", "wallet_challenge", "buyer_assistant", "menu_translation", "merchant_order_filter", "agent_mcp"] as const;
+export const RATE_LIMIT_BUCKETS = ["buyer_suggestion", "wallet_challenge", "buyer_assistant", "menu_translation", "merchant_order_filter", "agent_mcp", "merchant_copilot"] as const;
 
 export const rateLimitHits = pgTable(
   "rate_limit_hits",
@@ -608,7 +654,7 @@ export const rateLimitHits = pgTable(
     at: timestamp("at", { withTimezone: true }).notNull(),
   },
   (t) => [
-    check("rate_limit_hits_bucket_check", sql`${t.bucket} in ('buyer_suggestion', 'wallet_challenge', 'buyer_assistant', 'menu_translation', 'merchant_order_filter', 'agent_mcp')`),
+    check("rate_limit_hits_bucket_check", sql`${t.bucket} in ('buyer_suggestion', 'wallet_challenge', 'buyer_assistant', 'menu_translation', 'merchant_order_filter', 'agent_mcp', 'merchant_copilot')`),
     index("rate_limit_hits_bucket_at_idx").on(t.bucket, t.at),
     index("rate_limit_hits_subject_idx").on(t.bucket, t.subject, t.at),
   ],

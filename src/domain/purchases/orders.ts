@@ -6,6 +6,7 @@ import { derivePurchaseView, applyDerivedTransitions, type PaymentAttemptRow, ty
 import { formatPyusdAtomic } from "@/domain/pyusd/rate";
 import { OPERATOR_RESOLUTION } from "@/domain/pyusd/state";
 import { extraTransfersOf, type ExtraTransfer } from "@/domain/pyusd/recovery";
+import { refundsOf, type Refund } from "@/domain/payments/refunds";
 import { merchantMemberships, outlets, paymentAttempts, paymentDestinations, purchases, type StoredLine } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
@@ -53,6 +54,8 @@ export type MerchantOrder = {
   } | null;
   acknowledgedAt: string | null;
   canAcknowledge: boolean;
+  // S45: the one full refund of this order, beside its payment state, which it never changes.
+  refund: Pick<Refund, "state" | "amountMinor" | "currency" | "paypalRefundId" | "createdAt"> | null;
 };
 
 export type OutletOrders = {
@@ -85,7 +88,7 @@ async function latestAttempts(db: Pick<Db, "select">, purchaseIds: string[]): Pr
   return latest;
 }
 
-function orderJson({ purchase, sellerMerchantId, tokenAccount }: OrderRow, attempt: PaymentAttemptRow | null, extras: readonly ExtraTransfer[], now: Date): MerchantOrder {
+function orderJson({ purchase, sellerMerchantId, tokenAccount }: OrderRow, attempt: PaymentAttemptRow | null, extras: readonly ExtraTransfer[], now: Date, refund: Refund | null = null): MerchantOrder {
   const view = derivePurchaseView(purchase, attempt, now);
   const paid = view.state === "paid";
   return {
@@ -123,6 +126,7 @@ function orderJson({ purchase, sellerMerchantId, tokenAccount }: OrderRow, attem
       : null,
     acknowledgedAt: purchase.acknowledgedAt?.toISOString() ?? null,
     canAcknowledge: paid && purchase.acknowledgedAt === null,
+    refund: refund ? { state: refund.state, amountMinor: refund.amountMinor, currency: refund.currency, paypalRefundId: refund.paypalRefundId, createdAt: refund.createdAt } : null,
   };
 }
 
@@ -158,9 +162,10 @@ export async function listOutletOrders(db: Db, outletId: string, now: Date, befo
   const rows = page.slice(0, ORDERS_PAGE);
   const attempts = await latestAttempts(db, rows.map((row) => row.purchase.id));
   const extras = await extraTransfersOf(db, [...attempts.values()].filter((attempt) => attempt.rail === "pyusd").map((attempt) => attempt.id));
+  const refunds = await refundsOf(db, rows.map((row) => row.purchase.id));
   const orders = rows.map((row) => {
     const attempt = attempts.get(row.purchase.id) ?? null;
-    return orderJson(row, attempt, (attempt && extras.get(attempt.id)) ?? [], now);
+    return orderJson(row, attempt, (attempt && extras.get(attempt.id)) ?? [], now, refunds.get(row.purchase.id) ?? null);
   });
   for (const order of orders) {
     const stored = rows.find((row) => row.purchase.id === order.id)!.purchase.state;
@@ -194,7 +199,8 @@ export async function acknowledgeOrder(db: Db, input: { purchaseId: string; user
     if (!row) return appError("not_found", "Order not found.");
     const attempt = (await latestAttempts(tx, [row.purchase.id])).get(row.purchase.id) ?? null;
     const extras = attempt?.rail === "pyusd" ? ((await extraTransfersOf(tx, [attempt.id])).get(attempt.id) ?? []) : [];
-    const order = orderJson(row, attempt, extras, input.now);
+    const refund = (await refundsOf(tx, [row.purchase.id])).get(row.purchase.id) ?? null;
+    const order = orderJson(row, attempt, extras, input.now, refund);
 
     if (row.purchase.state !== "paid") {
       return appError("validation_failed", "Only a paid order can be acknowledged. This order is not paid, so nothing changed.", {
@@ -216,7 +222,7 @@ export async function acknowledgeOrder(db: Db, input: { purchaseId: string; user
       outletId: row.purchase.outletId,
       operatorVisible: false,
     });
-    return { order: orderJson({ purchase: updated!, sellerMerchantId: row.sellerMerchantId, tokenAccount: row.tokenAccount }, attempt, extras, input.now), changed: true };
+    return { order: orderJson({ purchase: updated!, sellerMerchantId: row.sellerMerchantId, tokenAccount: row.tokenAccount }, attempt, extras, input.now, refund), changed: true };
   });
 }
 
@@ -243,7 +249,7 @@ export async function archiveOrder(db: Db, input: { purchaseId: string; userId: 
     if (!row) return appError("not_found", "Order not found.");
     const attempt = (await latestAttempts(tx, [row.purchase.id])).get(row.purchase.id) ?? null;
     const extras = attempt?.rail === "pyusd" ? ((await extraTransfersOf(tx, [attempt.id])).get(attempt.id) ?? []) : [];
-    const order = orderJson(row, attempt, extras, input.now);
+    const order = orderJson(row, attempt, extras, input.now, (await refundsOf(tx, [row.purchase.id])).get(row.purchase.id) ?? null);
     if (row.purchase.merchantArchivedAt !== null) return { order, changed: false };
 
     await tx

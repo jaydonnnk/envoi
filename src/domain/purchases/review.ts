@@ -17,6 +17,7 @@ import {
 import { webEnv } from "@/env";
 import type { BuyerPrincipal } from "@/lib/auth-context";
 import { extraTransfersOf, type ExtraTransfer } from "@/domain/pyusd/recovery";
+import { refundsOf, type Refund } from "@/domain/payments/refunds";
 import { outlets, paymentAttempts, paymentDestinations, purchases, pyusdRates, type StoredLine } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
@@ -223,6 +224,8 @@ export type OwnPurchase = {
     atomicAmount: bigint;
   } | null;
   attempt: PaymentAttemptRow | null;
+  // S45: the one full refund of this purchase, beside its Paid state, which it never changes.
+  refund: Refund | null;
   // S17: extra transfers a window scan found for this purchase's PYUSD attempt; they never change
   // the payment state.
   extraTransfers: ExtraTransfer[];
@@ -284,6 +287,7 @@ export async function getOwnPurchase(db: Conn, principal: BuyerPrincipal, purcha
           }
         : null,
     attempt,
+    refund: (await refundsOf(db, [purchase.id])).get(purchase.id) ?? null,
     extraTransfers,
     view: derivePurchaseView(purchase, attempt, now),
     acknowledgedAt: purchase.acknowledgedAt,

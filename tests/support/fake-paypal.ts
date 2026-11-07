@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import type { PayPalOrder } from "@/domain/purchases/reconcile";
-import type { CreateOrderInput, PayPalWriteClient, ProviderResult } from "@/integrations/paypal/orders";
+import type { CreateOrderInput, PayPalWriteClient, ProviderRefund, ProviderResult } from "@/integrations/paypal/orders";
 
 // FIXTURE: a fake of the PayPal Orders v2 boundary (PayPalWriteClient). Nothing here talks to
 // PayPal; order and capture ids are labeled FIXTURE so no output can pass for a sandbox record.
@@ -9,7 +9,7 @@ import type { CreateOrderInput, PayPalWriteClient, ProviderResult } from "@/inte
 // "lose_response" acts and then drops the answer, as a timeout would, and "refuse" answers a 422
 // naming an issue code without acting.
 
-export type FakeOp = "createOrder" | "readOrder" | "captureOrder";
+export type FakeOp = "createOrder" | "readOrder" | "captureOrder" | "refundCapture";
 
 export type FakeCall = { op: FakeOp; orderId: string | null; requestId: string | null };
 
@@ -34,6 +34,10 @@ export type FakePayPal = {
   fail(op: FakeOp, fault: Fault, times?: number): void;
   // Every capture with a new request id is refused with this status and these issue codes.
   refuseCapture: { status: number; issues: string } | null;
+  // Every refund call, with the capture and PayPal-Request-Id it carried (S45).
+  refunds(): FakeCall[];
+  // Every refund with a new request id is refused with this status and these issue codes.
+  refuseRefund: { status: number; issues: string } | null;
   // Rewrites what a read returns, to model a provider record that differs from what Envoi sent.
   tamper: ((order: PayPalOrder, phase: Phase) => PayPalOrder) | null;
   // Runs inside readOrder before it answers, for example to move an injected clock.
@@ -67,6 +71,8 @@ export function createFakePayPal(): FakePayPal {
   const orders = new Map<string, FakeOrder>();
   const createdByKey = new Map<string, string>();
   const capturedByKey = new Map<string, ProviderResult<PayPalOrder>>();
+  const refundedByKey = new Map<string, ProviderResult<ProviderRefund>>();
+  const refundedCaptures = new Set<string>();
   const faults: { op: FakeOp; fault: Fault }[] = [];
   // Unique per fake, so fakes in one test database never reuse an order id.
   const run = randomBytes(4).toString("hex").toUpperCase();
@@ -82,11 +88,13 @@ export function createFakePayPal(): FakePayPal {
   const fake: FakePayPal = {
     calls: [],
     refuseCapture: null,
+    refuseRefund: null,
     tamper: null,
     onRead: null,
     writes: () => fake.calls.filter((call) => call.op !== "readOrder"),
     captures: () => fake.calls.filter((call) => call.op === "captureOrder"),
     reads: () => fake.calls.filter((call) => call.op === "readOrder"),
+    refunds: () => fake.calls.filter((call) => call.op === "refundCapture"),
     approve(orderId) {
       const order = orders.get(orderId);
       if (!order) throw new Error(`no fixture order ${orderId}`);
@@ -151,6 +159,28 @@ export function createFakePayPal(): FakePayPal {
             result = ok(view(orderId, order));
           }
           capturedByKey.set(requestId, result);
+        }
+        if (fault === "lose_response") return lost;
+        return result;
+      },
+      // orderId records the capture id refunded. Like PayPal, a repeated key returns the earlier
+      // refund, and a second key for an already refunded capture is refused.
+      async refundCapture(captureId, requestId) {
+        const fault = takeFault("refundCapture");
+        fake.calls.push({ op: "refundCapture", orderId: captureId, requestId });
+        if (fault === "lose_request") return lost;
+        if (fault === "refuse") return refused(422, "UNPROCESSABLE_ENTITY");
+        let result = refundedByKey.get(requestId);
+        if (!result) {
+          const order = [...orders.values()].find((candidate) => candidate.captureId === captureId);
+          if (fake.refuseRefund) result = refused(fake.refuseRefund.status, fake.refuseRefund.issues);
+          else if (!order) result = refused(404, "RESOURCE_NOT_FOUND");
+          else if (refundedCaptures.has(captureId)) result = refused(422, "UNPROCESSABLE_ENTITY,CAPTURE_FULLY_REFUNDED");
+          else {
+            refundedCaptures.add(captureId);
+            result = ok({ id: `FIXTURE-REFUND-${run}-${++counter}`, status: "COMPLETED" });
+          }
+          refundedByKey.set(requestId, result);
         }
         if (fault === "lose_response") return lost;
         return result;

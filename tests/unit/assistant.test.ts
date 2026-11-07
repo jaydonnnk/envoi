@@ -79,7 +79,9 @@ describe("Ask Envoi", () => {
   });
 
   it("the assistant reaches Envoi only through the MCP client", () => {
-    const files = sources(ASSISTANT_DIR);
+    // S45's merchant copilot shares this directory by Gate 3's file map; it is not the buyer agent,
+    // and its own boundary is checked in tests/integration/merchant-copilot.test.ts.
+    const files = sources(ASSISTANT_DIR).filter((source) => source.file !== "merchant-copilot.ts");
     expect(files.map((source) => source.file).sort()).toEqual(["agent.ts", "envoi-mcp.ts", "tools.ts", "trace.ts"]);
     const allowed = new Set(["ai", "@ai-sdk/openai", "zod", "./envoi-mcp", "./tools", "./trace", "../mcp/contracts", "node:async_hooks", "@modelcontextprotocol/sdk/client/index.js", "@modelcontextprotocol/sdk/client/streamableHttp.js", "@modelcontextprotocol/sdk/types.js"]);
     for (const { file, text } of files) {

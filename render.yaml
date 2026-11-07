@@ -57,6 +57,15 @@ services:
       # and AI_MODEL are all set.
       - key: ASSISTANT_AGENT_TOKEN
         sync: false
+      # Merchant copilot (S45): one labeled sandbox seller's own REST app, entered by hand. The copilot
+      # runs only for the outlet whose seller is PAYPAL_DEMO_SELLER_MERCHANT_ID, and is off unless all
+      # three, OPENAI_API_KEY and AI_MODEL are set. Refunds of that seller's captures use them.
+      - key: PAYPAL_DEMO_SELLER_CLIENT_ID
+        sync: false
+      - key: PAYPAL_DEMO_SELLER_CLIENT_SECRET
+        sync: false
+      - key: PAYPAL_DEMO_SELLER_MERCHANT_ID
+        sync: false
       # Menu translation and Show the stall (S29, S42). Off unless this and OPENAI_API_KEY are set.
       - key: AI_MENU_TRANSLATION_MODEL
         sync: false
