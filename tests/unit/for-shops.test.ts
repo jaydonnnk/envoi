@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import { feeOn, feePercentLabel, PAYPAL_SG_DOMESTIC, PAYPAL_SG_INTERNATIONAL, type PayPalRate } from "@/domain/fees/paypal-rates";
+import { feeOn, PAYPAL_SG_DOMESTIC, PAYPAL_SG_INTERNATIONAL, PAYPAL_SG_MICROPAYMENT_INTERNATIONAL, type PayPalRate } from "@/domain/fees/paypal-rates";
 import { SAVINGS_CLAIMS, savingsClaimsIn } from "../support/savings-claim";
 
 // S44: the public shops page, its fee calculator and the rates. The page must read no database, so
@@ -26,6 +26,9 @@ describe("the fee calculator matches the rate exactly", () => {
     ["domestic", 450, PAYPAL_SG_DOMESTIC, 68, 382],
     ["domestic", 1500, PAYPAL_SG_DOMESTIC, 109, 1391],
     ["domestic", 5000, PAYPAL_SG_DOMESTIC, 245, 4755],
+    ["micropayment", 450, PAYPAL_SG_MICROPAYMENT_INTERNATIONAL, 35, 415],
+    ["micropayment", 1500, PAYPAL_SG_MICROPAYMENT_INTERNATIONAL, 98, 1402],
+    ["micropayment", 5000, PAYPAL_SG_MICROPAYMENT_INTERNATIONAL, 308, 4692],
   ] as const)("%s %i", (_name, order, rate, feeMinor, netMinor) => {
     expect(feeOn(order, rate)).toEqual({ kind: "known", feeMinor, netMinor });
   });
@@ -37,20 +40,17 @@ describe("the fee calculator matches the rate exactly", () => {
     expect(PAYPAL_SG_DOMESTIC.source).toBe("https://www.paypal.com/sg/business/paypal-business-fees");
   });
 
-  it("states the fee as a share of the order, before rounding to the cent", () => {
-    expect(feePercentLabel(450, PAYPAL_SG_INTERNATIONAL)).toBe("15.5%");
-    expect(feePercentLabel(1500, PAYPAL_SG_INTERNATIONAL)).toBe("7.7%");
-    expect(feePercentLabel(5000, PAYPAL_SG_INTERNATIONAL)).toBe("5.4%");
+  it("shows the typed order's fee and what the shop keeps", () => {
+    const markup = page();
+    expect(markup).toContain("S$1.16");
+    expect(markup).toContain("S$13.84");
+    expect(markup).toContain("S$0.98");
   });
 
-  it("shows the approved worked orders on the page", () => {
-    const markup = page();
-    for (const cell of ["S$4.50", "S$0.70 (15.5%)", "S$3.80", "S$1.16 (7.7%)", "S$13.84", "S$2.70 (5.4%)", "S$47.30"]) {
-      expect(markup, cell).toContain(cell);
-    }
-    // The typed order, 15.00 by default, at the Singapore account's rate.
-    expect(markup).toContain("S$1.09 (7.2%)");
-    expect(markup).toContain("S$13.91");
+  it("the micropayment rate costs more above the S$26 the pitch names", () => {
+    const fee = (order: number, rate: PayPalRate) => (feeOn(order, rate) as { feeMinor: number }).feeMinor;
+    expect(fee(2500, PAYPAL_SG_MICROPAYMENT_INTERNATIONAL)).toBeLessThan(fee(2500, PAYPAL_SG_INTERNATIONAL));
+    expect(fee(2700, PAYPAL_SG_MICROPAYMENT_INTERNATIONAL)).toBeGreaterThan(fee(2700, PAYPAL_SG_INTERNATIONAL));
   });
 
   it("gives no number for an order that is not a positive whole amount", () => {
@@ -84,7 +84,7 @@ describe("no shops or landing copy says cheaper", () => {
     "fee-free for visitors",
     "beats card rates",
   ])("the scanner catches %s inside the page's markup", (needle) => {
-    const planted = page().replace("<h2>What you get</h2>", `<h2>${needle}</h2>`);
+    const planted = page().replace("<h2>Why add Envoi</h2>", `<h2>${needle}</h2>`);
     expect(planted).toContain(needle);
     expect(savingsClaimsIn(planted).length, needle).toBeGreaterThan(0);
   });
@@ -97,7 +97,7 @@ describe("no shops or landing copy says cheaper", () => {
   });
 });
 
-describe("a rate shows its date or reads unknown", () => {
+describe("a rate holds its date or reads unknown", () => {
   const unread: PayPalRate = { percentBasisPoints: null, fixedMinor: null, source: "https://www.paypal.com/sg/business/paypal-business-fees", readOn: "" };
 
   it("a null percent gives unknown, never zero", () => {
@@ -112,23 +112,22 @@ describe("a rate shows its date or reads unknown", () => {
     expect(feeOn(1500, { ...PAYPAL_SG_INTERNATIONAL, readOn: "" })).toEqual({ kind: "unknown" });
   });
 
-  it("the page shows each read rate with its source and date", () => {
+  it("the page says each rate in plain words, with its source and no date", () => {
     const markup = page();
-    expect(markup).toContain("Visitor’s PayPal: 4.40% + S$0.50, read on 7 Nov 2026.");
-    expect(markup).toContain("Singapore PayPal: 3.90% + S$0.50, read on 7 Nov 2026.");
+    expect(markup).toContain("Visitor with an overseas PayPal account: 4.40% of the order + S$0.50 per sale.");
+    expect(markup).toContain("Buyer with a Singapore PayPal account: 3.90% of the order + S$0.50 per sale.");
     expect(markup).toContain('href="https://www.paypal.com/sg/business/paypal-business-fees"');
-    expect(markup).toContain("last updated 28 Oct 2026");
+    expect(markup).not.toContain("2026");
   });
 
   it("the calculator prints Unknown and no amount for an unread rate", () => {
-    const markup = renderToStaticMarkup(createElement(FeeCalculator, { international: unread, domestic: unread }));
-    expect(markup).toContain("Visitor’s PayPal: rate unknown.");
-    expect(markup).toContain("Singapore PayPal: rate unknown.");
+    const markup = renderToStaticMarkup(createElement(FeeCalculator, { international: unread, domestic: unread, micropayment: unread }));
+    expect(markup).toContain("Visitor with an overseas PayPal account: rate unknown.");
+    expect(markup).toContain("Buyer with a Singapore PayPal account: rate unknown.");
     expect(markup).toContain(">Unknown<");
     expect(markup).not.toContain("S$0.00");
     expect(markup).not.toContain("S$0.50");
     expect(markup).not.toContain("S$13.84");
-    expect(markup).not.toContain("read on");
   });
 });
 
@@ -136,14 +135,19 @@ describe("the shops page", () => {
   it("states the approved pitch and what it costs", () => {
     const markup = page();
     expect(markup).toContain("<h1>Take PayPal from visitors whose cards do not work at your stall.</h1>");
-    expect(markup).toContain("Keep your SGQR. Visitors scan it in Envoi and pay your own PayPal. Envoi never holds your money. It adds no hardware.");
-    expect(markup).toContain("PayPal charges you per sale. Envoi adds nothing. On small orders the fee is large, so compare it with your margin, and set a minimum order if you need to.");
+    expect(markup).toContain("Keep your SGQR. Add no hardware. Under S$26, PayPal’s micropayment rate costs less.");
+    expect(markup).toContain("Money goes straight to your own PayPal. Envoi never holds it.");
+    expect(markup).toContain("Visitors whose cards and apps cannot pay your SGQR, can pay you with PayPal.");
+    expect(markup).toContain("No card terminal.");
+    expect(markup).toContain("PayPal takes a fee on each sale. Envoi adds nothing.");
+    expect(markup).toContain("The micropayment rate needs PayPal’s approval, and it then applies to every sale.");
+    expect(markup).toContain("Micropayment rate, overseas account: 6.00% of the order + S$0.08 per sale.");
   });
 
   it("promises no public sign-up and no poster before their slices exist", () => {
     const markup = page();
     expect(markup).toContain('<a class="button" href="/merchant/setup">Set up my shop</a>');
-    expect(markup).toContain("Shops on this test build use an account made by Envoi’s operator. There is no public sign-up yet.");
+    expect(markup).toContain("No public sign-up yet: Envoi’s operator makes test accounts.");
     expect(markup.toLowerCase()).not.toContain("poster");
     expect(markup).not.toContain("merchant-signup");
   });

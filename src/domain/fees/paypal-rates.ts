@@ -6,14 +6,19 @@ export type PayPalRate = { percentBasisPoints: number | null; fixedMinor: number
 export type FeeResult = { kind: "known"; feeMinor: number; netMinor: number } | { kind: "unknown" };
 
 export const PAYPAL_FEES_PAGE = "https://www.paypal.com/sg/business/paypal-business-fees";
-// The date PayPal's page itself gives ("Last Updated"), as read on PAYPAL_SG_*.readOn.
-export const PAYPAL_FEES_PAGE_UPDATED_ON = "2026-10-28";
+// PayPal's page said "Last Updated: 28, October 2026" when read. Dates stay here and in the S44 record,
+// not on the screen, by the user's instruction on 2026-11-07.
 
 // "Receiving international transactions": Singapore is in no named row, so "All other markets, All
 // markets" applies. Fixed fee from "Fixed fee for commercial transactions": Singapore dollar, 0.50 SGD.
 export const PAYPAL_SG_INTERNATIONAL: PayPalRate = { percentBasisPoints: 440, fixedMinor: 50, source: PAYPAL_FEES_PAGE, readOn: "2026-11-07" };
 // "Standard rate for receiving domestic transactions": MY & SG. The same fixed fee.
 export const PAYPAL_SG_DOMESTIC: PayPalRate = { percentBasisPoints: 390, fixedMinor: 50, source: PAYPAL_FEES_PAGE, readOn: "2026-11-07" };
+
+// "Receiving micropayments", All other markets (where available), international, plus the SGD row of
+// "Micropayments fixed fee". By application and pre-approval, and it then applies to every sale. PayPal's
+// help article speaks of digital goods, so whether a food stall qualifies is unknown until PayPal says.
+export const PAYPAL_SG_MICROPAYMENT_INTERNATIONAL: PayPalRate = { percentBasisPoints: 600, fixedMinor: 8, source: PAYPAL_FEES_PAGE, readOn: "2026-11-07" };
 
 type ReadRate = { percentBasisPoints: number; fixedMinor: number };
 
@@ -34,12 +39,4 @@ export function feeOn(orderMinor: number, rate: PayPalRate): FeeResult {
   // PayPal's page does not say how a fee larger than the sale is treated.
   if (feeMinor > orderMinor) return { kind: "unknown" };
   return { kind: "known", feeMinor, netMinor: orderMinor - feeMinor };
-}
-
-// The fee as a share of the order, one decimal, before rounding the fee to the cent. Null when unknown.
-export function feePercentLabel(orderMinor: number, rate: PayPalRate): string | null {
-  const read = readRate(rate);
-  if (read === null || !isOrderAmount(orderMinor)) return null;
-  const tenths = Math.round((orderMinor * read.percentBasisPoints + read.fixedMinor * 10_000) / (orderMinor * 10));
-  return `${Math.floor(tenths / 10)}.${tenths % 10}%`;
 }

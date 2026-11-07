@@ -302,12 +302,9 @@ footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; 
 .for-shops .layout { margin-top: 20px; }
 .plain-list { margin: 0; padding-left: 20px; list-style: disc; }
 .plain-list li { padding-bottom: 8px; }
-.fee-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 14px; }
-.fee-table caption { text-align: left; font-weight: 600; padding-bottom: 6px; }
-.fee-table th, .fee-table td { text-align: left; padding: 8px 8px 8px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
-.fee-table thead th { color: var(--muted); font-weight: 600; font-size: 13px; }
-.fee-table tbody th { font-weight: 400; }
-.fee-table td:last-child, .fee-table th:last-child { padding-right: 0; }
+.fee-result { margin-top: 12px; }
+.fee-details { margin-top: 12px; }
+.fee-details summary { cursor: pointer; color: var(--blue); font-weight: 600; font-size: 14px; }
 .fee-source { margin-top: 12px; }
 
 /* S27: the country choice in shop details, before the SGQR step. */
