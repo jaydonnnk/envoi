@@ -599,6 +599,11 @@ The user added the three `PAYPAL_DEMO_SELLER_*` names to `.env.local` and Render
 - Whether this app is attached to sandbox account `EQN6264CF9F4Y` is [unknown]: a client-credentials token does not name its account.
 - No write was sent. Product code stays unstarted until the seller's token can read its own capture.
 
+**Rerun after the user checked the app's account and features, 2026-11-07 [verified], read-only.**
+- Reporting now answers 200, but for account `972VTMQPEUZ5A`, the S27 US seller, not `EQN6264CF9F4Y`. The app sits under the US seller, so `PAYPAL_DEMO_SELLER_MERCHANT_ID` does not match it.
+- On that seller's own S27 order `3BF18639HM1756411` and capture `6UJ28034J5731743J`: REST order and capture 200 `COMPLETED`, payee `972VTMQPEUZ5A`; MCP `get_order` returns it; `list_transactions` lists 9 rows of that account and finds the capture by id; `list_disputes` is empty.
+- So the seller's own token reads orders Envoi's app created for it, and R-F2's last [unknown] is settled for reads. Refund by this token stays [unknown] until the authorized demo refund.
+
 **Gate text that the check contradicted, now in the drafts above.**
 - Gate 2 step 3 and Gate 3's `ALLOWED_PAYPAL_TOOLS` name `list_transaction`; PayPal's tool is `list_transactions`.
 - `get_merchant_insights` cannot work in sandbox, so in practice the model gets `get_order`, `list_disputes` and `get_dispute` from PayPal, plus Envoi's own orders.
