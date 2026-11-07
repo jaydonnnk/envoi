@@ -10,21 +10,49 @@ Deployed test environment: <https://envoi-helx.onrender.com> (Render Free, so th
 
 AI here is only ever a reader and a drafter. No model sets a price, approves a payment or moves money: every price comes from the shop's own published menu, and a person approves every payment.
 
-- **Ask Envoi** at `/buy/ask`: the assistant inside the site. It reads shops and menus through Envoi's own `/mcp` endpoint with the official MCP SDK client, asks when one phrase fits two items, and hands the buyer a one-time link to a server-priced review. It cannot pay, approve or read a receipt. It is on only when `OPENAI_API_KEY`, `AI_MODEL` and `ASSISTANT_AGENT_TOKEN` are all set; `/buy/ask` answers 404 when it is off, and the landing page and `/buy` link to it only while it is on.
-- **The one-sentence box** at `/buy`: one sentence to a basket the buyer can still change. The model names registered shops and items only; ids that are not on a published menu are dropped, prices come from the registry, and a quantity outside 1 to 20 is refused server-side rather than clamped.
-- **The menu explained and translated**: an AI translation beside each original name on the buyer's menu, with the original one tap away. A translation never changes a displayed price and never adds an item.
-- **Web menu import** at `/merchant/setup`: one hosted Kernel browser session reads the merchant's own public menu page and one model call drafts an editable table. A price is filled only when the page prints it as text with the same digits. The draft never publishes itself; the merchant confirms every row.
-- **Reference buyer agent** at `clients/buyer-agent/` (`npm run agent`): an agent on the person's own machine over the same MCP endpoint. It refuses an item the menu did not return and a quantity outside 1 to 20 before making any call, and it never sees the link's token.
+- **Ask Envoi** at `/buy/ask`: the assistant inside the site.
+  It reads shops and menus through Envoi's own `/mcp` endpoint with the official MCP SDK client, asks when one phrase fits two items, and hands the buyer a one-time link to a server-priced review.
+  A shop's page or QR can open it for that one shop.
+  Asked for a suggestion within a budget, it suggests only available menu items, Envoi checks the sum against the menu prices, and no link exists until the buyer accepts.
+  It gives no dietary assurance, and it cannot pay, approve or read a receipt.
+  It is on only when `OPENAI_API_KEY`, `AI_MODEL` and `ASSISTANT_AGENT_TOKEN` are all set; `/buy/ask` answers 404 when it is off, and the landing page and `/buy` link to it only while it is on.
+- **The one-sentence box** at `/buy`: one sentence to a basket the buyer can still change.
+  The model names registered shops and items only; ids that are not on a published menu are dropped, prices come from the registry, and a quantity outside 1 to 20 is refused server-side rather than clamped.
+- **The menu explained and translated**: an AI translation beside each original name on the buyer's menu, with the original one tap away.
+  A translation never changes a displayed price and never adds an item.
+- **Show the stall**: after a Paid receipt, the visitor can show the order in large text in English, 中文, Melayu or தமிழ் and play it aloud where the browser supports that language.
+  Original names and the paid amount stay on screen, and any translation is labeled as AI.
+- **Web menu import** at `/merchant/setup`: one hosted Kernel browser session reads the merchant's own public menu page and one model call drafts an editable table.
+  A price is filled only when the page prints it as text with the same digits.
+  The draft never publishes itself; the merchant confirms every row.
+- **Ask your orders** at `/merchant/orders`: one sentence from the merchant becomes filters on the orders table.
+  The model sees the sentence and the date, never an order, and it cannot change anything.
+- **Bring your own assistant** at `/agents`: how to connect an outside MCP assistant with an operator-issued token, limited to 60 `/mcp` requests per 10 minutes and revocable.
+  It gets the same reads and the same one-time link, and the person still approves the payment.
+- **Reference buyer agent** at `clients/buyer-agent/` (`npm run agent`): an agent on the person's own machine over the same MCP endpoint.
+  It refuses an item the menu did not return and a quantity outside 1 to 20 before making any call, and it never sees the link's token.
 
-Models are named by the environment and never in code: `AI_MODEL` for the assistant and the box, `AI_MENU_TRANSLATION_MODEL` for translations, `AI_WEB_MENU_MODEL` for the web import. On the deployed test environment `AI_MODEL` is `gpt-6-sol` (user-reported; the model in use cannot be read from outside).
+Models are named by the environment and never in code: `AI_MODEL` for the assistant, the box and Ask your orders, `AI_MENU_TRANSLATION_MODEL` for translations, `AI_WEB_MENU_MODEL` for the web import.
+On the deployed test environment `AI_MODEL` is `gpt-6-sol` (user-reported; the model in use cannot be read from outside).
 
-**What is measured, and what is not.** Ask Envoi's model scored 24 of 25 on the registered sentences in one local run against FIXTURE shops, after six candidates had been tried; the box's model scored 25 of 25 in one local run. Both are single runs on fixtures and are not a measure of real buyers. Ordering in languages other than those registered sentences is not evaluated yet, so no language is claimed. Ask Envoi through to a Paid receipt on the deployed site has not been run. Menu photo import ships closed: no vision model met its threshold in four rounds.
+**What is measured, and what is not.** Every result below is a single run on FIXTURE shops with builder review, not a measure of real buyers.
+
+- **Languages:** the site lists Japanese, Malay, Spanish and Chinese because those languages passed fixed cases.
+  In the S32 set, Ask Envoi scored 24 of 25 and the box 20 of 25, with zero wrong basket links.
+  Chinese passed all five cases on both paths in a separate follow-up.
+  This is not general language accuracy or native-reader validation.
+- **Ask Envoi today:** its current instructions scored 10 of 10 on the budget advice cases, with none off the menu, over budget or giving a dietary assurance, and 25 of 25 on the frozen sentences with zero wrong basket links.
+- **On the deployed site:** Ask Envoi reached a Paid receipt with PayPal sandbox test money, most recently on 2026-11-07 ([record](docs/plans/envoi/00-status.md#s34-accept-button-2026-11-07)).
+  An outside assistant, Claude Code, also made a link that the user then paid in sandbox ([record](docs/plans/envoi/00-status.md#s37-bring-your-own-assistant-2026-11-06)).
+- **Not claimed:** menu photo import ships closed, because no vision model met its threshold in four rounds.
+  No usability, completion or adoption result exists.
 
 ## Test money only
 
 Everything here is a hackathon prototype in a test environment.
 
-- **PayPal sandbox.** Every PayPal payment uses sandbox accounts and sandbox money; no real money moves.
+- **PayPal sandbox.** Every PayPal payment uses sandbox accounts and sandbox money; no real money moves. To pay on the deployed site, a tester uses a PayPal sandbox buyer account.
+- **Crypto through PayPal.** Offered only for seller ids listed in `PAYPAL_CRYPTO_ENABLED`, and exercised only in PayPal's sandbox simulator, labeled simulated; no token moves.
 - **Solana devnet.** PYUSD payments use devnet test tokens on Solana devnet, never mainnet. PYUSD is off unless `PYUSD_ENABLED` is `true`.
 - **Demo fixtures.** Seeded shops and sample data are labeled demo fixtures in the app. Shop branding is fictional unless a merchant has given permission.
 
@@ -34,15 +62,15 @@ The app shows these labels on every screen. Pending, failed or uncertain payment
 
 | Tool | What it does here | Limit that matters |
 | --- | --- | --- |
-| Render Free | Hosts the deployed test environment from `main` | Sleeps when idle; a cold first visit took about 28 s from Singapore |
+| Render Free | Hosts the deployed test environment from `main`; `render.yaml` records its settings and is not applied as a Blueprint | Sleeps when idle; a cold first visit took about 28 s from Singapore |
 | Neon Postgres | The database, over three roles: `DATABASE_URL`, `MIGRATION_DATABASE_URL` and `MAINTENANCE_DATABASE_URL` | Holds fixture shops and sandbox payments only |
 | PayPal sandbox | The buyer's approval, and the shop's own seller account as payee | Sandbox money only; Envoi is never the payee |
 | Solana devnet | PYUSD test tokens, off unless `PYUSD_ENABLED` is `true` | Devnet only, never mainnet; Envoi prepares, the wallet signs |
-| OpenAI | `AI_MODEL` for the assistant and the box, `AI_MENU_TRANSLATION_MODEL` for translations, `AI_WEB_MENU_MODEL` for the web import, through the Vercel AI SDK | Faked at its fetch boundary in every test; real calls happen only in recorded runs |
+| OpenAI | `AI_MODEL` for the assistant, the box and Ask your orders, `AI_MENU_TRANSLATION_MODEL` for translations, `AI_WEB_MENU_MODEL` for the web import, through the Vercel AI SDK | Faked at its fetch boundary in every test; real calls happen only in recorded runs |
 | Kernel | One hosted headless browser session per web menu import, which reads the merchant's own public page | Deleted in a `finally` block on every path; no PDF, no link following, no live view |
 | MCP SDK | `@modelcontextprotocol/sdk` 1.32.1: Envoi's own `/mcp` server, and the client the assistant and the reference agent use | Each tool answer is validated against the server's own output schema |
 | Better Auth | Merchant sign-in and the buyer's anonymous session | There is no public merchant sign-up; the operator creates accounts |
-| AG Grid Community 36.2.0 | The merchant's menu draft grid | Community edition only; no paid module and no AG Studio |
+| AG Grid Community 36.2.0 | The merchant's menu draft grid and orders table | Community edition only; no paid module and no AG Studio |
 | `barcode-detector` and `zxing-wasm` | SGQR sticker decode in the merchant's own browser | The sticker is never stored and never a payment destination |
 | GitHub Actions | CI on every push, and the maintenance runner on a schedule | The runner reconciles and closes only; it can never capture or send a payment |
 

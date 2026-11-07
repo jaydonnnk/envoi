@@ -38,21 +38,47 @@ services:
         sync: false
       - key: PAYPAL_PARTNER_ATTRIBUTION_ID
         sync: false
-      # Set now so S3 needs no Render change; the app reads it from S3 (webhook verification).
+      # The sandbox app's webhook registration; every delivery is verified against it (S3).
       - key: PAYPAL_WEBHOOK_ID
         sync: false
       # Kill switch for new PayPal starts and captures (D10): "true" or "false", entered by hand.
       - key: PAYMENTS_ENABLED
         sync: false
-      # OpenAI (S4 text suggestions, S11 menu photos). The key is entered by hand. AI_MODEL is the
-      # S4 evaluation's choice; AI_MENU_MODEL is the S11 vision evaluation's choice and needs a
-      # reviewed bounds entry in MENU_SPEND_POLICY, or every import is refused.
+      # Crypto through PayPal (S38): comma-separated seller merchant ids; empty means off.
+      - key: PAYPAL_CRYPTO_ENABLED
+        sync: false
+      # OpenAI. The key is entered by hand. AI_MODEL serves the box (S4), Ask Envoi (S25) and Ask your
+      # orders (S35). With both unset, buyers get manual selection and the orders table still filters.
       - key: OPENAI_API_KEY
         sync: false
       - key: AI_MODEL
         sync: false
+      # Ask Envoi (S25): an operator-issued agent token, server only. Off unless this, OPENAI_API_KEY
+      # and AI_MODEL are all set.
+      - key: ASSISTANT_AGENT_TOKEN
+        sync: false
+      # Menu translation and Show the stall (S29, S42). Off unless this and OPENAI_API_KEY are set.
+      - key: AI_MENU_TRANSLATION_MODEL
+        sync: false
+      # Menu photo import (S11), shipped closed. AI_MENU_MODEL needs a reviewed bounds entry in
+      # MENU_SPEND_POLICY, or every import is refused. The kill switch is "true" or "false", entered
+      # by hand; unset is false.
       - key: AI_MENU_MODEL
         sync: false
-      # Kill switch for menu photo imports (S11): "true" or "false", entered by hand; unset is false.
       - key: MENU_IMPORTS_ENABLED
+        sync: false
+      # Web menu import (S24). KERNEL_API_KEY is server only. AI_WEB_MENU_MODEL needs its own reviewed
+      # bounds entry in MENU_SPEND_POLICY. The kill switch is separate from MENU_IMPORTS_ENABLED; unset
+      # is false.
+      - key: KERNEL_API_KEY
+        sync: false
+      - key: AI_WEB_MENU_MODEL
+        sync: false
+      - key: WEB_IMPORTS_ENABLED
+        sync: false
+      # PYUSD on Solana devnet (S16). The rail's only two settings; the RPC URL is checked against the
+      # pinned devnet identity before every use. PYUSD_ENABLED unset is false.
+      - key: SOLANA_RPC_URL
+        sync: false
+      - key: PYUSD_ENABLED
         sync: false
