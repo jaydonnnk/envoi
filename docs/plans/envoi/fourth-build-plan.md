@@ -89,7 +89,7 @@ Branch: `envoi/slice-45-paypal-mcp-copilot`.
   - PayPal documents `mcp.sandbox.paypal.com` with SSE and Streamable HTTP, and a Bearer token from client credentials [vendor claim]. Which path works with Envoi's MCP client is [unknown].
   - A public issue reports every sandbox tool failing with `Unsupported cache mode: default` [unverified report]. Whether it still happens is [unknown].
   - Whether a token from Envoi's app can read or refund a captured payment whose payee is a shop's own seller account is [unknown].
-- **Allowed tools.** `get_merchant_insights`, `list_transaction`, `get_order`, `list_disputes` and `get_dispute`, filtered by Envoi's own allow-list after the server lists its tools.
+- **Allowed tools.** `get_order`, `list_transactions`, `list_disputes` and `get_dispute`, filtered by Envoi's own allow-list after the server lists its tools. Revised 2026-11-07 by the first check: `get_merchant_insights` is unsupported in sandbox, and the copilot runs only for one labeled demo seller on that seller's own credentials; see [Gate 2](02-architecture.md#flow-copilot-turn).
 - **Never given to the model.** `pay_order`, `create_order`, `create_refund` and every other write tool.
 - **Refunds.** Sent by Envoi's existing PayPal write client, only from the merchant's own confirmation.
 - **Builds.** One server-side agent turn with the existing tool-call and time budgets; token refresh; results filtered to the signed-in merchant's outlet; a refund confirmation screen; a refund recorded beside the capture without rewriting Paid.

@@ -3139,6 +3139,8 @@ unpaid_closed -> uncertain   (reason crypto_read_unverified)
 
 ## Reopening 2026-11-07: fourth build plan
 
+**Reopened again 2026-11-07 for S45's first check ("Yes to both", "Demo shop only"); the S45 rows below are drafted, awaiting re-approval.** See the [S45 record](00-status.md#s45-merchant-copilot-2026-11-07).
+
 **Amended for S44 and re-approved 2026-11-07 ("Yes to gate 1 and gate 3 changes as well"): test 64 and the fee constants below.**
 **Status: approved 2026-11-07 ("Approve Gate 3"), not built.** For [Gate 1](01-product.md#fourth-build-plan-proposed-2026-11-07) and [Gate 2](02-architecture.md#fourth-build-plan-amendment-2026-11-07), both approved 2026-11-07.
 Approval authorizes no code change, install, migration, model call, spend, merge, push or deploy.
@@ -3153,12 +3155,12 @@ Approval authorizes no code change, install, migration, model call, spend, merge
 | `src/domain/fees/paypal-rates.ts` | S44 | Reviewed rates with source and date, and the pure fee function |
 | `src/app/buy/ask/ask-envoi.tsx` | S44 | Collapses the steps under "How this was checked" |
 | `src/app/buy/ask/page.tsx`, `src/app/globals.css`, `tests/support/savings-claim.ts` | S44 | Added 2026-11-07: the lead that held developer wording, the styles, and the savings scanner |
-| `src/integrations/paypal/agent-tools.ts` | S45 | Connection to PayPal's MCP server and the allow-list |
+| `src/integrations/paypal/agent-tools.ts` | S45 | Connection to PayPal's MCP server over SSE, the allow-list and the payer redaction |
 | `src/integrations/assistant/merchant-copilot.ts` | S45 | One copilot turn, reusing the turn gate pattern |
 | `src/app/api/v1/merchant/outlets/[id]/copilot/route.ts` | S45 | Member-only turn route |
 | `src/app/api/v1/merchant/outlets/[id]/orders/[orderId]/refund/route.ts` | S45 | Member-only refund from a confirmation |
 | `src/domain/payments/refunds.ts` | S45 | Refund rules and state |
-| `src/integrations/paypal/orders.ts` | S45 | Adds `refundCapture` to `PayPalWriteClient` |
+| `src/integrations/paypal/orders.ts` | S45 | Adds `refundCapture` to `PayPalWriteClient`, called only on a client built from the demo seller's credentials |
 | `src/app/merchant/orders/copilot-panel.tsx` | S45 | Chat, calls made and refund confirmation |
 | `src/integrations/paypal/map.ts`, `src/domain/purchases/reconcile.ts`, `src/domain/payments/attempts.ts` | S46 | Reads and stores fee, net and country |
 | `src/domain/purchases/sales-summary.ts`, its route | S46 | Server totals |
@@ -3184,7 +3186,8 @@ function readRate(rate: PayPalRate): { percentBasisPoints: number; fixedMinor: n
 
 // src/integrations/paypal/agent-tools.ts
 const PAYPAL_MCP_HOST: "https://mcp.sandbox.paypal.com"; // a code constant, never a setting
-const ALLOWED_PAYPAL_TOOLS: readonly ["get_order", "get_merchant_insights", "list_transaction", "list_disputes", "get_dispute"];
+const ALLOWED_PAYPAL_TOOLS: readonly ["get_order", "list_transactions", "list_disputes", "get_dispute"]; // revised 2026-11-07 by S45's first check
+// The transport is the pinned SDK's SSEClientTransport at PAYPAL_MCP_HOST + "/sse"; a tool result holding status 401 counts as an expired token.
 type PayPalTools = { names: readonly string[]; call(name: AllowedPayPalTool, args: unknown, signal: AbortSignal): Promise<ToolAnswer>; close(): Promise<void> };
 function connectPayPalTools(token: () => Promise<string>, fetch?: typeof globalThis.fetch): Promise<PayPalTools>;
 
@@ -3196,6 +3199,8 @@ type CopilotResult =
   | { kind: "stopped"; reason: "tool_calls" | "time"; steps: CopilotStep[] }
   | { kind: "failed"; steps: CopilotStep[] };
 function runCopilotTurn(config: CopilotConfig, outletId: string, turns: readonly CopilotTurn[]): Promise<CopilotResult>;
+// CopilotConfig holds the demo seller's merchant id and token source; null config means the copilot is off.
+function demoSellerCopilot(env: WebEnv): CopilotConfig | null; // added 2026-11-07: all three PAYPAL_DEMO_SELLER_* names, OPENAI_API_KEY and AI_MODEL, or null
 
 // src/domain/payments/refunds.ts
 type RefundState = "sent" | "completed" | "failed" | "checking";
@@ -3235,9 +3240,9 @@ function triggerTouristReady(input: { outletId: string; revisionId: string }, tr
 
 ### Call stacks
 
-**Copilot turn.** `copilot/route.ts`, then `requireOutletMembership`, the enrollment check, `admit("merchant_copilot")`, `runCopilotTurn`, `connectPayPalTools`, `generateText` with local tools, then each allowed call and an outlet filter on its result, then `close` in `finally`.
+**Copilot turn.** `copilot/route.ts`, then `requireOutletMembership`, the enrollment check, the demo seller check (the outlet's seller equals `PAYPAL_DEMO_SELLER_MERCHANT_ID`, else not found), `admit("merchant_copilot")`, `runCopilotTurn`, `connectPayPalTools`, `generateText` with local tools, then each allowed call and an outlet filter on its result, then `close` in `finally`.
 
-**Refund.** `refund/route.ts`, then membership, `sendFullRefund`, a transaction that claims one refund row by unique attempt and idempotency key, `PayPalWriteClient.refundCapture` outside the transaction, then the state update and audit. A lost response stays `checking`, and maintenance's read decides it.
+**Refund.** `refund/route.ts`, then membership, the same demo seller check, `sendFullRefund` with the demo seller's write client, a transaction that claims one refund row by unique attempt and idempotency key, `PayPalWriteClient.refundCapture` outside the transaction, then the state update and audit. A lost response stays `checking`, and maintenance's read decides it.
 
 **Fee.** The existing capture or read path, then `mapOrder`, the existing verification unchanged, then the same attempt update adding fee, net and country when present.
 
@@ -3263,10 +3268,10 @@ Numbers continue from test 61. Each guard gets its own mutation with a distinct 
 | 65 | S45 | `the copilot cannot reach a tool outside its allow-list` | `pay_order` listed by the server never reaches the model or the transport |
 | 66 | S45 | `a model request cannot send a refund` | No model output reaches `refundCapture` |
 | 67 | S45 | `a refund needs the signed-in merchant's confirmation` | Another member, a buyer and no session are refused |
-| 68 | S45 | `one merchant's question reads no other merchant's order` | A foreign order id or payee is dropped |
+| 68 | S45 | `one merchant's question reads no other merchant's order` | A foreign order id or payee is dropped, and an outlet that is not the demo seller's gets no turn and no refund. Revised 2026-11-07 |
 | 69 | S45 | `PayPal text is data, not instructions` | An injected note changes no tool call |
 | 70 | S45 | `a refund leaves the Paid record intact` | State stays `paid`, with a refund beside it |
-| 71 | S45 | `an expired PayPal token is refreshed once` | One retry, then a failed turn |
+| 71 | S45 | `an expired PayPal token is refreshed once` | A `status: 401` inside a tool result, or an HTTP 401, gives one refresh and one retry, then a failed turn. Revised 2026-11-07 |
 | 72 | S45 | `a second refund of one capture sends nothing` | The unique claim holds under concurrency |
 | 73 | S46 | `a missing fee shows as unknown, never zero` | Null fields survive to the row and the totals |
 | 74 | S46 | `a missing fee never blocks Paid` | Verification's result does not change |
@@ -3304,8 +3309,8 @@ Numbers continue from test 61. Each guard gets its own mutation with a distinct 
 ### Least confident decisions
 
 1. **PayPal's MCP server from a web route.** One connection per turn copies the buyer agent, but sandbox reliability is [unknown]. If each connect is slow, the 60-second turn suffers.
-2. **Platform token.** The token may see Envoi's own account only. Then `list_transaction` and `get_merchant_insights` show the wrong data, so they stay off unless S45's check proves them, and the copilot uses `get_order` and Envoi's own orders.
-3. **Refund permission.** A refund on another seller's capture may need the seller's permission. If so, it runs only for the labeled demo seller's credentials.
+2. **Platform token.** S45's check confirmed it sees Envoi's own account only, and `get_merchant_insights` is unsupported in sandbox [verified 2026-11-07]. So the copilot uses the demo seller's own token, and whether that token reads orders Envoi created for the seller is [unknown] until its read-only check.
+3. **Refund permission.** Confirmed: Envoi's token was refused (403 `PERMISSION_DENIED`) [verified 2026-11-07]. Refunds run only on the labeled demo seller's credentials, and the copilot runs only for that one shop.
 4. **`hooks.before` for the limit.** Better Auth's hook API must allow a refusal before creating anything. S43 proves it before building on it.
 5. **Pending shop without a membership approval.** `createMerchantOutlet` today consumes an approved membership. `createPendingOutlet` bypasses that and relies on one-per-account and the unchanged publication checks.
 6. **Fixed views and sorts.** A small list limits what "ask your orders" can do, but keeps the model unable to change anything else.

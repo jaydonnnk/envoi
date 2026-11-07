@@ -725,6 +725,7 @@ No hold and no longer basket lock are added, because PayPal's expiry for an unap
 ## Fourth build plan amendment, 2026-11-07
 
 **Status: approved 2026-11-07 ("Approve Gate 2"), not built.** For [Gate 1's fourth build plan](01-product.md#fourth-build-plan-proposed-2026-11-07), approved 2026-11-07.
+**Reopened 2026-11-07 for S45's first check ("Yes to both", "Demo shop only"); the copilot revision is drafted, awaiting re-approval.** It changes the copilot turn, the refund's credentials, the names and R-F1 and R-F2 only; see the [S45 record](00-status.md#s45-merchant-copilot-2026-11-07).
 Approval accepts this as a proposal and authorizes no code change, install, migration, model call, spend, merge, push or deploy.
 Every earlier authority rule stands: no model sets a price, approves a payment or moves money, and Envoi is never the payee.
 
@@ -769,10 +770,12 @@ Totals are computed on the server, because the browser holds only one loaded pag
 
 1. A member's message reaches the route; membership and the limiter run first.
 2. One model loop runs on `AI_MODEL`, with `store: false`, six tool calls and 60 seconds, as the buyer agent has.
-3. Envoi connects to `mcp.sandbox.paypal.com` with a Bearer token from its client credentials, and lists the server's tools. Only an explicit allow-list in Envoi's own code reaches the model: `get_order`, `get_merchant_insights`, `list_transaction`, `list_disputes` and `get_dispute`, plus Envoi's own orders for this outlet. The host is a sandbox-only code constant, never a setting.
-4. `get_order` runs only for an order id Envoi holds for this outlet, and any result whose payee is not this outlet's seller is dropped.
-5. `propose_refund` is a local tool that checks the order and creates nothing. The route returns the proposal, and the browser shows the confirmation.
-6. PayPal and merchant text reaches the model as data, never as instructions.
+3. The copilot runs only for the one labeled demo shop: the outlet whose PayPal seller is `PAYPAL_DEMO_SELLER_MERCHANT_ID`. Every other outlet gets no turn and shows no panel, because Envoi's platform token cannot read a shop's transactions or refund its capture [verified 2026-11-07].
+4. Envoi connects to `mcp.sandbox.paypal.com` over SSE at `/sse`, with a Bearer token from the demo seller's own client credentials, and lists the server's tools. Streamable HTTP answered Not Found there [verified 2026-11-07]. Only an explicit allow-list in Envoi's own code reaches the model: `get_order`, `list_transactions`, `list_disputes` and `get_dispute`, plus Envoi's own orders for this outlet. `get_merchant_insights` is left out, because PayPal answers that it is not supported in sandbox [verified 2026-11-07]. The host is a sandbox-only code constant, never a setting.
+5. `get_order` runs only for an order id Envoi holds for this outlet, and any result whose payee is not this outlet's seller is dropped. The payer's name, email and account id are removed from every PayPal result before the model sees it.
+6. `propose_refund` is a local tool that checks the order and creates nothing. The route returns the proposal, and the browser shows the confirmation.
+7. PayPal and merchant text reaches the model as data, never as instructions.
+8. An expired or refused token shows as `status: 401` inside a normal tool result, not as a transport error [verified 2026-11-07]. Envoi reads that, refreshes the token once and retries the call once.
 
 `pay_order`, `create_order`, `create_refund` and every other PayPal write tool are never given to the model.
 
@@ -780,7 +783,7 @@ Totals are computed on the server, because the browser holds only one loaded pag
 
 1. The member taps Confirm, and the browser calls the refund route with the order id.
 2. The server re-checks membership, the Paid state and that no refund exists.
-3. The existing PayPal write client calls `POST /v2/payments/captures/{id}/refund` with an idempotency key, for the full amount only.
+3. A PayPal write client built from the demo seller's own credentials calls `POST /v2/payments/captures/{id}/refund` with an idempotency key, for the full amount only. Envoi's platform credentials were refused with 403 `PERMISSION_DENIED` [verified 2026-11-07], so they never send a refund.
 4. The refund is stored beside the capture. `paid` does not change, and the receipt and orders screen add a refund line.
 5. A lost response stays "checking" until a read decides it, as a capture does.
 
@@ -829,19 +832,19 @@ The key lives only in the environment, so the hash cannot be matched to a public
 ### External
 
 **New environment names:** `MERCHANT_SIGNUP_ENABLED`, `STICKER_HASH_KEY`, `RENDER_API_KEY`, `RENDER_WORKFLOW_SLUG`.
-**Conditional names,** only if the platform cannot read a seller's data: `PAYPAL_DEMO_SELLER_CLIENT_ID`, `PAYPAL_DEMO_SELLER_CLIENT_SECRET`, for one labeled sandbox seller.
+**Demo seller names,** needed because the platform cannot read a seller's data or refund its capture [verified 2026-11-07]: `PAYPAL_DEMO_SELLER_CLIENT_ID`, `PAYPAL_DEMO_SELLER_CLIENT_SECRET` and `PAYPAL_DEMO_SELLER_MERCHANT_ID`, for one labeled sandbox seller. The copilot is off unless all three, `OPENAI_API_KEY` and `AI_MODEL` are set.
 **Reused:** `OPENAI_API_KEY`, `AI_MODEL`, `AI_MENU_TRANSLATION_MODEL`, `PAYPAL_*`, `DATABASE_URL`.
 
 **New dependencies, each installed only inside its slice:** `ag-charts-community` and `ag-charts-react` (S46), and Render's TypeScript SDK (S50).
 
-**PayPal surface added:** capture refund, seller receivable breakdown, and reads through PayPal's hosted MCP server at `mcp.sandbox.paypal.com`, over SSE or Streamable HTTP [vendor claim]. `@paypal/agent-toolkit` is not installed: it requires `ai` ^4 and `zod` ^3, while Envoi runs `ai` 7.0.130 and `zod` 4 [verified].
+**PayPal surface added:** capture refund, seller receivable breakdown, and reads through PayPal's hosted MCP server at `mcp.sandbox.paypal.com`, over SSE [verified 2026-11-07]. `@paypal/agent-toolkit` is not installed: it requires `ai` ^4 and `zod` ^3, while Envoi runs `ai` 7.0.130 and `zod` 4 [verified].
 
 **Render:** `plan: starter` at $7 a month [vendor claim], plus Workflow compute by the second. Workflows has no free instance [vendor claim]. GitHub Actions keeps the maintenance runner.
 
 ### Risks and falsifiers
 
-- **R-F1 [unknown], PayPal's sandbox server.** Which path works with Envoi's client is unsettled, and one public issue reports every sandbox tool failing with `Unsupported cache mode: default`. S45's first check is outside the repository. If the server cannot serve Envoi, stop and ask. Direct REST reads are built only if the user agrees, and then no claim to use PayPal's agent tools is made.
-- **R-F2 [unknown], reading a seller.** App credentials may not read another seller's transactions, or refund their capture without the seller's permission. S45 tests both on sandbox first. If not, the demo uses one labeled seller's own credentials, and the copilot's `list_transaction` and `get_merchant_insights` stay off for every other shop.
+- **R-F1, PayPal's sandbox server.** S45's first check, 2026-11-07: SSE serves Envoi's client, and `Unsupported cache mode: default` did not appear on `get_order`, `list_disputes` or `list_transactions` [verified]. Sandbox reliability over many turns stays [unknown]. If the server cannot serve Envoi, stop and ask. Direct REST reads are built only if the user agrees, and then no claim to use PayPal's agent tools is made.
+- **R-F2, reading a seller.** S45's first check, 2026-11-07: Envoi's token reads a shop's order, but `list_transactions` reads only Envoi's own account, and a refund of a shop's capture was refused [verified]. The copilot therefore runs only for one labeled demo seller, on that seller's own credentials. Whether that seller's token reads the orders Envoi created for it is [unknown] until a read-only check once its credentials exist.
 - **R-F3, write tools on the server.** PayPal's server exposes write tools such as `pay_order` to any token that may call them. Envoi's allow-list filters them before the model, and a test proves an unlisted call is refused before it leaves Envoi.
 - **R-F4, ownership.** A submitted seller id does not prove ownership. The operator decides at approval.
 - **R-F5 [unknown], Workflows access.** A Hobby workspace may need a card. If the user will not add one, keep Starter, cut the Workflow and make no Workflows claim.
