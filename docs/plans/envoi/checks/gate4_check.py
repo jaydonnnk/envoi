@@ -433,7 +433,8 @@ for f, text in current.items():
 # 2026-11-07: the S34 accept button reopening, re-approved by the user ("Approve Gate 3"); fc342680...8f602b was the pin before it.
 # 2026-11-07: the fourth build plan, re-approved by the user ("Approve Gate 3").
 # 2026-11-07: S44 test 64 and fee constants, re-approved by the user ("Yes to gate 1 and gate 3 changes as well").
-G3_REOPENING_SHA256 = "d4161092b905d156ce3199d50ea0548278b4668b15d8eaa05cfd47f14e080592"
+# 2026-11-07: S45 first check, re-approved by the user ("i approve both gates"); d4161092...4e080592 was the pin before it.
+G3_REOPENING_SHA256 = "7c335121d5ba3f4574cc78b5a72fe090e17dc3a8ea32859e0969bc9895fdf4aa"
 # 02-architecture.md may likewise equal its continuation amendment text, re-approved by the user on 2026-10-25
 # (bc504e10...d0e47a9f was the shop QR and order archive text, re-approved on 2026-10-24,
 # 28d54654...45561154 the Phantom landing text of 2026-10-18, 938d0a99...f3bf30a6 the English-only text of 2026-10-15).
@@ -448,7 +449,8 @@ G3_REOPENING_SHA256 = "d4161092b905d156ce3199d50ea0548278b4668b15d8eaa05cfd47f14
 # 2026-10-29: the S25 limiter bucket reopening, re-approved by the user ("Approve Gate 2"); b1c2513f...b08f2 was the approved text before it, 63c408aa...2254ba78 the draft.
 # 2026-11-02: the MCP client amendment, re-approved by the user ("yes i authroize gate 2"); a2f88604...93a5bd06 was the approved S25 limiter bucket text before it.
 # 2026-11-07: the fourth build plan, re-approved by the user ("Approve Gate 2").
-G2_REOPENING_SHA256 = "80b3e947d94b30cb43e36e1472b927e630e40b4dbdba3676f6ba528045725b7e"
+# 2026-11-07: S45 first check, re-approved by the user ("i approve both gates"); 80b3e947...45725b7e was the pin before it.
+G2_REOPENING_SHA256 = "7b64f2ba87c93524ea8d7c3b3071b1bfd9c66c41cd364af1ca3de4f0411f6461"
 # Gate 1, re-approved 2026-10-16 after deferring menu photo drafting and again on 2026-10-21 for the
 # landing page, and on 2026-10-24 for the shop QR and order archive, then reopened and re-approved on 2026-10-25 for S19-S22:
 # the revised and added mockups, and 01-product.md without its closing status line, which keeps changing as slices finish

@@ -725,7 +725,7 @@ No hold and no longer basket lock are added, because PayPal's expiry for an unap
 ## Fourth build plan amendment, 2026-11-07
 
 **Status: approved 2026-11-07 ("Approve Gate 2"), not built.** For [Gate 1's fourth build plan](01-product.md#fourth-build-plan-proposed-2026-11-07), approved 2026-11-07.
-**Reopened 2026-11-07 for S45's first check ("Yes to both", "Demo shop only"); the copilot revision is drafted, awaiting re-approval.** It changes the copilot turn, the refund's credentials, the names and R-F1 and R-F2 only; see the [S45 record](00-status.md#s45-merchant-copilot-2026-11-07).
+**Reopened 2026-11-07 for S45's first check ("Yes to both", "Demo shop only") and re-approved 2026-11-07 ("i approve both gates").** It changes the copilot turn, the refund's credentials, the names and R-F1 and R-F2 only; see the [S45 record](00-status.md#s45-merchant-copilot-2026-11-07).
 Approval accepts this as a proposal and authorizes no code change, install, migration, model call, spend, merge, push or deploy.
 Every earlier authority rule stands: no model sets a price, approves a payment or moves money, and Envoi is never the payee.
 

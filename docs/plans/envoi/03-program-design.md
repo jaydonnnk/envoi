@@ -3139,7 +3139,7 @@ unpaid_closed -> uncertain   (reason crypto_read_unverified)
 
 ## Reopening 2026-11-07: fourth build plan
 
-**Reopened again 2026-11-07 for S45's first check ("Yes to both", "Demo shop only"); the S45 rows below are drafted, awaiting re-approval.** See the [S45 record](00-status.md#s45-merchant-copilot-2026-11-07).
+**Reopened again 2026-11-07 for S45's first check ("Yes to both", "Demo shop only") and re-approved 2026-11-07 ("i approve both gates").** See the [S45 record](00-status.md#s45-merchant-copilot-2026-11-07).
 
 **Amended for S44 and re-approved 2026-11-07 ("Yes to gate 1 and gate 3 changes as well"): test 64 and the fee constants below.**
 **Status: approved 2026-11-07 ("Approve Gate 3"), not built.** For [Gate 1](01-product.md#fourth-build-plan-proposed-2026-11-07) and [Gate 2](02-architecture.md#fourth-build-plan-amendment-2026-11-07), both approved 2026-11-07.
