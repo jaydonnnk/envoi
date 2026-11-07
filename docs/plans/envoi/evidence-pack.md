@@ -1,6 +1,6 @@
 # Envoi evidence pack
 
-Status: extended 2026-11-07 for S44. Extended 2026-11-05 for S41. Drafted 2026-10-21, marked complete 2026-10-29 when S15 closed, and extended for S19, S20, S21, the S22 round 4 outcome, S24, the removal of the usability study, S26 to S31 and S41. The video is the user's; anything it says must already be listed here.
+Status: extended 2026-11-08 for S45, built and tested locally only. Extended 2026-11-07 for S44. Extended 2026-11-05 for S41. Drafted 2026-10-21, marked complete 2026-10-29 when S15 closed, and extended for S19, S20, S21, the S22 round 4 outcome, S24, the removal of the usability study, S26 to S31 and S41. The video is the user's; anything it says must already be listed here.
 Every claim made in the README, the video or the submission is listed here with its label and the record that supports it.
 A claim with no record here is not made.
 
@@ -101,3 +101,14 @@ What exists instead is a set of single observed end-to-end runs, each listed abo
 | Whether a QR payment through Envoi pays a different rate | [unknown]: PayPal's page lists no QR rate, and the question to PayPal is unanswered | [fourth build plan](fourth-build-plan.md#8-questions-only-paypal-can-answer) |
 | Visitors from the UK, the US and Australia lack a wallet at these stalls | [user-reported] the founder's own observation as a Singaporean. No interview or study ran, so it is not measured demand | [fourth build plan](fourth-build-plan.md#1-thesis) |
 | Envoi is cheaper than cards, saves a shop money or brings extra sales | **not claimed**. A test scans the served landing and shops pages for savings wording | [S44](00-status.md#s44-the-tourist-pitch-2026-11-07) |
+
+## Merchant copilot (S45)
+
+| Claim | Label | Record |
+| --- | --- | --- |
+| PayPal's hosted MCP server serves Envoi over SSE at `mcp.sandbox.paypal.com/sse`; Streamable HTTP answered Not Found there | [verified] 2026-11-07, read-only calls | [S45](00-status.md#s45-merchant-copilot-2026-11-07) |
+| Envoi's platform token cannot refund a shop's capture: PayPal answered 403 `PERMISSION_DENIED` and no money moved | [verified] 2026-11-07 | [S45](00-status.md#s45-merchant-copilot-2026-11-07) |
+| The copilot runs only for the labeled demo shop, passes PayPal's model only four read tools, strips the payer's name, email and account id, and can only propose a refund that the merchant's own tap sends | [verified] against FIXTURE fakes of PayPal's MCP server, PayPal's write client and OpenAI, tests 65 to 72, each guard with its own mutation | [S45](00-status.md#s45-merchant-copilot-2026-11-07) |
+| A refunded order stays recorded as Paid, with the refund beside it, and a second confirmation sends nothing | [verified] against FIXTURE fakes | [S45](00-status.md#s45-merchant-copilot-2026-11-07) |
+| The copilot answers with zero invented amounts | [not run]: the pre-registered evaluation E1 to E8 waits for the OpenAI spend authorization | [S45](00-status.md#s45-merchant-copilot-2026-11-07) |
+| A refund proposed by the copilot and confirmed by the merchant reached PayPal sandbox on the deployed site | [not run]: waits for the sandbox purchase and refund authorization and the deploy | [S45](00-status.md#s45-merchant-copilot-2026-11-07) |

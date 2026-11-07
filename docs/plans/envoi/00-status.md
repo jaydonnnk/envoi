@@ -469,7 +469,7 @@ S38 started 2026-11-06 on `envoi/slice-38-pay-with-crypto` and is **its first st
 S34 started 2026-11-06 on `envoi/slice-34-menu-advice`, last in the build order, and shipped on 2026-11-07 at `6c41214`, deployed in `b658406` by the user's report. It was reopened the same day for the accept button on `envoi/slice-34-accept-button` and is **done 2026-11-07: on `main` at `248b64e` and live on Render**; see its [record](#s34-menu-advice-2026-11-06) and the [accept button record](#s34-accept-button-2026-11-07).
 Drafted 2026-11-07, not approved and outside the build order: the [fourth build plan](fourth-build-plan.md), proposing S44, S45, S46, S48, S49, S47, S50 and S43 in that order on the user's "recommended defaults". Gates 1 to 4 are re-approved for it, in the order S44, S45, S46, S48, S49, S47, S50, S43, and no slice is started; see the [record](#gates-1-2-3-and-4-reopening-2026-11-07-fourth-build-plan).
 S44 started 2026-11-07 on `envoi/slice-44-tourist-pitch` and is **done, merged to `main` at `87eb547` and deployed**; see its [record](#s44-the-tourist-pitch-2026-11-07).
-S45 started 2026-11-07 on `envoi/slice-45-paypal-mcp-copilot` and is **first check complete, Gates 2 and 3 re-approved, evaluation pre-registered; no product code yet, handed off to a fresh session**; see its [record](#s45-merchant-copilot-2026-11-07).
+S45 started 2026-11-07 on `envoi/slice-45-paypal-mcp-copilot` and is **built and tested locally, 2026-11-08; not merged, pushed or deployed, and its evaluation and sandbox refund are not run**; see its [record](#s45-merchant-copilot-2026-11-07).
 
 Added 2026-10-29, outside the build order: the second build plan, S25 to S31, with Gates 1-4 re-approved the same day ([record](#gate-1-reopening-2026-10-29-second-build-plan), [plan](04-slices.md#second-build-plan-s25-to-s31-added-2026-10-29)). S25 started 2026-10-29 on `envoi/slice-25-ask-envoi`; its evaluation missed (22 of 25) and the falsifier was applied the same day: the assistant stays off on Render and no assistant claim is made ([record](#s25-ask-envoi-in-the-site-2026-10-29)). Its independent review found no code blocker; two of its findings are fixed on `envoi/slice-25-review-fixes` ([record](#s25-review-fixes-2026-10-30)). S25 is done on 2026-10-30: migration 0026 is on Neon, and `main` at `144292b` is pushed with CI green and deployed on Render with the assistant off ([record](#s25-merge-migration-and-deploy-2026-10-30)). S26 is done, recorded 2026-11-04 on the user's "Do your three" after checking its done rule: its commits are on `main`, deployed, its evidence and cleanup are recorded, and the terminal agent stands in for Ask Envoi under S25's falsifier ([record](#s26-the-connected-run-2026-10-30)). S27 is done on 2026-11-02: its [local MCP continuation](#s27-mcp-client-local-continuation-2026-11-02) is verified, its [payment verification results](#s27-payment-verification-results-2026-11-02) passed, and the evidence commit `7514eb3` is on `main` with CI run 41456616279 passing. S28 is done on 2026-11-03 on `envoi/slice-28-rewards-card`, deployed from `main` at `25e5230` with CI passing ([record](#s28-paypal-pyusd-rewards-card-2026-11-03)); S29 is done on 2026-11-03 on `envoi/slice-29-menu-translation`: migration 0028 is on Neon, `main` at `7c05082` is pushed with CI run 41668339516 passing, and translation is on on Render with `gpt-6-luna` ([record](#s29-the-menu-explained-and-translated-2026-11-03)); S30 is deployed on 2026-11-04 from `envoi/slice-30-review-aids`: `main` at `ff4d48d` is pushed with CI run 41780152741 passing; its signed-in check on Render is pending ([record](#s30-draft-review-aids-2026-11-04)); S31 is done on 2026-11-04 on `envoi/slice-31-paypal-buttons`, deployed from `main` with CI passing ([record](#s31-paypal-approval-over-the-review-page-2026-11-04)).
 Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never cut), S26 the connected run (`envoi/slice-26-connected-run`, never cut), S27 US shops and currency-explicit money (`envoi/slice-27-us-shops`), S28 PayPal PYUSD rewards card (`envoi/slice-28-rewards-card`), S29 the menu explained and translated (`envoi/slice-29-menu-translation`), S30 draft review aids (`envoi/slice-30-review-aids`) and S31 PayPal approval over the review page (`envoi/slice-31-paypal-buttons`); cut order S31, S30, S29, then S27 with S28.
@@ -549,7 +549,7 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 
 ### S45 Merchant copilot, 2026-11-07
 
-**Status: first check done 2026-11-07, no product code yet. Branch `envoi/slice-45-paypal-mcp-copilot`, from `main` at `19757f7`.**
+**Status: built and tested locally 2026-11-08; not merged, pushed or deployed; evaluation E1 to E8 and the sandbox refund not run. Branch `envoi/slice-45-paypal-mcp-copilot`, from `main` at `19757f7`.**
 Authority: "Start S45 with check", 2026-11-07, answering whether to start S45 including the first check's read-only PayPal sandbox calls.
 It covers the local branch, commits and the read-only sandbox calls only.
 Not yet authorized: the OpenAI spend, migration on Neon, a sandbox purchase and refund, merge, push and deploy.
@@ -628,6 +628,39 @@ Gate 3's refund call stack said a lost response "stays `checking`, and maintenan
 The user chose "Refund route resends", 2026-11-08: the member's next confirm on a `checking` refund resends the same refund with the stored idempotency key as `PayPal-Request-Id` on the demo seller's write client, and PayPal's answer decides it.
 That PayPal answers a repeated `PayPal-Request-Id` with the original refund is a [vendor claim]; how long PayPal keeps the key is [unknown].
 Changed: Gate 2 refund step 5 and Gate 3's refund call stack, last sentence. Nothing else changes.
+
+**Build, 2026-11-08 [verified], local only.** Authority: "Build S45", 2026-11-08: build the slice locally. No paid model call, Neon migration, sandbox write, merge, push or deploy was made.
+- **Built:** migration `0032` (`refunds`, bucket `merchant_copilot`, web-role grants: insert and read, update of state, refund id, reason and time only; rollback in `drizzle/rollback/`); `src/integrations/paypal/agent-tools.ts` (SSE at `/sse`, `ALLOWED_PAYPAL_TOOLS`, payer redaction, one refresh on a 401 at connect or inside a result); `src/integrations/assistant/merchant-copilot.ts` (`demoSellerCopilot`, `runCopilotTurn`, tools `list_orders`, the four reads, `propose_refund`); `src/domain/payments/refunds.ts` (`sendFullRefund`, `isDemoSellerOutlet`, claim by the unique attempt index, a `checking` row resent with its stored key); `refundCapture` on `PayPalWriteClient` and `demoSellerWriteClient`; the copilot and refund routes; `copilot-panel.tsx`; a refund line on the orders table, the order record and the buyer's receipt.
+- **Results the model reads are data:** PayPal results are nested under `{ source: "paypal", data }`; `get_order` runs only for a PayPal order id Envoi holds for the outlet and drops a payee other than the demo seller; `list_transactions` keeps only rows whose `invoice_id` is one of the outlet's attempts; disputes are kept only when a disputed transaction is the outlet's capture. `list_orders` gives Envoi's own paid totals, computed in code.
+- **Tests 65 to 72** in `tests/integration/merchant-copilot.test.ts`, 21 cases, with PayPal's MCP server faked at its fetch boundary over SSE (`tests/support/fake-paypal-mcp.ts`), PayPal writes at `PayPalWriteClient` and OpenAI at its fetch boundary, all FIXTURE. The buyer agent's two directory scans now leave out `merchant-copilot.ts`, which Gate 3 places in the same directory; test 66 scans it on its own.
+- **Mutations, one at a time, each caught by its own case** (script in the session scratchpad, not committed):
+
+| Guard | Mutation | Failing case |
+| --- | --- | --- |
+| 65 call allow-list | `call` checks only the server's listing | refuses an unlisted name before it reaches the transport |
+| 65 names | `names` is the whole listing | the same case's `names` assertion |
+| 66 proposal only | `propose_refund` also calls `refundCapture` | answers a refund proposal from propose_refund and sends nothing |
+| 67 membership | the refund route skips `requireOutletMembership` | refuses no session, a buyer and another shop's member |
+| 68 order scope | `get_order` sends any id | never sends another shop's PayPal order id to PayPal |
+| 68 payee | the payee filter keeps everything | drops a PayPal record whose payee is not this shop's seller |
+| 68 transactions | no `invoice_id` filter | keeps only this shop's rows of the seller's transactions |
+| 68 payer | no redaction | never passes the payer's name, email or account id to the model |
+| 68 copilot route | no demo seller check | gives a shop that is not the demo seller's no copilot turn |
+| 68 refund route | no demo seller check | gives a shop that is not the demo seller's no refund |
+| 69 data | PayPal results not wrapped as data | passes an injected order note only as tool data |
+| 70 Paid kept | the refund also sets the purchase `unpaid_closed` | keeps the purchase paid and its capture confirmed |
+| 71 retry | no refresh after a `status: 401` result | refreshes once and retries once on a status 401 inside a tool result |
+| 71 failed turn | a second 401 is not a failed turn | fails the turn when the refreshed token is refused too |
+| 71 connect | no refresh on an HTTP 401 at connect | refreshes once on an HTTP 401 when the connection opens |
+| 72 claim | the conflict target is the fresh idempotency key | sends one refund for two concurrent confirmations |
+| 72 same key | a resend uses a new `PayPal-Request-Id` | resends a lost refund with the same PayPal-Request-Id |
+| 72 refused stays refused | a `failed` row is resent too | refuses a refused refund again without sending |
+
+  One mutation was dropped as equivalent: offering the model every name `PayPalTools` lists changes nothing, because that list is already the allow-list (guard 65 names).
+  A first mutation run was invalid: the script restored a mutated migration, which failed unrelated cases; the migration was restored and every mutation rerun.
+- **Checks:** `npm run typecheck` and `npm run lint` clean; `npm test` 115 files, 951 of 951 before the extra `list_orders` case (copilot file 21 of 21 after it); `npm run build`, `scripts/scan-build.ts` ("no send method name in 246 built files") and `tests/e2e/run-public-api.ts 3100` PASS, with the three demo seller names as FIXTURE placeholders in that run.
+- **Screens:** the production build on a disposable local database, FIXTURE shop, paid FIXTURE orders and one FIXTURE refund, at 1280 px and 390 px. The panel's heading, lead, card, buttons, "What it checked" and the three rules match the mockup's copy; no horizontal overflow at 390 px (scroll width 390). The model's answer was simulated in the browser for the screen check only; no model or PayPal call was made. Fixed: the card's sentence started in lower case when the order was not in the loaded list. The site's test badge and notices show above the panel.
+- **Not done, needs the user:** the OpenAI spend for E1 to E8; migration `0032` on Neon; one sandbox purchase and its refund on Render; merge, push and deploy.
 
 **Gate text that the check contradicted, now in the drafts above.**
 - Gate 2 step 3 and Gate 3's `ALLOWED_PAYPAL_TOOLS` name `list_transaction`; PayPal's tool is `list_transactions`.

@@ -1,6 +1,6 @@
 # Envoi demo and test guide
 
-Status: 2026-11-05. Written 2026-10-23 from `main` at `1d354f8`; the buyer text steps corrected 2026-10-26 for S21's one-box screen; the landing page, Ask Envoi and the box's example sentence corrected 2026-11-05 for S41.
+Status: 2026-11-08. Written 2026-10-23 from `main` at `1d354f8`; the buyer text steps corrected 2026-10-26 for S21's one-box screen; the landing page, Ask Envoi and the box's example sentence corrected 2026-11-05 for S41; the merchant copilot added to step 7 on 2026-11-08 for S45.
 It walks through every built journey, in the order a judge or tester would meet them.
 Test money only: PayPal sandbox and Solana devnet test tokens; no real money moves.
 Where this guide and a gate document disagree, the gate document wins.
@@ -194,6 +194,12 @@ Menu photo import is built but ships closed; do not demo it as working.
 2. Check: the order from step 4 shows as paid.
 3. Acknowledge it: acknowledgment is a separate action and does not change the paid state.
 4. Check: a pending, canceled or uncertain order is never shown as paid.
+5. Merchant copilot, on the labeled demo shop only (its PayPal seller is `PAYPAL_DEMO_SELLER_MERCHANT_ID`; every other shop shows no panel): under "Ask about your payments", ask "What did I take in this week?".
+   Check: every amount in the answer appears under "What it checked" as a record it read, and no other shop's order appears.
+6. Ask it to refund one paid order.
+   Check: a card asks "Refund S$… to the customer?" and nothing is sent yet. Tap "Not now" once, then ask again and tap "Confirm refund".
+7. Check: the order still reads Paid, with a "Refunded" line and its PayPal sandbox refund id beside it, and the buyer's receipt shows the same refund line.
+   A second Confirm sends nothing more.
 
 ## 8. AI agent handoff over MCP
 
@@ -295,7 +301,7 @@ Integration tests create and drop their own databases, so point `TEST_DATABASE_U
 | 4 PayPal | Receipt Paid, PayPal payee and amount match |
 | 5 Scan | Approved sticker opens shop, unknown one does not |
 | 6 Merchant | Publish works, stale review refused |
-| 7 Orders | Only paid shown as paid, acknowledge separate |
+| 7 Orders | Only paid shown as paid, acknowledge separate; on the demo shop the copilot only proposes a refund, only Confirm sends it, and the order stays Paid with the refund beside it |
 | 8 Agent | One-time link, expires in 10 min, no pay access |
 | 9 PYUSD | Paid only after finalized devnet transfer |
 | 10 Operator | Uncertain payment decided by maintenance |
