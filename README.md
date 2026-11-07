@@ -4,6 +4,11 @@ Envoi lets a visitor pay a shop in person with a payment method the visitor alre
 The money goes straight to the shop's own account, never through Envoi's.
 The visitor scans the shop's QR or says what they want, AI gets them past a menu they cannot read, Envoi prices the order from the shop's published menu, and the visitor approves the exact amount with PayPal or in their own wallet.
 
+The headline on the site is "Scan the stall's SGQR. Pay with the PayPal you already have."
+The first audience is a visitor from the UK, the US or Australia at a Singapore stall where their card does not work.
+PayPal is not on SGQR: Envoi identifies an enrolled shop from its sticker and pays that shop's own PayPal, and an unenrolled sticker stays unpayable.
+PayPal's fee is the shop's cost and Envoi adds nothing to it, so `/for-shops` shows the fee at PayPal's published Singapore rates, each with its source and read date; Envoi makes no claim to be cheaper than cards.
+
 Deployed test environment: <https://envoi-helx.onrender.com> (Render Free, so the first visit after idle can take a while).
 
 ## What the AI does

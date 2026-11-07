@@ -468,6 +468,7 @@ S37 started 2026-11-06 on `envoi/slice-37-own-assistant` and is **done, merged t
 S38 started 2026-11-06 on `envoi/slice-38-pay-with-crypto` and is **its first step recorded, with Gates 2, 3 and 4 re-approved for crypto settlement; merged, deployed and run on Render**; see its [record](#s38-crypto-through-paypal-2026-11-06).
 S34 started 2026-11-06 on `envoi/slice-34-menu-advice`, last in the build order, and shipped on 2026-11-07 at `6c41214`, deployed in `b658406` by the user's report. It was reopened the same day for the accept button on `envoi/slice-34-accept-button` and is **done 2026-11-07: on `main` at `248b64e` and live on Render**; see its [record](#s34-menu-advice-2026-11-06) and the [accept button record](#s34-accept-button-2026-11-07).
 Drafted 2026-11-07, not approved and outside the build order: the [fourth build plan](fourth-build-plan.md), proposing S44, S45, S46, S48, S49, S47, S50 and S43 in that order on the user's "recommended defaults". Gates 1 to 4 are re-approved for it, in the order S44, S45, S46, S48, S49, S47, S50, S43, and no slice is started; see the [record](#gates-1-2-3-and-4-reopening-2026-11-07-fourth-build-plan).
+S44 started 2026-11-07 on `envoi/slice-44-tourist-pitch` and is **built and locally verified, committed on its branch, not merged, pushed or deployed**, so it is not done; see its [record](#s44-the-tourist-pitch-2026-11-07).
 
 Added 2026-10-29, outside the build order: the second build plan, S25 to S31, with Gates 1-4 re-approved the same day ([record](#gate-1-reopening-2026-10-29-second-build-plan), [plan](04-slices.md#second-build-plan-s25-to-s31-added-2026-10-29)). S25 started 2026-10-29 on `envoi/slice-25-ask-envoi`; its evaluation missed (22 of 25) and the falsifier was applied the same day: the assistant stays off on Render and no assistant claim is made ([record](#s25-ask-envoi-in-the-site-2026-10-29)). Its independent review found no code blocker; two of its findings are fixed on `envoi/slice-25-review-fixes` ([record](#s25-review-fixes-2026-10-30)). S25 is done on 2026-10-30: migration 0026 is on Neon, and `main` at `144292b` is pushed with CI green and deployed on Render with the assistant off ([record](#s25-merge-migration-and-deploy-2026-10-30)). S26 is done, recorded 2026-11-04 on the user's "Do your three" after checking its done rule: its commits are on `main`, deployed, its evidence and cleanup are recorded, and the terminal agent stands in for Ask Envoi under S25's falsifier ([record](#s26-the-connected-run-2026-10-30)). S27 is done on 2026-11-02: its [local MCP continuation](#s27-mcp-client-local-continuation-2026-11-02) is verified, its [payment verification results](#s27-payment-verification-results-2026-11-02) passed, and the evidence commit `7514eb3` is on `main` with CI run 41456616279 passing. S28 is done on 2026-11-03 on `envoi/slice-28-rewards-card`, deployed from `main` at `25e5230` with CI passing ([record](#s28-paypal-pyusd-rewards-card-2026-11-03)); S29 is done on 2026-11-03 on `envoi/slice-29-menu-translation`: migration 0028 is on Neon, `main` at `7c05082` is pushed with CI run 41668339516 passing, and translation is on on Render with `gpt-6-luna` ([record](#s29-the-menu-explained-and-translated-2026-11-03)); S30 is deployed on 2026-11-04 from `envoi/slice-30-review-aids`: `main` at `ff4d48d` is pushed with CI run 41780152741 passing; its signed-in check on Render is pending ([record](#s30-draft-review-aids-2026-11-04)); S31 is done on 2026-11-04 on `envoi/slice-31-paypal-buttons`, deployed from `main` with CI passing ([record](#s31-paypal-approval-over-the-review-page-2026-11-04)).
 Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never cut), S26 the connected run (`envoi/slice-26-connected-run`, never cut), S27 US shops and currency-explicit money (`envoi/slice-27-us-shops`), S28 PayPal PYUSD rewards card (`envoi/slice-28-rewards-card`), S29 the menu explained and translated (`envoi/slice-29-menu-translation`), S30 draft review aids (`envoi/slice-30-review-aids`) and S31 PayPal approval over the review page (`envoi/slice-31-paypal-buttons`); cut order S31, S30, S29, then S27 with S28.
@@ -544,6 +545,85 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 - **Checker pins moved [verified]:** `checks/gate4_check.py` now pins the Gate 1 body, the eight new mockups and the Gate 2 and Gate 3 text the user approved on 2026-11-07.
 - **Secret scan [verified, pattern search only], 2026-11-07:** every added line in all 432 commits was searched for OpenAI, Kernel, Render, GitHub and AWS key shapes, private keys, passwords in Postgres URLs, assigned secrets, wallet byte arrays, Bearer tokens and quoted passwords, with values masked. `.env` and `.env.local` were never tracked. All 29 hits were false positives: 26 were words such as "task-a", and 3 were labeled test fixtures. `gitleaks` and `trufflehog` are not installed, and images were not inspected, so this does not prove the history is clean.
 - **Limits:** approval starts no slice. Nothing is built by this record, and no install, model call, migration, Neon write, Render change, payment or publication is authorized.
+
+### S44 The tourist pitch, 2026-11-07
+
+**Status: built and locally verified on `envoi/slice-44-tourist-pitch`, from `main` at `6cf2b96`. Not merged, pushed or deployed, so the Render check below is open and the slice is not done.**
+Authority: "Make a copy paste handoff prompt for the next agent to start slice 44", read in the handoff as the start of S44, its local branch and commits only.
+Merge, push and deploy are requested by name.
+CI run 42349204583 on `6cf2b96` passed [verified, `gh run view`, 2026-11-07].
+
+**Rates, read first, in a browser, from PayPal's own page.**
+Source: <https://www.paypal.com/sg/business/paypal-business-fees>, Merchant tab, which says "Last Updated: 28, October 2026".
+Read on 2026-11-07.
+
+| Rate | Value | Where on the page | Label |
+| --- | --- | --- | --- |
+| Domestic, Singapore | 3.90% + fixed fee | "Standard rate for receiving domestic transactions", row MY & SG | [verified] |
+| International, Singapore seller | 4.40% + fixed fee | "Receiving international transactions": SG is in no named row, so "All other markets, All markets" applies | [verified] |
+| Fixed fee, SGD | 0.50 SGD | "Fixed fee for commercial transactions", Singapore dollar | [verified] |
+| QR rate | none listed; the word "QR" is not on the page | Whole page searched | [unknown] whether one applies; the question to PayPal stays open |
+
+These confirm the values in the user's pasted review, and no rate reads unknown.
+They are estimates for a shop deciding whether to enroll: no sale's fee was read, and S46 owns that.
+
+**Calculated at those rates, in whole cents, rounding half up.**
+
+| Order | International | You keep | Domestic | You keep |
+| --- | --- | --- | --- | --- |
+| S$4.50 | S$0.70 (15.5%) | S$3.80 | S$0.68 (15.0%) | S$3.82 |
+| S$15.00 | S$1.16 (7.7%) | S$13.84 | S$1.09 (7.2%) | S$13.91 |
+| S$50.00 | S$2.70 (5.4%) | S$47.30 | S$2.45 (4.9%) | S$47.55 |
+
+The percentage is before rounding the fee to the cent, which is how the approved mockup's 15.5% arises (S$0.698 on S$4.50), and the page says so.
+PayPal's page does not say how a fee larger than the sale is treated, so such an order reads unknown.
+
+**Built.**
+- `src/domain/fees/paypal-rates.ts`: `PayPalRate`, `FeeResult` and `feeOn` as Gate 3 signs them, plus `feePercentLabel` and `readRate`.
+- `src/app/for-shops/page.tsx` and `fee-calculator.tsx`: public, and the test fails if the page imports the web database.
+- `src/app/page.tsx`: the approved headline, lead, four cards and the buttons "Scan a sticker", "Ask Envoi" and "I run a shop", which opens `/for-shops`.
+- `src/app/buy/ask/ask-envoi.tsx`: the steps closed under "How this was checked".
+- Orphaned by this slice and removed in cleanup: the `.landing-steps` and `.card.tint` styles.
+
+**Changes beyond the Gate 3 file list, none changing a decision.**
+- `src/app/buy/ask/page.tsx`: the mockup's lead replaces the developer wording that lived in this file.
+- `src/app/globals.css`, `tests/support/savings-claim.ts` and `tests/unit/ask-envoi-checked.test.ts`.
+
+**Departures from the approved mockups, for the user to accept or change.**
+1. `for-shops.html` shows "Set up my shop" and "Sign in". The page has one button, "Set up my shop", to `/merchant/setup`, plus "Shops on this test build use an account made by Envoi's operator. There is no public sign-up yet." The handoff asked for this until S43 exists.
+2. `for-shops.html` lists "A counter poster that tells visitors to scan." The line is held back because S49 builds the poster, and S49 must add it back.
+3. `landing-tourist.html` has no shop list link. "See all shops", GitHub and Evidence stay below the cards, because a visitor with no sticker and the assistant off would otherwise have no path.
+4. The mockup's calculator shows only the international rate. The page also shows the typed order at the domestic rate, because Gate 3 test 62 covers both.
+5. The language line follows the mockup, "Also available in Japanese, Malay, Spanish and Chinese.", in place of "Supported languages: ...".
+
+**Copy to watch [hypothesis].**
+"Orders already priced from your menu, shown to you in your language" is approved copy. It rests on Show the stall, which the visitor shows on their phone; the merchant's own orders screen has no language setting.
+
+**Tests.**
+- 62 `the fee calculator matches the rate exactly`, 63 `no shops or landing copy says cheaper` and 64 `a rate shows its date or reads unknown`, in `tests/unit/for-shops.test.ts`.
+- `tests/unit/landing-page.test.ts` revised for the new headline, under the Gate 3 record.
+- Named additions: `the shops page` and `Ask Envoi's steps`.
+
+**Mutations.** 31 applied alone, each with a failing check and each restored to a passing run; none survived: [`evidence/s44-mutations.json`](evidence/s44-mutations.json).
+Fee faults fail several rows of test 62 by design, because each row is an exact amount, so those rows prove the rates together and not separately.
+Test 63's scanner was also proved on the page's own markup, with ten planted savings phrases.
+
+**Checks, fresh, 2026-11-07, on the local disposable PostgreSQL.**
+Typecheck and lint pass; unit 443 of 443; integration 485 of 485; `npm run build`; `scripts/scan-build.ts`; `tests/e2e/run-public-api.ts`, labeled local FIXTURE only; `git diff --check`; and `gate4_check.py` all pass.
+Served HTML from `next start`: `/`, `/for-shops` and `/buy/ask` answer 200, with no savings wording and with the test badge and notice.
+
+**Screens, local only.**
+Checked in a real browser at 390 px and 1280 px: no horizontal overflow at 390 px on all three, with badge and notice present.
+Typed in the calculator: 4.50 gives S$0.70 and S$0.68, abc asks for an amount and prints no fee, and 0.40 reads Unknown.
+No model was called, and no message was sent in Ask Envoi, so a filled conversation and its open steps with real calls were not seen on this build.
+
+**Post-slice cleanup.** The two orphaned styles above were removed. `mockups/index.html` does not list the fourth build plan's mockups; left as it is, because each file is named directly in `01-product.md`.
+
+**Open.**
+- [ ] Merge, push and deploy, by name, from the user.
+- [ ] The three screens on Render at 390 px and 1280 px, with the deployed commit and its CI run recorded here.
+
+**What this does not establish.** No demand, usability, savings or sales result, no fee on any actual sale, and nothing about Render until the open check runs.
 
 ### S34 Menu advice, 2026-11-06
 

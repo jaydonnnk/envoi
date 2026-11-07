@@ -1,0 +1,284 @@
+{
+ "note": "S44 mutations, 2026-11-07. Unit project over tests/unit/for-shops, landing-page and ask-envoi-checked; each applied alone and restored.",
+ "baseline_tests": 46,
+ "results": [
+  {
+   "mutation": "M62a fee rounds down, not half up",
+   "file": "src/domain/fees/paypal-rates.ts",
+   "failing": [
+    "the fee calculator matches the rate exactly international 450",
+    "the fee calculator matches the rate exactly domestic 450",
+    "the fee calculator matches the rate exactly domestic 1500",
+    "the fee calculator matches the rate exactly shows the approved worked orders on the page"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "M62b fixed fee dropped",
+   "file": "src/domain/fees/paypal-rates.ts",
+   "failing": [
+    "the fee calculator matches the rate exactly international 450",
+    "the fee calculator matches the rate exactly international 1500",
+    "the fee calculator matches the rate exactly international 5000",
+    "the fee calculator matches the rate exactly domestic 450",
+    "the fee calculator matches the rate exactly domestic 1500",
+    "the fee calculator matches the rate exactly domestic 5000",
+    "the fee calculator matches the rate exactly shows the approved worked orders on the page",
+    "the fee calculator matches the rate exactly gives no number when the fee would pass the order"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "M62c international percent read wrong",
+   "file": "src/domain/fees/paypal-rates.ts",
+   "failing": [
+    "the fee calculator matches the rate exactly international 450",
+    "the fee calculator matches the rate exactly international 1500",
+    "the fee calculator matches the rate exactly international 5000",
+    "the fee calculator matches the rate exactly holds the rates read from PayPal's own page",
+    "the fee calculator matches the rate exactly states the fee as a share of the order, before rounding to the cent",
+    "the fee calculator matches the rate exactly shows the approved worked orders on the page",
+    "a rate shows its date or reads unknown the page shows each read rate with its source and date"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "M62d domestic percent read wrong",
+   "file": "src/domain/fees/paypal-rates.ts",
+   "failing": [
+    "the fee calculator matches the rate exactly domestic 450",
+    "the fee calculator matches the rate exactly domestic 1500",
+    "the fee calculator matches the rate exactly domestic 5000",
+    "the fee calculator matches the rate exactly holds the rates read from PayPal's own page",
+    "the fee calculator matches the rate exactly shows the approved worked orders on the page",
+    "a rate shows its date or reads unknown the page shows each read rate with its source and date"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "M62e net is not order minus fee",
+   "file": "src/domain/fees/paypal-rates.ts",
+   "failing": [
+    "the fee calculator matches the rate exactly international 450",
+    "the fee calculator matches the rate exactly international 1500",
+    "the fee calculator matches the rate exactly international 5000",
+    "the fee calculator matches the rate exactly domestic 450",
+    "the fee calculator matches the rate exactly domestic 1500",
+    "the fee calculator matches the rate exactly domestic 5000",
+    "the fee calculator matches the rate exactly shows the approved worked orders on the page"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "M62f invalid order gets a number",
+   "file": "src/domain/fees/paypal-rates.ts",
+   "failing": [
+    "the fee calculator matches the rate exactly gives no number for an order that is not a positive whole amount"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "M62g fee past the order gets a number",
+   "file": "src/domain/fees/paypal-rates.ts",
+   "failing": [
+    "the fee calculator matches the rate exactly gives no number when the fee would pass the order"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "M62h percent taken from the rounded fee",
+   "file": "src/domain/fees/paypal-rates.ts",
+   "failing": [
+    "the fee calculator matches the rate exactly states the fee as a share of the order, before rounding to the cent",
+    "the fee calculator matches the rate exactly shows the approved worked orders on the page"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "M63a shops page claims cheaper",
+   "file": "src/app/for-shops/page.tsx",
+   "failing": [
+    "no shops or landing copy says cheaper finds no savings claim on the served pages"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "M63b landing claims savings",
+   "file": "src/app/page.tsx",
+   "failing": [
+    "no shops or landing copy says cheaper finds no savings claim on the served pages"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "M63c scanner loses its cheap rule",
+   "file": "tests/support/savings-claim.ts",
+   "failing": [
+    "no shops or landing copy says cheaper the scanner catches Cheaper than cards inside the page's markup",
+    "no shops or landing copy says cheaper the scanner catches cheapest way to pay inside the page's markup"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "M63d scanner loses its savings rule",
+   "file": "tests/support/savings-claim.ts",
+   "failing": [
+    "no shops or landing copy says cheaper the scanner catches Save money on every sale inside the page's markup",
+    "no shops or landing copy says cheaper the scanner catches real savings for your stall inside the page's markup"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "M63e scanner loses its no-fees rule",
+   "file": "tests/support/savings-claim.ts",
+   "failing": [
+    "no shops or landing copy says cheaper the scanner catches no hidden fees inside the page's markup"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "M64a null percent no longer unknown",
+   "file": "src/domain/fees/paypal-rates.ts",
+   "failing": [
+    "a rate shows its date or reads unknown a null percent gives unknown, never zero"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "M64b null fixed fee no longer unknown",
+   "file": "src/domain/fees/paypal-rates.ts",
+   "failing": [
+    "a rate shows its date or reads unknown a null fixed fee gives unknown, never zero"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "M64c missing date no longer unknown",
+   "file": "src/domain/fees/paypal-rates.ts",
+   "failing": [
+    "a rate shows its date or reads unknown a rate with no read date gives unknown"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "M64d unknown prints zero",
+   "file": "src/app/for-shops/fee-calculator.tsx",
+   "failing": [
+    "a rate shows its date or reads unknown the calculator prints Unknown and no amount for an unread rate"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "M64e rate line loses its date",
+   "file": "src/app/for-shops/fee-calculator.tsx",
+   "failing": [
+    "a rate shows its date or reads unknown the page shows each read rate with its source and date"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "M64f source link removed",
+   "file": "src/app/for-shops/fee-calculator.tsx",
+   "failing": [
+    "a rate shows its date or reads unknown the page shows each read rate with its source and date"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "M64g unread rate line prints no unknown",
+   "file": "src/app/for-shops/fee-calculator.tsx",
+   "failing": [
+    "a rate shows its date or reads unknown the calculator prints Unknown and no amount for an unread rate"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "MF1 shops page reads the database",
+   "file": "src/app/for-shops/page.tsx",
+   "failing": [
+    "FILE FAILED: [vitest] There was an error when mocking a module. If you are using \"vi.mock\" factory, mak"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "MF2 operator-account note removed",
+   "file": "src/app/for-shops/page.tsx",
+   "failing": [
+    "the shops page promises no public sign-up and no poster before their slices exist"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "MF3 poster promised before S49",
+   "file": "src/app/for-shops/page.tsx",
+   "failing": [
+    "the shops page promises no public sign-up and no poster before their slices exist"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "ML1 old headline back",
+   "file": "src/app/page.tsx",
+   "failing": [
+    "landing page leads with the approved tourist headline"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "ML2 I run a shop back to sign-in",
+   "file": "src/app/page.tsx",
+   "failing": [
+    "landing page sends merchants to the shops page, not a sign-in form"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "ML3 Ask Envoi offered while the assistant is off",
+   "file": "src/app/page.tsx",
+   "failing": [
+    "landing page offers no Ask Envoi link while the assistant is off, and the scan stays primary"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "ML4 no way to the shop list",
+   "file": "src/app/page.tsx",
+   "failing": [
+    "landing page keeps a path to the shop list for a visitor with no sticker"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "ML5 Ask Envoi becomes primary",
+   "file": "src/app/page.tsx",
+   "failing": [
+    "landing page offers the scan first, as the one primary action"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "MA1 steps open by default",
+   "file": "src/app/buy/ask/ask-envoi.tsx",
+   "failing": [
+    "Ask Envoi's steps collapse under How this was checked, closed by default"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "MA2 developer wording in the open conversation",
+   "file": "src/app/buy/ask/ask-envoi.tsx",
+   "failing": [
+    "Ask Envoi's steps keeps developer wording out of the open conversation"
+   ],
+   "restored_passes": true
+  },
+  {
+   "mutation": "MA3 approved limits removed",
+   "file": "src/app/buy/ask/ask-envoi.tsx",
+   "failing": [
+    "Ask Envoi's steps states the approved limits inside the summary"
+   ],
+   "restored_passes": true
+  }
+ ]
+}

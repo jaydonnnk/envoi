@@ -65,26 +65,27 @@ The deployed site holds three more fixture shops that a local seed does not crea
 ## 2. Landing page
 
 1. Open `/`.
-2. Check: headline "Your language. One scan. PayPal."; the approved lead ending "Review the exact amount, then approve in PayPal."; a separate "Supported languages: Japanese, Malay, Spanish, Chinese." line; the buttons "Ask Envoi", "Find a shop" and "I run a shop" in that order, with "Ask Envoi" the only filled one; the "How it works" card with its three steps Scan, Ask and Approve; the notice "Test money only. No real money moves."; the GitHub and Evidence links; no navigation bar and no demo shop named.
-3. S32 and the S33 follow-up bound the supported list to Japanese, Malay, Spanish and Chinese, each 5/5 on both fixture paths. This is not general accuracy or native-reader validation.
-4. With the assistant off, "Ask Envoi" is absent and "Find a shop" becomes the filled button, because `/buy/ask` answers 404 when the assistant is off and the landing page must not link there.
+2. Check: headline "Scan the stall's SGQR. Pay with the PayPal you already have."; the lead ending "You see the exact amount and approve it in PayPal."; the buttons "Scan a sticker", "Ask Envoi" and "I run a shop" in that order, with "Scan a sticker" the only filled one; four cards, Scan, Ask, Approve and Show the stall; the line "Also available in Japanese, Malay, Spanish and Chinese."; the notice "Test money only. No real money moves."; the "See all shops", GitHub and Evidence links; no demo shop named.
+3. S32 and the S33 follow-up bound the language list to Japanese, Malay, Spanish and Chinese, each 5/5 on both fixture paths. This is not general accuracy or native-reader validation.
+4. With the assistant off, "Ask Envoi" is absent and "Scan a sticker" stays the filled button, because `/buy/ask` answers 404 when the assistant is off and the landing page must not link there.
 5. Resize to phone width (390 px): no sideways scroll.
+6. Press "I run a shop". `/for-shops` opens with no sign-in. Check: the headline "Take PayPal from visitors whose cards do not work at your stall."; "What it costs you"; the fee table S$0.70 (15.5%) on S$4.50, S$1.16 (7.7%) on S$15 and S$2.70 (5.4%) on S$50; each rate's read date and the link to PayPal's page; and the line saying accounts are made by Envoi's operator. Type 4.50: the top table reads S$0.70 and S$0.68. Type abc: it asks for an amount and prints no fee.
 
 ## 3. Buyer: Ask Envoi, or find a shop by text
 
 Ask Envoi is on only when `OPENAI_API_KEY`, `AI_MODEL` and `ASSISTANT_AGENT_TOKEN` are all set. When it is off, `/buy/ask` answers 404 and neither the landing page nor `/buy` links to it.
 
 1. From the landing page press "Ask Envoi", or open `/buy/ask`.
-2. Check the heading "Ask Envoi. Approve it yourself." and the lead's "It never pays."
+2. Check the heading "Ask Envoi. Approve it yourself." and the lead "Ask what a dish is, or what to order. Envoi hands you a review, and you approve the payment yourself."
 3. Type the box's own example, `one Kopi O and a kaya toast set at Lorong Demo Kopi`, and press Send. Every item in that example is one the seeded shop actually sells; an example naming an item it does not sell is the defect S41 fixed.
-4. Check: the reply names only shops and items registered on Envoi; the "What the assistant did" panel lists each call by its own operation name (`listOutlets`, `getOutletMenu`, `createPurchaseRequest`) with its HTTP status; and no price in the reply comes from the model.
+4. Check: the reply names only shops and items registered on Envoi; opening "How this was checked" lists each call by its own operation name (`listOutlets`, `getOutletMenu`, `createPurchaseRequest`) with its HTTP status; and no price in the reply comes from the model.
 5. When it offers a basket, "Review and pay" opens the existing server-priced review. The assistant sends no amount, cannot approve and cannot read a receipt.
 6. From a shop page, "Ask Envoi about this shop" opens the assistant at that shop. S33 ran that path to a Paid receipt once on the deployed site, with test money. Any further purchase is a new sandbox payment the person approves in PayPal.
 7. Ask for something off any menu: you get no invented shop and no invented item.
 
 **The one-sentence box**
 
-1. Click "Find a shop", or open `/buy`.
+1. Click "See all shops", or open `/buy`.
 2. Check the "Test environment" badge and the sandbox and devnet notice.
 3. In the one box labeled "What would you like, and where?", type `two kopi o and one kaya toast near Tanjong Pagar`, then press "Find it". There is no separate area field: the place goes in the same sentence.
 4. Check: only registered shops and items appear, with prices from the shop's menu, not from the AI. A sentence that gives a quantity for every item opens the shop with the basket already filled and the note "Nothing is reviewed or paid yet."
@@ -144,7 +145,7 @@ MIGRATION_DATABASE_URL=<database url> npm run operator -- approve-membership <em
 
 Then in the browser:
 
-1. Click "I run a shop", or open `/merchant/setup`, and sign in.
+1. Click "I run a shop", then "Set up my shop", or open `/merchant/setup`, and sign in.
 2. Check: public sign-up is refused; only operator-made accounts work.
 3. Create an outlet with a name and area, confirm its details, then enter the menu by hand and confirm it.
 4. Leave a price blank: confirmation is blocked until you fill it; a zero price is refused.

@@ -31,7 +31,7 @@ Labels: **[verified]** is supported by a cited record or check, **[vendor claim]
 | --- | --- |
 | SGQR | PayPal is not on SGQR. Envoi identifies an enrolled shop from the sticker and pays that shop's PayPal. An unenrolled sticker stays unpayable. |
 | Entry | A phone camera does not open Envoi from an SGQR code [hypothesis: the sticker holds payment data, not an Envoi link]. The tourist opens Envoi's scanner, and a counter poster tells them to. |
-| Fees | Never say cheaper than cards. A tourist's PayPal payment in Singapore costs 4.40% + S$0.50, which is S$0.70 on S$4.50, or 15.5% [user's pasted review of PayPal's page; re-read before S44 prints it]. |
+| Fees | Never say cheaper than cards. A tourist's PayPal payment in Singapore costs 4.40% + S$0.50, which is S$0.70 on S$4.50, or 15.5% [re-read on PayPal's own page on 2026-11-07; see the [S44 record](00-status.md#s44-the-tourist-pitch-2026-11-07)]. |
 | Merchant pitch | Extra tourist sales, no new hardware, and money in the shop's own PayPal. The sales are a claim to test, not a result. |
 | PYUSD | Optional. Singapore consumers cannot use it through PayPal, selling inside PayPal costs 3% from a non-USD currency, and cash-out stays unsolved. |
 | Competitor | Wise says customers outside Singapore can pay PayNow QR codes at businesses [vendor claim]. Its coverage far exceeds Envoi's. Envoi's edge is no new app, plus dish help and the stall handoff [hypothesis]. |

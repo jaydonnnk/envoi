@@ -1,6 +1,6 @@
 # Envoi evidence pack
 
-Status: extended 2026-11-05 for S41. Drafted 2026-10-21, marked complete 2026-10-29 when S15 closed, and extended for S19, S20, S21, the S22 round 4 outcome, S24, the removal of the usability study, S26 to S31 and S41. The video is the user's; anything it says must already be listed here.
+Status: extended 2026-11-07 for S44. Extended 2026-11-05 for S41. Drafted 2026-10-21, marked complete 2026-10-29 when S15 closed, and extended for S19, S20, S21, the S22 round 4 outcome, S24, the removal of the usability study, S26 to S31 and S41. The video is the user's; anything it says must already be listed here.
 Every claim made in the README, the video or the submission is listed here with its label and the record that supports it.
 A claim with no record here is not made.
 
@@ -89,3 +89,13 @@ Every payment below used PayPal sandbox money or Solana devnet test tokens; none
 
 No usability, completion-rate, timing or ease-of-use claim is made anywhere in the README, the video or the submission.
 What exists instead is a set of single observed end-to-end runs, each listed above with its own record, and one observed journey is not a sample of first-time buyers.
+
+## The tourist pitch (S44)
+
+| Claim | Label | Record |
+| --- | --- | --- |
+| PayPal's Singapore merchant fees page, last updated 28 Oct 2026, gives 3.90% + fixed fee for domestic transactions received in Singapore, 4.40% + fixed fee for international ones and a fixed fee of S$0.50 | [verified] read in a browser on 2026-11-07 | [S44](00-status.md#s44-the-tourist-pitch-2026-11-07) |
+| The calculator's results at those rates: S$0.70, S$1.16 and S$2.70 international; S$0.68, S$1.09 and S$2.45 domestic, on S$4.50, S$15 and S$50 | [verified] arithmetic against the read rates. An estimate, not a PayPal record of any sale | [S44](00-status.md#s44-the-tourist-pitch-2026-11-07) |
+| Whether a QR payment through Envoi pays a different rate | [unknown]: PayPal's page lists no QR rate, and the question to PayPal is unanswered | [fourth build plan](fourth-build-plan.md#8-questions-only-paypal-can-answer) |
+| Visitors from the UK, the US and Australia lack a wallet at these stalls | [user-reported] the founder's own observation as a Singaporean. No interview or study ran, so it is not measured demand | [fourth build plan](fourth-build-plan.md#1-thesis) |
+| Envoi is cheaper than cards, saves a shop money or brings extra sales | **not claimed**. A test scans the served landing and shops pages for savings wording | [S44](00-status.md#s44-the-tourist-pitch-2026-11-07) |
