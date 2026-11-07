@@ -110,56 +110,55 @@ export function AskEnvoi({ shop }: { shop?: AskShop }) {
   }
 
   return (
-    <div className="layout">
-      <section className="card" aria-labelledby="conversation-heading">
-        <h2 id="conversation-heading">Conversation</h2>
-        <div className="chat" aria-live="polite">
-          {turns.map((turn, index) => (
-            <div key={index} className={`bubble ${turn.role === "buyer" ? "me" : "bot"}`}>
-              {turn.text}
-            </div>
-          ))}
-          {busy && <div className="bubble bot muted">Reading Envoi…</div>}
-        </div>
-        <AcceptOffer offer={offer} busy={busy} onAccept={() => void send(ACCEPT_TEXT)} />
-        {link && (
-          <div className="actions">
-            <a className="button" href={link.url}>
-              Review and pay
-            </a>
-            <button type="button" className="button secondary" onClick={changeBasket}>
-              Change the basket
-            </button>
+    <section className="card" aria-label="Conversation">
+      <div className="chat" aria-live="polite">
+        {turns.map((turn, index) => (
+          <div key={index} className={`bubble ${turn.role === "buyer" ? "me" : "bot"}`}>
+            {turn.text}
           </div>
-        )}
-        {failure && (
-          <div className="status" role="alert">
-            <strong>{shop ? "Use the menu instead" : "Pick a shop instead"}</strong>
-            <small>
-              {failure} {shop ? <a href={`/buy?${new URLSearchParams({ outlet: shop.id }).toString()}`}>See this shop&apos;s menu</a> : <a href="/buy">See all shops</a>}
-            </small>
-          </div>
-        )}
-        <form onSubmit={submit}>
-          <label htmlFor="ask">Message</label>
-          <textarea
-            id="ask"
-            ref={message}
-            value={text}
-            maxLength={MAX_TEXT}
-            rows={3}
-            placeholder="For example: one Kopi O and a kaya toast set at Lorong Demo Kopi"
-            {...(shop ? { placeholder: shop.example ? `For example: one ${shop.example}` : `What would you like from ${shop.name}?` } : {})}
-            onChange={(event) => setText(event.target.value)}
-          />
-          <button className="button full" type="submit" disabled={busy || text.trim().length === 0}>
-            {busy ? "Asking…" : "Send"}
+        ))}
+        {busy && <div className="bubble bot muted">Reading Envoi…</div>}
+      </div>
+      <AcceptOffer offer={offer} busy={busy} onAccept={() => void send(ACCEPT_TEXT)} />
+      {link && (
+        <div className="actions">
+          <a className="button" href={link.url}>
+            Review and pay
+          </a>
+          <button type="button" className="button secondary" onClick={changeBasket}>
+            Change the basket
           </button>
-        </form>
-        <p className="muted fine">The menu prices above are a guide. The review shows Envoi&apos;s own price, and you approve the payment in PayPal sandbox yourself.</p>
-      </section>
-      <aside className="card tint" aria-labelledby="steps-heading">
-        <h2 id="steps-heading">What the assistant did</h2>
+        </div>
+      )}
+      {failure && (
+        <div className="status" role="alert">
+          <strong>{shop ? "Use the menu instead" : "Pick a shop instead"}</strong>
+          <small>
+            {failure} {shop ? <a href={`/buy?${new URLSearchParams({ outlet: shop.id }).toString()}`}>See this shop&apos;s menu</a> : <a href="/buy">See all shops</a>}
+          </small>
+        </div>
+      )}
+      <form onSubmit={submit}>
+        <label htmlFor="ask">Message</label>
+        <textarea
+          id="ask"
+          ref={message}
+          value={text}
+          maxLength={MAX_TEXT}
+          rows={3}
+          placeholder="For example: one Kopi O and a kaya toast set at Lorong Demo Kopi"
+          {...(shop ? { placeholder: shop.example ? `For example: one ${shop.example}` : `What would you like from ${shop.name}?` } : {})}
+          onChange={(event) => setText(event.target.value)}
+        />
+        <button className="button full" type="submit" disabled={busy || text.trim().length === 0}>
+          {busy ? "Asking…" : "Send"}
+        </button>
+      </form>
+      <p className="muted fine">The menu prices above are a guide. The review shows Envoi&apos;s own price, and you approve the payment in PayPal sandbox yourself.</p>
+      {/* S44: the calls behind the answer stay readable, closed, under one plain summary. */}
+      <details className="ask-checked">
+        <summary>How this was checked</summary>
+        <p>Each step reads the shop&apos;s published menu. The assistant cannot pay, approve or read your receipt.</p>
         <p className="muted">Each step is a call to Envoi&apos;s published API, made through Envoi&apos;s own MCP server with the official MCP client.</p>
         {steps.length === 0 && <p className="muted fine">No calls yet in this turn.</p>}
         {steps.map((step, index) => (
@@ -172,11 +171,10 @@ export function AskEnvoi({ shop }: { shop?: AskShop }) {
           </div>
         ))}
         <ol className="ask-rules">
-          <li>The assistant cannot pay, approve or read your receipt.</li>
           <li>Only published, available items can enter the basket.</li>
           <li>If the assistant fails or times out, the shop list and menu stay available.</li>
         </ol>
-      </aside>
-    </div>
+      </details>
+    </section>
   );
 }

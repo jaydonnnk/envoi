@@ -52,8 +52,7 @@ function GeneralAsk() {
         Approve it yourself.
       </h1>
       <p className="lead">
-        Envoi&apos;s own assistant, inside the site. It reads shops and menus through Envoi&apos;s published API, asks when your words fit two items, and hands you a review. It
-        never pays.
+        Ask what a dish is, or what to order. Envoi hands you a review, and you approve the payment yourself.
       </p>
       <AskEnvoi />
     </main>
