@@ -1,0 +1,92 @@
+{
+  "label": "PayPal sandbox, Singapore fixture shop, user-recorded phone journey",
+  "video": {
+    "filename": "video6307291394096504610.mp4",
+    "sha256": "9e97185129f97c85e1d7a862706f823cc75f1aee23f98cfaf10414597f13cb7a",
+    "durationSeconds": 54.333333333333336,
+    "published": false
+  },
+  "observations": {
+    "scanToTestShop": true,
+    "reviewAtSeconds": 12,
+    "paidAtSeconds": 40,
+    "showTheStallLanguages": [
+      "en",
+      "zh",
+      "ms",
+      "ta"
+    ]
+  },
+  "plannedMinor": 180,
+  "actualMinor": 650,
+  "deviation": "User selected and personally approved three items, not the proposed single item. Agent initiated no purchase or capture.",
+  "neon": [
+    {
+      "id": "pur_bpfllgrba6jxggox5jninyin6a",
+      "state": "paid",
+      "total_minor": 650,
+      "currency": "SGD",
+      "created_at": "2026-11-08T15:01:27.476Z",
+      "order_id": "6FP05345YE454760E",
+      "capture_id": "77E816612H944211M",
+      "attempt_state": "capture_confirmed",
+      "capture_gross_minor": 650,
+      "payer_country": "US",
+      "payee_merchant_id": "EQN6264CF9F4Y",
+      "seller_merchant_id": "EQN6264CF9F4Y",
+      "capture_verified_at": "2026-11-08T15:01:53.453Z"
+    }
+  ],
+  "paypalRead": {
+    "at": "2026-11-08T15:06:03.020Z",
+    "operation": "GET order only",
+    "id": "6FP05345YE454760E",
+    "status": "COMPLETED",
+    "purchaseId": "pur_bpfllgrba6jxggox5jninyin6a",
+    "amount": {
+      "currency": "SGD",
+      "minor": 650
+    },
+    "payeeMerchantId": "EQN6264CF9F4Y",
+    "payerCountry": "US",
+    "items": [
+      {
+        "name": "Kopi C",
+        "quantity": "1",
+        "unit": {
+          "currency": "SGD",
+          "minor": 180
+        }
+      },
+      {
+        "name": "Iced lemon tea",
+        "quantity": "1",
+        "unit": {
+          "currency": "SGD",
+          "minor": 220
+        }
+      },
+      {
+        "name": "Iced milk tea",
+        "quantity": "1",
+        "unit": {
+          "currency": "SGD",
+          "minor": 250
+        }
+      }
+    ],
+    "captures": [
+      {
+        "id": "77E816612H944211M",
+        "status": "COMPLETED",
+        "amount": {
+          "currency": "SGD",
+          "minor": 650
+        },
+        "feeMinor": 72,
+        "netMinor": 578
+      }
+    ]
+  },
+  "claimBoundary": "One fixture sandbox journey only. No customer, usability, timing, demand or general translation-quality claim."
+}
