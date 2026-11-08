@@ -3415,3 +3415,83 @@ Each guard gets its own mutation with an AssertionError, byte-identical restorat
 #### Evaluation, to be pre-registered before any paid call
 
 A fixed list of cases across the four languages and the fee states above, each sent once through the real call and the real `fillDigest`. Thresholds: zero invented figures on screen and zero refused outputs reaching a screen. A refusal is counted and reported, not hidden. Its exact cases, scorer, model, spend limit and stop rule are written into `00-status.md` and committed before the first call; spend needs its own authorization.
+
+### S50 amendment, drafted 2026-11-09
+
+**Status: drafted 2026-11-09 and approved 2026-11-09 ("yes i approve gate 3 as well").** It fills gaps in the approved S50 rows above and changes no Gate 1 or Gate 2 decision.
+The approved file row, the `triggerTouristReady` signature and tests 87 and 88 stay; this adds what they leave open, and its call stack replaces the "Workflow" call stack above.
+Approval authorizes local S50 application work only; no install, Render change, API key, model call, commit, merge, push or deploy.
+
+**Gaps found [verified 2026-11-09 against the gates and `main` at `2c1b009`].** `WorkflowTrigger` appears only in the signature and is not defined.
+The short timeout, the flow's name and steps, what a failed language does, the Workflow's own environment, build and start command, and the web service's new environment names are not stated.
+`getOrCreateTranslation` takes an outlet, not a revision, so a run started for one revision would translate whichever revision is published when it runs.
+
+**Render facts this relies on, read 2026-11-09 [vendor claim].** `@renderinc/sdk` (latest 1.8.0) defines a flow with `flow({ name }, fn)` and steps with `ctx.step(name, fn, args, { retry })`; a step does not retry unless told to; a step that fails after its retries fails the flow.
+Runs are started with `new Render().workflows.startFlow("<workflow-slug>/<flow-name>", [args], { signal })`, which returns once the run is created. The start command must run the file that registers the flow.
+Render's web service tier once called Starter is now named `0.5c-512mb` at $7 a month, and `render.yaml` records it by that name.
+
+#### Files added to the S50 row
+
+| File | Why |
+| --- | --- |
+| `src/integrations/render/workflow.ts` | `touristReadyTrigger`: the only importer of `@renderinc/sdk`'s client |
+| `src/app/api/v1/merchant/outlets/[id]/publish/route.ts` | Calls `triggerTouristReady` after `publishOutlet` succeeds |
+| `src/env.ts` | `RENDER_API_KEY` and `RENDER_WORKFLOW_SLUG`, optional, on the web schema; a new `workflowSchema` |
+| `src/integrations/ai/openai.ts` | `menuTranslator` takes only the two names it reads, so the Workflow can build it without the web settings |
+| `.env.example` | The new names, no values |
+| `tests/integration/tourist-ready.test.ts` | Tests 87 and 88 and the guards below |
+
+No migration, table or model prompt is added. `getOrCreateTranslation`, its languages and its storage are unchanged.
+
+#### Types and signatures
+
+```ts
+// src/domain/menu/prepare.ts
+const TOURIST_LANGUAGES: readonly ["en", "zh", "ms", "es", "ja"];
+type TouristReadyInput = { outletId: string; revisionId: string };
+type WorkflowTrigger = (input: TouristReadyInput, signal: AbortSignal) => Promise<void>; // throws on any failure
+const TRIGGER_TIMEOUT_MS = 3_000;
+function triggerTouristReady(input: TouristReadyInput, trigger: WorkflowTrigger): Promise<void>; // logs and returns on any failure
+type PrepareResult = "ready" | "superseded" | "not_found";
+function prepareLanguage(db: Db, input: TouristReadyInput, language: string, now: Date, translator: MenuTranslator): Promise<PrepareResult>; // throws on "unavailable", so the step retries
+
+// src/integrations/render/workflow.ts
+function touristReadyTrigger(env?: WebEnv): WorkflowTrigger | null; // null unless RENDER_API_KEY and RENDER_WORKFLOW_SLUG are set
+
+// workflows/tourist-ready.ts, the Workflow's entry point
+const touristReady: Flow<[TouristReadyInput], { language: string; result: PrepareResult | "failed" }[]>; // name "touristReady"
+
+// src/env.ts
+const workflowSchema: z.ZodObject<{ DATABASE_URL; OPENAI_API_KEY; AI_MENU_TRANSLATION_MODEL; LOG_LEVEL }>; // all required except LOG_LEVEL
+function workflowEnv(source?: NodeJS.ProcessEnv): WorkflowEnv;
+```
+
+#### Decisions
+
+1. **Trigger.** After `publishOutlet` returns success, the route builds `touristReadyTrigger()`. If it is null, nothing is called. Otherwise `triggerTouristReady` starts one run with the outlet id and the published revision id, aborted by `AbortSignal.timeout(3000)`. The route waits only for the start request, at most 3 seconds, never for the run. Any error or timeout is logged with the outlet id and revision id, and the route answers exactly as today. A failed publish starts nothing.
+2. **No idempotency key.** A second publish of the same revision may start a second run. That run finds every row stored and makes no model call, so a duplicate run costs a few seconds of Workflow compute and no translation.
+3. **Revision check.** Each step first reads the outlet's published revision. If it is not the revision the run was started for, the step returns `superseded` and makes no call, because a newer publish starts its own run.
+4. **Steps.** The flow `touristReady` runs five steps in order, one per language in `TOURIST_LANGUAGES`, each `prepareLanguage` with `retry: { maxRetries: 2, waitDurationMs: 2000, backoffScaling: 2 }`. `prepareLanguage` throws only when `getOrCreateTranslation` answers `unavailable`, so only a failed model call or a refused translation retries. The flow catches a step that fails after its retries, records `failed` for that language and continues with the next, so one language cannot stop the rest [hypothesis until seen on Render: that a step's final failure can be caught in the flow]. The flow has `timeoutSeconds: 600`.
+5. **On-demand stays.** The buyer translation route is not changed. A language the run did not store is translated on the first visit, as today.
+6. **Workflow environment.** The Workflow reads `DATABASE_URL` (the web role's URL, by Gate 3 least confident decision 9), `OPENAI_API_KEY` and `AI_MENU_TRANSLATION_MODEL`, all entered in its own dashboard settings, and never the auth secret, PayPal credentials or the Render key. Missing any required name stops the run before a step, logged as a configuration error.
+7. **Workflow build.** Same repository and branch as the web service. Build `npm ci`; start `npx tsx workflows/tourist-ready.ts`; region ohio. `tsx` is already a pinned dependency. `render.yaml` gains the web service's `plan: 0.5c-512mb`, the two new web names, and a `type: workflow` entry recording these settings, still as a record and not applied.
+8. **Web environment.** `RENDER_API_KEY` and `RENDER_WORKFLOW_SLUG` are optional on the web schema. Both unset means no trigger, which is the state in CI and local tests.
+
+#### Call stack, replacing the "Workflow" call stack above
+
+`publish/route.ts`, then `requireOutletMembership`, `confirmBody`, `publishOutlet`. On success: `touristReadyTrigger()`, and if it is set, `triggerTouristReady({ outletId, revisionId }, trigger)` with a 3 second abort, then `describeOutlet` and `getMenuDraft` as today.
+In the Workflow: `touristReady(ctx, input)`, then for each language `ctx.step(language, prepareLanguage)`, which calls `getPublishedMenu` for the revision check and then `getOrCreateTranslation`.
+
+#### Tests and guards
+
+Tests 87 and 88 keep their names and assertions. Integration tests run on a disposable local database through the real routes; the OpenAI translator and the Render trigger are FIXTURE fakes at their boundaries.
+
+- **87:** a trigger that throws, and a trigger that never settles until aborted, each leave the publish answering 200 with the outlet published; the second answers within 5 seconds. A buyer translation request afterwards answers through the FIXTURE translator.
+- **88:** running the five steps twice for one revision stores five rows, one per language, and calls the translator five times, not ten.
+- **Guards:** the trigger receives the committed outlet id and revision id; a refused publish, such as a stale version, calls no trigger; a run for a superseded revision makes no translator call; `prepareLanguage` throws on `unavailable` and returns on `not_found`.
+
+Each guard gets its own mutation with an AssertionError, byte-identical restoration and a passing rerun. A guard that would be proved only by a timeout is measured as elapsed time and asserted instead.
+
+#### Render check, after deploy
+
+One publish of a FIXTURE shop on Render, then a read-only count of `menu_translations` rows for that revision: five rows before any buyer asks. Then one more run of the same revision from the dashboard: still five rows. This makes up to five translation model calls, which need their own spend authorization.
