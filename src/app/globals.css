@@ -355,3 +355,22 @@ footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; 
 .copilot .chat form .actions { margin-top: 12px; }
 .copilot .chat label { margin-top: 8px; }
 .copilot .status.ok { margin: 0 0 14px; }
+
+/* S49: the optional printed instructions keep the shop name and test labels together. */
+.counter-poster { max-width: 540px; margin-top: 24px; text-align: center; border-top: 5px solid var(--blue); break-inside: avoid; }
+.counter-poster h2 { font-size: clamp(1.7rem, 4vw, 2.2rem); line-height: 1.15; }
+.poster-brand { font-size: 1.3rem; font-weight: 700; color: var(--blue); }
+.poster-instructions { margin: 24px 0; padding: 20px 16px; text-align: left; border: 1px solid var(--line); }
+.poster-instructions h3 { margin: 0 0 16px; font-size: 1rem; }
+.poster-instructions ol { margin: 0; padding-left: 22px; list-style: decimal; color: var(--muted); }
+.poster-instructions li { padding-bottom: 12px; }
+.poster-instructions li:last-child { padding-bottom: 0; }
+.poster-address { overflow-wrap: anywhere; color: var(--ink); }
+.counter-poster .chip { white-space: normal; }
+@media print {
+  body:has(.poster-page) { background: white; }
+  body:has(.poster-page) > header, body:has(.poster-page) > .notice, body:has(.poster-page) > footer,
+  .poster-page .poster-controls { display: none !important; }
+  .poster-page { max-width: none; padding: 0; margin: 0; }
+  .counter-poster { width: 155mm; max-width: 100%; margin: 10mm auto; padding: 8mm; color: #14293d; background: white; border-color: #14293d; box-shadow: none; }
+}

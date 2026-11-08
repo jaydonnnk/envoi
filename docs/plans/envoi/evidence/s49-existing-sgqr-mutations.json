@@ -1,0 +1,350 @@
+{
+  "label": "Local FIXTURE only",
+  "results": [
+    {
+      "guard": "fixture label",
+      "file": "src/app/merchant/setup/poster/poster.tsx",
+      "test": "tests/unit/merchant-poster.test.ts",
+      "filter": "the poster labels",
+      "mutation": {
+        "before": "outlet.isDemoFixture ? \"Test shop · test money only\" : \"Test money only\"",
+        "after": "false ? \"Test shop · test money only\" : \"Test money only\""
+      },
+      "assertion": "AssertionError: expected '<section class=\"card counter-poster\" …' to contain 'Test shop · test money only'",
+      "sha256": "fd2291874e8a6b0fa6b60c4706a0beac135d7adb02815ad33ef7af573b4a4b04",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-1.log"
+    },
+    {
+      "guard": "non-fixture label",
+      "file": "src/app/merchant/setup/poster/poster.tsx",
+      "test": "tests/unit/merchant-poster.test.ts",
+      "filter": "a non-fixture poster",
+      "mutation": {
+        "before": "outlet.isDemoFixture ? \"Test shop · test money only\" : \"Test money only\"",
+        "after": "true ? \"Test shop · test money only\" : \"Test money only\""
+      },
+      "assertion": "AssertionError: expected '<section class=\"card counter-poster\" …' not to contain 'Test shop'",
+      "sha256": "fd2291874e8a6b0fa6b60c4706a0beac135d7adb02815ad33ef7af573b4a4b04",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-2.log"
+    },
+    {
+      "guard": "test-money label",
+      "file": "src/app/merchant/setup/poster/poster.tsx",
+      "test": "tests/unit/merchant-poster.test.ts",
+      "filter": "a non-fixture poster",
+      "mutation": {
+        "before": ": \"Test money only\"",
+        "after": ": \"\""
+      },
+      "assertion": "AssertionError: expected '<section class=\"card counter-poster\" …' to contain 'Test money only'",
+      "sha256": "fd2291874e8a6b0fa6b60c4706a0beac135d7adb02815ad33ef7af573b4a4b04",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-3.log"
+    },
+    {
+      "guard": "shop name",
+      "file": "src/app/merchant/setup/poster/poster.tsx",
+      "test": "tests/unit/merchant-poster.test.ts",
+      "filter": "the poster names",
+      "mutation": {
+        "before": "<strong>{outlet.name}</strong>",
+        "after": "<strong>another shop</strong>"
+      },
+      "assertion": "AssertionError: expected '<section class=\"card counter-poster\" …' to contain 'FIXTURE Kopi'",
+      "sha256": "fd2291874e8a6b0fa6b60c4706a0beac135d7adb02815ad33ef7af573b4a4b04",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-4.log"
+    },
+    {
+      "guard": "scanner address",
+      "file": "src/app/merchant/setup/poster/poster.tsx",
+      "test": "tests/unit/merchant-poster.test.ts",
+      "filter": "the poster names",
+      "mutation": {
+        "before": "envoi-helx.onrender.com/buy/scan",
+        "after": "envoi-helx.onrender.com/"
+      },
+      "assertion": "AssertionError: expected '<section class=\"card counter-poster\" …' to contain 'envoi-helx.onrender.com/buy/scan'",
+      "sha256": "fd2291874e8a6b0fa6b60c4706a0beac135d7adb02815ad33ef7af573b4a4b04",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-5.log"
+    },
+    {
+      "guard": "existing SGQR instruction",
+      "file": "src/app/merchant/setup/poster/poster.tsx",
+      "test": "tests/unit/merchant-poster.test.ts",
+      "filter": "the poster names",
+      "mutation": {
+        "before": "SGQR beside this poster",
+        "after": "another code"
+      },
+      "assertion": "AssertionError: expected '<section class=\"card counter-poster\" …' to contain 'SGQR beside this poster'",
+      "sha256": "fd2291874e8a6b0fa6b60c4706a0beac135d7adb02815ad33ef7af573b4a4b04",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-6.log"
+    },
+    {
+      "guard": "human PayPal approval instruction",
+      "file": "src/app/merchant/setup/poster/poster.tsx",
+      "test": "tests/unit/merchant-poster.test.ts",
+      "filter": "the poster names",
+      "mutation": {
+        "before": "Approve the payment in PayPal",
+        "after": "Payment happens automatically"
+      },
+      "assertion": "AssertionError: expected '<section class=\"card counter-poster\" …' to contain 'Approve the payment in PayPal'",
+      "sha256": "fd2291874e8a6b0fa6b60c4706a0beac135d7adb02815ad33ef7af573b4a4b04",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-7.log"
+    },
+    {
+      "guard": "no QR image",
+      "file": "src/app/merchant/setup/poster/poster.tsx",
+      "test": "tests/unit/merchant-poster.test.ts",
+      "filter": "the poster contains no new QR",
+      "mutation": {
+        "before": "<p className=\"poster-brand\">Envoi</p>",
+        "after": "<p className=\"poster-brand\">Envoi</p><img src=\"fixture-code.png\" alt=\"FIXTURE QR\" />"
+      },
+      "assertion": "AssertionError: expected '<link rel=\"preload\" as=\"image\" href=\"…' not to match /<(?:img|svg|canvas)\\b|Envoi shop QR|…/i",
+      "sha256": "fd2291874e8a6b0fa6b60c4706a0beac135d7adb02815ad33ef7af573b4a4b04",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-8.log"
+    },
+    {
+      "guard": "no QR SVG",
+      "file": "src/app/merchant/setup/poster/poster.tsx",
+      "test": "tests/unit/merchant-poster.test.ts",
+      "filter": "the poster contains no new QR",
+      "mutation": {
+        "before": "<p className=\"poster-brand\">Envoi</p>",
+        "after": "<p className=\"poster-brand\">Envoi</p><svg><path /></svg>"
+      },
+      "assertion": "AssertionError: expected '<section class=\"card counter-poster\" …' not to match /<(?:img|svg|canvas)\\b|Envoi shop QR|…/i",
+      "sha256": "fd2291874e8a6b0fa6b60c4706a0beac135d7adb02815ad33ef7af573b4a4b04",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-9.log"
+    },
+    {
+      "guard": "no QR canvas",
+      "file": "src/app/merchant/setup/poster/poster.tsx",
+      "test": "tests/unit/merchant-poster.test.ts",
+      "filter": "the poster contains no new QR",
+      "mutation": {
+        "before": "<p className=\"poster-brand\">Envoi</p>",
+        "after": "<p className=\"poster-brand\">Envoi</p><canvas />"
+      },
+      "assertion": "AssertionError: expected '<section class=\"card counter-poster\" …' not to match /<(?:img|svg|canvas)\\b|Envoi shop QR|…/i",
+      "sha256": "fd2291874e8a6b0fa6b60c4706a0beac135d7adb02815ad33ef7af573b4a4b04",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-10.log"
+    },
+    {
+      "guard": "no advertised shop QR",
+      "file": "src/app/merchant/setup/poster/poster.tsx",
+      "test": "tests/unit/merchant-poster.test.ts",
+      "filter": "the poster contains no new QR",
+      "mutation": {
+        "before": "<p className=\"poster-brand\">Envoi</p>",
+        "after": "<p className=\"poster-brand\">Envoi shop QR</p>"
+      },
+      "assertion": "AssertionError: expected '<section class=\"card counter-poster\" …' not to match /<(?:img|svg|canvas)\\b|Envoi shop QR|…/i",
+      "sha256": "fd2291874e8a6b0fa6b60c4706a0beac135d7adb02815ad33ef7af573b4a4b04",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-11.log"
+    },
+    {
+      "guard": "immediate Print",
+      "file": "src/app/merchant/setup/poster/poster.tsx",
+      "test": "tests/unit/merchant-poster.test.ts",
+      "filter": "the poster can be printed",
+      "mutation": {
+        "before": "type=\"button\" onClick",
+        "after": "type=\"button\" disabled onClick"
+      },
+      "assertion": "AssertionError: expected '<section class=\"card counter-poster\" …' not to match /<button[^>]*disabled/",
+      "sha256": "fd2291874e8a6b0fa6b60c4706a0beac135d7adb02815ad33ef7af573b4a4b04",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-12.log"
+    },
+    {
+      "guard": "Chinese line",
+      "file": "src/app/merchant/setup/poster/poster.tsx",
+      "test": "tests/unit/merchant-poster.test.ts",
+      "filter": "renders the three reviewed",
+      "mutation": {
+        "before": "游客:扫码用 PayPal 付款",
+        "after": "REMOVED"
+      },
+      "assertion": "AssertionError: expected '<section class=\"card counter-poster\" …' to contain '游客:扫码用 PayPal 付款'",
+      "sha256": "fd2291874e8a6b0fa6b60c4706a0beac135d7adb02815ad33ef7af573b4a4b04",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-13.log"
+    },
+    {
+      "guard": "Malay line",
+      "file": "src/app/merchant/setup/poster/poster.tsx",
+      "test": "tests/unit/merchant-poster.test.ts",
+      "filter": "renders the three reviewed",
+      "mutation": {
+        "before": "Pelawat: imbas untuk bayar dengan PayPal",
+        "after": "REMOVED"
+      },
+      "assertion": "AssertionError: expected '<section class=\"card counter-poster\" …' to contain 'Pelawat: imbas untuk bayar dengan Pay…'",
+      "sha256": "fd2291874e8a6b0fa6b60c4706a0beac135d7adb02815ad33ef7af573b4a4b04",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-14.log"
+    },
+    {
+      "guard": "Tamil line",
+      "file": "src/app/merchant/setup/poster/poster.tsx",
+      "test": "tests/unit/merchant-poster.test.ts",
+      "filter": "renders the three reviewed",
+      "mutation": {
+        "before": "பார்வையாளர்கள்: PayPal மூலம் பணம் செலுத்த ஸ்கேன் செய்யவும்",
+        "after": "REMOVED"
+      },
+      "assertion": "AssertionError: expected '<section class=\"card counter-poster\" …' to contain 'பார்வையாளர்கள்: PayPal மூலம் பணம் செல…'",
+      "sha256": "fd2291874e8a6b0fa6b60c4706a0beac135d7adb02815ad33ef7af573b4a4b04",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-15.log"
+    },
+    {
+      "guard": "handoff",
+      "file": "src/app/receipt/[purchaseId]/show-the-stall.tsx",
+      "test": "tests/unit/show-the-stall.test.ts",
+      "filter": "presents the paid order",
+      "mutation": {
+        "before": "Show this paid order to the stall",
+        "after": "Order information"
+      },
+      "assertion": "AssertionError: expected '<section class=\"card show-the-stall\" …' to contain 'Show this paid order to the stall'",
+      "sha256": "8f3bff230efd5aaee46b20a7cbdbec548ff5475c8c9142835e322d19994540e4",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-16.log"
+    },
+    {
+      "guard": "membership",
+      "file": "src/app/merchant/setup/poster/page.tsx",
+      "test": "tests/integration/merchant-poster.test.ts",
+      "filter": "only an approved merchant",
+      "mutation": {
+        "before": "const principal = await requireMerchantMembership(getAuth(), webDb(), await headers());",
+        "after": "const principal = { kind: \"merchant_account\" as const, userId: (await webDb().execute<{ user_id: string }>(sql`select user_id from merchant_memberships where outlet_id is not null limit 1`))[0]!.user_id };"
+      },
+      "assertion": "AssertionError: expected '<main class=\"poster-page\"><div class=…' to contain 'Sign in with an approved merchant acc…'",
+      "sha256": "fd72dad75abddfa9c8404c44355bc90595381576495d66d4d024cb9b9db86809",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-17.log"
+    },
+    {
+      "guard": "shop ownership",
+      "file": "src/app/merchant/setup/poster/page.tsx",
+      "test": "tests/integration/merchant-poster.test.ts",
+      "filter": "an outlet outside",
+      "mutation": {
+        "before": ": outlets.find((shop) => shop.id === selected)",
+        "after": ": outlets.find((shop) => shop.published)"
+      },
+      "assertion": "AssertionError: expected '<main class=\"poster-page\"><div class=…' to contain 'Shop not available'",
+      "sha256": "fd72dad75abddfa9c8404c44355bc90595381576495d66d4d024cb9b9db86809",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-18.log"
+    },
+    {
+      "guard": "publication",
+      "file": "src/app/merchant/setup/poster/page.tsx",
+      "test": "tests/integration/merchant-poster.test.ts",
+      "filter": "an unpublished outlet",
+      "mutation": {
+        "before": "if (!outlet.published)",
+        "after": "if (false)"
+      },
+      "assertion": "AssertionError: expected '<main class=\"poster-page\"><div class=…' to contain 'Publish your shop before printing its…'",
+      "sha256": "fd72dad75abddfa9c8404c44355bc90595381576495d66d4d024cb9b9db86809",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-19.log"
+    },
+    {
+      "guard": "hidden list",
+      "file": "src/domain/outlets/search.ts",
+      "test": "tests/integration/hide-outlet.test.ts",
+      "filter": "a hidden shop stays",
+      "mutation": {
+        "before": "and(isNotNull(outlets.publishedMenuRevisionId), isNull(outlets.hiddenAt))",
+        "after": "isNotNull(outlets.publishedMenuRevisionId)"
+      },
+      "assertion": "AssertionError: expected [ …(3) ] to not include 'out_sidie6hw66yge4mamnggovsmsa'",
+      "sha256": "e9d214702de9eddd8c383500928af7a669cd251f43b11dc10b2965a98e4fb279",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-20.log"
+    },
+    {
+      "guard": "hidden direct menu",
+      "file": "src/domain/outlets/search.ts",
+      "test": "tests/integration/hide-outlet.test.ts",
+      "filter": "a hidden shop stays",
+      "mutation": {
+        "before": ".where(eq(outlets.id, outletId))",
+        "after": ".where(and(eq(outlets.id, outletId), isNull(outlets.hiddenAt)))"
+      },
+      "assertion": "AssertionError: expected undefined to be 'out_wfi6kkxtpixfkbtlpcto4qmgfi' // Object.is equality",
+      "sha256": "e9d214702de9eddd8c383500928af7a669cd251f43b11dc10b2965a98e4fb279",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-21.log"
+    },
+    {
+      "guard": "hidden shop context",
+      "file": "src/domain/outlets/search.ts",
+      "test": "tests/integration/hide-outlet.test.ts",
+      "filter": "a hidden shop stays",
+      "mutation": {
+        "before": ".where(eq(outlets.id, outletId))",
+        "after": ".where(and(eq(outlets.id, outletId), isNull(outlets.hiddenAt)))"
+      },
+      "assertion": "AssertionError: expected undefined to be 'out_cqkeycu4sdbqh3jfb7skpi7t4m' // Object.is equality",
+      "sha256": "e9d214702de9eddd8c383500928af7a669cd251f43b11dc10b2965a98e4fb279",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-22.log"
+    },
+    {
+      "guard": "published setup link",
+      "file": "src/app/merchant/setup/workspace.tsx",
+      "test": "tests/integration/merchant-poster.test.ts",
+      "filter": "setup offers Print poster",
+      "mutation": {
+        "before": "{outlet.published && <p className=\"fine\"><a href=",
+        "after": "{true && <p className=\"fine\"><a href="
+      },
+      "assertion": "AssertionError: expected '<div class=\"stack\"><section class=\"ca…' not to contain '>Print poster</a>'",
+      "sha256": "b5839880db1361622149ca3df44b48e87cd3570949a910bc826e130284cc964d",
+      "restored": true,
+      "rerun": "PASS",
+      "log": "/tmp/envoi-s49-revised-mutation-23.log"
+    }
+  ]
+}

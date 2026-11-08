@@ -21,6 +21,10 @@ const card = (status: StallStatus, rows = stallRows(LINES, ZH), onPlay: (() => v
 describe("show the stall card", () => {
   const opened = () => renderToStaticMarkup(createElement(ShowTheStall, { outletId: "out_fixture", lines: LINES, paidAmount: "S$6.70", translationAvailable: true }));
 
+  it("presents the paid order as the handoff to the stall", () => {
+    expect(opened()).toContain("Show this paid order to the stall");
+  });
+
   it("lists the languages as English, Chinese, Malay, Tamil", () => {
     const labels = [...opened().matchAll(/class="stall-language"[^>]*>([^<]+)</g)].map((match) => match[1]);
     expect(labels).toEqual(["English", "中文", "Melayu", "தமிழ்"]);

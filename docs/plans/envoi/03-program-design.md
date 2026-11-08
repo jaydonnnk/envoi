@@ -3139,6 +3139,10 @@ unpaid_closed -> uncertain   (reason crypto_read_unverified)
 
 ## Reopening 2026-11-07: fourth build plan
 
+**Reopened again and re-approved 2026-11-08 for S49's optional existing-SGQR print sheet ("Approved").** Gate 1 was re-approved with "Sure lets continue", accepting optional counter instructions behind "Print poster". This revision removes the extra poster QR, asynchronous QR drawing and print-readiness guard, changes the poster props and named test 85 assertions, and keeps the member route, handoff and hidden-shop behavior. Revised local S49 application work is authorized; no external action is added by this approval. The prior S49 approval below applies to the earlier QR design only.
+
+**Reopened 2026-11-08 for S49 demo polish ("Reopen Gate 3 with these additions"). Re-approved 2026-11-08 ("Approved. Please continue").** Only the S49 file map, poster signature and call stack, handoff wording and test assignments below change. S49 local application work may proceed under its existing start authorization; see the [S49 record](00-status.md#s49-demo-polish-2026-11-08).
+
 **Reopened 2026-11-08 for S48's count at enrollment ("Reopen, add 2 files") and re-approved 2026-11-08 ("Approve Gate 3").** The S48 file map row adds `src/domain/outlets/merchant.ts` and `src/app/merchant/setup/sgqr-sticker.tsx`, and the "Stall scan" call stack gains its enrollment read; see the [S48 record](00-status.md#s48-stall-demand-2026-11-08).
 **Reopened 2026-11-08 for S45's lost refund response ("Refund route resends") and re-approved 2026-11-08 ("Approve Gate 3").** The refund call stack's last sentence changes; see the [S45 record](00-status.md#s45-merchant-copilot-2026-11-07).
 **Reopened again 2026-11-07 for S45's first check ("Yes to both", "Demo shop only") and re-approved 2026-11-07 ("i approve both gates").** See the [S45 record](00-status.md#s45-merchant-copilot-2026-11-07).
@@ -3171,7 +3175,11 @@ Approval authorizes no code change, install, migration, model call, spend, merge
 | `src/domain/purchases/digest.ts`, `src/integrations/ai/digest.ts`, its route | S47 | Figures, template call and substitution |
 | `src/domain/sgqr/demand.ts`, `src/app/api/v1/outlets/resolve-sgqr/route.ts`, `src/app/buy/scan/scan-sticker.tsx` | S48 | Count and card |
 | `src/domain/outlets/merchant.ts`, `src/app/merchant/setup/sgqr-sticker.tsx` | S48 | Added 2026-11-08: `listIdentifiers` reads `scanCount` for each submitted sticker, and setup shows it as "scans" |
-| `src/app/merchant/setup/poster/page.tsx` | S49 | Printable poster |
+| `src/app/merchant/setup/poster/page.tsx` | S49 | Member-only printable page; selects only a published shop belonging to the signed-in member |
+| `src/app/merchant/setup/poster/poster.tsx` | S49 | Static counter instructions and native Print button; no QR writer, model or payment call |
+| `src/app/merchant/setup/workspace.tsx`, `src/app/globals.css` | S49 | Small optional "Print poster" link for the selected published shop; instructions and print-only styles |
+| `src/app/receipt/[purchaseId]/show-the-stall.tsx` | S49 | Adds "Show this paid order to the stall"; existing Paid-only visibility and acceptance note stay |
+| `tests/integration/merchant-poster.test.ts`, `tests/unit/merchant-poster.test.ts`, `tests/unit/show-the-stall.test.ts`, `tests/integration/hide-outlet.test.ts` | S49 | Test 85, poster membership and shop selection, handoff text, and existing hidden-shop behavior assigned to test 86 |
 | `render.yaml`, `workflows/tourist-ready.ts`, `src/domain/menu/prepare.ts` | S50 | Plan, flow and trigger |
 | `src/lib/auth.ts`, `src/domain/outlets/merchant.ts`, `src/domain/outlets/destination.ts`, `src/app/merchant/setup/*` | S43 | Sign-up, pending shop, seller request and waiting state |
 | `src/lib/ratelimit.ts`, `src/lib/db/schema.ts`, `drizzle/0032` to `0035` | Each | Buckets and additive columns |
@@ -3237,6 +3245,9 @@ function scanCount(db: Db, hash: string): Promise<number>;
 function createPendingOutlet(db: Db, input: OutletInput & { userId: string; now: Date }): Promise<CreatedOutlet | AppError>;
 function requestSeller(db: Db, input: { outletId: string; sellerMerchantId: string; userId: string; now: Date }): Promise<MerchantOutlet | AppError>;
 
+// src/app/merchant/setup/poster/poster.tsx, S49 amendment 2026-11-08
+function CounterPoster(props: { outlet: Pick<MerchantOutlet, "name" | "isDemoFixture"> }): React.JSX.Element;
+
 // src/domain/menu/prepare.ts
 function triggerTouristReady(input: { outletId: string; revisionId: string }, trigger: WorkflowTrigger): Promise<void>; // logs and returns on any failure
 ```
@@ -3254,6 +3265,12 @@ function triggerTouristReady(input: { outletId: string; revisionId: string }, tr
 **Digest.** `digest/route.ts`, then membership, enrollment, `admit("merchant_digest")`, `salesSummary`. An empty week returns no summary and makes no call. Otherwise the model call, then `fillDigest`.
 
 **Stall scan.** `resolve-sgqr/route.ts`, then `resolveSgqr`, and only on `no_match` with an identifier, `stickerHash`, `admit("sticker_scan")` and `recordNoMatchScan`. A failure to count changes nothing the buyer sees. At enrollment, `listIdentifiers` computes `stickerHash` for each submitted identifier and reads `scanCount`; with `STICKER_HASH_KEY` unset it reads no count and shows none.
+
+**Counter poster, S49 revision 2026-11-08.** The optional "Print poster" setup link names the selected published shop. `poster/page.tsx`, then `headers`, `requireMerchantMembership`, and only for a merchant account, `listMerchantOutlets` scoped to that account. The optional `outlet` query selects only from those member-owned outlets; an unknown or foreign id renders no sheet. Without a query, select the first published member-owned shop. An unpublished shop renders no printable sheet. `CounterPoster` receives only name and fixture flag. It renders the exact invitation lines and English steps in `mockups/merchant-poster.html`, including `envoi-helx.onrender.com/buy/scan`, and no QR or other code image. The visitor opens Envoi and scans the existing SGQR beside the sheet. The Print button is enabled immediately and calls `window.print()`; print CSS hides application chrome, controls and the setup link, retaining the shop name, instructions and test-money label. A fixture additionally shows "Test shop". No new QR is drawn, stored or printed and no SGQR is reproduced or altered. The existing S18 shop-QR component elsewhere in setup stays unchanged. The user confirms the unchanged Chinese, Malay and Tamil invitation lines [user-reported, 2026-11-08]; new instructions remain English only. No new route, environment name, provider or dependency is added. This is a private print utility, not a buyer page or required merchant explanation step.
+
+**Stall handoff, S49 amendment 2026-11-08.** The existing Paid-only receipt path and `ShowTheStall` stay in place. `StallCard` adds "Show this paid order to the stall" below its heading. No translation, speech, amount or acceptance behavior changes.
+
+**Public list, S49 amendment 2026-11-08.** Reuse `hide-outlet` only for individually authorized fixture ids on Neon. No production code change is needed. Hidden shops keep their direct menu and shop-context reads; test 86 assigns that existing behavior rather than duplicating it.
 
 **Sign-up.** `POST /api/auth/sign-up/email`, then a `hooks.before` guard checking `MERCHANT_SIGNUP_ENABLED` and `admit("merchant_signup")`, then Better Auth, `createPendingOutlet`, `requestSeller`, and later the operator's `assign-paypal-destination` and `approve-enrollment`, `acceptPayPalConnection` and `publishOutlet`, all unchanged.
 
@@ -3288,8 +3305,8 @@ Numbers continue from test 61. Each guard gets its own mutation with a distinct 
 | 82 | S48 | `one session cannot inflate a count past its limit` | The bucket stops the write |
 | 83 | S48 | `the card appears only for a no-match scan` | Ambiguous and matched scans do not show it |
 | 84 | S48 | `a failure to count changes nothing for the buyer` | The answer is unchanged |
-| 85 | S49 | `the poster labels the shop as a test shop while it is one` | The label and "not a payment code" render |
-| 86 | S49 | `a hidden shop stays reachable by its own link` | Off the list, open by link |
+| 85 | S49 | `the poster labels the shop as a test shop while it is one` | The fixture label renders; a non-fixture has no "Test shop" label and keeps "Test money only". The old QR/non-payment-code assertion is replaced by the scanner address and existing-SGQR instructions, with no code image |
+| 86 | S49 | `a hidden shop stays reachable by its own link` | Existing `hide-outlet.test.ts` direct-link check is named here and also asserts exclusion from the list; menu and shop context stay readable |
 | 87 | S50 | `a failed run leaves publication and on-demand translation working` | A thrown trigger still answers 200 |
 | 88 | S50 | `a repeated run makes no duplicate translation` | One row per revision and language |
 | 89 | S43 | `a stranger can sign up and create one pending shop` | Replaces `public signup is refused`, through this recorded change |
@@ -3320,3 +3337,9 @@ Numbers continue from test 61. Each guard gets its own mutation with a distinct 
 7. **No digits in the digest template.** It refuses even a harmless "2 tips", so some outputs show nothing. That is the safer failure.
 8. **Five prepared languages.** `en`, `zh`, `ms`, `es` and `ja` follow the supported list, plus English explanations for Western visitors. The translation evaluation did not cover every pair, so the language claim stays as it is.
 9. **Workflow database access.** It reuses the web role and its URL as a dashboard secret. A narrower role would be cleaner, but costs a migration before the freeze.
+
+### S49 verification additions, drafted 2026-11-08
+
+The S49 amendment also checks no session, a buyer session, no membership, another member's selected outlet and an unpublished outlet: none renders the selected shop's printable sheet. An approved member's published outlet renders its exact name. The handoff sentence renders on the existing stall card. No new dependency or migration is proposed.
+
+Each new guard gets its own mutation and AssertionError proof, byte-identical restoration and passing rerun. Test 86 independently mutates the list exclusion, direct menu read and shop-context read. The real browser at 390 px and 1280 px checks the optional "Print poster" link, exact shop name, scanner address, existing-SGQR steps, no new QR, enabled Print and print-only layout. Absence checks self-test their scanner by injecting representative img, svg and canvas needles into the actual serialized poster markup. An output PDF must contain one sheet with the shop name, instructions and test label; application chrome and buttons must be absent. The previous QR identity, non-payment-code notice and QR-readiness proofs are retired only for this changed poster, with their evidence preserved as historical. Revised tests and mutations get separate evidence and must not overwrite those old results. These are planned checks, not passing evidence.

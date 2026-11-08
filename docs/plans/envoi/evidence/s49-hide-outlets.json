@@ -1,0 +1,118 @@
+{
+  "at": "2026-11-08T13:45:27.018Z",
+  "authority": "Hide both named fixture shops",
+  "before": {
+    "counts": {
+      "__drizzle_migrations": 35,
+      "account": 7,
+      "agent_tokens": 8,
+      "audit_events": 520,
+      "enrollments": 4,
+      "maintenance_runs": 84,
+      "menu_import_admission": 1,
+      "menu_imports": 2,
+      "menu_items": 53,
+      "menu_revisions": 14,
+      "menu_translations": 14,
+      "merchant_memberships": 7,
+      "operator_grants": 1,
+      "outlet_identifiers": 1,
+      "outlets": 8,
+      "payment_attempts": 50,
+      "payment_destinations": 9,
+      "provider_events": 98,
+      "purchase_requests": 23,
+      "purchases": 88,
+      "pyusd_extra_transfers": 0,
+      "pyusd_rates": 3,
+      "rate_limit_hits": 18,
+      "refunds": 1,
+      "rpc_limiter_backoff": 1,
+      "rpc_limiter_calls": 3,
+      "rpc_limiter_slots": 2,
+      "session": 22,
+      "sticker_scan_counts": 1,
+      "user": 50,
+      "verification": 0,
+      "wallet_challenges": 3
+    },
+    "outlets": [
+      {
+        "id": "out_tttwxkjybonzkofmjpnil3pxcq",
+        "name": "Judge Demo Cafe",
+        "fixture": true,
+        "hidden": false,
+        "published": true
+      },
+      {
+        "id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+        "name": "Test Shop",
+        "fixture": true,
+        "hidden": false,
+        "published": true
+      }
+    ]
+  },
+  "results": [
+    {
+      "status": "hidden",
+      "outletId": "out_vrlbnc3zylbrr6g2drovaiqkfu"
+    },
+    {
+      "status": "hidden",
+      "outletId": "out_tttwxkjybonzkofmjpnil3pxcq"
+    }
+  ],
+  "after": {
+    "counts": {
+      "__drizzle_migrations": 35,
+      "account": 7,
+      "agent_tokens": 8,
+      "audit_events": 522,
+      "enrollments": 4,
+      "maintenance_runs": 84,
+      "menu_import_admission": 1,
+      "menu_imports": 2,
+      "menu_items": 53,
+      "menu_revisions": 14,
+      "menu_translations": 14,
+      "merchant_memberships": 7,
+      "operator_grants": 1,
+      "outlet_identifiers": 1,
+      "outlets": 8,
+      "payment_attempts": 50,
+      "payment_destinations": 9,
+      "provider_events": 98,
+      "purchase_requests": 23,
+      "purchases": 88,
+      "pyusd_extra_transfers": 0,
+      "pyusd_rates": 3,
+      "rate_limit_hits": 18,
+      "refunds": 1,
+      "rpc_limiter_backoff": 1,
+      "rpc_limiter_calls": 3,
+      "rpc_limiter_slots": 2,
+      "session": 22,
+      "sticker_scan_counts": 1,
+      "user": 50,
+      "verification": 0,
+      "wallet_challenges": 3
+    },
+    "outlets": [
+      {
+        "id": "out_tttwxkjybonzkofmjpnil3pxcq",
+        "name": "Judge Demo Cafe",
+        "fixture": true,
+        "hidden": true,
+        "published": true
+      },
+      {
+        "id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+        "name": "Test Shop",
+        "fixture": true,
+        "hidden": true,
+        "published": true
+      }
+    ]
+  }
+}

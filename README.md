@@ -12,6 +12,8 @@ PayPal's micropayment rate can cost a shop less than PayPal's standard rate on o
 
 Deployed test environment: <https://envoi-helx.onrender.com> (Render Free, so the first visit after idle can take a while).
 
+S49 demo polish is in progress. The deployed public list now hides the internal fixtures Test Shop and Judge Demo Cafe; their direct links and records still work. The revised poster proposal uses the stall's existing SGQR, with no second QR. Gates 1 and 3 are approved for an optional "Print poster" utility. The QR-free sheet is implemented locally and is not deployed. See the [S49 record](docs/plans/envoi/00-status.md#s49-demo-polish-2026-11-08).
+
 ## What the AI does
 
 AI here is only ever a reader and a drafter. No model sets a price, approves a payment or moves money: every price comes from the shop's own published menu, and a person approves every payment.

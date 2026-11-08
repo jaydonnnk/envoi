@@ -73,6 +73,7 @@ export function StallCard({
   return (
     <section className="card show-the-stall" aria-labelledby="show-the-stall-heading">
       <h2 id="show-the-stall-heading">Show the stall</h2>
+      <p className="muted">Show this paid order to the stall</p>
       {choose && (
         <p className="muted stall-languages">
           <span>{status === "translated" && "AI translation. "}Language:</span>

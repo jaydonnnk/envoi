@@ -41,7 +41,8 @@ describe("hiding a demo fixture shop", () => {
     expect(ids.has(other.outletId)).toBe(true);
   });
 
-  it("keeps its direct links working", async () => {
+  it("a hidden shop stays reachable by its own link", async () => {
+    expect((await listPublishedOutlets(db as never)).map((row) => row.id)).not.toContain(hidden.outletId);
     expect((await getPublishedMenu(db as never, hidden.outletId))?.outlet.id).toBe(hidden.outletId);
     expect((await shopContext(db as never, hidden.outletId))?.id).toBe(hidden.outletId);
   });

@@ -60,7 +60,7 @@ It has no PayPal seller yet; attach one with:
 MIGRATION_DATABASE_URL=postgres://postgres@127.0.0.1:5432/envoi_dev npm run operator -- assign-paypal-destination <outletId> <sellerMerchantId>
 ```
 
-The deployed site holds three more fixture shops that a local seed does not create, added by S41 so the public list reads like a list of shops: Ah Seng Chicken Rice (Maxwell), Tiong Bahru Kopi House (Tiong Bahru) and Larkspur Street Taqueria (San Francisco, USD). Create them with `npm run operator -- seed-judge-fixtures`, which is idempotent, then attach a seller to each the same way. The two Singapore shops share the sandbox seller `EQN6264CF9F4Y`, so a payment at either would reach the same PayPal sandbox account: a fixture limitation, never two shops each paid into their own account. The four earlier fixtures stay, because no rename or unpublish command exists, so the deployed list shows both the believable names and "S26 Fixture Shop", "S27 US Fixture Shop" and "Test Shop".
+The deployed site holds three more fixture shops that a local seed does not create, added by S41 so the public list reads like a list of shops: Ah Seng Chicken Rice (Maxwell), Tiong Bahru Kopi House (Tiong Bahru) and Larkspur Street Taqueria (San Francisco, USD). Create them with `npm run operator -- seed-judge-fixtures`, which is idempotent, then attach a seller to each the same way. The two Singapore shops share the sandbox seller `EQN6264CF9F4Y`, so a payment at either would reach the same PayPal sandbox account: a fixture limitation, never two shops each paid into their own account. Current list, verified 2026-11-08 after the authorized S49 hide: Ah Seng Chicken Rice, Larkspur Street Taqueria, Lorong Demo Kopi and Tiong Bahru Kopi House. Test Shop and Judge Demo Cafe are hidden from lists and search; their direct links, merchant screens and records still work. `show-outlet` reverses a hide. The S26 and S27 fixture names are historical, not the current public list.
 
 ## 2. Landing page
 
@@ -316,3 +316,7 @@ Integration tests create and drop their own databases, so point `TEST_DATABASE_U
 | 12 Checks | All exit 0 |
 
 The usability target (4 of 5 first-time buyers within 3 minutes) is never measured: the study was removed on 2026-10-29 by the user's decision, so never claim it, or any usability, timing or ease-of-use result, from this guide.
+
+## S49 work in progress, 2026-11-08
+
+The revised counter-poster mockup contains no new QR. It tells the visitor to open Envoi's scanner and scan the stall's existing SGQR beside it. Gates 1 and 3 are approved for an optional "Print poster" link in merchant setup. The QR-free sheet is implemented locally, not deployed. The previous QR-poster implementation and the added "Show this paid order to the stall" sentence passed local fixture checks but were not deployed. S49's recorded Singapore fixture shop to Paid run with a US sandbox buyer remains unrecorded; no new purchase is authorized. See the [S49 record](00-status.md#s49-demo-polish-2026-11-08).

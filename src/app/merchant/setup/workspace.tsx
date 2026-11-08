@@ -353,6 +353,7 @@ export function Workspace({
           <CountryChoice key={`${outlet.id}:${outlet.country}`} outlet={outlet} onSaved={replace} />
           {/* The SGQR sticker is a Singapore code; a US shop has its Envoi shop QR only (S27). */}
           {outlet.country === "SG" ? <SgqrSticker key={outlet.id} outlet={outlet} onSaved={replace} /> : <div className="shop-qr-only"><ShopQr outlet={outlet} /></div>}
+          {outlet.published && <p className="fine"><a href={`/merchant/setup/poster?outlet=${encodeURIComponent(outlet.id)}`}>Print poster</a></p>}
         </section>
       )}
 

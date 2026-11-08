@@ -341,6 +341,14 @@ It replaces "Your language. One scan. PayPal." on the landing page, and the supp
 - Wise says customers outside Singapore can pay PayNow QR codes at businesses [vendor claim]. It is the real alternative, and its coverage far exceeds Envoi's.
 - A licensed partner paying a stall's PayNow is the only route that would make any SGQR payable. It stays roadmap and is not built.
 
+### S49 poster revision, drafted 2026-11-08
+
+**Gate 1 reopened and re-approved 2026-11-08 ("Sure lets continue", accepting the optional printable counter instructions).** The user chose "Use the existing SGQR, remove the poster’s shop QR". This replaces only S49's additional poster QR with instructions beside the stall's existing SGQR. No application revision has been built for this direction.
+
+The poster is an optional printable sheet behind a small "Print poster" link in merchant setup. It is not a public buyer page, separate merchant explanation screen or required onboarding step. It tells the visitor to open `envoi-helx.onrender.com/buy/scan`, scan the stall's existing SGQR, choose an order, review the exact amount and approve in PayPal. It contains no new QR and does not reproduce or alter the stall's SGQR. The shop's name and "Test shop · test money only" stay visible. The existing Chinese, Malay and Tamil invitation lines stay unchanged, under the user's reported review; the new instructions are English only. Screen: `mockups/merchant-poster.html`.
+
+This does not claim native SGQR payment-scheme membership. The existing scan identifies an enrolled shop; the payment still goes to that shop's PayPal account. An unenrolled SGQR remains unpayable. The long scanner address adds a typing step [hypothesis: friction]; no usability claim is made. The member-only printable route in Gate 2 and the S49 build order, tests 85 and 86, falsifier and authorizations in Gate 4 stay the same. Gate 3 must reconcile its old QR generation, signature, print readiness and notice assertions before application changes.
+
 ### What changes for the buyer
 
 - **The landing page speaks to the Western visitor.** Screen: `mockups/landing-tourist.html`.
@@ -355,7 +363,7 @@ It replaces "Your language. One scan. PayPal." on the landing page, and the supp
 - **A sales desk as the merchant's home:** paid sales, PayPal's fee and the net per order, totals, sales by payment method, a chart and a CSV export. A missing fee reads unknown, never zero. An order is called overseas only from the country PayPal gives. Ask your orders also sorts and chooses views. Screen: `mockups/merchant-desk.html`.
 - **A weekly summary written by AI,** in English, 中文, Melayu or தமிழ், labeled as AI. Code computes every figure, and a summary holding any other figure is refused. It appears on the same screen.
 - **A payments copilot.** The merchant asks about their sandbox PayPal records, using PayPal's hosted agent tools if they work with Envoi. It sees only that shop's orders. It can suggest a refund, and only the merchant's own confirmation sends it. It can never take a payment. A refund sits beside the Paid record and does not rewrite it. Screen: `mockups/merchant-copilot.html`.
-- **A printable counter poster.** It is labeled a test shop while it is one, and its QR is not a payment code. Screen: `mockups/merchant-poster.html`.
+- **A printable counter poster.** Revised and re-approved 2026-11-08: it contains no new QR and tells the visitor to open Envoi and scan the stall's existing SGQR beside it. It keeps the shop name and the test-shop label. Screen: `mockups/merchant-poster.html`. The earlier poster QR proposal is superseded. The sheet is optional behind "Print poster" in merchant setup.
 - **Merchant sign-up, replacing "There is still no public sign-up".** Anyone can create an account and one pending shop, with no email verification or password reset in the test environment, stated on the form. An admin still approves every shop, and until then it has no public page and takes no payment. The merchant submits a sandbox seller id for that review. Every self-created shop is labeled a test shop. Screen: `mockups/merchant-signup.html`.
 
 ### What changes for the demo and the record
