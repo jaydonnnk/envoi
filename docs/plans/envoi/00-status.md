@@ -581,6 +581,9 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 - **Leak found and fixed [verified]:** `.env.local` now sets `RENDER_API_KEY` [verified, boolean only], and the end-to-end run refused to start with `RENDER_WORKFLOW_SLUG` unset. Tests spread `process.env`, so a real key could have reached a test server. `createTestDatabase` now deletes both Render names after loading `.env.local`, and the end-to-end run sets them to fixture values; it publishes nothing.
 - **Fresh checks [verified], 2026-11-09:** `npm test` 125 files, 1035 of 1035; typecheck and lint clean; `npm run build` passed; `scripts/scan-build.ts` passed over 259 files; `tests/e2e/run-public-api.ts` PASS (local FIXTURE only); `gate4_check.py` PASS against `main`; `git diff --check` clean; a scoped secret scan of the diff and new files found nothing.
 - **Commit authority, the user's words, 2026-11-09:** "Yes, commit", for committing this S50 work on `envoi/slice-50-render-workflow`. It authorizes no push, merge or deploy.
+- **Commits [verified], 2026-11-09:** `ef8db03` (docs) and `81fa972` (feat) on `envoi/slice-50-render-workflow`.
+- **Cold start, first half [verified], 2026-11-09:** two requests to `https://envoi-helx.onrender.com/` at 17:25:27Z and 17:25:28Z answered 200 with time to first byte 0.766 s and 0.358 s, from this Mac in Singapore to Ohio.
+- **Release and spend authority, the user's words, 2026-11-09:** "Just continue in this session. yes i authorize", answering the open merge, push and deploy of the S50 commits and the spend for up to five translation model calls in the live check.
 
 ### S47 The tourist digest, 2026-11-08
 
