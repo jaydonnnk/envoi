@@ -24,8 +24,8 @@ Have ready:
 
 Never type a real password, card or seed phrase into Envoi, and never show `.env.local`, Render settings or a wallet seed on screen.
 
-Warm the deployed site first: open it once and wait.
-An idle cold first visit takes about 28 s on Render Free.
+Since S50 the deployed site runs on Render's `0.5c-512mb` plan and does not sleep.
+After 25 minutes with no request from the tester, it answered in about 0.3 s (one sample, 2026-11-09).
 
 ## 1. Local setup (skip for deployed)
 
@@ -100,7 +100,8 @@ Ask Envoi is on only when `OPENAI_API_KEY`, `AI_MODEL` and `ASSISTANT_AGENT_TOKE
 2. Check each item shows an AI translation beside its original name, its price and its availability, with the original menu one tap away.
 3. Check no displayed price changed and no item appeared that is not on that menu. A translation never sets a price.
 4. It is off unless `AI_MENU_TRANSLATION_MODEL` and `OPENAI_API_KEY` are both set; with it off the menu shows original names only.
-5. Nothing here measures whether an explanation is right. The registered evaluation checked prices and items, not meaning, and its builder read three explanations as wrong.
+5. Since S50, publishing a menu starts a Render Workflow run that stores the translations in `en`, `zh`, `ms`, `es` and `ja`, so those languages answer without a model call. Check the run under the `envoi-workflow` service in the Render dashboard. Any other language, or a failed run, is translated on the first visit as before.
+6. Nothing here measures whether an explanation is right. The registered evaluation checked prices and items, not meaning, and its builder read three explanations as wrong.
 
 ## 4. Buyer: review and pay with PayPal sandbox
 

@@ -10,7 +10,7 @@ PayPal is not on SGQR: Envoi identifies an enrolled shop from its sticker and pa
 PayPal's fee is the shop's cost and Envoi adds nothing to it, so `/for-shops` shows the fee at PayPal's published Singapore rates and links the source; Envoi makes no claim to be cheaper than cards.
 PayPal's micropayment rate can cost a shop less than PayPal's standard rate on orders under S$26, but it needs PayPal's approval and then applies to every sale, and whether a food stall qualifies is unknown.
 
-Deployed test environment: <https://envoi-helx.onrender.com> (Render Free, so the first visit after idle can take a while).
+Deployed test environment: <https://envoi-helx.onrender.com> (Render `0.5c-512mb`, which does not sleep, since S50).
 
 S49 demo polish is in progress. The deployed public list now hides the internal fixtures Test Shop and Judge Demo Cafe; their direct links and records still work. The revised poster proposal uses the stall's existing SGQR, with no second QR. Gates 1 and 3 are approved for an optional "Print poster" utility. The QR-free sheet is deployed and was checked on Render at 390 px and 1280 px. One recorded fixture scan-to-Paid journey is verified: a US sandbox buyer personally approved three items totaling S$6.50; Envoi and PayPal records match. See the [S49 record](docs/plans/envoi/00-status.md#s49-demo-polish-2026-11-08).
 
@@ -88,7 +88,7 @@ The app shows these labels on every screen. Pending, failed or uncertain payment
 
 | Tool | What it does here | Limit that matters |
 | --- | --- | --- |
-| Render Free | Hosts the deployed test environment from `main`; `render.yaml` records its settings and is not applied as a Blueprint | Sleeps when idle; a cold first visit took about 28 s from Singapore |
+| Render | Hosts the deployed test environment from `main` on the `0.5c-512mb` plan (S50), and the `envoi-workflow` Workflow that stores five menu translations after each publish through `@renderinc/sdk`; `render.yaml` records both and is not applied as a Blueprint | Does not sleep; after 25 idle minutes one request answered in 0.32 s. Before S50, on Free, a cold first visit took about 28 s. A failed Workflow run leaves on-demand translation working |
 | Neon Postgres | The database, over three roles: `DATABASE_URL`, `MIGRATION_DATABASE_URL` and `MAINTENANCE_DATABASE_URL` | Holds fixture shops and sandbox payments only |
 | PayPal sandbox | The buyer's approval, and the shop's own seller account as payee | Sandbox money only; Envoi is never the payee |
 | PayPal's MCP server | The merchant copilot's reads at `mcp.sandbox.paypal.com/sse`, on the demo seller's own token | Sandbox only; Envoi passes on four read tools and no write tool |
