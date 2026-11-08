@@ -16,7 +16,7 @@ import {
 import { AgGridReact } from "ag-grid-react";
 import { useMemo } from "react";
 import type { MerchantOrder } from "@/domain/purchases/orders";
-import { orderStatus, orderTotal, paidVia, refundCopy } from "./order-copy";
+import { orderStatus, orderTotal, paidVia, paymentChips, refundCopy } from "./order-copy";
 
 // The merchant's orders table (S35; Gate 3 file map): AG Grid Community, sorting and column filters in
 // the browser only. It displays rows and edits nothing. Every word in the Payment column comes from
@@ -106,7 +106,7 @@ export function OrdersGrid({
         width: 90,
         cellClass: ["cell-middle", "money"],
       },
-      { colId: "payment", headerName: "Payment", valueGetter: (p) => (p.data ? orderStatus(p.data).chip : ""), cellRenderer: PaymentCell, minWidth: 150, flex: 1 },
+      { colId: "payment", headerName: "Payment", valueGetter: (p) => (p.data ? paymentChips(p.data) : ""), cellRenderer: PaymentCell, minWidth: 150, flex: 1 },
       { colId: "paidVia", headerName: "Paid via", valueGetter: (p) => (p.data ? paidVia(p.data) : ""), minWidth: 130, flex: 1 },
       {
         colId: "acknowledged",

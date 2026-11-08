@@ -167,3 +167,13 @@ export function plainReply(text: string): string {
     .replace(/(^|[^\w*])\*(?=\S)([^*]*?\S)\*(?![\w*])/g, "$1$2")
     .replace(/`([^`]+)`/g, "$1");
 }
+
+// The Payment column's value: every chip its cell shows. The grid re-renders a cell only when this
+// value changes, so a refund or an extra transfer on a Paid order must change it (S45 Render check,
+// 2026-11-08: a confirmed refund stayed off the row until the page was reloaded).
+export function paymentChips(order: MerchantOrder): string {
+  const chips = [orderStatus(order).chip];
+  if (order.pyusd && order.pyusd.extraTransfers.length > 0) chips.push("Extra transfer");
+  if (order.refund) chips.push(refundCopy(order.refund).chip);
+  return chips.join(", ");
+}
