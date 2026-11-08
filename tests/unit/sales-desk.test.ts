@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { countryText, feeText, filterWords, methodRows, netText, ordersCsv } from "@/app/merchant/orders/order-copy";
+import { countryText, deskTiles, feeText, filterWords, knownTotalText, methodRows, netText, ordersCsv } from "@/app/merchant/orders/order-copy";
 import { applyOrderFilter, isOverseas, parseOrderFilter } from "@/domain/purchases/order-filter";
 import type { MerchantOrder } from "@/domain/purchases/orders";
 import { decideCaptureOutcome, saleFigures, type ExpectedPurchase } from "@/domain/purchases/reconcile";
@@ -80,6 +80,20 @@ describe("73 a missing fee shows as unknown, never zero", () => {
   it("names unknown fees in the by-method table instead of adding them as zero", () => {
     const [row] = methodRows({ currency: "SGD", paidMinor: 1960, paidCount: 2, knownFeeMinor: 83, knownNetMinor: 897, unknownFeeCount: 1, byRail: [{ rail: "paypal", paidMinor: 1960, paidCount: 2, knownFeeMinor: 83, knownNetMinor: 897, unknownFeeCount: 1 }] });
     expect(row!.fees).toBe("S$0.83 known, 1 unknown");
+  });
+
+  it("reads a total with no known fee behind it as Unknown, never S$0.00", () => {
+    // Found on Render, 2026-11-08: four paid orders, none with a fee, read "Net after PayPal fees S$0.00".
+    const none = { currency: "SGD" as const, paidMinor: 1850, paidCount: 4, knownFeeMinor: 0, knownNetMinor: 0, unknownFeeCount: 4, byRail: [{ rail: "paypal" as const, paidMinor: 1850, paidCount: 4, knownFeeMinor: 0, knownNetMinor: 0, unknownFeeCount: 4 }] };
+    expect(deskTiles(none).net).toBe("Unknown");
+    expect([knownTotalText(none, none.knownFeeMinor), knownTotalText(none, none.knownNetMinor)]).toEqual(["Unknown", "Unknown"]);
+    expect(methodRows(none)[0]!.fees).toBe("4 unknown");
+    expect(ordersCsv([], [none]).split("\r\n")[1]).toBe("\"Totals, paid only (SGD)\",4 paid,S$18.50,Unknown,Unknown,,");
+    // One known fee makes the totals known again, with the unknown ones still named.
+    const one = { ...none, knownFeeMinor: 83, knownNetMinor: 897, unknownFeeCount: 3, byRail: [{ ...none.byRail[0]!, knownFeeMinor: 83, knownNetMinor: 897, unknownFeeCount: 3 }] };
+    expect(deskTiles(one).net).toBe("S$8.97");
+    expect(knownTotalText(one, one.knownFeeMinor)).toBe("S$0.83 known");
+    expect(methodRows(one)[0]!.fees).toBe("S$0.83 known, 3 unknown");
   });
 });
 

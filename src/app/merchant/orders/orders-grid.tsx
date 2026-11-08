@@ -21,7 +21,7 @@ import type { OrderSort } from "@/domain/purchases/order-filter";
 import type { MerchantOrder } from "@/domain/purchases/orders";
 import type { SalesSummary } from "@/domain/purchases/sales-summary";
 import { formatMoney, money } from "@/lib/money";
-import { countryText, feeText, netMinor, netText, orderStatus, orderTotal, paymentChips, refundCopy } from "./order-copy";
+import { countryText, feeText, knownTotalText, netMinor, netText, orderStatus, orderTotal, paymentChips, refundCopy } from "./order-copy";
 
 // The merchant's orders table (S35; Gate 3 file map): AG Grid Community, sorting and column filters in
 // the browser only. It displays rows and edits nothing. Every word in the Payment column comes from
@@ -72,14 +72,13 @@ const isTotals = (row: GridRow | undefined): row is TotalsRow => row !== undefin
 const orderOf = (row: GridRow | undefined): MerchantOrder | null => (row && !isTotals(row) ? row : null);
 
 export const TOTALS_LABEL = "Totals, paid only";
-const known = (summary: SalesSummary, minor: number) => `${formatMoney(money(summary.currency, minor))} known`;
 
 // Text for the totals row's cell in each column; empty where a total means nothing.
 export function totalsCell(summary: SalesSummary, colId: string): string {
   if (colId === "time") return TOTALS_LABEL;
   if (colId === "total") return formatMoney(money(summary.currency, summary.paidMinor));
-  if (colId === "fee") return known(summary, summary.knownFeeMinor);
-  if (colId === "net") return known(summary, summary.knownNetMinor);
+  if (colId === "fee") return knownTotalText(summary, summary.knownFeeMinor);
+  if (colId === "net") return knownTotalText(summary, summary.knownNetMinor);
   if (colId === "payment") return `${summary.paidCount} paid`;
   return "";
 }

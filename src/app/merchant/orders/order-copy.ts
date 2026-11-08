@@ -226,6 +226,17 @@ export function paymentChips(order: MerchantOrder): string {
   return chips.join(", ");
 }
 
+// A total of PayPal's figures counts only orders whose figure PayPal gave. When it gave none, the
+// total is unknown, not S$0.00 (S46 Render check, 2026-11-08: four paid orders, all without a fee,
+// read "Net after PayPal fees S$0.00"). PYUSD orders count as known: they carry no PayPal fee.
+function knownFigureCount(total: { paidCount: number; unknownFeeCount: number }): number {
+  return total.paidCount - total.unknownFeeCount;
+}
+
+export function knownTotalText(summary: SalesSummary, minor: number): string {
+  return knownFigureCount(summary) === 0 ? UNKNOWN : `${formatMoney(money(summary.currency, minor))} known`;
+}
+
 // S46: the "By payment method" table, one row per currency and method, from the server's summary.
 export type MethodRow = { id: string; method: string; paid: string; fees: string };
 
@@ -234,7 +245,7 @@ export function methodRows(summary: SalesSummary): MethodRow[] {
     const paid = formatMoney(money(summary.currency, total.paidMinor));
     if (total.rail === "pyusd") return { id: `${summary.currency}-pyusd`, method: "PYUSD, devnet test tokens", paid, fees: NO_PAYPAL_FEE };
     const fee = formatMoney(money(summary.currency, total.knownFeeMinor));
-    const fees = total.unknownFeeCount === 0 ? fee : `${fee} known, ${total.unknownFeeCount} unknown`;
+    const fees = total.unknownFeeCount === 0 ? fee : knownFigureCount(total) === 0 ? `${total.unknownFeeCount} unknown` : `${fee} known, ${total.unknownFeeCount} unknown`;
     return { id: `${summary.currency}-paypal`, method: "PayPal", paid, fees };
   });
 }
@@ -243,7 +254,7 @@ export function methodRows(summary: SalesSummary): MethodRow[] {
 export function deskTiles(summary: SalesSummary): { paid: string; net: string; note: string | null } {
   return {
     paid: formatMoney(money(summary.currency, summary.paidMinor)),
-    net: formatMoney(money(summary.currency, summary.knownNetMinor)),
+    net: knownFigureCount(summary) === 0 ? UNKNOWN : formatMoney(money(summary.currency, summary.knownNetMinor)),
     note: summary.unknownFeeCount === 0 ? null : `${summary.unknownFeeCount} paid ${summary.unknownFeeCount === 1 ? "order has" : "orders have"} no fee from PayPal, so ${summary.unknownFeeCount === 1 ? "its" : "their"} net is not counted.`,
   };
 }
@@ -264,7 +275,7 @@ export function ordersCsv(rows: readonly { time: string; order: MerchantOrder }[
     lines.push([time, order.lines.map((line) => `${line.quantity} × ${line.name}`).join(", "), orderTotal(order), feeText(order), netText(order), countryText(order), paymentChips(order)]);
   }
   for (const summary of summaries) {
-    lines.push([`Totals, paid only (${summary.currency})`, `${summary.paidCount} paid`, formatMoney(money(summary.currency, summary.paidMinor)), `${formatMoney(money(summary.currency, summary.knownFeeMinor))} known`, `${formatMoney(money(summary.currency, summary.knownNetMinor))} known`, "", ""]);
+    lines.push([`Totals, paid only (${summary.currency})`, `${summary.paidCount} paid`, formatMoney(money(summary.currency, summary.paidMinor)), knownTotalText(summary, summary.knownFeeMinor), knownTotalText(summary, summary.knownNetMinor), "", ""]);
   }
   return lines.map((line) => line.map(csvCell).join(",")).join("\r\n") + "\r\n";
 }
