@@ -550,7 +550,7 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 
 ### S46 Tourist Sales Desk, 2026-11-08
 
-**Status: in progress. First step recorded; AG Charts installed; migration `0033` written and the fee, net and country stored locally (not on Neon); no named test, desk screen, model call or spend yet. Branch `envoi/slice-46-sales-desk`, from `main` at `2e24893`.**
+**Status: in progress. Built locally with named tests 73 to 77 passing and each guard mutation-proven; not yet seen in a browser, not evaluated, not migrated on Neon, not merged or deployed. Branch `envoi/slice-46-sales-desk`, from `main` at `2e24893`.**
 
 - **Start, the user's words, 2026-11-08:** "Yes, start S46", answering whether S46 is started. It covers creating the local branch; local commits on it follow the S45 precedent. It covers no install, model call, Neon write, purchase, merge, push or deploy.
 - **Main before the branch, the user's words, 2026-11-08:** "Fast-forward and push", answering whether to fast-forward `main` to the S45 docs commit `2e24893` and push it. `main` was fast-forwarded from `1cadc1c` to `2e24893` and pushed; `git ls-remote origin refs/heads/main` returned `2e24893f9329b7c222729ac4a814fd997f871c94` [verified]. The branch was created from it and confirmed with `git branch --show-current`.
@@ -564,7 +564,28 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 - Migration `drizzle/0033_sales_desk.sql` (generated, then edited to add grants) adds nullable `payment_attempts.capture_fee_minor`, `capture_net_minor` and `payer_country` and the `merchant_digest` bucket, and grants `UPDATE` on the three columns to `envoi_web` and `envoi_maintenance`, the two roles that write verified capture evidence. Rollback: `drizzle/rollback/0033_sales_desk.down.sql`. Not applied to Neon.
 - `mapOrder` reads `paypal_fee` and `net_amount` only when readable, non-negative and in the capture's own currency, and the country only as a two-letter code; anything else is null. `saleFigures(order)` is read after `decideCaptureOutcome` at the three confirm sites (completion, crypto settlement, recovery) and changes no decision. The test fake returns no fee, net or country unless a test adds them.
 - Commits: `23d7ee3` stops the history scan's expected Git probe printing `fatal: Not a valid object name` into every test run (stderr captured, a real failure still throws); `32ecc4b` the migration and mapping. After both, `npm test` 116 files, 955 of 955, with no stray line; typecheck clean.
-- Not yet built: tests 73 to 77 and their mutations, the merchant orders row fields, `sales-summary` and its route, `sort` and `view`, the desk grid, pinned totals, CSV, by-method grid and chart, the evaluation.
+- `fab282a`, the desk: merchant order rows carry `captureFeeMinor`, `captureNetMinor` and `payerCountry` (paid only) and the shop's country; `src/domain/purchases/sales-summary.ts` and `GET /api/v1/merchant/outlets/[id]/sales-summary` (`from` and `to` inclusive Singapore dates, default the last seven days, at most 366) sum paid orders only, per currency and method, known fees and nets only, and count unknown fees; `OrderFilterSchema` and the model's strict schema gain `sort` and `view` from fixed lists (prompt `order-filter-prompt-2026-11-08`); `isOverseas` needs PayPal's payer country and one other than the shop's. The page reads "Your sales desk" with the Gate 1 lead, tiles per currency, PayPal fee, Net and PayPal account from columns, a pinned "Totals, paid only" row per currency from the summary, Export CSV (cells a spreadsheet would read as a formula are prefixed with an apostrophe), and `sales-chart.tsx` with the "By payment method" grid and an AG Charts bar chart of the same figures.
+- **Decision within the mockup [hypothesis]:** a paid PYUSD order shows "No PayPal fee" and counts its total as net, because its devnet test tokens went straight to the shop with no PayPal step; the mockup's own figures (S$96.40 paid, S$8.25 PayPal fees, S$88.15 net) do the same. The pinned row and the tiles cover the filter's dates, or the last seven days when none is set, not only the rows on screen, as Gate 3's call stack requires.
+- **Named tests [verified, local fixtures only]:** 73 `a missing fee shows as unknown, never zero` (unit: mapping, copy and the by-method table; integration: the orders route row and the summary), 74 `a missing fee never blocks Paid` (unit: the same decision with or without the breakdown; integration: completion reaches Paid with no figures), 75 `totals count paid orders only` (integration: a pending and an uncertain order add nothing), 76 `the model's answer can change only filters, sort and view` (unit), 77 `an order is called overseas only from PayPal's country` (unit), plus a CSV formula test and a 0033 grants test. Files: `tests/unit/sales-desk.test.ts`, `tests/integration/sales-desk.test.ts`. Full run after `fab282a`: 118 files, 970 of 970; typecheck and lint clean; `git diff --check` clean.
+- **Mutations [verified]:** each applied alone by a scratch script, the named test run, the file restored byte-identical (SHA-256 compared) and the test rerun; all 13 failed with an AssertionError and passed on rerun.
+
+| # | Guard and mutation | Test that failed |
+| --- | --- | --- |
+| M1 | `breakdownPart` returns 0 for a missing breakdown | 73 unit, "keeps a missing, unreadable, negative or other-currency figure null" |
+| M2 | orders row sends `captureFeeMinor ?? 0` | 73 integration |
+| M3 | summary counts no unknown fee (`filter (where false)`) | 73 integration |
+| M4 | `feeText` writes S$0.00 for a missing fee | 73 unit, "writes Unknown ..." |
+| M5 | `decideCaptureOutcome` treats a missing fee as uncertain | 74 unit |
+| M6 | summary drops `state = 'paid'` | 75 integration |
+| M7 | sort object not strict | 76 unit, "makes any other field or value no filter" |
+| M8 | view is any string | 76 unit, the same case |
+| M9 | `isOverseas` ignores the shop's own country | 77 unit (two cases) |
+| M10 | `isOverseas` ignores a null country | 77 unit (two cases) |
+| M11 | CSV formula guard removed | CSV unit |
+| M12 | payer country loses the older payer address fallback | 73 unit, country case |
+| M13 | 0033 maintenance grant moved to the web role | grants integration, `42501` |
+
+- **Not yet done:** the screen in a browser at 390 px and 1280 px, the evaluation pre-registration and run, `npm run build`, `scripts/scan-build.ts`, `tests/e2e/run-public-api.ts`, migration `0033` and the seed on Neon, merge, push and deploy.
 
 **First step, read-only, 2026-11-08 [verified].**
 Authority: "Yes, read it", 2026-11-08, answering whether to make one read-only sandbox order read and one capture read with Envoi's platform credentials.
