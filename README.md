@@ -33,12 +33,13 @@ AI here is only ever a reader and a drafter. No model sets a price, approves a p
   The draft never publishes itself; the merchant confirms every row.
 - **Ask your orders** at `/merchant/orders`: one sentence from the merchant becomes filters on the orders table.
   The model sees the sentence and the date, never an order, and it cannot change anything.
-- **Merchant copilot** at `/merchant/orders`, for one labeled demo shop only: the merchant asks about their own sandbox PayPal records in plain words.
+- **Merchant copilot** at `/merchant/orders`, for the labeled demo shops only (Judge Demo Cafe and Test Shop, which share one sandbox demo seller): the merchant asks about their own sandbox PayPal records in plain words.
   It reads Envoi's own orders of that shop and four PayPal reads (`get_order`, `list_transactions`, `list_disputes`, `get_dispute`) through PayPal's hosted MCP server over SSE, on the demo seller's own sandbox credentials.
   Every PayPal result is filtered to that shop and stripped of the payer's name, email and account id before the model sees it, and PayPal's write tools never reach the model.
   It can suggest a full refund of one paid order, but only the merchant's own tap on Confirm sends it, and the order stays recorded as Paid with the refund beside it.
-  It is on only when `PAYPAL_DEMO_SELLER_CLIENT_ID`, `PAYPAL_DEMO_SELLER_CLIENT_SECRET`, `PAYPAL_DEMO_SELLER_MERCHANT_ID`, `OPENAI_API_KEY` and `AI_MODEL` are all set, and only for the shop whose PayPal seller is that merchant id.
-  Built and tested against FIXTURE fakes; its pre-registered evaluation has not run and it is not yet deployed.
+  It is on only when `PAYPAL_DEMO_SELLER_CLIENT_ID`, `PAYPAL_DEMO_SELLER_CLIENT_SECRET`, `PAYPAL_DEMO_SELLER_MERCHANT_ID`, `OPENAI_API_KEY` and `AI_MODEL` are all set, and only for a shop with an approved enrollment whose PayPal seller is that merchant id.
+  Deployed 2026-11-08. Its pre-registered evaluation ran 7 of 8 questions once each on sandbox data, and all 7 passed with no invented amount; the eighth, an injected order note, could not be placed without a write and is covered by an automated test only.
+  On the deployed site one sandbox purchase of S$1.80 was refunded by the merchant's tap on a refund the copilot proposed (sandbox refund `99V07871LW516274N`). One run, not a measure of reliability.
 - **Bring your own assistant** at `/agents`: how to connect an outside MCP assistant with an operator-issued token, limited to 60 `/mcp` requests per 10 minutes and revocable.
   It gets the same reads and the same one-time link, and the person still approves the payment.
 - **Reference buyer agent** at `clients/buyer-agent/` (`npm run agent`): an agent on the person's own machine over the same MCP endpoint.
