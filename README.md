@@ -31,8 +31,13 @@ AI here is only ever a reader and a drafter. No model sets a price, approves a p
 - **Web menu import** at `/merchant/setup`: one hosted Kernel browser session reads the merchant's own public menu page and one model call drafts an editable table.
   A price is filled only when the page prints it as text with the same digits.
   The draft never publishes itself; the merchant confirms every row.
-- **Ask your orders** at `/merchant/orders`: one sentence from the merchant becomes filters on the orders table.
+- **Your sales desk** at `/merchant/orders`: each paid PayPal order shows PayPal's fee, the net and the country of the payer's PayPal account, read from the order PayPal returns when Envoi verifies the capture.
+  A fee PayPal did not give reads Unknown, never zero, and an order is called overseas only from that PayPal country.
+  Tiles, a pinned "Totals, paid only" row, a by-method table and an AG Charts bar chart are computed on the server over paid orders only, leaving out orders with a completed refund, and Export CSV saves the table.
+  Orders paid before 2026-11-08 carry no fee and read Unknown.
+- **Ask your orders** at `/merchant/orders`: one sentence from the merchant becomes filters, a sort and a view on the orders table.
   The model sees the sentence and the date, never an order, and it cannot change anything.
+  Its sort and view answered 16 of 16 pre-registered sentences as registered on `gpt-6-sol` on 2026-11-08: one run of fixed English sentences, not a measure of accuracy.
 - **Merchant copilot** at `/merchant/orders`, for the labeled demo shops only (Judge Demo Cafe and Test Shop, which share one sandbox demo seller): the merchant asks about their own sandbox PayPal records in plain words.
   It reads Envoi's own orders of that shop and four PayPal reads (`get_order`, `list_transactions`, `list_disputes`, `get_dispute`) through PayPal's hosted MCP server over SSE, on the demo seller's own sandbox credentials.
   Every PayPal result is filtered to that shop and stripped of the payer's name, email and account id before the model sees it, and PayPal's write tools never reach the model.
@@ -85,6 +90,7 @@ The app shows these labels on every screen. Pending, failed or uncertain payment
 | MCP SDK | `@modelcontextprotocol/sdk` 1.32.1: Envoi's own `/mcp` server, and the client the assistant and the reference agent use | Each tool answer is validated against the server's own output schema |
 | Better Auth | Merchant sign-in and the buyer's anonymous session | There is no public merchant sign-up; the operator creates accounts |
 | AG Grid Community 36.2.0 | The merchant's menu draft grid and orders table | Community edition only; no paid module and no AG Studio |
+| AG Charts Community 14.2.0 | The sales desk's bar chart of paid sales and known PayPal fees by payment method | Community edition only; it draws the server's totals and computes none |
 | `barcode-detector` and `zxing-wasm` | SGQR sticker decode in the merchant's own browser | The sticker is never stored and never a payment destination |
 | GitHub Actions | CI on every push, and the maintenance runner on a schedule | The runner reconciles and closes only; it can never capture or send a payment |
 
