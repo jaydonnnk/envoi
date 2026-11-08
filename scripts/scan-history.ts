@@ -158,8 +158,10 @@ export function scanText(object: string, path: string, text: string, needles: Re
   return findings;
 }
 
+// stderr is captured, not inherited: the commit probe below expects "fatal" for a ref missing
+// locally, and a real failure still throws with Git's message in the error.
 const git = (repo: string, args: string[], input?: string) =>
-  execFileSync("git", ["-C", repo, ...args], { input, maxBuffer: 1024 * 1024 * 1024 });
+  execFileSync("git", ["-C", repo, ...args], { input, maxBuffer: 1024 * 1024 * 1024, stdio: ["pipe", "pipe", "pipe"] });
 
 export function scanHistory(repo: string, options: { remote?: string; env?: boolean } = {}): HistoryScan {
   const needles = options.env === false ? new Map<string, string>() : envNeedles(repo);
