@@ -647,6 +647,12 @@ The pre-registration was committed as `d865c7e` at 2026-11-08T18:21:13+08:00, be
 - **Spend:** 9,489 input tokens (none cached) and 911 output tokens, about US$0.028 at US$2 and US$10 per million [vendor claim], against the US$0.50 limit. The OpenAI meter reading was not given, so the spend against the US$5 cap is [unknown]; the actual invoice is [unknown].
 - **Claim boundary:** these 16 fixed English sentences, one run, `gpt-6-sol`, a fixed date. No accuracy claim beyond them, and nothing about other languages or the real orders of any shop.
 
+**Release authorizations, the user's words, 2026-11-08:** "Approve migration 0033"; "No seed, one sandbox buy", answering whether to write a labeled seed or to show a known fee through one sandbox purchase at Judge Demo Cafe (FIXTURE) after the deploy; "Approve merge, push, deploy", for `git merge --ff-only` into `main`, the push and Render's auto-deploy, after the fresh checks pass.
+
+- **Fresh checks before the merge [verified], 2026-11-08, at `f50dc29`:** typecheck and lint clean; `npm test` 118 files, 971 of 971; `npm run build` passed; `scripts/scan-build.ts` passed; `tests/e2e/run-public-api.ts` PASS (local FIXTURE only); `gate4_check.py` PASS; `git diff --check` clean.
+- **Migration 0033 on Neon [verified], 2026-11-08T10:28:45Z:** project "Envoi", branch `production`, by `npm run db:migrate`. Migrations went from 33 to 34. Purchases 87, attempts 49, outlets 8, paid 32, purchase total sum 33805, limiter rows 18 and refunds 1 are identical before and after. The three columns exist and are null on all 49 attempts; `envoi_web` and `envoi_maintenance` hold `UPDATE` on each; the bucket check allows `merchant_digest`.
+- **Seed:** none written, by the user's choice. Older orders read Unknown, as Gate 2 says.
+
 ### S45 Merchant copilot, 2026-11-07
 
 **Status: deployed 2026-11-08 at `3a7e0b7`; evaluation run (7 of 8 questions, all passing, E7 by test 69 only); one sandbox refund confirmed on Render. The orders table refresh fix is live at `1cadc1c` (CI run 42462358791 success, Render Live), not yet seen rendered after a refund. Branch `envoi/slice-45-paypal-mcp-copilot`, from `main` at `19757f7`.**
