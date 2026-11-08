@@ -1,6 +1,6 @@
 # Envoi evidence pack
 
-Status: extended 2026-11-08 for S48, built and checked locally, not yet deployed. Extended 2026-11-08 for S46, deployed and evaluated, with one PayPal fee shown on the deployed site. Extended 2026-11-08 for S45, deployed, evaluated and with one sandbox refund on the deployed site. Extended 2026-11-07 for S44. Extended 2026-11-05 for S41. Drafted 2026-10-21, marked complete 2026-10-29 when S15 closed, and extended for S19, S20, S21, the S22 round 4 outcome, S24, the removal of the usability study, S26 to S31 and S41. The video is the user's; anything it says must already be listed here.
+Status: extended 2026-11-08 for S48, deployed at `c3fb8c0` and checked on Render. Extended 2026-11-08 for S46, deployed and evaluated, with one PayPal fee shown on the deployed site. Extended 2026-11-08 for S45, deployed, evaluated and with one sandbox refund on the deployed site. Extended 2026-11-07 for S44. Extended 2026-11-05 for S41. Drafted 2026-10-21, marked complete 2026-10-29 when S15 closed, and extended for S19, S20, S21, the S22 round 4 outcome, S24, the removal of the usability study, S26 to S31 and S41. The video is the user's; anything it says must already be listed here.
 Every claim made in the README, the video or the submission is listed here with its label and the record that supports it.
 A claim with no record here is not made.
 
@@ -122,7 +122,7 @@ What exists instead is a set of single observed end-to-end runs, each listed abo
 | The card shows only for a no-match scan, and the merchant sees the count as scans | [verified] locally, test 83 and a browser check at 375 px and 1280 px on FIXTURE data | [S48](00-status.md#s48-stall-demand-2026-11-08) |
 | The Melayu and தமிழ் card text is a reviewed translation | **not claimed**: both are labeled "Draft translation" | [S48](00-status.md#s48-stall-demand-2026-11-08) |
 | A scan count measures demand, sales or visitors | **not claimed**: counts can be inflated within the limit, so they read "scans" | [S48](00-status.md#s48-stall-demand-2026-11-08) |
-| S48 is live on the deployed site | [unknown] until migration `0034`, the merge and the deploy are done | [S48](00-status.md#s48-stall-demand-2026-11-08) |
+| S48 is live on the deployed site | [verified] at `c3fb8c0` on 2026-11-08: one FIXTURE sticker showed the card at 390 px and 1280 px and wrote one count row | [S48](00-status.md#s48-stall-demand-2026-11-08) |
 
 ## Tourist Sales Desk (S46)
 
