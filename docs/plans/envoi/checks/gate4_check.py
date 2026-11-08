@@ -435,7 +435,8 @@ for f, text in current.items():
 # 2026-11-07: S44 test 64 and fee constants, re-approved by the user ("Yes to gate 1 and gate 3 changes as well").
 # 2026-11-07: S45 first check, re-approved by the user ("i approve both gates"); d4161092...4e080592 was the pin before it.
 # 2026-11-08: S45 lost refund response, re-approved by the user ("Approve Gate 3"); 7c335121...95fdf4aa was the pin before it.
-G3_REOPENING_SHA256 = "e97fc24b2696c7d32acd755b85d73cf642250b354e45a4b77abfd15c9e279652"
+# 2026-11-08: S48 count at enrollment, re-approved by the user ("Approve Gate 3"); e97fc24b...5e279652 was the pin before it.
+G3_REOPENING_SHA256 = "bec86cdd99b71db74f156a4ba6c8658ba1c882632d96a1b486a3337a6a72c903"
 # 02-architecture.md may likewise equal its continuation amendment text, re-approved by the user on 2026-10-25
 # (bc504e10...d0e47a9f was the shop QR and order archive text, re-approved on 2026-10-24,
 # 28d54654...45561154 the Phantom landing text of 2026-10-18, 938d0a99...f3bf30a6 the English-only text of 2026-10-15).

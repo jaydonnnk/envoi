@@ -3139,6 +3139,7 @@ unpaid_closed -> uncertain   (reason crypto_read_unverified)
 
 ## Reopening 2026-11-07: fourth build plan
 
+**Reopened 2026-11-08 for S48's count at enrollment ("Reopen, add 2 files") and re-approved 2026-11-08 ("Approve Gate 3").** The S48 file map row adds `src/domain/outlets/merchant.ts` and `src/app/merchant/setup/sgqr-sticker.tsx`, and the "Stall scan" call stack gains its enrollment read; see the [S48 record](00-status.md#s48-stall-demand-2026-11-08).
 **Reopened 2026-11-08 for S45's lost refund response ("Refund route resends") and re-approved 2026-11-08 ("Approve Gate 3").** The refund call stack's last sentence changes; see the [S45 record](00-status.md#s45-merchant-copilot-2026-11-07).
 **Reopened again 2026-11-07 for S45's first check ("Yes to both", "Demo shop only") and re-approved 2026-11-07 ("i approve both gates").** See the [S45 record](00-status.md#s45-merchant-copilot-2026-11-07).
 
@@ -3169,6 +3170,7 @@ Approval authorizes no code change, install, migration, model call, spend, merge
 | `src/app/merchant/orders/orders-grid.tsx`, `orders-view.tsx`, `sales-chart.tsx` | S46 | Columns, pinned totals, CSV, second grid and chart |
 | `src/domain/purchases/digest.ts`, `src/integrations/ai/digest.ts`, its route | S47 | Figures, template call and substitution |
 | `src/domain/sgqr/demand.ts`, `src/app/api/v1/outlets/resolve-sgqr/route.ts`, `src/app/buy/scan/scan-sticker.tsx` | S48 | Count and card |
+| `src/domain/outlets/merchant.ts`, `src/app/merchant/setup/sgqr-sticker.tsx` | S48 | Added 2026-11-08: `listIdentifiers` reads `scanCount` for each submitted sticker, and setup shows it as "scans" |
 | `src/app/merchant/setup/poster/page.tsx` | S49 | Printable poster |
 | `render.yaml`, `workflows/tourist-ready.ts`, `src/domain/menu/prepare.ts` | S50 | Plan, flow and trigger |
 | `src/lib/auth.ts`, `src/domain/outlets/merchant.ts`, `src/domain/outlets/destination.ts`, `src/app/merchant/setup/*` | S43 | Sign-up, pending shop, seller request and waiting state |
@@ -3251,7 +3253,7 @@ function triggerTouristReady(input: { outletId: string; revisionId: string }, tr
 
 **Digest.** `digest/route.ts`, then membership, enrollment, `admit("merchant_digest")`, `salesSummary`. An empty week returns no summary and makes no call. Otherwise the model call, then `fillDigest`.
 
-**Stall scan.** `resolve-sgqr/route.ts`, then `resolveSgqr`, and only on `no_match` with an identifier, `stickerHash`, `admit("sticker_scan")` and `recordNoMatchScan`. A failure to count changes nothing the buyer sees.
+**Stall scan.** `resolve-sgqr/route.ts`, then `resolveSgqr`, and only on `no_match` with an identifier, `stickerHash`, `admit("sticker_scan")` and `recordNoMatchScan`. A failure to count changes nothing the buyer sees. At enrollment, `listIdentifiers` computes `stickerHash` for each submitted identifier and reads `scanCount`; with `STICKER_HASH_KEY` unset it reads no count and shows none.
 
 **Sign-up.** `POST /api/auth/sign-up/email`, then a `hooks.before` guard checking `MERCHANT_SIGNUP_ENABLED` and `admit("merchant_signup")`, then Better Auth, `createPendingOutlet`, `requestSeller`, and later the operator's `assign-paypal-destination` and `approve-enrollment`, `acceptPayPalConnection` and `publishOutlet`, all unchanged.
 
