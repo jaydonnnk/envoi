@@ -149,7 +149,8 @@ export function suggestionModel(): SuggestionModel | null {
 
 // The menu explained and translated (S29) is on only when the key and the evaluated
 // AI_MENU_TRANSLATION_MODEL are both configured.
-export function menuTranslator(env: WebEnv = webEnv()): MenuTranslator | null {
+// Takes only the two names it reads, so the Tourist-ready Workflow (S50) can build it from its own env.
+export function menuTranslator(env: Pick<WebEnv, "OPENAI_API_KEY" | "AI_MENU_TRANSLATION_MODEL"> = webEnv()): MenuTranslator | null {
   if (!env.OPENAI_API_KEY || !env.AI_MENU_TRANSLATION_MODEL) return null;
   const { OPENAI_API_KEY: apiKey, AI_MENU_TRANSLATION_MODEL: model } = env;
   return {

@@ -67,6 +67,11 @@ const webSchema = z.object({
   // sticker's scheme and identifier; it lives only in the environment, so a stored hash cannot be
   // matched to a public UEN list without it. Unset means no scan is counted and setup shows no count.
   STICKER_HASH_KEY: z.string().min(32, "must be at least 32 characters").optional(),
+  // Tourist-ready Workflow (S50, Gate 3 S50 amendment). After a publish commits, the web service
+  // starts one Render flow run with these; either unset means no run is started and buyers get
+  // on-demand translation as before. The key is server only.
+  RENDER_API_KEY: z.string().min(1).optional(),
+  RENDER_WORKFLOW_SLUG: z.string().regex(/^[a-z0-9][a-z0-9-]*$/, "must be a Render workflow slug").optional(),
   // PYUSD on Solana devnet (S16). These are the rail's only two settings: the cluster, genesis hash,
   // mint, token program and decimals are reviewed code constants in src/domain/pyusd/constants.ts,
   // and any other PYUSD_ or SOLANA_ name refuses to boot. The RPC URL is checked against the pinned
@@ -104,11 +109,20 @@ const maintenanceSchema = z.object({
   SOLANA_RPC_URL: z.url().optional(),
 });
 const testSchema = z.object({ TEST_DATABASE_URL: postgresUrl });
+// The Tourist-ready Workflow (S50): the web role's URL (Gate 3 least confident decision 9) and the
+// translation model. It never reads the auth secret, PayPal credentials or the Render key.
+const workflowSchema = z.object({
+  DATABASE_URL: postgresUrl,
+  OPENAI_API_KEY: z.string().min(1),
+  AI_MENU_TRANSLATION_MODEL: z.string().min(1),
+  LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
+});
 
 export type WebEnv = z.infer<typeof webSchema>;
 export type MigrationEnv = z.infer<typeof migrationSchema>;
 export type MaintenanceEnv = z.infer<typeof maintenanceSchema>;
 export type TestEnv = z.infer<typeof testSchema>;
+export type WorkflowEnv = z.infer<typeof workflowSchema>;
 
 // Every name this module reads, once each: the maintenance runner shares some with the web app.
 // .env.example must list exactly these.
@@ -118,6 +132,7 @@ export const ENV_NAMES = [
     ...Object.keys(migrationSchema.shape),
     ...Object.keys(maintenanceSchema.shape),
     ...Object.keys(testSchema.shape),
+    ...Object.keys(workflowSchema.shape),
   ]),
 ] as const;
 
@@ -155,6 +170,10 @@ export function maintenanceEnv(source: NodeJS.ProcessEnv = process.env): Mainten
 
 export function testEnv(source: NodeJS.ProcessEnv = process.env): TestEnv {
   return parse(testSchema, source, "test");
+}
+
+export function workflowEnv(source: NodeJS.ProcessEnv = process.env): WorkflowEnv {
+  return parse(workflowSchema, source, "workflow");
 }
 
 // Command-line entrypoints are not started by Next.js, so they load .env.local themselves.

@@ -27,6 +27,10 @@ function withDatabase(url: string, database: string, user?: string): string {
 
 export async function createTestDatabase(label: string, options: { migrate?: boolean } = {}): Promise<TestDatabase> {
   if (!process.env.TEST_DATABASE_URL) loadLocalEnvFile();
+  // S50: a real Render key in .env.local must never start a Workflow run from a test. A test that
+  // needs the trigger sets FIXTURE values and fakes api.render.com at the fetch boundary.
+  delete process.env.RENDER_API_KEY;
+  delete process.env.RENDER_WORKFLOW_SLUG;
   const baseUrl = testEnv().TEST_DATABASE_URL;
   const name = `envoi_t_${label}_${randomBytes(4).toString("hex")}`;
 

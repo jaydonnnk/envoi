@@ -1,4 +1,4 @@
-# Render Free web service. NOT applied as a Blueprint (Blueprints are paid on
+# Render web service on the 0.5c-512mb compute plan (once called Starter; S50, 2026-11-09). NOT applied as a Blueprint (Blueprints are paid on
 # this account): the service is created by hand in the dashboard with exactly these settings, and
 # this file is the record to keep them in sync with. Secret values are entered in the dashboard and
 # never committed. Migrations and operator commands run locally, not on Render.
@@ -6,7 +6,8 @@ services:
   - type: web
     name: envoi
     runtime: node
-    plan: free
+    # 0.5c-512mb, $7 a month [vendor claim]: it does not sleep, unlike Free (S50).
+    plan: 0.5c-512mb
     # Next to Neon's aws-us-east-2, so database round trips stay in-region (R12 measures the rest).
     region: ohio
     branch: main
@@ -73,6 +74,12 @@ services:
       # characters, entered by hand. Unset means no scan is counted.
       - key: STICKER_HASH_KEY
         sync: false
+      # Tourist-ready Workflow (S50): after a publish, start one run of the workflow below. Both unset
+      # means no run is started. The key is server only, entered by hand.
+      - key: RENDER_API_KEY
+        sync: false
+      - key: RENDER_WORKFLOW_SLUG
+        sync: false
       # Menu photo import (S11), shipped closed. AI_MENU_MODEL needs a reviewed bounds entry in
       # MENU_SPEND_POLICY, or every import is refused. The kill switch is "true" or "false", entered
       # by hand; unset is false.
@@ -94,4 +101,22 @@ services:
       - key: SOLANA_RPC_URL
         sync: false
       - key: PYUSD_ENABLED
+        sync: false
+  # Tourist-ready Workflow (S50): prepares the five menu translations after a publish. Created by hand
+  # in the dashboard; compute is set per flow in code (flex), so no plan here. It reads the web role's
+  # URL (Gate 3 least confident decision 9) and the translation model, never the auth secret, PayPal
+  # credentials or the Render key.
+  - type: workflow
+    name: envoi-tourist-ready
+    runtime: node
+    region: ohio
+    branch: main
+    buildCommand: npm ci
+    startCommand: npx tsx workflows/tourist-ready.ts
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: AI_MENU_TRANSLATION_MODEL
         sync: false

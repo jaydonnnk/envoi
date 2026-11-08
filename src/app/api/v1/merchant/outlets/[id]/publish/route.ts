@@ -1,7 +1,9 @@
 import { getMenuDraft } from "@/domain/menu/draft";
+import { triggerTouristReady } from "@/domain/menu/prepare";
 import { draftJson } from "@/domain/menu/serialize";
 import { describeOutlet } from "@/domain/outlets/merchant";
 import { publishOutlet } from "@/domain/outlets/publish";
+import { touristReadyTrigger } from "@/integrations/render/workflow";
 import { getAuth } from "@/lib/auth";
 import { isOutletMember, requireOutletMembership } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
@@ -30,6 +32,10 @@ export async function POST(request: Request, { params }: Params): Promise<Respon
     now: new Date(),
   });
   if (isAppError(published)) return httpErr(published);
+  // S50: prepare the tourist languages. Waits only for the start request, at most 3 seconds; a
+  // failure is logged and the publish answers as before.
+  const trigger = touristReadyTrigger();
+  if (trigger) await triggerTouristReady({ outletId: principal.outletId, revisionId: published.revisionId }, trigger);
   const draft = await getMenuDraft(webDb(), principal.outletId);
   return httpOk({ outlet: await describeOutlet(webDb(), principal.outletId), draft: draft ? draftJson(draft) : null });
 }
