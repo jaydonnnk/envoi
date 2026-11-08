@@ -3343,3 +3343,75 @@ Numbers continue from test 61. Each guard gets its own mutation with a distinct 
 The S49 amendment also checks no session, a buyer session, no membership, another member's selected outlet and an unpublished outlet: none renders the selected shop's printable sheet. An approved member's published outlet renders its exact name. The handoff sentence renders on the existing stall card. No new dependency or migration is proposed.
 
 Each new guard gets its own mutation and AssertionError proof, byte-identical restoration and passing rerun. Test 86 independently mutates the list exclusion, direct menu read and shop-context read. The real browser at 390 px and 1280 px checks the optional "Print poster" link, exact shop name, scanner address, existing-SGQR steps, no new QR, enabled Print and print-only layout. Absence checks self-test their scanner by injecting representative img, svg and canvas needles into the actual serialized poster markup. An output PDF must contain one sheet with the shop name, instructions and test label; application chrome and buttons must be absent. The previous QR identity, non-payment-code notice and QR-readiness proofs are retired only for this changed poster, with their evidence preserved as historical. Revised tests and mutations get separate evidence and must not overwrite those old results. These are planned checks, not passing evidence.
+
+### S47 amendment, drafted 2026-11-08
+
+**Status: drafted 2026-11-08 and approved 2026-11-08 ("Approval to spend both us 5 cap and gate 3 approval").** It fills gaps in the approved S47 rows above and changes no Gate 1 or Gate 2 decision.
+The approved file row, `fillDigest` signature and tests 78 and 79 stay; this adds what they leave open, and its call stack replaces the "Digest" call stack above.
+Approval authorizes local S47 application work. The same words authorize S47 OpenAI spend up to US$5; no migration, install, commit, merge, push or deploy.
+
+**Gaps found [verified 2026-11-08 against the gates and `main` at `8b5f001`].** The file map names no screen file; `DigestFigures` is not defined; the request, language, week, limiter, enrollment check, several currencies, unknown fees and the refusal display are not stated.
+
+#### Files added to the S47 row
+
+| File | Why |
+| --- | --- |
+| `src/app/merchant/orders/digest-card.tsx` | The summary card: language choice, one button, the AI label, the filled text or a code-written notice |
+| `src/app/merchant/orders/orders-view.tsx`, `src/app/merchant/orders/page.tsx` | Mount the card per shop, only while the digest model is configured |
+| `src/lib/ratelimit.ts` | `DIGEST_LIMITS`; the `merchant_digest` bucket already exists from `0033` |
+| `src/app/globals.css` | Card styles, if the existing card classes are not enough |
+| `tests/unit/digest.test.ts`, `tests/integration/digest-route.test.ts` | Tests 78 and 79 and the guards below |
+
+No migration, dependency, environment name or table is added. `AI_MODEL` and `OPENAI_API_KEY` are reused.
+
+#### Types and signatures
+
+```ts
+// src/domain/purchases/digest.ts
+const DIGEST_LANGUAGES: readonly ["en", "zh", "ms", "ta"]; // English, 中文, Melayu, தமிழ், the S42 stall labels
+type DigestLanguage = (typeof DIGEST_LANGUAGES)[number];
+type DigestPlaceholder = (typeof DIGEST_PLACEHOLDERS)[number];
+// Code-formatted strings. A null figure is not offered to the model, and its placeholder in a template counts as unknown.
+type DigestFigures = { paid_total: string; paid_count: string; net_total: string | null; fee_total: string | null };
+function digestFigures(summary: SalesSummary, offerFees: boolean): DigestFigures;
+function offeredPlaceholders(summaries: readonly SalesSummary[]): DigestPlaceholder[];
+function hasApprovedEnrollment(db: Pick<Db, "select">, outletId: string): Promise<boolean>;
+type DigestModel = (input: { language: DigestLanguage; placeholders: readonly DigestPlaceholder[] }) => Promise<string | null>;
+
+// src/integrations/ai/digest.ts
+function createDigestModel(config: { apiKey: string; model: string; fetch?: typeof globalThis.fetch }): DigestModel;
+function digestModel(env?: WebEnv): DigestModel | null; // null unless OPENAI_API_KEY and AI_MODEL are set
+```
+
+#### Decisions
+
+1. **Request.** `POST /api/v1/merchant/outlets/[id]/digest` takes `{ "language": "en" | "zh" | "ms" | "ta" }`, strict, in a bounded body. It runs only when the merchant presses the button, never on page load, so a page view spends nothing.
+2. **Week.** The same seven Singapore dates as the S46 tiles' default: today and the six days before, `from` inclusive and the day after today exclusive. The browser cannot choose the range. The card reads "This week, written by AI", as the tiles say "this week" for the same range.
+3. **Enrollment.** After membership, an outlet without an `approved` enrollment answers `not_found` and spends nothing. Then `admit("merchant_digest")` with `DIGEST_LIMITS` [hypothesis: starting values]: 10 per outlet in 10 minutes and 60 across all outlets in an hour, like the order filter.
+4. **Empty week.** When `salesSummary` returns no currency, the route answers `{ "digest": { "kind": "empty" } }` with no model call, and the card shows the code-written line "No paid orders this week, so there is nothing to summarize." That line is not labeled AI.
+5. **One call, several currencies.** One model call writes one template. The server fills it once per currency in `salesSummary`'s order, as separate paragraphs. SGD and USD are never added together.
+6. **Unknown fees.** `fee_total` and `net_total` are offered only when every currency's `unknownFeeCount` is 0. Otherwise the model is told only `paid_total` and `paid_count`, and a template using a fee or net placeholder is refused as `unknown_placeholder`. So the summary never calls a partly known net "what reached you" and never turns unknown into zero. The tiles above keep showing the known net with their note.
+7. **What the model receives.** The language and the list of offered placeholder names only. No figure, order, shop name, date or merchant text. Tool-free, `store: false`, a strict schema `{ template: string }` of at most 600 characters, no retries, 1,000 output tokens and 20 seconds. A failure or a schema miss is "no summary".
+8. **Refusal rules in `fillDigest`, applied to the template before any substitution.** `digit`: any Unicode number character (`\p{N}`, which covers ASCII and Tamil digits), any Chinese numeral character (〇零一二两三四五六七八九十百千万亿), or a number word as a whole word in English, Malay or Tamil from a fixed list in code. `unknown_placeholder`: any `{{name}}` not in `DIGEST_PLACEHOLDERS`, any placeholder whose figure is null, or any stray `{{` or `}}`. Substitution is one pass, so a substituted value is never scanned again.
+9. **Refused display.** The route answers `{ "digest": { "kind": "refused" } }` with no text, and logs the reason, the model and the prompt version, never the template. The card shows the code-written line "Envoi did not show this summary because it held a figure Envoi did not compute. The totals above are unchanged." The merchant may press the button again; each press is a new admitted call.
+10. **Shown text.** The filled paragraphs render as plain React text, never HTML. The card labels them "Written by AI" and says "The figures come from Envoi's records, not the AI." No digest is stored.
+11. **Off.** With no model configured, the page mounts no card and the route answers `provider_unreachable`, as the order filter does.
+
+#### Call stack, replacing the "Digest" call stack above
+
+`digest/route.ts`, then `requireOutletMembership`, `hasApprovedEnrollment`, the bounded body, `digestModel`, `admit("merchant_digest", outletId, DIGEST_LIMITS)`, `salesSummary` over the week. No currency returns `empty` with no call. Otherwise `offeredPlaceholders`, one `DigestModel` call, then `fillDigest` once per currency with `digestFigures`; any refusal refuses the whole digest.
+
+#### Tests and guards
+
+Tests 78 and 79 keep their names and assertions.
+
+- **78, unit:** ASCII digits, a Tamil digit, a Chinese numeral, an English, Malay and Tamil number word, an unknown name, a null figure's placeholder and a stray brace each refuse with the right reason; a clean template in each language fills exactly; a value holding `{{paid_total}}` is not substituted twice.
+- **78, integration:** a faked model answering a template with a digit gives `refused` and no text; a fee placeholder while one fee is unknown gives `refused`.
+- **79, integration:** a week with no paid order makes zero faked-model calls and answers `empty`; a paid order outside the seven dates or one with a completed refund also leaves it empty.
+- **Guards, integration:** another merchant, a buyer and no session are refused before the model; an outlet without an approved enrollment makes no call; the limiter stops the eleventh call; the model's input holds no figure, by a planted needle amount and order item that must not appear in the captured request body; SGD and USD fill as two paragraphs.
+
+Each guard gets its own mutation with an AssertionError, byte-identical restoration and a passing rerun. Provider fakes stay at the fetch boundary and are labeled FIXTURE.
+
+#### Evaluation, to be pre-registered before any paid call
+
+A fixed list of cases across the four languages and the fee states above, each sent once through the real call and the real `fillDigest`. Thresholds: zero invented figures on screen and zero refused outputs reaching a screen. A refusal is counted and reported, not hidden. Its exact cases, scorer, model, spend limit and stop rule are written into `00-status.md` and committed before the first call; spend needs its own authorization.
