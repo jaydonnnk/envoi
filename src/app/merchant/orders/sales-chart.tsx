@@ -15,12 +15,13 @@ import { methodRows, type MethodRow } from "./order-copy";
 ModuleRegistry.registerModules([ClientSideRowModelModule]);
 ChartModules.registerModules([BarSeriesModule, CategoryAxisModule, NumberAxisModule, LegendModule]);
 
-const theme = themeQuartz.withParams({ accentColor: "#145deb", foregroundColor: "#14293d", borderColor: "#c9d7e6", headerBackgroundColor: "#f1f6fc", fontFamily: "inherit", fontSize: 15 });
+const theme = themeQuartz.withParams({ accentColor: "#145deb", foregroundColor: "#14293d", borderColor: "#c9d7e6", headerBackgroundColor: "#f1f6fc", fontFamily: "inherit", fontSize: 15, cellHorizontalPadding: 10 });
 
 const columns: ColDef<MethodRow>[] = [
-  { colId: "method", headerName: "Method", field: "method", flex: 2, minWidth: 160 },
-  { colId: "paid", headerName: "Paid", field: "paid", flex: 1, minWidth: 100, cellClass: "money" },
-  { colId: "fees", headerName: "Fees", field: "fees", flex: 1, minWidth: 130, cellClass: "money" },
+  // Fits a 390 px phone: the method wraps, and fees keep room for "S$0.95 known, 1 unknown".
+  { colId: "method", headerName: "Method", field: "method", flex: 2, minWidth: 90, wrapText: true, autoHeight: true },
+  { colId: "paid", headerName: "Paid", field: "paid", flex: 1, minWidth: 85, cellClass: "money" },
+  { colId: "fees", headerName: "Fees", field: "fees", flex: 2, minWidth: 140, wrapText: true, autoHeight: true, cellClass: "cell-wrapped" },
 ];
 
 // Bars in the currency's major unit, as the axis reads them. Only known fees are drawn.
@@ -35,8 +36,8 @@ function chartOptions(currency: Currency, byRail: readonly RailTotal[]): AgCarte
     height: 240,
     background: { visible: false },
     series: [
-      { type: "bar", xKey: "method", yKey: "paid", yName: `Paid (${currency})`, fill: "#145deb" },
-      { type: "bar", xKey: "method", yKey: "fee", yName: `Known PayPal fees (${currency})`, fill: "#90500c" },
+      { type: "bar", xKey: "method", yKey: "paid", yName: "Paid", fill: "#145deb" },
+      { type: "bar", xKey: "method", yKey: "fee", yName: "Known PayPal fees", fill: "#90500c" },
     ],
     axes: { x: { type: "category", position: "bottom" }, y: { type: "number", position: "left", label: { formatter: ({ value }) => formatMoney(money(currency, Math.round(Number(value) * 100))) } } },
     legend: { position: "bottom" },
@@ -49,11 +50,12 @@ export function SalesByMethod({ summaries }: { summaries: readonly SalesSummary[
   return (
     <div className="card orders-card">
       <h3>By payment method</h3>
-      <div className="orders-grid">
+      <div className="orders-grid method-grid">
         <AgGridReact<MethodRow> theme={theme} rowData={rows} columnDefs={columns} getRowId={(p) => p.data.id} domLayout="autoHeight" suppressMovableColumns defaultColDef={{ sortable: false, resizable: true }} />
       </div>
       {summaries.map((summary) => (
         <figure className="sales-chart" key={summary.currency} aria-label={`Paid and known PayPal fees by payment method, ${summary.currency}`}>
+          {summaries.length > 1 && <figcaption className="muted">{summary.currency}</figcaption>}
           <AgCharts options={chartOptions(summary.currency, summary.byRail)} />
         </figure>
       ))}

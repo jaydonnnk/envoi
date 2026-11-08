@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { SINGAPORE_TIME } from "@/app/purchase-copy";
 import { applyOrderFilter, type OrderFilter } from "@/domain/purchases/order-filter";
 import type { MerchantOrder, OutletOrders } from "@/domain/purchases/orders";
@@ -219,8 +219,6 @@ export function OrdersView({ initial, askEnabled, copilot = false }: { initial: 
   const [filter, setFilter] = useState<OrderFilter | null>(null);
   const [nothingChosen, setNothingChosen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [acknowledgingId, setAcknowledgingId] = useState<string | null>(null);
-  const [acknowledgeError, setAcknowledgeError] = useState<string | null>(null);
   const recordRef = useRef<HTMLDivElement>(null);
   const outletId = data.outlet.id;
   const [summary, setSummary] = useState<SummaryAnswer | null>(null);
@@ -288,17 +286,6 @@ export function OrdersView({ initial, askEnabled, copilot = false }: { initial: 
       archivedCount: current.archivedCount + (changed ? 1 : 0),
     }));
 
-  const acknowledgeRow = useCallback(async (order: MerchantOrder) => {
-    setAcknowledgingId(order.id);
-    setAcknowledgeError(null);
-    const result = await postAcknowledge(order.id);
-    setAcknowledgingId(null);
-    if (result.ok && result.data) {
-      const updated = result.data.order;
-      setData((current) => ({ ...current, orders: current.orders.map((each) => (each.id === updated.id ? updated : each)) }));
-    } else setAcknowledgeError(result.error?.message ?? ACKNOWLEDGE_FAILED);
-  }, []);
-
   const selectRow = useCallback((order: MerchantOrder) => setSelectedId(order.id), []);
 
   async function ask(event: FormEvent) {
@@ -351,13 +338,17 @@ export function OrdersView({ initial, askEnabled, copilot = false }: { initial: 
             const tiles = deskTiles(each);
             const label = summaryFrom || summaryTo ? `${summary.from} to ${summary.to}` : "this week";
             return (
-              <div className="card desk-tile" key={each.currency}>
-                <p className="muted">Paid {label}</p>
-                <p className="total money">{tiles.paid}</p>
-                <p className="muted">Net after PayPal fees</p>
-                <p className="total money">{tiles.net}</p>
-                {tiles.note && <p className="muted fine">{tiles.note}</p>}
-              </div>
+              <Fragment key={each.currency}>
+                <div className="card desk-tile">
+                  <p className="muted">Paid {label}</p>
+                  <p className="total money">{tiles.paid}</p>
+                </div>
+                <div className="card desk-tile">
+                  <p className="muted">Net after PayPal fees</p>
+                  <p className="total money">{tiles.net}</p>
+                  {tiles.note && <p className="muted fine">{tiles.note}</p>}
+                </div>
+              </Fragment>
             );
           })}
         </div>
@@ -399,12 +390,7 @@ export function OrdersView({ initial, askEnabled, copilot = false }: { initial: 
               {askError}
             </p>
           )}
-          {acknowledgeError && (
-            <p className="error" role="alert">
-              {acknowledgeError}
-            </p>
-          )}
-          <OrdersGrid orders={shown} totals={summary?.summaries ?? []} sort={filter?.sort ?? null} selectedId={selectedId} busyId={acknowledgingId} onSelect={selectRow} onAcknowledge={acknowledgeRow} />
+          <OrdersGrid orders={shown} totals={summary?.summaries ?? []} sort={filter?.sort ?? null} selectedId={selectedId} onSelect={selectRow} />
           <div className="actions">
             <button
               className="button secondary"

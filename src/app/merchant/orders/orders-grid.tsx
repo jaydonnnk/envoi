@@ -21,12 +21,13 @@ import type { OrderSort } from "@/domain/purchases/order-filter";
 import type { MerchantOrder } from "@/domain/purchases/orders";
 import type { SalesSummary } from "@/domain/purchases/sales-summary";
 import { formatMoney, money } from "@/lib/money";
-import { countryText, feeText, netMinor, netText, orderStatus, orderTotal, paidVia, paymentChips, refundCopy } from "./order-copy";
+import { countryText, feeText, netMinor, netText, orderStatus, orderTotal, paymentChips, refundCopy } from "./order-copy";
 
 // The merchant's orders table (S35; Gate 3 file map): AG Grid Community, sorting and column filters in
 // the browser only. It displays rows and edits nothing. Every word in the Payment column comes from
 // orderStatus, so a row reads Paid only when the server's state is paid. Keyboard: arrows move between
-// cells, Enter opens the order's record, and Enter on an Acknowledge cell acknowledges it.
+// cells, and Enter opens the order's record, where a paid order is acknowledged (from S46, the desk
+// keeps the mockup's columns and acknowledgment lives in the record only).
 // S46: PayPal's fee, the net and the PayPal account's country per order, and one pinned totals row
 // per currency taken from the server's summary, never added up from the loaded rows.
 
@@ -47,6 +48,8 @@ const theme = themeQuartz.withParams({
   headerBackgroundColor: "#f1f6fc",
   fontFamily: "inherit",
   fontSize: 15,
+  // S46: eight columns fit a 1280 px desk without sideways scrolling.
+  cellHorizontalPadding: 10,
 });
 
 const DAY_AND_MONTH = new Intl.DateTimeFormat("en-SG", { day: "numeric", month: "short", timeZone: "Asia/Singapore" });
@@ -113,36 +116,18 @@ function PaymentCell({ data: row }: ICellRendererParams<GridRow>) {
   );
 }
 
-type AcknowledgeProps = { busyId: string | null; onAcknowledge: (order: MerchantOrder) => void };
-
-function AcknowledgedCell({ data: row, busyId, onAcknowledge }: ICellRendererParams<GridRow> & AcknowledgeProps) {
-  const data = orderOf(row);
-  if (!data) return null;
-  if (data.acknowledgedAt) return <>Yes</>;
-  if (!data.canAcknowledge) return <span className="muted">No</span>;
-  return (
-    <button className="grid-remove" type="button" tabIndex={-1} disabled={busyId === data.id} onClick={() => onAcknowledge(data)}>
-      {busyId === data.id ? "Acknowledging" : "Acknowledge"}
-    </button>
-  );
-}
-
 export function OrdersGrid({
   orders,
   totals,
   sort,
   selectedId,
-  busyId,
   onSelect,
-  onAcknowledge,
 }: {
   orders: readonly MerchantOrder[];
   totals: readonly SalesSummary[];
   sort: OrderSort | null;
   selectedId: string | null;
-  busyId: string | null;
   onSelect: (order: MerchantOrder) => void;
-  onAcknowledge: (order: MerchantOrder) => void;
 }) {
   const columns = useMemo<ColDef<GridRow>[]>(
     () => [
@@ -153,36 +138,30 @@ export function OrdersGrid({
         valueFormatter: (p) => (isTotals(p.data) ? TOTALS_LABEL : orderTime(p.value as string)),
         filterValueGetter: (p) => (orderOf(p.data) ? orderTime(orderOf(p.data)!.createdAt) : ""),
         sort: "desc",
-        minWidth: 120,
-        width: 120,
+        minWidth: 115,
+        width: 115,
+        // The totals label wraps in this narrow column rather than being cut off.
+        wrapText: true,
+        autoHeight: true,
+        cellClass: "cell-wrapped",
       },
-      { colId: "items", headerName: "Items", valueGetter: shown("items", itemsOf), minWidth: 170, flex: 2, wrapText: true, autoHeight: true, cellClass: "cell-wrapped" },
+      { colId: "items", headerName: "Items", valueGetter: shown("items", itemsOf), minWidth: 130, flex: 2, wrapText: true, autoHeight: true, cellClass: "cell-wrapped" },
       {
         colId: "total",
         headerName: "Total",
         valueGetter: (p) => (isTotals(p.data) ? p.data.summary.paidMinor : orderOf(p.data) ? totalKey(orderOf(p.data)!) : 0),
         valueFormatter: (p) => (isTotals(p.data) ? totalsCell(p.data.summary, "total") : orderOf(p.data) ? orderTotal(orderOf(p.data)!) : ""),
         filterValueGetter: (p) => (orderOf(p.data) ? orderTotal(orderOf(p.data)!) : ""),
-        minWidth: 90,
-        width: 90,
+        minWidth: 80,
+        width: 80,
         cellClass: ["cell-middle", "money"],
       },
-      { colId: "fee", headerName: "PayPal fee", valueGetter: shown("fee", feeText), comparator: byMinor((order) => (order.state === "paid" && order.rail !== "pyusd" ? (order.payment?.captureFeeMinor ?? null) : null)), minWidth: 120, width: 120, cellClass: ["cell-middle", "money"] },
-      { colId: "net", headerName: "Net", valueGetter: shown("net", netText), comparator: byMinor(netMinor), minWidth: 120, width: 120, cellClass: ["cell-middle", "money"] },
-      { colId: "country", headerName: "PayPal account from", valueGetter: shown("country", countryText), minWidth: 150, flex: 1 },
-      { colId: "payment", headerName: "Payment", valueGetter: shown("payment", paymentChips), cellRenderer: PaymentCell, minWidth: 150, flex: 1 },
-      { colId: "paidVia", headerName: "Paid via", valueGetter: shown("paidVia", paidVia), minWidth: 130, flex: 1 },
-      {
-        colId: "acknowledged",
-        headerName: "Acknowledged",
-        valueGetter: (p) => (isTotals(p.data) ? "" : orderOf(p.data)?.acknowledgedAt ? "Yes" : "No"),
-        cellRenderer: AcknowledgedCell,
-        cellRendererParams: { busyId, onAcknowledge } satisfies AcknowledgeProps,
-        minWidth: 170,
-        width: 170,
-      },
+      { colId: "fee", headerName: "PayPal fee", valueGetter: shown("fee", feeText), comparator: byMinor((order) => (order.state === "paid" && order.rail !== "pyusd" ? (order.payment?.captureFeeMinor ?? null) : null)), minWidth: 125, width: 125, cellClass: ["cell-middle", "money"] },
+      { colId: "net", headerName: "Net", valueGetter: shown("net", netText), comparator: byMinor(netMinor), minWidth: 125, width: 125, cellClass: ["cell-middle", "money"] },
+      { colId: "country", headerName: "PayPal account from", valueGetter: shown("country", countryText), minWidth: 135, width: 135 },
+      { colId: "payment", headerName: "Payment", valueGetter: shown("payment", paymentChips), cellRenderer: PaymentCell, minWidth: 110, flex: 1 },
     ],
-    [busyId, onAcknowledge],
+    [],
   );
 
   // The sort "ask your orders" chose, applied with Community's column state; none keeps the newest first.
@@ -208,20 +187,17 @@ export function OrdersGrid({
         suppressColumnVirtualisation
         // Tab leaves the table instead of walking every cell; the arrow keys move between cells.
         tabToNextCell={() => false}
-        defaultColDef={{ sortable: true, resizable: true, filter: "agTextColumnFilter", cellClass: "cell-middle" }}
+        defaultColDef={{ sortable: true, resizable: true, filter: "agTextColumnFilter", cellClass: "cell-middle", wrapHeaderText: true, autoHeaderHeight: true }}
         overlayNoRowsTemplate='<span class="muted">No orders match. Clear the filters to see all loaded orders.</span>'
         rowClassRules={{ "row-chosen": (p) => orderOf(p.data)?.id === selectedId, "row-totals": (p) => isTotals(p.data) }}
         onRowClicked={(event) => {
-          // The Acknowledge button acts by itself and does not open the record.
-          if ((event.event?.target as Element | null)?.closest("button")) return;
           const order = orderOf(event.data);
           if (order) onSelect(order);
         }}
         onCellKeyDown={(event: CellKeyDownEvent<GridRow>) => {
           const order = orderOf(event.data);
           if ((event.event as KeyboardEvent | null)?.key !== "Enter" || !order) return;
-          if (event.column.getColId() === "acknowledged" && order.canAcknowledge && !order.acknowledgedAt) onAcknowledge(order);
-          else onSelect(order);
+          onSelect(order);
         }}
       />
     </div>
