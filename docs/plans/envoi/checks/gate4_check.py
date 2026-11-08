@@ -452,7 +452,8 @@ G3_REOPENING_SHA256 = "e97fc24b2696c7d32acd755b85d73cf642250b354e45a4b77abfd15c9
 # 2026-11-07: the fourth build plan, re-approved by the user ("Approve Gate 2").
 # 2026-11-07: S45 first check, re-approved by the user ("i approve both gates"); 80b3e947...45725b7e was the pin before it.
 # 2026-11-08: S45 lost refund response, re-approved by the user ("Approve Gate 2"); 7b64f2ba...0f6461 was the pin before it.
-G2_REOPENING_SHA256 = "aaf7d924626a80d0512b95f49eeca57bce51ec6c5bfd62fab1d843acc5f9de3d"
+# 2026-11-08: S45 two demo shops, re-approved by the user ("Approve Gate 2"); aaf7d924...c5f9de3d was the pin before it.
+G2_REOPENING_SHA256 = "54a40825a4fcc6cd2908b484429b80eb91b83fce797db1b4274f21d456920fac"
 # Gate 1, re-approved 2026-10-16 after deferring menu photo drafting and again on 2026-10-21 for the
 # landing page, and on 2026-10-24 for the shop QR and order archive, then reopened and re-approved on 2026-10-25 for S19-S22:
 # the revised and added mockups, and 01-product.md without its closing status line, which keeps changing as slices finish

@@ -725,6 +725,7 @@ No hold and no longer basket lock are added, because PayPal's expiry for an unap
 ## Fourth build plan amendment, 2026-11-07
 
 **Status: approved 2026-11-07 ("Approve Gate 2"), not built.** For [Gate 1's fourth build plan](01-product.md#fourth-build-plan-proposed-2026-11-07), approved 2026-11-07.
+**Reopened 2026-11-08 for two demo shops ("Judge Demo Cafe, accept both") and re-approved 2026-11-08 ("Approve Gate 2"):** copilot step 3 changes.
 **Reopened 2026-11-08 for S45's lost refund response ("Refund route resends") and re-approved 2026-11-08 ("Approve Gate 2"):** refund step 5 changes.
 **Reopened 2026-11-07 for S45's first check ("Yes to both", "Demo shop only") and re-approved 2026-11-07 ("i approve both gates").** It changes the copilot turn, the refund's credentials, the names and R-F1 and R-F2 only; see the [S45 record](00-status.md#s45-merchant-copilot-2026-11-07).
 Approval accepts this as a proposal and authorizes no code change, install, migration, model call, spend, merge, push or deploy.
@@ -771,7 +772,7 @@ Totals are computed on the server, because the browser holds only one loaded pag
 
 1. A member's message reaches the route; membership and the limiter run first.
 2. One model loop runs on `AI_MODEL`, with `store: false`, six tool calls and 60 seconds, as the buyer agent has.
-3. The copilot runs only for the one labeled demo shop: the outlet whose PayPal seller is `PAYPAL_DEMO_SELLER_MERCHANT_ID`. Every other outlet gets no turn and shows no panel, because Envoi's platform token cannot read a shop's transactions or refund its capture [verified 2026-11-07].
+3. The copilot runs only for the labeled demo shops: each outlet with an approved enrollment whose active PayPal seller is `PAYPAL_DEMO_SELLER_MERCHANT_ID`. On Neon two FIXTURE outlets share that seller this way, "Judge Demo Cafe" and "Test Shop" [verified 2026-11-08]; each sees only its own orders, because every result is filtered to the outlet, as step 5 says for `get_order`. Every other outlet gets no turn and shows no panel, because Envoi's platform token cannot read a shop's transactions or refund its capture [verified 2026-11-07].
 4. Envoi connects to `mcp.sandbox.paypal.com` over SSE at `/sse`, with a Bearer token from the demo seller's own client credentials, and lists the server's tools. Streamable HTTP answered Not Found there [verified 2026-11-07]. Only an explicit allow-list in Envoi's own code reaches the model: `get_order`, `list_transactions`, `list_disputes` and `get_dispute`, plus Envoi's own orders for this outlet. `get_merchant_insights` is left out, because PayPal answers that it is not supported in sandbox [verified 2026-11-07]. The host is a sandbox-only code constant, never a setting.
 5. `get_order` runs only for an order id Envoi holds for this outlet, and any result whose payee is not this outlet's seller is dropped. The payer's name, email and account id are removed from every PayPal result before the model sees it.
 6. `propose_refund` is a local tool that checks the order and creates nothing. The route returns the proposal, and the browser shows the confirmation.
