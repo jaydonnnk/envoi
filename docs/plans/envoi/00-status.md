@@ -583,6 +583,7 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 - **Commit authority, the user's words, 2026-11-09:** "Yes, commit", for committing this S50 work on `envoi/slice-50-render-workflow`. It authorizes no push, merge or deploy.
 - **Commits [verified], 2026-11-09:** `ef8db03` (docs) and `81fa972` (feat) on `envoi/slice-50-render-workflow`.
 - **Cold start, first half [verified], 2026-11-09:** two requests to `https://envoi-helx.onrender.com/` at 17:25:27Z and 17:25:28Z answered 200 with time to first byte 0.766 s and 0.358 s, from this Mac in Singapore to Ohio.
+- **Cold start measured [verified], 2026-11-09:** after 1500 s with no request from this session (Free slept after 15 minutes), requests at 17:50:28Z and 17:50:29Z answered 200 with time to first byte 0.321 s and 0.313 s, within the warm range above. Boundary: one sample, from one network; requests by other visitors during the idle window are [unknown]. It shows the service did not sleep for 25 minutes on `0.5c-512mb`, nothing more.
 - **Release and spend authority, the user's words, 2026-11-09:** "Just continue in this session. yes i authorize", answering the open merge, push and deploy of the S50 commits and the spend for up to five translation model calls in the live check.
 
 ### S47 The tourist digest, 2026-11-08
