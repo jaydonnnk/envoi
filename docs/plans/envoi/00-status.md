@@ -616,6 +616,14 @@ Gate 3's S47 amendment asks for "a fixed list of cases across the four languages
 - **Stop rule:** the counting fetch stops requests that could pass the limit; a stopped or failed request is a no-answer case and is reported. The run is not repeated.
 - **What a pass means:** on these 12 fixed cases with `gpt-6-sol`, no figure other than code's reached the shown text. It is no claim about translation quality, tone or number words outside the code's lists. **Usefulness, reported, not a pass condition:** if fewer than 6 of 12 cases are shown, the card mostly shows the refusal notice, and the user decides whether S47 ships. **What a fail means:** the Gate 1 falsifier fired; S47 does not ship, the misses are recorded, and any fix needs a new pre-registration.
 
+**Evaluation run, 2026-11-08 [verified].** The pre-registration was committed as `67fd71c` at 2026-11-08T23:54:10+08:00, before the first call. The run started at 2026-11-08T15:54:23Z with `S47_SPEND_LIMIT_USD=0.50` and `gpt-6-sol`, made 12 requests once each, with no retry, no refused request and no stop, and wrote [`s47-digest-eval-gpt-6-sol.json`](evidence/s47-digest-eval-gpt-6-sol.json) with every raw template, shown paragraph and score.
+
+- **Result: PASS.** 12 of 12 shown, 0 refused, 0 no-answer, 0 invented figures, 0 refused outputs shown. No request body held a FIXTURE figure. Each answer took 1.7 s to 4.4 s.
+- **Placeholders:** every template used each offered placeholder exactly once. D9 to D12, with a fee unknown, used only `paid_total` and `paid_count`.
+- **Spend:** 2,952 input tokens (none cached) and 1,998 output tokens, about US$0.026 at US$2 and US$10 per million [vendor claim], against the US$0.50 limit and the US$5 cap. The OpenAI meter and the invoice are [unknown].
+- **Read by the agent, not an independent check [hypothesis]:** no number word appears in any shown paragraph. D9 in English says "the shop received S$96.40", which is the paid total before PayPal's fees; the word "received" can read as net. D10 in Chinese reads "已付款订单量为6", a figure without a measure word. Neither is an invented figure; both are wording, recorded for the user. Every English template says "6 paid orders"; with one order the same template would read "1 paid orders" [hypothesis, untested].
+- **Claim boundary:** these 12 fixed cases, one run, `gpt-6-sol`, FIXTURE figures. No claim about translation quality, tone, other figures, other models or real shops.
+
 ### S49 Demo polish, 2026-11-08
 
 **Status: complete 2026-11-08. QR-free optional print utility deployed at `6317644`, CI `42491666591` success. User-recorded Singapore fixture SGQR to Paid journey verified with a US sandbox buyer, actual total S$6.50. Branch `envoi/slice-49-demo-polish` retained.**

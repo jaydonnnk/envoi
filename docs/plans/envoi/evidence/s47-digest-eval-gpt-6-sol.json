@@ -1,0 +1,313 @@
+{
+  "label": "S47 weekly summary evaluation; FIXTURE sales summaries, no order data; test environment",
+  "model": "gpt-6-sol",
+  "limitUsd": 0.5,
+  "estimatedSpendUsd": 0.025884,
+  "usage": {
+    "requests": 12,
+    "refusedRequests": 0,
+    "input": 2952,
+    "cached": 0,
+    "output": 1998
+  },
+  "leakedNeedles": [],
+  "outcome": {
+    "total": 12,
+    "shown": 12,
+    "refused": 0,
+    "noAnswer": 0,
+    "invented": 0,
+    "refusedShown": 0,
+    "pass": true
+  },
+  "results": [
+    {
+      "id": "D1",
+      "language": "en",
+      "state": "sgd-known",
+      "placeholders": [
+        "paid_total",
+        "paid_count",
+        "net_total",
+        "fee_total"
+      ],
+      "raw": "This week, {{paid_total}} was paid to the shop through Envoi across {{paid_count}} paid orders. PayPal charged {{fee_total}} in fees, and {{net_total}} reached the shop.",
+      "kind": "ok",
+      "refusalReason": null,
+      "shown": [
+        {
+          "currency": "SGD",
+          "text": "This week, S$96.40 was paid to the shop through Envoi across 6 paid orders. PayPal charged S$8.25 in fees, and S$88.15 reached the shop."
+        }
+      ],
+      "invented": [],
+      "ms": 4407
+    },
+    {
+      "id": "D2",
+      "language": "zh",
+      "state": "sgd-known",
+      "placeholders": [
+        "paid_total",
+        "paid_count",
+        "net_total",
+        "fee_total"
+      ],
+      "raw": "本周通过 Envoi 支付给店铺的订单共 {{paid_count}} 笔，付款总额为 {{paid_total}}；PayPal 收取手续费 {{fee_total}}，店铺实收 {{net_total}}。",
+      "kind": "ok",
+      "refusalReason": null,
+      "shown": [
+        {
+          "currency": "SGD",
+          "text": "本周通过 Envoi 支付给店铺的订单共 6 笔，付款总额为 S$96.40；PayPal 收取手续费 S$8.25，店铺实收 S$88.15。"
+        }
+      ],
+      "invented": [],
+      "ms": 2183
+    },
+    {
+      "id": "D3",
+      "language": "ms",
+      "state": "sgd-known",
+      "placeholders": [
+        "paid_total",
+        "paid_count",
+        "net_total",
+        "fee_total"
+      ],
+      "raw": "Minggu ini, jumlah bayaran kepada gerai melalui Envoi ialah {{paid_total}} bagi {{paid_count}} pesanan berbayar. Yuran PayPal ialah {{fee_total}}, dan jumlah yang diterima gerai selepas yuran ialah {{net_total}}.",
+      "kind": "ok",
+      "refusalReason": null,
+      "shown": [
+        {
+          "currency": "SGD",
+          "text": "Minggu ini, jumlah bayaran kepada gerai melalui Envoi ialah S$96.40 bagi 6 pesanan berbayar. Yuran PayPal ialah S$8.25, dan jumlah yang diterima gerai selepas yuran ialah S$88.15."
+        }
+      ],
+      "invented": [],
+      "ms": 3861
+    },
+    {
+      "id": "D4",
+      "language": "ta",
+      "state": "sgd-known",
+      "placeholders": [
+        "paid_total",
+        "paid_count",
+        "net_total",
+        "fee_total"
+      ],
+      "raw": "இந்த வாரம் Envoi மூலம் கடைக்குச் செலுத்தப்பட்ட தொகை {{paid_total}}; பணம் செலுத்தப்பட்ட ஆர்டர்களின் எண்ணிக்கை {{paid_count}}. PayPal வசூலித்த கட்டணம் {{fee_total}}; கட்டணங்களுக்குப் பிறகு கடைக்குக் கிடைத்த தொகை {{net_total}}.",
+      "kind": "ok",
+      "refusalReason": null,
+      "shown": [
+        {
+          "currency": "SGD",
+          "text": "இந்த வாரம் Envoi மூலம் கடைக்குச் செலுத்தப்பட்ட தொகை S$96.40; பணம் செலுத்தப்பட்ட ஆர்டர்களின் எண்ணிக்கை 6. PayPal வசூலித்த கட்டணம் S$8.25; கட்டணங்களுக்குப் பிறகு கடைக்குக் கிடைத்த தொகை S$88.15."
+        }
+      ],
+      "invented": [],
+      "ms": 2631
+    },
+    {
+      "id": "D5",
+      "language": "en",
+      "state": "sgd-usd-known",
+      "placeholders": [
+        "paid_total",
+        "paid_count",
+        "net_total",
+        "fee_total"
+      ],
+      "raw": "This week, {{paid_count}} paid orders brought {{paid_total}} to the shop through Envoi. PayPal charged {{fee_total}} in fees, leaving {{net_total}} for the shop.",
+      "kind": "ok",
+      "refusalReason": null,
+      "shown": [
+        {
+          "currency": "SGD",
+          "text": "This week, 6 paid orders brought S$96.40 to the shop through Envoi. PayPal charged S$8.25 in fees, leaving S$88.15 for the shop."
+        },
+        {
+          "currency": "USD",
+          "text": "This week, 2 paid orders brought US$23.50 to the shop through Envoi. PayPal charged US$1.52 in fees, leaving US$21.98 for the shop."
+        }
+      ],
+      "invented": [],
+      "ms": 2398
+    },
+    {
+      "id": "D6",
+      "language": "zh",
+      "state": "sgd-usd-known",
+      "placeholders": [
+        "paid_total",
+        "paid_count",
+        "net_total",
+        "fee_total"
+      ],
+      "raw": "本周通过 Envoi 支付给摊位的订单共 {{paid_count}} 笔，付款总额为 {{paid_total}}。扣除 PayPal 手续费 {{fee_total}} 后，摊位实收 {{net_total}}。",
+      "kind": "ok",
+      "refusalReason": null,
+      "shown": [
+        {
+          "currency": "SGD",
+          "text": "本周通过 Envoi 支付给摊位的订单共 6 笔，付款总额为 S$96.40。扣除 PayPal 手续费 S$8.25 后，摊位实收 S$88.15。"
+        },
+        {
+          "currency": "USD",
+          "text": "本周通过 Envoi 支付给摊位的订单共 2 笔，付款总额为 US$23.50。扣除 PayPal 手续费 US$1.52 后，摊位实收 US$21.98。"
+        }
+      ],
+      "invented": [],
+      "ms": 2294
+    },
+    {
+      "id": "D7",
+      "language": "ms",
+      "state": "sgd-usd-known",
+      "placeholders": [
+        "paid_total",
+        "paid_count",
+        "net_total",
+        "fee_total"
+      ],
+      "raw": "Minggu ini, jumlah bayaran kepada gerai melalui Envoi ialah {{paid_total}} daripada {{paid_count}} pesanan berbayar. Selepas yuran PayPal sebanyak {{fee_total}}, jumlah bersih yang diterima gerai ialah {{net_total}}.",
+      "kind": "ok",
+      "refusalReason": null,
+      "shown": [
+        {
+          "currency": "SGD",
+          "text": "Minggu ini, jumlah bayaran kepada gerai melalui Envoi ialah S$96.40 daripada 6 pesanan berbayar. Selepas yuran PayPal sebanyak S$8.25, jumlah bersih yang diterima gerai ialah S$88.15."
+        },
+        {
+          "currency": "USD",
+          "text": "Minggu ini, jumlah bayaran kepada gerai melalui Envoi ialah US$23.50 daripada 2 pesanan berbayar. Selepas yuran PayPal sebanyak US$1.52, jumlah bersih yang diterima gerai ialah US$21.98."
+        }
+      ],
+      "invented": [],
+      "ms": 1733
+    },
+    {
+      "id": "D8",
+      "language": "ta",
+      "state": "sgd-usd-known",
+      "placeholders": [
+        "paid_total",
+        "paid_count",
+        "net_total",
+        "fee_total"
+      ],
+      "raw": "இந்த வாரம் Envoi வழியாகக் கடைக்குச் செலுத்தப்பட்ட தொகை {{paid_total}}; பணம் செலுத்தப்பட்ட ஆர்டர்களின் எண்ணிக்கை {{paid_count}}. PayPal கட்டணங்களுக்குப் பிறகு கடைக்குக் கிடைத்த தொகை {{net_total}}; PayPal வசூலித்த கட்டணம் {{fee_total}}.",
+      "kind": "ok",
+      "refusalReason": null,
+      "shown": [
+        {
+          "currency": "SGD",
+          "text": "இந்த வாரம் Envoi வழியாகக் கடைக்குச் செலுத்தப்பட்ட தொகை S$96.40; பணம் செலுத்தப்பட்ட ஆர்டர்களின் எண்ணிக்கை 6. PayPal கட்டணங்களுக்குப் பிறகு கடைக்குக் கிடைத்த தொகை S$88.15; PayPal வசூலித்த கட்டணம் S$8.25."
+        },
+        {
+          "currency": "USD",
+          "text": "இந்த வாரம் Envoi வழியாகக் கடைக்குச் செலுத்தப்பட்ட தொகை US$23.50; பணம் செலுத்தப்பட்ட ஆர்டர்களின் எண்ணிக்கை 2. PayPal கட்டணங்களுக்குப் பிறகு கடைக்குக் கிடைத்த தொகை US$21.98; PayPal வசூலித்த கட்டணம் US$1.52."
+        }
+      ],
+      "invented": [],
+      "ms": 2478
+    },
+    {
+      "id": "D9",
+      "language": "en",
+      "state": "sgd-usd-one-unknown",
+      "placeholders": [
+        "paid_total",
+        "paid_count"
+      ],
+      "raw": "This week, the shop received {{paid_total}} through Envoi from {{paid_count}} paid orders.",
+      "kind": "ok",
+      "refusalReason": null,
+      "shown": [
+        {
+          "currency": "SGD",
+          "text": "This week, the shop received S$96.40 through Envoi from 6 paid orders."
+        },
+        {
+          "currency": "USD",
+          "text": "This week, the shop received US$23.50 through Envoi from 2 paid orders."
+        }
+      ],
+      "invented": [],
+      "ms": 2199
+    },
+    {
+      "id": "D10",
+      "language": "zh",
+      "state": "sgd-usd-one-unknown",
+      "placeholders": [
+        "paid_total",
+        "paid_count"
+      ],
+      "raw": "本周通过Envoi收到的付款总额为{{paid_total}}，已付款订单量为{{paid_count}}。",
+      "kind": "ok",
+      "refusalReason": null,
+      "shown": [
+        {
+          "currency": "SGD",
+          "text": "本周通过Envoi收到的付款总额为S$96.40，已付款订单量为6。"
+        },
+        {
+          "currency": "USD",
+          "text": "本周通过Envoi收到的付款总额为US$23.50，已付款订单量为2。"
+        }
+      ],
+      "invented": [],
+      "ms": 1704
+    },
+    {
+      "id": "D11",
+      "language": "ms",
+      "state": "sgd-usd-one-unknown",
+      "placeholders": [
+        "paid_total",
+        "paid_count"
+      ],
+      "raw": "Jumlah bayaran yang diterima oleh gerai melalui Envoi minggu ini ialah {{paid_total}} bagi {{paid_count}} pesanan berbayar.",
+      "kind": "ok",
+      "refusalReason": null,
+      "shown": [
+        {
+          "currency": "SGD",
+          "text": "Jumlah bayaran yang diterima oleh gerai melalui Envoi minggu ini ialah S$96.40 bagi 6 pesanan berbayar."
+        },
+        {
+          "currency": "USD",
+          "text": "Jumlah bayaran yang diterima oleh gerai melalui Envoi minggu ini ialah US$23.50 bagi 2 pesanan berbayar."
+        }
+      ],
+      "invented": [],
+      "ms": 2280
+    },
+    {
+      "id": "D12",
+      "language": "ta",
+      "state": "sgd-usd-one-unknown",
+      "placeholders": [
+        "paid_total",
+        "paid_count"
+      ],
+      "raw": "இந்த வாரம் Envoi மூலம் கடைக்குச் செலுத்தப்பட்ட தொகை {{paid_total}}. பணம் செலுத்தப்பட்ட ஆர்டர்களின் எண்ணிக்கை {{paid_count}}.",
+      "kind": "ok",
+      "refusalReason": null,
+      "shown": [
+        {
+          "currency": "SGD",
+          "text": "இந்த வாரம் Envoi மூலம் கடைக்குச் செலுத்தப்பட்ட தொகை S$96.40. பணம் செலுத்தப்பட்ட ஆர்டர்களின் எண்ணிக்கை 6."
+        },
+        {
+          "currency": "USD",
+          "text": "இந்த வாரம் Envoi மூலம் கடைக்குச் செலுத்தப்பட்ட தொகை US$23.50. பணம் செலுத்தப்பட்ட ஆர்டர்களின் எண்ணிக்கை 2."
+        }
+      ],
+      "invented": [],
+      "ms": 2514
+    }
+  ]
+}
