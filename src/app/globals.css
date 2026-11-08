@@ -179,6 +179,8 @@ footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; 
 .orders-grid .grid-swipe { display: none; margin: 0 0 8px; }
 .orders-grid .ag-cell.cell-middle { display: flex; align-items: center; }
 .orders-grid .ag-cell.cell-wrapped { display: block; line-height: 1.4; padding-top: 12px; padding-bottom: 12px; }
+/* Payment chips wrap and the row grows with them: a Paid order with a refund carries two chips. */
+.orders-grid .ag-cell.cell-chips { display: flex; align-items: center; padding-top: 8px; padding-bottom: 8px; line-height: 1.4; }
 /* The default 150 px floor leaves a blank band under a short filtered list; the no-rows line still fits. */
 .orders-grid .ag-grid-scrolling-rows.ag-layout-auto-height { min-height: 60px; }
 .orders-grid .ag-row { cursor: pointer; }
@@ -189,6 +191,8 @@ footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; 
 .desk-tile p { margin: 0 0 4px; }
 .desk-tile .fine { margin-top: 8px; }
 .orders-grid .ag-row.row-totals { cursor: default; font-weight: 600; background: #f1f6fc; }
+/* A long bold total wraps "known" under its figure instead of running into the next column. */
+.orders-grid .ag-row.row-totals .ag-cell.money { white-space: normal; }
 .sales-chart { margin: 16px 0 0; min-width: 0; }
 .method-grid .ag-layout-auto-height .ag-center-cols-viewport,
 .method-grid .ag-layout-auto-height .ag-center-cols-container,

@@ -151,14 +151,18 @@ export function OrdersGrid({
         valueGetter: (p) => (isTotals(p.data) ? p.data.summary.paidMinor : orderOf(p.data) ? totalKey(orderOf(p.data)!) : 0),
         valueFormatter: (p) => (isTotals(p.data) ? totalsCell(p.data.summary, "total") : orderOf(p.data) ? orderTotal(orderOf(p.data)!) : ""),
         filterValueGetter: (p) => (orderOf(p.data) ? orderTotal(orderOf(p.data)!) : ""),
-        minWidth: 80,
-        width: 80,
+        // Room for a bold totals figure (S46 Render check: "S$16.70" overflowed 80 px by 3 px); a
+        // longer one wraps and the row grows.
+        minWidth: 92,
+        width: 92,
+        wrapText: true,
+        autoHeight: true,
         cellClass: ["cell-middle", "money"],
       },
-      { colId: "fee", headerName: "PayPal fee", valueGetter: shown("fee", feeText), comparator: byMinor((order) => (order.state === "paid" && order.rail !== "pyusd" ? (order.payment?.captureFeeMinor ?? null) : null)), minWidth: 125, width: 125, cellClass: ["cell-middle", "money"] },
-      { colId: "net", headerName: "Net", valueGetter: shown("net", netText), comparator: byMinor(netMinor), minWidth: 125, width: 125, cellClass: ["cell-middle", "money"] },
+      { colId: "fee", headerName: "PayPal fee", valueGetter: shown("fee", feeText), comparator: byMinor((order) => (order.state === "paid" && order.rail !== "pyusd" ? (order.payment?.captureFeeMinor ?? null) : null)), minWidth: 125, width: 125, wrapText: true, autoHeight: true, cellClass: ["cell-middle", "money"] },
+      { colId: "net", headerName: "Net", valueGetter: shown("net", netText), comparator: byMinor(netMinor), minWidth: 125, width: 125, wrapText: true, autoHeight: true, cellClass: ["cell-middle", "money"] },
       { colId: "country", headerName: "PayPal account from", valueGetter: shown("country", countryText), minWidth: 135, width: 135 },
-      { colId: "payment", headerName: "Payment", valueGetter: shown("payment", paymentChips), cellRenderer: PaymentCell, minWidth: 110, flex: 1 },
+      { colId: "payment", headerName: "Payment", valueGetter: shown("payment", paymentChips), cellRenderer: PaymentCell, minWidth: 110, flex: 1, autoHeight: true, cellClass: "cell-chips" },
     ],
     [],
   );
