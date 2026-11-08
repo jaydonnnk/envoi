@@ -558,7 +558,7 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 - **Gate 3 reopening, the user's words, 2026-11-08:** "Reopen, add 2 files (Recommended)", then "Approve Gate 3". The S48 file map adds `src/domain/outlets/merchant.ts` and `src/app/merchant/setup/sgqr-sticker.tsx`, and the "Stall scan" call stack gains the enrollment read. `gate4_check.py` pins the new `03-program-design.md`.
 - **Limiter row, the user's words, 2026-11-08:** "Accept, short window (Recommended)". The approved `admit("sticker_scan")` writes a `rate_limit_hits` row with the buyer's user id and time, pruned after the window; it names no sticker. `sticker_scan_counts` keeps only the keyed hash, the week and the count, with no timestamp, so the two tables cannot be joined by time [hypothesis].
 - **Card translations, the user's words, 2026-11-08:** "You write Melayu and தமிழ் text and show "Draft translation" on those two. Dont add the native reader check".
-- **Not yet authorized:** `STICKER_HASH_KEY` on Render, migration `0034` on Neon, merge, push and deploy.
+- **Not yet authorized:** migration `0034` on Neon, merge, push and deploy.
 
 **Build, 2026-11-08 [verified], local only, commits `c34ecc6` and `565d626`.**
 
@@ -588,7 +588,10 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 - **Fresh checks, 2026-11-08 [verified], at `c34ecc6`:** typecheck and lint clean; `npm test` 120 files, 982 of 982; `npm run build` passed; `scripts/scan-build.ts` found no send method name in 251 built files; `tests/e2e/run-public-api.ts` PASS (local FIXTURE only); `gate4_check.py` PASS; `git diff --check` clean.
 - **Browser, local FIXTURE, 2026-11-08 [verified]:** a temporary preview (disposable database, demo FIXTURE shop, FIXTURE merchant, FIXTURE key, `next dev` on port 3148, deleted afterwards). At 375 px and 1280 px a pasted FIXTURE sticker with UEN `T26PV0001D` showed the card; Tamil showed "Draft translation"; no element was wider than the page. Two scans, then the merchant entered that UEN in setup and saw "2 scans". The aside heading rendered at body size and was fixed in `565d626`.
 - **Falsifier, local [verified]:** no stored field names a scanner or stall. `sticker_scan_counts` holds only a keyed hash, a week and a count. The `sticker_scan` limiter row holds the buyer id and a time for up to an hour, and names no sticker, as the user accepted.
-- **Not done:** `STICKER_HASH_KEY` on Render, migration `0034` on Neon, merge, push, deploy and the Render check.
+- **`STICKER_HASH_KEY`, the user's words, 2026-11-08:** "Key set in both", for `.env.local` and Render. A node script read `.env.local` and printed only that the name is set, at least 32 characters and not a FIXTURE value [verified]; that it is set on Render is the user's report.
+- **Docs, `0704b51`:** `README.md`, `demo-guide.md` and `evidence-pack.md` describe the card and the count, label Melayu and தமிழ் as draft, and leave the deployed site [unknown].
+- **Post-slice cleanup, 2026-11-08 [verified]:** the architect-reviewer cleanup over `a5261da..HEAD` found no orphan file, no new untracked file but the user's own handoff notes, no export without a user (`scanWeek` is used inside `demand.ts` and by its test), no TODO, skip or only, and no stale wording; the old no-match text has no remaining reference. `resolve.ts`'s "resolving never writes" stays true of `resolveSgqr`, since the count is written by the route. Nothing to delete.
+- **Not done:** migration `0034` on Neon, merge, push, deploy and the Render check.
 
 ### S46 Tourist Sales Desk, 2026-11-08
 
