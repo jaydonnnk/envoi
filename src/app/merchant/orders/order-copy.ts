@@ -156,3 +156,14 @@ export function refundCopy(refund: NonNullable<MerchantOrder["refund"]>): { chip
       return { chip: "Refund refused", tone: "warn", body: `PayPal refused the ${amount} refund, so no money went back. The order stays recorded as Paid.` };
   }
 }
+
+// The copilot panel shows the model's reply as plain text, so Markdown emphasis it adds around a
+// figure or a name (**S$16.70**, *2 x Ebi fry*, `pur_...`) is dropped and every word is kept. A marker
+// must hug its text, so "2 * 3" and snake_case stay as written.
+export function plainReply(text: string): string {
+  return text
+    .replace(/\*\*(?=\S)([^*]*?\S)\*\*/g, "$1")
+    .replace(/__(?=\S)([^_]*?\S)__/g, "$1")
+    .replace(/(^|[^\w*])\*(?=\S)([^*]*?\S)\*(?![\w*])/g, "$1$2")
+    .replace(/`([^`]+)`/g, "$1");
+}

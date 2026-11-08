@@ -5,6 +5,7 @@ import { requestJson } from "@/lib/browser/session";
 import { useRestoreFocus } from "@/lib/browser/focus";
 import { formatMoney, money, type Currency } from "@/lib/money";
 import type { MerchantOrder } from "@/domain/purchases/orders";
+import { plainReply } from "./order-copy";
 import { orderTime } from "./orders-grid";
 
 // The merchant copilot (S45; Gate 1 mockup merchant-copilot.html). Shown only for the labeled demo
@@ -109,7 +110,7 @@ export function CopilotPanel({ outletId, orders, onRefunded }: { outletId: strin
         <section className="card chat" aria-label="Conversation">
           {turns.map((turn, index) => (
             <div key={index} className={`bubble ${turn.role === "merchant" ? "me" : "bot"}`}>
-              {turn.text}
+              {turn.role === "copilot" ? plainReply(turn.text) : turn.text}
             </div>
           ))}
           {busy && <div className="bubble bot muted">Checking your records…</div>}
