@@ -143,6 +143,24 @@ describe("the sales desk", () => {
     });
   });
 
+  describe("75 totals count paid orders only, without completed refunds", () => {
+    it("leaves out an order whose refund PayPal completed, and keeps one whose refund is still sent", async () => {
+      const kept = await completed({ feeMinor: 62, netMinor: 518, payerCountry: "US" });
+      const refunded = await completed({ feeMinor: 83, netMinor: 897, payerCountry: "GB" });
+      const pendingRefund = await completed({ feeMinor: 10, netMinor: 90, payerCountry: "AU" });
+      const [user] = await fixture.database.admin<{ id: string }[]>`select id from "user" limit 1`;
+      // FIXTURE refund rows, as S45's confirmed refund writes them.
+      for (const [purchaseId, state] of [[refunded.purchaseId, "completed"], [pendingRefund.purchaseId, "sent"]] as const) {
+        const [attempt] = await fixture.database.admin<{ id: string; capture_id: string; g: number }[]>`select id, capture_id, capture_gross_minor as g from payment_attempts where purchase_id = ${purchaseId}`;
+        await fixture.database.admin`insert into refunds (id, attempt_id, purchase_id, outlet_id, capture_id, paypal_refund_id, amount_minor, currency, state, confirmed_by_user_id, idempotency_key) values (${`ref_${purchaseId}`}, ${attempt!.id}, ${purchaseId}, ${shop.outletId}, ${attempt!.capture_id}, ${state === "completed" ? `FIXTURE-${purchaseId}` : null}, ${attempt!.g}, 'SGD', ${state}, ${user!.id}, ${`key_${purchaseId}`})`;
+      }
+
+      expect((await orders()).orders.filter((order) => order.state === "paid")).toHaveLength(3);
+      const [sgd] = await summaries();
+      expect(sgd).toMatchObject({ paidCount: 2, paidMinor: (await gross(kept.purchaseId)) + (await gross(pendingRefund.purchaseId)), knownFeeMinor: 72, knownNetMinor: 608, unknownFeeCount: 0 });
+    });
+  });
+
   describe("0033 grants", () => {
     let web: postgres.Sql;
     let maintenance: postgres.Sql;

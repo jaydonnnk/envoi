@@ -1,11 +1,14 @@
 import { and, eq, gte, lt, sql } from "drizzle-orm";
-import { paymentAttempts, purchases } from "@/lib/db/schema";
+import { paymentAttempts, purchases, refunds } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import type { Currency } from "@/lib/money";
 
 // The sales desk's totals (S46; Gate 2 "GET /merchant/outlets/{id}/sales-summary", Gate 3 Types).
 // Computed on the server over every paid order in the range, because the browser holds only one
-// page of orders. Only paid orders count: a pending, uncertain or closed order adds nothing.
+// page of orders. Only paid orders count: a pending, uncertain or closed order adds nothing, and
+// neither does a paid order whose refund PayPal completed, because its money went back to the
+// buyer (the user's choice on the S46 Render check, 2026-11-08). A refund still sent or checking
+// leaves the order counted: no money is known to have gone back yet.
 // PayPal's fee and net are summed only where PayPal gave them; the rest are counted as unknown,
 // never added as zero. A PYUSD order moved devnet test tokens straight to the shop, with no PayPal
 // fee, so its total is also what reached the shop.
@@ -42,7 +45,15 @@ export async function salesSummary(db: Db, outletId: string, from: Date, to: Dat
     .from(purchases)
     // The one confirmed PayPal attempt of a paid PayPal order. A PYUSD order has none and joins null.
     .leftJoin(paymentAttempts, and(eq(paymentAttempts.purchaseId, purchases.id), eq(paymentAttempts.rail, "paypal"), eq(paymentAttempts.state, "capture_confirmed")))
-    .where(and(eq(purchases.outletId, outletId), eq(purchases.state, "paid"), gte(purchases.createdAt, from), lt(purchases.createdAt, to)))
+    .where(
+      and(
+        eq(purchases.outletId, outletId),
+        eq(purchases.state, "paid"),
+        gte(purchases.createdAt, from),
+        lt(purchases.createdAt, to),
+        sql`not exists (select 1 from ${refunds} where ${refunds.purchaseId} = ${purchases.id} and ${refunds.state} = 'completed')`,
+      ),
+    )
     .groupBy(purchases.currency, purchases.rail)
     .orderBy(purchases.currency, purchases.rail);
 

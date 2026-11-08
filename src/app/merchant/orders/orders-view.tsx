@@ -400,7 +400,7 @@ export function OrdersView({ initial, askEnabled, copilot = false }: { initial: 
               Export CSV
             </button>
           </div>
-          <p className="muted fine">Sandbox test money. Pending and checking orders are never shown as Paid. Totals come from Envoi&apos;s records of paid orders{summary ? `, ${summary.from} to ${summary.to}` : ""}; a fee PayPal did not give reads Unknown.</p>
+          <p className="muted fine">Sandbox test money. Pending and checking orders are never shown as Paid. Totals come from Envoi&apos;s records of paid orders, leaving out refunded ones{summary ? `, ${summary.from} to ${summary.to}` : ""}; a fee PayPal did not give reads Unknown.</p>
           <p className="muted fine">Paid and acknowledged are separate facts, and you can acknowledge only a paid order. Select an order to see its full record or delete it.</p>
         </div>
       )}
