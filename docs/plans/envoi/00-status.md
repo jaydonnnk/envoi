@@ -652,6 +652,22 @@ The pre-registration was committed as `d865c7e` at 2026-11-08T18:21:13+08:00, be
 - **Fresh checks before the merge [verified], 2026-11-08, at `f50dc29`:** typecheck and lint clean; `npm test` 118 files, 971 of 971; `npm run build` passed; `scripts/scan-build.ts` passed; `tests/e2e/run-public-api.ts` PASS (local FIXTURE only); `gate4_check.py` PASS; `git diff --check` clean.
 - **Migration 0033 on Neon [verified], 2026-11-08T10:28:45Z:** project "Envoi", branch `production`, by `npm run db:migrate`. Migrations went from 33 to 34. Purchases 87, attempts 49, outlets 8, paid 32, purchase total sum 33805, limiter rows 18 and refunds 1 are identical before and after. The three columns exist and are null on all 49 attempts; `envoi_web` and `envoi_maintenance` hold `UPDATE` on each; the bucket check allows `merchant_digest`.
 - **Seed:** none written, by the user's choice. Older orders read Unknown, as Gate 2 says.
+- **First release [verified]:** `main` fast-forwarded from `2e24893` to `e18f02e` and pushed; `git ls-remote origin refs/heads/main` returned `e18f02e501db171ae8247fe472bab0960aecb2a6`. CI run 42471630768 passed at `e18f02e`. The Render dashboard showed `e18f02e` Deployed (2m 38s, auto-deploy).
+- **Render check of `e18f02e`, Judge Demo Cafe (FIXTURE), signed in by the user [verified]:** "Your sales desk", the test environment badge and the "Demo fixture" and "Sandbox: test money only" labels; four paid orders, all fees Unknown; no page overflow at 1280 px or 390 px. Two problems found:
+  - The "Net after PayPal fees" tile read S$0.00, and the totals row "S$0.00 known", although no order had a fee. That shows zero for unknown, against Gate 1's "A missing fee reads unknown, never zero". Fixed in `e3d8366`: when no order behind a total has PayPal's figure, the tile, the pinned row and the CSV totals read Unknown and the by-method fees read "4 unknown".
+  - The S$1.80 order refunded in S45 still counted in "Paid this week" (S$18.50). The gates do not settle it, because a refunded order stays Paid. **The user's choice, 2026-11-08:** "Leave out refunded orders". Recorded as a choice within Gate 2's "over paid orders" [hypothesis that it needs no reopening; the user was told to say so if it does]. Fixed in `f2010e7` and `e0c7464`: an order whose refund PayPal completed leaves the totals, tiles, by-method table and chart, and stays in the table as Paid, Refunded; a refund still sent or checking leaves it counted. The note reads "leaving out orders with a completed refund", because the PYUSD extra transfer test keeps the word "refunded" off that page.
+- **Mutations for the fixes [verified]**, each applied alone, failing on an AssertionError, restored byte-identical and passing on rerun:
+
+| # | Guard and mutation | Test that failed |
+| --- | --- | --- |
+| M14 | `knownTotalText` never reads Unknown | 73 unit, "reads a total with no known fee behind it as Unknown, never S$0.00" |
+| M15 | the net tile never reads Unknown | the same case |
+| M16 | the by-method fees never read "N unknown" alone | the same case |
+| M17 | the completed-refund filter removed | 75 integration, "leaves out an order whose refund PayPal completed ..." |
+| M18 | any refund state, not only completed, leaves the totals | the same case |
+
+  The grid's pinned row calls the same `knownTotalText`; its wiring is not unit tested and is checked on Render.
+- **Fix release authority, the user's words, 2026-11-08:** "Approve fix merge and push", for fast-forwarding `main` to these fixes, the push and the deploy, after the full checks pass again. Full checks at `e0c7464` [verified]: typecheck and lint clean; 118 files, 973 of 973; build; scan-build at 251 files; public API e2e PASS (local FIXTURE only); `gate4_check.py` PASS; `git diff --check` clean.
 
 ### S45 Merchant copilot, 2026-11-07
 
