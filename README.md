@@ -40,6 +40,9 @@ AI here is only ever a reader and a drafter. No model sets a price, approves a p
   A fee PayPal did not give reads Unknown, never zero, and an order is called overseas only from that PayPal country.
   Tiles, a pinned "Totals, paid only" row, a by-method table and an AG Charts bar chart are computed on the server over paid orders only, leaving out orders with a completed refund, and Export CSV saves the table.
   Orders paid before 2026-11-08 carry no fee and read Unknown.
+- **This week, written by AI** at `/merchant/orders`: on a shop with an approved enrollment, the merchant picks English, 中文, Melayu or தமிழ் and asks for a short weekly summary.
+  The model writes only a template with placeholder names and never sees a figure; Envoi fills in every figure from its own records, once per currency.
+  A template holding any number of its own, or a fee or net while a fee is unknown, is refused and no summary is shown.
 - **Ask your orders** at `/merchant/orders`: one sentence from the merchant becomes filters, a sort and a view on the orders table.
   The model sees the sentence and the date, never an order, and it cannot change anything.
   Its sort and view answered 16 of 16 pre-registered sentences as registered on `gpt-6-sol` on 2026-11-08: one run of fixed English sentences, not a measure of accuracy.

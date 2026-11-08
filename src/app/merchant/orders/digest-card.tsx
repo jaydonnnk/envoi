@@ -15,8 +15,8 @@ const LANGUAGES: readonly { tag: DigestLanguage; label: string }[] = [
   { tag: "ta", label: "தமிழ்" },
 ];
 
-export const DIGEST_EMPTY = "No paid orders this week, so there is nothing to summarize.";
-export const DIGEST_REFUSED = "Envoi did not show this summary because it held a figure Envoi did not compute. The totals above are unchanged.";
+const DIGEST_EMPTY = "No paid orders this week, so there is nothing to summarize.";
+const DIGEST_REFUSED = "Envoi did not show this summary because it held a figure Envoi did not compute. The totals above are unchanged.";
 
 type Shown = { kind: "idle" } | { kind: "busy" } | { kind: "answer"; answer: DigestAnswer; language: DigestLanguage } | { kind: "failed"; message: string };
 
@@ -33,7 +33,7 @@ export function DigestCard({ outletId }: { outletId: string }) {
 
   const digest = shown.kind === "answer" ? shown.answer.digest : null;
   return (
-    <section className="card digest-card" aria-labelledby={`digest-${outletId}`}>
+    <section className="card orders-card" aria-labelledby={`digest-${outletId}`}>
       <h3 id={`digest-${outletId}`}>This week, written by AI</h3>
       <p className="muted stall-languages">
         <span>Language:</span>

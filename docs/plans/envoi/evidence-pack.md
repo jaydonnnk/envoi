@@ -134,6 +134,14 @@ What exists instead is a set of single observed end-to-end runs, each listed abo
 | The desk is live on the deployed site | [verified] at `ed263de` on 2026-11-08, Judge Demo Cafe at 390 px and 1280 px: three paid orders S$16.70, every fee Unknown because they predate the change. Then one new sandbox purchase, S$1.80 Kopi C, stored and showed fee S$0.56, net S$1.24 and country US, matching Neon | [S46](00-status.md#s46-tourist-sales-desk-2026-11-08) |
 | Envoi computes any figure from a model | **not claimed**. Every desk figure comes from PayPal's order read or Envoi's records; the model only chooses filters, a sort and a view | [S46](00-status.md#s46-tourist-sales-desk-2026-11-08) |
 
+## The weekly summary (S47)
+
+| Claim | Label | Record |
+| --- | --- | --- |
+| A summary holding a figure code did not compute is refused, and an empty week makes no model call | [verified] against FIXTURE fakes, tests 78 and 79, each guard with its own mutation (22 in all) | [S47](00-status.md#s47-the-tourist-digest-2026-11-08) |
+| No invented figure reached the shown text | [verified] on 12 of 12 pre-registered fixed cases across English, 中文, Melayu and தமிழ் and three fee and currency states, one run on `gpt-6-sol` on 2026-11-08, about US$0.026, 0 refused. A small fixed set; number words outside the code's lists, translation quality and tone are not scored | [S47](00-status.md#s47-the-tourist-digest-2026-11-08) |
+| The model computes, judges or advises on sales | **not claimed**. It writes wording around placeholder names; every figure is filled in by Envoi | [S47](00-status.md#s47-the-tourist-digest-2026-11-08) |
+
 ## Demo polish (S49), in progress
 
 [verified, deployed API and Neon, 2026-11-08] On the user's "Hide both named fixture shops", Test Shop and Judge Demo Cafe left the public list. Their direct menu endpoints still return 200. All public table row counts stayed equal except `audit_events`, 520 to 522. The public list shows Ah Seng Chicken Rice, Larkspur Street Taqueria, Lorong Demo Kopi and Tiong Bahru Kopi House. [Hide evidence](evidence/s49-hide-outlets.json).

@@ -12,7 +12,7 @@ import { log, toSafeErrorRecord } from "@/lib/log";
 
 export const DIGEST_PROMPT_VERSION = "digest-prompt-2026-11-08";
 
-export const MAX_DIGEST_TEMPLATE_CHARS = 600;
+const MAX_DIGEST_TEMPLATE_CHARS = 600;
 // [hypothesis] A few sentences fit well inside this, including a reasoning model's own tokens.
 const DIGEST_MAX_OUTPUT_TOKENS = 1_000;
 const DIGEST_BUDGET_MS = 20_000;

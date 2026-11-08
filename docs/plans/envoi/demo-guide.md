@@ -1,6 +1,6 @@
 # Envoi demo and test guide
 
-Status: 2026-11-08. Written 2026-10-23 from `main` at `1d354f8`; the buyer text steps corrected 2026-10-26 for S21's one-box screen; the landing page, Ask Envoi and the box's example sentence corrected 2026-11-05 for S41; the merchant copilot added to step 7 on 2026-11-08 for S45, and the sales desk added to step 7 on 2026-11-08 for S46.
+Status: 2026-11-08. Written 2026-10-23 from `main` at `1d354f8`; the buyer text steps corrected 2026-10-26 for S21's one-box screen; the landing page, Ask Envoi and the box's example sentence corrected 2026-11-05 for S41; the merchant copilot added to step 7 on 2026-11-08 for S45, the sales desk added to step 7 on 2026-11-08 for S46, and the weekly summary added to step 7 on 2026-11-08 for S47.
 It walks through every built journey, in the order a judge or tester would meet them.
 Test money only: PayPal sandbox and Solana devnet test tokens; no real money moves.
 Where this guide and a gate document disagree, the gate document wins.
@@ -207,6 +207,8 @@ Menu photo import is built but ships closed; do not demo it as working.
 10. Under "Ask your orders", type "show me the biggest orders first", then "orders from overseas visitors".
     Check: the table sorts by Total, then shows only paid orders whose PayPal account is outside the shop's country; an order with an Unknown country is never shown as overseas.
 11. Export CSV, and check its last line holds the same totals as the pinned row. The "By payment method" table and chart show the same figures.
+12. Under "This week, written by AI", choose a language and press "Write this week's summary".
+    Check: the text carries the "Written by AI" label, and every amount and count in it equals "Paid this week" and the tiles above; while any fee is Unknown it names only the paid total and the order count.
 
 ## 8. AI agent handoff over MCP
 
