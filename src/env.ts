@@ -71,7 +71,8 @@ const webSchema = z.object({
   // starts one Render flow run with these; either unset means no run is started and buyers get
   // on-demand translation as before. The key is server only.
   RENDER_API_KEY: z.string().min(1).optional(),
-  RENDER_WORKFLOW_SLUG: z.string().regex(/^[a-z0-9][a-z0-9-]*$/, "must be a Render workflow slug").optional(),
+  // A malformed slug never stops the web service; touristReadyTrigger turns the trigger off (S50).
+  RENDER_WORKFLOW_SLUG: z.string().min(1).optional(),
   // PYUSD on Solana devnet (S16). These are the rail's only two settings: the cluster, genesis hash,
   // mint, token program and decimals are reviewed code constants in src/domain/pyusd/constants.ts,
   // and any other PYUSD_ or SOLANA_ name refuses to boot. The RPC URL is checked against the pinned
