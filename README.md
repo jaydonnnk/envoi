@@ -28,6 +28,9 @@ AI here is only ever a reader and a drafter. No model sets a price, approves a p
   A translation never changes a displayed price and never adds an item.
 - **Show the stall**: after a Paid receipt, the visitor can show the order in large text in English, 中文, Melayu or தமிழ் and play it aloud where the browser supports that language.
   Original names and the paid amount stay on screen, and any translation is labeled as AI.
+- **A stall that is not on Envoi** at `/buy/scan`: a sticker that matches no published shop shows a static card the visitor can show the stall, in English, 中文, and Melayu and தமிழ் marked as draft translations, with a QR code to `/for-shops`.
+  Scanning still pays nothing and adds no shop. Envoi keeps only a weekly count of scans under an HMAC-SHA256 of the sticker's UEN keyed by `STICKER_HASH_KEY`: no stall name, sticker text or anything about the visitor.
+  A merchant who later submits that UEN in setup sees the count as scans, never as sales or visitors; one buyer adds at most 5 in 10 minutes.
 - **Web menu import** at `/merchant/setup`: one hosted Kernel browser session reads the merchant's own public menu page and one model call drafts an editable table.
   A price is filled only when the page prints it as text with the same digits.
   The draft never publishes itself; the merchant confirms every row.

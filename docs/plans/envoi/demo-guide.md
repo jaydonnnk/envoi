@@ -124,7 +124,8 @@ Negative checks:
 1. Open `/buy/scan`.
 2. Allow the camera and scan a shop's SGQR sticker, or paste its contents under "Or paste the sticker contents".
 3. Check: a sticker with an approved identifier mapping opens that shop; the sticker is never used as a payment destination.
-4. Check: an unknown sticker gives a clear message and still offers text search.
+4. Check: an unknown sticker shows "This stall isn't on Envoi yet", a card in 中文 and English with buttons for English, 中文, Melayu and தமிழ் (the last two read "Draft translation"), a QR code to the shops page, "What Envoi keeps" and "Search for a shop". Nothing can be paid and no shop is added.
+   Each such scan adds one to a count kept under a keyed hash; entering that UEN later in merchant setup shows it as "N scans".
 5. Deny the camera: the paste field still works.
 
 The sticker must have a mapping submitted by the merchant and approved with `approve-identifier`.

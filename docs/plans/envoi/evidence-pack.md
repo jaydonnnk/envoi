@@ -1,6 +1,6 @@
 # Envoi evidence pack
 
-Status: extended 2026-11-08 for S46, deployed and evaluated, with one PayPal fee shown on the deployed site. Extended 2026-11-08 for S45, deployed, evaluated and with one sandbox refund on the deployed site. Extended 2026-11-07 for S44. Extended 2026-11-05 for S41. Drafted 2026-10-21, marked complete 2026-10-29 when S15 closed, and extended for S19, S20, S21, the S22 round 4 outcome, S24, the removal of the usability study, S26 to S31 and S41. The video is the user's; anything it says must already be listed here.
+Status: extended 2026-11-08 for S48, built and checked locally, not yet deployed. Extended 2026-11-08 for S46, deployed and evaluated, with one PayPal fee shown on the deployed site. Extended 2026-11-08 for S45, deployed, evaluated and with one sandbox refund on the deployed site. Extended 2026-11-07 for S44. Extended 2026-11-05 for S41. Drafted 2026-10-21, marked complete 2026-10-29 when S15 closed, and extended for S19, S20, S21, the S22 round 4 outcome, S24, the removal of the usability study, S26 to S31 and S41. The video is the user's; anything it says must already be listed here.
 Every claim made in the README, the video or the submission is listed here with its label and the record that supports it.
 A claim with no record here is not made.
 
@@ -112,6 +112,17 @@ What exists instead is a set of single observed end-to-end runs, each listed abo
 | A refunded order stays recorded as Paid, with the refund beside it, and a second confirmation sends nothing | [verified] against FIXTURE fakes | [S45](00-status.md#s45-merchant-copilot-2026-11-07) |
 | The copilot answers with zero invented amounts | [verified] on 7 of the 8 pre-registered questions, run once each on sandbox data on 2026-11-08, all 7 passing, with each amount checked against Neon and PayPal. E7, an injected order note, was not run live and rests on test 69 alone. Seven questions are a small sample, not a measure of accuracy | [S45](00-status.md#s45-merchant-copilot-2026-11-07) |
 | A refund proposed by the copilot and confirmed by the merchant reached PayPal sandbox on the deployed site | [verified] once, 2026-11-08, on `3a7e0b7`: purchase `pur_azhptg6xt5odsjwieqmccokseu`, S$1.80, capture `8CE889446D4557218` now `REFUNDED` in PayPal, refund `99V07871LW516274N` `completed`, the order still Paid with "Refunded" beside it. The buyer's receipt was not checked on the deployed site | [S45](00-status.md#s45-merchant-copilot-2026-11-07) |
+
+## Stall demand (S48)
+
+| Claim | Label | Record |
+| --- | --- | --- |
+| An unenrolled scan stores only a keyed hash, a week and a count: no stall name, sticker text, UEN or buyer, in the row or the logs | [verified] against FIXTURE stickers in a local database, tests 80 and 81 with their mutations | [S48](00-status.md#s48-stall-demand-2026-11-08) |
+| One buyer adds at most 5 to a count in 10 minutes, and a failed count leaves the buyer's answer unchanged | [verified] locally, tests 82 and 84 | [S48](00-status.md#s48-stall-demand-2026-11-08) |
+| The card shows only for a no-match scan, and the merchant sees the count as scans | [verified] locally, test 83 and a browser check at 375 px and 1280 px on FIXTURE data | [S48](00-status.md#s48-stall-demand-2026-11-08) |
+| The Melayu and தமிழ் card text is a reviewed translation | **not claimed**: both are labeled "Draft translation" | [S48](00-status.md#s48-stall-demand-2026-11-08) |
+| A scan count measures demand, sales or visitors | **not claimed**: counts can be inflated within the limit, so they read "scans" | [S48](00-status.md#s48-stall-demand-2026-11-08) |
+| S48 is live on the deployed site | [unknown] until migration `0034`, the merge and the deploy are done | [S48](00-status.md#s48-stall-demand-2026-11-08) |
 
 ## Tourist Sales Desk (S46)
 
