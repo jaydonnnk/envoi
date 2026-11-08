@@ -590,7 +590,31 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
   Not independently mutated: membership refusal (the shared `requireOutletMembership`, unchanged from S46) and the absence of tools (no tool is defined, so there is nothing to mutate without a crash); the integration test still asserts both.
 - **Fresh checks [verified], 2026-11-08, on the uncommitted tree:** `npm test` 124 files, 1029 of 1029; typecheck and lint clean; `npm run build` passed; `scripts/scan-build.ts` passed over 258 files; `tests/e2e/run-public-api.ts` PASS (local FIXTURE only); `gate4_check.py` PASS; `git diff --check` clean.
 - **Commit authority, the user's words, 2026-11-08:** "Yes, commit", for committing this S47 work on `envoi/slice-47-digest`. It authorizes no push, merge or deploy.
-- **Not done yet:** the evaluation pre-registration and its paid run, the local and Render views at 390 px and 1280 px, post-slice cleanup and release. No model call has been made.
+- **Not done yet:** the paid evaluation run below, the local and Render views at 390 px and 1280 px, post-slice cleanup and release. No model call has been made.
+
+#### S47 weekly summary evaluation, pre-registration
+
+Written 2026-11-08, before any S47 model call, and committed before the first one.
+Gate 3's S47 amendment asks for "a fixed list of cases across the four languages and the fee states", each sent once through the real call and the real `fillDigest`.
+
+- **What runs:** each case below sends one request, in order, through the real tool-free call of `src/integrations/ai/digest.ts` (prompt `digest-prompt-2026-11-08`), and the answer is filled by the real `composeDigest`, which calls `fillDigest` once per currency, by [`s47-digest-eval.mts`](evidence/s47-digest-eval.mts). The call is given the language and the offered placeholder names only. The sales summaries are FIXTURE values in the script, so no database, PayPal, Neon or Render is touched.
+- **Model:** `gpt-6-sol`. The user confirmed on 2026-11-08 that Render's `AI_MODEL` is `gpt-6-sol` ("Yes the model is gpt-6-sol"). The script takes the model name as an argument and does not read `AI_MODEL`. Finding [verified, boolean only]: the local `.env.local` `AI_MODEL` is not `gpt-6-sol`; it does not affect this run.
+- **Spend:** authorized by "Approval to spend both us 5 cap and gate 3 approval". The run limit is US$0.50, far below that cap. A counting fetch refuses any other model and any request once one more worst case (4,000 input and 1,000 output tokens at US$2 and US$10 per million [vendor claim, S35's prices]) could pass the limit. The worst case for all 12 is about US$0.22. The OpenAI meter and remaining credit are [unknown].
+- **FIXTURE summaries:** SGD all known is S$96.40, 6 paid orders, fee S$8.25, net S$88.15 (the mockup's illustration figures). USD all known is US$23.50, 2 paid, fee US$1.52, net US$21.98. SGD one unknown is S$96.40, 6 paid, one fee unknown, known fee S$7.00 and known net S$71.15.
+
+| # | Language | Fee state and currencies | Placeholders offered |
+| --- | --- | --- | --- |
+| D1 to D4 | en, zh, ms, ta | all known, SGD only | paid_total, paid_count, net_total, fee_total |
+| D5 to D8 | en, zh, ms, ta | all known, SGD and USD | paid_total, paid_count, net_total, fee_total |
+| D9 to D12 | en, zh, ms, ta | one SGD fee unknown, SGD and USD | paid_total, paid_count |
+
+- **What reaches the screen:** when `composeDigest` accepts the template, its filled paragraphs; when it refuses, or the model gives no template, nothing but the code-written notice.
+- **Scorer, independent of `fillDigest`:** in every shown paragraph, each run of Unicode number characters joined by dots or commas, with an optional `S$` or `US$` in front, must equal one of the figures code computed for that paragraph's currency; any Chinese numeral character counts as invented. A run that is not such a figure, including a figure from the other currency, is an invented figure. The script also checks that no request body held any FIXTURE figure (a needle list).
+- **Not scored automatically:** number words. Only `fillDigest`'s own word lists stop them, so a number word outside those lists is [unknown] to this scorer. Every raw template and shown paragraph is recorded for the user to read.
+- **Scorer self-test [verified, no network], 2026-11-08:** `selftest` fills a clean template in both currencies to the exact expected USD text, refuses a fee placeholder while a fee is unknown and a template with its own digit, and checks seven detection probes (a wrong count, a wrong cent, the other currency's figure, 16 beside 6, a Tamil digit and a Chinese numeral) and the verdict. Six scorer mutations each made it report a failure and exit 1, and each restored file was byte-identical by SHA-256 and passed: SM1 number runs ASCII only (Tamil digit probe); SM2 Chinese numeral check removed (Chinese probe); SM3 figures allowed from every currency (US$23.50 probe); SM4 verdict ignores invented figures; SM5 verdict ignores a refused output shown; SM6 verdict ignores the case count. The self-test reports through its own failure list, not a test runner's AssertionError.
+- **Pass rule, pre-registered:** all 12 cases run once, with zero invented figures shown and zero refused outputs shown. Refusals and no-answer cases are counted and reported; they are not failures of this rule. One run; every result is reported; nothing is re-scored, dropped or rerun into a pass, and the prompt is not changed.
+- **Stop rule:** the counting fetch stops requests that could pass the limit; a stopped or failed request is a no-answer case and is reported. The run is not repeated.
+- **What a pass means:** on these 12 fixed cases with `gpt-6-sol`, no figure other than code's reached the shown text. It is no claim about translation quality, tone or number words outside the code's lists. **Usefulness, reported, not a pass condition:** if fewer than 6 of 12 cases are shown, the card mostly shows the refusal notice, and the user decides whether S47 ships. **What a fail means:** the Gate 1 falsifier fired; S47 does not ship, the misses are recorded, and any fix needs a new pre-registration.
 
 ### S49 Demo polish, 2026-11-08
 
