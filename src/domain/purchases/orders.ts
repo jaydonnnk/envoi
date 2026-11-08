@@ -1,4 +1,4 @@
-import type { Currency } from "@/lib/money";
+import type { Country, Currency } from "@/lib/money";
 import { and, count, desc, eq, inArray, isNotNull, isNull, ne, not, or, sql } from "drizzle-orm";
 import { recordAudit } from "@/domain/audit/events";
 import { ORDER_STATES } from "@/domain/purchases/order-filter";
@@ -51,6 +51,11 @@ export type MerchantOrder = {
     captureId: string | null;
     captureGrossMinor: number | null;
     captureVerifiedAt: string | null;
+    // S46: what PayPal said it charged, what reached the shop and the payer's PayPal country, only
+    // beside a verified payment. Null means PayPal did not say: unknown, never zero.
+    captureFeeMinor: number | null;
+    captureNetMinor: number | null;
+    payerCountry: string | null;
   } | null;
   acknowledgedAt: string | null;
   canAcknowledge: boolean;
@@ -59,7 +64,7 @@ export type MerchantOrder = {
 };
 
 export type OutletOrders = {
-  outlet: { id: string; name: string; isDemoFixture: boolean };
+  outlet: { id: string; name: string; isDemoFixture: boolean; country: Country };
   orders: MerchantOrder[];
   // Orders of this outlet the merchant archived and the list leaves out (S18).
   archivedCount: number;
@@ -122,6 +127,9 @@ function orderJson({ purchase, sellerMerchantId, tokenAccount }: OrderRow, attem
           captureId: paid ? attempt.captureId : null,
           captureGrossMinor: paid ? attempt.captureGrossMinor : null,
           captureVerifiedAt: paid ? (attempt.captureVerifiedAt?.toISOString() ?? null) : null,
+          captureFeeMinor: paid ? attempt.captureFeeMinor : null,
+          captureNetMinor: paid ? attempt.captureNetMinor : null,
+          payerCountry: paid ? attempt.payerCountry : null,
         }
       : null,
     acknowledgedAt: purchase.acknowledgedAt?.toISOString() ?? null,
@@ -137,7 +145,7 @@ const orderColumns = { purchase: purchases, sellerMerchantId: paymentDestination
 // for this outlet. The read is a touch: it stores the transitions the derived view already shows.
 export async function listOutletOrders(db: Db, outletId: string, now: Date, before: string | null = null): Promise<OutletOrders | AppError | null> {
   const [outlet] = await db
-    .select({ id: outlets.id, name: outlets.name, isDemoFixture: outlets.isDemoFixture })
+    .select({ id: outlets.id, name: outlets.name, isDemoFixture: outlets.isDemoFixture, country: outlets.country })
     .from(outlets)
     .where(eq(outlets.id, outletId))
     .limit(1);

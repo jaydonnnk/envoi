@@ -26,7 +26,7 @@ describe("the orders filter route", () => {
   };
   let api: ReturnType<typeof shopApi>;
 
-  const NOTHING = { states: null, rails: null, currencies: null, from: null, to: null };
+  const NOTHING = { states: null, rails: null, currencies: null, from: null, to: null, sort: null, view: null };
   const paidPayPalThisWeek = { ...NOTHING, states: ["paid"], rails: ["paypal"], from: "2026-10-29", to: "2026-11-04" };
 
   beforeAll(async () => {

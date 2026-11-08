@@ -18,7 +18,7 @@ const fixtureOrder = (id: string, overrides: Partial<MerchantOrder>): MerchantOr
     state: "pending_payment",
     recipient: null,
     pyusd: null,
-    payment: { environment: "sandbox", attemptState: "order_created", orderId: "FIXTURE-order", captureId: null, captureGrossMinor: null, captureVerifiedAt: null },
+    payment: { environment: "sandbox", attemptState: "order_created", orderId: "FIXTURE-order", captureId: null, captureGrossMinor: null, captureVerifiedAt: null, captureFeeMinor: null, captureNetMinor: null, payerCountry: null },
     acknowledgedAt: null,
     canAcknowledge: false,
     ...overrides,
@@ -26,10 +26,12 @@ const fixtureOrder = (id: string, overrides: Partial<MerchantOrder>): MerchantOr
 
 const paid = fixtureOrder("paid", { state: "paid", canAcknowledge: true });
 const pending = fixtureOrder("pending", {});
-const checking = fixtureOrder("checking", { payment: { environment: "sandbox", attemptState: "capture_unknown", orderId: "FIXTURE-order", captureId: null, captureGrossMinor: null, captureVerifiedAt: null } });
+const checking = fixtureOrder("checking", { payment: { environment: "sandbox", attemptState: "capture_unknown", orderId: "FIXTURE-order", captureId: null, captureGrossMinor: null, captureVerifiedAt: null, captureFeeMinor: null, captureNetMinor: null, payerCountry: null } });
 const uncertain = fixtureOrder("uncertain", { state: "uncertain" });
 const closed = fixtureOrder("closed", { state: "unpaid_closed" });
 const notPaid = [pending, checking, uncertain, closed];
+// An SG shop's table: the shop's country matters only to the overseas view (S46).
+const filterAt = (orders: readonly MerchantOrder[], filter: OrderFilter) => applyOrderFilter(orders, filter, "SG");
 const answering = (answer: unknown) => () => Promise.resolve(answer);
 
 describe("the orders filter", () => {
@@ -59,10 +61,10 @@ describe("the orders filter", () => {
 
   it("a filter never turns a pending order into a paid row", () => {
     const all = [paid, ...notPaid];
-    expect(applyOrderFilter(all, { states: ["paid"] }).map((order) => order.id)).toEqual(["paid"]);
+    expect(filterAt(all, { states: ["paid"] }).map((order) => order.id)).toEqual(["paid"]);
     const filters: OrderFilter[] = [{}, { rails: ["paypal"] }, { currencies: ["SGD"] }, { states: ["pending_payment", "uncertain", "unpaid_closed"] }];
     for (const filter of filters) {
-      const rows = applyOrderFilter(notPaid, filter);
+      const rows = filterAt(notPaid, filter);
       expect(rows).toHaveLength(notPaid.length);
       for (const [index, row] of rows.entries()) {
         expect(row).toBe(notPaid[index]);
@@ -78,16 +80,16 @@ describe("the orders filter", () => {
     const usd = fixtureOrder("usd", { currency: "USD" });
     const noRail = fixtureOrder("no-rail", { rail: null });
     const ids = (orders: MerchantOrder[]) => orders.map((order) => order.id);
-    expect(ids(applyOrderFilter([pending, pyusd, noRail], { rails: ["pyusd"] }))).toEqual(["pyusd"]);
-    expect(ids(applyOrderFilter([pending, usd], { currencies: ["USD"] }))).toEqual(["usd"]);
+    expect(ids(filterAt([pending, pyusd, noRail], { rails: ["pyusd"] }))).toEqual(["pyusd"]);
+    expect(ids(filterAt([pending, usd], { currencies: ["USD"] }))).toEqual(["usd"]);
 
     // 16:30 UTC on 3 Nov is 00:30 on 4 Nov in Singapore; 15:30 UTC is still 3 Nov there.
     const early = fixtureOrder("early", { createdAt: "2026-11-03T16:30:00.000Z" });
     const late = fixtureOrder("late", { createdAt: "2026-11-03T15:30:00.000Z" });
     expect(singaporeDate(new Date(early.createdAt))).toBe("2026-11-04");
-    expect(ids(applyOrderFilter([early, late], { from: "2026-11-04" }))).toEqual(["early"]);
-    expect(ids(applyOrderFilter([early, late], { to: "2026-11-03" }))).toEqual(["late"]);
-    expect(ids(applyOrderFilter([early, late], { from: "2026-11-03", to: "2026-11-04" }))).toEqual(["early", "late"]);
+    expect(ids(filterAt([early, late], { from: "2026-11-04" }))).toEqual(["early"]);
+    expect(ids(filterAt([early, late], { to: "2026-11-03" }))).toEqual(["late"]);
+    expect(ids(filterAt([early, late], { from: "2026-11-03", to: "2026-11-04" }))).toEqual(["early", "late"]);
   });
 });
 

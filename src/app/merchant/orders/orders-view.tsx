@@ -5,9 +5,11 @@ import { SINGAPORE_TIME } from "@/app/purchase-copy";
 import { applyOrderFilter, type OrderFilter } from "@/domain/purchases/order-filter";
 import type { MerchantOrder, OutletOrders } from "@/domain/purchases/orders";
 import { requestJson } from "@/lib/browser/session";
-import { archivedCountLine, DELETE_COPY, extraTransferNote, filterWords, mayStillBePaid, needsReading, orderStatus, orderTotal, refundCopy } from "./order-copy";
+import type { SalesSummary } from "@/domain/purchases/sales-summary";
+import { archivedCountLine, deskTiles, ordersCsv, DELETE_COPY, extraTransferNote, filterWords, mayStillBePaid, needsReading, orderStatus, orderTotal, refundCopy } from "./order-copy";
 import { CopilotPanel } from "./copilot-panel";
-import { OrdersGrid } from "./orders-grid";
+import { OrdersGrid, orderTime } from "./orders-grid";
+import { SalesByMethod } from "./sales-chart";
 import { startOrdersPolling, withNewest, withOlder, type PolledOrder } from "./polling";
 import { useRestoreFocus } from "@/lib/browser/focus";
 
@@ -18,6 +20,28 @@ async function fetchOrders(outletId: string, before: string | null = null): Prom
   const query = before === null ? "" : `?before=${encodeURIComponent(before)}`;
   const result = await requestJson<OutletOrders>("GET", `/api/v1/merchant/outlets/${encodeURIComponent(outletId)}/orders${query}`);
   return result.ok && result.data ? result.data : null;
+}
+
+// S46: the server's totals of paid orders, for the filter's dates or by default the last seven days.
+type SummaryAnswer = { from: string; to: string; summaries: SalesSummary[] };
+
+async function fetchSummary(outletId: string, from?: string, to?: string): Promise<SummaryAnswer | null> {
+  // From alone runs to today, the server's default; to alone is that one day.
+  const query = new URLSearchParams();
+  if (from ?? to) query.set("from", (from ?? to)!);
+  if (to) query.set("to", to);
+  const suffix = query.size > 0 ? `?${query}` : "";
+  const result = await requestJson<SummaryAnswer>("GET", `/api/v1/merchant/outlets/${encodeURIComponent(outletId)}/sales-summary${suffix}`);
+  return result.ok && result.data ? result.data : null;
+}
+
+function downloadCsv(name: string, text: string) {
+  const url = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = name;
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 const ACKNOWLEDGE_FAILED = "Envoi could not record the acknowledgment. Nothing changed; try again.";
@@ -199,6 +223,23 @@ export function OrdersView({ initial, askEnabled, copilot = false }: { initial: 
   const [acknowledgeError, setAcknowledgeError] = useState<string | null>(null);
   const recordRef = useRef<HTMLDivElement>(null);
   const outletId = data.outlet.id;
+  const [summary, setSummary] = useState<SummaryAnswer | null>(null);
+  const [summaryFailed, setSummaryFailed] = useState(false);
+  // Refetched when an order's payment changes or the filter's dates change, never summed here.
+  const paymentKey = data.orders.map((order) => `${order.id}:${order.state}:${order.payment?.captureFeeMinor ?? ""}`).join(",");
+  const summaryFrom = filter?.from;
+  const summaryTo = filter?.to;
+  useEffect(() => {
+    let live = true;
+    void fetchSummary(outletId, summaryFrom, summaryTo).then((answer) => {
+      if (!live) return;
+      setSummary(answer);
+      setSummaryFailed(answer === null);
+    });
+    return () => {
+      live = false;
+    };
+  }, [outletId, paymentKey, summaryFrom, summaryTo]);
 
   const showNewest = (next: OutletOrders) => setData((current) => ({ ...next, orders: withNewest(current.orders, next.orders) }));
 
@@ -281,7 +322,7 @@ export function OrdersView({ initial, askEnabled, copilot = false }: { initial: 
     setNothingChosen(false);
   }
 
-  const shown = filter ? applyOrderFilter(data.orders, filter) : data.orders;
+  const shown = filter ? applyOrderFilter(data.orders, filter, data.outlet.country) : data.orders;
   const selected = shown.find((order) => order.id === selectedId) ?? null;
   const toRead = data.orders.filter((order) => needsReading(order) && order.id !== selectedId);
 
@@ -304,6 +345,24 @@ export function OrdersView({ initial, askEnabled, copilot = false }: { initial: 
           {data.orders.some((order) => order.pyusd) && <span className="chip warn">Devnet: test tokens only</span>}
         </span>
       </div>
+      {summary && summary.summaries.length > 0 && (
+        <div className="desk-tiles">
+          {summary.summaries.map((each) => {
+            const tiles = deskTiles(each);
+            const label = summaryFrom || summaryTo ? `${summary.from} to ${summary.to}` : "this week";
+            return (
+              <div className="card desk-tile" key={each.currency}>
+                <p className="muted">Paid {label}</p>
+                <p className="total money">{tiles.paid}</p>
+                <p className="muted">Net after PayPal fees</p>
+                <p className="total money">{tiles.net}</p>
+                {tiles.note && <p className="muted fine">{tiles.note}</p>}
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {summaryFailed && <p className="muted">Envoi could not load the totals. The orders below are unchanged; check again for new orders to retry.</p>}
       {copilot && <CopilotPanel outletId={outletId} orders={data.orders} onRefunded={checkNow} />}
       {data.orders.length === 0 ? (
         <p className="muted">No orders yet.</p>
@@ -345,11 +404,21 @@ export function OrdersView({ initial, askEnabled, copilot = false }: { initial: 
               {acknowledgeError}
             </p>
           )}
-          <OrdersGrid orders={shown} selectedId={selectedId} busyId={acknowledgingId} onSelect={selectRow} onAcknowledge={acknowledgeRow} />
-          <p className="muted fine">Sandbox test money. Pending and checking orders are never shown as Paid.</p>
+          <OrdersGrid orders={shown} totals={summary?.summaries ?? []} sort={filter?.sort ?? null} selectedId={selectedId} busyId={acknowledgingId} onSelect={selectRow} onAcknowledge={acknowledgeRow} />
+          <div className="actions">
+            <button
+              className="button secondary"
+              type="button"
+              onClick={() => downloadCsv(`envoi-orders-${outletId}.csv`, ordersCsv(shown.map((order) => ({ time: orderTime(order.createdAt), order })), summary?.summaries ?? []))}
+            >
+              Export CSV
+            </button>
+          </div>
+          <p className="muted fine">Sandbox test money. Pending and checking orders are never shown as Paid. Totals come from Envoi&apos;s records of paid orders{summary ? `, ${summary.from} to ${summary.to}` : ""}; a fee PayPal did not give reads Unknown.</p>
           <p className="muted fine">Paid and acknowledged are separate facts, and you can acknowledge only a paid order. Select an order to see its full record or delete it.</p>
         </div>
       )}
+      {summary && <SalesByMethod summaries={summary.summaries} />}
       {selected && (
         <div className="order-record" ref={recordRef} tabIndex={-1}>
           <OrderCard key={selected.id} order={selected} onAcknowledged={replace} onArchived={removeArchived} />

@@ -1,7 +1,7 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import { ORDER_STATES, type OrderFilterModel } from "@/domain/purchases/order-filter";
+import { ORDER_STATES, ORDER_VIEWS, SORT_COLUMNS, SORT_DIRECTIONS, type OrderFilterModel } from "@/domain/purchases/order-filter";
 import { CURRENCIES, type Currency } from "@/lib/money";
 import { log, toSafeErrorRecord } from "@/lib/log";
 
@@ -9,9 +9,9 @@ import { log, toSafeErrorRecord } from "@/lib/log";
 // false, a strict schema, no tools, no retries and a time budget. It receives the merchant's sentence
 // and the date. It never receives an order, and the sentence is never logged.
 
-const ORDER_FILTER_PROMPT_VERSION = "order-filter-prompt-2026-11-06";
+const ORDER_FILTER_PROMPT_VERSION = "order-filter-prompt-2026-11-08";
 
-// [hypothesis] Five short fields fit well inside this, including a reasoning model's own tokens.
+// [hypothesis] Seven short fields fit well inside this, including a reasoning model's own tokens.
 const ORDER_FILTER_MAX_OUTPUT_TOKENS = 1_000;
 const ORDER_FILTER_BUDGET_MS = 20_000;
 
@@ -23,6 +23,8 @@ const ModelAnswer = z
     currencies: z.array(z.enum(CURRENCIES as readonly [Currency, ...Currency[]])).nullable(),
     from: z.string().nullable(),
     to: z.string().nullable(),
+    sort: z.object({ column: z.enum(SORT_COLUMNS), direction: z.enum(SORT_DIRECTIONS) }).strict().nullable(),
+    view: z.enum(ORDER_VIEWS).nullable(),
   })
   .strict();
 
@@ -35,7 +37,9 @@ Set a field only when the sentence asks for it, otherwise null.
 "rails": paypal or pyusd. Crypto or Solana means pyusd.
 "currencies": SGD or USD. Singapore dollars means SGD and US dollars means USD.
 "from" and "to": both inclusive. Today means today for both. Yesterday means the day before for both. This week means "from" six days before today and "to" today. Last week means the seven days before that. This month means "from" the first of this month and "to" today.
-If the sentence asks for no filter you can express, answer null for all five. Never guess one.`;
+"sort": how to order the table. "column" is time, total, fee (what PayPal charged) or net (what reached the shop); "direction" is asc or desc. Newest or latest first means time desc; oldest first means time asc. Biggest or largest means desc; smallest means asc.
+"view": all, paid, needs_attention or overseas. Problems, needs a look or needs attention means needs_attention. Overseas, foreign, tourists or visitors means overseas.
+If the sentence asks for nothing you can express, answer null for all seven. Never guess one.`;
 }
 
 type FetchFunction = typeof globalThis.fetch;

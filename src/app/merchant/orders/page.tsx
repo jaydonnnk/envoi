@@ -62,8 +62,8 @@ export default async function MerchantOrdersPage() {
   return (
     <main>
       <p className="eyebrow">Merchant</p>
-      <h1>Orders</h1>
-      <p className="lead">{shops.some((shop) => shop.orders.orders.length > 0) ? "Ask in your own words, or sort and filter the table. Asking changes no order." : "Orders appear here once a buyer starts one at your shop."}</p>
+      <h1>Your sales desk</h1>
+      <p className="lead">{shops.some((shop) => shop.orders.orders.length > 0) ? "Sales from Envoi, what PayPal charged and what reached you. Sandbox test money." : "Orders appear here once a buyer starts one at your shop."}</p>
       {shops.length === 0 && (
         <section className="card">
           <h2>No shop yet</h2>

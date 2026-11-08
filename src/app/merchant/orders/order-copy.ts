@@ -1,5 +1,6 @@
-import type { OrderFilter, OrderState } from "@/domain/purchases/order-filter";
+import type { OrderFilter, OrderSort, OrderState, OrderView } from "@/domain/purchases/order-filter";
 import type { MerchantOrder } from "@/domain/purchases/orders";
+import type { SalesSummary } from "@/domain/purchases/sales-summary";
 import { formatMoney, money } from "@/lib/money";
 
 export type OrderStatus = { chip: string; tone: "ok" | "warn" | "plain"; body: string };
@@ -139,7 +140,54 @@ export function filterWords(filter: OrderFilter): string[] {
     ...(filter.rails ?? []).map((rail) => RAIL_WORDS[rail]!),
     ...(filter.currencies ?? []),
     ...[dateWords(filter.from, filter.to)].filter((words) => words !== null),
+    ...(filter.view && filter.view !== "all" ? [VIEW_WORDS[filter.view]] : []),
+    ...(filter.sort ? [SORT_WORDS[filter.sort.column][filter.sort.direction]] : []),
   ];
+}
+
+// S46: the view and sort the merchant asked for, in the mockup's words.
+const VIEW_WORDS: Record<Exclude<OrderView, "all">, string> = {
+  paid: "Paid",
+  needs_attention: "Needs attention",
+  overseas: "PayPal account outside the shop's country",
+};
+const SORT_WORDS: Record<OrderSort["column"], Record<OrderSort["direction"], string>> = {
+  time: { asc: "oldest first", desc: "newest first" },
+  total: { asc: "smallest first", desc: "largest first" },
+  fee: { asc: "smallest PayPal fee first", desc: "largest PayPal fee first" },
+  net: { asc: "smallest net first", desc: "largest net first" },
+};
+
+// S46: the desk's three PayPal columns. A paid PayPal order without PayPal's figure reads Unknown,
+// never zero. A PYUSD order paid in devnet test tokens has no PayPal fee, so its net is its total.
+// An order that is not paid shows nothing here: nothing was charged yet.
+const COUNTRY_NAMES = new Intl.DisplayNames(["en"], { type: "region" });
+export const UNKNOWN = "Unknown";
+export const NO_PAYPAL_FEE = "No PayPal fee";
+
+export function feeText(order: MerchantOrder): string {
+  if (order.state !== "paid") return "";
+  if (order.rail === "pyusd") return NO_PAYPAL_FEE;
+  const fee = order.payment?.captureFeeMinor ?? null;
+  return fee === null ? UNKNOWN : formatMoney(money(order.currency, fee));
+}
+
+export function netMinor(order: MerchantOrder): number | null {
+  if (order.state !== "paid") return null;
+  if (order.rail === "pyusd") return order.totalMinor;
+  return order.payment?.captureNetMinor ?? null;
+}
+
+export function netText(order: MerchantOrder): string {
+  if (order.state !== "paid") return "";
+  const net = netMinor(order);
+  return net === null ? UNKNOWN : formatMoney(money(order.currency, net));
+}
+
+export function countryText(order: MerchantOrder): string {
+  if (order.state !== "paid" || order.rail === "pyusd") return "";
+  const code = order.payment?.payerCountry ?? null;
+  return code === null ? UNKNOWN : (COUNTRY_NAMES.of(code) ?? code);
 }
 
 // S45: a refund is its own line beside the payment state. A refunded order stays Paid.
@@ -176,4 +224,47 @@ export function paymentChips(order: MerchantOrder): string {
   if (order.pyusd && order.pyusd.extraTransfers.length > 0) chips.push("Extra transfer");
   if (order.refund) chips.push(refundCopy(order.refund).chip);
   return chips.join(", ");
+}
+
+// S46: the "By payment method" table, one row per currency and method, from the server's summary.
+export type MethodRow = { id: string; method: string; paid: string; fees: string };
+
+export function methodRows(summary: SalesSummary): MethodRow[] {
+  return summary.byRail.map((total) => {
+    const paid = formatMoney(money(summary.currency, total.paidMinor));
+    if (total.rail === "pyusd") return { id: `${summary.currency}-pyusd`, method: "PYUSD, devnet test tokens", paid, fees: NO_PAYPAL_FEE };
+    const fee = formatMoney(money(summary.currency, total.knownFeeMinor));
+    const fees = total.unknownFeeCount === 0 ? fee : `${fee} known, ${total.unknownFeeCount} unknown`;
+    return { id: `${summary.currency}-paypal`, method: "PayPal", paid, fees };
+  });
+}
+
+// The desk's two tiles for one currency. Net counts only what is known; an unknown fee is named.
+export function deskTiles(summary: SalesSummary): { paid: string; net: string; note: string | null } {
+  return {
+    paid: formatMoney(money(summary.currency, summary.paidMinor)),
+    net: formatMoney(money(summary.currency, summary.knownNetMinor)),
+    note: summary.unknownFeeCount === 0 ? null : `${summary.unknownFeeCount} paid ${summary.unknownFeeCount === 1 ? "order has" : "orders have"} no fee from PayPal, so ${summary.unknownFeeCount === 1 ? "its" : "their"} net is not counted.`,
+  };
+}
+
+// CSV of the rows shown, then the server's totals. A cell a spreadsheet would read as a formula
+// (=, +, -, @, a tab or a return first) is prefixed with an apostrophe, so a menu item's name can
+// never run in the merchant's spreadsheet.
+const CSV_HEADER = ["Time (Singapore)", "Items", "Total", "PayPal fee", "Net", "PayPal account from", "Payment"];
+
+function csvCell(value: string): string {
+  const safe = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+  return /[",\n\r]/.test(safe) ? `"${safe.replaceAll('"', '""')}"` : safe;
+}
+
+export function ordersCsv(rows: readonly { time: string; order: MerchantOrder }[], summaries: readonly SalesSummary[]): string {
+  const lines = [CSV_HEADER];
+  for (const { time, order } of rows) {
+    lines.push([time, order.lines.map((line) => `${line.quantity} × ${line.name}`).join(", "), orderTotal(order), feeText(order), netText(order), countryText(order), paymentChips(order)]);
+  }
+  for (const summary of summaries) {
+    lines.push([`Totals, paid only (${summary.currency})`, `${summary.paidCount} paid`, formatMoney(money(summary.currency, summary.paidMinor)), `${formatMoney(money(summary.currency, summary.knownFeeMinor))} known`, `${formatMoney(money(summary.currency, summary.knownNetMinor))} known`, "", ""]);
+  }
+  return lines.map((line) => line.map(csvCell).join(",")).join("\r\n") + "\r\n";
 }
