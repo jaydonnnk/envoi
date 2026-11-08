@@ -253,6 +253,7 @@ footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; 
 .sgqr .identifiers .chip { margin-top: 6px; }
 .unenrolled > h2 { font-size: clamp(1.6rem, 4vw, 2.4rem); margin: 8px 0 12px; }
 .unenrolled-card h3 { font-size: 1.4rem; margin: 0 0 10px; }
+.unenrolled aside h3 { margin: 0 0 8px; font-size: 1.05rem; }
 .unenrolled-card img { display: block; width: 100%; max-width: 200px; height: auto; margin: 8px auto 14px; image-rendering: pixelated; }
 .shop-qr { border: 1px solid var(--line); border-radius: 12px; padding: 18px; text-align: center; background: var(--paper); }
 .shop-qr h3 { margin: 0 0 10px; }
