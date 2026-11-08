@@ -3,7 +3,9 @@ import { headers } from "next/headers";
 import { webEnv } from "@/env";
 import { listMerchantOutlets } from "@/domain/outlets/merchant";
 import { isDemoSellerOutlet } from "@/domain/payments/refunds";
+import { hasApprovedEnrollment } from "@/domain/purchases/digest";
 import { listOutletOrders, type OutletOrders } from "@/domain/purchases/orders";
+import { digestModel } from "@/integrations/ai/digest";
 import { orderFilterEnabled } from "@/integrations/ai/openai";
 import { demoSellerCopilot } from "@/integrations/assistant/merchant-copilot";
 import { getAuth } from "@/lib/auth";
@@ -53,10 +55,18 @@ export default async function MerchantOrdersPage() {
   const askEnabled = orderFilterEnabled();
   // S45: the copilot panel appears only for the labeled demo shop, and only while the copilot is on.
   const copilot = demoSellerCopilot(webEnv());
-  const shops: { orders: OutletOrders; copilot: boolean }[] = [];
+  // S47: the weekly summary card appears only for an approved shop while its model is configured.
+  const digestOn = digestModel() !== null;
+  const shops: { orders: OutletOrders; copilot: boolean; digest: boolean }[] = [];
   for (const outlet of outlets) {
     const orders = await listOutletOrders(webDb(), outlet.id, now);
-    if (orders && !isAppError(orders)) shops.push({ orders, copilot: copilot !== null && (await isDemoSellerOutlet(webDb(), outlet.id, copilot.merchantId)) });
+    if (orders && !isAppError(orders)) {
+      shops.push({
+        orders,
+        copilot: copilot !== null && (await isDemoSellerOutlet(webDb(), outlet.id, copilot.merchantId)),
+        digest: digestOn && (await hasApprovedEnrollment(webDb(), outlet.id)),
+      });
+    }
   }
 
   return (
@@ -71,7 +81,7 @@ export default async function MerchantOrdersPage() {
         </section>
       )}
       {shops.map((shop) => (
-        <OrdersView key={shop.orders.outlet.id} initial={shop.orders} askEnabled={askEnabled} copilot={shop.copilot} />
+        <OrdersView key={shop.orders.outlet.id} initial={shop.orders} askEnabled={askEnabled} copilot={shop.copilot} digest={shop.digest} />
       ))}
       <div className="actions">
         <a className="button secondary" href="/merchant/setup">

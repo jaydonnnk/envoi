@@ -8,6 +8,7 @@ import { requestJson } from "@/lib/browser/session";
 import type { SalesSummary } from "@/domain/purchases/sales-summary";
 import { archivedCountLine, deskTiles, ordersCsv, DELETE_COPY, extraTransferNote, filterWords, mayStillBePaid, needsReading, orderStatus, orderTotal, refundCopy } from "./order-copy";
 import { CopilotPanel } from "./copilot-panel";
+import { DigestCard } from "./digest-card";
 import { OrdersGrid, orderTime } from "./orders-grid";
 import { SalesByMethod } from "./sales-chart";
 import { startOrdersPolling, withNewest, withOlder, type PolledOrder } from "./polling";
@@ -201,8 +202,9 @@ function OrderCard({
 
 // One outlet's orders, kept current within the S3 polling bounds. Polls and "Check for new orders"
 // re-read the newest page; "Show older orders" adds the page before the oldest order shown.
-// copilot is true only for the labeled demo shop while the copilot is on (S45).
-export function OrdersView({ initial, askEnabled, copilot = false }: { initial: OutletOrders; askEnabled: boolean; copilot?: boolean }) {
+// copilot is true only for the labeled demo shop while the copilot is on (S45). digest is true only
+// for an approved shop while the weekly summary's model is configured (S47).
+export function OrdersView({ initial, askEnabled, copilot = false, digest = false }: { initial: OutletOrders; askEnabled: boolean; copilot?: boolean; digest?: boolean }) {
   const [data, setData] = useState(initial);
   // Whether the list holds every order back to the oldest. A poll only adds newer orders, and no
   // order shown is ever dropped, so only loading the last older page completes it.
@@ -405,6 +407,7 @@ export function OrdersView({ initial, askEnabled, copilot = false }: { initial: 
         </div>
       )}
       {summary && <SalesByMethod summaries={summary.summaries} />}
+      {digest && data.orders.length > 0 && <DigestCard outletId={outletId} />}
       {selected && (
         <div className="order-record" ref={recordRef} tabIndex={-1}>
           <OrderCard key={selected.id} order={selected} onAcknowledged={replace} onArchived={removeArchived} />

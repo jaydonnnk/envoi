@@ -55,6 +55,14 @@ export const COPILOT_LIMITS: RateLimits = {
   global: { max: 60, windowMs: 60 * 60_000 },
 };
 
+// S47, Gate 3 S47 amendment 2026-11-08 [hypothesis: starting values]: at most 10 weekly summaries per
+// outlet in 10 minutes and 60 across all outlets in an hour, like the order filter. Each admitted
+// summary may spend model money, so the limiter runs before the model call. The subject is the outlet.
+export const DIGEST_LIMITS: RateLimits = {
+  perSubject: { max: 10, windowMs: 10 * 60_000 },
+  global: { max: 60, windowMs: 60 * 60_000 },
+};
+
 // S37, Gate 3 third build plan [hypothesis: starting values]: at most 60 /mcp POSTs per agent token in
 // 10 minutes, about 10 full sentences at 6 POSTs each (handshake, tool list, three tools). Each token
 // has its own allowance, so no global window applies.
