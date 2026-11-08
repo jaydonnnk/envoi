@@ -21,6 +21,9 @@ describe("merchant SGQR identifier mapping", () => {
 
   beforeAll(async () => {
     fixture = await createPaymentsFixture("sgqr");
+    // These cases assert the scan count is not read (null), which holds only without STICKER_HASH_KEY;
+    // a local .env.local may set it, so it is removed before the web env is first read.
+    delete process.env.STICKER_HASH_KEY;
     routes = await loadMerchantRoutes();
     api = shopApi(fixture.database, routes);
     web = postgres(fixture.database.webUrl, { max: 1, onnotice: () => {} });
