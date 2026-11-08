@@ -1,0 +1,46 @@
+{
+  "at": "2026-11-08T14:48:01.102Z",
+  "mode": "READ ONLY",
+  "purpose": "candidate selection only, no purchase authorization",
+  "candidates": [
+    {
+      "id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+      "name": "Test Shop",
+      "country": "SG",
+      "hidden": true,
+      "enrollment": "approved",
+      "environment": "sandbox",
+      "destination_status": "active",
+      "destination_accepted": true,
+      "menu_item_id": "itm_rpuonb2ag72dfn4tudxol7tzhy",
+      "item_name": "Kopi C",
+      "unit_minor": 180
+    },
+    {
+      "id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+      "name": "Test Shop",
+      "country": "SG",
+      "hidden": true,
+      "enrollment": "approved",
+      "environment": "sandbox",
+      "destination_status": "active",
+      "destination_accepted": true,
+      "menu_item_id": "itm_orkwjxszkbnw4lbm25ydfmdwwm",
+      "item_name": "Iced lemon tea",
+      "unit_minor": 220
+    },
+    {
+      "id": "out_vrlbnc3zylbrr6g2drovaiqkfu",
+      "name": "Test Shop",
+      "country": "SG",
+      "hidden": true,
+      "enrollment": "approved",
+      "environment": "sandbox",
+      "destination_status": "active",
+      "destination_accepted": true,
+      "menu_item_id": "itm_fcx4h677abzullp3d3pkyogorm",
+      "item_name": "Iced milk tea",
+      "unit_minor": 250
+    }
+  ]
+}
