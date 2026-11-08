@@ -6,7 +6,9 @@ import type { Currency } from "@/lib/money";
 
 export type ProviderAmount = { currency: string; minor: number | null }; // minor null: unreadable value
 export type ProviderItem = { name: string; quantity: string; unit: ProviderAmount | null };
-export type ProviderCapture = { id: string | null; status: string; amount: ProviderAmount | null };
+// feeMinor and netMinor (S46) are PayPal's seller_receivable_breakdown, null when PayPal did not say.
+// No decision below reads them, or payerCountry.
+export type ProviderCapture = { id: string | null; status: string; amount: ProviderAmount | null; feeMinor: number | null; netMinor: number | null };
 
 export type PayPalOrder = {
   id: string;
@@ -18,6 +20,7 @@ export type PayPalOrder = {
   items: ProviderItem[] | null;
   captures: ProviderCapture[];
   approvalUrl: string | null;
+  payerCountry: string | null;
 };
 
 export type ExpectedPurchase = {
@@ -95,6 +98,16 @@ export function decideCaptureOutcome(order: PayPalOrder, expected: ExpectedPurch
     decision: "confirmed",
     evidence: { orderId: order.id, captureId: capture.id, grossMinor: expected.totalMinor, currency: expected.currency, payeeId: expected.payeeId, verifiedAt },
   };
+}
+
+// S46: what PayPal said it charged, what reached the seller and the payer's country, stored beside
+// a confirmed capture's evidence. Read after decideCaptureOutcome and never by it: a missing value
+// stays null (unknown) and changes no decision.
+export type SaleFigures = { captureFeeMinor: number | null; captureNetMinor: number | null; payerCountry: string | null };
+
+export function saleFigures(order: PayPalOrder): SaleFigures {
+  const capture = order.captures.length === 1 ? order.captures[0] : undefined;
+  return { captureFeeMinor: capture?.feeMinor ?? null, captureNetMinor: capture?.netMinor ?? null, payerCountry: order.payerCountry };
 }
 
 // Outcome-reason prefix stored when a same-key create replay was refused outright by PayPal.

@@ -33,6 +33,8 @@
     "@solana/kit": "8.4.0",
     "@solana/wallet-standard-features": "1.5.0",
     "@wallet-standard/app": "1.1.1",
+    "ag-charts-community": "14.2.0",
+    "ag-charts-react": "14.2.0",
     "ag-grid-community": "36.2.0",
     "ag-grid-react": "36.2.0",
     "ai": "7.0.130",

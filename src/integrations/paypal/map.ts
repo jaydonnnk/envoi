@@ -23,10 +23,44 @@ function items(value: unknown): ProviderItem[] | null {
   return value.map((item) => (isObject(item) ? { name: str(item.name) ?? "", quantity: str(item.quantity) ?? "", unit: amount(item.unit_amount) } : { name: "", quantity: "", unit: null }));
 }
 
+// S46: PayPal's fee and the net to the seller, from seller_receivable_breakdown. Each is kept only
+// when it is a readable, non-negative amount in the capture's own currency; anything else is null,
+// which the desk shows as unknown, never zero. Neither is read by any payment decision.
+function breakdownPart(breakdown: Json | null, key: string, captureAmount: ProviderAmount | null): number | null {
+  if (!breakdown || !captureAmount) return null;
+  const part = amount(breakdown[key]);
+  if (!part || part.minor === null || part.minor < 0 || part.currency !== captureAmount.currency) return null;
+  return part.minor;
+}
+
 function captures(unit: Json | null): ProviderCapture[] {
   const payments = unit && isObject(unit.payments) ? unit.payments : null;
   const list = payments && Array.isArray(payments.captures) ? payments.captures : [];
-  return list.map((capture) => (isObject(capture) ? { id: str(capture.id), status: str(capture.status) ?? "", amount: amount(capture.amount) } : { id: null, status: "", amount: null }));
+  return list.map((capture) => {
+    if (!isObject(capture)) return { id: null, status: "", amount: null, feeMinor: null, netMinor: null };
+    const captureAmount = amount(capture.amount);
+    const breakdown = isObject(capture.seller_receivable_breakdown) ? capture.seller_receivable_breakdown : null;
+    return {
+      id: str(capture.id),
+      status: str(capture.status) ?? "",
+      amount: captureAmount,
+      feeMinor: breakdownPart(breakdown, "paypal_fee", captureAmount),
+      netMinor: breakdownPart(breakdown, "net_amount", captureAmount),
+    };
+  });
+}
+
+// S46: the country of the payer's PayPal account, as PayPal gives it, and nothing else about the
+// payer. The account address under payment_source comes first, then the older payer address.
+function countryCode(value: unknown): string | null {
+  const address = isObject(value) && isObject(value.address) ? value.address : null;
+  const code = address ? str(address.country_code) : null;
+  return code !== null && /^[A-Z]{2}$/.test(code) ? code : null;
+}
+
+function payerCountry(body: Json): string | null {
+  const source = isObject(body.payment_source) ? body.payment_source : null;
+  return countryCode(source ? source.paypal : null) ?? countryCode(body.payer);
 }
 
 function approvalUrl(links: unknown): string | null {
@@ -53,6 +87,7 @@ export function mapOrder(body: unknown): PayPalOrder | null {
     items: unit ? items(unit.items) : null,
     captures: captures(unit),
     approvalUrl: approvalUrl(body.links),
+    payerCountry: payerCountry(body),
   };
 }
 

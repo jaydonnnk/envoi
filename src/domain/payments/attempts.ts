@@ -7,6 +7,8 @@ import type { PricedLine } from "@/domain/purchases/price";
 import {
   CREATE_REPLAY_REFUSED,
   decideCaptureOutcome,
+  saleFigures,
+  type SaleFigures,
   decideCreateRecovery,
   isDefinitiveRefusal,
   verifyApprovedOrder,
@@ -75,7 +77,7 @@ function isUniqueViolation(err: unknown): boolean {
   return false;
 }
 
-type AttemptChanges = Partial<Pick<PaymentAttemptRow, "orderId" | "approvalUrl" | "captureRequestId" | "captureId" | "captureGrossMinor" | "captureVerifiedAt" | "outcomeReason">>;
+type AttemptChanges = Partial<Pick<PaymentAttemptRow, "orderId" | "approvalUrl" | "captureRequestId" | "captureId" | "captureGrossMinor" | "captureVerifiedAt" | "captureFeeMinor" | "captureNetMinor" | "payerCountry" | "outcomeReason">>;
 
 // Compare-and-set on the attempt. Throws on a transition the table forbids; returns whether this
 // call moved the row.
@@ -352,7 +354,7 @@ async function currentView(db: Db, principal: BuyerPrincipal, purchaseId: string
   return purchase ? purchase.view : { state: "uncertain", paypalAttempt: null, pyusdAttempt: null };
 }
 
-async function recordOutcome(db: Db, purchase: OwnPurchase, attempt: PaymentAttemptRow, decision: CaptureDecision | { decision: "no_evidence"; reason: string }, now: Date): Promise<void> {
+async function recordOutcome(db: Db, purchase: OwnPurchase, attempt: PaymentAttemptRow, decision: CaptureDecision | { decision: "no_evidence"; reason: string }, figures: SaleFigures | null, now: Date): Promise<void> {
   await db.transaction(async (tx) => {
     if (decision.decision === "confirmed") {
       const { evidence } = decision;
@@ -360,6 +362,7 @@ async function recordOutcome(db: Db, purchase: OwnPurchase, attempt: PaymentAtte
         captureId: evidence.captureId,
         captureGrossMinor: evidence.grossMinor,
         captureVerifiedAt: evidence.verifiedAt,
+        ...figures,
       });
       await transitionPurchase(tx, purchase.id, ["pending_payment"], "paid", "capture_confirmed");
       await recordAudit(tx, {
@@ -454,7 +457,7 @@ export async function completePayPal(deps: PayPalDeps, principal: BuyerPrincipal
       evidence.kind === "ok"
         ? decideCaptureOutcome(evidence.value, expected, now())
         : { decision: "no_evidence" as const, reason: providerReason("capture", evidence) };
-    await recordOutcome(db, purchase, attempt, decision, now());
+    await recordOutcome(db, purchase, attempt, decision, evidence.kind === "ok" ? saleFigures(evidence.value) : null, now());
     const view = await currentView(db, principal, purchaseId, now());
     return decision.decision === "confirmed"
       ? { status: "paid", view, captureId: decision.evidence.captureId }
@@ -557,7 +560,7 @@ async function settleCrypto(deps: Pick<ReconcileDeps, "db" | "now" | "actor">, p
 
     if (decision.decision === "confirmed") {
       const { evidence } = decision;
-      await transitionAttempt(tx, attemptId, from, "capture_confirmed", now, { captureId: evidence.captureId, captureGrossMinor: evidence.grossMinor, captureVerifiedAt: evidence.verifiedAt, outcomeReason: null }, "crypto");
+      await transitionAttempt(tx, attemptId, from, "capture_confirmed", now, { captureId: evidence.captureId, captureGrossMinor: evidence.grossMinor, captureVerifiedAt: evidence.verifiedAt, ...saleFigures(order), outcomeReason: null }, "crypto");
       await transitionPurchase(tx, purchaseId, purchaseStatesInto("paid", "capture_confirmed", "crypto"), "paid", "capture_confirmed", "crypto");
       await audit("paypal_capture_confirmed", false, { captureId: evidence.captureId, grossMinor: evidence.grossMinor, payeeId: evidence.payeeId, funding: "crypto" });
       if (purchase.state === "unpaid_closed") await audit("crypto_settled_after_close", true, { captureId: evidence.captureId });
@@ -619,7 +622,7 @@ async function claimProviderRead(db: Db, attemptId: string, now: Date): Promise<
 }
 
 type RecoveryVerdict =
-  | { kind: "confirmed"; decision: Extract<CaptureDecision, { decision: "confirmed" }> }
+  | { kind: "confirmed"; decision: Extract<CaptureDecision, { decision: "confirmed" }>; figures: SaleFigures }
   | { kind: "failed"; reason: string }
   | { kind: "inconclusive"; reason: string };
 
@@ -635,6 +638,7 @@ async function applyVerdict(deps: ReconcileDeps, purchaseId: string, purchaseSta
         captureId: evidence.captureId,
         captureGrossMinor: evidence.grossMinor,
         captureVerifiedAt: evidence.verifiedAt,
+        ...verdict.figures,
       });
       if (!moved) {
         // Already decided. A confirmed capture after a verified failure is the operator's to see.
@@ -697,7 +701,7 @@ async function recoverCapture(deps: ReconcileDeps, purchase: PurchaseFacts & { s
   const first = await readOrder();
   if (first.kind === "ok") {
     const decision = decide(first.value);
-    if (decision.decision === "confirmed") return apply({ kind: "confirmed", decision });
+    if (decision.decision === "confirmed") return apply({ kind: "confirmed", decision, figures: saleFigures(first.value) });
     // A capture PayPal reports but that does not match, or is not complete, is never paid and
     // never failed: it stays uncertain.
     if (first.value.captures.length > 0) return apply({ kind: "inconclusive", reason: decision.reason });
@@ -713,7 +717,7 @@ async function recoverCapture(deps: ReconcileDeps, purchase: PurchaseFacts & { s
   // Without PayPal's record of the order nothing is proven, whatever the replay answered.
   if (after.kind !== "ok") return apply({ kind: "inconclusive", reason: providerReason("read", after) });
   const decision = decide(after.value);
-  if (decision.decision === "confirmed") return apply({ kind: "confirmed", decision });
+  if (decision.decision === "confirmed") return apply({ kind: "confirmed", decision, figures: saleFigures(after.value) });
   if (after.value.captures.length === 0 && isDefinitiveRefusal(replayed)) {
     return apply({ kind: "failed", reason: `capture_refused_${replayed.status}:${replayed.issues}` });
   }

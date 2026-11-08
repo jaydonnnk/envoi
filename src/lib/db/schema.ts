@@ -472,6 +472,11 @@ export const paymentAttempts = pgTable(
     captureId: text("capture_id").unique(),
     captureGrossMinor: integer("capture_gross_minor"),
     captureVerifiedAt: timestamp("capture_verified_at", { withTimezone: true }),
+    // S46: what PayPal's seller_receivable_breakdown and payer address said when the capture was
+    // verified. Null means PayPal did not say (unknown), never zero; they never decide Paid.
+    captureFeeMinor: integer("capture_fee_minor"),
+    captureNetMinor: integer("capture_net_minor"),
+    payerCountry: text("payer_country"),
     outcomeReason: text("outcome_reason"),
     leaseOwner: text("lease_owner"),
     leaseExpiresAt: timestamp("lease_expires_at", { withTimezone: true }),
@@ -643,7 +648,7 @@ export const auditEvents = pgTable(
 // nothing. Admission prunes rows older than the bucket's longest window, so the table stays small
 // without a maintenance task.
 
-export const RATE_LIMIT_BUCKETS = ["buyer_suggestion", "wallet_challenge", "buyer_assistant", "menu_translation", "merchant_order_filter", "agent_mcp", "merchant_copilot"] as const;
+export const RATE_LIMIT_BUCKETS = ["buyer_suggestion", "wallet_challenge", "buyer_assistant", "menu_translation", "merchant_order_filter", "agent_mcp", "merchant_copilot", "merchant_digest"] as const;
 
 export const rateLimitHits = pgTable(
   "rate_limit_hits",
@@ -654,7 +659,7 @@ export const rateLimitHits = pgTable(
     at: timestamp("at", { withTimezone: true }).notNull(),
   },
   (t) => [
-    check("rate_limit_hits_bucket_check", sql`${t.bucket} in ('buyer_suggestion', 'wallet_challenge', 'buyer_assistant', 'menu_translation', 'merchant_order_filter', 'agent_mcp', 'merchant_copilot')`),
+    check("rate_limit_hits_bucket_check", sql`${t.bucket} in ('buyer_suggestion', 'wallet_challenge', 'buyer_assistant', 'menu_translation', 'merchant_order_filter', 'agent_mcp', 'merchant_copilot', 'merchant_digest')`),
     index("rate_limit_hits_bucket_at_idx").on(t.bucket, t.at),
     index("rate_limit_hits_subject_idx").on(t.bucket, t.subject, t.at),
   ],

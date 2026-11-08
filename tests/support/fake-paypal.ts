@@ -58,8 +58,10 @@ function view(id: string, order: FakeOrder): PayPalOrder {
     amount: { currency, minor: total },
     customId: order.input.correlationId,
     items: order.input.lines.map((line) => ({ name: line.name, quantity: String(line.quantity), unit: { currency, minor: line.unitMinor } })),
-    captures: order.captureId ? [{ id: order.captureId, status: "COMPLETED", amount: { currency, minor: total } }] : [],
+    // No fee, net or payer country unless a test adds them with `tamper` (S46): PayPal may omit them.
+    captures: order.captureId ? [{ id: order.captureId, status: "COMPLETED", amount: { currency, minor: total }, feeMinor: null, netMinor: null }] : [],
     approvalUrl: order.status === "PAYER_ACTION_REQUIRED" ? `${SANDBOX_APPROVAL}${id}` : null,
+    payerCountry: null,
   };
 }
 

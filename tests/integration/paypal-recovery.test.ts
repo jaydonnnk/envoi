@@ -381,7 +381,7 @@ describe("PayPal recovery (fixture fault injection)", () => {
       // The first read is lost, the replay is refused, and the next read shows a pending capture.
       fake.fail("readOrder", "lose_request");
       fake.refuseCapture = { status: 422, issues: "UNPROCESSABLE_ENTITY,ORDER_NOT_APPROVED" };
-      fake.tamper = (order) => ({ ...order, captures: [{ id: "FIXTURE-CAPTURE-PENDING", status: "PENDING", amount: order.amount }] });
+      fake.tamper = (order) => ({ ...order, captures: [{ id: "FIXTURE-CAPTURE-PENDING", status: "PENDING", amount: order.amount, feeMinor: null, netMinor: null }] });
       expect((await reconcile(cookie, purchaseId)).check).toBe("read");
       expect(await rows(purchaseId)).toMatchObject({ purchase: "uncertain", attempts: [{ state: "capture_unknown", capture_id: null }] });
     });
