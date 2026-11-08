@@ -30,4 +30,25 @@ describe("scan result", () => {
     ];
     for (const resolution of shown) expect(render(resolution), resolution.kind).not.toMatch(/role=|aria-live/);
   });
+
+  // S48: the card a visitor shows a stall appears for a no-match only. A single match opens the
+  // outlet and never reaches ScanResult; it is rendered here anyway to show the card is not its fallback.
+  describe("83 the card appears only for a no-match scan", () => {
+    const card = "This stall isn&#x27;t on Envoi yet";
+    it("shows the card, its languages and the shops page for a no-match", () => {
+      const html = render({ kind: "no_match" });
+      expect(html).toContain(card);
+      for (const label of ["English", "中文", "Melayu", "தமிழ்"]) expect(html).toContain(label);
+      expect(html).toContain('href="/for-shops"');
+      expect(html).toContain("What Envoi keeps");
+    });
+    it("does not show it for an ambiguous, unsupported or matched scan", () => {
+      const others = [
+        { kind: "ambiguous", candidates: [fixtureOutlet("out_fixture_a", "FIXTURE stall 1"), fixtureOutlet("out_fixture_b", "FIXTURE stall 2")] },
+        { kind: "unsupported_payload", unrecognizedCount: 0 },
+        { kind: "single", outlet: fixtureOutlet("out_fixture_a", "FIXTURE stall 1") },
+      ] as unknown as Shown[];
+      for (const resolution of others) expect(render(resolution), resolution.kind).not.toContain(card);
+    });
+  });
 });

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { PublishedOutletSummary } from "@/domain/outlets/search";
 import { SGQR_MAX_PAYLOAD_CHARS } from "@/domain/sgqr/decode";
 import type { SgqrResolution } from "@/domain/sgqr/resolve";
-import { qrDetector } from "@/lib/browser/qr";
+import { drawShopQr, qrDetector } from "@/lib/browser/qr";
 import { ensureBuyerSession, postJson } from "@/lib/browser/session";
 import { useRestoreFocus } from "@/lib/browser/focus";
 
@@ -275,24 +275,96 @@ export function ScanResult({ resolution }: { resolution: Exclude<SgqrResolution,
       </section>
     );
   }
-  if (resolution.kind === "no_match") {
-    return (
-      <section className="card">
-        <div className="status">
-          <strong>This shop is not on Envoi</strong>
-          <small>Nothing can be bought through Envoi with this sticker, and scanning it does not add the shop. Search by name instead.</small>
-        </div>
-        <p className="muted fine">
-          Is this your shop? <a href="/merchant/setup">Enroll it in merchant setup</a>.
-        </p>
-      </section>
-    );
-  }
+  if (resolution.kind === "no_match") return <UnenrolledStall />;
   return (
     <section className="card">
       <div className="status">
         <strong>Envoi cannot identify a shop from this code</strong>
         <small>It is not a shop&apos;s SGQR sticker, or it was misread. Scan or paste it again, or search by name.</small>
+      </div>
+    </section>
+  );
+}
+
+// S48: the reviewed static card a visitor can show a stall that is not on Envoi (Gate 1 screen
+// buyer-unenrolled-scan.html). No model is called. The Malay and Tamil lines were written without a
+// native reader's review, so they say "Draft translation".
+type CardLanguage = "en" | "zh" | "ms" | "ta";
+
+const CARD_TEXT: Record<CardLanguage, { label: string; heading: string; body: string; draft: boolean }> = {
+  en: { label: "English", heading: "A visitor wanted to pay you with PayPal.", body: "Scan to see how to join Envoi. Money goes straight to your own PayPal.", draft: false },
+  zh: { label: "中文", heading: "有游客想用 PayPal 付款给您", body: "扫描二维码，了解如何加入 Envoi。您的款项直接进入您自己的 PayPal。", draft: false },
+  ms: { label: "Melayu", heading: "Seorang pelawat ingin membayar anda dengan PayPal.", body: "Imbas untuk melihat cara menyertai Envoi. Wang terus masuk ke akaun PayPal anda sendiri.", draft: true },
+  ta: {
+    label: "தமிழ்",
+    heading: "ஒரு பார்வையாளர் PayPal மூலம் உங்களுக்குப் பணம் செலுத்த விரும்பினார்.",
+    body: "Envoi-இல் எப்படிச் சேர்வது என்பதைப் பார்க்க ஸ்கேன் செய்யுங்கள். பணம் நேரடியாக உங்கள் சொந்த PayPal கணக்கிற்குச் செல்லும்.",
+    draft: true,
+  },
+};
+
+const CARD_LANGUAGES: readonly CardLanguage[] = ["en", "zh", "ms", "ta"];
+
+function UnenrolledStall() {
+  const [language, setLanguage] = useState<CardLanguage>("zh");
+  const [image, setImage] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let objectUrl: string | null = null;
+    let live = true;
+    drawShopQr(`${window.location.origin}/for-shops`)
+      .then((png) => {
+        if (!live) return;
+        objectUrl = URL.createObjectURL(png);
+        setImage(objectUrl);
+      })
+      .catch(() => live && setFailed(true));
+    return () => {
+      live = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, []);
+
+  const text = CARD_TEXT[language];
+  return (
+    <section className="unenrolled" aria-labelledby="unenrolled-heading">
+      <h2 id="unenrolled-heading">This stall isn&apos;t on Envoi yet</h2>
+      <p className="lead">You cannot pay this stall through Envoi. Scanning did not add it. You can show the stall this card, and search for another shop.</p>
+      <div className="layout">
+        <section className="card unenrolled-card" aria-label="Card to show the stall">
+          <h3 lang={language}>{text.heading}</h3>
+          <p lang={language}>{text.body}</p>
+          {language !== "en" && <p lang="en">{`${CARD_TEXT.en.heading} ${CARD_TEXT.en.body}`}</p>}
+          {text.draft && <p className="muted fine">Draft translation</p>}
+          {failed ? (
+            <p className="muted fine">
+              The QR code could not be drawn in this browser. The stall can open <a href="/for-shops">Envoi for shops</a> instead.
+            </p>
+          ) : image ? (
+            // eslint-disable-next-line @next/next/no-img-element -- a local object URL, not an optimizable asset
+            <img src={image} alt="QR code that opens Envoi's page for shops" width={200} height={200} />
+          ) : (
+            <p className="muted fine">Drawing the QR code</p>
+          )}
+          <p className="stall-languages">
+            {CARD_LANGUAGES.map((tag) => (
+              <button key={tag} type="button" className="stall-language" lang={tag} aria-pressed={tag === language} onClick={() => setLanguage(tag)}>
+                {CARD_TEXT[tag].label}
+              </button>
+            ))}
+          </p>
+        </section>
+        <aside className="card">
+          <h3>What Envoi keeps</h3>
+          <p>Only a count of scans for this sticker, under a scrambled code. Not the stall&apos;s name, the sticker&apos;s text or anything about you.</p>
+          <a className="button secondary full" href="/buy">
+            Search for a shop
+          </a>
+          <p className="muted fine">
+            Is this your shop? <a href="/for-shops">See how to join Envoi</a>.
+          </p>
+        </aside>
       </div>
     </section>
   );

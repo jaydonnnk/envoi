@@ -5,6 +5,7 @@ import type { MenuDraft } from "@/domain/menu/types";
 import { getPayPalConnection, type PayPalConnection } from "@/domain/outlets/destination";
 import { publicationStatus, type PublicationStatus } from "@/domain/outlets/publish";
 import { decodeEmvcoTlv, type SupportedScheme } from "@/domain/sgqr/decode";
+import { scanCount, stickerHash } from "@/domain/sgqr/demand";
 import { isMappable, mappableIdentifier } from "@/domain/sgqr/validate";
 import { formatPyusdPerSgd, isRateExpired, latestPyusdRate } from "@/domain/pyusd/rate";
 import { rewardsCard, type RewardsCard } from "@/domain/rewards/paypal-pyusd";
@@ -30,6 +31,9 @@ export type OutletIdentifier = {
   source: "sticker" | "corrected" | "manual";
   checksumValid: boolean | null;
   approved: boolean;
+  // S48: how often buyers scanned this identifier on Envoi while no published shop matched it, read
+  // through its keyed hash. Null when STICKER_HASH_KEY is unset, so no count is read or shown.
+  scans: number | null;
 };
 
 export type MerchantOutlet = {
@@ -115,15 +119,19 @@ async function listIdentifiers(db: Pick<Db, "select">, outletId: string): Promis
     .from(outletIdentifiers)
     .where(eq(outletIdentifiers.outletId, outletId))
     .orderBy(asc(outletIdentifiers.submittedAt), asc(outletIdentifiers.id));
-  return rows.map((row) => ({
-    id: row.id,
-    scheme: "paynow_uen",
-    identifier: row.identifier,
-    distinguisher: row.distinguisher,
-    source: row.source === "sticker" || row.source === "corrected" ? row.source : "manual",
-    checksumValid: row.checksumValid,
-    approved: row.approvedAt !== null,
-  }));
+  const key = webEnv().STICKER_HASH_KEY;
+  return Promise.all(
+    rows.map(async (row) => ({
+      id: row.id,
+      scheme: "paynow_uen" as const,
+      identifier: row.identifier,
+      distinguisher: row.distinguisher,
+      source: row.source === "sticker" || row.source === "corrected" ? row.source : "manual",
+      checksumValid: row.checksumValid,
+      approved: row.approvedAt !== null,
+      scans: key ? await scanCount(db, stickerHash("paynow_uen", row.identifier, key)) : null,
+    })),
+  );
 }
 
 async function toMerchantOutlet(db: Pick<Db, "select">, row: OutletRow): Promise<MerchantOutlet> {

@@ -69,6 +69,10 @@ services:
       # Menu translation and Show the stall (S29, S42). Off unless this and OPENAI_API_KEY are set.
       - key: AI_MENU_TRANSLATION_MODEL
         sync: false
+      # Stall demand (S48): the key for the keyed hash of an unenrolled sticker, at least 32
+      # characters, entered by hand. Unset means no scan is counted.
+      - key: STICKER_HASH_KEY
+        sync: false
       # Menu photo import (S11), shipped closed. AI_MENU_MODEL needs a reviewed bounds entry in
       # MENU_SPEND_POLICY, or every import is refused. The kill switch is "true" or "false", entered
       # by hand; unset is false.

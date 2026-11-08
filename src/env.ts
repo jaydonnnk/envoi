@@ -63,6 +63,10 @@ const webSchema = z.object({
   PAYPAL_DEMO_SELLER_CLIENT_ID: z.string().min(1).optional(),
   PAYPAL_DEMO_SELLER_CLIENT_SECRET: z.string().min(1).optional(),
   PAYPAL_DEMO_SELLER_MERCHANT_ID: z.string().regex(/^[A-Z0-9]{13}$/, "must be a 13-character PayPal merchant id").optional(),
+  // Stall demand (S48, Gate 2 "Flow: stall demand"). The key for the HMAC-SHA256 of an unenrolled
+  // sticker's scheme and identifier; it lives only in the environment, so a stored hash cannot be
+  // matched to a public UEN list without it. Unset means no scan is counted and setup shows no count.
+  STICKER_HASH_KEY: z.string().min(32, "must be at least 32 characters").optional(),
   // PYUSD on Solana devnet (S16). These are the rail's only two settings: the cluster, genesis hash,
   // mint, token program and decimals are reviewed code constants in src/domain/pyusd/constants.ts,
   // and any other PYUSD_ or SOLANA_ name refuses to boot. The RPC URL is checked against the pinned

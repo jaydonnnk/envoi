@@ -71,6 +71,14 @@ export const SITE_ASSISTANT_MCP_LIMITS: RateLimits = {
   global: null,
 };
 
+// S48, Gate 3 reopening 2026-11-07 [hypothesis: starting values]: at most 5 counted unenrolled scans
+// per buyer in 10 minutes and 300 across all buyers in an hour, so one session cannot inflate a
+// sticker's count past 5. The window is short, so a limiter row naming the buyer is pruned soon.
+export const STICKER_SCAN_LIMITS: RateLimits = {
+  perSubject: { max: 5, windowMs: 10 * 60_000 },
+  global: { max: 300, windowMs: 60 * 60_000 },
+};
+
 // S16, Gate 3 "PYUSD merchant wallet and rate": at most 10 wallet challenges per outlet in an hour.
 // The subject is the outlet, so a member cannot spread requests across sessions to exceed it.
 export const WALLET_CHALLENGE_LIMITS: RateLimits = {

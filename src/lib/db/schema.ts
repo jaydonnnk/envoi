@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { bigint, boolean, check, customType, index, integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex, type AnyPgColumn } from "drizzle-orm/pg-core";
+import { bigint, boolean, check, customType, date, index, integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex, type AnyPgColumn } from "drizzle-orm/pg-core";
 import type { Country, Currency } from "@/lib/money";
 
 // Every table lives in public. drizzle-orm refuses pgSchema("public"), so the schema pin is the
@@ -648,7 +648,7 @@ export const auditEvents = pgTable(
 // nothing. Admission prunes rows older than the bucket's longest window, so the table stays small
 // without a maintenance task.
 
-export const RATE_LIMIT_BUCKETS = ["buyer_suggestion", "wallet_challenge", "buyer_assistant", "menu_translation", "merchant_order_filter", "agent_mcp", "merchant_copilot", "merchant_digest"] as const;
+export const RATE_LIMIT_BUCKETS = ["buyer_suggestion", "wallet_challenge", "buyer_assistant", "menu_translation", "merchant_order_filter", "agent_mcp", "merchant_copilot", "merchant_digest", "sticker_scan"] as const;
 
 export const rateLimitHits = pgTable(
   "rate_limit_hits",
@@ -659,9 +659,28 @@ export const rateLimitHits = pgTable(
     at: timestamp("at", { withTimezone: true }).notNull(),
   },
   (t) => [
-    check("rate_limit_hits_bucket_check", sql`${t.bucket} in ('buyer_suggestion', 'wallet_challenge', 'buyer_assistant', 'menu_translation', 'merchant_order_filter', 'agent_mcp', 'merchant_copilot', 'merchant_digest')`),
+    check("rate_limit_hits_bucket_check", sql`${t.bucket} in ('buyer_suggestion', 'wallet_challenge', 'buyer_assistant', 'menu_translation', 'merchant_order_filter', 'agent_mcp', 'merchant_copilot', 'merchant_digest', 'sticker_scan')`),
     index("rate_limit_hits_bucket_at_idx").on(t.bucket, t.at),
     index("rate_limit_hits_subject_idx").on(t.bucket, t.subject, t.at),
+  ],
+);
+
+// Stall demand (S48, Gate 2 Data 3): how often an unenrolled sticker is scanned, per week. The only
+// key is an HMAC-SHA256 of the sticker's scheme and identifier under STICKER_HASH_KEY. It holds no
+// name, sticker text, identifier, session, user, address or time beyond the week, so a row cannot
+// name a stall or a scanner, and nothing joins it to a limiter row by time.
+export const stickerScanCounts = pgTable(
+  "sticker_scan_counts",
+  {
+    stickerHash: text("sticker_hash").notNull(),
+    // The Monday that starts the week in Singapore.
+    week: date("week", { mode: "string" }).notNull(),
+    count: integer("count").notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.stickerHash, t.week] }),
+    check("sticker_scan_counts_hash_check", sql`${t.stickerHash} ~ '^[0-9a-f]{64}$'`),
+    check("sticker_scan_counts_count_check", sql`${t.count} > 0`),
   ],
 );
 

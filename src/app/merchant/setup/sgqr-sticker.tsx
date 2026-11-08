@@ -56,6 +56,11 @@ function Submitted({ identifiers }: { identifiers: OutletIdentifier[] }) {
               {SOURCE_LABEL[entry.source]}
               {checksumLabel(entry.checksumValid) ? `, ${checksumLabel(entry.checksumValid)!.toLowerCase()}` : ""}
             </small>
+            {entry.scans !== null && (
+              <small>
+                {entry.scans} {entry.scans === 1 ? "scan" : "scans"} on Envoi while no shop on Envoi matched this UEN. A count of scans only, not of sales or visitors.
+              </small>
+            )}
             <span className={`chip ${entry.approved ? "ok" : "warn"}`}>{entry.approved ? "Approved by the Envoi operator" : "Waiting for the Envoi operator"}</span>
           </div>
         </li>

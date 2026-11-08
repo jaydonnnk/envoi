@@ -70,7 +70,7 @@ describe("merchant SGQR identifier mapping", () => {
     expect(fromSticker?.status).toBe(200);
     const outlet = (await envelope<{ outlet: MerchantOutlet }>(fromSticker!)).data.outlet;
     expect(outlet.identifiers).toEqual([
-      { id: expect.any(String), scheme: "paynow_uen", identifier: FIXTURE_UEN, distinguisher: "FIXTURE stall 1", source: "sticker", checksumValid: true, approved: false },
+      { id: expect.any(String), scheme: "paynow_uen", identifier: FIXTURE_UEN, distinguisher: "FIXTURE stall 1", source: "sticker", checksumValid: true, approved: false, scans: null },
     ]);
 
     // The same sticker with a UEN it does not carry, a sticker whose checksum fails, and no sticker.

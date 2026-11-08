@@ -83,6 +83,8 @@ try {
     PAYPAL_DEMO_SELLER_CLIENT_ID: "fixture-unused",
     PAYPAL_DEMO_SELLER_CLIENT_SECRET: "fixture-unused",
     PAYPAL_DEMO_SELLER_MERCHANT_ID: "FXTRUNUSED0AA",
+    // S48: no route this run calls scans a sticker, so the key is a fixture value.
+    STICKER_HASH_KEY: "fixture-unused-sticker-hash-key-0000000000",
     // S38: no seller in this run is on the allowlist, so crypto stays off.
     PAYPAL_CRYPTO_ENABLED: "FIXTURE-UNLISTED-SELLER",
     SOLANA_RPC_URL: "http://127.0.0.1:9/fixture-unused",
