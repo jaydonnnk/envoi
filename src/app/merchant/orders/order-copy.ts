@@ -162,8 +162,8 @@ const SORT_WORDS: Record<OrderSort["column"], Record<OrderSort["direction"], str
 // never zero. A PYUSD order paid in devnet test tokens has no PayPal fee, so its net is its total.
 // An order that is not paid shows nothing here: nothing was charged yet.
 const COUNTRY_NAMES = new Intl.DisplayNames(["en"], { type: "region" });
-export const UNKNOWN = "Unknown";
-export const NO_PAYPAL_FEE = "No PayPal fee";
+const UNKNOWN = "Unknown";
+const NO_PAYPAL_FEE = "No PayPal fee";
 
 export function feeText(order: MerchantOrder): string {
   if (order.state !== "paid") return "";

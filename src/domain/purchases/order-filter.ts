@@ -70,7 +70,7 @@ export function isOverseas(order: MerchantOrder, shopCountry: Country): boolean 
 
 // Needs attention: Envoi could not confirm the payment, a PyUSD record must be read, or a refund is
 // still being checked or failed. Pending orders are waiting on the buyer, not on the shop.
-export function needsAttention(order: MerchantOrder): boolean {
+function needsAttention(order: MerchantOrder): boolean {
   if (order.state === "uncertain") return true;
   if (order.pyusd && (order.pyusd.extraTransfers.length > 0 || order.pyusd.closedBy === "operator")) return true;
   return order.refund?.state === "checking" || order.refund?.state === "failed";

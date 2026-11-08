@@ -71,10 +71,10 @@ type GridRow = MerchantOrder | TotalsRow;
 const isTotals = (row: GridRow | undefined): row is TotalsRow => row !== undefined && "kind" in row && row.kind === "totals";
 const orderOf = (row: GridRow | undefined): MerchantOrder | null => (row && !isTotals(row) ? row : null);
 
-export const TOTALS_LABEL = "Totals, paid only";
+const TOTALS_LABEL = "Totals, paid only";
 
 // Text for the totals row's cell in each column; empty where a total means nothing.
-export function totalsCell(summary: SalesSummary, colId: string): string {
+function totalsCell(summary: SalesSummary, colId: string): string {
   if (colId === "time") return TOTALS_LABEL;
   if (colId === "total") return formatMoney(money(summary.currency, summary.paidMinor));
   if (colId === "fee") return knownTotalText(summary, summary.knownFeeMinor);
