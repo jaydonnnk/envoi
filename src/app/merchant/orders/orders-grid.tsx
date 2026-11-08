@@ -9,6 +9,7 @@ import {
   TextFilterModule,
   ValidationModule,
   themeQuartz,
+  PaginationModule,
   PinnedRowModule,
   type CellKeyDownEvent,
   type ColDef,
@@ -30,6 +31,8 @@ import { countryText, feeText, knownTotalText, netMinor, netText, orderStatus, o
 // keeps the mockup's columns and acknowledgment lives in the record only).
 // S46: PayPal's fee, the net and the PayPal account's country per order, and one pinned totals row
 // per currency taken from the server's summary, never added up from the loaded rows.
+// Ten rows per page with AG Grid's own pager; the pinned totals row stays on every page and still
+// counts every order, not the page shown.
 
 ModuleRegistry.registerModules([
   ClientSideRowModelModule,
@@ -38,6 +41,7 @@ ModuleRegistry.registerModules([
   RowAutoHeightModule,
   RowStyleModule,
   PinnedRowModule,
+  PaginationModule,
   ...(process.env.NODE_ENV === "production" ? [] : [ValidationModule]),
 ]);
 
@@ -185,6 +189,9 @@ export function OrdersGrid({
         columnDefs={columns}
         getRowId={(p) => (isTotals(p.data) ? `totals-${p.data.summary.currency}` : p.data.id)}
         domLayout="autoHeight"
+        pagination
+        paginationPageSize={10}
+        paginationPageSizeSelector={false}
         animateRows={false}
         suppressMovableColumns
         suppressColumnVirtualisation

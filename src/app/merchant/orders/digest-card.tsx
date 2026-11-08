@@ -24,6 +24,14 @@ export function DigestCard({ outletId }: { outletId: string }) {
   const [language, setLanguage] = useState<DigestLanguage>("en");
   const [shown, setShown] = useState<Shown>({ kind: "idle" });
 
+  // A new language clears the shown summary, so text in the old language never stays on screen. A
+  // new summary is written only when the merchant presses the button.
+  function choose(tag: DigestLanguage) {
+    if (tag === language || shown.kind === "busy") return;
+    setLanguage(tag);
+    setShown({ kind: "idle" });
+  }
+
   async function write() {
     setShown({ kind: "busy" });
     const result = await requestJson<DigestAnswer>("POST", `/api/v1/merchant/outlets/${encodeURIComponent(outletId)}/digest`, { language });
@@ -38,7 +46,7 @@ export function DigestCard({ outletId }: { outletId: string }) {
       <p className="muted stall-languages">
         <span>Language:</span>
         {LANGUAGES.map((choice) => (
-          <button key={choice.tag} type="button" className="stall-language" lang={choice.tag} aria-pressed={choice.tag === language} onClick={() => setLanguage(choice.tag)}>
+          <button key={choice.tag} type="button" className="stall-language" lang={choice.tag} aria-pressed={choice.tag === language} onClick={() => choose(choice.tag)}>
             {choice.label}
           </button>
         ))}
