@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { countryText, feeText, methodRows, netText, ordersCsv } from "@/app/merchant/orders/order-copy";
+import { countryText, feeText, filterWords, methodRows, netText, ordersCsv } from "@/app/merchant/orders/order-copy";
 import { applyOrderFilter, isOverseas, parseOrderFilter } from "@/domain/purchases/order-filter";
 import type { MerchantOrder } from "@/domain/purchases/orders";
 import { decideCaptureOutcome, saleFigures, type ExpectedPurchase } from "@/domain/purchases/reconcile";
@@ -127,6 +127,11 @@ describe("77 an order is called overseas only from PayPal's country", () => {
     expect(isOverseas(order("us-shop", "paid", "US"), "US")).toBe(false);
     // A US dollar order without PayPal's country is not overseas: currency never decides it.
     expect(isOverseas(order("usd", "paid", null, "USD"), "SG")).toBe(false);
+  });
+
+  it("names the shop's own country in the filter words, as the mockup does", () => {
+    expect(filterWords({ states: ["paid"], view: "overseas", sort: { column: "total", direction: "desc" } }, "SG")).toEqual(["Paid", "PayPal account outside Singapore", "largest first"]);
+    expect(filterWords({ view: "overseas" }, "US")).toEqual(["PayPal account outside the United States"]);
   });
 
   it("is what the overseas view shows", () => {

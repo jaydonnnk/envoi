@@ -385,7 +385,7 @@ export function OrdersView({ initial, askEnabled, copilot = false }: { initial: 
           <div aria-live="polite">
             {filter && (
               <p className="muted filters-set">
-                Filters set: {filterWords(filter).join(" · ")}.{" "}
+                Filters set: {filterWords(filter, data.outlet.country).join(" · ")}.{" "}
                 <button className="link-button" type="button" onClick={clearFilter}>
                   Clear
                 </button>

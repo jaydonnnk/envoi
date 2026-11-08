@@ -1,7 +1,7 @@
 import type { OrderFilter, OrderSort, OrderState, OrderView } from "@/domain/purchases/order-filter";
 import type { MerchantOrder } from "@/domain/purchases/orders";
 import type { SalesSummary } from "@/domain/purchases/sales-summary";
-import { formatMoney, money } from "@/lib/money";
+import { formatMoney, money, type Country } from "@/lib/money";
 
 export type OrderStatus = { chip: string; tone: "ok" | "warn" | "plain"; body: string };
 
@@ -134,23 +134,23 @@ function dateWords(from: string | undefined, to: string | undefined): string | n
 }
 
 // "Filters set: Paid · PayPal · 29 Oct to 4 Nov." shows the merchant exactly what the model chose.
-export function filterWords(filter: OrderFilter): string[] {
+export function filterWords(filter: OrderFilter, shopCountry: Country = "SG"): string[] {
   return [
     ...(filter.states ?? []).map((state) => STATE_WORDS[state]),
     ...(filter.rails ?? []).map((rail) => RAIL_WORDS[rail]!),
     ...(filter.currencies ?? []),
     ...[dateWords(filter.from, filter.to)].filter((words) => words !== null),
-    ...(filter.view && filter.view !== "all" ? [VIEW_WORDS[filter.view]] : []),
+    ...(filter.view === "overseas" ? [`PayPal account outside ${SHOP_COUNTRY_NAMES[shopCountry]}`] : filter.view && filter.view !== "all" ? [VIEW_WORDS[filter.view]] : []),
     ...(filter.sort ? [SORT_WORDS[filter.sort.column][filter.sort.direction]] : []),
   ];
 }
 
 // S46: the view and sort the merchant asked for, in the mockup's words.
-const VIEW_WORDS: Record<Exclude<OrderView, "all">, string> = {
+const VIEW_WORDS: Record<Exclude<OrderView, "all" | "overseas">, string> = {
   paid: "Paid",
   needs_attention: "Needs attention",
-  overseas: "PayPal account outside the shop's country",
 };
+const SHOP_COUNTRY_NAMES: Record<Country, string> = { SG: "Singapore", US: "the United States" };
 const SORT_WORDS: Record<OrderSort["column"], Record<OrderSort["direction"], string>> = {
   time: { asc: "oldest first", desc: "newest first" },
   total: { asc: "smallest first", desc: "largest first" },
