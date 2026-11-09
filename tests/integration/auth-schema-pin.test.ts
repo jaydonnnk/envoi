@@ -29,7 +29,7 @@ describe("auth tables resolve to public only", () => {
   });
 
   it("Better Auth reads and writes public even when search_path puts neon_auth first", async () => {
-    const auth = createAuth({ db: web.db, secret: "test-fixture-secret-0123456789abcdef0123456789", baseURL: TEST_BASE_URL, trustedOrigins: [TEST_BASE_URL] });
+    const auth = createAuth({ db: web.db, secret: "test-fixture-secret-0123456789abcdef0123456789", baseURL: TEST_BASE_URL, trustedOrigins: [TEST_BASE_URL], signup: { enabled: false } });
 
     const cookie = await anonymousCookie((request) => auth.handler(request));
     const session = await auth.api.getSession({ headers: new Headers({ cookie }) });

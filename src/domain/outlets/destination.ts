@@ -1,6 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { recordAudit } from "@/domain/audit/events";
-import { paymentDestinations } from "@/lib/db/schema";
+import { describeOutlet, type MerchantOutlet } from "@/domain/outlets/merchant";
+import { enrollments, paymentDestinations } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { appError, type AppError } from "@/lib/errors";
 
@@ -92,4 +93,29 @@ export async function outletRails(db: Pick<Db, "select">, outletId: string): Pro
     .from(paymentDestinations)
     .where(and(eq(paymentDestinations.outletId, outletId), eq(paymentDestinations.status, "active")));
   return { paypal: rows.some((row) => row.rail === "paypal"), pyusd: rows.some((row) => row.rail === "pyusd") };
+}
+
+// S43 (Gate 3 S43 amendment decision 8): a pending shop's member submits a sandbox seller id for the
+// operator's review. It is stored on the enrollment and creates no destination; a later request
+// replaces it while the enrollment is pending, and an approved enrollment refuses it.
+export async function requestSeller(db: Db, input: { outletId: string; sellerMerchantId: string; userId: string; now: Date }): Promise<MerchantOutlet | AppError> {
+  return db.transaction(async (tx) => {
+    const [row] = await tx.select({ id: enrollments.id, status: enrollments.status }).from(enrollments).where(eq(enrollments.outletId, input.outletId)).for("update");
+    if (!row) return appError("not_found", "Shop not found.");
+    if (row.status !== "pending") {
+      return appError("validation_failed", "This shop is already approved. Its PayPal connection is set by the Envoi operator.", { details: { reason: "enrollment_approved" } });
+    }
+    await tx.update(enrollments).set({ requestedSellerMerchantId: input.sellerMerchantId, sellerRequestedAt: input.now }).where(eq(enrollments.id, row.id));
+    await recordAudit(tx, {
+      at: input.now,
+      actor: `merchant:${input.userId}`,
+      action: "paypal_seller_requested",
+      outletId: input.outletId,
+      operatorVisible: true,
+      details: { sellerMerchantId: input.sellerMerchantId },
+    });
+    const outlet = await describeOutlet(tx, input.outletId);
+    if (!outlet) throw new Error("the outlet vanished in its own transaction");
+    return outlet;
+  });
 }

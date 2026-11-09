@@ -1,9 +1,10 @@
 import { draftJson } from "@/domain/menu/serialize";
-import { createMerchantOutlet, listMerchantOutlets } from "@/domain/outlets/merchant";
+import { createMerchantOutlet, createPendingOutlet, listMerchantOutlets, type CreatedOutlet, type OutletInput } from "@/domain/outlets/merchant";
+import { webEnv } from "@/env";
 import { getAuth } from "@/lib/auth";
-import { isMerchantAccount, requireMerchantMembership } from "@/lib/auth-context";
+import { isMerchantAccount, isSignupAccount, requireMerchantMembership, requireSignupAccount } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
-import { appError, isAppError } from "@/lib/errors";
+import { appError, isAppError, type AppError } from "@/lib/errors";
 import { httpErr, httpOk } from "@/lib/http/respond";
 import { outletBody } from "./input";
 
@@ -17,15 +18,26 @@ export async function GET(request: Request): Promise<Response> {
 }
 
 // Creates an unpublished outlet with an empty menu draft, using up one approved membership, and
-// returns both.
+// returns both. S43: while MERCHANT_SIGNUP_ENABLED is true, a permanent account with no membership
+// row creates its one pending shop instead (Gate 3 S43 amendment decision 7).
 export async function POST(request: Request): Promise<Response> {
-  const principal = await requireMerchantMembership(getAuth(), webDb(), request.headers);
-  if (!isMerchantAccount(principal)) return httpErr(principal);
+  const member = await requireMerchantMembership(getAuth(), webDb(), request.headers);
+  let create: (input: OutletInput & { userId: string; now: Date }) => Promise<CreatedOutlet | AppError> = (input) => createMerchantOutlet(webDb(), input);
+  let userId: string;
+  if (isMerchantAccount(member)) {
+    userId = member.userId;
+  } else {
+    if (member.code !== "forbidden_membership" || webEnv().MERCHANT_SIGNUP_ENABLED !== "true") return httpErr(member);
+    const stranger = await requireSignupAccount(getAuth(), webDb(), request.headers);
+    if (!isSignupAccount(stranger)) return httpErr(stranger);
+    userId = stranger.userId;
+    create = (input) => createPendingOutlet(webDb(), input);
+  }
 
   const parsed = outletBody.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return httpErr(appError("validation_failed", "Give the shop a name and an area."));
 
-  const created = await createMerchantOutlet(webDb(), { ...parsed.data, userId: principal.userId, now: new Date() });
+  const created = await create({ ...parsed.data, userId, now: new Date() });
   if (isAppError(created)) return httpErr(created);
   // The same shape GET menu-draft answers: a new shop has had no photo import.
   return httpOk({ outlet: created.outlet, draft: { ...draftJson(created.draft), latestImport: null } }, { status: 201 });

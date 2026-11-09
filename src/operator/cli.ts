@@ -7,6 +7,7 @@ import { join } from "node:path";
 import { recordAudit } from "@/domain/audit/events";
 import { confirmMenuDraft } from "@/domain/menu/confirm";
 import { getMenuDraft, saveMenuDraft } from "@/domain/menu/draft";
+import { PAYPAL_MERCHANT_ID } from "@/domain/outlets/paypal-id";
 import { publishOutlet } from "@/domain/outlets/publish";
 import { archivedOrderReceipts } from "@/domain/purchases/orders";
 import { transitionPurchase } from "@/domain/purchases/state";
@@ -161,10 +162,6 @@ export async function seedJudgeFixtures(db: OperatorDb, now: Date = new Date()):
   }
   return results;
 }
-
-// PayPal account ids: 13 characters from 2-9 and A-Z without I and O (PayPal rejects any other
-// payee merchant_id with INVALID_PARAMETER_SYNTAX).
-const PAYPAL_MERCHANT_ID = /^[2-9A-HJ-NP-Z]{13}$/;
 
 export type AssignResult = { status: "created" | "unchanged"; outletId: string; destinationId: string; sellerMerchantId: string; version: number };
 

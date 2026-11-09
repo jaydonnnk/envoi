@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { webEnv } from "@/env";
+import { isPendingSelfSignup } from "@/domain/outlets/merchant";
 import { isDemoSellerOutlet } from "@/domain/payments/refunds";
 import { TURN_BUDGET_MS } from "@/integrations/assistant/agent";
 import { demoSellerCopilot, MAX_COPILOT_TURN_CHARS, MAX_COPILOT_TURNS, runCopilotTurn, type CopilotStep } from "@/integrations/assistant/merchant-copilot";
@@ -49,7 +50,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const config = demoSellerCopilot(webEnv());
   const off = appError("not_found", "There is no copilot for this shop.");
-  if (!config || !(await isDemoSellerOutlet(webDb(), principal.outletId, config.merchantId))) return httpErr(off);
+  // S43: a self-created shop gets no turn until its enrollment is approved.
+  if (!config || (await isPendingSelfSignup(webDb(), principal.outletId)) || !(await isDemoSellerOutlet(webDb(), principal.outletId, config.merchantId))) return httpErr(off);
 
   const invalid = appError("validation_failed", `Send at most ${MAX_COPILOT_TURNS} messages of ${MAX_COPILOT_TURN_CHARS} characters or fewer, ending with yours.`);
   const read = await readCountedBody(request.body, MAX_BODY_BYTES, BODY_READ_MS, request.signal);

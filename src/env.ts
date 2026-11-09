@@ -73,6 +73,9 @@ const webSchema = z.object({
   RENDER_API_KEY: z.string().min(1).optional(),
   // A malformed slug never stops the web service; touristReadyTrigger turns the trigger off (S50).
   RENDER_WORKFLOW_SLUG: z.string().min(1).optional(),
+  // Merchant sign-up (S43, Gate 3 S43 amendment decision 1): only "true" opens sign-up, a pending
+  // shop and the seller request; unset or "false" keeps sign-up refused as before S43.
+  MERCHANT_SIGNUP_ENABLED: z.enum(["true", "false"]).optional(),
   // PYUSD on Solana devnet (S16). These are the rail's only two settings: the cluster, genesis hash,
   // mint, token program and decimals are reviewed code constants in src/domain/pyusd/constants.ts,
   // and any other PYUSD_ or SOLANA_ name refuses to boot. The RPC URL is checked against the pinned

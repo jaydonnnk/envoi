@@ -54,6 +54,10 @@ export type MerchantOutlet = {
   pyusd: PyusdSetup;
   // S28: paid this month and PayPal's PYUSD rewards, for the rewards card.
   rewards: RewardsCard;
+  // S43: a shop a stranger created through sign-up, and the sandbox seller id its member submitted
+  // for the operator's review. The request is never a payment destination.
+  selfSignup: boolean;
+  requestedSeller: { merchantId: string; at: string } | null;
 };
 
 // S16: the outlet's PYUSD devnet setup as its merchant sees it. The wallet proves key control only;
@@ -93,6 +97,9 @@ const outletColumns = {
   publishedMenuRevisionId: outlets.publishedMenuRevisionId,
   detailsConfirmedAt: outlets.detailsConfirmedAt,
   enrollment: enrollments.status,
+  selfSignup: outlets.selfSignup,
+  requestedSellerMerchantId: enrollments.requestedSellerMerchantId,
+  sellerRequestedAt: enrollments.sellerRequestedAt,
 };
 
 type OutletRow = {
@@ -104,6 +111,9 @@ type OutletRow = {
   publishedMenuRevisionId: string | null;
   detailsConfirmedAt: Date | null;
   enrollment: string | null;
+  selfSignup: boolean;
+  requestedSellerMerchantId: string | null;
+  sellerRequestedAt: Date | null;
 };
 
 async function listIdentifiers(db: Pick<Db, "select">, outletId: string): Promise<OutletIdentifier[]> {
@@ -152,6 +162,9 @@ async function toMerchantOutlet(db: Pick<Db, "select">, row: OutletRow): Promise
     identifiers: await listIdentifiers(db, row.id),
     pyusd: await pyusdSetup(db, row.id, new Date()),
     rewards: await rewardsCard(db, row.id, new Date()),
+    selfSignup: row.selfSignup,
+    requestedSeller:
+      row.requestedSellerMerchantId !== null && row.sellerRequestedAt !== null ? { merchantId: row.requestedSellerMerchantId, at: row.sellerRequestedAt.toISOString() } : null,
   };
 }
 
@@ -229,6 +242,53 @@ export async function createMerchantOutlet(db: Db, input: OutletInput & { userId
     if (!draft || !outlet) throw new Error("The new outlet or its draft revision was not found in its own transaction.");
     return { outlet, draft };
   });
+}
+
+// S43 (decision 9): true for a self-created shop whose enrollment is not approved. The photo import,
+// the web import and the copilot refuse such a shop before any limiter, Kernel or model call.
+export async function isPendingSelfSignup(db: Pick<Db, "select">, outletId: string): Promise<boolean> {
+  const [row] = await db
+    .select({ selfSignup: outlets.selfSignup, status: enrollments.status })
+    .from(outlets)
+    .leftJoin(enrollments, eq(enrollments.outletId, outlets.id))
+    .where(eq(outlets.id, outletId));
+  return row !== undefined && row.selfSignup && row.status !== "approved";
+}
+
+// S43 (Gate 3 S43 amendment decision 6): a stranger's one pending shop. create_self_signup_outlet
+// (migration 0035) writes the outlet, labeled a demo fixture and marked self_signup, its bound owner
+// membership, a pending enrollment and an empty draft in this transaction, and refuses an account
+// with any membership. Only the operator's approve-enrollment approves the shop.
+export async function createPendingOutlet(db: Db, input: OutletInput & { userId: string; now: Date }): Promise<CreatedOutlet | AppError> {
+  try {
+    return await db.transaction(async (tx) => {
+      const rows = await tx.execute<{ id: string }>(sql`select create_self_signup_outlet(${input.userId}, ${input.name}, ${input.area}, ${input.now.toISOString()}::timestamptz) as id`);
+      const outletId = rows[0]?.id;
+      if (!outletId) throw new Error("create_self_signup_outlet returned no outlet id");
+      await recordAudit(tx, {
+        at: input.now,
+        actor: merchantActor(input.userId),
+        action: "outlet_self_created",
+        outletId,
+        operatorVisible: true,
+        details: { selfSignup: true },
+      });
+      const draft = await getMenuDraft(tx, outletId);
+      const outlet = await describeOutlet(tx, outletId);
+      if (!draft || !outlet) throw new Error("The new outlet or its draft revision was not found in its own transaction.");
+      return { outlet, draft };
+    });
+  } catch (err) {
+    if (isSelfSignupRefusal(err)) return appError("forbidden_membership", "This account already has a shop. One shop per account.");
+    throw err;
+  }
+}
+
+function isSelfSignupRefusal(err: unknown): boolean {
+  for (let current: unknown = err; current; current = (current as { cause?: unknown }).cause) {
+    if (current instanceof Error && current.message.startsWith("self_signup_refused:")) return true;
+  }
+  return false;
 }
 
 // Edits the name and area of an unpublished outlet, and sets or clears its outlet confirmation. A
