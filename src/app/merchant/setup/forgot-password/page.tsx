@@ -12,14 +12,12 @@ export default function ForgotPasswordPage() {
       <main>
         <p className="eyebrow">Merchant setup</p>
         <h1>Reset your password</h1>
-        <div className="layout">
-          <section className="card" aria-label="Password reset unavailable">
-            <p>Password reset is unavailable in this test environment.</p>
-            <div className="actions">
-              <a href="/merchant/setup">Back to sign in</a>
-            </div>
-          </section>
-        </div>
+        <section className="card" aria-label="Password reset unavailable">
+          <p>Password reset is unavailable in this test environment.</p>
+          <div className="actions">
+            <a href="/merchant/setup">Back to sign in</a>
+          </div>
+        </section>
       </main>
     );
   }
@@ -27,11 +25,9 @@ export default function ForgotPasswordPage() {
     <main>
       <p className="eyebrow">Merchant setup</p>
       <h1>Reset your password</h1>
-      <div className="layout">
-        <section className="card slip" aria-label="Request a reset link">
-          <ForgotPasswordForm />
-        </section>
-      </div>
+      <section className="card slip" aria-label="Request a reset link">
+        <ForgotPasswordForm />
+      </section>
     </main>
   );
 }

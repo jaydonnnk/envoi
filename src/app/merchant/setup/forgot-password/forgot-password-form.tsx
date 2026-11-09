@@ -44,7 +44,7 @@ export function ForgotPasswordForm() {
         </button>
         <a href="/merchant/setup">Back to sign in</a>
       </div>
-      <p role="status">{result}</p>
+      <p className="fine" role="status">{result}</p>
       {error && (
         <p className="error" role="alert">
           {error}
