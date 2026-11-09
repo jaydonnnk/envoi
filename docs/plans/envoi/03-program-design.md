@@ -3495,3 +3495,106 @@ Each guard gets its own mutation with an AssertionError, byte-identical restorat
 #### Render check, after deploy
 
 One publish of a FIXTURE shop on Render, then a read-only count of `menu_translations` rows for that revision: five rows before any buyer asks. Then one more run of the same revision from the dashboard: still five rows. This makes up to five translation model calls, which need their own spend authorization.
+
+### S43 amendment, drafted 2026-11-09
+
+**Status: drafted 2026-11-09 and approved 2026-11-09 ("Approve Gate 3").** It fills gaps in the approved S43 rows above and changes no Gate 1 or Gate 2 decision.
+The approved file row, the `createPendingOutlet` and `requestSeller` signatures, the "Sign-up" call stack and tests 89 to 98 stay; this adds what they leave open.
+Approval authorizes local S43 application work only; no `MERCHANT_SIGNUP_ENABLED` setting, Neon migration, operator approval on Neon, sandbox purchase, commit, merge, push or deploy.
+
+**Gaps found [verified 2026-11-09 against the gates and `main` at `83c95cd`].** The `merchant_signup` limits and the address the per-address window keys on are not stated.
+The outlet marker and the seller-request columns are not named.
+The web role cannot insert a membership (migration 0011 grants it `SELECT` and `UPDATE ("outlet_id")` only), so the atomic outlet, membership and enrollment of Gate 2's sign-up flow has no stated path.
+Gate 2 lists `POST /api/v1/merchant/outlets/[id]/destinations/paypal/request` and `publish.ts`; the Gate 3 file row has neither.
+The waiting state and the sign-up form are not specified beyond the mockup.
+The web import route checks membership only, so without a new check a pending shop could spend Kernel and model budget.
+The copy that says there is no public sign-up is in `src/app/merchant/setup/page.tsx` and `src/app/for-shops/`, tested by `tests/unit/for-shops.test.ts`; `tests/unit/landing-page.test.ts`, which the record above names, asserts no sign-up wording.
+
+**First step [verified 2026-11-09 on a disposable local database].** Better Auth 1.7.7's `hooks.before`, built with `createAuthMiddleware`, refuses a sign-up by throwing `APIError` before any `user`, `account` or `session` row exists, with and without a buyer session; an allowed sign-up in the same probe creates all three. See the S43 record in `00-status.md`.
+
+**Render fact this relies on [unknown].** Render's web service docs say its load balancer terminates TLS and forwards each request, but do not say which header carries the client address or whether a client-sent `X-Forwarded-For` is overwritten or appended to. Decision 3 keys on the last entry and is checked on Render after deploy.
+
+#### Files added to the S43 row
+
+| File | Why |
+| --- | --- |
+| `drizzle/0035_merchant_signup.sql` | The two enrollment columns, the outlet marker, the bucket and `create_self_signup_outlet` |
+| `src/lib/auth.ts` | `AuthOptions` gains `signup`; `disableSignUp` follows the switch; the `hooks.before` guard |
+| `src/domain/outlets/signup.ts` | `signupSubject`, `MERCHANT_SIGNUP_LIMITS` and the guard's admission |
+| `src/domain/outlets/paypal-id.ts` | `PAYPAL_MERCHANT_ID`, moved from `src/operator/cli.ts`, which imports it |
+| `src/app/api/v1/merchant/outlets/route.ts` | `POST` creates a pending shop for an account with no membership while the switch is on |
+| `src/app/api/v1/merchant/outlets/[id]/destinations/paypal/request/route.ts` | The member submits a sandbox seller id |
+| `src/app/api/v1/merchant/outlets/[id]/menu-imports/route.ts`, `.../menu-imports/web/route.ts`, `.../copilot/route.ts` | Refuse a self-created shop until its enrollment is approved |
+| `src/domain/outlets/publish.ts` | Unchanged; the existing publication checks are what tests 91 and 92 prove |
+| `src/app/merchant/setup/page.tsx`, `src/app/merchant/setup/sign-up.tsx`, `src/app/merchant/setup/workspace.tsx` | The sign-up form, the shop form for a signed-in account with no shop, and the waiting state |
+| `src/app/for-shops/` | The sign-up line follows the switch |
+| `src/env.ts`, `.env.example` | `MERCHANT_SIGNUP_ENABLED`, optional, on the web schema |
+| `tests/integration/merchant-signup.test.ts` | Tests 89 to 98 and the guards below |
+| `tests/unit/for-shops.test.ts` | Revised, replacing the `landing-page.test.ts` revision named above |
+
+#### Types and signatures
+
+```ts
+// src/lib/auth.ts
+type AuthOptions = { db: Db; secret: string; baseURL: string; trustedOrigins: string[]; signup: { enabled: boolean } };
+
+// src/domain/outlets/signup.ts
+const MERCHANT_SIGNUP_LIMITS: RateLimits; // perSubject { max: 3, windowMs: 60 * 60_000 }, global { max: 30, windowMs: 60 * 60_000 }
+function signupSubject(headers: Headers, secret: string): string; // HMAC-SHA256 under the auth secret, hex
+function admitSignup(db: Db, headers: Headers, secret: string, now: Date): Promise<Admission>;
+
+// src/domain/outlets/paypal-id.ts
+const PAYPAL_MERCHANT_ID: RegExp; // /^[2-9A-HJ-NP-Z]{13}$/, unchanged
+
+// src/domain/outlets/merchant.ts, added fields
+type MerchantOutlet = { /* existing fields */ selfSignup: boolean; requestedSeller: { merchantId: string; at: string } | null };
+
+// src/env.ts
+MERCHANT_SIGNUP_ENABLED: z.enum(["true", "false"]).optional(); // only "true" opens sign-up
+```
+
+`OutletInput` and `CreatedOutlet` are the existing types in `src/domain/outlets/merchant.ts`.
+`requestSeller` answers the outlet with `requestedSeller` set.
+
+#### Decisions
+
+1. **Switch off.** `MERCHANT_SIGNUP_ENABLED` unset or not `true` keeps `disableSignUp: true`, so the sign-up answers exactly as today and the guard never runs. The outlet route, the request route and the sign-up form answer as if sign-up did not exist: the route refuses with today's `forbidden_membership`, the request route answers `not_found`, and the form is not rendered.
+2. **Switch on.** `disableSignUp: false`, and `hooks.before` runs for the path `/sign-up/email` only. It calls `admitSignup` and, when refused, throws `APIError("TOO_MANY_REQUESTS", { code: "RATE_LIMITED", message: "Too many sign-ups for now. No account was created." })`. Any other path is untouched.
+3. **The address.** `signupSubject` takes the last comma-separated entry of `x-forwarded-for`, trimmed, or `unknown` when the header is missing. It stores only `HMAC-SHA256(secret, "merchant_signup\n" + address)`, so no address is written. Every request with no header shares the subject `unknown`. The global window bounds the total whatever the address.
+4. **Limits [hypothesis].** 3 sign-ups per address and 30 in all per hour. They bound what a stranger can create; neither is a measurement of demand.
+5. **Migration `0035`.** `outlets.self_signup boolean not null default false`; `enrollments.requested_seller_merchant_id text` and `enrollments.seller_requested_at timestamptz`, both null until a request; the bucket check gains `merchant_signup`. The web role gets `UPDATE ("requested_seller_merchant_id", "seller_requested_at")` on `enrollments`, and no write on `outlets.self_signup`.
+6. **The pending shop.** `create_self_signup_outlet(user_id, name, area, now)` is a `SECURITY DEFINER` function owned by the migration role, with a pinned `search_path`, executable by `envoi_web` only. It locks the user row, refuses an anonymous or missing user, refuses any user with a `merchant_memberships` row in any state, then inserts the outlet (`is_demo_fixture` true, `self_signup` true), a bound owner membership (`is_demo` true, `evidence_ref` `self_signup`, `approved_at` the time of creation), a `pending` enrollment (`is_demo` true) and an empty draft revision, and returns the outlet id. The membership gives the account its own shop only; the operator's `approve-enrollment` stays the approval. `createPendingOutlet` calls it in one transaction, records `outlet_self_created` for the operator and answers `CreatedOutlet`. A refusal answers `forbidden_membership`, "This account already has a shop. One shop per account."
+7. **The outlet route.** `POST /api/v1/merchant/outlets` keeps `createMerchantOutlet` for an account with an approved, unbound membership. With the switch on, a permanent account with no membership row calls `createPendingOutlet`. A buyer session is refused as today.
+8. **The seller request.** `POST /api/v1/merchant/outlets/[id]/destinations/paypal/request`, with `{ sellerMerchantId }`: membership, same origin, the switch, `PAYPAL_MERCHANT_ID`, then `requestSeller`, which locks the enrollment, refuses unless it is `pending` (`validation_failed`, reason `enrollment_approved`), stores the id and time, and records `paypal_seller_requested` for the operator. A later request replaces the earlier one while pending. It creates no destination: the operator's `assign-paypal-destination` still names the seller.
+9. **Approval gate on spend.** The photo import, the web import and the copilot refuse an outlet whose `self_signup` is true and whose enrollment is not `approved`, with `not_found`, before any limiter, Kernel or model call. Operator-made shops are unchanged.
+10. **Sign-up screen.** With the switch on, the signed-out setup page shows the mockup's "Create your account" card beside the sign-in card, with its lead, its fields and the line "No confirmation email is sent, and a lost password cannot be reset in this test environment." The form calls `sign-up/email`, then the outlet route, then the request route. If a later call fails, the account stays signed in and the page shows the shop form without the account fields.
+11. **Waiting state.** A self-created shop whose enrollment is pending shows the mockup's "Waiting for approval" card above the workspace, with "After you apply" and "What happens next" as drawn. The menu editor works; publish stays refused by the existing checks.
+12. **Copy that follows the switch.** With the switch on, the setup page lead and the for-shops line say a test shop can be set up here and an Envoi admin approves every shop; with it off they stay as today. `README.md` changes only once sign-up is live on Render.
+
+#### Call stack, adding to the "Sign-up" call stack above
+
+`POST /api/auth/sign-up/email`, then Better Auth's router, `hooks.before` (path check, `admitSignup`), then Better Auth's own sign-up and, from a buyer session, `onLinkAccount` unchanged.
+Then `POST /api/v1/merchant/outlets`, `merchantSession`, the membership read, `createPendingOutlet`, `create_self_signup_outlet`, audit.
+Then `POST .../destinations/paypal/request`, `requireOutletMembership`, `assertSameOrigin`, `requestSeller`, audit.
+
+#### Tests and guards
+
+Integration tests run on a disposable local database through the real routes; PayPal, Kernel and the model are FIXTURE fakes at their boundaries.
+
+- **89:** with the switch on, a sign-up, a shop and a seller request leave one user, one membership bound to one outlet with `self_signup` and `is_demo_fixture` true, one `pending` enrollment holding the seller id, and no destination.
+- **90:** with the switch off, the sign-up answers 400, the outlet route `forbidden_membership` and the request route `not_found`, and no user exists. It keeps `public signup is refused`'s assertions.
+- **91:** the pending shop's publish is refused by the existing checks, and a purchase start for it is refused, with no attempt row.
+- **92:** after the operator's `assign-paypal-destination`, `approve-enrollment`, the member's acceptance and confirmations, the shop publishes.
+- **93:** the signed-up account gets the existing refusal on another merchant's outlet, draft, orders, destination and request routes.
+- **94:** the fourth sign-up from one address in an hour, and the thirty-first in all from many addresses, each answer 429 and create no user, account or session.
+- **95:** a buyer session that signs up keeps its purchases' owner, and no membership exists for the anonymous user.
+- **96:** a second shop for the same account is refused and creates no outlet, enrollment or membership; two concurrent creations make one shop.
+- **97:** the pending shop's photo import, web import and copilot answer `not_found`, and the FIXTURE Kernel and model fakes record no call.
+- **98:** the approved self-created shop shows its test label on the list, shop, review and receipt screens.
+- **Guards:** the path check (another path is not limited); the subject uses the last `x-forwarded-for` entry and stores no address; the definer function's anonymous-user, any-membership and lock checks; the request route's pending check and id format; the switch on each of the three routes and the form.
+
+Each guard gets its own mutation with an AssertionError, byte-identical restoration and a passing rerun.
+
+#### Render check, after deploy
+
+With the switch on, one sign-up from the browser, then a read-only count showing one new user, outlet, membership and pending enrollment. A second sign-up from a request carrying a different first `x-forwarded-for` entry counts against the same subject, or decision 3 is reopened. Then the operator's approval on Neon, the member's publish (which also starts one S50 Workflow run) and one sandbox purchase to Paid, each with its own authorization.
