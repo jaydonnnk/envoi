@@ -1,0 +1,65 @@
+{
+  "label": "S54 local browser check; disposable FIXTURE shop; OpenAI and PayPal MCP FIXTURE fakes at the fetch boundaries; no live model; test money only",
+  "page": "http://localhost:3000/merchant/orders",
+  "outletId": "out_nxtcypzkbddguujgaze74quuem",
+  "notice": "Envoi did not show this answer because it named an amount that no record checked this turn. Nothing was sent. Your orders table still works.",
+  "shown": "You have no paid orders this week.",
+  "startedAt": "2026-11-09T17:56:49.769Z",
+  "widths": [
+    {
+      "width": "390",
+      "innerWidth": 390,
+      "scrollWidth": 390,
+      "noOverflow": true,
+      "badge": true,
+      "fixtureLabels": true,
+      "refused": {
+        "reply": "Envoi did not show this answer because it named an amount that no record checked this turn. Nothing was sent. Your orders table still works.",
+        "steps": [
+          {
+            "label": "Envoi order records",
+            "note": "read"
+          }
+        ],
+        "refundCard": false,
+        "error": null,
+        "screenshot": "evidence/s54-browser-390-refused.jpg"
+      },
+      "shown": {
+        "reply": "You have no paid orders this week.",
+        "steps": [],
+        "refundCard": false,
+        "error": null,
+        "screenshot": "evidence/s54-browser-390-shown.jpg"
+      }
+    },
+    {
+      "width": "1280",
+      "innerWidth": 1280,
+      "scrollWidth": 1280,
+      "noOverflow": true,
+      "badge": true,
+      "fixtureLabels": true,
+      "refused": {
+        "reply": "Envoi did not show this answer because it named an amount that no record checked this turn. Nothing was sent. Your orders table still works.",
+        "steps": [
+          {
+            "label": "Envoi order records",
+            "note": "read"
+          }
+        ],
+        "refundCard": false,
+        "error": null,
+        "screenshot": "evidence/s54-browser-1280-refused.jpg"
+      },
+      "shown": {
+        "reply": "You have no paid orders this week.",
+        "steps": [],
+        "refundCard": false,
+        "error": null,
+        "screenshot": "evidence/s54-browser-1280-shown.jpg"
+      }
+    }
+  ],
+  "finishedAt": "2026-11-09T17:56:56.818Z"
+}

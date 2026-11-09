@@ -12,6 +12,7 @@ import { isAppError } from "@/lib/errors";
 import { formatMoney, money, type Currency } from "@/lib/money";
 import { ALLOWED_PAYPAL_TOOLS, connectPayPalTools, demoSellerToken, type AllowedPayPalTool, type PayPalTools, type ToolAnswer } from "../paypal/agent-tools";
 import { TURN_BUDGET_MS } from "./agent";
+import { collectFigures, COPILOT_UNCHECKED_NOTICE, uncheckedAmounts } from "./copilot-figures";
 import { MAX_TOOL_CALLS } from "./tools";
 
 // The merchant copilot (S45, Gate 2 "Flow: copilot turn"). One model loop on AI_MODEL with store:
@@ -134,6 +135,8 @@ export async function runCopilotTurn(config: CopilotConfig, outletId: string, tu
   const db = config.db ?? webDb();
   const now = config.now ?? (() => new Date());
   const steps: CopilotStep[] = [];
+  // S54: every amount this turn's own tool results hold. A reply naming any other amount is refused.
+  const figures = new Set<string>();
   let calls = 0;
   let exceeded: "tool_calls" | "time" | null = null;
   let failed = false;
@@ -156,6 +159,7 @@ export async function runCopilotTurn(config: CopilotConfig, outletId: string, tu
     spend();
     const started = Date.now();
     const { value, status } = await run();
+    for (const figure of collectFigures(value)) figures.add(figure);
     steps.push({ operation, status, ms: Date.now() - started });
     if (controller.signal.aborted) throw new Error("turn aborted");
     return value;
@@ -282,6 +286,7 @@ export async function runCopilotTurn(config: CopilotConfig, outletId: string, tu
     });
     if (failed) return { kind: "failed", steps };
     if (exceeded) return { kind: "stopped", reason: exceeded, steps };
+    if (uncheckedAmounts(result.text, figures).length > 0) return { kind: "reply", text: COPILOT_UNCHECKED_NOTICE, steps, refund: null };
     return { kind: "reply", text: result.text, steps, refund: proposal };
   } catch {
     if (failed) return { kind: "failed", steps };

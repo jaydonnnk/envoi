@@ -429,4 +429,61 @@ describe("the merchant copilot and its refunds", () => {
       expect(fake.refunds().length - before).toBe(1);
     });
   });
+
+  describe("99 a copilot reply naming an amount no tool result holds is refused", () => {
+    it("shows the code-written notice, drops the proposal and keeps the steps", async () => {
+      const paid = await paidOrder(demo, FIXTURE_SELLER);
+      // The turn's tools hold this shop's S$5.80 orders; the model names an amount none of them holds.
+      plan = [
+        tools([{ name: "list_orders", args: {} }, { name: "propose_refund", args: { orderId: paid.purchaseId } }]),
+        { kind: "text", text: "This week you took S$99.99. Nothing is sent unless you tap Confirm." },
+      ];
+      const response = await ask(demo, demo.cookie, "What did I take this week, and refund it?");
+      expect(response.status).toBe(200);
+      const body = (await envelope<Reply>(response)).data;
+      expect(body.reply).toBe("Envoi did not show this answer because it named an amount that no record checked this turn. Nothing was sent. Your orders table still works.");
+      expect(body.refund).toBeNull();
+      expect(body.steps.map((step) => step.operation)).toEqual(["list_orders", "propose_refund"]);
+      expect(refundsSent()).toEqual([]);
+    });
+  });
+
+  describe("100 a copilot reply whose amounts all appear in this turn's tool results is shown", () => {
+    it("shows a paid total that list_orders returned", async () => {
+      await paidOrder(demo, FIXTURE_SELLER);
+      plan = [tools([{ name: "list_orders", args: {} }]), { kind: "text", text: "This week you took S$5.80." }];
+      const body = (await envelope<Reply>(await ask(demo, demo.cookie, "What did I take this week?"))).data;
+      expect(body.reply).toBe("This week you took S$5.80.");
+      expect(body.steps.map((step) => step.operation)).toEqual(["list_orders"]);
+    });
+
+    it("shows a fee that list_transactions returned", async () => {
+      const paid = await paidOrder(demo, FIXTURE_SELLER);
+      mcp.answer = (call) =>
+        call.name === "list_transactions"
+          ? {
+              transaction_details: [
+                { transaction_info: { transaction_id: paid.captureId, invoice_id: paid.attemptId, transaction_amount: { currency_code: "SGD", value: "5.80" }, fee_amount: { currency_code: "SGD", value: "-0.62" } } },
+              ],
+            }
+          : {};
+      plan = [tools([{ name: "list_transactions", args: {} }]), { kind: "text", text: "PayPal shows fees of SGD -0.62." }];
+      const body = (await envelope<Reply>(await ask(demo, demo.cookie, "What fees did PayPal charge?"))).data;
+      expect(body.reply).toBe("PayPal shows fees of SGD -0.62.");
+      expect(body.steps.map((step) => step.operation)).toEqual(["list_transactions"]);
+    });
+
+    it("shows a reply that names no amount", async () => {
+      plan = [{ kind: "text", text: "I can see only this shop's orders." }];
+      const body = (await envelope<Reply>(await ask(demo, demo.cookie, "Whose orders can you see?"))).data;
+      expect(body.reply).toBe("I can see only this shop's orders.");
+    });
+
+    it("never refuses a count, a date or an order id", async () => {
+      const paid = await paidOrder(demo, FIXTURE_SELLER);
+      plan = [tools([{ name: "list_orders", args: {} }]), { kind: "text", text: `You have 12 orders. The latest is ${paid.purchaseId} on 8 November.` }];
+      const body = (await envelope<Reply>(await ask(demo, demo.cookie, "How many orders are there?"))).data;
+      expect(body.reply).toBe(`You have 12 orders. The latest is ${paid.purchaseId} on 8 November.`);
+    });
+  });
 });
