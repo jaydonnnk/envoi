@@ -1,7 +1,10 @@
 // S44: the public page a shop owner reaches from "I run a shop", before any sign-in (Gate 1 fourth
-// build plan, amended 2026-11-07, mockups/for-shops.html). It reads no database. Until S43 exists it promises no public
-// sign-up, and until S49 exists it does not list the counter poster.
+// build plan, amended 2026-11-07, mockups/for-shops.html). It reads no database. Its sign-up line
+// follows MERCHANT_SIGNUP_ENABLED (S43, Gate 3 S43 amendment decision 12), read on each request so a
+// changed switch never leaves a built page saying the opposite.
 import { FeeCalculator } from "./fee-calculator";
+
+export const dynamic = "force-dynamic";
 
 const WHY_ENVOI = [
   "Visitors whose cards and apps cannot pay your SGQR, can pay you with PayPal.",
@@ -12,6 +15,7 @@ const WHY_ENVOI = [
 ];
 
 export default function ForShopsPage() {
+  const signupOpen = process.env.MERCHANT_SIGNUP_ENABLED === "true";
   return (
     <main id="main" className="for-shops">
       <p className="eyebrow">For shops</p>
@@ -31,7 +35,7 @@ export default function ForShopsPage() {
                 Set up my shop
               </a>
             </div>
-            <p className="muted fine">No public sign-up yet: Envoi’s operator makes test accounts.</p>
+            <p className="muted fine">{signupOpen ? "Set up a test shop here. An Envoi admin approves every shop before it can sell." : "No public sign-up yet: Envoi’s operator makes test accounts."}</p>
           </section>
           <section className="card warning">
             <h2>What it costs you</h2>

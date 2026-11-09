@@ -28,7 +28,7 @@ export async function POST(request: Request): Promise<Response> {
     userId = member.userId;
   } else {
     if (member.code !== "forbidden_membership" || webEnv().MERCHANT_SIGNUP_ENABLED !== "true") return httpErr(member);
-    const stranger = await requireSignupAccount(getAuth(), webDb(), request.headers);
+    const stranger = await requireSignupAccount(getAuth(), request.headers);
     if (!isSignupAccount(stranger)) return httpErr(stranger);
     userId = stranger.userId;
     create = (input) => createPendingOutlet(webDb(), input);

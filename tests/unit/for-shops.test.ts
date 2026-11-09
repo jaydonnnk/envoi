@@ -144,11 +144,31 @@ describe("the shops page", () => {
     expect(markup).toContain("Micropayment rate, overseas account: 6.00% of the order + S$0.08 per sale.");
   });
 
-  it("promises no public sign-up and no poster before their slices exist", () => {
-    const markup = page();
-    expect(markup).toContain('<a class="button" href="/merchant/setup">Set up my shop</a>');
-    expect(markup).toContain("No public sign-up yet: Envoi’s operator makes test accounts.");
-    expect(markup.toLowerCase()).not.toContain("poster");
-    expect(markup).not.toContain("merchant-signup");
+  // S43 decision 12: the sign-up line follows MERCHANT_SIGNUP_ENABLED; only "true" opens it.
+  it.each([undefined, "false", "TRUE"])("with MERCHANT_SIGNUP_ENABLED=%s it promises no public sign-up and no poster", (value) => {
+    vi.stubEnv("MERCHANT_SIGNUP_ENABLED", value);
+    try {
+      const markup = page();
+      expect(markup).toContain('<a class="button" href="/merchant/setup">Set up my shop</a>');
+      expect(markup).toContain("No public sign-up yet: Envoi’s operator makes test accounts.");
+      expect(markup).not.toContain("An Envoi admin approves every shop");
+      expect(markup.toLowerCase()).not.toContain("poster");
+      expect(markup).not.toContain("merchant-signup");
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("with MERCHANT_SIGNUP_ENABLED=true it says a test shop can be set up and an admin approves every shop", () => {
+    vi.stubEnv("MERCHANT_SIGNUP_ENABLED", "true");
+    try {
+      const markup = page();
+      expect(markup).toContain('<a class="button" href="/merchant/setup">Set up my shop</a>');
+      expect(markup).toContain("Set up a test shop here. An Envoi admin approves every shop before it can sell.");
+      expect(markup).not.toContain("No public sign-up");
+      expect(markup.toLowerCase()).not.toContain("poster");
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 });

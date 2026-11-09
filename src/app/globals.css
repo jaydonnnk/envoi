@@ -342,6 +342,10 @@ footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; 
 .rewards-subhead { border-top: 1px solid var(--line); margin: 20px 0 8px; padding-top: 20px; font-size: 1.05rem; }
 
 /* Bring your own assistant (S37), per mockups/buyer-own-assistant.html. */
+.field-hint { margin-top: 8px; }
+.waiting { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr); gap: 18px; align-items: start; }
+.waiting .card.warning h2 { margin-top: 12px; }
+@media (max-width: 640px) { .waiting { grid-template-columns: 1fr; } }
 .steps { list-style: decimal; padding-left: 22px; color: var(--muted); }
 .steps li { padding-bottom: 12px; }
 .steps code { font: 13px/1.5 Consolas, ui-monospace, monospace; overflow-wrap: anywhere; }

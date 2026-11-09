@@ -6,23 +6,60 @@ import { getMenuDraft } from "@/domain/menu/draft";
 import { draftJson } from "@/domain/menu/serialize";
 import { listMerchantOutlets } from "@/domain/outlets/merchant";
 import { PAYPAL_PYUSD_REWARDS } from "@/domain/rewards/paypal-pyusd";
+import { webEnv } from "@/env";
 import { getAuth } from "@/lib/auth";
 import { isMerchantAccount, requireMerchantMembership } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
 import { SignInForm, SignOutButton } from "./sign-in";
+import { ShopSignUpForm, SignUpForm } from "./sign-up";
 import { Workspace } from "./workspace";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "Merchant setup | Envoi", robots: { index: false, follow: false } };
 
+const SIGNUP_LEAD = "Test environment. Nothing here takes real money. An Envoi admin approves every shop before it can sell.";
+
 export default async function MerchantSetupPage() {
   const requestHeaders = await headers();
   const session = await getAuth().api.getSession({ headers: requestHeaders });
 
-  // No permanent session: only the sign-in form, with no shop data. A buyer session holds no
-  // membership, so it reaches nothing here.
+  // S43 (Gate 3 S43 amendment decisions 1, 10 and 12): with MERCHANT_SIGNUP_ENABLED off the page
+  // is exactly as before S43 and renders no sign-up form.
+  const signupOpen = webEnv().MERCHANT_SIGNUP_ENABLED === "true";
+
+  // No permanent session: only the sign-in form (and, with sign-up open, the sign-up form), with no
+  // shop data. A buyer session holds no membership, so it reaches nothing here.
   if (!session || session.user.isAnonymous === true) {
+    const buyerSession = session && (
+      <aside className="card warning first-on-phone" aria-labelledby="buyer-session-heading">
+        <h2 id="buyer-session-heading">This browser has a buyer session</h2>
+        <p>Signing in here replaces it. Receipts opened in this browser will no longer open in it, although Envoi keeps the purchases.</p>
+        <p className="fine">To keep them, sign in from a private window instead. Signing in grants the merchant account nothing from the buyer session.</p>
+      </aside>
+    );
+    if (signupOpen) {
+      return (
+        <main>
+          <p className="eyebrow">Merchant setup</p>
+          <h1>Set up your shop</h1>
+          <p className="lead">{SIGNUP_LEAD}</p>
+          <div className="layout">
+            <section className="card slip" aria-labelledby="sign-up-heading">
+              <h2 id="sign-up-heading">Create your account</h2>
+              <SignUpForm />
+            </section>
+            <div className="stack">
+              {buyerSession}
+              <section className="card" aria-labelledby="sign-in-heading">
+                <h2 id="sign-in-heading">Already have an account?</h2>
+                <SignInForm />
+              </section>
+            </div>
+          </div>
+        </main>
+      );
+    }
     return (
       <main>
         <p className="eyebrow">Merchant setup</p>
@@ -33,13 +70,7 @@ export default async function MerchantSetupPage() {
             <h2 id="sign-in-heading">Merchant sign-in</h2>
             <SignInForm />
           </section>
-          {session && (
-            <aside className="card warning first-on-phone" aria-labelledby="buyer-session-heading">
-              <h2 id="buyer-session-heading">This browser has a buyer session</h2>
-              <p>Signing in here replaces it. Receipts opened in this browser will no longer open in it, although Envoi keeps the purchases.</p>
-              <p className="fine">To keep them, sign in from a private window instead. Signing in grants the merchant account nothing from the buyer session.</p>
-            </aside>
-          )}
+          {buyerSession}
         </div>
       </main>
     );
@@ -47,6 +78,27 @@ export default async function MerchantSetupPage() {
 
   const principal = await requireMerchantMembership(getAuth(), webDb(), requestHeaders);
   if (!isMerchantAccount(principal)) {
+    // With sign-up open, a permanent account with no shop creates its one test shop here; the
+    // database refuses one that holds any membership row.
+    if (signupOpen) {
+      return (
+        <main>
+          <p className="eyebrow">Merchant setup</p>
+          <h1>Set up your shop</h1>
+          <p className="lead">{SIGNUP_LEAD}</p>
+          <div className="layout">
+            <section className="card slip" aria-labelledby="shop-heading">
+              <h2 id="shop-heading">Create your shop</h2>
+              <p className="muted">Signed in as {session.user.email}. One shop per account.</p>
+              <ShopSignUpForm />
+            </section>
+          </div>
+          <div className="actions">
+            <SignOutButton />
+          </div>
+        </main>
+      );
+    }
     return (
       <main>
         <p className="eyebrow">Merchant setup</p>
@@ -62,12 +114,14 @@ export default async function MerchantSetupPage() {
   const first = initial.outlets[0];
   const draft = first ? await getMenuDraft(webDb(), first.id) : null;
   const latest = first ? await latestImport(webDb(), first.id, new Date()) : null;
+  // S43 decision 9: the imports refuse a self-created shop until it is approved, so none is offered.
+  const pendingSelfSignup = first !== undefined && first.selfSignup && first.enrollment !== "approved";
   return (
     <main>
       <p className="eyebrow">Merchant setup</p>
       <h1>Your shop</h1>
       <p className="lead">Signed in as {session.user.name}. Buyers see only what you publish; drafts stay invisible to them.</p>
-      <Workspace initial={initial} rewardsTerms={PAYPAL_PYUSD_REWARDS} importsOpen={menuImportsOpen()} webImportsOpen={webImportsOpen()} initialDraft={draft ? { ...draftJson(draft), latestImport: latest ? importJson(latest) : null } : null} />
+      <Workspace initial={initial} rewardsTerms={PAYPAL_PYUSD_REWARDS} importsOpen={menuImportsOpen() && !pendingSelfSignup} webImportsOpen={webImportsOpen() && !pendingSelfSignup} initialDraft={draft ? { ...draftJson(draft), latestImport: latest ? importJson(latest) : null } : null} />
       <div className="actions">
         <a className="button secondary" href="/merchant/orders">
           See orders

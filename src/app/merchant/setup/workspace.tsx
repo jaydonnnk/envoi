@@ -13,6 +13,7 @@ import { ShopQr } from "./shop-qr";
 import { CountryChoice } from "./country";
 import { RewardsCardView, type RewardsTerms } from "./rewards-card";
 import { useRestoreFocus } from "@/lib/browser/focus";
+import { requestSeller } from "./sign-up";
 
 function OutletChips({ outlet }: { outlet: MerchantOutlet }) {
   return (
@@ -176,6 +177,80 @@ function PayPalCard({ outlet, onSaved }: { outlet: MerchantOutlet; onSaved: (sav
   );
 }
 
+// S43 (Gate 3 S43 amendment decision 11): a self-created shop before the admin approves it. The
+// member can still edit the menu; publishing stays refused by the existing checks. The seller id it
+// submitted is shown, and can be sent again or replaced while the shop is pending.
+function WaitingForApproval({ outlet, onSaved }: { outlet: MerchantOutlet; onSaved: (next: MerchantOutlet) => void }) {
+  const [busy, setBusy] = useState(false);
+  useRestoreFocus(busy);
+  const [error, setError] = useState<string | null>(null);
+  const [changing, setChanging] = useState(outlet.requestedSeller === null);
+
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const seller = new FormData(event.currentTarget).get("seller");
+    setBusy(true);
+    setError(null);
+    const failed = await requestSeller(outlet.id, seller);
+    const list = failed ? null : await requestJson<MerchantOutlets>("GET", "/api/v1/merchant/outlets");
+    setBusy(false);
+    if (failed) {
+      setError(failed);
+      return;
+    }
+    const next = list?.data?.outlets.find((candidate) => candidate.id === outlet.id);
+    if (next) onSaved(next);
+    setChanging(false);
+  }
+
+  return (
+    <div className="waiting">
+      <section className="card warning" aria-labelledby="waiting-heading">
+        <span className="chip warn">Waiting for approval</span>
+        <h2 id="waiting-heading">After you apply</h2>
+        <p>Your shop has no public page and cannot take payments yet.</p>
+        {outlet.requestedSeller && !changing ? (
+          <>
+            <p className="fine">
+              PayPal sandbox seller id sent for review: <strong className="mono">{outlet.requestedSeller.merchantId}</strong>
+            </p>
+            <button className="button secondary small" type="button" onClick={() => setChanging(true)}>
+              Change seller id
+            </button>
+          </>
+        ) : (
+          <form onSubmit={submit}>
+            <label htmlFor="waiting-seller">PayPal sandbox seller id</label>
+            <input id="waiting-seller" name="seller" maxLength={13} autoComplete="off" spellCheck={false} aria-describedby="waiting-seller-hint" required />
+            <small id="waiting-seller-hint" className="field-hint">
+              The admin reviews this before connecting it. It is not used until then.
+            </small>
+            <div className="actions">
+              <button className="button" type="submit" disabled={busy}>
+                {busy ? "Sending" : "Send for review"}
+              </button>
+            </div>
+            {error && (
+              <p className="error" role="alert">
+                {error}
+              </p>
+            )}
+          </form>
+        )}
+      </section>
+      <section className="card" aria-labelledby="next-heading">
+        <h2 id="next-heading">What happens next</h2>
+        <ol className="steps">
+          <li>Add your menu by hand and confirm each row.</li>
+          <li>An Envoi admin reviews your shop and seller id.</li>
+          <li>Once approved, you publish. Your shop is labeled a test shop.</li>
+        </ol>
+        <p className="muted">One shop per account. Your account reaches only your own shop.</p>
+      </section>
+    </div>
+  );
+}
+
 const CHECKS: { check: PublicationCheck; label: string }[] = [
   { check: "enrollment", label: "Enrollment approved by the Envoi operator" },
   { check: "outlet_details", label: "Shop details confirmed" },
@@ -318,6 +393,7 @@ export function Workspace({
 
   return (
     <div className="stack">
+      {outlet && outlet.selfSignup && outlet.enrollment !== "approved" && <WaitingForApproval key={`waiting:${outlet.id}`} outlet={outlet} onSaved={replace} />}
       {outlets.length > 1 && (
         <nav className="card" aria-label="Your shops">
           {outlets.map((candidate) => (

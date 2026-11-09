@@ -438,18 +438,6 @@ describe("merchant sign-in and manual menu draft", () => {
     }
   });
 
-  it("public signup is refused", async () => {
-    const response = await routes.auth.POST(
-      new Request(`${TEST_BASE_URL}/api/auth/sign-up/email`, {
-        method: "POST",
-        headers: { "content-type": "application/json", origin: TEST_BASE_URL },
-        body: JSON.stringify({ email: "walk-in@merchant.example.test", password: "FIXTURE-not-a-real-password", name: "Walk in" }),
-      }),
-    );
-    expect(response.status).toBe(400);
-    expect(await fixture.database.admin`select id from "user" where email = 'walk-in@merchant.example.test'`).toHaveLength(0);
-  });
-
   it("a merchant edits the name and area of its unpublished outlet", async () => {
     const { cookie, outletId } = await merchantWithOutlet("rename");
     const response = await patchOutlet(outletId, cookie, { name: "  FIXTURE renamed kopi ", area: "Telok Ayer" });

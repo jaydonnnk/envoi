@@ -89,16 +89,14 @@ export async function requireMerchantMembership(auth: Auth, db: Db, headers: Hea
   return { kind: "merchant_account", userId: session.userId };
 }
 
-// S43: a permanent account holding no membership row in any state, which may create its one pending
-// shop while MERCHANT_SIGNUP_ENABLED is true. The caller checks the switch; the database function
-// re-checks the account and its memberships under a lock.
+// S43: a permanent account that may create its one pending shop while MERCHANT_SIGNUP_ENABLED is
+// true. The caller checks the switch; create_self_signup_outlet refuses, under a lock on the user
+// row, an anonymous account and any account holding a membership row in any state.
 export type SignupAccountPrincipal = { kind: "signup_account"; userId: string };
 
-export async function requireSignupAccount(auth: Auth, db: Db, headers: Headers): Promise<SignupAccountPrincipal | AppError> {
+export async function requireSignupAccount(auth: Auth, headers: Headers): Promise<SignupAccountPrincipal | AppError> {
   const session = await merchantSession(auth, headers);
   if ("code" in session) return session;
-  const [row] = await db.select({ id: merchantMemberships.id }).from(merchantMemberships).where(eq(merchantMemberships.userId, session.userId)).limit(1);
-  if (row) return appError("forbidden_membership", "This account already has a shop. One shop per account.");
   return { kind: "signup_account", userId: session.userId };
 }
 
