@@ -148,7 +148,8 @@ MIGRATION_DATABASE_URL=<database url> npm run operator -- approve-membership <em
 Then in the browser:
 
 1. Click "I run a shop", then "Set up my shop", or open `/merchant/setup`, and sign in.
-2. Check: public sign-up is refused; only operator-made accounts work.
+2. Check: with `MERCHANT_SIGNUP_ENABLED` unset or `false`, public sign-up is refused and only operator-made accounts work.
+   With it `true`, "Create your account" makes an account and one pending test shop with a requested sandbox seller id; the page shows "Waiting for approval" until the operator runs `assign-paypal-destination <outletId> <sellerId>` and `approve-enrollment <outletId>`.
 3. Create an outlet with a name and area, confirm its details, then enter the menu by hand and confirm it.
 4. Leave a price blank: confirmation is blocked until you fill it; a zero price is refused.
 5. In the sticker section, choose [`fixtures/sgqr-sticker-R26ZZ0001X.png`](fixtures/sgqr-sticker-R26ZZ0001X.png), check it reads "PayNow UEN R26ZZ0001X" with a valid checksum, and press "Submit for operator approval".

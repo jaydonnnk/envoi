@@ -96,7 +96,7 @@ The app shows these labels on every screen. Pending, failed or uncertain payment
 | OpenAI | `AI_MODEL` for the assistant, the box and Ask your orders, `AI_MENU_TRANSLATION_MODEL` for translations, `AI_WEB_MENU_MODEL` for the web import, through the Vercel AI SDK | Faked at its fetch boundary in every test; real calls happen only in recorded runs |
 | Kernel | One hosted headless browser session per web menu import, which reads the merchant's own public page | Deleted in a `finally` block on every path; no PDF, no link following, no live view |
 | MCP SDK | `@modelcontextprotocol/sdk` 1.32.1: Envoi's own `/mcp` server, and the client the assistant and the reference agent use | Each tool answer is validated against the server's own output schema |
-| Better Auth | Merchant sign-in and the buyer's anonymous session | There is no public merchant sign-up; the operator creates accounts |
+| Better Auth | Merchant sign-up and sign-in, and the buyer's anonymous session | Sign-up is on only while `MERCHANT_SIGNUP_ENABLED` is `true`, limited to 3 per address and 30 in all per hour; each account gets one pending test shop that the operator approves before it has a public page or takes payment |
 | AG Grid Community 36.2.0 | The merchant's menu draft grid and orders table | Community edition only; no paid module and no AG Studio |
 | AG Charts Community 14.2.0 | The sales desk's bar chart of paid sales and known PayPal fees by payment method | Community edition only; it draws the server's totals and computes none |
 | `barcode-detector` and `zxing-wasm` | SGQR sticker decode in the merchant's own browser | The sticker is never stored and never a payment destination |
