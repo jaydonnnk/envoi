@@ -21,8 +21,8 @@ export default function ForShopsPage() {
       <p className="eyebrow">For shops</p>
       <h1>Take PayPal from visitors whose cards do not work at your stall.</h1>
       <p className="lead">Keep your SGQR. Add no hardware. Under S$26, PayPal’s micropayment rate costs less.</p>
-      <div className="layout">
-        <div className="stack">
+      <div className="stack">
+        <div className="layout paired">
           <section className="card slip">
             <h2>Why add Envoi</h2>
             <ul className="plain-list">
@@ -37,13 +37,13 @@ export default function ForShopsPage() {
             </div>
             <p className="muted fine">{signupOpen ? "Set up a test shop here. An Envoi admin approves every shop before it can sell." : "No public sign-up yet: Envoi’s operator makes test accounts."}</p>
           </section>
-          <section className="card warning">
-            <h2>What it costs you</h2>
-            <p>PayPal takes a fee on each sale. Envoi adds nothing.</p>
-            <p className="muted fine">The micropayment rate needs PayPal’s approval, and it then applies to every sale.</p>
-          </section>
+          <FeeCalculator />
         </div>
-        <FeeCalculator />
+        <section className="card warning">
+          <h2>What it costs you</h2>
+          <p>PayPal takes a fee on each sale. Envoi adds nothing.</p>
+          <p className="muted fine">The micropayment rate needs PayPal’s approval, and it then applies to every sale.</p>
+        </section>
       </div>
     </main>
   );

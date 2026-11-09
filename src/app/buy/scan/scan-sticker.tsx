@@ -331,7 +331,7 @@ function UnenrolledStall() {
     <section className="unenrolled" aria-labelledby="unenrolled-heading">
       <h2 id="unenrolled-heading">This stall isn&apos;t on Envoi yet</h2>
       <p className="lead">You cannot pay this stall through Envoi. Scanning did not add it. You can show the stall this card, and search for another shop.</p>
-      <div className="layout">
+      <div className="layout paired">
         <section className="card unenrolled-card" aria-label="Card to show the stall">
           <h3 lang={language}>{text.heading}</h3>
           <p lang={language}>{text.body}</p>

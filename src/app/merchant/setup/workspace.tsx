@@ -204,7 +204,7 @@ function WaitingForApproval({ outlet, onSaved }: { outlet: MerchantOutlet; onSav
   }
 
   return (
-    <div className="waiting">
+    <div className="layout paired waiting">
       <section className="card warning" aria-labelledby="waiting-heading">
         <span className="chip warn">Waiting for approval</span>
         <h2 id="waiting-heading">After you apply</h2>

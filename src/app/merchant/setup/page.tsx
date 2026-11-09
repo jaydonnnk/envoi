@@ -43,7 +43,7 @@ export default async function MerchantSetupPage() {
           <p className="eyebrow">Merchant setup</p>
           <h1>Set up your shop</h1>
           <p className="lead">{SIGNUP_LEAD}</p>
-          <div className="layout">
+          <div className="layout paired">
             <section className="card slip" aria-labelledby="sign-up-heading">
               <h2 id="sign-up-heading">Create your account</h2>
               <SignUpForm />

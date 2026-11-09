@@ -82,6 +82,8 @@ small { font-size: 13px; display: block; }
 .actions.rate-form label { margin-bottom: 0; }
 
 .layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr); gap: 18px; align-items: start; }
+.layout.paired { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
+.layout.paired > .stack:has(> .first-on-phone) { grid-template-rows: auto 1fr; }
 .rail { display: block; border: 2px solid var(--blue); border-radius: 8px; padding: 14px; margin: 0 0 12px; }
 .rail.unavailable { border: 1px solid var(--line); background: var(--pale); color: var(--muted); }
 .rail-head { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
@@ -246,7 +248,7 @@ footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; 
   main { padding: 22px 16px 44px; }
   footer { padding: 0 16px 24px; }
   .card { padding: 18px; }
-  .layout { grid-template-columns: 1fr; }
+  .layout, .layout.paired { grid-template-columns: minmax(0, 1fr); }
   .orders-grid .grid-swipe { display: block; }
   /* A warning that must be read before acting comes first in the single column. */
   .layout > .first-on-phone { order: -1; }
@@ -344,9 +346,7 @@ footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; 
 /* Bring your own assistant (S37), per mockups/buyer-own-assistant.html. */
 .field-hint { margin-top: 8px; }
 .area-attribution { overflow-wrap: anywhere; }
-.waiting { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr); gap: 18px; align-items: start; }
 .waiting .card.warning h2 { margin-top: 12px; }
-@media (max-width: 640px) { .waiting { grid-template-columns: 1fr; } }
 .steps { list-style: decimal; padding-left: 22px; color: var(--muted); }
 .steps li { padding-bottom: 12px; }
 .steps code { font: 13px/1.5 Consolas, ui-monospace, monospace; overflow-wrap: anywhere; }
