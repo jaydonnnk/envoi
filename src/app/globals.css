@@ -345,7 +345,8 @@ footer { max-width: 960px; margin: auto; padding: 0 24px 28px; font-size: 13px; 
 
 /* Bring your own assistant (S37), per mockups/buyer-own-assistant.html. */
 .field-hint { margin-top: 8px; }
-.area-attribution { overflow-wrap: anywhere; }
+.area-attribution { overflow-wrap: anywhere; font-size: 11px; line-height: 1.45; margin-top: 10px; }
+.area-attribution a { color: inherit; }
 .waiting .card.warning h2 { margin-top: 12px; }
 .steps { list-style: decimal; padding-left: 22px; color: var(--muted); }
 .steps li { padding-bottom: 12px; }
