@@ -613,6 +613,7 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 - **Checks [verified].** Typecheck and lint clean; production build; `scan-build.ts` finds no send method name in 280 built files; the public API and MCP contract over real HTTP at `http://localhost:3111` passed on a disposable database; `gate4_check.py` PASS; `git diff --check` clean.
 - **Browser [verified].** Local production build at `http://localhost:3000` on a disposable PostgreSQL with one published FIXTURE shop. OpenAI and PayPal's MCP server were FIXTURE fakes at the fetch boundaries; no live model ran and no sandbox money moved. At 390 px and 1280 px the refused question shows the notice with "Envoi order records / read" and no refund card, and the legitimate question is shown unchanged; no horizontal overflow, with the Test environment badge and the fixture labels visible. Screens: [390 refused](evidence/s54-browser-390-refused.jpg), [390 shown](evidence/s54-browser-390-shown.jpg), [1280 refused](evidence/s54-browser-1280-refused.jpg), [1280 shown](evidence/s54-browser-1280-shown.jpg); [metrics](evidence/s54-browser-check.json).
 - **Boundary.** No Render, Neon, PayPal sandbox or OpenAI call was made. The hosted result, the deployed SHA and CI for the slice are [unknown] until release. The notice is reply text, so the route and the panel needed no change.
+- **Mirror.** `demo-guide.md` step 5 now says a reply naming an unchecked amount shows the notice instead, with the records it read still listed and no refund card.
 
 ### S43 Merchant sign-up, 2026-11-09
 
