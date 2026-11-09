@@ -3598,3 +3598,56 @@ Each guard gets its own mutation with an AssertionError, byte-identical restorat
 #### Render check, after deploy
 
 With the switch on, one sign-up from the browser, then a read-only count showing one new user, outlet, membership and pending enrollment. A second sign-up from a request carrying a different first `x-forwarded-for` entry counts against the same subject, or decision 3 is reopened. Then the operator's approval on Neon, the member's publish (which also starts one S50 Workflow run) and one sandbox purchase to Paid, each with its own authorization.
+
+### S54 amendment, drafted 2026-11-09
+
+**Status: drafted 2026-11-09 and approved 2026-11-09 ("approve gate 3 and continue").** For the copilot figure guard in [Gate 2](02-architecture.md#s54-copilot-figure-guard-drafted-2026-11-09), approved the same day.
+The user authorized the guard and its slice on 2026-11-09 ("I authorized the doc fixes and the copilot figure guard. Make a slice for that."); Gates 2 and 3 were approved the same day.
+No migration, environment name, dependency or prompt change. The S45 evaluation stays valid.
+
+#### Files
+
+| File | Why |
+| --- | --- |
+| `src/integrations/assistant/copilot-figures.ts` | New, pure: collect amounts from a tool result, extract money mentions from a reply, report unchecked ones |
+| `src/integrations/assistant/merchant-copilot.ts` | Collects figures in `step()`; checks `result.text` before returning a reply |
+| `tests/unit/copilot-figures.test.ts` | Extraction, normalization and the recorded S45 replies as regression anchors |
+| `tests/integration/merchant-copilot.test.ts` | Tests 99 and 100 through the real turn with the FIXTURE boundaries |
+
+#### Types and signatures
+
+```ts
+// src/integrations/assistant/copilot-figures.ts
+// Canonical form: integer cents as a decimal string, e.g. "1670", "-62". No float path.
+export function collectFigures(value: unknown): Set<string>;
+export function replyAmounts(text: string): string[];
+export function uncheckedAmounts(text: string, figures: ReadonlySet<string>): string[];
+export const COPILOT_UNCHECKED_NOTICE = "Envoi did not show this answer because it named an amount that no record checked this turn. Nothing was sent. Your orders table still works.";
+```
+
+`collectFigures` walks a tool result once: every object with a string `currency_code` and a decimal string `value` (PayPal's money shape) contributes its value; every string matching a money mention (Envoi's `formatMoney` output) contributes its number.
+A money mention is `S$`, `US$`, `$`, `SGD` or `USD` beside an optional minus and a number with comma thousands and up to two decimals, before or after the number. A number with more than two decimals canonicalizes to itself and so never matches a two-decimal figure.
+`replyAmounts` extracts the same mentions from the reply. Counts, dates, order ids and percentages are not mentions.
+
+#### Call stack, adding to the "Copilot turn" call stack
+
+`runCopilotTurn` creates one `Set<string>`; `step()` adds `collectFigures(value)` for every tool result of this turn.
+After `generateText`, a reply with `uncheckedAmounts(result.text, figures)` non-empty returns `{ kind: "reply", text: COPILOT_UNCHECKED_NOTICE, steps, refund: null }`; otherwise the reply is returned as today.
+A refused turn's steps still reach the panel, so "What it checked" stays truthful.
+
+#### Tests and guards
+
+Integration tests run on a disposable local database through the real turn, with PayPal's MCP server, PayPal writes and OpenAI as FIXTURE fakes at their boundaries.
+
+- **99:** `a copilot reply naming an amount no tool result holds is refused`: the model says "S$99.99" while the turn's tools hold S$16.70; the route answers the notice, no proposal, and the steps intact.
+- **100:** `a copilot reply whose amounts all appear in this turn's tool results is shown`: "S$16.70" is shown; a fee reply "SGD -0.62" matching `list_transactions` is shown; a reply with no amount is shown; counts, dates and order ids never refuse.
+- **Unit anchors:** the recorded S45 replies E1 ("S$16.70"), E3 ("S$3.50") and E8 ("SGD -0.62, SGD -0.62, and SGD -0.83") pass with their turns' figure sets; commas ("S$1,234.50"), negatives, postfix codes and bare `$` normalize; a three-decimal mention never matches.
+- **Guards, each with its own mutation:** the check removed (99 fails); collection dropped (100 fails); comma stripping removed (unit fails); a refusal keeps its proposal (99 fails).
+
+#### Least confident decisions
+
+1. **Values, not currency labels.** A USD figure written as S$ passes when the same number exists in the turn's results. The claim enforced is the S45 evaluation's: every amount appears in a tool result of this turn.
+2. **Only money mentions.** A wrong count ("10 orders" for 3) is not refused; the claim is about amounts, and counts and dates stay the model's words.
+3. **The pattern set.** "16.70 dollars" or a currency word in another script is not extracted, so it is not checked [boundary]. The prompt already asks for amounts exactly as written in tool results, which use S$, US$ and currency codes.
+4. **A refusal drops the proposal.** The proposal's amount is code's own, but a turn whose text failed the check shows no card; the merchant asks again.
+5. **This turn only.** An amount from an earlier turn's tools is not in this turn's set and refuses. Conservative, and the evaluation's rule.

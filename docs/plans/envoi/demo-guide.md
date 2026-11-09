@@ -1,6 +1,6 @@
 # Envoi demo and test guide
 
-Status: 2026-11-08. Written 2026-10-23 from `main` at `1d354f8`; the buyer text steps corrected 2026-10-26 for S21's one-box screen; the landing page, Ask Envoi and the box's example sentence corrected 2026-11-05 for S41; the merchant copilot added to step 7 on 2026-11-08 for S45, the sales desk added to step 7 on 2026-11-08 for S46, and the weekly summary added to step 7 on 2026-11-08 for S47.
+Status: 2026-11-09. Written 2026-10-23 from `main` at `1d354f8`; the buyer text steps corrected 2026-10-26 for S21's one-box screen; the landing page, Ask Envoi and the box's example sentence corrected 2026-11-05 for S41; the merchant copilot added to step 7 on 2026-11-08 for S45, the sales desk added to step 7 on 2026-11-08 for S46, and the weekly summary added to step 7 on 2026-11-08 for S47; step 6 carries S51's email confirmation and S53's password reset, and step 12 drops the `typecheck:client` script removed in S27 (2026-11-09).
 It walks through every built journey, in the order a judge or tester would meet them.
 Test money only: PayPal sandbox and Solana devnet test tokens; no real money moves.
 Where this guide and a gate document disagree, the gate document wins.
@@ -148,8 +148,9 @@ MIGRATION_DATABASE_URL=<database url> npm run operator -- approve-membership <em
 Then in the browser:
 
 1. Click "I run a shop", then "Set up my shop", or open `/merchant/setup`, and sign in.
-2. Check: with `MERCHANT_SIGNUP_ENABLED` unset or `false`, public sign-up is refused and only operator-made accounts work.
-   With it `true`, "Create your account" makes an account and one pending test shop with a requested sandbox seller id; the page shows "Waiting for approval" until the operator runs `assign-paypal-destination <outletId> <sellerId>` and `approve-enrollment <outletId>`.
+2. Check: with `MERCHANT_SIGNUP_ENABLED` unset or `false`, or mail unconfigured, public sign-up is refused and only operator-made accounts work.
+   With it open, "Create your account" sends a confirmation email first (S51): the account cannot create a shop until the link is clicked. Then one pending test shop with a requested sandbox seller id; the page shows "Waiting for approval" until the operator runs `assign-paypal-destination <outletId> <sellerId>` and `approve-enrollment <outletId>`.
+   "Forgot your password?" on the sign-in card emails a one-use reset link (S53); it resets the password and signs out every earlier session.
 3. Create an outlet with a name and area, confirm its details, then enter the menu by hand and confirm it.
 4. Leave a price blank: confirmation is blocked until you fill it; a zero price is refused.
 5. In the sticker section, choose [`fixtures/sgqr-sticker-R26ZZ0001X.png`](fixtures/sgqr-sticker-R26ZZ0001X.png), check it reads "PayNow UEN R26ZZ0001X" with a valid checksum, and press "Submit for operator approval".
@@ -281,10 +282,6 @@ npm run typecheck
 ```
 
 ```bash
-npm run typecheck:client
-```
-
-```bash
 npm run lint
 ```
 
@@ -307,7 +304,7 @@ Integration tests create and drop their own databases, so point `TEST_DATABASE_U
 
 | Step | Pass when |
 | --- | --- |
-| 2 Landing | Pitch headline, Ask Envoi offered first and only while the assistant is on, no sideways scroll at 390 px |
+| 2 Landing | Pitch headline, "Scan a sticker" the first button, Ask Envoi offered only while the assistant is on, no sideways scroll at 390 px |
 | 3 Ask and text | Ask Envoi names only registered shops and items and stops before Paid; the box's own example lists both items and guesses no quantity |
 | 4 PayPal | Receipt Paid, PayPal payee and amount match |
 | 5 Scan | Approved sticker opens shop, unknown one does not |

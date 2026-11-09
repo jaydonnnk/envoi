@@ -781,6 +781,13 @@ Totals are computed on the server, because the browser holds only one loaded pag
 
 `pay_order`, `create_order`, `create_refund` and every other PayPal write tool are never given to the model.
 
+### S54 copilot figure guard, drafted 2026-11-09
+
+**Status: drafted 2026-11-09 and approved 2026-11-09 ("approve gate 2 and continue").** It adds one step to the copilot turn and changes no endpoint, table, environment name or dependency.
+Gate 1 is unchanged: the fourth plan's success measure already requires zero invented amounts from the copilot, and the refusal notice mirrors the digest's approved refusal pattern.
+
+9. After the model loop, every money mention in the reply is checked against the amounts collected from this turn's own tool results. A reply naming an amount no tool result holds is replaced by a code-written notice, and any refund proposal from that turn is dropped. The prompt is unchanged, so the S45 evaluation stays valid. Counts, dates, order ids and percentages are not money mentions and are not checked; the check compares values, not currency labels.
+
 ### Flow: refund
 
 1. The member taps Confirm, and the browser calls the refund route with the order id.

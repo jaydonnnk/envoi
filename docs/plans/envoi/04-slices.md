@@ -1224,6 +1224,11 @@ Branch: `envoi/slice-43-merchant-signup`. **Visible result.** `mockups/merchant-
 
 See the [approved merchant onboarding slice plan](merchant-onboarding-review/04-slices.md) for the S43 follow-up.
 
+#### S54 The copilot figure guard, drafted 2026-11-09
+
+**Status: APPROVED 2026-11-09 ("I approve gate 4").** After S53, outside the build-order table. Gates 2 and 3 were approved the same day ("approve gate 2 and continue", "approve gate 3 and continue"). Approval starts no slice; the handoff prompt carries the start.
+Branch: `envoi/slice-54-copilot-figure-guard`. **Visible result.** On the demo shop, a copilot reply naming an amount no record checked this turn shows the refusal notice instead of the answer; every legitimate reply is unchanged. **Tests.** 99 and 100, plus the unit anchors and four guard mutations in the [Gate 3 amendment](03-program-design.md#s54-amendment-drafted-2026-11-09). **Builds.** The figure collection and check of the Gate 2 step; no migration, dependency, environment name or prompt change. **Evidence.** The full suite, the mutations, and a local browser view of one refused and one shown reply on a FIXTURE shop. **Falsifier.** Any recorded S45 evaluation reply is refused by the guard: it is too strict and does not ship. **Authorizations.** Start, then merge, push and deploy; a live model smoke is optional and needs its own spend words.
+
 ## Test assignment
 
 Every one of the 92 named tests in the re-approved Gate 3 test plan, 71 standalone tests and 21 groups covering 231 cases, is assigned to exactly one slice.

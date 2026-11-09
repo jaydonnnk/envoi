@@ -441,7 +441,11 @@ for f, text in current.items():
 # 2026-11-08: S47 amendment, approved ("Approval to spend both us 5 cap and gate 3 approval"); 61e52e83...80086265 was the pin before it.
 # 2026-11-09: S50 amendment, approved ("yes i approve gate 3 as well"); fd40cc7f...e54419ea was the pin before it.
 # 2026-11-09: S43 amendment, approved ("Approve Gate 3"); ded90609...7c99c9 was the pin before it.
-G3_REOPENING_SHA256 = "60a7cfacc07615e4607cd3dc3dbcd05d90d383a4fae68f2b530638be432409a8"
+# 2026-11-09: S54 amendment, approved ("approve gate 3 and continue"); 60a7cfac...32409a8 was the pin before it.
+# 2026-11-09: wording correction after that approval: the sentence saying the gate drafts still needed their
+# approvals now records that Gates 2 and 3 were approved the same day. No contract, test or decision text changed
+# (e8390cf4...afc769 was the approved text before this correction).
+G3_REOPENING_SHA256 = "16d88e1dd35a85747243a35da7f0b9a4f4d496a8905780b394330a105cc96780"
 # 02-architecture.md may likewise equal its continuation amendment text, re-approved by the user on 2026-10-25
 # (bc504e10...d0e47a9f was the shop QR and order archive text, re-approved on 2026-10-24,
 # 28d54654...45561154 the Phantom landing text of 2026-10-18, 938d0a99...f3bf30a6 the English-only text of 2026-10-15).
@@ -459,7 +463,8 @@ G3_REOPENING_SHA256 = "60a7cfacc07615e4607cd3dc3dbcd05d90d383a4fae68f2b530638be4
 # 2026-11-07: S45 first check, re-approved by the user ("i approve both gates"); 80b3e947...45725b7e was the pin before it.
 # 2026-11-08: S45 lost refund response, re-approved by the user ("Approve Gate 2"); 7b64f2ba...0f6461 was the pin before it.
 # 2026-11-08: S45 two demo shops, re-approved by the user ("Approve Gate 2"); aaf7d924...c5f9de3d was the pin before it.
-G2_REOPENING_SHA256 = "54a40825a4fcc6cd2908b484429b80eb91b83fce797db1b4274f21d456920fac"
+# 2026-11-09: S54 copilot figure guard, approved by the user ("approve gate 2 and continue"); 54a40825...6920fac was the pin before it.
+G2_REOPENING_SHA256 = "352cfdb02212db829937d6391b632abaccfa0850c1f17a7a4f7c4b3875fbafce"
 # Gate 1, re-approved 2026-10-16 after deferring menu photo drafting and again on 2026-10-21 for the
 # landing page, and on 2026-10-24 for the shop QR and order archive, then reopened and re-approved on 2026-10-25 for S19-S22:
 # the revised and added mockups, and 01-product.md without its closing status line, which keeps changing as slices finish
@@ -504,7 +509,9 @@ G1_MOCKUP_SHA256 = {
 # 2026-11-07: the fourth build plan, re-approved by the user ("Approve Gate 1").
 # 2026-11-07: the S44 shops page, re-approved by the user ("Yes to gate 1 and gate 3 changes as well").
 # 2026-11-08: S49 existing-SGQR optional print sheet, re-approved ("Sure lets continue").
-G1_BODY_SHA256 = "b1492fa2453814ba3e9ed8e3ce9b39af3ad9016715cc6ef4cf67292ac7ef7c03"
+# 2026-11-09: wording correction authorized with the doc fixes: the rates show with their source and no read date,
+# matching the approved for-shops mockup and test 64; no decision changes (b1492fa2...7ef7c03 was the text before it).
+G1_BODY_SHA256 = "175c176d6a4252d431e060a7086536983607fd128d344aaf10853260d2cd27f6"
 for root, _, files in os.walk(folder):
     for name in sorted(files):
         rel = os.path.relpath(os.path.join(root, name), folder)
