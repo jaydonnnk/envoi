@@ -10,6 +10,7 @@ import type { DraftWithImport } from "./menu-import";
 import { PyusdWalletCard } from "./pyusd-wallet";
 import { SgqrSticker } from "./sgqr-sticker";
 import { ShopQr } from "./shop-qr";
+import { ShopLocation } from "./shop-location";
 import { CountryChoice } from "./country";
 import { RewardsCardView, type RewardsTerms } from "./rewards-card";
 import { useRestoreFocus } from "@/lib/browser/focus";
@@ -43,7 +44,7 @@ function OutletForm({ outlet, submitLabel, onSaved, onCancel }: { outlet?: Merch
     setError(null);
     const result = outlet
       ? await requestJson<Saved>("PATCH", `/api/v1/merchant/outlets/${encodeURIComponent(outlet.id)}`, { ...body, detailsConfirmed: form.get("confirmed") === "on" })
-      : await requestJson<Saved>("POST", "/api/v1/merchant/outlets", body);
+      : await requestJson<Saved>("POST", "/api/v1/merchant/outlets", { ...body, country: form.get("country") });
     setBusy(false);
     if (!result.ok || !result.data) {
       setError(result.error?.message ?? "The shop could not be saved. Try again.");
@@ -54,11 +55,10 @@ function OutletForm({ outlet, submitLabel, onSaved, onCancel }: { outlet?: Merch
 
   const prefix = outlet ? `outlet-${outlet.id}` : "new-outlet";
   return (
-    <form onSubmit={submit}>
+    <form method="post" onSubmit={submit}>
       <label htmlFor={`${prefix}-name`}>Shop name</label>
       <input id={`${prefix}-name`} name="name" defaultValue={outlet?.name} maxLength={80} required />
-      <label htmlFor={`${prefix}-area`}>Outlet area</label>
-      <input id={`${prefix}-area`} name="area" defaultValue={outlet?.area} maxLength={80} placeholder="For example Tanjong Pagar" required />
+      <ShopLocation prefix={prefix} saved={outlet} />
       {outlet && (
         <label className="check">
           <input type="checkbox" name="confirmed" />I reviewed the shop name and area.
@@ -415,7 +415,7 @@ export function Workspace({
             )}
           </div>
           {editing ? (
-            <OutletForm outlet={outlet} submitLabel="Save details" onSaved={updated} onCancel={() => setEditing(false)} />
+            <OutletForm key={`details:${outlet.id}:${outlet.country}`} outlet={outlet} submitLabel="Save details" onSaved={updated} onCancel={() => setEditing(false)} />
           ) : (
             <>
               <p>

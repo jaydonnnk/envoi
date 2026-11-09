@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { requestJson } from "@/lib/browser/session";
 import { useRestoreFocus } from "@/lib/browser/focus";
+import { ShopLocation } from "./shop-location";
 import { VerificationPrompt } from "./verification-prompt";
 
 const SELLER_HINT = "The admin reviews this before connecting it. It is not used until then.";
@@ -26,7 +27,7 @@ async function createAccount(email: string, password: FormDataEntryValue | null)
 }
 
 async function createShopAndRequest(form: FormData): Promise<{ step: Step; error: string } | null> {
-  const created = await requestJson<{ outlet: { id: string } }>("POST", "/api/v1/merchant/outlets", { name: form.get("name"), area: form.get("area") });
+  const created = await requestJson<{ outlet: { id: string } }>("POST", "/api/v1/merchant/outlets", { name: form.get("name"), area: form.get("area"), country: form.get("country") });
   if (!created.ok || !created.data) return { step: "shop", error: created.error?.message ?? "The shop could not be created. Try again." };
   const requested = await requestSeller(created.data.outlet.id, form.get("seller"));
   return requested ? { step: "seller", error: requested } : null;
@@ -42,8 +43,7 @@ function ShopFields({ prefix }: { prefix: string }) {
     <>
       <label htmlFor={`${prefix}-name`}>Shop name</label>
       <input id={`${prefix}-name`} name="name" maxLength={80} required />
-      <label htmlFor={`${prefix}-area`}>Area</label>
-      <input id={`${prefix}-area`} name="area" maxLength={80} placeholder="For example Tanjong Pagar" required />
+      <ShopLocation prefix={prefix} />
       <label htmlFor={`${prefix}-seller`}>PayPal sandbox seller id</label>
       <input id={`${prefix}-seller`} name="seller" maxLength={13} autoComplete="off" spellCheck={false} aria-describedby={`${prefix}-seller-hint`} required />
       <small id={`${prefix}-seller-hint`} className="field-hint">

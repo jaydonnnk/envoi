@@ -91,6 +91,8 @@ try {
     RENDER_WORKFLOW_SLUG: "fixture-unused",
     // S43: this run signs no one up, so merchant sign-up stays off as before S43.
     MERCHANT_SIGNUP_ENABLED: "false",
+    RESEND_API_KEY: "fixture-unused",
+    MERCHANT_EMAIL_FROM: "fixture-unused@example.test",
     // S38: no seller in this run is on the allowlist, so crypto stays off.
     PAYPAL_CRYPTO_ENABLED: "FIXTURE-UNLISTED-SELLER",
     SOLANA_RPC_URL: "http://127.0.0.1:9/fixture-unused",

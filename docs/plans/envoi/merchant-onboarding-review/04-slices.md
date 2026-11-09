@@ -69,4 +69,4 @@ Rerun S51 and S43 tests 89 to 98 as regression checks. [Assertions and mutations
 3. On the isolated candidate, prove one real signup, inbox receipt, explicit confirmation, password sign-in and pending shop save. Check the Area label, enrollment status and legacy sign-in. Report this separately from fixture proof. With approval, enable hosted signup only after the checks pass.
 4. If a release check fails, keep hosted signup paused and retain the migration and cohort guard while diagnosing. Any older binary would require a separately reviewed rollback plan once it could encounter flagged accounts.
 
-S51 is authorized for local implementation. See the [status record](../00-status.md#merchant-email-confirmation-and-area-search-2026-11-09).
+S51 and S52 are complete locally. See the [status record](../00-status.md#merchant-email-confirmation-and-area-search-2026-11-09).

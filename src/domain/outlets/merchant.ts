@@ -3,6 +3,7 @@ import { recordAudit } from "@/domain/audit/events";
 import { getMenuDraft } from "@/domain/menu/draft";
 import type { MenuDraft } from "@/domain/menu/types";
 import { getPayPalConnection, type PayPalConnection } from "@/domain/outlets/destination";
+import { isSingaporeArea } from "@/domain/outlets/sg-areas";
 import { publicationStatus, type PublicationStatus } from "@/domain/outlets/publish";
 import { decodeEmvcoTlv, type SupportedScheme } from "@/domain/sgqr/decode";
 import { scanCount, stickerHash } from "@/domain/sgqr/demand";
@@ -195,6 +196,13 @@ export async function listMerchantOutlets(db: Pick<Db, "select">, userId: string
 }
 
 export type OutletInput = { name: string; area: string };
+export type OutletCreateInput = OutletInput & { country: Country };
+
+export function normalizeOutletArea(area: string, country: Country): string | null {
+  if (country === "SG") return isSingaporeArea(area) ? area : null;
+  const trimmed = area.trim();
+  return trimmed.length > 0 && trimmed.length <= OUTLET_LIMITS.maxTextChars ? trimmed : null;
+}
 
 // detailsConfirmed: the merchant declares they reviewed exactly these details. Saving without it
 // clears any earlier confirmation, so a confirmation always names the current name and area.
@@ -207,7 +215,7 @@ export type CreatedOutlet = { outlet: MerchantOutlet; draft: MenuDraft };
 // outlet. It returns that empty draft, so the setup page shows the menu editor without a second
 // request. Without such a membership nothing is created. Two concurrent creations cannot share one
 // membership, because the second waits on the row lock and then finds it bound.
-export async function createMerchantOutlet(db: Db, input: OutletInput & { userId: string; now: Date }): Promise<CreatedOutlet | AppError> {
+export async function createMerchantOutlet(db: Db, input: OutletCreateInput & { userId: string; now: Date }): Promise<CreatedOutlet | AppError> {
   return db.transaction(async (tx) => {
     const [membership] = await tx
       .select({ id: merchantMemberships.id, isDemo: merchantMemberships.isDemo })
@@ -237,6 +245,7 @@ export async function createMerchantOutlet(db: Db, input: OutletInput & { userId
       operatorVisible: true,
       details: { membershipId: membership.id, menuRevisionId, isDemo: membership.isDemo },
     });
+    await tx.update(outlets).set({ country: input.country }).where(eq(outlets.id, outletId));
     const draft = await getMenuDraft(tx, outletId);
     const outlet = await describeOutlet(tx, outletId);
     if (!draft || !outlet) throw new Error("The new outlet or its draft revision was not found in its own transaction.");
@@ -259,7 +268,7 @@ export async function isPendingSelfSignup(db: Pick<Db, "select">, outletId: stri
 // (migration 0035) writes the outlet, labeled a demo fixture and marked self_signup, its bound owner
 // membership, a pending enrollment and an empty draft in this transaction, and refuses an account
 // with any membership. Only the operator's approve-enrollment approves the shop.
-export async function createPendingOutlet(db: Db, input: OutletInput & { userId: string; now: Date }): Promise<CreatedOutlet | AppError> {
+export async function createPendingOutlet(db: Db, input: OutletCreateInput & { userId: string; now: Date }): Promise<CreatedOutlet | AppError> {
   try {
     return await db.transaction(async (tx) => {
       const rows = await tx.execute<{ id: string }>(sql`select create_self_signup_outlet(${input.userId}, ${input.name}, ${input.area}, ${input.now.toISOString()}::timestamptz) as id`);
@@ -273,6 +282,7 @@ export async function createPendingOutlet(db: Db, input: OutletInput & { userId:
         operatorVisible: true,
         details: { selfSignup: true },
       });
+      await tx.update(outlets).set({ country: input.country }).where(eq(outlets.id, outletId));
       const draft = await getMenuDraft(tx, outletId);
       const outlet = await describeOutlet(tx, outletId);
       if (!draft || !outlet) throw new Error("The new outlet or its draft revision was not found in its own transaction.");
@@ -309,9 +319,11 @@ export async function updateMerchantOutlet(db: Db, input: OutletUpdate & { outle
     if (current.publishedMenuRevisionId !== null) {
       return appError("validation_failed", "A published shop's details cannot be edited here.", { details: { reason: "outlet_published" } });
     }
+    const area = current.area === input.area ? current.area : normalizeOutletArea(input.area, current.country);
+    if (area === null) return appError("validation_failed", "Choose a valid area for the shop's country.");
     await tx
       .update(outlets)
-      .set({ name: input.name, area: input.area, detailsConfirmedAt: input.detailsConfirmed ? input.now : null })
+      .set({ name: input.name, area, detailsConfirmedAt: input.detailsConfirmed ? input.now : null })
       .where(eq(outlets.id, input.outletId));
     await recordAudit(tx, {
       at: input.now,
@@ -319,7 +331,7 @@ export async function updateMerchantOutlet(db: Db, input: OutletUpdate & { outle
       action: "outlet_updated",
       outletId: input.outletId,
       operatorVisible: false,
-      details: { nameChanged: current.name !== input.name, areaChanged: current.area !== input.area, detailsConfirmed: input.detailsConfirmed },
+      details: { nameChanged: current.name !== input.name, areaChanged: current.area !== area, detailsConfirmed: input.detailsConfirmed },
     });
     const outlet = await describeOutlet(tx, input.outletId);
     if (!outlet) throw new Error("the outlet vanished in its own transaction");

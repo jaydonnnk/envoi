@@ -8,14 +8,17 @@ import { SGQR_MAX_PAYLOAD_CHARS } from "@/domain/sgqr/decode";
 
 const text = (max: number) => z.string().trim().max(max);
 
-export const outletBody = z.object({
+const outletFields = z.object({
   name: text(OUTLET_LIMITS.maxTextChars).min(1),
-  area: text(OUTLET_LIMITS.maxTextChars).min(1),
+  area: z.string(),
 });
+
+const country = z.enum(["SG", "US"]);
+export const outletCreateBody = outletFields.extend({ country: country.default("SG") });
 
 // S7: saving with detailsConfirmed true confirms exactly these details; without it, any earlier
 // confirmation is cleared.
-export const outletUpdateBody = outletBody.extend({ detailsConfirmed: z.boolean().default(false) });
+export const outletUpdateBody = outletFields.extend({ detailsConfirmed: z.boolean().default(false) });
 
 // S9: an identifier submission through the same edit route. It carries no name or area, and a body
 // that mixes the two is refused rather than half applied. The payload is the decoded sticker text,
@@ -62,4 +65,4 @@ export const paypalConnectionBody = z.object({ sellerMerchantId: z.string().trim
 
 // S27: the country choice, alone in its body like an identifier submission, so it is never half
 // applied with a name or area edit.
-export const countryBody = z.object({ country: z.enum(["SG", "US"]) }).strict();
+export const countryBody = z.object({ country }).strict();

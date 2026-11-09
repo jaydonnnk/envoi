@@ -12,7 +12,7 @@ import { approveEnrollment, assignPayPalDestination, approveMembership, createMe
 import { createFakeKernel, FIXTURE_PAGE_TEXT, isKernelUrl } from "../support/fake-kernel";
 import { createFakePayPal, type FakePayPal } from "../support/fake-paypal";
 import { FIXTURE_BOUNDS, FIXTURE_VISION_ENV, createFakeVision, fixturePolicy, importRequest, photoBody, solidJpeg, visionItem } from "../support/menu-import";
-import { fixtureConfirmationLink, jsonRequest, newMerchant, signInCookie } from "../support/merchant";
+import { fixtureConfirmationLink, jsonRequest, newMerchant, signInCookie, withoutOutletCountryUpdate } from "../support/merchant";
 import { createPaymentsFixture, FIXTURE_SELLER, jsonPost, routeParams, type PaymentsFixture } from "../support/payments";
 import { envelope, FIXTURE_MENU, loadMerchantRoutes, publishedItems, shopApi, type DraftJson, type MerchantRoutes, type Shop } from "../support/publication";
 import { anonymousCookie, TEST_BASE_URL } from "../support/session";
@@ -177,6 +177,41 @@ afterAll(async () => {
 });
 
 describe("S43 merchant sign-up with MERCHANT_SIGNUP_ENABLED=true", () => {
+  it("country governs Area on create and edit for a confirmed self-signup", async () => {
+    const singapore = await signUp("area-sg");
+    const unitedStates = await signUp("area-us");
+    const create = (cookie: string, input: unknown) => routes.outlets.POST(jsonRequest("POST", "/api/v1/merchant/outlets", cookie, input));
+    const before = await counts();
+    const drafts = () => fixture.database.admin`select count(*) from menu_revisions`;
+    const draftsBefore = await drafts();
+    const name = "FIXTURE signup Area shop";
+    expect((await create(singapore.cookie, { name, country: "SG", area: "Fixture invented Area" })).status).toBe(400);
+    expect((await create(unitedStates.cookie, { name, country: "US", area: "  " })).status).toBe(400);
+    expect(await counts()).toEqual(before);
+    expect(await drafts()).toEqual(draftsBefore);
+
+    const usShop = { name, area: "  Sunset Park  ", country: "US" };
+    await withoutOutletCountryUpdate(fixture.database, async () => {
+      await expect(create(unitedStates.cookie, usShop)).rejects.toMatchObject({ cause: { code: "42501" } });
+      expect(await counts()).toEqual(before);
+      expect(await drafts()).toEqual(draftsBefore);
+    });
+
+    for (const [account, input, saved] of [
+      [singapore, { name, area: "Bedok North" }, { country: "SG", area: "Bedok North", currency: "SGD" }],
+      [unitedStates, usShop, { country: "US", area: "Sunset Park", currency: "USD" }],
+    ] as const) {
+      const created = await create(account.cookie, input);
+      expect(created.status).toBe(201);
+      const response = await created.json();
+      expect(response.data.outlet).toMatchObject({ name, ...saved, enrollment: "pending", selfSignup: true });
+      expect(response.data.draft).toMatchObject({ outletId: response.data.outlet.id, status: "draft", items: [] });
+      const read = await routes.outlets.GET(jsonRequest("GET", "/api/v1/merchant/outlets", account.cookie));
+      expect(read.status).toBe(200);
+      expect((await read.json()).data.outlets).toEqual([expect.objectContaining({ id: response.data.outlet.id, ...saved })]);
+    }
+  });
+
   it("89: a sign-up, a shop and a seller request leave one labeled pending shop and no destination", async () => {
     const before = await counts();
     const shop = await signedUpShop("t89");

@@ -20,6 +20,16 @@ export async function newMerchant(database: TestDatabase, label: string, options
   return { email, password, userId };
 }
 
+// Fail the country write after the outlet, draft and enrollment inserts have run.
+export async function withoutOutletCountryUpdate(database: TestDatabase, run: () => Promise<void>): Promise<void> {
+  await database.admin`revoke update (country) on outlets from envoi_web`;
+  try {
+    await run();
+  } finally {
+    await database.admin`grant update (country) on outlets to envoi_web`;
+  }
+}
+
 // Signs in through the real Better Auth handler, sending the browser's current cookie if it has
 // one, and returns the Cookie header the browser sends afterwards.
 export async function signInCookie(handler: Handler, merchant: Pick<TestMerchant, "email" | "password">, cookie?: string): Promise<string> {

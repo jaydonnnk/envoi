@@ -3,7 +3,7 @@ import postgres from "postgres";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import * as schema from "@/lib/db/schema";
 import { issueAgentToken } from "@/operator/cli";
-import { jsonRequest, newMerchant, signInCookie, type TestMerchant } from "../support/merchant";
+import { jsonRequest, newMerchant, signInCookie, withoutOutletCountryUpdate, type TestMerchant } from "../support/merchant";
 import { createPaymentsFixture, jsonPost, routeParams, type PaymentsFixture } from "../support/payments";
 import { anonymousCookie, TEST_BASE_URL } from "../support/session";
 
@@ -246,6 +246,61 @@ describe("merchant sign-in and manual menu draft", () => {
     expect(list.data).toMatchObject({ outlets: [{ name: "FIXTURE first", published: false, enrollment: "pending", isDemoFixture: true }], canCreateOutlet: false });
   });
 
+  it("country governs Area on create and edit for an approved membership", async () => {
+    const merchant = await newMerchant(fixture.database, "area", { membership: true });
+    const cookie = await signInCookie(routes.auth.POST, merchant);
+    const create = (location: unknown) => routes.outlets.POST(jsonRequest("POST", "/api/v1/merchant/outlets", cookie, location));
+    const counts = () => fixture.database.admin`
+      select (select count(*) from outlets) as outlets,
+        (select count(*) from menu_revisions) as revisions, (select count(*) from enrollments) as enrollments`;
+    const before = await counts();
+    const name = "FIXTURE approved Area shop";
+    const forged = await create({ name, area: "bedok north" });
+    expect(forged.status).toBe(400);
+    expect((await body(forged)).error.code).toBe("validation_failed");
+    expect((await create({ name, area: "   ", country: "US" })).status).toBe(400);
+    expect((await create({ name, area: "A".repeat(81), country: "US" })).status).toBe(400);
+    expect((await create({ name, area: "Bedok North", country: "GB" })).status).toBe(400);
+    expect(await counts()).toEqual(before);
+
+    const usShop = { name, area: "  SoHo  ", country: "US" };
+    await withoutOutletCountryUpdate(fixture.database, async () => {
+      await expect(create(usShop)).rejects.toMatchObject({ cause: { code: "42501" } });
+      expect(await counts()).toEqual(before);
+    });
+    const created = await create(usShop);
+    expect(created.status).toBe(201);
+    const { outlet } = (await body<{ outlet: { id: string } }>(created)).data;
+    expect(outlet).toMatchObject({ name, country: "US", area: "SoHo", currency: "USD" });
+
+    const edit = (input: unknown) => patchOutlet(outlet.id, cookie, input);
+    const edited = await edit({ name, area: "  Lower East Side  ", detailsConfirmed: true });
+    expect(edited.status).toBe(200);
+    expect((await body<{ outlet: unknown }>(edited)).data.outlet).toMatchObject({ country: "US", area: "Lower East Side", detailsConfirmed: true });
+    expect((await edit({ name: "FIXTURE refused", area: "   " })).status).toBe(400);
+    expect((await edit({ name, area: "A".repeat(81) })).status).toBe(400);
+    expect((await edit({ country: "SG", area: "Bedok North" })).status).toBe(400);
+
+    const changedCountry = await edit({ country: "SG" });
+    expect(changedCountry.status).toBe(200);
+    expect((await body<{ outlet: unknown }>(changedCountry)).data.outlet).toMatchObject({ name, country: "SG", area: "Lower East Side", detailsConfirmed: true });
+    const legacy = "  Fixture old Singapore Area  ";
+    await fixture.database.admin`update outlets set area = ${legacy}, details_confirmed_at = null where id = ${outlet.id}`;
+    const confirmed = await edit({ name, area: legacy, detailsConfirmed: true });
+    expect(confirmed.status).toBe(200);
+    expect((await body<{ outlet: unknown }>(confirmed)).data.outlet).toMatchObject({ name, area: legacy, detailsConfirmed: true });
+    const invalid = await edit({ name: "FIXTURE refused", area: "Bedok North " });
+    expect(invalid.status).toBe(400);
+    expect((await body(invalid)).error.code).toBe("validation_failed");
+    const read = await routes.outlets.GET(jsonRequest("GET", "/api/v1/merchant/outlets", cookie));
+    expect((await body<{ outlets: unknown[] }>(read)).data.outlets).toEqual([
+      expect.objectContaining({ id: outlet.id, name, country: "SG", area: legacy, detailsConfirmed: true }),
+    ]);
+    const replacement = await edit({ name, area: "Bedok North" });
+    expect(replacement.status).toBe(200);
+    expect((await body<{ outlet: unknown }>(replacement)).data.outlet).toMatchObject({ country: "SG", area: "Bedok North", detailsConfirmed: false });
+  });
+
   it("a new outlet comes back with its empty draft", async () => {
     const merchant = await newMerchant(fixture.database, "created-draft", { membership: true });
     const cookie = await signInCookie(routes.auth.POST, merchant);
@@ -440,10 +495,10 @@ describe("merchant sign-in and manual menu draft", () => {
 
   it("a merchant edits the name and area of its unpublished outlet", async () => {
     const { cookie, outletId } = await merchantWithOutlet("rename");
-    const response = await patchOutlet(outletId, cookie, { name: "  FIXTURE renamed kopi ", area: "Telok Ayer" });
+    const response = await patchOutlet(outletId, cookie, { name: "  FIXTURE renamed kopi ", area: "Outram" });
     expect(response.status).toBe(200);
-    expect((await body<{ outlet: unknown }>(response)).data.outlet).toMatchObject({ id: outletId, name: "FIXTURE renamed kopi", area: "Telok Ayer", published: false });
+    expect((await body<{ outlet: unknown }>(response)).data.outlet).toMatchObject({ id: outletId, name: "FIXTURE renamed kopi", area: "Outram", published: false });
     const [row] = await fixture.database.admin<{ name: string; area: string }[]>`select name, area from outlets where id = ${outletId}`;
-    expect(row).toEqual({ name: "FIXTURE renamed kopi", area: "Telok Ayer" });
+    expect(row).toEqual({ name: "FIXTURE renamed kopi", area: "Outram" });
   });
 });

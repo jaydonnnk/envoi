@@ -236,7 +236,7 @@ export type ImportShop = { merchant: TestMerchant; outletId: string; revisionId:
 // A FIXTURE merchant with one approved membership and a new, unpublished shop with an empty draft.
 export async function newImportShop(database: TestDatabase, label: string): Promise<ImportShop> {
   const merchant = await newMerchant(database, label, { membership: true });
-  const created = await createMerchantOutlet(drizzle(database.admin, { schema }), { name: `FIXTURE ${label} kopi`, area: "Tanjong Pagar", userId: merchant.userId, now: new Date() });
+  const created = await createMerchantOutlet(drizzle(database.admin, { schema }), { name: `FIXTURE ${label} kopi`, area: "Tanjong Pagar", country: "SG", userId: merchant.userId, now: new Date() });
   if (isAppError(created)) throw new Error(`FIXTURE shop was not created: ${created.code}`);
   return { merchant, outletId: created.outlet.id, revisionId: created.draft.revisionId };
 }
