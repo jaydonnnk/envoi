@@ -253,6 +253,13 @@
       "when": 1794196070979,
       "tag": "0035_merchant_signup",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1794202706644,
+      "tag": "0036_merchant_email_confirmation",
+      "breakpoints": true
     }
   ]
 }

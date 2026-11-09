@@ -6,7 +6,7 @@ import { getMenuDraft } from "@/domain/menu/draft";
 import { draftJson } from "@/domain/menu/serialize";
 import { listMerchantOutlets } from "@/domain/outlets/merchant";
 import { PAYPAL_PYUSD_REWARDS } from "@/domain/rewards/paypal-pyusd";
-import { webEnv } from "@/env";
+import { merchantSignupOpen } from "@/env";
 import { getAuth } from "@/lib/auth";
 import { isMerchantAccount, requireMerchantMembership } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
@@ -24,9 +24,8 @@ export default async function MerchantSetupPage() {
   const requestHeaders = await headers();
   const session = await getAuth().api.getSession({ headers: requestHeaders });
 
-  // S43 (Gate 3 S43 amendment decisions 1, 10 and 12): with MERCHANT_SIGNUP_ENABLED off the page
-  // is exactly as before S43 and renders no sign-up form.
-  const signupOpen = webEnv().MERCHANT_SIGNUP_ENABLED === "true";
+  // Public signup requires the switch and configured confirmation mail.
+  const signupOpen = merchantSignupOpen();
 
   // No permanent session: only the sign-in form (and, with sign-up open, the sign-up form), with no
   // shop data. A buyer session holds no membership, so it reaches nothing here.

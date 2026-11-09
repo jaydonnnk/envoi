@@ -44,7 +44,7 @@ Labels: **[verified]** is supported by a cited record or check, **[vendor claim]
 | --- | --- |
 | Count unenrolled scans by a keyed hash | Yes. This changes the rule that a scan writes nothing. |
 | Amount mode for a stall with no menu | No. Roadmap only, because prices stay server-side. |
-| S43 email verification | None in the test environment, stated on the form. |
+| S43 email verification | Shipped without confirmation. The [Gate 1 revision re-approved 2026-11-09](merchant-onboarding-review/01-product.md) requires confirmation for new self-service accounts. |
 | S43 approval | Admin approval is still required before a shop can publish or sell, by the user's later decision. It replaces the earlier default of publishing unapproved. |
 | S43 PayPal seller id | Submitted by the merchant for the admin's review; the admin assigns it. |
 | PayPal agent tools | PayPal's hosted MCP server, by the user's decision, not the installed Toolkit. |

@@ -73,9 +73,10 @@ const webSchema = z.object({
   RENDER_API_KEY: z.string().min(1).optional(),
   // A malformed slug never stops the web service; touristReadyTrigger turns the trigger off (S50).
   RENDER_WORKFLOW_SLUG: z.string().min(1).optional(),
-  // Merchant sign-up (S43, Gate 3 S43 amendment decision 1): only "true" opens sign-up, a pending
-  // shop and the seller request; unset or "false" keeps sign-up refused as before S43.
+  // Public merchant sign-up requires this switch and usable mail settings (S51).
   MERCHANT_SIGNUP_ENABLED: z.enum(["true", "false"]).optional(),
+  RESEND_API_KEY: z.string().optional(),
+  MERCHANT_EMAIL_FROM: z.string().optional(),
   // PYUSD on Solana devnet (S16). These are the rail's only two settings: the cluster, genesis hash,
   // mint, token program and decimals are reviewed code constants in src/domain/pyusd/constants.ts,
   // and any other PYUSD_ or SOLANA_ name refuses to boot. The RPC URL is checked against the pinned
@@ -162,6 +163,18 @@ export function webEnv(source: NodeJS.ProcessEnv = process.env): WebEnv {
     webCache = parse(webSchema, source, "web");
   }
   return webCache;
+}
+
+export type MailSettings = { apiKey: string; from: string };
+
+export function merchantMailSettings(source: NodeJS.ProcessEnv = process.env): MailSettings | null {
+  const apiKey = source.RESEND_API_KEY?.trim();
+  const from = z.email().safeParse(source.MERCHANT_EMAIL_FROM?.trim());
+  return apiKey && from.success ? { apiKey, from: from.data } : null;
+}
+
+export function merchantSignupOpen(source: NodeJS.ProcessEnv = process.env): boolean {
+  return source.MERCHANT_SIGNUP_ENABLED === "true" && merchantMailSettings(source) !== null;
 }
 
 export function migrationEnv(source: NodeJS.ProcessEnv = process.env): MigrationEnv {

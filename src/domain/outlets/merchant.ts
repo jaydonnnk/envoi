@@ -279,16 +279,20 @@ export async function createPendingOutlet(db: Db, input: OutletInput & { userId:
       return { outlet, draft };
     });
   } catch (err) {
-    if (isSelfSignupRefusal(err)) return appError("forbidden_membership", "This account already has a shop. One shop per account.");
+    const refusal = selfSignupRefusal(err);
+    if (refusal === "self_signup_refused: email_unconfirmed") {
+      return appError("forbidden_membership", "Confirm your email before creating a shop.", { details: { reason: "email_unconfirmed" } });
+    }
+    if (refusal) return appError("forbidden_membership", "This account already has a shop. One shop per account.");
     throw err;
   }
 }
 
-function isSelfSignupRefusal(err: unknown): boolean {
+function selfSignupRefusal(err: unknown): string | null {
   for (let current: unknown = err; current; current = (current as { cause?: unknown }).cause) {
-    if (current instanceof Error && current.message.startsWith("self_signup_refused:")) return true;
+    if (current instanceof Error && current.message.startsWith("self_signup_refused:")) return current.message;
   }
-  return false;
+  return null;
 }
 
 // Edits the name and area of an unpublished outlet, and sets or clears its outlet confirmation. A

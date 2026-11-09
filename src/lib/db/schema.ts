@@ -22,6 +22,7 @@ export const user = pgTable("user", {
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").notNull().default(false),
+  merchantEmailVerificationRequired: boolean("merchant_email_verification_required").notNull().default(false),
   image: text("image"),
   isAnonymous: boolean("is_anonymous").default(false),
   createdAt: createdAt(),
@@ -655,7 +656,7 @@ export const auditEvents = pgTable(
 // nothing. Admission prunes rows older than the bucket's longest window, so the table stays small
 // without a maintenance task.
 
-export const RATE_LIMIT_BUCKETS = ["buyer_suggestion", "wallet_challenge", "buyer_assistant", "menu_translation", "merchant_order_filter", "agent_mcp", "merchant_copilot", "merchant_digest", "sticker_scan", "merchant_signup"] as const;
+export const RATE_LIMIT_BUCKETS = ["buyer_suggestion", "wallet_challenge", "buyer_assistant", "menu_translation", "merchant_order_filter", "agent_mcp", "merchant_copilot", "merchant_digest", "sticker_scan", "merchant_signup", "merchant_email_resend", "merchant_email_delivery"] as const;
 
 export const rateLimitHits = pgTable(
   "rate_limit_hits",
@@ -666,7 +667,7 @@ export const rateLimitHits = pgTable(
     at: timestamp("at", { withTimezone: true }).notNull(),
   },
   (t) => [
-    check("rate_limit_hits_bucket_check", sql`${t.bucket} in ('buyer_suggestion', 'wallet_challenge', 'buyer_assistant', 'menu_translation', 'merchant_order_filter', 'agent_mcp', 'merchant_copilot', 'merchant_digest', 'sticker_scan', 'merchant_signup')`),
+    check("rate_limit_hits_bucket_check", sql`${t.bucket} in ('buyer_suggestion', 'wallet_challenge', 'buyer_assistant', 'menu_translation', 'merchant_order_filter', 'agent_mcp', 'merchant_copilot', 'merchant_digest', 'sticker_scan', 'merchant_signup', 'merchant_email_resend', 'merchant_email_delivery')`),
     index("rate_limit_hits_bucket_at_idx").on(t.bucket, t.at),
     index("rate_limit_hits_subject_idx").on(t.bucket, t.subject, t.at),
   ],

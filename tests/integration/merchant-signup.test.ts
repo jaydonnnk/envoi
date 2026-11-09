@@ -12,13 +12,13 @@ import { approveEnrollment, assignPayPalDestination, approveMembership, createMe
 import { createFakeKernel, FIXTURE_PAGE_TEXT, isKernelUrl } from "../support/fake-kernel";
 import { createFakePayPal, type FakePayPal } from "../support/fake-paypal";
 import { FIXTURE_BOUNDS, FIXTURE_VISION_ENV, createFakeVision, fixturePolicy, importRequest, photoBody, solidJpeg, visionItem } from "../support/menu-import";
-import { jsonRequest, newMerchant, signInCookie } from "../support/merchant";
+import { fixtureConfirmationLink, jsonRequest, newMerchant, signInCookie } from "../support/merchant";
 import { createPaymentsFixture, FIXTURE_SELLER, jsonPost, routeParams, type PaymentsFixture } from "../support/payments";
 import { envelope, FIXTURE_MENU, loadMerchantRoutes, publishedItems, shopApi, type DraftJson, type MerchantRoutes, type Shop } from "../support/publication";
 import { anonymousCookie, TEST_BASE_URL } from "../support/session";
 
 // S43 named tests 89 to 98 and the guards of the Gate 3 S43 amendment, through the real routes and
-// the real Better Auth handler as envoi_web on a disposable database migrated through 0035. PayPal
+// the real Better Auth handler as envoi_web on a disposable database with the real migrations. Confirmation mail is faked at fetch. PayPal
 // writes are a FIXTURE fake at PayPalWriteClient; Kernel and the model are FIXTURE fakes at their
 // fetch boundary, and every outbound fetch is recorded. Passwords and addresses are FIXTURE values
 // from the documentation ranges, never real ones.
@@ -28,6 +28,13 @@ vi.mock("@/integrations/paypal/orders", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/integrations/paypal/orders")>()),
   paypalWriteClient: () => platform.client,
 }));
+
+const scheduled = vi.hoisted(() => [] as Array<() => Promise<void>>);
+vi.mock("next/server", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/server")>()),
+  after: (task: () => Promise<void>) => { scheduled.push(task); },
+}));
+const mail = new Map<string, string>();
 
 // FIXTURE: a second sandbox-style seller id in PayPal's id alphabet. Not a real account.
 const REQUESTED_SELLER = "FXTRSELLER3CD";
@@ -95,12 +102,6 @@ function signUpRequest(email: string, options: { forwardedFor?: string | null; c
   });
 }
 
-const cookieOf = (response: Response) =>
-  response.headers
-    .getSetCookie()
-    .map((value) => value.split(";")[0])
-    .join("; ");
-
 let emailSeq = 0;
 const freshEmail = (label: string) => `${label}-${emailSeq++}@signup.example.test`;
 
@@ -108,8 +109,18 @@ async function signUp(label: string, options: { forwardedFor?: string | null; co
   const email = freshEmail(label);
   const response = await routes.auth.POST(signUpRequest(email, options));
   expect(response.status, `${label}: sign-up`).toBe(200);
+  expect(response.headers.getSetCookie()).toHaveLength(0);
+  for (const task of scheduled.splice(0)) await task();
+  const message = mail.get(email);
+  if (!message) throw new Error("No fixture confirmation email");
+  const token = new URLSearchParams(fixtureConfirmationLink(message).hash.slice(1)).get("token");
+  const confirm = (await import("@/app/api/v1/merchant/email/confirm/route")).POST;
+  const confirmed = await confirm(jsonRequest("POST", "/api/v1/merchant/email/confirm", options.cookie ?? null, { token }));
+  expect(confirmed.status).toBe(200);
+  expect(confirmed.headers.getSetCookie()).toHaveLength(0);
+  const cookie = await signInCookie(routes.auth.POST, { email, password: PASSWORD }, options.cookie);
   const [user] = await fixture.database.admin<{ id: string }[]>`select id from "user" where email = ${email}`;
-  return { cookie: cookieOf(response), userId: user!.id, email };
+  return { cookie, userId: user!.id, email };
 }
 
 const createShop = (cookie: string, name = "FIXTURE signup kopi") => routes.outlets.POST(jsonRequest("POST", "/api/v1/merchant/outlets", cookie, { name, area: "Tanjong Pagar" }));
@@ -128,7 +139,9 @@ async function signedUpShop(label: string): Promise<Shop & { userId: string }> {
 }
 
 beforeAll(async () => {
-  fixture = await createPaymentsFixture("signup", { MERCHANT_SIGNUP_ENABLED: "true", ...SPEND_ENV });
+  fixture = await createPaymentsFixture("signup", {
+    MERCHANT_SIGNUP_ENABLED: "true", RESEND_API_KEY: "fixture-mail-key", MERCHANT_EMAIL_FROM: "fixture@example.test", ...SPEND_ENV,
+  });
   paypal = createFakePayPal();
   platform.client = paypal.client;
   const kernel = createFakeKernel(() => ({ kind: "page", text: FIXTURE_PAGE_TEXT }));
@@ -136,6 +149,11 @@ beforeAll(async () => {
   vi.stubGlobal("fetch", ((input: RequestInfo | URL, init?: RequestInit) => {
     const url = input instanceof Request ? input.url : String(input);
     fetched.push(url);
+    if (url === "https://api.resend.com/emails") {
+      const body = JSON.parse(String(init?.body)) as { to: [string]; text: string };
+      mail.set(body.to[0], body.text);
+      return Promise.resolve(Response.json({ id: "fixture-mail" }));
+    }
     return isKernelUrl(url) ? kernel.fetch(input, init) : vision.fetch(input, init);
   }) as typeof globalThis.fetch);
   importRuntime.policy = fixturePolicy(1_000_000, [FIXTURE_BOUNDS, { ...FIXTURE_BOUNDS, model: FIXTURE_WEB_MODEL }]);
@@ -148,6 +166,8 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  scheduled.length = 0;
+  mail.clear();
   await fixture.database.admin`delete from rate_limit_hits`;
 });
 
@@ -249,7 +269,7 @@ describe("S43 merchant sign-up with MERCHANT_SIGNUP_ENABLED=true", () => {
       select (select count(*)::int from "user" where email = ${email}) + (select count(*)::int from account a join "user" u on u.id = a.user_id where u.email = ${email})
         + (select count(*)::int from session s join "user" u on u.id = s.user_id where u.email = ${email}) as n`.then((rows) => rows[0]!.n);
     const one = "203.0.113.7";
-    for (let i = 0; i < 3; i += 1) await signUp(`t94-same-${i}`, { forwardedFor: one });
+    for (let i = 0; i < 3; i += 1) expect((await routes.auth.POST(signUpRequest(freshEmail(`t94-same-${i}`), { forwardedFor: one }))).status).toBe(200);
     const fourth = freshEmail("t94-fourth");
     const refused = await routes.auth.POST(signUpRequest(fourth, { forwardedFor: one }));
     expect(refused.status).toBe(429);
@@ -263,7 +283,7 @@ describe("S43 merchant sign-up with MERCHANT_SIGNUP_ENABLED=true", () => {
     expect((await routes.auth.POST(signUpRequest(fromBuyer, { forwardedFor: one, cookie: buyer }))).status).toBe(429);
     expect(await usersOf(fromBuyer)).toBe(0);
     expect(await everyone()).toEqual(usersBefore);
-    for (let i = 0; i < 27; i += 1) await signUp(`t94-many-${i}`);
+    for (let i = 0; i < 27; i += 1) expect((await routes.auth.POST(signUpRequest(freshEmail(`t94-many-${i}`)))).status).toBe(200);
     const thirtyFirst = freshEmail("t94-thirty-first");
     const global = await routes.auth.POST(signUpRequest(thirtyFirst));
     expect(global.status).toBe(429);
@@ -306,7 +326,7 @@ describe("S43 merchant sign-up with MERCHANT_SIGNUP_ENABLED=true", () => {
     for (const needle of needles) expect(surface).not.toContain(needle);
   });
 
-  it("95: a buyer session that signs up keeps its purchases' owner and gives the anonymous user no membership", async () => {
+  it("95: a buyer session that signs up, confirms and signs in keeps its purchases' owner and gives the anonymous user no membership", async () => {
     const buyer = await anonymousCookie(routes.auth.POST);
     const [kopi] = fixture.items;
     const created = await routes.purchases.POST(jsonPost("/api/v1/purchases", buyer, { outletId: fixture.outletId, rail: "paypal", lines: [{ menuItemId: kopi!.id, quantity: 1 }] }));
@@ -435,12 +455,13 @@ describe("S43 merchant sign-up with MERCHANT_SIGNUP_ENABLED=true", () => {
       await routes.copilot.POST(jsonRequest("POST", `/api/v1/merchant/outlets/${shop.outletId}/copilot`, shop.cookie, { turns: [{ role: "user", text: "FIXTURE question" }] }), routeParams(shop.outletId)),
     ];
     fetched.length = 0;
+    const existingLimits = await fixture.database.admin`select id, bucket from rate_limit_hits order by id`;
     for (const response of await spend()) {
       expect(response.status).toBe(404);
       expect((await envelope(response)).error.code).toBe("not_found");
     }
     expect(fetched).toEqual([]);
-    expect(await fixture.database.admin`select id from rate_limit_hits where bucket <> 'merchant_signup'`).toHaveLength(0);
+    expect(await fixture.database.admin`select id, bucket from rate_limit_hits order by id`).toEqual(existingLimits);
     expect(await fixture.database.admin`select id from menu_imports where outlet_id = ${shop.outletId}`).toHaveLength(0);
 
     // Control: once the operator approves the shop, the same photo import reaches the FIXTURE model.

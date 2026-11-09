@@ -13,10 +13,13 @@ export const MERCHANT_SIGNUP_LIMITS: RateLimits = {
 // the nearest proxy adds, or "unknown" without the header; whether Render overwrites a client-sent
 // header is [unknown] until the Render check. Only an HMAC under the auth secret is stored, never the
 // address, and the label keeps this hash apart from any other use of the secret.
-export function signupSubject(headers: Headers, secret: string): string {
+export function signupProxyAddress(headers: Headers): string {
   const entries = (headers.get("x-forwarded-for") ?? "").split(",").map((entry) => entry.trim()).filter((entry) => entry.length > 0);
-  const address = entries.at(-1) ?? "unknown";
-  return createHmac("sha256", secret).update(`merchant_signup\n${address}`, "utf8").digest("hex");
+  return entries.at(-1) ?? "unknown";
+}
+
+export function signupSubject(headers: Headers, secret: string): string {
+  return createHmac("sha256", secret).update(`merchant_signup\n${signupProxyAddress(headers)}`, "utf8").digest("hex");
 }
 
 export function admitSignup(db: Db, headers: Headers, secret: string, now: Date): Promise<Admission> {

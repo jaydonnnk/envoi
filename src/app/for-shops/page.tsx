@@ -1,7 +1,7 @@
 // S44: the public page a shop owner reaches from "I run a shop", before any sign-in (Gate 1 fourth
 // build plan, amended 2026-11-07, mockups/for-shops.html). It reads no database. Its sign-up line
-// follows MERCHANT_SIGNUP_ENABLED (S43, Gate 3 S43 amendment decision 12), read on each request so a
-// changed switch never leaves a built page saying the opposite.
+// follows the effective public signup switch, including mail readiness (S51).
+import { merchantSignupOpen } from "@/env";
 import { FeeCalculator } from "./fee-calculator";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +15,7 @@ const WHY_ENVOI = [
 ];
 
 export default function ForShopsPage() {
-  const signupOpen = process.env.MERCHANT_SIGNUP_ENABLED === "true";
+  const signupOpen = merchantSignupOpen();
   return (
     <main id="main" className="for-shops">
       <p className="eyebrow">For shops</p>

@@ -159,8 +159,21 @@ describe("the shops page", () => {
     }
   });
 
-  it("with MERCHANT_SIGNUP_ENABLED=true it says a test shop can be set up and an admin approves every shop", () => {
+  it("with the switch on and no mail settings it reports no public sign-up", () => {
     vi.stubEnv("MERCHANT_SIGNUP_ENABLED", "true");
+    vi.stubEnv("RESEND_API_KEY", "fixture-key");
+    vi.stubEnv("MERCHANT_EMAIL_FROM", undefined);
+    try {
+      expect(page()).toContain("No public sign-up yet");
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("with MERCHANT_SIGNUP_ENABLED=true and mail configured it says a test shop can be set up and an admin approves every shop", () => {
+    vi.stubEnv("MERCHANT_SIGNUP_ENABLED", "true");
+    vi.stubEnv("RESEND_API_KEY", "fixture-key");
+    vi.stubEnv("MERCHANT_EMAIL_FROM", "fixture@example.test");
     try {
       const markup = page();
       expect(markup).toContain('<a class="button" href="/merchant/setup">Set up my shop</a>');

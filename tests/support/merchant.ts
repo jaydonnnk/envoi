@@ -43,3 +43,10 @@ export function jsonRequest(method: string, path: string, cookie: string | null,
     body: body === undefined ? undefined : JSON.stringify(body),
   });
 }
+
+// The only links followed by signup tests are from the in-memory fixture mailbox.
+export function fixtureConfirmationLink(message: string): URL {
+  const link = message.split("\n").find(line => line.startsWith(TEST_BASE_URL));
+  if (!link) throw new Error("Missing fixture confirmation link");
+  return new URL(link);
+}

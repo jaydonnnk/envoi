@@ -1222,6 +1222,8 @@ Branch: `envoi/slice-43-merchant-signup`. **Visible result.** `mockups/merchant-
 **Counts:** 37 named tests, numbered 62 to 98. Earlier counts are unchanged.
 **Not in this plan:** amount mode, a settlement partner paying PayNow, Agent Ready, Store Sync, WebMCP, voice input, interviews and any admin screen.
 
+See the [approved merchant onboarding slice plan](merchant-onboarding-review/04-slices.md) for the S43 follow-up.
+
 ## Test assignment
 
 Every one of the 92 named tests in the re-approved Gate 3 test plan, 71 standalone tests and 21 groups covering 231 cases, is assigned to exactly one slice.

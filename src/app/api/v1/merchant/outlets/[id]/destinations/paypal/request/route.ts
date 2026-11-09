@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { webEnv } from "@/env";
+import { merchantSignupOpen } from "@/env";
 import { requestSeller } from "@/domain/outlets/destination";
 import { PAYPAL_MERCHANT_ID } from "@/domain/outlets/paypal-id";
 import { getAuth } from "@/lib/auth";
@@ -10,7 +10,7 @@ import { httpErr, httpOk } from "@/lib/http/respond";
 import { assertSameOrigin } from "@/lib/http/origin";
 
 // S43 (Gate 3 S43 amendment decision 8): a pending shop's member submits a sandbox seller id for the
-// operator's review. It creates no destination. While MERCHANT_SIGNUP_ENABLED is not true the route
+// operator's review. It creates no destination. While public signup is closed the route
 // answers like a missing one.
 export const dynamic = "force-dynamic";
 
@@ -19,7 +19,7 @@ type Params = { params: Promise<{ id: string }> };
 const requestBody = z.object({ sellerMerchantId: z.string().trim().toUpperCase() });
 
 export async function POST(request: Request, { params }: Params): Promise<Response> {
-  if (webEnv().MERCHANT_SIGNUP_ENABLED !== "true") return httpErr(unknownRouteError());
+  if (!merchantSignupOpen()) return httpErr(unknownRouteError());
   const principal = await requireOutletMembership(getAuth(), webDb(), request.headers, (await params).id);
   if (!isOutletMember(principal)) return httpErr(principal);
   const foreign = assertSameOrigin(request);

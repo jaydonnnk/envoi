@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edit shop details | Envoi mockup</title>
+<style>
+  * { box-sizing: border-box }
+  body { margin: 0; background: #f1f6fc; color: #14293d; font: 16px/1.55 system-ui, sans-serif }
+  header { background: white; border-bottom: 1px solid #c9d7e6 }
+  header div { margin: auto; max-width: 960px; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px }
+  header strong { font-size: 1.35rem }
+  .badge { background: #ceedf3; border-radius: 4px; padding: 4px 8px; font-size: .8rem }
+  main { max-width: 960px; padding: 24px 20px 48px; margin: auto }
+  .eyebrow { color: #145deb; font: 600 .78rem/1.5 ui-monospace, monospace; text-transform: uppercase; letter-spacing: .06em }
+  h1, h2 { font-family: "Trebuchet MS", system-ui, sans-serif; line-height: 1.15 }
+  h1 { font-size: clamp(2rem, 5vw, 2.8rem); letter-spacing: -.04em; margin: 8px 0 12px }
+  h2 { margin: 0 0 14px; font-size: 1.25rem }
+  p { margin: 0 0 14px }
+  .lead, small { color: #52657a }
+  .card { min-width: 0; max-width: 560px; background: white; border: 1px solid #c9d7e6; border-radius: 12px; padding: 20px }
+  .slip { border-top: 5px solid #145deb }
+  .pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px }
+  label { font-weight: 600; display: block; margin: 12px 0 5px }
+  label:first-child { margin-top: 0 }
+  input, select { width: 100%; border: 1px solid #8da3bb; border-radius: 7px; padding: 10px; font: inherit; color: inherit; background: white }
+  select { margin-bottom: 4px }
+  small { display: block }
+  .actions { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; margin-top: 18px }
+  button, .button { font: 600 15px system-ui, sans-serif; color: white; background: #145deb; border: 1px solid #145deb; border-radius: 7px; padding: 11px 14px; cursor: pointer; text-decoration: none }
+  .secondary { color: #14293d; background: white; border-color: #8da3bb }
+  a { color: #145deb; text-underline-offset: 4px }
+  :focus-visible { outline: 2px solid #145deb; outline-offset: 3px }
+  @media (max-width: 640px) { .pair { grid-template-columns: minmax(0, 1fr) } }
+</style>
+</head>
+<body>
+<header><div><strong>envoi</strong><span class="badge">Gate 1 mockup · Sample only</span></div></header>
+<main>
+  <p class="eyebrow">Merchant setup</p>
+  <h1>Edit shop details</h1>
+<section class="card slip" aria-label="Shop details">
+  <label for="shop-name">Shop name</label>
+  <input id="shop-name" value="Sample Singapore Shop">
+
+  <label for="area-search">Search Singapore areas</label>
+  <input id="area-search" type="search" placeholder="For example, Bedok or Tanjong Pagar" aria-controls="area" autocomplete="off">
+  <label for="area">Area</label>
+  <select id="area" aria-describedby="area-help area-status">
+    <option value="">Choose an area</option>
+    <option selected>Bedok North</option>
+    <option>Bedok South</option>
+    <option>Bugis</option>
+    <option>Chinatown</option>
+    <option>Queenstown</option>
+    <option>Tampines</option>
+    <option>Tanjong Pagar</option>
+  </select>
+  <small id="area-help">Sample list. Choose a nearby planning area if your neighbourhood is missing.</small>
+  <small id="area-status" role="status"></small>
+
+  <div class="actions"><button id="save" type="button">Save shop details</button></div>
+  <p id="shop-status" role="status"></p>
+</section>
+</main>
+<script>
+  const search = document.querySelector("#area-search");
+  const area = document.querySelector("#area");
+  const choices = Array.from(area.options).slice(1);
+  search.addEventListener("input", () => {
+    const query = search.value.trim().toLowerCase();
+    const matches = choices.filter(option => option.text.toLowerCase().includes(query));
+    const selected = area.value;
+    area.replaceChildren(area.options[0], ...matches);
+    area.value = matches.some(option => option.value === selected) ? selected : "";
+    document.querySelector("#area-status").textContent = matches.length ? "" : "No matching sample areas.";
+  });
+
+  document.querySelector("#save").addEventListener("click", () => {
+    document.querySelector("#shop-status").textContent = area.value ? "Mockup only. This would save " + area.value + "." : "Choose an Area.";
+  });
+</script>
+</body>
+</html>

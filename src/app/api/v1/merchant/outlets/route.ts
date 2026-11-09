@@ -1,6 +1,6 @@
 import { draftJson } from "@/domain/menu/serialize";
 import { createMerchantOutlet, createPendingOutlet, listMerchantOutlets, type CreatedOutlet, type OutletInput } from "@/domain/outlets/merchant";
-import { webEnv } from "@/env";
+import { merchantSignupOpen } from "@/env";
 import { getAuth } from "@/lib/auth";
 import { isMerchantAccount, isSignupAccount, requireMerchantMembership, requireSignupAccount } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
@@ -18,7 +18,7 @@ export async function GET(request: Request): Promise<Response> {
 }
 
 // Creates an unpublished outlet with an empty menu draft, using up one approved membership, and
-// returns both. S43: while MERCHANT_SIGNUP_ENABLED is true, a permanent account with no membership
+// returns both. S43: while public signup is open, a permanent account with no membership
 // row creates its one pending shop instead (Gate 3 S43 amendment decision 7).
 export async function POST(request: Request): Promise<Response> {
   const member = await requireMerchantMembership(getAuth(), webDb(), request.headers);
@@ -27,7 +27,7 @@ export async function POST(request: Request): Promise<Response> {
   if (isMerchantAccount(member)) {
     userId = member.userId;
   } else {
-    if (member.code !== "forbidden_membership" || webEnv().MERCHANT_SIGNUP_ENABLED !== "true") return httpErr(member);
+    if (member.code !== "forbidden_membership" || !merchantSignupOpen()) return httpErr(member);
     const stranger = await requireSignupAccount(getAuth(), request.headers);
     if (!isSignupAccount(stranger)) return httpErr(stranger);
     userId = stranger.userId;
