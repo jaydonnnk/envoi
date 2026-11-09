@@ -615,6 +615,7 @@ Order and branches: S25 Ask Envoi in the site (`envoi/slice-25-ask-envoi`, never
 - **Boundary.** The deployed build is live at `f9a4f5b`; a hosted copilot turn with a live model was not run, so the guard's hosted behavior remains [unknown] beyond the local FIXTURE browser check and the suite. No PayPal sandbox purchase, Neon write or OpenAI call was made by S54. The notice is reply text, so the route and the panel needed no change.
 - **Mirror.** `demo-guide.md` step 5 now says a reply naming an unchecked amount shows the notice instead, with the records it read still listed and no refund card.
 - **Release [verified], 2026-11-09.** Remote `main` fast-forwarded from `8e28d6f` to `f9a4f5b`; CI run 42670701780 passed every step on that SHA; Render deploy `dep-dbp0m9h5efls73ckaphg` is `live` on `f9a4f5be7371008747b1319bd180af5a9a599d01` at 18:06:45Z, read from Render's API. The slice branch is kept.
+- **CI anomaly on the docs record [unknown], 2026-11-09.** The docs-only commit `b07f943` created no CI jobs on its push (run 42671604671), a fresh dispatch (run 42671849557) or a rerun (attempt 2), while `.github/workflows/ci.yml` is byte-identical to `f9a4f5b`, whose run passed. The cause is [unknown] and external to the code; the deployed build's CI is green. This record tests whether a new commit clears it.
 
 ### S43 Merchant sign-up, 2026-11-09
 
