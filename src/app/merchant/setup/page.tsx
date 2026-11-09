@@ -6,7 +6,7 @@ import { getMenuDraft } from "@/domain/menu/draft";
 import { draftJson } from "@/domain/menu/serialize";
 import { listMerchantOutlets } from "@/domain/outlets/merchant";
 import { PAYPAL_PYUSD_REWARDS } from "@/domain/rewards/paypal-pyusd";
-import { merchantSignupOpen } from "@/env";
+import { merchantMailSettings, merchantSignupOpen } from "@/env";
 import { getAuth } from "@/lib/auth";
 import { isMerchantAccount, requireMerchantMembership } from "@/lib/auth-context";
 import { webDb } from "@/lib/db/web";
@@ -26,6 +26,8 @@ export default async function MerchantSetupPage() {
 
   // Public signup requires the switch and configured confirmation mail.
   const signupOpen = merchantSignupOpen();
+  // Password reset is offered only while mail settings exist (Gate 2 decision 6).
+  const resetAvailable = merchantMailSettings() !== null;
 
   // No permanent session: only the sign-in form (and, with sign-up open, the sign-up form), with no
   // shop data. A buyer session holds no membership, so it reaches nothing here.
@@ -52,7 +54,7 @@ export default async function MerchantSetupPage() {
               {buyerSession}
               <section className="card" aria-labelledby="sign-in-heading">
                 <h2 id="sign-in-heading">Already have an account?</h2>
-                <SignInForm />
+                <SignInForm resetAvailable={resetAvailable} />
               </section>
             </div>
           </div>
@@ -67,7 +69,7 @@ export default async function MerchantSetupPage() {
         <div className="layout">
           <section className="card" aria-labelledby="sign-in-heading">
             <h2 id="sign-in-heading">Merchant sign-in</h2>
-            <SignInForm />
+            <SignInForm resetAvailable={resetAvailable} />
           </section>
           {buyerSession}
         </div>

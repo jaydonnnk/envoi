@@ -5,7 +5,7 @@ import { anonymous } from "better-auth/plugins";
 import { and, eq } from "drizzle-orm";
 import { after } from "next/server";
 import { recordAudit } from "@/domain/audit/events";
-import { deliverMerchantConfirmation, MAX_MERCHANT_EMAIL_LENGTH } from "@/domain/outlets/email-confirmation";
+import { admitConfirmationResend, deliverMerchantConfirmation, deliverPasswordReset, MAX_MERCHANT_EMAIL_LENGTH } from "@/domain/outlets/email-confirmation";
 import { admitSignup } from "@/domain/outlets/signup";
 import { merchantMailSettings, merchantSignupOpen, webEnv, type MailSettings } from "@/env";
 import { authSchema, user } from "@/lib/db/schema";
@@ -21,6 +21,7 @@ export type AuthOptions = {
 };
 
 const SIGN_UP_PATH = "/sign-up/email";
+const RESET_PASSWORD_PATH = "/request-password-reset";
 
 export function createAuth(options: AuthOptions) {
   const mail = options.signup.mail;
@@ -32,7 +33,30 @@ export function createAuth(options: AuthOptions) {
     // The adapter only sees these four tables; they resolve to public through the web role's
     // pinned search_path (migration 0001), never to neon_auth.
     database: drizzleAdapter(options.db, { provider: "pg", schema: authSchema, transaction: true }),
-    emailAndPassword: { enabled: true, disableSignUp: !signupOpen, autoSignIn: false },
+    emailAndPassword: {
+      enabled: true,
+      disableSignUp: !signupOpen,
+      autoSignIn: false,
+      // Reset is on only while mail settings exist (Gate 2 decision 6).
+      ...(mail ? {
+        resetPasswordTokenExpiresIn: 3_600,
+        revokeSessionsOnPasswordReset: true,
+        sendResetPassword: async ({ user: recipient, token }) => {
+          try {
+            after(() => deliverPasswordReset({
+              db: options.db,
+              secret: options.secret,
+              settings: mail,
+              origin: options.trustedOrigins[0] ?? options.baseURL,
+              recipient,
+              token,
+            }));
+          } catch {
+            log("warn", "merchant_password_reset_schedule_failed");
+          }
+        },
+      } : {}),
+    },
     disabledPaths: ["/verify-email", "/send-verification-email"],
     user: {
       additionalFields: {
@@ -86,6 +110,15 @@ export function createAuth(options: AuthOptions) {
     // any user, account or session row. Only the sign-up path is limited.
     hooks: {
       before: createAuthMiddleware(async (ctx) => {
+        // Gate 2 decision 4: reset requests share the per-address resend window.
+        if (ctx.path === RESET_PASSWORD_PATH) {
+          if (!mail) return;
+          const admission = await admitConfirmationResend(options.db, ctx.headers ?? new Headers(), options.secret, new Date());
+          if (admission.kind === "rate_limited") {
+            throw new APIError("TOO_MANY_REQUESTS", { code: "RATE_LIMITED", message: "Too many password reset requests. Try again later." });
+          }
+          return;
+        }
         if (!signupOpen || ctx.path !== SIGN_UP_PATH) return;
         if (typeof ctx.body?.email === "string" && ctx.body.email.length > MAX_MERCHANT_EMAIL_LENGTH) {
           throw new APIError("BAD_REQUEST", { code: "INVALID_EMAIL", message: "Enter a valid email address." });

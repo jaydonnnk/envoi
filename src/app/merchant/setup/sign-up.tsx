@@ -97,7 +97,7 @@ export function SignUpForm() {
       <label htmlFor="signup-password">Password</label>
       <input id="signup-password" name="password" type="password" autoComplete="new-password" minLength={8} maxLength={128} aria-describedby="signup-confirmation-hint" required />
       <small id="signup-confirmation-hint" className="field-hint">
-        Confirm your email before you create a shop. Password reset is unavailable in this test environment.
+        Confirm your email before you create a shop.
       </small>
       <div className="actions">
         <button className="button" type="submit" disabled={busy}>

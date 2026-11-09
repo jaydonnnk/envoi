@@ -73,6 +73,15 @@ describe("the setup page follows MERCHANT_SIGNUP_ENABLED", () => {
     expect(markup).not.toContain("Create your account");
   });
 
+  it("offers the reset link only while mail settings exist", async () => {
+    const withMail = await render();
+    expect(withMail).toContain("Forgot your password?");
+    expect(withMail).toContain('href="/merchant/setup/forgot-password"');
+    vi.stubEnv("RESEND_API_KEY", undefined);
+    const withoutMail = await render();
+    expect(withoutMail).not.toContain("Forgot your password?");
+  });
+
   it("signed in with no membership: the shop form only with the switch on", async () => {
     state.session = { user: { isAnonymous: false, name: "FIXTURE owner", email: "owner@signup.example.test" } };
     vi.stubEnv("MERCHANT_SIGNUP_ENABLED", "false");

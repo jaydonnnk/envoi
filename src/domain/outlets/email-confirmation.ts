@@ -1,8 +1,8 @@
 import { createHmac } from "node:crypto";
-import { and, eq } from "drizzle-orm";
+import { and, eq, or, sql } from "drizzle-orm";
 import { signupProxyAddress } from "@/domain/outlets/signup";
 import type { MailSettings } from "@/env";
-import { sendConfirmationMail } from "@/integrations/email/resend";
+import { sendConfirmationMail, sendPasswordResetMail } from "@/integrations/email/resend";
 import { account, user } from "@/lib/db/schema";
 import type { Db } from "@/lib/db/web";
 import { readCountedBody } from "@/lib/http/bounded-body";
@@ -58,6 +58,48 @@ export async function deliverMerchantConfirmation(options: {
     if (outcome === "failed") log("warn", "merchant_confirmation_delivery_failed");
   } catch {
     log("warn", "merchant_confirmation_delivery_failed");
+  }
+}
+
+export async function deliverPasswordReset(options: {
+  db: Db;
+  secret: string;
+  settings: MailSettings;
+  origin: string;
+  recipient: { id: string; email: string };
+  token: string;
+}): Promise<void> {
+  const { db, secret, settings, origin, recipient, token } = options;
+  const email = recipient.email.trim().toLowerCase();
+  try {
+    // /reset-password creates a credential account for a user without one, so only a permanent
+    // account with a password that is not awaiting confirmation may receive a link.
+    const [eligible] = await db
+      .select({ id: user.id })
+      .from(user)
+      .innerJoin(account, and(eq(account.userId, user.id), eq(account.accountId, user.id), eq(account.providerId, "credential")))
+      .where(and(
+        eq(user.id, recipient.id),
+        eq(user.email, email),
+        sql`coalesce(${user.isAnonymous}, false) = false`,
+        or(eq(user.merchantEmailVerificationRequired, false), eq(user.emailVerified, true)),
+      ))
+      .limit(1);
+    if (!eligible) return;
+
+    const bucket = "merchant_email_delivery";
+    const admission = await admit(db, bucket, subject(secret, bucket, email), {
+      perSubject: { max: 3, windowMs: HOUR_MS },
+      global: { max: 50, windowMs: 24 * HOUR_MS },
+    }, new Date());
+    if (admission.kind !== "admitted") return;
+
+    const resetUrl = new URL("/merchant/setup/reset-password", origin);
+    resetUrl.hash = new URLSearchParams({ token }).toString();
+    const outcome = await sendPasswordResetMail(settings, { to: email, resetUrl: resetUrl.toString() });
+    if (outcome === "failed") log("warn", "merchant_password_reset_delivery_failed");
+  } catch {
+    log("warn", "merchant_password_reset_delivery_failed");
   }
 }
 
