@@ -301,8 +301,8 @@ main.landing { max-width: none; padding: 0; }
 .lp-track.lp-playing { height: 400vh; }
 .lp-stage { position: relative; height: clamp(640px, 100svh, 920px); overflow: hidden; background: var(--paper); display: flex; flex-direction: column; container-type: size; }
 .lp-playing .lp-stage { position: sticky; top: 0; height: 100vh; height: 100svh; }
-.lp-copy-band { width: 100%; max-width: 1180px; margin: 0 auto; padding: clamp(18px, 5cqh, 56px) 28px clamp(14px, 3cqh, 32px); position: relative; z-index: 3; flex: none; }
-.landing-hero { max-width: min(600px, 54%); }
+.lp-copy-band { width: 100%; max-width: 960px; margin: 0 auto; padding: clamp(18px, 5cqh, 56px) 24px clamp(14px, 3cqh, 32px); position: relative; z-index: 3; flex: none; }
+.landing-hero { max-width: min(600px, 62%); }
 .lp-eyebrow { font-size: 14px; color: var(--blue); font-weight: 600; margin: 0; }
 .landing-hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 600; letter-spacing: -0.02em; line-height: 1.06; text-wrap: balance; font-size: clamp(1.7rem, min(4.4cqw, 6.4cqh), 3.6rem); margin: 0.35em 0 0.4em; }
 .landing-hero .lead { font-size: clamp(15px, 2.5cqh, 18px); margin: 0; max-width: 540px; }
@@ -311,11 +311,11 @@ main.landing { max-width: none; padding: 0; }
 .lp-scene { position: relative; flex: 1 1 auto; min-height: max(150px, 28%); container-type: size; z-index: 4; }
 .lp-awning { position: absolute; left: 0; right: 0; top: 0; height: clamp(16px, 9cqh, 30px); background: repeating-linear-gradient(90deg, #b33a2b 0 56px, #f3e9d2 56px 112px); box-shadow: 0 6px 12px rgba(20, 41, 61, 0.12); }
 .lp-counter { position: absolute; left: 0; right: 0; top: clamp(16px, 9cqh, 30px); bottom: 0; background: linear-gradient(#e2c58d 0 16%, #c9a15e 16% 19%, #ad8446 19% 100%); }
-.lp-plate-label { position: absolute; left: calc(max(28px, calc(50% - 562px)) + 170px); top: calc(clamp(16px, 9cqh, 30px) + 8px); font: 11px ui-monospace, Consolas, monospace; color: rgba(20, 41, 61, 0.55); z-index: 2; }
-.lp-sticker { position: absolute; left: max(28px, calc(50% - 562px)); top: calc(clamp(16px, 9cqh, 30px) + 14px); z-index: 2; width: clamp(72px, calc((100cqh - 64px) * 0.62), 150px); transform: rotate(-4deg); transform-origin: 50% 100%; filter: drop-shadow(0 14px 22px rgba(20, 41, 61, 0.28)); will-change: transform; }
+.lp-plate-label { position: absolute; left: calc(max(24px, calc(50% - 456px)) + 170px); top: calc(clamp(16px, 9cqh, 30px) + 8px); font: 11px ui-monospace, Consolas, monospace; color: rgba(20, 41, 61, 0.55); z-index: 2; }
+.lp-sticker { position: absolute; left: max(24px, calc(50% - 456px)); top: calc(clamp(16px, 9cqh, 30px) + 14px); z-index: 2; width: clamp(72px, calc((100cqh - 64px) * 0.62), 150px); transform: rotate(-4deg); transform-origin: 50% 100%; filter: drop-shadow(0 14px 22px rgba(20, 41, 61, 0.28)); will-change: transform; }
 .lp-sticker-art { display: block; width: 100%; height: auto; }
 
-.lp-phone { position: absolute; right: max(28px, calc(50% - 562px)); bottom: -3svh; z-index: 4; width: clamp(190px, min(44svh, 30vw), 270px); transform-origin: 50% 100%; will-change: transform, opacity; }
+.lp-phone { position: absolute; right: max(24px, calc(50% - 456px)); bottom: -3svh; z-index: 4; width: clamp(190px, min(44svh, 30vw), 270px); transform-origin: 50% 100%; will-change: transform, opacity; }
 .lp-phone-body { background: #10222f; border-radius: 32px; padding: 11px; box-shadow: 0 28px 60px rgba(20, 41, 61, 0.38); }
 .lp-screen { position: relative; background: #fff; border-radius: 23px; aspect-ratio: 9 / 16; overflow: hidden; container-type: inline-size; }
 .lp-notch { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 34%; height: 16px; background: #10222f; border-radius: 10px; z-index: 2; }
@@ -349,7 +349,7 @@ main.landing { max-width: none; padding: 0; }
 .lp-bar i { display: block; height: 100%; width: 0; background: var(--blue); }
 .lp-hint { color: var(--muted); }
 
-.lp-below { max-width: 1180px; margin: 0 auto; padding: 48px 28px 56px; }
+.lp-below { max-width: 960px; margin: 0 auto; padding: 48px 24px 56px; }
 .landing-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .landing-cards .card { border-radius: 16px; }
 .lp-step { font-size: 12px; font-weight: 600; color: var(--blue); }
