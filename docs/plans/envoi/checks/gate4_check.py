@@ -445,7 +445,8 @@ for f, text in current.items():
 # 2026-11-09: wording correction after that approval: the sentence saying the gate drafts still needed their
 # approvals now records that Gates 2 and 3 were approved the same day. No contract, test or decision text changed
 # (e8390cf4...afc769 was the approved text before this correction).
-G3_REOPENING_SHA256 = "16d88e1dd35a85747243a35da7f0b9a4f4d496a8905780b394330a105cc96780"
+# 2026-11-10: S55 landing scroll stage, approved in advance ("I pre approve the gates it shouldnt change any logic anyways"); 16d88e1d...c96780 was the pin before it.
+G3_REOPENING_SHA256 = "a7043972b21106b31ef0e0744c435c35f386e099ccc9b169d67bfadb9db6b087"
 # 02-architecture.md may likewise equal its continuation amendment text, re-approved by the user on 2026-10-25
 # (bc504e10...d0e47a9f was the shop QR and order archive text, re-approved on 2026-10-24,
 # 28d54654...45561154 the Phantom landing text of 2026-10-18, 938d0a99...f3bf30a6 the English-only text of 2026-10-15).
@@ -464,7 +465,8 @@ G3_REOPENING_SHA256 = "16d88e1dd35a85747243a35da7f0b9a4f4d496a8905780b394330a105
 # 2026-11-08: S45 lost refund response, re-approved by the user ("Approve Gate 2"); 7b64f2ba...0f6461 was the pin before it.
 # 2026-11-08: S45 two demo shops, re-approved by the user ("Approve Gate 2"); aaf7d924...c5f9de3d was the pin before it.
 # 2026-11-09: S54 copilot figure guard, approved by the user ("approve gate 2 and continue"); 54a40825...6920fac was the pin before it.
-G2_REOPENING_SHA256 = "352cfdb02212db829937d6391b632abaccfa0850c1f17a7a4f7c4b3875fbafce"
+# 2026-11-10: S55 landing scroll stage, approved in advance ("I pre approve the gates it shouldnt change any logic anyways"); 352cfdb0...fbafce was the pin before it.
+G2_REOPENING_SHA256 = "59cedfffa548065b4d8351dc9e04102fd9cfe0b080e8d249b3e50757a8b8ff33"
 # Gate 1, re-approved 2026-10-16 after deferring menu photo drafting and again on 2026-10-21 for the
 # landing page, and on 2026-10-24 for the shop QR and order archive, then reopened and re-approved on 2026-10-25 for S19-S22:
 # the revised and added mockups, and 01-product.md without its closing status line, which keeps changing as slices finish

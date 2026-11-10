@@ -859,3 +859,11 @@ The key lives only in the environment, so the hash cannot be matched to a public
 - **R-F5 [unknown], Workflows access.** A Hobby workspace may need a card. If the user will not add one, keep Starter, cut the Workflow and make no Workflows claim.
 - **R-F6, scan counts.** They can be inflated within the limit, so they read "scans".
 - **R-F7, sign-up abuse.** Strangers can create accounts and pending shops. The limits, the absence of any public page before approval and `MERCHANT_SIGNUP_ENABLED` as a kill switch bound it.
+
+## S55 landing scroll stage, approved in advance 2026-11-10
+
+Approved in advance by the user ("I pre approve the gates it shouldnt change any logic anyways").
+The landing page stays a server component that renders every word.
+One client component, `src/app/landing-motion.tsx`, adds a class that pins the stage and sets transform and opacity on decorative, `aria-hidden` elements as the visitor scrolls.
+It reads no data, calls no API and adds no dependency, environment name or migration.
+The drawn sticker is an inline SVG with no encoded data.

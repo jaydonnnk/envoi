@@ -3651,3 +3651,10 @@ Integration tests run on a disposable local database through the real turn, with
 3. **The pattern set.** "16.70 dollars" or a currency word in another script is not extracted, so it is not checked [boundary]. The prompt already asks for amounts exactly as written in tool results, which use S$, US$ and currency codes.
 4. **A refusal drops the proposal.** The proposal's amount is code's own, but a turn whose text failed the check shows no card; the merchant asks again.
 5. **This turn only.** An amount from an earlier turn's tools is not in this turn's set and refuses. Conservative, and the evaluation's rule.
+
+### S55 amendment, approved in advance 2026-11-10
+
+Approved in advance by the user ("I pre approve the gates it shouldnt change any logic anyways").
+No named test is added or removed.
+The existing landing page unit test, `tests/unit/landing-page.test.ts`, keeps every assertion and adds four: the drawn scene is `aria-hidden`; the sticker reads "Illustration." and "Not a real SGQR."; the phone's approve control is a `span`, not a link, and no PayPal address appears; and the phone's dishes read "Illustration. Sample dishes and prices." with "Test money only. Nothing is Paid until you approve."
+Each of the four is proven by its own mutation, recorded in the S55 status record.
