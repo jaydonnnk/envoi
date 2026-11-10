@@ -90,6 +90,29 @@ describe("landing page", () => {
     expect(markup).not.toContain("any language");
   });
 
+  // S55, 2026-11-10: the scroll stage. The scene is decoration, so assistive tech skips it; the drawn
+  // sticker says it is not a real SGQR; and its phone shows an approve control that is not a link.
+  it("hides the drawn scene from assistive technology", () => {
+    expect(landing(true)).toMatch(/<div class="lp-scene" aria-hidden="true">/);
+  });
+
+  it("labels the drawn sticker as an illustration, not a real SGQR", () => {
+    const markup = landing(true);
+    expect(markup).toContain("Illustration.</text>");
+    expect(markup).toContain("Not a real SGQR.</text>");
+  });
+
+  it("keeps the phone's approve control a picture, not a link to PayPal", () => {
+    expect(landing(true)).toContain('<span class="lp-approve">Approve in PayPal</span>');
+    expect(landing(true)).not.toContain("paypal.com");
+  });
+
+  it("labels the phone's sample dishes and keeps Paid behind approval", () => {
+    const markup = landing(true);
+    expect(markup).toContain("Illustration. Sample dishes and prices.");
+    expect(markup).toContain("Test money only. Nothing is Paid until you approve.");
+  });
+
   it("every other page keeps the demo fixture notice and footer", () => {
     const buy = render("/buy");
     expect(buy).toContain("Demo fixture shops, PayPal sandbox test money and Solana devnet test tokens only.");
