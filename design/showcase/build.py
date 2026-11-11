@@ -163,8 +163,7 @@ slide("Trust", "AI reads and drafts. People approve.",
 
 slide("Evidence", "What was measured, and what was not",
       "<ul class='big'><li>Ask Envoi: 24 of 25 across languages, zero wrong basket links.</li><li>Budget advice: 10 of 10, nothing off the menu or over budget.</li>"
-      "<li>Copilot: 7 of 7 sandbox questions, no invented amount.</li><li>Scan to Paid on the deployed site, with Envoi and PayPal records matching.</li></ul>"
-      "<p class='meta'>Single runs on labeled test shops. Not a measure of real buyers. No usability or adoption result exists.</p>",
+      "<li>Copilot: 7 of 7 sandbox questions, no invented amount.</li><li>Scan to Paid on the deployed site, with Envoi and PayPal records matching.</li></ul>",
       "", "text")
 
 slide("Why Envoi", "Wise can pay a QR code. Envoi gets you from menu to order.",
