@@ -1,0 +1,5 @@
+{"recordedOn":"2026-11-11","client":"Claude Code (Claude Opus 5.5) over Envoi's /mcp",
+"calls":[
+{"tool":"search_outlets","input":{"name":"Ah Seng"},"output":"Ah Seng Chicken Rice, Maxwell, SG, SGD, Demo fixture shop, not a real merchant"},
+{"tool":"get_menu","input":{"outletId":"out_zuzum2yp2wyo6bfea3gfktrjdi"},"output":"Hainanese chicken rice (steamed) S$6.50; Roast chicken rice S$7.00; Chicken rice set with soup S$8.50; Iced lemon tea S$2.20"},
+{"tool":"create_purchase_request","input":{"lines":[{"item":"Chicken rice set with soup","quantity":1}]},"output":"One-time link, expires in 10 minutes. Envoi shows the price; you approve the payment in PayPal sandbox yourself."}]}
