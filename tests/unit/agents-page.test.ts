@@ -53,7 +53,7 @@ describe("the agents page", () => {
       "Connect",
       "Add this MCP server to your assistant: https://envoi-helx.onrender.com/mcp",
       "Use your test token as the bearer token. Judges: it is in the submission form.",
-      'Ask: "Two iced teas at Test Shop."',
+      'Ask: "Two Kopi O at Lorong Demo Kopi."',
       "Open the link it gives you, check the price and approve in PayPal sandbox yourself.",
       "Test environment. Demo fixture shops and test money only.",
     ]) expect(text).toContain(copy);

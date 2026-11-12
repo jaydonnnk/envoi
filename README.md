@@ -221,7 +221,6 @@ The receipt opens only in the browser that made the purchase.
 2. Use an Envoi agent token as the bearer token.
    Tokens are issued by the Envoi operator; judges have one in the submission form.
 3. Ask, for example, `Two Kopi O at Lorong Demo Kopi.`
-   Name a shop from the table above: the `/agents` page's own example names Test Shop, which is not listed and cannot be found by search.
 4. Open the link within 10 minutes, press **Open the review**, and approve in PayPal yourself.
    Each link works once.
 

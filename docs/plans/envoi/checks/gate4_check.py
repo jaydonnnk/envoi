@@ -501,6 +501,8 @@ G1_MOCKUP_SHA256 = {
     os.path.join("mockups", "merchant-web-import-review.html"): "83cb171c64d30ad4658e9cd04dc0d94b9d5c0094332c4a5c6d9aa203b2d75656",
     # 2026-11-07: the S34 accept button note, pre-approved by the user ("I pre approve ur gate 1 and gatte 4 changes").
     os.path.join("mockups", "buyer-menu-advice.html"): "a3a5cc39e6ada0409c9669d272d17c2712ea28420e28a41606fed8f508c70f4f",
+    # 2026-11-12: the agents page example names a listed shop, approved by the user ("Yes, fix and deploy").
+    os.path.join("mockups", "buyer-own-assistant.html"): "565511e00b1cd417fb67ab800e755c6d3d064959947ead3229c193c4d953c767",
 }
 # Current: the web menu import reopening, re-approved by the user on 2026-10-29, on top of the usability-study removal,
 # which is still DRAFTED AND NOT APPROVED (631a626b...3632271aa9 was the draft of both, 4718a3f5...701140e2 was the 2026-10-28 body with the approved round 5 allowance,

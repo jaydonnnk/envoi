@@ -20,7 +20,7 @@ export default function AgentsPage() {
             Add this MCP server to your assistant: <code>{MCP_URL}</code>
           </li>
           <li>Use your test token as the bearer token. Judges: it is in the submission form.</li>
-          <li>Ask: &quot;Two iced teas at Test Shop.&quot;</li>
+          <li>Ask: &quot;Two Kopi O at Lorong Demo Kopi.&quot;</li>
           <li>Open the link it gives you, check the price and approve in PayPal sandbox yourself.</li>
         </ol>
         <p className="muted">Test environment. Demo fixture shops and test money only.</p>
