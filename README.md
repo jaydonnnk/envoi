@@ -168,11 +168,77 @@ Pending, failed or uncertain payments are never shown as Paid, and Envoi never h
 
 ## Try it
 
-1. Open <https://envoi-helx.onrender.com>.
-2. Choose **Ask Envoi** and ask what to eat at one of the listed shops within a budget, or choose **Scan a sticker**.
-3. Open the one-time link, review the exact total and who gets paid, and approve in PayPal with a PayPal sandbox buyer account.
-4. On the Paid receipt, tap **Show this paid order to the stall**.
-5. Visit `/for-shops` for the fee calculator and `/agents` to connect your own MCP assistant.
+Everything below runs on the live test environment at <https://envoi-helx.onrender.com>.
+Nothing needs installing, and no real money moves.
+
+### What you need
+
+- **A PayPal sandbox buyer account**, to approve a payment.
+  Sign in at <https://developer.paypal.com> with any PayPal account, open **Testing Tools > Sandbox Accounts**, and use the **Personal** account it lists, or create one.
+  Use that account's email and password on PayPal's sandbox sign-in page, never a real PayPal login.
+- **A phone or laptop browser.** Scanning needs a camera; every other step works on a laptop.
+
+### The listed test shops
+
+All are labeled demo fixtures, and every one takes PayPal sandbox payments.
+
+| Shop | Country | Good for |
+| --- | --- | --- |
+| Ah Huat Confirm Plus Chop Kopitiam | Singapore | The scan demo: a menu in Chinese and Singlish that Envoi explains |
+| Ah Seng Chicken Rice | Singapore | Ask Envoi and assistant orders |
+| Lorong Demo Kopi | Singapore | A short kopitiam menu |
+| Tiong Bahru Kopi House | Singapore | A short kopitiam menu |
+| Envoi Singapore Shop | Singapore | The only shop that also takes PYUSD on Solana devnet |
+| Larkspur Street Taqueria | United States | A USD order |
+| US Demo Shop | United States | A USD order |
+
+### Pay at a stall
+
+1. Open <https://envoi-helx.onrender.com/buy/scan>.
+2. Scan the labeled test sticker [`sgqr-sticker-R26ZZ0002A.png`](docs/plans/envoi/fixtures/sgqr-sticker-R26ZZ0002A.png), shown on a second screen or printed.
+   It opens Ah Huat Confirm Plus Chop Kopitiam.
+   Its UEN is made up, so it is not a real SGQR, and no bank app can pay it.
+   Without a camera, copy the sticker's contents from any QR reader into **Or paste the sticker contents**.
+3. Read the menu: each dish is explained beside its original name.
+   Switch the language to see the same menu in another language at the same prices.
+4. Add items and press **Review**.
+   The review shows the exact total and the shop's PayPal sandbox account as the payee.
+5. Approve in PayPal with your sandbox buyer account.
+   The receipt says **Paid** once PayPal confirms the capture.
+6. Under **Show the stall** on the receipt, pick 中文, Melayu or தமிழ் and press **Play aloud**.
+
+The receipt opens only in the browser that made the purchase.
+
+### Ask Envoi
+
+1. On the home page, choose **Ask Envoi**, or open `/buy/ask`.
+2. Ask, for example, `What should I try at Ah Seng Chicken Rice for S$10?`
+3. Accept the suggested basket, then open the review and pay as above.
+
+### Bring your own assistant
+
+1. Add the MCP server `https://envoi-helx.onrender.com/mcp` to an assistant that supports remote MCP servers, such as Claude Code or Meta Muse.
+2. Use an Envoi agent token as the bearer token.
+   Tokens are issued by the Envoi operator; judges have one in the submission form.
+3. Ask, for example, `Two Kopi O at Lorong Demo Kopi.`
+   Name a shop from the table above: the `/agents` page's own example names Test Shop, which is not listed and cannot be found by search.
+4. Open the link within 10 minutes, press **Open the review**, and approve in PayPal yourself.
+   Each link works once.
+
+### Optional: PYUSD on Solana devnet
+
+1. In Phantom, turn on Testnet Mode and choose Solana Devnet.
+   The wallet needs some devnet SOL for the network fee and some devnet PYUSD.
+2. Open Envoi Singapore Shop, add items, press **Review** and choose **PYUSD on Solana devnet**.
+3. Press pay and approve in Phantom.
+   The receipt says **Paid** only after Envoi verifies the finalized devnet transfer, which can take up to a minute; press **Check status** to recheck.
+
+Pay from your own wallet, not the shop's: a transfer from the shop's own account to itself is flagged as a mismatch and never shown as Paid.
+
+### The shop side
+
+`/for-shops` shows the fee calculator.
+`/merchant/setup` lets anyone create an account and draft a shop, but a shop can publish only after the Envoi operator approves it and connects a PayPal sandbox seller account, so a new shop will wait at that step.
 
 ## Built with
 
